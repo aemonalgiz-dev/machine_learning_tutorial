@@ -21,7 +21,7 @@ const CURRICULUM: Bucket[] = [
   {
     heading: "Fundamental Mathematics",
     blurb:
-      "Only the parts of each that the rest of the site actually leans on, not a course in its own right.",
+      "While the mathematics for the field of machine learning is vast, there are only a handful of concepts required to understand the fundamentals. These concepts are provided in the sections below. They're far from complete courses on the topics, just what we need to understand the rest of the material.",
     concepts: [
       {
         title: "Calculus Primer",
@@ -141,7 +141,7 @@ export default function Home() {
             <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               {bucket.heading}
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
               {bucket.blurb}
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
