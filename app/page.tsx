@@ -26,17 +26,17 @@ const CURRICULUM: Bucket[] = [
       {
         title: "Calculus Primer",
         blurb:
-          "The derivative of a function is its slope at each point, and that slope is zero at the function's lowest point. A model uses this to fit itself, adjusting its numbers until the derivative of its error reaches zero.",
+          "When we fit a model, we are really searching for the settings that make its error as small as possible. A derivative gives us the slope of a curve at any point, and since that slope is zero at the very bottom, we can use it to find where the error stops falling.",
       },
       {
         title: "Linear Algebra Primer",
         blurb:
-          "A vector is a list of numbers and a matrix is a grid of them, with a few rules for combining the two. Every model with more than one input is written in this notation.",
+          "Once a model takes more than one input, we bundle those inputs into a vector and its workings into a matrix. It is mostly a compact notation, though it is the notation almost everything past a single line is written in, so it is worth getting comfortable with early.",
       },
       {
         title: "Statistics & Probability Primer",
         blurb:
-          "The mean is a typical value, the variance is how far the data spreads around it, and correlation is whether two quantities rise and fall together. These are what you measure to say how strongly one thing predicts another.",
+          "Machine learning assumes there is a real pattern hidden under noisy data, and these are the tools we use to pin it down. The mean gives us a typical value, the variance tells us how far the data spreads around it, and correlation tells us whether two quantities move together, which is where the idea of one thing predicting another begins.",
       },
     ],
   },
@@ -53,12 +53,12 @@ const CURRICULUM: Bucket[] = [
       {
         title: "Multiple & Polynomial Regression",
         blurb:
-          "Model a relationship that depends on several inputs at once, or one that curves, by fitting a plane or a curve instead of a straight line. The underlying mechanics of how we build the regression remain almost identical.",
+          "Often a relationship depends on several inputs at once, or it bends rather than running straight, so we fit a plane or a curve in place of a line. The underlying mechanics of how we build the regression remain almost identical.",
       },
       {
         title: "Ridge & Lasso",
         blurb:
-          "A flexible model left alone will fit the noise in its training data as well as the signal. Ridge and lasso pull its numbers back toward zero, trading a slightly worse fit now for better predictions later.",
+          "Data is noisy, which can lead to simple regressions fitting to clerical errors, outliers, or other data issues. Ridge and lasso prevent the “ideal” fit for our training data, trading a slightly worse fit now for better predictions later.",
       },
     ],
   },
@@ -69,17 +69,17 @@ const CURRICULUM: Bucket[] = [
       {
         title: "Logistic Regression",
         blurb:
-          "Fit a curve that turns the inputs into a probability between zero and one, then read anything above one half as one class and anything below it as the other. The line where the probability is one half is the boundary between them.",
+          "Sometimes we do not want a number, we want a yes or a no. Logistic regression fits a curve that turns the inputs into a probability between zero and one, and then anything above one half becomes a yes and anything below it a no, with the boundary sitting where the probability is exactly a half.",
       },
       {
         title: "k-Nearest Neighbours",
         blurb:
-          "There is no training step. To label a new point, find the few known points closest to it and take their majority, so the model is just the examples it has stored.",
+          "This one does no training at all. To label a new point we look at the handful of known points nearest to it and let them vote, so the model is really just the examples we have kept.",
       },
       {
         title: "Decision Trees",
         blurb:
-          "Split the data with a yes-or-no question, then split each part again, picking each question to separate the classes as cleanly as it can. The result is a flowchart you can read from the top.",
+          "We split the data with a yes-or-no question, then split each part again, choosing every question to separate the classes as cleanly as we can. What we end up with reads like a flowchart we could follow by hand.",
       },
     ],
   },
@@ -90,7 +90,7 @@ const CURRICULUM: Bucket[] = [
       {
         title: "Bagging, Forests & Boosting",
         blurb:
-          "Train many models, each on a slightly different slice of the data, and combine their answers. Their individual mistakes tend to disagree, so they cancel out.",
+          "A single model is easy to fool, so instead we train many of them, each on a slightly different slice of the data, and combine what they say. Their individual mistakes tend to disagree, so they cancel out.",
       },
     ],
   },
@@ -101,12 +101,12 @@ const CURRICULUM: Bucket[] = [
       {
         title: "k-Means Clustering",
         blurb:
-          "Sort the data into a set number of groups by putting each point with the nearest group centre, then recomputing each centre from its points, and repeating until nothing moves.",
+          "Here no one has labelled the data, so we look for the groups ourselves. We put each point with the nearest group centre, recompute each centre from the points it now holds, and repeat until nothing moves.",
       },
       {
         title: "Principal Component Analysis",
         blurb:
-          "Find the few directions the data varies along the most, and describe each point by where it sits along them. Many correlated numbers become a few independent ones.",
+          "Data with many features usually varies along only a few real directions. We find those directions and describe each point by where it falls along them, so many correlated numbers collapse into a few independent ones.",
       },
     ],
   },
@@ -117,7 +117,7 @@ const CURRICULUM: Bucket[] = [
       {
         title: "The Kernel Trick",
         blurb:
-          "Replace the dot product between two points with a function that scores their similarity in a much larger space. It lets a straight-line method draw curved boundaries without ever building that space.",
+          "Some data cannot be split by a straight boundary in the space we are handed. The trick is to swap the dot product between two points for a function that measures their similarity in a much larger space, which lets a straight-line method draw curved boundaries without our ever building that space.",
       },
     ],
   },
