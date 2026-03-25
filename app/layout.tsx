@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "oop_ml — machine learning, one concept at a time",
+  title: "oop_ml: machine learning, one concept at a time",
   description:
-    "A teaching tour of machine learning: the problem behind each idea, a plain and a technical explanation, and something you can poke — computed live by a from-scratch library.",
+    "A teaching tour of machine learning. Each idea starts with the problem behind it, gets a plain explanation and a technical one, and comes with something you can experiment with, computed live by a library written from scratch.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -40,6 +40,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </nav>
         </header>
         <main className="flex-1">{children}</main>
+        <footer className="border-t border-slate-200 dark:border-slate-800">
+          <div className="mx-auto max-w-5xl px-6 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            Powered by{" "}
+            <a
+              href="https://github.com/aemonalgiz-dev/oop_ml"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono font-semibold text-slate-700 underline-offset-4 hover:text-indigo-600 hover:underline dark:text-slate-300 dark:hover:text-indigo-400"
+            >
+              oop_ml
+            </a>
+          </div>
+        </footer>
       </body>
     </html>
   );

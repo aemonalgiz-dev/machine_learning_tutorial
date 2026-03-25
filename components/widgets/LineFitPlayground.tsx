@@ -13,9 +13,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, fitSimpleLinearRegression, LineFit, Point } from "@/lib/api";
 
-const DOMAIN = { xMin: 0, xMax: 10, yMin: 0, yMax: 10 };
+// The axes carry a concrete meaning: a point is one person, their height in
+// centimetres against their weight in kilograms. The ranges and tick spacing are
+// chosen so the grid reads in real, human values rather than an abstract 0 to 10.
+const DOMAIN = { xMin: 150, xMax: 200, yMin: 40, yMax: 100 };
+const TICK = { x: 10, y: 10 };
+
+// The API refuses a fit of more than this many points; the widget holds the same
+// ceiling so a learner meets the limit here, before a request is ever sent.
+const MAX_POINTS = 100;
+
 const VIEW = { width: 640, height: 440 };
-const PAD = { left: 44, right: 16, top: 16, bottom: 36 };
+const PAD = { left: 60, right: 16, top: 16, bottom: 52 };
 
 const PLOT = {
   width: VIEW.width - PAD.left - PAD.right,
@@ -50,20 +59,25 @@ const clamp = (value: number, low: number, high: number) =>
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
 const STARTING_POINTS: Point[] = [
-  { x: 1, y: 2 },
-  { x: 3, y: 3.4 },
-  { x: 5, y: 4.1 },
-  { x: 7, y: 6.3 },
-  { x: 9, y: 6.9 },
+  { x: 155, y: 52 },
+  { x: 163, y: 58 },
+  { x: 170, y: 63 },
+  { x: 178, y: 71 },
+  { x: 186, y: 79 },
+  { x: 193, y: 88 },
 ];
 
 function randomScatter(): Point[] {
-  const slope = 0.4 + Math.random() * 0.6;
-  const intercept = 1 + Math.random() * 2;
+  // Weight tends to rise with height, plus a person-to-person wobble.
+  const slope = 0.55 + Math.random() * 0.25;
+  const intercept = -40 + (Math.random() - 0.5) * 16;
   return Array.from({ length: 6 }, (_, index) => {
-    const x = round2(1 + index * 1.5);
-    const noise = (Math.random() - 0.5) * 2.5;
-    return { x, y: clamp(round2(slope * x + intercept + noise), 0, 10) };
+    const x = round2(155 + index * 7);
+    const noise = (Math.random() - 0.5) * 10;
+    return {
+      x,
+      y: clamp(round2(slope * x + intercept + noise), DOMAIN.yMin, DOMAIN.yMax),
+    };
   });
 }
 
@@ -76,13 +90,11 @@ export function LineFitPlayground() {
 
   // Debounced fit: the effect re-runs on every points change, but waits out a
   // short quiet period first, so a drag that changes points many times a second
-  // still sends only a request or two.
+  // still sends only a request or two. Fewer than two points is not an error to
+  // record in state, it is derived below at render time, so the effect only ever
+  // runs the fetch and never sets state synchronously.
   useEffect(() => {
-    if (points.length < 2) {
-      setFit(null);
-      setMessage("Add at least two points to fit a line.");
-      return;
-    }
+    if (points.length < 2) return;
     const timer = setTimeout(async () => {
       try {
         setFit(await fitSimpleLinearRegression(points));
@@ -105,6 +117,7 @@ export function LineFitPlayground() {
 
   const onBackgroundPointerDown = (event: React.PointerEvent) => {
     if (dragging.current !== null) return;
+    if (points.length >= MAX_POINTS) return; // never grow past the API's ceiling
     const dropped = eventToData(event.clientX, event.clientY);
     setPoints((current) => [...current, dropped]);
     dragging.current = points.length; // the new point's index
@@ -136,6 +149,19 @@ export function LineFitPlayground() {
     setPoints((current) => current.filter((_, i) => i !== index));
   };
 
+  // With fewer than two points there is nothing to fit, so the line and its
+  // prompt are derived here rather than written into state. That keeps the
+  // stored fit from a previous, larger set of points off the screen until the
+  // next fetch replaces it.
+  const tooFewPoints = points.length < 2;
+  const atCapacity = points.length >= MAX_POINTS;
+  const displayFit = tooFewPoints ? null : fit;
+  const displayMessage = tooFewPoints
+    ? "Add at least two points to fit a line."
+    : atCapacity
+      ? `This demo fits at most ${MAX_POINTS} points. Remove one to add another.`
+      : message;
+
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
@@ -159,9 +185,9 @@ export function LineFitPlayground() {
         <Grid />
 
         {/* residual sticks: each point down (or up) to the fitted line */}
-        {fit &&
+        {displayFit &&
           points.map((point, index) => {
-            const predictedY = fit.slope * point.x + fit.intercept;
+            const predictedY = displayFit.slope * point.x + displayFit.intercept;
             const a = toPixel(point);
             const b = toPixel({ x: point.x, y: predictedY });
             return (
@@ -180,12 +206,12 @@ export function LineFitPlayground() {
           })}
 
         {/* the fitted line, clipped to the plot */}
-        {fit && (
+        {displayFit && (
           <line
-            x1={toPixel({ x: fit.line.x_start, y: fit.line.y_start }).px}
-            y1={toPixel({ x: fit.line.x_start, y: fit.line.y_start }).py}
-            x2={toPixel({ x: fit.line.x_end, y: fit.line.y_end }).px}
-            y2={toPixel({ x: fit.line.x_end, y: fit.line.y_end }).py}
+            x1={toPixel({ x: displayFit.line.x_start, y: displayFit.line.y_start }).px}
+            y1={toPixel({ x: displayFit.line.x_start, y: displayFit.line.y_start }).py}
+            x2={toPixel({ x: displayFit.line.x_end, y: displayFit.line.y_end }).px}
+            y2={toPixel({ x: displayFit.line.x_end, y: displayFit.line.y_end }).py}
             stroke="currentColor"
             className="text-indigo-500"
             strokeWidth={2.5}
@@ -210,7 +236,11 @@ export function LineFitPlayground() {
         })}
       </svg>
 
-      <StatsPanel fit={fit} message={message} pointCount={points.length} />
+      <StatsPanel
+        fit={displayFit}
+        message={displayMessage}
+        pointCount={points.length}
+      />
     </div>
   );
 }
@@ -227,11 +257,11 @@ function StatsPanel({
   return (
     <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
       <Stat label="Points" value={String(pointCount)} />
-      <Stat label="Slope" value={fit ? fit.slope.toFixed(3) : "—"} />
-      <Stat label="Intercept" value={fit ? fit.intercept.toFixed(3) : "—"} />
+      <Stat label="Slope" value={fit ? fit.slope.toFixed(3) : "…"} />
+      <Stat label="Intercept" value={fit ? fit.intercept.toFixed(3) : "…"} />
       <Stat
         label="R²"
-        value={fit ? fit.r_squared.toFixed(3) : "—"}
+        value={fit ? fit.r_squared.toFixed(3) : "…"}
         hint="how much of the spread the line explains"
       />
       {message && (
@@ -284,7 +314,7 @@ function Button({
 
 function Grid() {
   const lines = [];
-  for (let gx = DOMAIN.xMin; gx <= DOMAIN.xMax; gx += 2) {
+  for (let gx = DOMAIN.xMin; gx <= DOMAIN.xMax; gx += TICK.x) {
     const { px } = toPixel({ x: gx, y: 0 });
     lines.push(
       <g key={`gx-${gx}`}>
@@ -307,7 +337,7 @@ function Grid() {
       </g>,
     );
   }
-  for (let gy = DOMAIN.yMin; gy <= DOMAIN.yMax; gy += 2) {
+  for (let gy = DOMAIN.yMin; gy <= DOMAIN.yMax; gy += TICK.y) {
     const { py } = toPixel({ x: 0, y: gy });
     lines.push(
       <g key={`gy-${gy}`}>
@@ -330,5 +360,26 @@ function Grid() {
       </g>,
     );
   }
-  return <>{lines}</>;
+  return (
+    <>
+      {lines}
+      <text
+        x={PAD.left + PLOT.width / 2}
+        y={VIEW.height - 6}
+        textAnchor="middle"
+        className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
+      >
+        Height (cm)
+      </text>
+      <text
+        x={16}
+        y={PAD.top + PLOT.height / 2}
+        textAnchor="middle"
+        transform={`rotate(-90 16 ${PAD.top + PLOT.height / 2})`}
+        className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
+      >
+        Weight (kg)
+      </text>
+    </>
+  );
 }

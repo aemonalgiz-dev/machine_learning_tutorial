@@ -49,54 +49,32 @@ export function ConceptPage({
         </aside>
       )}
 
-      <Section
-        kicker="The problem that forced it"
-        title="Where this came from"
-      >
-        {history}
-      </Section>
+      <Section title="Where This Came From">{history}</Section>
 
       <section className="my-12">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {playground}
         </div>
-        <p className="mt-3 text-center text-sm text-slate-500 dark:text-slate-500">
-          Every fit here is computed by the{" "}
-          <code className="rounded bg-slate-100 px-1 py-0.5 text-xs dark:bg-slate-800">
-            oop_ml
-          </code>{" "}
-          library through its API — the same code, not a re-implementation in
-          your browser.
-        </p>
       </section>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <Section kicker="For anyone" title="In plain terms">
-          {layperson}
-        </Section>
-        <Section kicker="For the technical reader" title="The mechanism">
-          {technical}
-        </Section>
+        <Section title="How to Conceptualize">{layperson}</Section>
+        <Section title="The Mechanism">{technical}</Section>
       </div>
     </article>
   );
 }
 
 function Section({
-  kicker,
   title,
   children,
 }: {
-  kicker: string;
   title: string;
   children: ReactNode;
 }) {
   return (
     <section>
-      <p className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-        {kicker}
-      </p>
-      <h2 className="mb-3 mt-1 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+      <h2 className="mb-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">
         {title}
       </h2>
       <div className="space-y-4 text-slate-700 dark:text-slate-300">
