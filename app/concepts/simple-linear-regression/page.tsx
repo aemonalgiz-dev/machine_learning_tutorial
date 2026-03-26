@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { LineFitPlayground } from "@/components/widgets/LineFitPlayground";
 
@@ -147,6 +148,68 @@ export default function SimpleLinearRegressionPage() {
             A correct fit reports that rather than returning a line. Enter points
             above that share a single x, and the fit comes back as an error, not
             a number.
+          </p>
+        </>
+      }
+      derivation={
+        <>
+          <p>
+            The slope and intercept formulas were handed to you above. Here is
+            where they come from, using exactly the idea from the{" "}
+            <Link
+              href="/primers/calculus"
+              className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400"
+            >
+              calculus primer
+            </Link>
+            : the lowest point of a smooth curve is where its derivative is zero.
+          </p>
+          <p>
+            The quantity we are minimising is the residual sum of squares, written
+            out now with the line&rsquo;s two settings, the slope β and the
+            intercept α, in plain view.
+          </p>
+          <Equation>{"RSS(β, α) = Σ(yᵢ − (βxᵢ + α))²"}</Equation>
+          <p>
+            This is a function of two settings, not one, so its lowest point is
+            not where a single derivative is zero but where the ground is flat in
+            both directions at once. That means taking the partial derivative with
+            respect to each setting, holding the other fixed, and setting both to
+            zero.
+          </p>
+          <p>
+            Start with the intercept. Differentiate with respect to α and set the
+            result to zero.
+          </p>
+          <Equation>{"∂RSS/∂α = −2 Σ(yᵢ − βxᵢ − α) = 0"}</Equation>
+          <p>
+            The −2 divides out, and what remains says the residuals sum to zero.
+            Solving for α gives the intercept.
+          </p>
+          <Equation>{"α = ȳ − β·x̄"}</Equation>
+          <p>
+            which is just the statement that the fitted line passes through the
+            point of averages, (x̄, ȳ). Now the slope. Differentiate with respect
+            to β and set that to zero as well.
+          </p>
+          <Equation>{"∂RSS/∂β = −2 Σ xᵢ(yᵢ − βxᵢ − α) = 0"}</Equation>
+          <p>
+            Substitute the α we just found and rearrange, and the sums collapse
+            into a ratio of two familiar quantities.
+          </p>
+          <Equation>{"β = Σ(xᵢ − x̄)(yᵢ − ȳ) / Σ(xᵢ − x̄)²"}</Equation>
+          <p>
+            The top is how x and y vary together, their covariance; the bottom is
+            how x varies on its own, its variance. The slope is the one divided by
+            the other.
+          </p>
+          <p>
+            Notice what did not happen: we never had to walk downhill. Because the
+            residual sum of squares is a simple bowl in β and α, setting its two
+            derivatives to zero gave equations we could solve outright, so the fit
+            is a formula rather than a search. That is the lucky case the calculus
+            primer set against gradient descent, and simple linear regression sits
+            squarely in it.
           </p>
         </>
       }
