@@ -58,22 +58,34 @@ const clamp = (value: number, low: number, high: number) =>
   Math.min(high, Math.max(low, value));
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
+// Fifteen points by default, spread across the range, so the scatter shows real
+// variance around the line rather than lying almost perfectly on it.
 const STARTING_POINTS: Point[] = [
-  { x: 155, y: 52 },
-  { x: 163, y: 58 },
-  { x: 170, y: 63 },
-  { x: 178, y: 71 },
-  { x: 186, y: 79 },
-  { x: 193, y: 88 },
+  { x: 152, y: 51 },
+  { x: 155, y: 61 },
+  { x: 158, y: 56 },
+  { x: 161, y: 66 },
+  { x: 164, y: 62 },
+  { x: 167, y: 71 },
+  { x: 170, y: 66 },
+  { x: 173, y: 76 },
+  { x: 176, y: 71 },
+  { x: 179, y: 81 },
+  { x: 182, y: 75 },
+  { x: 185, y: 86 },
+  { x: 188, y: 81 },
+  { x: 191, y: 91 },
+  { x: 194, y: 86 },
 ];
 
 function randomScatter(): Point[] {
-  // Weight tends to rise with height, plus a person-to-person wobble.
-  const slope = 0.55 + Math.random() * 0.25;
-  const intercept = -40 + (Math.random() - 0.5) * 16;
-  return Array.from({ length: 6 }, (_, index) => {
-    const x = round2(155 + index * 7);
-    const noise = (Math.random() - 0.5) * 10;
+  // Weight tends to rise with height, plus a person-to-person wobble. Fifteen
+  // points give a more honest spread than a handful sitting on the line.
+  const slope = 0.5 + Math.random() * 0.25;
+  const intercept = -40 + (Math.random() - 0.5) * 12;
+  return Array.from({ length: 15 }, (_, index) => {
+    const x = round2(152 + index * 3);
+    const noise = (Math.random() - 0.5) * 14;
     return {
       x,
       y: clamp(round2(slope * x + intercept + noise), DOMAIN.yMin, DOMAIN.yMax),
