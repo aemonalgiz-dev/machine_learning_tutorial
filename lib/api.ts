@@ -42,19 +42,16 @@ export class ApiError extends Error {
   }
 }
 
-export async function fitSimpleLinearRegression(
-  points: Point[],
-): Promise<LineFit> {
+// One POST, one place to turn a non-2xx into a readable ApiError. Every call
+// below is a thin wrapper over this.
+async function postJson<T>(path: string, body: unknown): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(
-      `${API_BASE_URL}/concepts/simple-linear-regression/fit`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ points }),
-      },
-    );
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
   } catch {
     throw new ApiError(
       "The compute API is not reachable. Is it running?",
@@ -63,13 +60,64 @@ export async function fitSimpleLinearRegression(
   }
 
   if (!response.ok) {
-    const body = await response.json().catch(() => null);
+    const errorBody = await response.json().catch(() => null);
     const detail =
-      body?.detail && typeof body.detail === "string"
-        ? body.detail
+      errorBody?.detail && typeof errorBody.detail === "string"
+        ? errorBody.detail
         : "The API could not compute this input.";
     throw new ApiError(detail, "refused");
   }
 
-  return (await response.json()) as LineFit;
+  return (await response.json()) as T;
+}
+
+export async function fitSimpleLinearRegression(
+  points: Point[],
+): Promise<LineFit> {
+  return postJson<LineFit>("/concepts/simple-linear-regression/fit", { points });
+}
+
+// --- Calculus primer: gradient descent on a fixed curve ---------------------
+
+export type DescentFunction = "bowl" | "valley";
+
+export type DescentOutcome = "converged" | "step_limit_reached" | "diverged";
+
+export interface CurvePoint {
+  x: number;
+  y: number;
+}
+
+export interface DescentPoint {
+  x: number;
+  y: number;
+  slope: number;
+}
+
+export interface DescentWindow {
+  x_min: number;
+  x_max: number;
+  y_min: number;
+  y_max: number;
+}
+
+export interface Descent {
+  curve: CurvePoint[];
+  window: DescentWindow;
+  path: DescentPoint[];
+  outcome: DescentOutcome;
+  minimum: CurvePoint | null;
+}
+
+export interface DescentRequest {
+  function: DescentFunction;
+  start: number;
+  learning_rate: number;
+  steps?: number;
+}
+
+export async function runGradientDescent(
+  request: DescentRequest,
+): Promise<Descent> {
+  return postJson<Descent>("/primers/calculus/descend", request);
 }

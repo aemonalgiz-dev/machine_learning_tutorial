@@ -3,9 +3,9 @@ import Link from "next/link";
 interface Concept {
   title: string;
   blurb: string;
-  // A slug means the concept has a live page and the card links to it. Without
-  // one the card is a placeholder, shown but not yet clickable.
-  slug?: string;
+  // An href means the page exists and the card links to it. Without one the
+  // card is a placeholder, shown but not yet clickable.
+  href?: string;
 }
 
 interface Bucket {
@@ -25,6 +25,7 @@ const CURRICULUM: Bucket[] = [
     concepts: [
       {
         title: "Calculus Primer",
+        href: "/primers/calculus",
         blurb:
           "When we fit a model, we are really searching for the settings that make its error as small as possible. A derivative gives us the slope of a curve at any point, and since that slope is zero at the very bottom, we can use it to find where the error stops falling.",
       },
@@ -46,7 +47,7 @@ const CURRICULUM: Bucket[] = [
     concepts: [
       {
         title: "Simple Linear Regression",
-        slug: "simple-linear-regression",
+        href: "/concepts/simple-linear-regression",
         blurb:
           "Fit a straight line to model the relationship between two sets of data, such as height and weight. Once it is fit, the line turns any height into a predicted weight.",
       },
@@ -162,10 +163,10 @@ export default function Home() {
 }
 
 function ConceptCard({ concept }: { concept: Concept }) {
-  if (concept.slug) {
+  if (concept.href) {
     return (
       <Link
-        href={`/concepts/${concept.slug}`}
+        href={concept.href}
         className="group block rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700"
       >
         <div className="flex items-baseline justify-between gap-3">
