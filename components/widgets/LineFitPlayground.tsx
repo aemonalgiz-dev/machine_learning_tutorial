@@ -78,6 +78,17 @@ const STARTING_POINTS: Point[] = [
   { x: 194, y: 86 },
 ];
 
+// The five people the page's worked example fits by hand. Loaded by its own
+// button so the prose's arithmetic and the widget's readouts can be compared
+// digit for digit: slope 0.800, intercept -68.000, R-squared 0.909.
+const WORKED_EXAMPLE: Point[] = [
+  { x: 160, y: 58 },
+  { x: 165, y: 66 },
+  { x: 170, y: 68 },
+  { x: 175, y: 74 },
+  { x: 180, y: 74 },
+];
+
 function randomScatter(): Point[] {
   // Weight tends to rise with height, plus a person-to-person wobble. Fifteen
   // points give a more honest spread than a handful sitting on the line.
@@ -178,6 +189,7 @@ export function LineFitPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <Button onClick={() => setPoints(randomScatter())}>Random scatter</Button>
+        <Button onClick={() => setPoints(WORKED_EXAMPLE)}>Worked example</Button>
         <Button onClick={() => setPoints(STARTING_POINTS)}>Reset</Button>
         <Button onClick={() => setPoints([])}>Clear</Button>
         <span className="ml-auto text-xs text-slate-500 dark:text-slate-500">

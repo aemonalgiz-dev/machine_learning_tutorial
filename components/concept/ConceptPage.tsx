@@ -2,20 +2,25 @@
 //
 // A concept opens with the problem that forced it, then a shared interactive
 // playground, then its explanations stacked full-width rather than in columns.
-// The explanations are collapsible: the plain one is open by default, and the
-// mechanism and the derivation are folded away for the reader who wants them.
-// Native <details> does the folding, so the page stays a server component.
+// The explanations are collapsible: the first is open by default, and the rest
+// are folded away for the reader who wants them. A page passes as many sections
+// as its subject needs rather than filling three fixed slots. Native <details>
+// does the folding, so the page stays a server component.
 
 import { ReactNode } from "react";
+
+export interface ConceptSection {
+  title: string;
+  content: ReactNode;
+  defaultOpen?: boolean;
+}
 
 interface ConceptPageProps {
   title: string;
   tagline: string;
   history: ReactNode;
   playground: ReactNode;
-  layperson: ReactNode;
-  technical: ReactNode;
-  derivation?: ReactNode;
+  sections: ConceptSection[];
   prerequisites?: ReactNode;
 }
 
@@ -24,9 +29,7 @@ export function ConceptPage({
   tagline,
   history,
   playground,
-  layperson,
-  technical,
-  derivation,
+  sections,
   prerequisites,
 }: ConceptPageProps) {
   return (
@@ -65,13 +68,15 @@ export function ConceptPage({
       </section>
 
       <div className="border-t border-slate-200 dark:border-slate-800">
-        <CollapsibleSection title="How to Conceptualize" defaultOpen>
-          {layperson}
-        </CollapsibleSection>
-        <CollapsibleSection title="The Mechanism">{technical}</CollapsibleSection>
-        {derivation && (
-          <CollapsibleSection title="How to Derive">{derivation}</CollapsibleSection>
-        )}
+        {sections.map((section) => (
+          <CollapsibleSection
+            key={section.title}
+            title={section.title}
+            defaultOpen={section.defaultOpen}
+          >
+            {section.content}
+          </CollapsibleSection>
+        ))}
       </div>
     </article>
   );
