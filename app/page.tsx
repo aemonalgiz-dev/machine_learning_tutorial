@@ -53,7 +53,7 @@ const CURRICULUM: Bucket[] = [
       {
         title: "Multiple & Polynomial Regression",
         blurb:
-          "Model a relationship that depends on several inputs at once, or one that curves, by fitting a plane or a curve instead of a straight line. The way it is fitted does not change.",
+          "Model a relationship that depends on several inputs at once, or one that curves, by fitting a plane or a curve instead of a straight line. The underlying mechanics of how we build the regression remain almost identical.",
       },
       {
         title: "Ridge & Lasso",
