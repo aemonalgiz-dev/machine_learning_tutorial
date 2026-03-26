@@ -121,3 +121,26 @@ export async function runGradientDescent(
 ): Promise<Descent> {
   return postJson<Descent>("/primers/calculus/descend", request);
 }
+
+// The step before descent: the slope of a curve at one point, for the tangent
+// explorer.
+export interface CurveSlope {
+  x: number;
+  y: number;
+  slope: number;
+}
+
+export interface Tangent {
+  curve: CurvePoint[];
+  window: DescentWindow;
+  point: CurveSlope;
+}
+
+export interface TangentRequest {
+  function: DescentFunction;
+  x: number;
+}
+
+export async function curveTangent(request: TangentRequest): Promise<Tangent> {
+  return postJson<Tangent>("/primers/calculus/tangent", request);
+}
