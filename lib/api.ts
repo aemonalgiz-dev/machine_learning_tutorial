@@ -226,3 +226,22 @@ export async function transformPlane(
 ): Promise<PlaneTransform> {
   return postJson<PlaneTransform>("/primers/linear-algebra/transform", matrix);
 }
+
+export interface AppliedVector {
+  image: PlanePoint;
+  aligned: boolean;
+  factor: number | null;
+  angle_degrees: number | null;
+  eigen: EigenDirection[];
+  has_real_eigen: boolean;
+}
+
+export async function applyMatrix(
+  matrix: Matrix2x2,
+  vector: PlanePoint,
+): Promise<AppliedVector> {
+  return postJson<AppliedVector>("/primers/linear-algebra/apply", {
+    ...matrix,
+    vector,
+  });
+}
