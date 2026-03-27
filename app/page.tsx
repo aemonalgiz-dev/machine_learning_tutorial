@@ -37,6 +37,7 @@ const CURRICULUM: Bucket[] = [
       },
       {
         title: "Statistics & Probability Primer",
+        href: "/primers/statistics",
         blurb:
           "Machine learning assumes there is a real pattern hidden under noisy data, and these are the tools we use to pin it down. The mean gives us a typical value, the variance tells us how far the data spreads around it, and correlation tells us whether two quantities move together, which is where the idea of one thing predicting another begins.",
       },

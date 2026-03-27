@@ -245,3 +245,48 @@ export async function applyMatrix(
     vector,
   });
 }
+
+// --- Statistics primer: summaries of a cloud, and draws from a population ---
+
+export interface CloudSummary {
+  mean_x: number;
+  mean_y: number;
+  variance_x: number;
+  variance_y: number;
+  standard_deviation_x: number;
+  standard_deviation_y: number;
+  covariance: number;
+  correlation: number | null;
+}
+
+export async function summarizeCloud(points: Point[]): Promise<CloudSummary> {
+  return postJson<CloudSummary>("/primers/statistics/summarize", { points });
+}
+
+export interface HistogramBin {
+  start: number;
+  end: number;
+  count: number;
+}
+
+export interface SampleDraw {
+  values: number[];
+  count: number;
+  mean: number;
+  standard_deviation: number;
+  bins: HistogramBin[];
+  true_mean: number;
+  true_standard_deviation: number;
+}
+
+export async function drawSample(
+  values: number[],
+  draw: number,
+  seed: number,
+): Promise<SampleDraw> {
+  return postJson<SampleDraw>("/primers/statistics/sample", {
+    values,
+    draw,
+    seed,
+  });
+}
