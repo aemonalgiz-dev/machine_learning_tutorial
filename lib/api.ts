@@ -246,6 +246,52 @@ export async function applyMatrix(
   });
 }
 
+// --- Multiple & polynomial regression, and ridge & lasso ------------------
+
+export interface NamedCoefficient {
+  name: string;
+  value: number;
+}
+
+export interface PolynomialFit {
+  coefficients: NamedCoefficient[];
+  intercept: number;
+  r_squared: number;
+  curve: CurvePoint[];
+}
+
+export async function fitPolynomial(
+  points: Point[],
+  degree: number,
+): Promise<PolynomialFit> {
+  return postJson<PolynomialFit>("/concepts/multiple-polynomial-regression/fit", {
+    points,
+    degree,
+  });
+}
+
+export type PenaltyModel = "ridge" | "lasso";
+
+export interface PenalisedFit {
+  coefficients: NamedCoefficient[];
+  intercept: number;
+  r_squared: number;
+  nonzero_count: number;
+  curve: CurvePoint[];
+}
+
+export async function fitPenalised(
+  points: Point[],
+  model: PenaltyModel,
+  penalty: number,
+): Promise<PenalisedFit> {
+  return postJson<PenalisedFit>("/concepts/ridge-lasso/fit", {
+    points,
+    model,
+    penalty,
+  });
+}
+
 // --- Statistics primer: summaries of a cloud, and draws from a population ---
 
 export interface CloudSummary {
