@@ -73,16 +73,19 @@ const CURRICULUM: Bucket[] = [
     concepts: [
       {
         title: "Logistic Regression",
+        href: "/concepts/logistic-regression",
         blurb:
           "Sometimes we do not want a number, we want a yes or a no. Logistic regression fits a curve that turns the inputs into a probability between zero and one, and then anything above one half becomes a yes and anything below it a no, with the boundary sitting where the probability is exactly a half.",
       },
       {
         title: "k-Nearest Neighbours",
+        href: "/concepts/k-nearest-neighbours",
         blurb:
           "This one does no training at all. To label a new point we look at the handful of known points nearest to it and let them vote, so the model is really just the examples we have kept.",
       },
       {
         title: "Decision Trees",
+        href: "/concepts/decision-trees",
         blurb:
           "We split the data with a yes-or-no question, then split each part again, choosing every question to separate the classes as cleanly as we can. What we end up with reads like a flowchart we could follow by hand.",
       },
