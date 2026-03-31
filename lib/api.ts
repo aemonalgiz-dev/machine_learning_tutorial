@@ -418,6 +418,40 @@ export async function fitBoosting(
   });
 }
 
+// --- Unsupervised: k-means and principal component analysis ----------------
+
+export interface Clustering {
+  labels: number[];
+  centres: Point[];
+  inertia: number;
+  iterations_run: number;
+  regions: RegionGrid;
+}
+
+export async function clusterPeople(
+  points: Point[],
+  k: number,
+): Promise<Clustering> {
+  return postJson<Clustering>("/concepts/k-means/cluster", { points, k });
+}
+
+export interface ComponentDocument {
+  dx: number;
+  dy: number;
+  variance: number;
+  share: number;
+}
+
+export interface PcaAnalysis {
+  mean: Point;
+  components: ComponentDocument[];
+  reconstructions: Point[];
+}
+
+export async function analyzeCloud(points: Point[]): Promise<PcaAnalysis> {
+  return postJson<PcaAnalysis>("/concepts/pca/analyze", { points });
+}
+
 // --- Statistics primer: summaries of a cloud, and draws from a population ---
 
 export interface CloudSummary {

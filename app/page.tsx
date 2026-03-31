@@ -121,11 +121,13 @@ const CURRICULUM: Bucket[] = [
     concepts: [
       {
         title: "k-Means Clustering",
+        href: "/concepts/k-means",
         blurb:
           "Here no one has labelled the data, so we look for the groups ourselves. We put each point with the nearest group centre, recompute each centre from the points it now holds, and repeat until nothing moves.",
       },
       {
         title: "Principal Component Analysis",
+        href: "/concepts/pca",
         blurb:
           "Data with many features usually varies along only a few real directions. We find those directions and describe each point by where it falls along them, so many correlated numbers collapse into a few independent ones.",
       },
