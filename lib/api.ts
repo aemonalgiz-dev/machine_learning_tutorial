@@ -379,6 +379,45 @@ export async function fitTree(
   });
 }
 
+// --- Ensembles: bagging, random forests, gradient boosting -----------------
+
+export interface CommitteeAnswer {
+  accuracy: number;
+  out_of_bag_score: number;
+  roots_on_height: number;
+  roots_on_weight: number;
+  regions: RegionGrid;
+}
+
+export async function fitCommittee(
+  kind: "bagging" | "random-forest",
+  points: LabelledPoint[],
+  nMembers: number,
+): Promise<CommitteeAnswer> {
+  return postJson<CommitteeAnswer>(`/concepts/ensembles/${kind}`, {
+    points,
+    n_members: nMembers,
+  });
+}
+
+export interface BoostingAnswer {
+  r_squared: number;
+  predictions: number[];
+  curve: CurvePoint[];
+}
+
+export async function fitBoosting(
+  points: Point[],
+  rounds: number,
+  learningRate: number,
+): Promise<BoostingAnswer> {
+  return postJson<BoostingAnswer>("/concepts/ensembles/gradient-boosting", {
+    points,
+    rounds,
+    learning_rate: learningRate,
+  });
+}
+
 // --- Statistics primer: summaries of a cloud, and draws from a population ---
 
 export interface CloudSummary {

@@ -93,12 +93,25 @@ const CURRICULUM: Bucket[] = [
   },
   {
     heading: "Ensembles",
-    blurb: "Many models together, outvoting any one of them.",
+    blurb: "Many models combined, so no single model's mistakes decide the answer.",
     concepts: [
       {
-        title: "Bagging, Forests & Boosting",
+        title: "Bagging",
+        href: "/concepts/bagging",
         blurb:
-          "A single model is easy to fool, so instead we train many of them, each on a slightly different slice of the data, and combine what they say. Their individual mistakes tend to disagree, so they cancel out.",
+          "A deep tree memorises whichever data it happens to see, though that instability can be spent rather than suffered. We grow many trees, each on its own resample of the data, and let them vote, so the accidents each tree memorised cancel in the crowd.",
+      },
+      {
+        title: "Random Forests",
+        href: "/concepts/random-forests",
+        blurb:
+          "A bagged committee still thinks alike, since every tree sees the same strong feature and opens with the same question. A forest offers each split a random subset of the features, manufacturing disagreement on purpose, which is what a vote needs to do its work.",
+      },
+      {
+        title: "Gradient Boosting",
+        href: "/concepts/gradient-boosting",
+        blurb:
+          "Rather than growing experts in parallel, we grow them in sequence. Each small tree is fitted to whatever the running total still gets wrong, and a learning rate keeps every correction modest, so the model assembles itself out of its own mistakes.",
       },
     ],
   },
