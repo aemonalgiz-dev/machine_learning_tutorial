@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "oop_ml: machine learning, one concept at a time",
   description:
-    "A teaching tour of machine learning. Each idea starts with the problem behind it, gets a plain explanation and a technical one, and comes with something you can experiment with, computed live by a library written from scratch.",
+    "Every concept starts with the problem it was invented to solve, gets an intuitive explanation and a technical one, and comes with an interactive example computed live by a library written from scratch.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
