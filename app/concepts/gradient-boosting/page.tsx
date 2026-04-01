@@ -192,6 +192,40 @@ export default function GradientBoostingPage() {
             </>
           ),
         },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                The word gradient in the name is a claim, and it takes three
+                lines to make good. Fix one person and ask how the
+                model&rsquo;s error changes as their prediction p moves,
+                holding the target y still. The error is the squared miss
+                with the conventional half in front.
+              </p>
+              <Equation>{"E = ½·(y − p)²\ndE/dp = −(y − p)"}</Equation>
+              <p>
+                The half is there so the derivative comes out as a clean
+                subtraction, the same bookkeeping kindness the calculus
+                primer used, and the line says the error&rsquo;s slope with
+                respect to the prediction is minus the residual. Downhill is
+                therefore the residual&rsquo;s own direction, and one step of
+                the primer&rsquo;s walk, taken not in a setting but in the
+                prediction itself, reads
+              </p>
+              <Equation>{"p  ←  p − η·(−(y − p))  =  p + η·(y − p)"}</Equation>
+              <p>
+                which is exactly what a round does. The stump fitted to the
+                residuals estimates the downhill direction for every person
+                at once, adding η times its answer is the step, and gradient
+                boosting is gradient descent with the space of settings
+                traded for the space of predictions. The worked
+                example&rsquo;s arithmetic, 6 stepping to 4 and 7 and onward,
+                was this equation applied by hand.
+              </p>
+            </>
+          ),
+        },
       ]}
     />
   );

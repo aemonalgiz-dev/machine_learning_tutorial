@@ -177,6 +177,49 @@ export default function BaggingPage() {
             </>
           ),
         },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                Two numbers on this page deserve their derivations. The first
+                is the missing third. A person dodges one draw with
+                probability 1 − 1/n, and the n draws are independent, so
+                they dodge all of them with that probability multiplied by
+                itself n times.
+              </p>
+              <Equation>{"P(left out) = (1 − 1/n)ⁿ\nn = 25 gives 0.360,   n = 1000 gives 0.368"}</Equation>
+              <p>
+                As the crowd grows the number settles toward 1/e, about
+                0.368, which is why every bootstrap, whatever its size,
+                leaves out roughly the same third.
+              </p>
+              <p>
+                The second is why averaging helps, and by exactly how much.
+                Borrow one fact beyond the statistics primer, that variances
+                of independent quantities add. A committee&rsquo;s answer is
+                the mean of B members, so its variance is the sum of theirs
+                divided by B², and for independent members sharing a variance
+                σ² that leaves
+              </p>
+              <Equation>{"Var(mean of B independent members) = σ²/B"}</Equation>
+              <p>
+                scatter shrinking with every member added. The members are
+                not independent, though, having grown from resamples of one
+                crowd, and carrying their shared correlation ρ through the
+                same bookkeeping splits the variance in two.
+              </p>
+              <Equation>{"Var(committee) = ρσ² + (1 − ρ)·σ²/B"}</Equation>
+              <p>
+                The second term is the part voting can remove, and it dies as
+                B grows. The first term does not contain B at all. No
+                committee size touches it, which is the ceiling this page
+                ended on written as a formula, and the ρ sitting in it is the
+                next page&rsquo;s whole reason to exist.
+              </p>
+            </>
+          ),
+        },
       ]}
     />
   );

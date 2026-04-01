@@ -189,6 +189,55 @@ export default function PcaPage() {
             </>
           ),
         },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                The claim to earn is that hunting variance leads to the
+                covariance matrix&rsquo;s kept directions, and it walks in
+                two steps. First, what is the variance of the cloud along a
+                chosen unit direction u. Each person&rsquo;s deviation d
+                lands on u by the dot product, so the variance along u is the
+                average of those projections squared, and expanding the
+                square makes something familiar appear.
+              </p>
+              <Equation>{"(d · u)² = (d₁u₁ + d₂u₂)²\n        = d₁²·u₁² + 2·d₁d₂·u₁u₂ + d₂²·u₂²"}</Equation>
+              <p>
+                Average this over the people and the d sums become the
+                statistics primer&rsquo;s quantities, the two variances on
+                the squared terms and the covariance on the cross term, which
+                is to say the whole expression is the covariance matrix C
+                evaluated on u.
+              </p>
+              <Equation>{"variance along u = uᵀ C u"}</Equation>
+              <p>
+                Second, maximise that over unit directions. Picture u
+                sweeping the unit circle with the value uᵀCu riding along. At
+                the direction where the value peaks, nudging u along the
+                circle must change nothing, so the expression&rsquo;s slope,
+                which works out to 2Cu, can have no component along the
+                circle. It must point straight along u itself, and a vector
+                Cu pointing along u is the linear algebra primer&rsquo;s
+                definition made flesh.
+              </p>
+              <Equation>{"C u = λ u"}</Equation>
+              <p>
+                The best direction is an eigenvector of C, and dotting
+                both sides of the eigen equation with u closes the loop.
+              </p>
+              <Equation>{"uᵀ C u = λ·(u · u) = λ"}</Equation>
+              <p>
+                The factor λ is the variance achieved along its direction,
+                and the shares the readouts report are these factors divided
+                by their total. The second component repeats the argument
+                among directions perpendicular to the first. Nothing about
+                the eigen machinery was borrowed on faith, the variance hunt
+                walks straight into it.
+              </p>
+            </>
+          ),
+        },
       ]}
     />
   );

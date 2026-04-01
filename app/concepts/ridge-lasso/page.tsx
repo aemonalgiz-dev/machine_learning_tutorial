@@ -241,6 +241,55 @@ export default function RidgeLassoPage() {
             </>
           ),
         },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                Ridge&rsquo;s formula comes from the same move as every
+                regression so far, set the derivatives of the objective to
+                zero, with one new term along for the ride. The objective is
+                the residual sum of squares plus the charge, and
+                differentiating with respect to any one coefficient produces
+                the old flatness condition plus the charge&rsquo;s own
+                derivative, 2λβ.
+              </p>
+              <Equation>{"∂/∂β [ RSS + λ·Σβ² ]  =  ∂RSS/∂β + 2λβ  =  0"}</Equation>
+              <p>
+                One equation per coefficient again, still linear, so algebra
+                can still finish the job. For a single centred feature the
+                ordinary condition said the slope is the product sum over the
+                square sum, and the new term moves λ into the denominator.
+              </p>
+              <Equation>{"−2·Σx(y − βx) + 2λβ = 0\nβ = Σxy / (Σx² + λ)"}</Equation>
+              <p>
+                which on the five people is 200 over 250 plus λ, the worked
+                shrinkage table earned rather than stated. With many features
+                the equations bundle into the multiple regression
+                page&rsquo;s normal equations with λ added down the diagonal,
+                and that addition is also what steadies Hoerl&rsquo;s wild
+                solutions, since two correlated inputs can no longer trade
+                enormous opposite coefficients between them for free once
+                every coefficient pays for its size.
+              </p>
+              <p>
+                Lasso refuses this treatment, and the refusal is the
+                interesting part. Its charge is λ·Σ|β|, and the absolute
+                value has a corner at zero, no derivative there to set to
+                zero, so no equation comes out and no closed form exists.
+                What the corner gives instead is the zeroing. Just right of
+                zero the charge pulls back with force λ, just left of zero it
+                pushes forward with force λ, and when the data&rsquo;s pull
+                on a coefficient is weaker than that, the best the
+                coefficient can do is stop exactly at the corner. That is why
+                lasso subtracts where ridge divides, why its coefficients
+                reach zero at a finite penalty, and why the library fits it
+                by sweeping one coefficient at a time rather than by a
+                formula.
+              </p>
+            </>
+          ),
+        },
       ]}
     />
   );

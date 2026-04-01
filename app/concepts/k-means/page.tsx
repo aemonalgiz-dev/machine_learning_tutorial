@@ -191,6 +191,38 @@ export default function KMeansPage() {
             </>
           ),
         },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                The mechanism leaned on one claim, that the mean is the point
+                minimising the total squared distance to a group, and the
+                calculus primer&rsquo;s move settles it in three lines. Work
+                one coordinate at a time and ask which centre c makes the
+                total smallest.
+              </p>
+              <Equation>{"T(c) = Σ (xᵢ − c)²\ndT/dc = −2·Σ (xᵢ − c) = 0"}</Equation>
+              <p>
+                The condition says the deviations from c must cancel exactly,
+                the statistics primer&rsquo;s balance point, and solving it
+                shows the mean is the only number they cancel around.
+              </p>
+              <Equation>{"Σ xᵢ − n·c = 0     so     c = (Σ xᵢ) / n"}</Equation>
+              <p>
+                So the update step is not a heuristic. It is the exact
+                minimiser of the very total the method tracks, and with that
+                in hand the convergence argument closes properly. The
+                assignment step lowers the inertia by moving people to nearer
+                centres, the update step lowers it because the mean minimises
+                it exactly, and a total that only falls over finitely many
+                possible groupings has nowhere to go but to rest. What the
+                derivation does not promise is which rest, the two-valley
+                caution again, and the restarts exist for precisely that gap.
+              </p>
+            </>
+          ),
+        },
       ]}
     />
   );

@@ -210,6 +210,48 @@ export default function LogisticRegressionPage() {
             </>
           ),
         },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                The climbing section quoted a balance condition, and it can
+                be earned. What the fit maximises is the likelihood, the
+                probability the curve assigns to the outcomes that actually
+                happened, each pass contributing its p and each fail its
+                1 − p. Products are miserable to differentiate, so take the
+                logarithm, which turns them into sums and moves nothing,
+                since whatever maximises one maximises the other.
+              </p>
+              <Equation>{"ℓ = Σ [ yᵢ·ln(pᵢ) + (1 − yᵢ)·ln(1 − pᵢ) ]"}</Equation>
+              <p>
+                Now differentiate with respect to the slope, remembering p
+                depends on it through the score and the squash. The sigmoid
+                obliges with the tidiest derivative in the subject, worth
+                verifying once from its definition back in The Mechanism.
+              </p>
+              <Equation>{"dσ/dz = σ·(1 − σ)"}</Equation>
+              <p>
+                Push the chain rule through and the tidiness cancels
+                everything awkward. The ln(p) term contributes y/p times
+                p(1 − p) times x, the 1 − p term its mirror image, and what
+                survives is almost embarrassingly small.
+              </p>
+              <Equation>{"∂ℓ/∂β = Σ (yᵢ − pᵢ)·xᵢ          ∂ℓ/∂α = Σ (yᵢ − pᵢ)"}</Equation>
+              <p>
+                Setting both to zero gives the balance the climbing section
+                promised, gaps between outcomes and probabilities summing to
+                nothing, the straight line&rsquo;s residual conditions with p
+                standing where the prediction stood. The difference is what
+                happens next. In the linear case the prediction was βx + α
+                and the conditions were equations algebra could finish. Here
+                p wraps the score in an exponential, no rearrangement
+                isolates β, and that is the honest reason this page climbs
+                where the straight line solved.
+              </p>
+            </>
+          ),
+        },
       ]}
     />
   );
