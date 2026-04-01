@@ -24,7 +24,7 @@ const RANGE = {
 };
 
 // Twenty people, frozen so the page can quote the fitted numbers.
-const PEOPLE: Person3d[] = [
+const MEASURED_PEOPLE: Person3d[] = [
   { height: 186, age: 48, weight: 82.5 },
   { height: 186, age: 34, weight: 78.6 },
   { height: 173, age: 64, weight: 67.8 },
@@ -47,6 +47,41 @@ const PEOPLE: Person3d[] = [
   { height: 153, age: 55, weight: 61.7 },
 ];
 
+// The same twenty people with weights sitting almost exactly on one plane,
+// the ideal case, a very strong fit.
+const IDEAL_PEOPLE: Person3d[] = [
+  { height: 186, age: 48, weight: 79.4 },
+  { height: 186, age: 34, weight: 76.0 },
+  { height: 173, age: 64, weight: 74.2 },
+  { height: 163, age: 23, weight: 59.8 },
+  { height: 152, age: 54, weight: 59.4 },
+  { height: 167, age: 64, weight: 69.7 },
+  { height: 168, age: 31, weight: 65.1 },
+  { height: 152, age: 65, weight: 60.5 },
+  { height: 152, age: 64, weight: 61.2 },
+  { height: 195, age: 21, weight: 79.3 },
+  { height: 179, age: 55, weight: 76.3 },
+  { height: 161, age: 20, weight: 58.0 },
+  { height: 170, age: 45, weight: 68.9 },
+  { height: 194, age: 42, weight: 82.4 },
+  { height: 190, age: 30, weight: 78.6 },
+  { height: 188, age: 36, weight: 77.6 },
+  { height: 168, age: 60, weight: 70.4 },
+  { height: 172, age: 36, weight: 67.7 },
+  { height: 180, age: 27, weight: 71.9 },
+  { height: 153, age: 55, weight: 59.4 },
+];
+
+function randomPeople(): Person3d[] {
+  return Array.from({ length: 20 }, () => {
+    const height = Math.round(150 + Math.random() * 45);
+    const age = Math.round(20 + Math.random() * 48);
+    const weight =
+      Math.round((0.62 * height + 0.18 * age - 45 + (Math.random() - 0.5) * 8) * 10) / 10;
+    return { height, age, weight };
+  });
+}
+
 function cubePoint(height: number, age: number, weight: number): Point3 {
   return {
     x: toCube(height, RANGE.height[0], RANGE.height[1]),
@@ -56,6 +91,7 @@ function cubePoint(height: number, age: number, weight: number): Point3 {
 }
 
 export function PlanePlayground3D() {
+  const [people, setPeople] = useState<Person3d[]>(MEASURED_PEOPLE);
   const [fit, setFit] = useState<PlaneFit3d | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [orbit, setOrbit] = useState<Orbit>({ yaw: -2.2, pitch: 0.5 });
@@ -64,13 +100,13 @@ export function PlanePlayground3D() {
   useEffect(() => {
     (async () => {
       try {
-        setFit(await fitPlane3d(PEOPLE));
+        setFit(await fitPlane3d(people));
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
         else setMessage("Something went wrong.");
       }
     })();
-  }, []);
+  }, [people]);
 
   const onPointerDown = (event: React.PointerEvent) => {
     dragging.current = { x: event.clientX, y: event.clientY };
@@ -119,7 +155,7 @@ export function PlanePlayground3D() {
     })
     .sort((first, second) => second.depth - first.depth);
 
-  const projectedPeople = PEOPLE.map((person) => ({
+  const projectedPeople = people.map((person) => ({
     ...project(cubePoint(person.height, person.age, person.weight), orbit, HALF, SCALE),
   })).sort((first, second) => second.depth - first.depth);
 
@@ -134,6 +170,26 @@ export function PlanePlayground3D() {
 
   return (
     <div>
+      <div className="flex flex-wrap items-center gap-2 pb-3">
+        <button
+          onClick={() => setPeople(IDEAL_PEOPLE)}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => setPeople(MEASURED_PEOPLE)}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          The measured twenty
+        </button>
+        <button
+          onClick={() => setPeople(randomPeople())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random people
+        </button>
+      </div>
       <svg
         viewBox={`0 0 ${VIEW} ${VIEW}`}
         className="mx-auto w-full max-w-lg cursor-grab touch-none select-none rounded-lg bg-slate-50 active:cursor-grabbing dark:bg-slate-950"

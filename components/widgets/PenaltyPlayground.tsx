@@ -48,6 +48,39 @@ const NOISY_THROW: Point[] = [
   { x: 4.0, y: 1.2 },
 ];
 
+// The same throw measured without noise, the ideal case, fifteen points on
+// the exact arc h = 20t - 4.9t^2.
+const IDEAL_THROW: Point[] = [
+  { x: 0.0, y: 0.0 },
+  { x: 0.29, y: 5.39 },
+  { x: 0.57, y: 9.81 },
+  { x: 0.86, y: 13.58 },
+  { x: 1.14, y: 16.43 },
+  { x: 1.43, y: 18.58 },
+  { x: 1.71, y: 19.87 },
+  { x: 2.0, y: 20.4 },
+  { x: 2.29, y: 20.1 },
+  { x: 2.57, y: 19.04 },
+  { x: 2.86, y: 17.12 },
+  { x: 3.14, y: 14.48 },
+  { x: 3.43, y: 10.95 },
+  { x: 3.71, y: 6.75 },
+  { x: 4.0, y: 1.6 },
+];
+
+function randomThrow(): Point[] {
+  const launch = 17 + Math.random() * 5;
+  return Array.from({ length: 15 }, (_, index) => {
+    const t = Math.round(((index * 4) / 14) * 100) / 100;
+    const noise = (Math.random() - 0.5) * 3;
+    const h = Math.max(
+      DOMAIN.yMin,
+      Math.min(DOMAIN.yMax, launch * t - 4.9 * t * t + noise),
+    );
+    return { x: t, y: Math.round(h * 10) / 10 };
+  });
+}
+
 function toPixel(point: { x: number; y: number }) {
   const px =
     PAD.left +
@@ -75,6 +108,7 @@ function statusText(fit: PenalisedFit | null, model: PenaltyModel): string {
 }
 
 export function PenaltyPlayground() {
+  const [points, setPoints] = useState<Point[]>(NOISY_THROW);
   const [model, setModel] = useState<PenaltyModel>("ridge");
   const [exponent, setExponent] = useState(-1);
   const [fit, setFit] = useState<PenalisedFit | null>(null);
@@ -85,7 +119,7 @@ export function PenaltyPlayground() {
   useEffect(() => {
     const timer = setTimeout(async () => {
       try {
-        setFit(await fitPenalised(NOISY_THROW, model, penalty));
+        setFit(await fitPenalised(points, model, penalty));
         setMessage(null);
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
@@ -93,7 +127,7 @@ export function PenaltyPlayground() {
       }
     }, 120);
     return () => clearTimeout(timer);
-  }, [model, penalty]);
+  }, [points, model, penalty]);
 
   const curvePath = fit
     ? fit.curve
@@ -115,6 +149,24 @@ export function PenaltyPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
+        <button
+          onClick={() => setPoints(IDEAL_THROW)}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => setPoints(NOISY_THROW)}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Full throw
+        </button>
+        <button
+          onClick={() => setPoints(randomThrow())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random throw
+        </button>
         <div className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {(["ridge", "lasso"] as PenaltyModel[]).map((option) => (
             <button
@@ -151,7 +203,7 @@ export function PenaltyPlayground() {
         className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950"
       >
         {/* the ball, fixed here so the bars stay the story */}
-        {NOISY_THROW.map((point, index) => {
+        {points.map((point, index) => {
           const { px, py } = toPixel(point);
           return (
             <circle

@@ -48,6 +48,18 @@ const CROWD: Point[] = [
   { x: 178, y: 78 },
 ];
 
+
+function randomClumps(): Point[] {
+  const around = (centreX: number, centreY: number, count: number): Point[] =>
+    Array.from({ length: count }, () => ({
+      x: Math.round(centreX + (Math.random() - 0.5) * 26),
+      y: Math.round(centreY + (Math.random() - 0.5) * 24),
+    }));
+  const cornerX = 120 + Math.random() * 20;
+  const cornerY = 25 + Math.random() * 15;
+  return [...around(cornerX, cornerY, 8), ...around(cornerX + 55, cornerY + 45, 8)];
+}
+
 const MAX_POINTS = 100;
 
 const POINT_FILLS = [
@@ -181,13 +193,19 @@ export function KMeansPlayground() {
           onClick={() => setPoints(WORKED_PEOPLE)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Worked example
+          An Ideal Case
         </button>
         <button
           onClick={() => setPoints(CROWD)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
           The crowd, unlabelled
+        </button>
+        <button
+          onClick={() => setPoints(randomClumps())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random clumps
         </button>
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
           k

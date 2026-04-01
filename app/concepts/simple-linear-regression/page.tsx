@@ -224,7 +224,7 @@ export default function SimpleLinearRegressionPage() {
                 Two people sit below the line, two above, one exactly on it, and
                 the residuals sum to zero, which the derivation below will show
                 is no accident, since the best line always balances its misses this
-                way. Press the &ldquo;Worked example&rdquo; button in the box
+                way. Press the &ldquo;measured five&rdquo; button in the box
                 above and these five people load into the plot; the readouts will
                 show slope 0.800 and intercept −68.000, the numbers we just
                 computed with pencil arithmetic.
@@ -271,7 +271,7 @@ export default function SimpleLinearRegressionPage() {
                 If the line does no better than predicting the average, RSS
                 equals TSS and R² is 0, which you can see in the widget by
                 scattering points with no trend and watching the score fall. The
-                widget&rsquo;s R² readout on the worked example shows 0.909,
+                widget&rsquo;s R² readout on the measured five shows 0.909,
                 matching the arithmetic above.
               </p>
             </>

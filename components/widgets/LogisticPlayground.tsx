@@ -37,6 +37,32 @@ const WORKED_OUTCOMES: Outcome[] = [
   { x: 8, label: 1 },
 ];
 
+// The ideal case, a clear gap between the classes, every student called
+// correctly. Separation also steepens the curve, which the page explains.
+const IDEAL_OUTCOMES: Outcome[] = [
+  { x: 1, label: 0 },
+  { x: 1.5, label: 0 },
+  { x: 2, label: 0 },
+  { x: 2.5, label: 0 },
+  { x: 3, label: 0 },
+  { x: 3.5, label: 0 },
+  { x: 5.5, label: 1 },
+  { x: 6, label: 1 },
+  { x: 6.5, label: 1 },
+  { x: 7, label: 1 },
+  { x: 7.5, label: 1 },
+  { x: 8, label: 1 },
+];
+
+function randomOutcomes(): Outcome[] {
+  const boundary = 3.5 + Math.random() * 2;
+  return Array.from({ length: 14 }, () => {
+    const hours = Math.round((0.5 + Math.random() * 9) * 4) / 4;
+    const lean = 1 / (1 + Math.exp(-(hours - boundary) * 1.5));
+    return { x: hours, label: Math.random() < lean ? 1 : 0 };
+  });
+}
+
 const MAX_POINTS = 100;
 
 function toPixelX(x: number) {
@@ -139,10 +165,22 @@ export function LogisticPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button
+          onClick={() => setPoints(IDEAL_OUTCOMES)}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          An Ideal Case
+        </button>
+        <button
           onClick={() => setPoints(WORKED_OUTCOMES)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Worked example
+          The overlap
+        </button>
+        <button
+          onClick={() => setPoints(randomOutcomes())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random class
         </button>
         <span className="ml-auto text-xs text-slate-500 dark:text-slate-500">
           Click high to add a pass, low to add a fail · drag sideways ·

@@ -62,6 +62,22 @@ const MUDDLED_PEOPLE: LabelledPoint[] = [
   { x: 143, y: 50, label: 0 },
 ];
 
+
+function randomCrowd(): LabelledPoint[] {
+  const around = (
+    centreX: number,
+    centreY: number,
+    label: number,
+    count: number,
+  ): LabelledPoint[] =>
+    Array.from({ length: count }, () => ({
+      x: Math.round(centreX + (Math.random() - 0.5) * 34),
+      y: Math.round(centreY + (Math.random() - 0.5) * 30),
+      label,
+    }));
+  return [...around(132, 36, 0, 8), ...around(168, 66, 1, 8)];
+}
+
 const MAX_POINTS = 100;
 
 function toPixel(point: { x: number; y: number }) {
@@ -194,13 +210,19 @@ export function TreePlayground() {
           onClick={() => setPoints(WORKED_PEOPLE)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Worked example
+          An Ideal Case
         </button>
         <button
           onClick={() => setPoints(MUDDLED_PEOPLE)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
           Muddled crowd
+        </button>
+        <button
+          onClick={() => setPoints(randomCrowd())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random crowd
         </button>
         <div className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {[

@@ -124,7 +124,7 @@ export default function KNearestNeighboursPage() {
           content: (
             <>
               <p>
-                Press the worked example button, which places the query at a
+                Press the borderline case button, which places the query at a
                 height of 150 cm and a weight of 45 kg, and work the distances
                 by hand to the five people nearest it. Each difference below
                 is a multiple of the 3-4-5 triangle from the linear algebra

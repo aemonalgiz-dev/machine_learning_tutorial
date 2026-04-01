@@ -137,7 +137,7 @@ export default function KMeansPage() {
           content: (
             <>
               <p>
-                Press the worked example button, eight people in two tight
+                Press the ideal case button, eight people in two tight
                 clumps, and set k to 2. The method settles in two iterations,
                 and everything it reports can be checked by hand. Each
                 resting centre should be the plain mean of its clump, so sum

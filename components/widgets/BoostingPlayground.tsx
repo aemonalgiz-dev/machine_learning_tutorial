@@ -45,6 +45,20 @@ const WORKED_POINTS: Point[] = [
   { x: 3, y: 10 },
 ];
 
+
+function randomThrow(): Point[] {
+  const launch = 17 + Math.random() * 5;
+  return Array.from({ length: 15 }, (_, index) => {
+    const t = Math.round(((index * 4) / 14) * 100) / 100;
+    const noise = (Math.random() - 0.5) * 3;
+    const h = Math.max(
+      DOMAIN.yMin,
+      Math.min(DOMAIN.yMax, launch * t - 4.9 * t * t + noise),
+    );
+    return { x: t, y: Math.round(h * 10) / 10 };
+  });
+}
+
 const MAX_POINTS = 100;
 
 function toPixel(point: Point) {
@@ -173,7 +187,13 @@ export function BoostingPlayground() {
           onClick={() => setPoints(WORKED_POINTS)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Worked example
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => setPoints(randomThrow())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random throw
         </button>
         <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
           Rounds

@@ -89,7 +89,7 @@ export default function KernelTrickPage() {
                 the page is about why that one change is enough.
               </p>
               <p>
-                The fevers-only button loads a clinic a straight line
+                The ideal case button loads a clinic a straight line
                 handles fine, worth pressing to keep the trick honest. Where
                 the data separates cleanly, all three readings agree, and the
                 kernel buys nothing.
