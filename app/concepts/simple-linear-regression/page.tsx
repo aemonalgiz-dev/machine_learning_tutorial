@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { LineFitPlayground } from "@/components/widgets/LineFitPlayground";
+import { LossBowlPlayground } from "@/components/widgets/LossBowlPlayground";
 
 export const metadata: Metadata = {
   title: "Simple linear regression · oop_ml",
@@ -341,6 +342,20 @@ export default function SimpleLinearRegressionPage() {
                 the lucky case the calculus primer set against gradient descent,
                 and simple linear regression sits squarely in it.
               </p>
+              <p>
+                The bowl itself can be drawn, and it is worth a minute of
+                dragging. Every point of the wireframe below is one possible
+                line through the five worked people, its slope across, its
+                intercept into the depth, and its height the RSS that line
+                earns. The green dot marks the floor, and its readouts are the
+                worked example&rsquo;s own numbers, slope 0.800, intercept
+                −68.00, RSS 16.0. Turn the room and the bowl reveals itself
+                to be a valley running diagonally, since a steeper slope can
+                be partly repaid by a lower intercept, two settings trading
+                off against each other exactly as the pair of equations above
+                said they would.
+              </p>
+              <LossBowlPlayground />
             </>
           ),
         },

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
+import { PlanePlayground3D } from "@/components/widgets/PlanePlayground3D";
 import { PolynomialPlayground } from "@/components/widgets/PolynomialPlayground";
 
 export const metadata: Metadata = {
@@ -133,6 +134,39 @@ export default function MultiplePolynomialRegressionPage() {
                 regression is multiple regression whose extra features are
                 powers, and the underlying mechanics of how we build the
                 regression remain almost identical to the straight line&rsquo;s.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: "The Plane Itself",
+          content: (
+            <>
+              <p>
+                The several-inputs model deserves to be seen rather than taken
+                on faith, and with two inputs it can be. Below are twenty
+                people in a room, height running across, age running into the
+                depth, and weight rising upward, with the fitted model drawn
+                as a wireframe. It is a plane, the straight line&rsquo;s
+                bigger sibling, and dragging the room around shows what the
+                two coefficients mean in the flesh. The surface tilts upward
+                along the height axis at 0.651 kg per centimetre, and tilts
+                gently along the age axis at 0.154 kg per year, each tilt
+                readable on its own while the other axis holds still, which
+                is exactly the holding-others-fixed reading from the section
+                above.
+              </p>
+              <PlanePlayground3D />
+              <p>
+                The dots do not sit on the plane, and that is the familiar
+                part. They scatter above and below it just as the regression
+                page&rsquo;s dots scattered about the line, the residuals now
+                being vertical drops in a room rather than on a page, and R²
+                reads 0.865, the share of the weight variation the two inputs
+                explain together. With a third input the picture would need a
+                fourth direction and the drawing gives out, though the
+                machinery does not notice, which is why the pages trust the
+                algebra and keep the drawings to what fits.
               </p>
             </>
           ),

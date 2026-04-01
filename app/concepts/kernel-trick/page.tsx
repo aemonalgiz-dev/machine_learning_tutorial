@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
+import { KernelLiftPlayground } from "@/components/widgets/KernelLiftPlayground";
 import { KernelPlayground } from "@/components/widgets/KernelPlayground";
 
 export const metadata: Metadata = {
@@ -173,6 +174,39 @@ export default function KernelTrickPage() {
                 implied space has infinitely many dimensions, no φ could ever
                 be written out, and the kernel visits it by shortcut anyway,
                 which is why its fences can take almost any shape.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: "Seeing the Lift",
+          content: (
+            <>
+              <p>
+                The mapped space is usually somewhere we cannot look, though
+                for the worked φ on two measurements it is only
+                three-dimensional, and that is a room we can stand in. Below,
+                every patient from the clinic has been carried through the
+                worked mapping, their standardized vitals squared and crossed
+                into the three coordinates the axes name, and the picture at
+                the top of the page comes apart. Down in two dimensions the
+                unwell surrounded the healthy. Up here they do not, since the
+                squares fold both directions of every extreme, hypothermic
+                and feverish alike, toward the same large-u, large-w corner,
+                and the healthy band gathers near the origin below them.
+              </p>
+              <KernelLiftPlayground />
+              <p>
+                The green wireframe is the point of the picture. It is a flat
+                plane, found by an ordinary linear fit run on the three
+                lifted columns, and it slides cleanly between the classes at
+                an accuracy of 1.000. Drag the room around until the plane is
+                edge-on and the separation is plain to the eye. This plane is
+                what the squared kernel&rsquo;s widget was drawing all along.
+                Its closed fence in two dimensions is exactly this flat
+                cut&rsquo;s shadow, and the trick&rsquo;s whole claim, a
+                straight boundary in a space never built, is here just once,
+                small enough to build after all, and look at directly.
               </p>
             </>
           ),
