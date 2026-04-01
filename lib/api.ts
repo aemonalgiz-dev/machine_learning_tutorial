@@ -307,8 +307,14 @@ export interface LogisticFit {
   curve: CurvePoint[];
 }
 
-export async function fitLogistic(points: Outcome[]): Promise<LogisticFit> {
-  return postJson<LogisticFit>("/concepts/logistic-regression/fit", { points });
+export async function fitLogistic(
+  points: Outcome[],
+  learningRate: number,
+): Promise<LogisticFit> {
+  return postJson<LogisticFit>("/concepts/logistic-regression/fit", {
+    points,
+    learning_rate: learningRate,
+  });
 }
 
 export interface LabelledPoint {

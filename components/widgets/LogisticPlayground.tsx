@@ -78,8 +78,11 @@ function toHours(px: number) {
   return Math.min(DOMAIN.xMax, Math.max(DOMAIN.xMin, Math.round(raw * 20) / 20));
 }
 
-function statusText(fit: LogisticFit | null): string {
+function statusText(fit: LogisticFit | null, learningRate: number): string {
   if (!fit) return "…";
+  if (learningRate > 2 && fit.slope > 5) {
+    return "The climb is overshooting. Each stride flies past the top, the slope balloons instead of settling, and the boundary wanders.";
+  }
   if (fit.slope > 5) {
     return "The two classes no longer overlap, so nothing stops the slope growing and the curve steepens toward a step.";
   }
@@ -91,15 +94,18 @@ function statusText(fit: LogisticFit | null): string {
 
 export function LogisticPlayground() {
   const [points, setPoints] = useState<Outcome[]>(WORKED_OUTCOMES);
+  const [rateExponent, setRateExponent] = useState(-1);
   const [fit, setFit] = useState<LogisticFit | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragging = useRef<number | null>(null);
 
+  const learningRate = Math.round(10 ** rateExponent * 100) / 100;
+
   useEffect(() => {
     const timer = setTimeout(async () => {
       try {
-        setFit(await fitLogistic(points));
+        setFit(await fitLogistic(points, learningRate));
         setMessage(null);
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
@@ -107,7 +113,7 @@ export function LogisticPlayground() {
       }
     }, 120);
     return () => clearTimeout(timer);
-  }, [points]);
+  }, [points, learningRate]);
 
   const eventToPlot = useCallback((clientX: number, clientY: number) => {
     const svg = svgRef.current!;
@@ -182,10 +188,21 @@ export function LogisticPlayground() {
         >
           Random class
         </button>
-        <span className="ml-auto text-xs text-slate-500 dark:text-slate-500">
-          Click high to add a pass, low to add a fail · drag sideways ·
-          double-click to remove
-        </span>
+        <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          Learning rate
+          <input
+            type="range"
+            min={-1}
+            max={1.7}
+            step={0.1}
+            value={rateExponent}
+            onChange={(event) => setRateExponent(Number(event.target.value))}
+            className="w-32 accent-indigo-600"
+          />
+          <span className="w-12 font-mono text-sm">
+            {learningRate.toFixed(learningRate >= 10 ? 0 : 2)}
+          </span>
+        </label>
       </div>
 
       <svg
@@ -305,7 +322,7 @@ export function LogisticPlayground() {
       </div>
 
       <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-        {message ? message : statusText(fit)}
+        {message ? message : statusText(fit, learningRate)}
       </p>
     </div>
   );

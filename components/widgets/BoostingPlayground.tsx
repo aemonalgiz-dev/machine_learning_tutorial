@@ -213,7 +213,7 @@ export function BoostingPlayground() {
           <input
             type="range"
             min={0.05}
-            max={1}
+            max={2}
             step={0.05}
             value={learningRate}
             onChange={(event) => setLearningRate(Number(event.target.value))}
