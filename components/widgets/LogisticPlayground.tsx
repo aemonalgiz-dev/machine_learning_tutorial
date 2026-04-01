@@ -56,9 +56,9 @@ const IDEAL_OUTCOMES: Outcome[] = [
 
 function randomOutcomes(): Outcome[] {
   const boundary = 3.5 + Math.random() * 2;
-  return Array.from({ length: 14 }, () => {
+  return Array.from({ length: 16 }, () => {
     const hours = Math.round((0.5 + Math.random() * 9) * 4) / 4;
-    const lean = 1 / (1 + Math.exp(-(hours - boundary) * 1.5));
+    const lean = 1 / (1 + Math.exp(-(hours - boundary) * 0.5));
     return { x: hours, label: Math.random() < lean ? 1 : 0 };
   });
 }

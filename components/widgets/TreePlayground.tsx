@@ -71,11 +71,11 @@ function randomCrowd(): LabelledPoint[] {
     count: number,
   ): LabelledPoint[] =>
     Array.from({ length: count }, () => ({
-      x: Math.round(centreX + (Math.random() - 0.5) * 34),
-      y: Math.round(centreY + (Math.random() - 0.5) * 30),
+      x: Math.round(centreX + (Math.random() - 0.5) * 48),
+      y: Math.round(centreY + (Math.random() - 0.5) * 42),
       label,
     }));
-  return [...around(132, 36, 0, 8), ...around(168, 66, 1, 8)];
+  return [...around(139, 42, 0, 8), ...around(161, 60, 1, 8)];
 }
 
 const MAX_POINTS = 100;

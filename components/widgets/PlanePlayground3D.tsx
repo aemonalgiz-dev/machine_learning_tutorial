@@ -77,7 +77,7 @@ function randomPeople(): Person3d[] {
     const height = Math.round(150 + Math.random() * 45);
     const age = Math.round(20 + Math.random() * 48);
     const weight =
-      Math.round((0.62 * height + 0.18 * age - 45 + (Math.random() - 0.5) * 8) * 10) / 10;
+      Math.round((0.62 * height + 0.18 * age - 45 + (Math.random() - 0.5) * 18) * 10) / 10;
     return { height, age, weight };
   });
 }

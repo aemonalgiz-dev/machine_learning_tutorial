@@ -76,11 +76,11 @@ function toData(px: number, py: number): Point {
 }
 
 function randomPeople(): Point[] {
-  const slope = 0.5 + Math.random() * 0.25;
+  const slope = 0.35 + Math.random() * 0.55;
   const intercept = -40 + (Math.random() - 0.5) * 12;
   return Array.from({ length: 15 }, (_, index) => {
     const x = Math.round((152 + index * 3) * 100) / 100;
-    const noise = (Math.random() - 0.5) * 14;
+    const noise = (Math.random() - 0.5) * 26;
     const y = Math.min(
       DOMAIN.yMax,
       Math.max(DOMAIN.yMin, Math.round((slope * x + intercept + noise) * 100) / 100),

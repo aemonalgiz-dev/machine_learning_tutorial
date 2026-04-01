@@ -52,12 +52,12 @@ const CROWD: Point[] = [
 function randomClumps(): Point[] {
   const around = (centreX: number, centreY: number, count: number): Point[] =>
     Array.from({ length: count }, () => ({
-      x: Math.round(centreX + (Math.random() - 0.5) * 26),
-      y: Math.round(centreY + (Math.random() - 0.5) * 24),
+      x: Math.round(centreX + (Math.random() - 0.5) * 38),
+      y: Math.round(centreY + (Math.random() - 0.5) * 34),
     }));
   const cornerX = 120 + Math.random() * 20;
   const cornerY = 25 + Math.random() * 15;
-  return [...around(cornerX, cornerY, 8), ...around(cornerX + 55, cornerY + 45, 8)];
+  return [...around(cornerX, cornerY, 8), ...around(cornerX + 40, cornerY + 32, 8)];
 }
 
 const MAX_POINTS = 100;

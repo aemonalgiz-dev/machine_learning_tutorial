@@ -64,11 +64,11 @@ const IDEAL_CASE: Point[] = [
 ];
 
 function randomPeople(): Point[] {
-  const slope = 0.5 + Math.random() * 0.4;
+  const slope = 0.3 + Math.random() * 0.6;
   const intercept = -40 + (Math.random() - 0.5) * 12;
   return Array.from({ length: 15 }, (_, index) => {
     const x = 152 + index * 3;
-    const noise = (Math.random() - 0.5) * 16;
+    const noise = (Math.random() - 0.5) * 28;
     const y = Math.min(100, Math.max(40, slope * x + intercept + noise));
     return { x, y: Math.round(y * 10) / 10 };
   });

@@ -72,13 +72,13 @@ const FEVER_ONLY: LabelledPoint[] = [
 
 function randomClinic(): LabelledPoint[] {
   const healthy: LabelledPoint[] = Array.from({ length: 9 }, () => ({
-    x: Math.round((36.4 + Math.random() * 1.0) * 10) / 10,
-    y: Math.round(62 + Math.random() * 26),
+    x: Math.round((36.2 + Math.random() * 1.4) * 10) / 10,
+    y: Math.round(56 + Math.random() * 38),
     label: 1,
   }));
   const unwell: LabelledPoint[] = Array.from({ length: 12 }, () => {
     const angle = Math.random() * Math.PI * 2;
-    const reach = 0.75 + Math.random() * 0.25;
+    const reach = 0.55 + Math.random() * 0.45;
     return {
       x: Math.round((37.7 + Math.cos(angle) * 2.6 * reach) * 10) / 10,
       y: Math.round(88 + Math.sin(angle) * 46 * reach),

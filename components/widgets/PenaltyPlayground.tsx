@@ -72,7 +72,7 @@ function randomThrow(): Point[] {
   const launch = 17 + Math.random() * 5;
   return Array.from({ length: 15 }, (_, index) => {
     const t = Math.round(((index * 4) / 14) * 100) / 100;
-    const noise = (Math.random() - 0.5) * 3;
+    const noise = (Math.random() - 0.5) * 9;
     const h = Math.max(
       DOMAIN.yMin,
       Math.min(DOMAIN.yMax, launch * t - 4.9 * t * t + noise),
