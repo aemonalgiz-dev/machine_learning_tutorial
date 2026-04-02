@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { TreePlayground } from "@/components/widgets/TreePlayground";
+import { RootGainChart } from "@/components/widgets/RootGainChart";
 
 export const metadata: Metadata = {
   title: "Decision Trees · oop_ml",
@@ -231,6 +232,12 @@ export default function DecisionTreesPage() {
                 question left two pure sides scoring zero, so the whole 0.496
                 was the gain, the number the worked example found.
               </p>
+              <p>
+                The sweep is drawn below, every question the root weighed
+                with the gain it earned, and the winning split is simply the
+                tallest mark.
+              </p>
+              <RootGainChart />
             </>
           ),
         },

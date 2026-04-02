@@ -26,6 +26,9 @@ export interface LineFit {
   r_squared: number;
   line: FittedLine;
   residuals: number[];
+  mean_target: number;
+  rss: number;
+  tss: number;
 }
 
 // A typed library refusal comes back as { error, detail }; the widgets show the
@@ -305,6 +308,8 @@ export interface LogisticFit {
   boundary: number | null;
   accuracy: number;
   curve: CurvePoint[];
+  gaps: number[];
+  gap_total: number;
 }
 
 export async function fitLogistic(
@@ -578,4 +583,177 @@ export async function drawSample(
     draw,
     seed,
   });
+}
+
+// --- The incremental charts, one quantity assembled piece by piece ----------
+
+export interface DegreeScore {
+  degree: number;
+  r_squared: number;
+}
+
+export async function sweepDegrees(
+  points: Point[],
+  maxDegree: number,
+): Promise<{ scores: DegreeScore[] }> {
+  return postJson<{ scores: DegreeScore[] }>(
+    "/concepts/multiple-polynomial-regression/degree-sweep",
+    { points, max_degree: maxDegree },
+  );
+}
+
+export interface ShrinkagePath {
+  penalties: number[];
+  ridge_slopes: number[];
+  lasso_slopes: number[];
+}
+
+export async function traceShrinkage(points: Point[]): Promise<ShrinkagePath> {
+  return postJson<ShrinkagePath>("/concepts/ridge-lasso/shrinkage-path", {
+    points,
+  });
+}
+
+export interface RootCandidate {
+  feature: string;
+  threshold: number;
+  gain: number;
+  admitted: boolean;
+}
+
+export interface RootSearch {
+  candidates: RootCandidate[];
+  best_feature: string;
+  best_threshold: number;
+  best_gain: number;
+}
+
+export async function searchRootCandidates(
+  points: LabelledPoint[],
+): Promise<RootSearch> {
+  return postJson<RootSearch>("/concepts/decision-trees/root-candidates", {
+    points,
+  });
+}
+
+export interface LeaveOutCurve {
+  sizes: number[];
+  probabilities: number[];
+  limit: number;
+}
+
+export async function traceLeaveOut(maxCrowd: number): Promise<LeaveOutCurve> {
+  return postJson<LeaveOutCurve>("/concepts/ensembles/leave-out-curve", {
+    max_crowd: maxCrowd,
+  });
+}
+
+export interface VarianceCurve {
+  correlation: number;
+  variances: number[];
+}
+
+export interface CommitteeVariance {
+  members: number[];
+  curves: VarianceCurve[];
+}
+
+export async function traceCommitteeVariance(
+  maxMembers: number,
+): Promise<CommitteeVariance> {
+  return postJson<CommitteeVariance>("/concepts/ensembles/committee-variance", {
+    max_members: maxMembers,
+  });
+}
+
+export interface BoostingDescent {
+  rounds: number[];
+  residual_sums: number[];
+}
+
+export async function traceBoostingDescent(
+  points: Point[],
+  rounds: number,
+  learningRate: number,
+): Promise<BoostingDescent> {
+  return postJson<BoostingDescent>("/concepts/ensembles/boosting-descent", {
+    points,
+    rounds,
+    learning_rate: learningRate,
+  });
+}
+
+export interface InertiaCurve {
+  iterations: number[];
+  inertias: number[];
+}
+
+export async function traceInertia(
+  points: Point[],
+  clusterCount: number,
+): Promise<InertiaCurve> {
+  return postJson<InertiaCurve>("/concepts/k-means/inertia-curve", {
+    points,
+    n_clusters: clusterCount,
+  });
+}
+
+export interface SweepComponent {
+  angle_degrees: number;
+  variance: number;
+}
+
+export interface VarianceSweep {
+  angles_degrees: number[];
+  variances: number[];
+  components: SweepComponent[];
+}
+
+export async function sweepVariance(points: Point[]): Promise<VarianceSweep> {
+  return postJson<VarianceSweep>("/concepts/pca/variance-sweep", { points });
+}
+
+export interface SingleVector {
+  east: number;
+  north: number;
+  east_squared: number;
+  north_squared: number;
+  length_squared: number;
+  length: number;
+}
+
+export async function measureVector(
+  vector: PlanePoint,
+): Promise<SingleVector> {
+  return postJson<SingleVector>("/primers/linear-algebra/vector", { vector });
+}
+
+export interface ValueDescription {
+  mean: number;
+  deviations: number[];
+  deviation_total: number;
+  squared_deviations: number[];
+  variance: number;
+  standard_deviation: number;
+}
+
+export async function describeValues(
+  values: number[],
+): Promise<ValueDescription> {
+  return postJson<ValueDescription>("/primers/statistics/describe-values", {
+    values,
+  });
+}
+
+export interface LineSlope {
+  rise: number;
+  run: number;
+  slope: number | null;
+}
+
+export async function measureLineSlope(
+  first: PlanePoint,
+  second: PlanePoint,
+): Promise<LineSlope> {
+  return postJson<LineSlope>("/primers/calculus/line-slope", { first, second });
 }

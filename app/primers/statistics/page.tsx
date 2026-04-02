@@ -6,6 +6,7 @@ import {
   PrimerPlayground,
   PrimerSection,
 } from "@/components/concept/PrimerPage";
+import { MeanBalancePlayground } from "@/components/widgets/MeanBalancePlayground";
 import { SamplingPlayground } from "@/components/widgets/SamplingPlayground";
 import { StatisticsPlayground } from "@/components/widgets/StatisticsPlayground";
 
@@ -77,6 +78,14 @@ export default function StatisticsPrimerPage() {
           to zero. These distances from the mean are called deviations, and the
           rest of the primer is built out of them.
         </p>
+        <p>
+          The balance is worth watching. Drag any person below. The mean
+          chases the crowd, every deviation redraws, and their total sits
+          pinned at zero the whole time.
+        </p>
+        <PrimerPlayground>
+          <MeanBalancePlayground />
+        </PrimerPlayground>
       </PrimerSection>
 
       <PrimerSection title="Variance and Standard Deviation">

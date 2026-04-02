@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { PcaPlayground } from "@/components/widgets/PcaPlayground";
+import { VarianceSweepChart } from "@/components/widgets/VarianceSweepChart";
 
 export const metadata: Metadata = {
   title: "Principal Component Analysis · oop_ml",
@@ -235,6 +236,13 @@ export default function PcaPage() {
                 the eigen machinery was borrowed on faith, the variance hunt
                 walks straight into it.
               </p>
+              <p>
+                The search itself can be drawn. Below, a direction sweeps the
+                half circle and the cloud&rsquo;s variance is measured along
+                it at every angle, and the curve peaks and troughs exactly
+                where the fitted components stand.
+              </p>
+              <VarianceSweepChart />
             </>
           ),
         },

@@ -7,6 +7,7 @@ import {
   PrimerSection,
 } from "@/components/concept/PrimerPage";
 import { EigenPlayground } from "@/components/widgets/EigenPlayground";
+import { SingleVectorPlayground } from "@/components/widgets/SingleVectorPlayground";
 import { MatrixPlayground } from "@/components/widgets/MatrixPlayground";
 import { VectorPlayground } from "@/components/widgets/VectorPlayground";
 
@@ -75,6 +76,16 @@ export default function LinearAlgebraPrimerPage() {
           except the number of entries. We stay in two dimensions here because
           two dimensions fit on a screen.
         </p>
+        <p>
+          Before anything is measured between two of them, here is one on its
+          own. Drag the tip. The two dashed walks are the pair of numbers made
+          visible, and the readouts assemble the arrow&rsquo;s length out of
+          them, a right triangle doing the work, which the next section writes
+          down properly.
+        </p>
+        <PrimerPlayground>
+          <SingleVectorPlayground />
+        </PrimerPlayground>
       </PrimerSection>
 
       <PrimerSection title="Length and Distance">

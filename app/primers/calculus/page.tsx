@@ -6,6 +6,7 @@ import {
   PrimerSection,
 } from "@/components/concept/PrimerPage";
 import { DerivativeExplorer } from "@/components/widgets/DerivativeExplorer";
+import { SlopePlayground } from "@/components/widgets/SlopePlayground";
 import { GradientDescentPlayground } from "@/components/widgets/GradientDescentPlayground";
 
 export const metadata: Metadata = {
@@ -73,6 +74,14 @@ export default function CalculusPrimerPage() {
           different things, and the entire subject of this primer is closing the
           gap between them.
         </p>
+        <p>
+          Rise over run can be dragged. The two points below start at the
+          worked pair, and the triangle between them remeasures as either
+          moves.
+        </p>
+        <PrimerPlayground>
+          <SlopePlayground />
+        </PrimerPlayground>
       </PrimerSection>
 
       <PrimerSection title="The Average Rate of Change on a Curve">
