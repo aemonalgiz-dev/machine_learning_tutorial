@@ -191,8 +191,7 @@ export default function GradientBoostingPage() {
                 rather than a diverging curve, and the primer&rsquo;s descent
                 slider is where the runaway itself can be watched happening.
                 Where to stop is the question the site keeps
-                meeting, and the honest answer is unchanged, data the fit
-                never saw. Unlike bagging, boosting&rsquo;s members are
+                meeting, and the honest answer is unchanged, <Link href="/concepts/held-out-evaluation" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400">data the fit never saw</Link>. Unlike bagging, boosting&rsquo;s members are
                 sequential and share everything, so no out-of-bag shortcut
                 exists here, and the held-out discipline has to be supplied
                 from outside the model.

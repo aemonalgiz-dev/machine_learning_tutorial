@@ -4,6 +4,7 @@ import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { KernelLiftPlayground } from "@/components/widgets/KernelLiftPlayground";
 import { KernelPlayground } from "@/components/widgets/KernelPlayground";
+import { KernelSimilarityChart } from "@/components/widgets/KernelSimilarityChart";
 
 export const metadata: Metadata = {
   title: "The Kernel Trick · oop_ml",
@@ -136,6 +137,19 @@ export default function KernelTrickPage() {
                 first, exactly as the k-nearest neighbours page&rsquo;s
                 scaling trap demanded.
               </p>
+              <p>
+                What the swap really changes is what near means, and that is
+                drawable. Below, one point sweeps along a line while a
+                reference stands still, and each kernel reports how alike
+                the pair is. The dot product grows without bound and never
+                forgets anyone, the squared kernel doubles down on that, and
+                the radial curves are bumps, high beside the reference and
+                vanishing away from it, with gamma setting how fast the
+                forgetting happens. That vanishing is why a radial
+                machine&rsquo;s answer is decided by the neighbourhood, the
+                k-nearest page&rsquo;s instinct reborn as a similarity.
+              </p>
+              <KernelSimilarityChart />
             </>
           ),
         },
@@ -266,7 +280,7 @@ export default function KernelTrickPage() {
                 all must be kept. And the kernel is a modelling choice, as
                 the widget shows when the radial fence hugs tighter than the
                 squared one, judged honestly the way every such choice on
-                this site is judged, on data the fit never saw.
+                this site is judged, on <Link href="/concepts/held-out-evaluation" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400">data the fit never saw</Link>.
               </p>
               <p>
                 This page closes the core set, and it is worth noticing what

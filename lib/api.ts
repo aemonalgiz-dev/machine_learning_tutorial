@@ -801,3 +801,65 @@ export async function walkTree(
     visitor,
   });
 }
+
+// --- Held-out evaluation, the page every other page points at -------------
+
+export interface SplitFit {
+  held_out_indices: number[];
+  train_r_squared: number;
+  held_out_r_squared: number;
+  curve: CurvePoint[];
+}
+
+export async function fitOnSplit(
+  points: Point[],
+  degree: number,
+): Promise<SplitFit> {
+  return postJson<SplitFit>("/concepts/evaluation/split-fit", {
+    points,
+    degree,
+  });
+}
+
+export interface GapCurve {
+  degrees: number[];
+  train_scores: number[];
+  held_out_scores: number[];
+}
+
+export async function traceGapCurve(points: Point[]): Promise<GapCurve> {
+  return postJson<GapCurve>("/concepts/evaluation/degree-curve", { points });
+}
+
+export interface DegreeValidation {
+  degree: number;
+  mean_r_squared: number;
+  spread: number;
+}
+
+export async function traceValidationCurve(
+  points: Point[],
+): Promise<{ validations: DegreeValidation[] }> {
+  return postJson<{ validations: DegreeValidation[] }>(
+    "/concepts/evaluation/validation-curve",
+    { points },
+  );
+}
+
+export interface SimilarityCurve {
+  label: string;
+  values: number[];
+}
+
+export interface KernelSimilarity {
+  positions: number[];
+  reference: number;
+  curves: SimilarityCurve[];
+}
+
+export async function traceKernelSimilarity(): Promise<KernelSimilarity> {
+  return postJson<KernelSimilarity>(
+    "/concepts/kernel-trick/similarity-curve",
+    {},
+  );
+}
