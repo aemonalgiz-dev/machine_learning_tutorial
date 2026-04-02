@@ -6,6 +6,7 @@ import {
   PrimerSection,
 } from "@/components/concept/PrimerPage";
 import { GradientDescentPlayground } from "@/components/widgets/GradientDescentPlayground";
+import { TangentExplorer } from "@/components/widgets/TangentExplorer";
 
 export const metadata: Metadata = {
   title: "Calculus Primer · oop_ml",
@@ -36,97 +37,137 @@ export default function CalculusPrimerPage() {
           ball stops rising or a cost stops falling. Newton and Leibniz, working
           separately, saw that both reduced to one thing: how fast is this
           quantity changing right here, at this exact point. The tool they built
-          to answer it is the derivative.
+          to answer it is the derivative, and it is the whole of what this primer
+          needs from calculus.
         </p>
       </PrimerSection>
 
       <PrimerSection title="What a Derivative Is">
         <p>
-          A derivative measures how fast one quantity changes as another changes.
-          For a curve on a graph that rate has a picture: it is the slope of the
-          curve, how steeply it climbs or falls at a given point.
+          Start with a straight line, because its steepness is easy. A line has
+          one slope everywhere, and you measure it by taking any two points on it
+          and dividing the rise, how far it climbed, by the run, how far it went
+          across. A slope of 2 means two steps up for every step across; a slope
+          of −0.5 means half a step down for every step across.
         </p>
         <p>
-          The catch is that a curve&rsquo;s steepness is different at every point,
-          so there is no single slope for the whole thing. The derivative pins it
-          down one point at a time. At any point, picture the straight line that
-          just grazes the curve there without crossing it, the tangent. The slope
-          of that tangent is the derivative at that point, and we write it
-          f&rsquo;(x).
+          A curve is harder, because its steepness keeps changing. It might be
+          plunging in one place, drifting almost flat in another, and climbing
+          somewhere else, so there is no single slope to report for the whole of
+          it. What we can still ask is a narrower question: how steep is the curve
+          right here, at this one point?
         </p>
         <p>
-          Its sign alone tells you which way the curve is heading. Where the curve
-          is falling the tangent tilts down and the derivative is negative, where
-          it is rising the derivative is positive, and at the exact top or bottom,
-          where the curve stops going one way and turns to go the other, the
-          tangent is flat and the derivative is zero.
+          To answer it, picture zooming in on that point until the curve looks
+          straight, or, what comes to the same thing, draw the one straight line
+          that just touches the curve there and runs alongside it without cutting
+          across. That line is the tangent, and its slope is the steepness of the
+          curve at that point. That slope is the derivative, and we write it
+          f&rsquo;(x): the derivative at the input x.
         </p>
-        <Equation>{"f'(x) = 0   where the curve turns around"}</Equation>
+        <PrimerPlayground>
+          <TangentExplorer />
+        </PrimerPlayground>
         <p>
-          That last case is the one the rest of this primer is built on: the
-          lowest point of a curve is a place where its derivative is zero.
+          Drag the point along the curve and watch the tangent tilt to match. Two
+          things are worth noticing. First, the sign of the slope tells you which
+          way the curve is heading: on the way down the tangent tilts downhill and
+          the slope is negative, and on the way up it tilts uphill and the slope
+          is positive. Second, and this is the part everything later leans on, as
+          you drag toward the bottom the tangent flattens, and at the very bottom,
+          where the curve stops falling and turns to rise, it is perfectly level
+          and the slope is exactly zero.
+        </p>
+        <Equation>{"f'(x) = 0   at the bottom of the curve"}</Equation>
+        <p>
+          So the derivative does two jobs at once. It measures how steep the curve
+          is, and by its sign it says which way is downhill. Both of those are
+          about to matter.
         </p>
       </PrimerSection>
 
       <PrimerSection title="Finding the Lowest Point">
         <p>
-          Knowing the bottom sits where the derivative is zero, one option is to
-          solve f&rsquo;(x) = 0 for x directly. For a simple curve that works, but
-          most curves worth minimising are far too tangled to solve by hand. So
-          instead of solving for the bottom, we walk to it.
+          We want the lowest point of a curve, and we now know something exact
+          about it: it sits where the slope is zero. That hands us one way to find
+          it. Write down the derivative, set it equal to zero, and solve for x.
+          For the neat curves in a textbook that is the whole job.
         </p>
         <p>
-          Picture standing on a hillside in thick fog. You want the lowest point
-          of the valley, but you can only see the ground at your feet. What you
-          can still tell is which way it slopes and how steeply, so you step
-          downhill, look again, and step again. As the ground flattens your steps
-          shrink, until you are standing where it is level and there is nowhere
-          lower to go. That is gradient descent, and the box below does exactly
-          it.
+          It stops working the moment the curve gets complicated. The error of a
+          real model is a curve too, but one we often cannot even write down
+          cleanly, let alone set to zero and solve. So we give up on solving for
+          the bottom and find it by walking instead, using the derivative not as
+          an equation to solve but as a direction to follow.
+        </p>
+        <p>
+          That is the second job the derivative does: it points downhill. Picture
+          standing on a hillside in thick fog. You cannot see the valley floor,
+          only the ground at your feet, but the slope underfoot still tells you
+          which way is down. So you take a step that way, read the slope again
+          where you land, and step again. Every step follows the slope downward,
+          and because the ground flattens as you near the bottom, the steps shrink
+          on their own, until you are standing somewhere level with nowhere lower
+          to go. That process is gradient descent, and the box below runs it.
         </p>
         <PrimerPlayground>
           <GradientDescentPlayground />
         </PrimerPlayground>
         <p>
-          Drag the start point and watch the walk slide toward the bottom. The
-          steeper the ground the bigger the step, which is why the steps are long
-          up on the wall and short near the floor, and the dashed line is the
-          tangent at the start, so you can see the slope is what sets the first
-          step.
+          Drag the start point and watch the walk come down. The steps are long
+          where the wall is steep and short where the curve levels off, because
+          each step is sized by the slope it stands on, the very slope the tangent
+          showed you in the last section. The dashed line marks the tangent at the
+          start, so you can see the first step is set by the slope there.
         </p>
         <p>
-          Switch to the two-valley curve and a limit shows up. The walk only ever
-          finds the valley on the side it started, never climbing the hill between
-          them to reach the other. Gradient descent finds a nearby bottom, not
-          always the lowest one, and the models inherit that.
+          Switch to the two-valley curve and a limitation shows itself. The walk
+          only follows the slope down into whichever valley it started above, and
+          once it reaches the bottom the ground rises on both sides, so it stops,
+          even if the other valley is deeper. Gradient descent finds a nearby
+          bottom, not necessarily the lowest one, and the models that use it
+          inherit that.
         </p>
       </PrimerSection>
 
       <PrimerSection title="The Learning Rate">
         <p>
-          Each step moves against the slope, scaled by a number called the
-          learning rate.
+          There is one thing the walk needs that we have skated over: how far to
+          move on each step. The slope gives the direction and a sense of the
+          steepness, but it does not say how boldly to commit to it, and that
+          choice is a number of its own, the learning rate. Written η, it simply
+          scales each step.
         </p>
         <Equation>{"x  ←  x − η · f'(x)"}</Equation>
         <p>
-          It is the one delicate choice. Too small and the walk crawls, taking
-          many more steps than it needs. Too large and each step jumps clean past
-          the bottom to a point higher up the far side, and the next jumps back
-          further still, so the walk climbs out instead of settling. For the
-          single bowl the threshold is exact: it converges for any rate below 2
-          and runs away above it. Push the slider past 2 and watch it happen.
+          Read that as: to get the next point, take the current one and move
+          against the slope by η times the slope. The size of η matters more than
+          it looks. Set it small and the walk is timid, inching down and taking
+          far more steps than it needs. Set it large and each step can carry clean
+          past the bottom and land higher up the opposite wall, and the next step
+          carries back further still, so instead of settling the walk climbs
+          outward and runs away.
+        </p>
+        <p>
+          Somewhere between timid and reckless is a rate that reaches the bottom in
+          a handful of steps. For the single bowl above the dividing line is
+          exact: any rate below 2 settles, any rate above 2 runs away. Turn the
+          slider past 2 and watch the walk stop converging and start escaping.
         </p>
       </PrimerSection>
 
       <PrimerSection title="Why Every Model Uses This">
         <p>
-          Fitting a model means choosing its settings so its error is as small as
-          possible, and as small as possible is just the bottom of a curve. The
-          error is a function of the settings, and gradient descent walks its
-          slope down to that bottom, which is how most of the models on this site
-          are actually fit. The curve here has one input so we can draw it; a real
-          model&rsquo;s error has one input for every setting it tunes, but the
-          step is exactly the same.
+          None of this is a detour from machine learning; it is the engine
+          underneath it. Fitting a model means choosing the settings that make its
+          mistakes as small as possible, and as small as possible is the bottom of
+          a curve, the model&rsquo;s error plotted against its settings. The model
+          reads the slope of that error and steps downhill, which is the walk you
+          just drove. The only real difference is how many directions there are to
+          step in at once: this curve has a single input, so we can draw it flat
+          on the page, while a real model&rsquo;s error has one input for every
+          setting it tunes, far too many to picture. But the step is the same one,
+          taken in all of them together.
         </p>
       </PrimerSection>
     </PrimerPage>
