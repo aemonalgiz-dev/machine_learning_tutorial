@@ -563,12 +563,18 @@ export interface HistogramBin {
   count: number;
 }
 
+export interface BellPoint {
+  x: number;
+  expected_count: number;
+}
+
 export interface SampleDraw {
   values: number[];
   count: number;
   mean: number;
   standard_deviation: number;
   bins: HistogramBin[];
+  bell: BellPoint[];
   true_mean: number;
   true_standard_deviation: number;
 }
