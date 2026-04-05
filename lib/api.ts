@@ -144,3 +144,25 @@ export interface TangentRequest {
 export async function curveTangent(request: TangentRequest): Promise<Tangent> {
   return postJson<Tangent>("/primers/calculus/tangent", request);
 }
+
+// The definition of the derivative: the average rate of change across a gap (the
+// secant), and the derivative at the base (the tangent) the secant approaches as
+// the gap shrinks.
+export interface Secant {
+  curve: CurvePoint[];
+  window: DescentWindow;
+  base_point: CurvePoint;
+  second_point: CurvePoint;
+  secant_slope: number;
+  tangent_slope: number;
+}
+
+export interface SecantRequest {
+  function: DescentFunction;
+  base: number;
+  gap: number;
+}
+
+export async function curveSecant(request: SecantRequest): Promise<Secant> {
+  return postJson<Secant>("/primers/calculus/secant", request);
+}

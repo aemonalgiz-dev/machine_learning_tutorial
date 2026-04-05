@@ -5,24 +5,24 @@ import {
   PrimerPlayground,
   PrimerSection,
 } from "@/components/concept/PrimerPage";
+import { DerivativeExplorer } from "@/components/widgets/DerivativeExplorer";
 import { GradientDescentPlayground } from "@/components/widgets/GradientDescentPlayground";
-import { TangentExplorer } from "@/components/widgets/TangentExplorer";
 
 export const metadata: Metadata = {
   title: "Calculus Primer · oop_ml",
   description:
-    "What a derivative is, and how following it downhill finds the lowest point of a curve, which is how the models on this site are fit.",
+    "What a derivative is, built from the average rate of change, and how following it downhill finds the lowest point of a curve.",
 };
 
 export default function CalculusPrimerPage() {
   return (
     <PrimerPage
       title="Calculus Primer"
-      tagline="What a derivative is, and how following it downhill finds the lowest point of a curve."
+      tagline="What a derivative is, built up from the average rate of change, and how following it downhill finds the lowest point of a curve."
       prerequisites={
         <>
           You only need to know what a function and its graph are: a rule that
-          turns an input into an output, drawn as a curve. Everything about
+          turns an input into an output, drawn as a curve. Everything about rates,
           slopes and steps is built up from here.
         </>
       }
@@ -42,56 +42,83 @@ export default function CalculusPrimerPage() {
         </p>
       </PrimerSection>
 
-      <PrimerSection title="What a Derivative Is">
+      <PrimerSection title="The Average Rate of Change">
         <p>
-          Start with a straight line, because its steepness is easy. A line has
-          one slope everywhere, and you measure it by taking any two points on it
-          and dividing the rise, how far it climbed, by the run, how far it went
-          across. A slope of 2 means two steps up for every step across; a slope
-          of −0.5 means half a step down for every step across.
+          Before we can talk about the steepness of a curve, we should be clear
+          about what steepness even means, and the cleanest example is speed.
+          Speed is a rate of change: distance changing over time. If you drive 100
+          miles in 2 hours, your average speed for the trip is 100 divided by 2,
+          fifty miles an hour. That is a real number, but it is an average over
+          the whole two hours, and at no single moment does the speedometer have
+          to read it. You might have been stopped at a light, or well over fifty
+          on the motorway.
         </p>
         <p>
-          A curve is harder, because its steepness keeps changing. It might be
-          plunging in one place, drifting almost flat in another, and climbing
-          somewhere else, so there is no single slope to report for the whole of
-          it. What we can still ask is a narrower question: how steep is the curve
-          right here, at this one point?
+          The same split shows up on any graph. Take a curve and mark two points
+          on it. The straight line through those two points is called a secant,
+          and its slope is the rise, how far the curve climbed between them,
+          divided by the run, how far along we went. That slope is the average
+          rate of change of the curve between the two points, in just the way
+          fifty miles an hour was the average over the trip.
         </p>
         <p>
-          To answer it, picture zooming in on that point until the curve looks
-          straight, or, what comes to the same thing, draw the one straight line
-          that just touches the curve there and runs alongside it without cutting
-          across. That line is the tangent, and its slope is the steepness of the
-          curve at that point. That slope is the derivative, and we write it
-          f&rsquo;(x): the derivative at the input x.
+          Drag the base point in the box below to move where you are looking, and
+          use the gap slider to set how far apart the two points are. The solid
+          line is the secant, and the number beside it is its slope, the average
+          rate of change across that gap.
         </p>
         <PrimerPlayground>
-          <TangentExplorer />
+          <DerivativeExplorer />
         </PrimerPlayground>
+      </PrimerSection>
+
+      <PrimerSection title="From a Stretch to a Point">
         <p>
-          Drag the point along the curve and watch the tangent tilt to match. Two
-          things are worth noticing. First, the sign of the slope tells you which
-          way the curve is heading: on the way down the tangent tilts downhill and
-          the slope is negative, and on the way up it tilts uphill and the slope
-          is positive. Second, and this is the part everything later leans on, as
-          you drag toward the bottom the tangent flattens, and at the very bottom,
-          where the curve stops falling and turns to rise, it is perfectly level
-          and the slope is exactly zero.
+          An average across a stretch is not quite what we are after. We wanted
+          the steepness of the curve at a single point, the instantaneous rate,
+          the speedometer reading rather than the trip average. The secant cannot
+          give us that on its own, because one point is not two points and has no
+          line through it by itself.
+        </p>
+        <p>
+          Here is the move the whole of calculus is built on. Keep the base point
+          fixed and slide the second point toward it, shrinking the gap on the
+          slider above. The secant still measures an average, but over a shorter
+          and shorter stretch, so it becomes a better and better stand-in for the
+          steepness right at the base. As the gap closes, watch the two numbers in
+          the readout, the average slope and the derivative, come together: the
+          average rate of change is homing in on a single value.
+        </p>
+        <p>
+          That value, the one the secant approaches as the gap shrinks to nothing,
+          is the instantaneous rate of change at the base point. In the limit the
+          two points merge, and the secant stops cutting across the curve and
+          instead just grazes it: it has become the tangent, the dashed line. The
+          slope of that tangent is the derivative, and we write it f&rsquo;(x).
+        </p>
+        <Equation>{"f'(x) = the slope the secant approaches as the gap shrinks to zero"}</Equation>
+        <p>
+          Now that we can read the steepness at any single point, drag the base
+          point along the curve and watch the derivative change with it. On the
+          way down the tangent tilts downhill and the derivative is negative, on
+          the way up it tilts uphill and the derivative is positive, and at the
+          very bottom, where the curve stops falling and turns to rise, the tangent
+          is flat and the derivative is exactly zero.
         </p>
         <Equation>{"f'(x) = 0   at the bottom of the curve"}</Equation>
         <p>
           So the derivative does two jobs at once. It measures how steep the curve
-          is, and by its sign it says which way is downhill. Both of those are
-          about to matter.
+          is at a point, and by its sign it says which way is downhill. Both of
+          those are about to matter.
         </p>
       </PrimerSection>
 
       <PrimerSection title="Finding the Lowest Point">
         <p>
           We want the lowest point of a curve, and we now know something exact
-          about it: it sits where the slope is zero. That hands us one way to find
-          it. Write down the derivative, set it equal to zero, and solve for x.
-          For the neat curves in a textbook that is the whole job.
+          about it: it sits where the derivative is zero. That hands us one way to
+          find it. Write down the derivative, set it equal to zero, and solve for
+          x. For the neat curves in a textbook that is the whole job.
         </p>
         <p>
           It stops working the moment the curve gets complicated. The error of a
@@ -117,8 +144,8 @@ export default function CalculusPrimerPage() {
           Drag the start point and watch the walk come down. The steps are long
           where the wall is steep and short where the curve levels off, because
           each step is sized by the slope it stands on, the very slope the tangent
-          showed you in the last section. The dashed line marks the tangent at the
-          start, so you can see the first step is set by the slope there.
+          measured a moment ago. The dashed line marks the tangent at the start,
+          so you can see the first step is set by the slope there.
         </p>
         <p>
           Switch to the two-valley curve and a limitation shows itself. The walk
@@ -164,8 +191,8 @@ export default function CalculusPrimerPage() {
           a curve, the model&rsquo;s error plotted against its settings. The model
           reads the slope of that error and steps downhill, which is the walk you
           just drove. The only real difference is how many directions there are to
-          step in at once: this curve has a single input, so we can draw it flat
-          on the page, while a real model&rsquo;s error has one input for every
+          step in at once: this curve has a single input, so we can draw it flat on
+          the page, while a real model&rsquo;s error has one input for every
           setting it tunes, far too many to picture. But the step is the same one,
           taken in all of them together.
         </p>
