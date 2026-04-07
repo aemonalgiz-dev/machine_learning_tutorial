@@ -1,12 +1,10 @@
 // The reusable shell every concept page is poured into.
 //
-// The teaching structure, made concrete: a concept opens with the *problem that
-// forced someone to invent it* (not a timeline), then explains itself twice --
-// once for a layperson, once for a technical reader -- with both explanations
-// narrating one shared interactive playground rather than two separate ones. The
-// playground sits between the two tracks so it belongs to both: the layperson
-// reads what to watch, the technical reader reads why it moves, and they poke
-// the same live example.
+// A concept opens with the problem that forced it, then a shared interactive
+// playground, then its explanations stacked full-width rather than in columns.
+// The explanations are collapsible: the plain one is open by default, and the
+// mechanism and the derivation are folded away for the reader who wants them.
+// Native <details> does the folding, so the page stays a server component.
 
 import { ReactNode } from "react";
 
@@ -17,6 +15,7 @@ interface ConceptPageProps {
   playground: ReactNode;
   layperson: ReactNode;
   technical: ReactNode;
+  derivation?: ReactNode;
   prerequisites?: ReactNode;
 }
 
@@ -27,10 +26,11 @@ export function ConceptPage({
   playground,
   layperson,
   technical,
+  derivation,
   prerequisites,
 }: ConceptPageProps) {
   return (
-    <article className="mx-auto max-w-5xl px-6 py-12">
+    <article className="mx-auto max-w-3xl px-6 py-12">
       <header className="mb-10">
         <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
           {title}
@@ -49,37 +49,66 @@ export function ConceptPage({
         </aside>
       )}
 
-      <Section title="Where This Came From">{history}</Section>
+      <section className="mb-8">
+        <h2 className="mb-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+          Where This Came From
+        </h2>
+        <div className="space-y-4 text-slate-700 dark:text-slate-300">
+          {history}
+        </div>
+      </section>
 
-      <section className="my-12">
+      <section className="my-8">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {playground}
         </div>
       </section>
 
-      <div className="grid gap-8 md:grid-cols-2">
-        <Section title="How to Conceptualize">{layperson}</Section>
-        <Section title="The Mechanism">{technical}</Section>
+      <div className="border-t border-slate-200 dark:border-slate-800">
+        <CollapsibleSection title="How to Conceptualize" defaultOpen>
+          {layperson}
+        </CollapsibleSection>
+        <CollapsibleSection title="The Mechanism">{technical}</CollapsibleSection>
+        {derivation && (
+          <CollapsibleSection title="How to Derive">{derivation}</CollapsibleSection>
+        )}
       </div>
     </article>
   );
 }
 
-function Section({
+function CollapsibleSection({
   title,
   children,
+  defaultOpen = false,
 }: {
   title: string;
   children: ReactNode;
+  defaultOpen?: boolean;
 }) {
   return (
-    <section>
-      <h2 className="mb-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">
+    <details
+      open={defaultOpen}
+      className="group border-b border-slate-200 dark:border-slate-800"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-2xl font-semibold text-slate-900 [&::-webkit-details-marker]:hidden dark:text-slate-100">
         {title}
-      </h2>
-      <div className="space-y-4 text-slate-700 dark:text-slate-300">
+        <svg
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden="true"
+          className="ml-4 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </summary>
+      <div className="space-y-4 pb-6 text-slate-700 dark:text-slate-300">
         {children}
       </div>
-    </section>
+    </details>
   );
 }
