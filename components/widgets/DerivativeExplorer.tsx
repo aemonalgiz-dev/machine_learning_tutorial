@@ -19,8 +19,11 @@ const PLOT = {
   height: VIEW.height - PAD.top - PAD.bottom,
 };
 
-const START_BASE = 4;
-const START_GAP = 1.5;
+// The widget opens on the exact configuration the primer's worked example uses,
+// base 3 with a gap of 2, so the first row of the prose's table is what the
+// reader sees on load.
+const START_BASE = 3;
+const START_GAP = 2;
 
 function projectX(window: Secant["window"], x: number): number {
   return (
