@@ -21,7 +21,7 @@ export default function CalculusPrimerPage() {
       tagline="What a derivative is, built up from slopes and average rates of change, and how following it downhill finds the lowest point of a curve."
       prerequisites={
         <>
-          You only need to know what a function and its graph are: a rule that
+          You only need to know what a function and its graph are, a rule that
           turns an input into an output, drawn as a curve. Everything about rates,
           slopes and steps is built up from here.
         </>
@@ -35,7 +35,7 @@ export default function CalculusPrimerPage() {
           stone, at a single instant rather than averaged over an interval. The
           other was the highest or lowest point of a curve, the moment a thrown
           ball stops rising or a cost stops falling. Newton and Leibniz, working
-          separately, saw that both reduced to one thing: how fast is this
+          separately, saw that both reduced to one question, how fast is this
           quantity changing right here, at this exact point. The tool they built
           to answer it is the derivative, and it is the whole of what this primer
           needs from calculus.
@@ -45,7 +45,7 @@ export default function CalculusPrimerPage() {
       <PrimerSection title="Slopes and Rates of Change">
         <p>
           Everything in this primer rests on the idea of a slope, so we should
-          build that first, on the easiest possible ground: a straight line. The
+          build that first, on the easiest possible ground, a straight line. The
           slope of a line measures how much it climbs for every step you take
           across, and you compute it from any two points on the line by dividing
           the rise, how far up it went between them, by the run, how far across.
@@ -54,7 +54,7 @@ export default function CalculusPrimerPage() {
         <p>
           Suppose a line passes through the points (2, 3) and (6, 11). Between
           them it ran 4 across, from 2 to 6, and rose 8, from 3 to 11. Its slope
-          is 8 divided by 4, which is 2: two up for every one across. Had it
+          is 8 divided by 4, which is 2, two up for every one across. Had it
           dropped between the two points the rise would come out negative, and so
           would the slope. A downhill line has a negative slope, and a flat line
           has a slope of zero, because it rises by nothing no matter how far it
@@ -65,7 +65,7 @@ export default function CalculusPrimerPage() {
           it is a rate of change. If the line&rsquo;s x-axis is time in hours and
           its y-axis is distance in miles, then rise over run is miles over
           hours, and the slope <em>is</em> your speed. Drive 100 miles in 2 hours
-          and the line from start to finish has slope 50: fifty miles an hour.
+          and the line from start to finish has slope 50, fifty miles an hour.
           Though notice what kind of number that is. It is an average over the
           whole trip. At no single moment did the speedometer have to read 50;
           you may have been stopped at a light for some of it and doing 70 for
@@ -80,8 +80,8 @@ export default function CalculusPrimerPage() {
           A straight line has one slope everywhere, which is what made it easy. A
           curve does not. It might fall steeply in one place, flatten out, and
           climb somewhere else, so no single number describes its steepness. What
-          we can still do is exactly what the odometer did: pick two points on
-          the curve and measure the average between them.
+          we can still do is what we did with the drive, pick two points on the
+          curve and measure the average between them.
         </p>
         <p>
           The straight line drawn through two points of a curve is called a
@@ -101,8 +101,8 @@ export default function CalculusPrimerPage() {
         </p>
         <Equation>{"average slope = (10 − 4) / (5 − 3) = 3"}</Equation>
         <p>
-          That is what the box below shows on load: the base point sits at x = 3,
-          the gap is 2, and the solid line through the two points has slope 3.00,
+          That is what the box below shows on load. The base point starts at
+          x = 3, the gap is 2, and the solid line through the two points has slope 3.00,
           exactly the number we just computed by hand. The dashed line and the
           second readout will be explained in a moment; for now, drag the base
           point around and watch the average slope change as the stretch of curve
@@ -118,8 +118,8 @@ export default function CalculusPrimerPage() {
           An average across a stretch is still not what we set out to find. We
           wanted the steepness of the curve at a single point, the speedometer
           reading rather than the trip average. And a single point, on its own,
-          gives us nothing to divide: one point has no rise and no run. It looks
-          like a dead end.
+          gives us nothing to divide, since one point has no rise and no run. It
+          looks like a dead end.
         </p>
         <p>
           Here is the move the whole of calculus is built on. If the average over
@@ -128,29 +128,29 @@ export default function CalculusPrimerPage() {
           point in closer, computing the same rise over run every time. Each
           average is taken over a shorter piece of curve, so each is a better
           stand-in for the steepness right at the base. Working the arithmetic
-          the same way we worked f(3) and f(5), this is what happens:
+          the same way we worked f(3) and f(5), this is what happens.
         </p>
         <Equation>{"gap    second point    average slope\n2.00   x = 5.00        3.00\n1.00   x = 4.00        2.50\n0.50   x = 3.50        2.25\n0.10   x = 3.10        2.05\n0.02   x = 3.02        2.01"}</Equation>
         <p>
-          The averages are not wandering. They are marching straight toward 2,
-          and the smaller the gap, the closer they sit to it: 3, then 2.5, then
-          2.25, then 2.05, then 2.01. Every row of that table is a position of
-          the gap slider in the box above, so you do not have to take our word
-          for it. Slide the gap down from 2.00 and watch the average-slope
-          readout walk through these exact numbers.
+          The averages are not wandering. They are approaching 2, and the
+          smaller the gap, the closer they are. 3, then 2.5, then 2.25, then
+          2.05, then 2.01. Every row of that table is a position of the gap
+          slider in the box above, so you do not have to take our word for it.
+          Slide the gap down from 2.00 and watch the average-slope readout walk
+          through these exact numbers.
         </p>
         <p>
           The number the averages close in on, 2 here, is called the
           instantaneous rate of change of the curve at x = 3, and it is what the
-          derivative <em>is</em>. Writing the gap as h, the definition says: take
-          the average slope across a gap of h, and ask what value it approaches
-          as h shrinks toward zero.
+          derivative <em>is</em>. Writing the gap as h, the definition says to
+          take the average slope across a gap of h and ask what value it
+          approaches as h shrinks toward zero.
         </p>
         <Equation>{"f'(x) = (f(x + h) − f(x)) / h,   as the gap h shrinks toward 0"}</Equation>
         <p>
           The picture of the same process is the two lines in the widget. While
           the second point slides in, the solid secant rotates, and it settles
-          onto the dashed line: the tangent, the one straight line that grazes
+          onto the dashed line, the tangent, the one straight line that grazes
           the curve at the base point and runs alongside it there. The secant
           measures an average and the tangent is what the averages become, so the
           slope of the tangent is the derivative. That is why the two readouts
@@ -168,28 +168,28 @@ export default function CalculusPrimerPage() {
           every step; nothing is hidden.
         </p>
         <p>
-          The recipe says: take the height at x + h, subtract the height at x,
+          The recipe says to take the height at x + h, subtract the height at x,
           and divide by h. The height at x + h comes from substituting x + h into
-          the function, and expanding the square:
+          the function, and expanding the square.
         </p>
         <Equation>{"f(x + h) = 0.5·(x + h)² − (x + h) + 2.5\n        = 0.5·x² + x·h + 0.5·h² − x − h + 2.5"}</Equation>
         <p>
           Now subtract f(x), which is 0.5·x² − x + 2.5. The 0.5·x², the −x and
           the 2.5 all cancel, because they appear in both, and only the terms
-          that involve h survive:
+          that involve h survive.
         </p>
         <Equation>{"f(x + h) − f(x) = x·h + 0.5·h² − h"}</Equation>
         <p>
-          Divide by h, and every term loses one h:
+          Divide by h, and every term loses one h.
         </p>
         <Equation>{"(f(x + h) − f(x)) / h = x + 0.5·h − 1"}</Equation>
         <p>
           And there is the whole story in one line. The average slope across a
-          gap of h is x + 0.5·h − 1: the number x − 1, plus half the gap. At the
+          gap of h is x + 0.5·h − 1, the number x − 1 plus half the gap. At the
           base x = 3 that is 2 plus half the gap, and you can check it against
           the table in the last section, where a gap of 1 gave 2.5 and a gap of
           0.1 gave 2.05. The table was never mysterious; it was this formula in
-          disguise. And now the limit costs nothing: as h shrinks toward zero,
+          disguise. And now the limit costs nothing. As h shrinks toward zero,
           the 0.5·h term dies away, and what remains is the derivative,
         </p>
         <Equation>{"f'(x) = x − 1"}</Equation>
@@ -207,45 +207,48 @@ export default function CalculusPrimerPage() {
           With f&rsquo;(x) = x − 1 in hand, read what it says about the shape of
           the curve. Left of x = 1 it is negative, so the tangent tilts downhill
           and the curve is falling. Right of x = 1 it is positive, so the curve
-          is rising. And at exactly x = 1 it is zero: the curve has stopped
+          is rising. And at exactly x = 1 it is zero. The curve has stopped
           falling and not yet begun to rise, the tangent lies flat, and that is
           the floor of the bowl.
         </p>
         <Equation>{"f'(x) = x − 1 = 0   →   x = 1\nf(1) = 0.5 − 1 + 2.5 = 2"}</Equation>
         <p>
           So the lowest point of this curve sits at (1, 2), and we found it
-          without looking at the drawing at all: we set the derivative to zero
+          without looking at the drawing at all. We set the derivative to zero
           and solved. That is the classic calculus route to a minimum, and for a
           curve this simple it is the whole job.
         </p>
         <p>
           One honest caution before we lean on this. A zero derivative marks any
           flat spot, and the bottom of a valley is not the only place a curve
-          lies flat: the top of a hill is flat too. The two-valley curve in the
-          next section has three flat spots, the floor of each valley and the
+          lies flat, since the top of a hill is flat too. The two-valley curve in
+          the next section has three flat spots, the floor of each valley and the
           crest of the hill between them, and the derivative is zero at all
           three. What separates a floor from a crest is the sign pattern around
-          it: at a floor the curve falls in and rises out, negative to positive,
-          while at a crest it rises in and falls out. Zero alone says
-          &ldquo;flat&rdquo;; the neighbourhood says which kind of flat.
+          it. At a floor the curve falls in and rises out, negative to positive,
+          while at a crest it rises in and falls out, so a zero derivative only
+          tells us the curve is flat there, and we read the signs around it to
+          know which kind of flat we have found.
         </p>
       </PrimerSection>
 
       <PrimerSection title="Finding the Bottom by Walking">
         <p>
-          Solving f&rsquo;(x) = 0 worked because x − 1 = 0 is an equation a child
-          can solve. The error of a real model is also a curve with a bottom we
-          want, though it is a curve in many settings at once, and setting its
-          derivative to zero produces a tangle of simultaneous equations that
-          usually cannot be solved outright. So we keep the insight, the bottom
-          is where the slope is zero, and give up on jumping there in one
-          algebraic step. Instead we walk, and we use the derivative the other
-          way: not as an equation to solve but as a direction to follow.
+          Solving f&rsquo;(x) = 0 worked because x − 1 = 0 is what we call the
+          &ldquo;trivial case&rdquo;, though if you pluck any random function it
+          is unlikely to be trivial. The error of a real model is also a curve
+          with a bottom we want, though it is a curve in many settings at once,
+          and setting its derivative to zero produces a tangle of simultaneous
+          equations that usually cannot be solved outright. So we keep the
+          insight, the bottom is where the slope is zero, and give up on jumping
+          there in one algebraic step. Instead we walk, and we use the
+          derivative the other way, not as an equation to solve but as a
+          direction to follow.
         </p>
         <p>
           Picture standing on a hillside in thick fog. You cannot see the valley
           floor, only the ground at your feet, but the slope underfoot still
-          tells you which way is down: if the slope is negative, downhill is to
+          tells you which way is down. If the slope is negative, downhill is to
           the right, and if it is positive, downhill is to the left. So you step
           downhill, read the slope again where you land, and step again. Because
           the ground flattens as you approach the bottom, the slopes you read
@@ -264,7 +267,7 @@ export default function CalculusPrimerPage() {
           first stride is long exactly because the slope there is steep. Near the
           floor the dots crowd together as the slopes, and with them the steps,
           die away toward zero. The walk stops where the derivative told us it
-          would: at x = 1, height 2.
+          would, at x = 1, height 2.
         </p>
         <p>
           Now switch to the two-valley curve, and the caution from the last
@@ -280,29 +283,29 @@ export default function CalculusPrimerPage() {
 
       <PrimerSection title="The Learning Rate">
         <p>
-          There is one choice in the walk that we have not pinned down: how far
+          There is one choice in the walk that we have not pinned down, how far
           to move on each step. The slope gives a direction and a magnitude, but
           we still choose how boldly to act on it, and that choice is a number of
           its own, the learning rate, written η. Each step moves against the
-          slope, scaled by η:
+          slope, scaled by η.
         </p>
         <Equation>{"x  ←  x − η · f'(x)"}</Equation>
         <p>
           For our bowl we know the derivative exactly, f&rsquo;(x) = x − 1, so
           for once we can see precisely what this rule does rather than guessing.
-          Substitute it in:
+          Substitute it in.
         </p>
         <Equation>{"x  ←  x − η·(x − 1)"}</Equation>
         <p>
           Subtract 1 from both sides, and the rule becomes a statement about the
-          distance between where we stand and the floor at x = 1:
+          distance between where we stand and the floor at x = 1.
         </p>
         <Equation>{"(x − 1)  ←  (1 − η) · (x − 1)"}</Equation>
         <p>
           Every step multiplies our distance from the bottom by the same factor,
-          1 − η. The entire behaviour of the walk is in that one factor:
+          1 − η. The entire behaviour of the walk is in that one factor.
         </p>
-        <Equation>{"η = 0.3   factor  0.7    each step closes 30% of the distance\nη = 1.0   factor  0.0    one step lands exactly on the floor\nη = 1.9   factor −0.9    overshoots to the far side, yet shrinks\nη = 2.0   factor −1.0    hops between two mirror points forever\nη = 2.5   factor −1.5    grows every step: the walk runs away"}</Equation>
+        <Equation>{"η = 0.3   factor  0.7    each step closes 30% of the distance\nη = 1.0   factor  0.0    one step lands exactly on the floor\nη = 1.9   factor −0.9    overshoots to the far side, yet shrinks\nη = 2.0   factor −1.0    hops between two mirror points forever\nη = 2.5   factor −1.5    grows every step, the walk runs away"}</Equation>
         <p>
           Every line of that table is something you can do to the slider above.
           At the default 0.30 the walk glides down one side, each step closing
@@ -331,8 +334,8 @@ export default function CalculusPrimerPage() {
           bottom of a curve, the model&rsquo;s error plotted against its
           settings. The model reads the slope of that error and steps downhill,
           sized by a learning rate, exactly the walk you just drove. The only
-          real difference is how many directions there are to step in at once:
-          our curve has a single input, so we can draw it flat on the page, while
+          real difference is how many directions there are to step in at once.
+          Our curve has a single input, so we can draw it flat on the page, while
           a real model&rsquo;s error has one input for every setting it tunes,
           far too many to picture. But the step is the same one, taken in all of
           them together, and everything you just watched, the shrinking steps,

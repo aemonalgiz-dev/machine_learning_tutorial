@@ -37,7 +37,7 @@ const DEFAULT_START: Record<DescentFunction, number> = { bowl: 5, valley: -3.2 }
 const OUTCOME_TEXT: Record<Descent["outcome"], string> = {
   converged: "Settled at the bottom, where the slope is zero.",
   step_limit_reached: "Still moving when it ran out of steps.",
-  diverged: "The step was too large: it overshot and ran away.",
+  diverged: "The step was too large, so it overshot and ran away.",
 };
 
 function projectX(window: DescentWindow, x: number): number {

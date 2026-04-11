@@ -89,7 +89,7 @@ export default function SimpleLinearRegressionPage() {
                 height along the bottom and their weight up the side. A tall,
                 heavy person sits toward the upper right, a short, light person
                 toward the lower left. The blue line is a guess at
-                someone&rsquo;s weight from their height alone: find their height
+                someone&rsquo;s weight from their height alone. Find their height
                 along the bottom, go up to the line, and that is the weight the
                 line would predict for them.
               </p>
@@ -149,7 +149,7 @@ export default function SimpleLinearRegressionPage() {
                 best line outright rather than search for it.
               </p>
               <p>
-                So the total we minimise is the residual sum of squares: square
+                So the total we minimise is the residual sum of squares. Square
                 every residual and add them up.
               </p>
               <Equation>{"RSS = Σ(yᵢ − ŷᵢ)²"}</Equation>
@@ -179,7 +179,7 @@ export default function SimpleLinearRegressionPage() {
               <p>
                 Formulas are easier to trust after they have been worked once by
                 hand, so let us fit five people, start to finish, with nothing
-                hidden. Their heights and weights:
+                hidden. Here are their heights and weights.
               </p>
               <Equation>{"height (cm):  160   165   170   175   180\nweight (kg):   58    66    68    74    74"}</Equation>
               <p>
@@ -194,7 +194,7 @@ export default function SimpleLinearRegressionPage() {
               <Equation>{"height − x̄:   −10    −5     0     5    10\nweight − ȳ:   −10    −2     0     6     6"}</Equation>
               <p>
                 The top of the slope formula multiplies the two deviations person
-                by person and adds them up. Notice what that measures: a person
+                by person and adds them up. Notice what that measures. A person
                 below average in both height and weight contributes a positive
                 product, negative times negative, and so does a person above
                 average in both. The products only come out negative when height
@@ -222,7 +222,7 @@ export default function SimpleLinearRegressionPage() {
               <p>
                 Two people sit below the line, two above, one exactly on it, and
                 the residuals sum to zero, which the derivation below will show
-                is no accident: the best line always balances its misses this
+                is no accident, since the best line always balances its misses this
                 way. Press the &ldquo;Worked example&rdquo; button in the box
                 above and these five people load into the plot; the readouts will
                 show slope 0.800 and intercept −68.000, the numbers we just
@@ -241,8 +241,8 @@ export default function SimpleLinearRegressionPage() {
                 poor fit, so we need a score for how much the line actually
                 explains. To score anything you need a baseline to compare
                 against, and the honest baseline here is the simplest predictor
-                that exists: ignore height entirely and predict the average
-                weight, 68 kg, for every single person.
+                there is, one that ignores height entirely and predicts the
+                average weight, 68 kg, for every single person.
               </p>
               <p>
                 How badly does that baseline miss? Its residuals are just the
@@ -263,9 +263,9 @@ export default function SimpleLinearRegressionPage() {
               </p>
               <Equation>{"R² = 1 − RSS / TSS = 1 − 16 / 176 ≈ 0.909"}</Equation>
               <p>
-                Read it as: height explains about 91% of the variation in weight
-                among these five people, and the remaining 9% is whatever height
-                cannot account for. The two ends of the scale follow directly.
+                Read it as saying height explains about 91% of the variation in
+                weight among these five people, and the remaining 9% is whatever
+                height cannot account for. The two ends of the scale follow directly.
                 If every point sits exactly on the line, RSS is 0 and R² is 1.
                 If the line does no better than predicting the average, RSS
                 equals TSS and R² is 0, which you can see in the widget by
@@ -290,8 +290,8 @@ export default function SimpleLinearRegressionPage() {
                 >
                   calculus primer
                 </Link>
-                : the lowest point of a smooth curve is where its derivative is
-                zero.
+                , that the lowest point of a smooth curve is where its derivative
+                is zero.
               </p>
               <p>
                 The quantity we are minimising is the residual sum of squares,
@@ -334,7 +334,7 @@ export default function SimpleLinearRegressionPage() {
                 one divided by the other.
               </p>
               <p>
-                Notice what did not happen: we never had to walk downhill.
+                Notice what did not happen. We never had to walk downhill.
                 Because the residual sum of squares is a simple bowl in β and α,
                 setting its two derivatives to zero gave equations we could solve
                 outright, so the fit is a formula rather than a search. That is
