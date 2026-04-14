@@ -31,6 +31,7 @@ const CURRICULUM: Bucket[] = [
       },
       {
         title: "Linear Algebra Primer",
+        href: "/primers/linear-algebra",
         blurb:
           "Once a model takes more than one input, we bundle those inputs into a vector and its workings into a matrix. It is mostly a compact notation, though it is the notation almost everything past a single line is written in, so it is worth getting comfortable with early.",
       },

@@ -166,3 +166,63 @@ export interface SecantRequest {
 export async function curveSecant(request: SecantRequest): Promise<Secant> {
   return postJson<Secant>("/primers/calculus/secant", request);
 }
+
+// --- Linear algebra primer: vectors, and a matrix moving the plane ----------
+
+export interface PlanePoint {
+  x: number;
+  y: number;
+}
+
+export interface VectorPair {
+  length_first: number;
+  length_second: number;
+  distance: number;
+  dot: number;
+  cosine: number | null;
+}
+
+export async function measureVectors(
+  first: PlanePoint,
+  second: PlanePoint,
+): Promise<VectorPair> {
+  return postJson<VectorPair>("/primers/linear-algebra/vectors", {
+    first,
+    second,
+  });
+}
+
+export interface Matrix2x2 {
+  a: number;
+  b: number;
+  c: number;
+  d: number;
+}
+
+export interface GridSegment {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface EigenDirection {
+  value: number;
+  x: number;
+  y: number;
+}
+
+export interface PlaneTransform {
+  grid_lines: GridSegment[];
+  unit_square: PlanePoint[];
+  basis_first: PlanePoint;
+  basis_second: PlanePoint;
+  eigen: EigenDirection[];
+  has_real_eigen: boolean;
+}
+
+export async function transformPlane(
+  matrix: Matrix2x2,
+): Promise<PlaneTransform> {
+  return postJson<PlaneTransform>("/primers/linear-algebra/transform", matrix);
+}
