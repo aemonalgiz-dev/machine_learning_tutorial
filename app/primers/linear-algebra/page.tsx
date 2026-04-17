@@ -6,6 +6,7 @@ import {
   PrimerPlayground,
   PrimerSection,
 } from "@/components/concept/PrimerPage";
+import { EigenPlayground } from "@/components/widgets/EigenPlayground";
 import { MatrixPlayground } from "@/components/widgets/MatrixPlayground";
 import { VectorPlayground } from "@/components/widgets/VectorPlayground";
 
@@ -203,17 +204,33 @@ export default function LinearAlgebraPrimerPage() {
         <p>
           These special directions, the ones the matrix only stretches and never
           turns, are called eigenvectors, and the stretch factors are their
-          eigenvalues. The dashed lines in the widget are exactly these
-          directions, and the readouts report the factors, ×3.00 along (0.71,
-          0.71) and ×1.00 along (0.71, −0.71). Those are our (1, 1) and (1, −1)
-          scaled to length one, the same directions in unit form.
+          eigenvalues. The plane widget above marks them as dashed lines and
+          reports ×3.00 along (0.71, 0.71) and ×1.00 along (0.71, −0.71), which
+          are our (1, 1) and (1, −1) scaled to length one, the same directions
+          in unit form.
         </p>
         <p>
-          Not every matrix has them. Load the rotation preset, which turns every
-          arrow a quarter turn, and the widget reports that no direction survives
-          unturned, which for a rotation is exactly right. Load the shear and
-          only one direction holds. Whether these directions exist, and where
-          they point, is a fingerprint of what the matrix does.
+          The box below lets you hunt for them yourself, which is the fastest way
+          to feel what they are. The indigo arrow is yours to drag, and the amber
+          arrow is where the matrix sends it. It opens with your arrow at (2, 0),
+          whose image (4, 2) points a visibly different way, a turn of about 27
+          degrees. Now sweep your arrow slowly toward the dashed line and watch
+          the turn shrink. Land on (2, 2) and the two arrows fall into a single
+          line, the turn reads zero, and the stretch factor reads ×3.00. You are
+          standing on an eigen direction, and the amber arrow is simply your
+          arrow, three times longer. Cross over to (2, −2) and they line up
+          again at ×1.00, the direction the matrix leaves entirely alone.
+        </p>
+        <PrimerPlayground>
+          <EigenPlayground />
+        </PrimerPlayground>
+        <p>
+          Not every matrix has such directions. Load the rotation preset, which
+          turns every arrow a quarter turn, and sweep your arrow the whole way
+          around. The turn readout stays pinned at 90 degrees and the arrows
+          never line up, which for a rotation is exactly right. Load the shear
+          and only one direction holds. Whether these directions exist, and
+          where they point, is a fingerprint of what the matrix does.
         </p>
         <p>
           Why care about a matrix&rsquo;s kept directions? Because they are the
