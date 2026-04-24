@@ -55,11 +55,13 @@ const CURRICULUM: Bucket[] = [
       },
       {
         title: "Multiple & Polynomial Regression",
+        href: "/concepts/multiple-polynomial-regression",
         blurb:
           "Often a relationship depends on several inputs at once, or it bends rather than running straight, so we fit a plane or a curve in place of a line. The underlying mechanics of how we build the regression remain almost identical.",
       },
       {
         title: "Ridge & Lasso",
+        href: "/concepts/ridge-lasso",
         blurb:
           "Data is noisy, which can lead to simple regressions fitting to clerical errors, outliers, or other data issues. Ridge and lasso prevent the “ideal” fit for our training data, trading a slightly worse fit now for better predictions later.",
       },
