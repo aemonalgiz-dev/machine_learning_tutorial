@@ -292,6 +292,93 @@ export async function fitPenalised(
   });
 }
 
+// --- Classification: logistic, k-nearest neighbours, decision trees --------
+
+export interface Outcome {
+  x: number;
+  label: number;
+}
+
+export interface LogisticFit {
+  slope: number;
+  intercept: number;
+  boundary: number | null;
+  accuracy: number;
+  curve: CurvePoint[];
+}
+
+export async function fitLogistic(points: Outcome[]): Promise<LogisticFit> {
+  return postJson<LogisticFit>("/concepts/logistic-regression/fit", { points });
+}
+
+export interface LabelledPoint {
+  x: number;
+  y: number;
+  label: number;
+}
+
+export interface RegionGrid {
+  x_min: number;
+  x_max: number;
+  y_min: number;
+  y_max: number;
+  cells: number;
+  labels: number[][];
+}
+
+export interface ChosenNeighbour {
+  index: number;
+  distance: number;
+  label: number;
+}
+
+export interface KnnAnswer {
+  prediction: number;
+  neighbours: ChosenNeighbour[];
+  votes_for_zero: number;
+  votes_for_one: number;
+  regions: RegionGrid;
+}
+
+export async function classifyByNeighbours(
+  points: LabelledPoint[],
+  query: Point,
+  k: number,
+): Promise<KnnAnswer> {
+  return postJson<KnnAnswer>("/concepts/k-nearest-neighbours/classify", {
+    points,
+    query,
+    k,
+  });
+}
+
+export interface TreeNodeDocument {
+  kind: string;
+  samples: number;
+  question: string | null;
+  left: TreeNodeDocument | null;
+  right: TreeNodeDocument | null;
+  label: number | null;
+}
+
+export interface TreeFit {
+  tree: TreeNodeDocument;
+  depth: number;
+  n_leaves: number;
+  accuracy: number;
+  regions: RegionGrid;
+}
+
+export async function fitTree(
+  points: LabelledPoint[],
+  maxDepth: number,
+): Promise<TreeFit> {
+  return postJson<TreeFit>("/concepts/decision-trees/fit", {
+    points,
+    max_depth: maxDepth,
+  });
+}
+
 // --- Statistics primer: summaries of a cloud, and draws from a population ---
 
 export interface CloudSummary {
