@@ -418,6 +418,25 @@ export async function fitBoosting(
   });
 }
 
+// --- The kernel trick -------------------------------------------------------
+
+export type KernelChoice = "linear" | "polynomial" | "rbf";
+
+export interface KernelAnswer {
+  accuracy: number;
+  regions: RegionGrid;
+}
+
+export async function classifyWithKernel(
+  points: LabelledPoint[],
+  kernel: KernelChoice,
+): Promise<KernelAnswer> {
+  return postJson<KernelAnswer>("/concepts/kernel-trick/classify", {
+    points,
+    kernel,
+  });
+}
+
 // --- Unsupervised: k-means and principal component analysis ----------------
 
 export interface Clustering {

@@ -139,6 +139,7 @@ const CURRICULUM: Bucket[] = [
     concepts: [
       {
         title: "The Kernel Trick",
+        href: "/concepts/kernel-trick",
         blurb:
           "Some data cannot be split by a straight boundary in the space we are handed. The trick is to swap the dot product between two points for a function that measures their similarity in a much larger space, which lets a straight-line method draw curved boundaries without our ever building that space.",
       },
@@ -154,12 +155,15 @@ export default function Home() {
           Machine learning, one concept at a time
         </h1>
         <p className="mt-5 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
-          Every idea here starts with the problem that made someone invent it.
-          Then it is explained twice, once in plain language and once for a
-          technical reader, and it comes with something you can experiment with.
-          The numbers behind each example are computed live by a machine learning
-          library written from scratch, so what you are looking at is the real
-          method running, not a simplified stand-in for it.
+          Every concept in machine learning was invented to solve a problem.
+          I&rsquo;ve always believed understanding the initial problem a tool
+          solved helps to instill comprehension, so every page here begins with
+          that historical context. While there are technical sections provided,
+          this site is meant to be generally accessible for anyone, and each
+          page carries an interactive example where you can experiment with
+          small values of your own. The computations behind these examples are
+          performed live by a machine learning library written from scratch, so
+          you&rsquo;re seeing how the methods really behave.
         </p>
       </section>
 
