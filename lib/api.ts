@@ -418,6 +418,64 @@ export async function fitBoosting(
   });
 }
 
+// --- The three-dimensional pictures -----------------------------------------
+
+export interface Person3d {
+  height: number;
+  age: number;
+  weight: number;
+}
+
+export interface PlaneFit3d {
+  height_coefficient: number;
+  age_coefficient: number;
+  intercept: number;
+  r_squared: number;
+  heights_axis: number[];
+  ages_axis: number[];
+  surface: number[][];
+}
+
+export async function fitPlane3d(people: Person3d[]): Promise<PlaneFit3d> {
+  return postJson<PlaneFit3d>(
+    "/concepts/multiple-polynomial-regression/fit-plane",
+    { people },
+  );
+}
+
+export interface LossSurface {
+  slopes: number[];
+  intercepts: number[];
+  rss: number[][];
+  minimum: { slope: number; intercept: number; rss: number };
+}
+
+export async function lossSurface(points: Point[]): Promise<LossSurface> {
+  return postJson<LossSurface>("/concepts/simple-linear-regression/loss-surface", {
+    points,
+  });
+}
+
+export interface LiftedPoint {
+  u: number;
+  v: number;
+  w: number;
+  label: number;
+}
+
+export interface ClinicLift {
+  points: LiftedPoint[];
+  plane: { a: number; b: number; c: number; d: number };
+  accuracy: number;
+}
+
+export async function liftClinic(points: LabelledPoint[]): Promise<ClinicLift> {
+  return postJson<ClinicLift>("/concepts/kernel-trick/lift", {
+    points,
+    kernel: "polynomial",
+  });
+}
+
 // --- The kernel trick -------------------------------------------------------
 
 export type KernelChoice = "linear" | "polynomial" | "rbf";
