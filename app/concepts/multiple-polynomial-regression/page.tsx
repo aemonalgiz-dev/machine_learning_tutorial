@@ -182,7 +182,7 @@ export default function MultiplePolynomialRegressionPage() {
               </p>
               <Equation>{"h = 20·t − 4.9·t²"}</Equation>
               <p>
-                Press the worked example button above, which loads five exact
+                Press the ideal case button above, which loads five exact
                 measurements of that throw, and set the degree to 2. The fit
                 comes back with the coefficient on t reading 20.00, the
                 coefficient on t² reading −4.90, the intercept reading 0.00 and

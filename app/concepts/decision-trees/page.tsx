@@ -136,7 +136,7 @@ export default function DecisionTreesPage() {
           content: (
             <>
               <p>
-                Press the worked example button, which loads the clean crowd of
+                Press the ideal case button, which loads the clean crowd of
                 eleven, and the whole model comes out as a single question.
               </p>
               <Equation>{"height < 151.5?   yes, answer child   no, answer adult"}</Equation>

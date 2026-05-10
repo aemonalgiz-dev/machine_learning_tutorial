@@ -29,6 +29,26 @@ const WORKED_PEOPLE: Point[] = [
   { x: 180, y: 74 },
 ];
 
+// Fifteen people lying almost exactly on the line the measured five fit,
+// the ideal case, a very strong fit rather than a sterile perfect one.
+const IDEAL_CASE: Point[] = [
+  { x: 152, y: 54.2 },
+  { x: 155, y: 55.4 },
+  { x: 158, y: 58.7 },
+  { x: 161, y: 60.5 },
+  { x: 164, y: 63.2 },
+  { x: 167, y: 66.2 },
+  { x: 170, y: 67.4 },
+  { x: 173, y: 70.7 },
+  { x: 176, y: 72.5 },
+  { x: 179, y: 75.2 },
+  { x: 182, y: 78.2 },
+  { x: 185, y: 79.4 },
+  { x: 188, y: 82.7 },
+  { x: 191, y: 84.5 },
+  { x: 194, y: 87.2 },
+];
+
 const MAX_POINTS = 100;
 
 function toPixel(point: Point) {
@@ -164,7 +184,8 @@ export function StatisticsPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <Button onClick={() => setPoints(WORKED_PEOPLE)}>Worked example</Button>
+        <Button onClick={() => setPoints(IDEAL_CASE)}>An Ideal Case</Button>
+        <Button onClick={() => setPoints(WORKED_PEOPLE)}>The measured five</Button>
         <Button onClick={() => setPoints(randomPeople())}>Random people</Button>
         <Button onClick={() => setPoints(shapelessPeople())}>No pattern</Button>
         <span className="ml-auto text-xs text-slate-500 dark:text-slate-500">

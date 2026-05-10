@@ -81,12 +81,32 @@ const STARTING_POINTS: Point[] = [
 // The five people the page's worked example fits by hand. Loaded by its own
 // button so the prose's arithmetic and the widget's readouts can be compared
 // digit for digit: slope 0.800, intercept -68.000, R-squared 0.909.
-const WORKED_EXAMPLE: Point[] = [
+const MEASURED_FIVE: Point[] = [
   { x: 160, y: 58 },
   { x: 165, y: 66 },
   { x: 170, y: 68 },
   { x: 175, y: 74 },
   { x: 180, y: 74 },
+];
+
+// Fifteen people lying almost exactly on the line the measured five fit,
+// the ideal case, a very strong fit rather than a sterile perfect one.
+const IDEAL_CASE: Point[] = [
+  { x: 152, y: 54.2 },
+  { x: 155, y: 55.4 },
+  { x: 158, y: 58.7 },
+  { x: 161, y: 60.5 },
+  { x: 164, y: 63.2 },
+  { x: 167, y: 66.2 },
+  { x: 170, y: 67.4 },
+  { x: 173, y: 70.7 },
+  { x: 176, y: 72.5 },
+  { x: 179, y: 75.2 },
+  { x: 182, y: 78.2 },
+  { x: 185, y: 79.4 },
+  { x: 188, y: 82.7 },
+  { x: 191, y: 84.5 },
+  { x: 194, y: 87.2 },
 ];
 
 function randomScatter(): Point[] {
@@ -188,8 +208,9 @@ export function LineFitPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
+        <Button onClick={() => setPoints(IDEAL_CASE)}>An Ideal Case</Button>
+        <Button onClick={() => setPoints(MEASURED_FIVE)}>The measured five</Button>
         <Button onClick={() => setPoints(randomScatter())}>Random scatter</Button>
-        <Button onClick={() => setPoints(WORKED_EXAMPLE)}>Worked example</Button>
         <Button onClick={() => setPoints(STARTING_POINTS)}>Reset</Button>
         <Button onClick={() => setPoints([])}>Clear</Button>
         <span className="ml-auto text-xs text-slate-500 dark:text-slate-500">

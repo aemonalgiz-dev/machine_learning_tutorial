@@ -43,6 +43,37 @@ const CROWD: Point[] = [
   { x: 178, y: 78 },
 ];
 
+// Fifteen people hugging one diagonal, the ideal case, nearly all of the
+// spread carried by a single direction.
+const IDEAL_CASE: Point[] = [
+  { x: 152, y: 51 },
+  { x: 155, y: 52 },
+  { x: 158, y: 56.5 },
+  { x: 161, y: 58.5 },
+  { x: 164, y: 62 },
+  { x: 167, y: 66 },
+  { x: 170, y: 67 },
+  { x: 173, y: 71.5 },
+  { x: 176, y: 73.5 },
+  { x: 179, y: 77 },
+  { x: 182, y: 81 },
+  { x: 185, y: 82 },
+  { x: 188, y: 86.5 },
+  { x: 191, y: 88.5 },
+  { x: 194, y: 92 },
+];
+
+function randomPeople(): Point[] {
+  const slope = 0.5 + Math.random() * 0.4;
+  const intercept = -40 + (Math.random() - 0.5) * 12;
+  return Array.from({ length: 15 }, (_, index) => {
+    const x = 152 + index * 3;
+    const noise = (Math.random() - 0.5) * 16;
+    const y = Math.min(100, Math.max(40, slope * x + intercept + noise));
+    return { x, y: Math.round(y * 10) / 10 };
+  });
+}
+
 const MAX_POINTS = 100;
 
 function toPixel(point: Point) {
@@ -161,10 +192,22 @@ export function PcaPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button
+          onClick={() => setPoints(IDEAL_CASE)}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          An Ideal Case
+        </button>
+        <button
           onClick={() => setPoints(WORKED_PEOPLE)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Worked example
+          The measured four
+        </button>
+        <button
+          onClick={() => setPoints(randomPeople())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random people
         </button>
         <button
           onClick={() => setPoints(CROWD)}

@@ -124,7 +124,7 @@ export default function GradientBoostingPage() {
           content: (
             <>
               <p>
-                Press the worked example button, which loads three clean
+                Press the ideal case button, which loads three clean
                 points, and the whole method can be run by hand. The targets
                 are 2, 6 and 10 at t of 1, 2 and 3, and the learning rate
                 slider should sit at 0.50.

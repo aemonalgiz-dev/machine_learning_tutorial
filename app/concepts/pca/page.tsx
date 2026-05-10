@@ -127,7 +127,7 @@ export default function PcaPage() {
           content: (
             <>
               <p>
-                Press the worked example button, four people placed so every
+                Press the measured four button, four people placed so every
                 number comes out clean. Their mean is (170, 68), and their
                 deviations from it are (10, 10), (−10, −10), (5, −5) and
                 (−5, 5). Build the sums the covariance matrix needs, exactly

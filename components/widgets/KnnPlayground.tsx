@@ -44,6 +44,45 @@ const WORKED_PEOPLE: LabelledPoint[] = [
 
 const WORKED_QUERY: Point = { x: 150, y: 45 };
 
+// The ideal case, two well-separated clumps with the query deep inside one,
+// so every k from 1 to 15 returns the same confident answer.
+const IDEAL_PEOPLE: LabelledPoint[] = [
+  { x: 118, y: 24, label: 0 },
+  { x: 120, y: 27, label: 0 },
+  { x: 122, y: 25, label: 0 },
+  { x: 124, y: 29, label: 0 },
+  { x: 119, y: 30, label: 0 },
+  { x: 125, y: 26, label: 0 },
+  { x: 121, y: 32, label: 0 },
+  { x: 126, y: 31, label: 0 },
+  { x: 117, y: 28, label: 0 },
+  { x: 176, y: 74, label: 1 },
+  { x: 179, y: 78, label: 1 },
+  { x: 182, y: 76, label: 1 },
+  { x: 185, y: 80, label: 1 },
+  { x: 178, y: 82, label: 1 },
+  { x: 183, y: 84, label: 1 },
+  { x: 180, y: 72, label: 1 },
+  { x: 186, y: 77, label: 1 },
+];
+
+const IDEAL_QUERY: Point = { x: 122, y: 28 };
+
+function randomCrowd(): LabelledPoint[] {
+  const around = (
+    centreX: number,
+    centreY: number,
+    label: number,
+    count: number,
+  ): LabelledPoint[] =>
+    Array.from({ length: count }, () => ({
+      x: Math.round(centreX + (Math.random() - 0.5) * 30),
+      y: Math.round(centreY + (Math.random() - 0.5) * 26),
+      label,
+    }));
+  return [...around(130, 32, 0, 8), ...around(170, 70, 1, 8)];
+}
+
 const MAX_POINTS = 100;
 
 function toPixel(point: { x: number; y: number }) {
@@ -173,12 +212,27 @@ export function KnnPlayground() {
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button
           onClick={() => {
+            setPoints(IDEAL_PEOPLE);
+            setQuery(IDEAL_QUERY);
+          }}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => {
             setPoints(WORKED_PEOPLE);
             setQuery(WORKED_QUERY);
           }}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Worked example
+          The borderline case
+        </button>
+        <button
+          onClick={() => setPoints(randomCrowd())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random crowd
         </button>
         <div className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {[

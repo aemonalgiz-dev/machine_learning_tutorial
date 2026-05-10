@@ -21,7 +21,7 @@ const SCALE = HALF / RANGE;
 const WORKED: Matrix2x2 = { a: 2, b: 1, c: 1, d: 2 };
 
 const PRESETS: { label: string; matrix: Matrix2x2 }[] = [
-  { label: "Worked example", matrix: WORKED },
+  { label: "The worked matrix", matrix: WORKED },
   { label: "Stretch", matrix: { a: 2, b: 0, c: 0, d: 0.5 } },
   { label: "Shear", matrix: { a: 1, b: 1, c: 0, d: 1 } },
   { label: "Rotation", matrix: { a: 0, b: -1, c: 1, d: 0 } },

@@ -69,6 +69,25 @@ const FEVER_ONLY: LabelledPoint[] = [
   { x: 38.6, y: 104, label: 0 },
 ];
 
+
+function randomClinic(): LabelledPoint[] {
+  const healthy: LabelledPoint[] = Array.from({ length: 9 }, () => ({
+    x: Math.round((36.4 + Math.random() * 1.0) * 10) / 10,
+    y: Math.round(62 + Math.random() * 26),
+    label: 1,
+  }));
+  const unwell: LabelledPoint[] = Array.from({ length: 12 }, () => {
+    const angle = Math.random() * Math.PI * 2;
+    const reach = 0.75 + Math.random() * 0.25;
+    return {
+      x: Math.round((37.7 + Math.cos(angle) * 2.6 * reach) * 10) / 10,
+      y: Math.round(88 + Math.sin(angle) * 46 * reach),
+      label: 0,
+    };
+  });
+  return [...healthy, ...unwell];
+}
+
 const MAX_POINTS = 100;
 
 const KERNELS: { key: KernelChoice; label: string }[] = [
@@ -210,7 +229,13 @@ export function KernelPlayground() {
           onClick={() => setPoints(FEVER_ONLY)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          Fevers only
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => setPoints(randomClinic())}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+        >
+          Random clinic
         </button>
         <div className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {[

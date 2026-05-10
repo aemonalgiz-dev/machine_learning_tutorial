@@ -23,7 +23,7 @@ const PLOT = {
 
 // Five exact measurements of h = 20t - 4.9t^2, the worked example whose
 // degree-2 fit recovers 20 and -4.9 to the last digit.
-const WORKED_THROW: Point[] = [
+const IDEAL_THROW: Point[] = [
   { x: 0, y: 0 },
   { x: 1, y: 15.1 },
   { x: 2, y: 20.4 },
@@ -185,7 +185,7 @@ export function PolynomialPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <Button onClick={() => setPoints(WORKED_THROW)}>Worked example</Button>
+        <Button onClick={() => setPoints(IDEAL_THROW)}>An Ideal Case</Button>
         <Button onClick={() => setPoints(NOISY_THROW)}>Full throw</Button>
         <Button onClick={() => setPoints(randomThrow())}>Random throw</Button>
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
