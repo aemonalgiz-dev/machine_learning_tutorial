@@ -112,11 +112,11 @@ const IDEAL_CASE: Point[] = [
 function randomScatter(): Point[] {
   // Weight tends to rise with height, plus a person-to-person wobble. Fifteen
   // points give a more honest spread than a handful sitting on the line.
-  const slope = 0.5 + Math.random() * 0.25;
+  const slope = 0.35 + Math.random() * 0.55;
   const intercept = -40 + (Math.random() - 0.5) * 12;
   return Array.from({ length: 15 }, (_, index) => {
     const x = round2(152 + index * 3);
-    const noise = (Math.random() - 0.5) * 14;
+    const noise = (Math.random() - 0.5) * 26;
     return {
       x,
       y: clamp(round2(slope * x + intercept + noise), DOMAIN.yMin, DOMAIN.yMax),
