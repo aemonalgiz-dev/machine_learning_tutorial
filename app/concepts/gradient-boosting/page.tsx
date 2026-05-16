@@ -173,7 +173,16 @@ export default function GradientBoostingPage() {
                 Try the extremes above. At η of 1.00 the fit lunges, tracing
                 the points quickly and roughly, and at 0.05 it creeps, still
                 far from the arc after fifty rounds and impeccably smooth on
-                the way. Where to stop is the question the site keeps
+                the way. The slider will also let you cross 1, and the answer
+                that comes back is worth reading. Past 1 each round&rsquo;s
+                correction overshoots the very mistake it just fitted, leaving
+                a bigger error than it found, and past 2 the leftovers would
+                grow round after round, the calculus primer&rsquo;s runaway
+                playing out in prediction space. The library refuses to build
+                such a model at all, so the widget hands you its refusal
+                rather than a diverging curve, and the primer&rsquo;s descent
+                slider is where the runaway itself can be watched happening.
+                Where to stop is the question the site keeps
                 meeting, and the honest answer is unchanged, data the fit
                 never saw. Unlike bagging, boosting&rsquo;s members are
                 sequential and share everything, so no out-of-bag shortcut
