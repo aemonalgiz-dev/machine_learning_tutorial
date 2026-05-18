@@ -196,6 +196,44 @@ export default function DecisionTreesPage() {
             </>
           ),
         },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                The Gini formula was handed over without ceremony, and it
+                comes from one small thought experiment. Draw two people from
+                a group at random, independently, and ask how often they
+                belong to different classes. The first draw is a child with
+                probability p₀ and so is the second, so both are children
+                with probability p₀², both adults with probability p₁², and
+                the draws agree with the sum of those two.
+              </p>
+              <Equation>{"P(two draws agree) = p₀² + p₁²\nG = P(two draws differ) = 1 − p₀² − p₁²"}</Equation>
+              <p>
+                The formula is that thought experiment written down. A pure
+                group cannot produce a disagreeing pair, so it scores zero,
+                and a fifty-fifty group disagrees half the time, the worst
+                two classes can manage, which is why those two facts could be
+                used earlier without proof.
+              </p>
+              <p>
+                The split score follows from the same drawing game. After a
+                split, a random person lands on the left side with
+                probability n_left over n, so the impurity a split leaves
+                behind is each side&rsquo;s Gini weighted by its share of the
+                people, and a candidate&rsquo;s gain is the parent&rsquo;s
+                impurity minus that expectation.
+              </p>
+              <Equation>{"gain = G_parent − (n_left/n)·G_left − (n_right/n)·G_right"}</Equation>
+              <p>
+                On the clean crowd the parent scored 60/121 and the winning
+                question left two pure sides scoring zero, so the whole 0.496
+                was the gain, the number the worked example found.
+              </p>
+            </>
+          ),
+        },
       ]}
     />
   );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { Equation } from "@/components/concept/PrimerPage";
 import { CommitteePlayground } from "@/components/widgets/CommitteePlayground";
 
 export const metadata: Metadata = {
@@ -130,6 +131,37 @@ export default function RandomForestsPage() {
                 carry redundant signal, the bet usually pays, which is why
                 the forest earned its reputation, and why on a two-feature
                 teaching crowd it politely declines to look magical.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                The forest&rsquo;s derivation is one reading of the bagging
+                page&rsquo;s formula, worth repeating here with the right
+                term circled.
+              </p>
+              <Equation>{"Var(committee) = ρσ² + (1 − ρ)·σ²/B"}</Equation>
+              <p>
+                Let the committee grow without bound and the second term
+                vanishes, leaving ρσ², the floor. Everything bagging can ever
+                achieve is written in that limit, and the two knobs are in
+                plain view. σ² is a member&rsquo;s own variance, and ρ is how
+                much the members err together. Restricting the features
+                touches both at once. A member denied the best question fits
+                its resample worse, raising σ², and members denied it at
+                different moments stop opening with the same first opinion,
+                lowering ρ. The bet profits exactly when the fall in ρσ²
+                outweighs the rise from σ², which is arithmetic the data
+                settles rather than the method. On two features the coin
+                denies the best question half the time, so the price in σ²
+                is steep, while with hundreds of redundant features the same
+                restriction costs little skill and still spreads the first
+                opinions wide, which is the previous section&rsquo;s verdict
+                restated as this formula evaluated on two different worlds.
               </p>
             </>
           ),

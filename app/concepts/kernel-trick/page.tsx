@@ -212,6 +212,38 @@ export default function KernelTrickPage() {
           ),
         },
         {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                The worked example checked the identity on one pair of
+                points, and it holds in symbols by nothing more than
+                expanding a square. Take the squared kernel and multiply it
+                out.
+              </p>
+              <Equation>{"(a · b)² = (a₁b₁ + a₂b₂)²\n        = a₁²·b₁² + 2·a₁a₂·b₁b₂ + a₂²·b₂²"}</Equation>
+              <p>
+                Now read the right side as a dot product by splitting each
+                term between an a-part and a b-part. The outer terms split
+                cleanly, and the middle term&rsquo;s 2 is shared out as √2
+                times √2, one factor to each side, which is the whole reason
+                the mapping carries that √2.
+              </p>
+              <Equation>{"= (a₁², √2·a₁a₂, a₂²) · (b₁², √2·b₁b₂, b₂²)\n= φ(a) · φ(b)"}</Equation>
+              <p>
+                That is the identity in general, not just at 121, and the
+                same expansion runs for any number of features and any
+                power, only with more terms to share out. The radial kernel
+                earns its infinite space the same way, since the exponential
+                can be written as an endless series of such powers, every
+                term a polynomial kernel with its own implied columns,
+                stacked without end. No φ could be written out, and none is
+                needed, which is the trick keeping its own promise.
+              </p>
+            </>
+          ),
+        },
+        {
           title: "The Same Swap Everywhere",
           content: (
             <>

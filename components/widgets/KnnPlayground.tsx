@@ -27,7 +27,7 @@ const PLOT = {
 };
 
 // The worked set, five children and six adults, with a query whose nearest
-// three sit at distances 5, 10 and 13, every one a 3-4-5 triangle.
+// three sit at distances 5, 10 and 13, every one a Pythagorean triple.
 const WORKED_PEOPLE: LabelledPoint[] = [
   { x: 147, y: 41, label: 0 },
   { x: 156, y: 53, label: 1 },

@@ -127,8 +127,9 @@ export default function KNearestNeighboursPage() {
                 Press the borderline case button, which places the query at a
                 height of 150 cm and a weight of 45 kg, and work the distances
                 by hand to the five people nearest it. Each difference below
-                is a multiple of the 3-4-5 triangle from the linear algebra
-                primer, so every root comes out clean.
+                lands on a Pythagorean triple, four of them multiples of the
+                linear algebra primer&rsquo;s 3-4-5 triangle and one the
+                5-12-13, so every root comes out clean.
               </p>
               <Equation>{"child at (147, 41)   difference (3, 4)     distance  5\nadult at (156, 53)   difference (6, 8)     distance 10\nchild at (145, 57)   difference (5, 12)    distance 13\nadult at (159, 57)   difference (9, 12)    distance 15\nadult at (162, 61)   difference (12, 16)   distance 20"}</Equation>
               <p>
@@ -207,6 +208,41 @@ export default function KNearestNeighboursPage() {
                 typical spread. A model that runs on distances inherits the
                 units of its data, and evening those units out is not a
                 refinement here, it is part of using the method correctly.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: "How to Derive",
+          content: (
+            <>
+              <p>
+                A method with no objective would seem to leave nothing to
+                derive, though one piece of it can be earned rather than
+                assumed, the vote itself. Why should the majority of the
+                neighbours decide, rather than the single nearest one, or
+                some fancier weighting?
+              </p>
+              <p>
+                Treat the k neighbours as a small poll of the query&rsquo;s
+                neighbourhood. If a fraction p̂ of them are adults, that
+                fraction is our estimate of the chance that a person standing
+                at the query&rsquo;s spot is an adult, the statistics
+                primer&rsquo;s sampling idea pointed at a neighbourhood
+                instead of a population. Now weigh the two possible answers
+                against that estimate. Guess adult and the expected chance of
+                being wrong is 1 − p̂. Guess child and it is p̂.
+              </p>
+              <Equation>{"guess adult   when  1 − p̂ < p̂,   that is, when  p̂ > ½"}</Equation>
+              <p>
+                Choosing the answer with the smaller expected mistake means
+                guessing adult exactly when more than half the neighbours
+                are, and that is the majority vote. The vote is not a
+                convention. It is the guess that minimises expected mistakes
+                given what the neighbourhood poll says, and the reason k
+                stays odd drops out of the same line, since an even k allows
+                p̂ exactly one half, where the two guesses tie and the rule
+                goes silent.
               </p>
             </>
           ),
