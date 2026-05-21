@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { CommitteePlayground } from "@/components/widgets/CommitteePlayground";
+import { VarianceFloorChart } from "@/components/widgets/VarianceFloorChart";
 
 export const metadata: Metadata = {
   title: "Random Forests · oop_ml",
@@ -163,6 +164,12 @@ export default function RandomForestsPage() {
                 opinions wide, which is the previous section&rsquo;s verdict
                 restated as this formula evaluated on two different worlds.
               </p>
+              <p>
+                The formula is drawn below for three correlations. Every
+                curve falls fast, then flattens onto its own floor, and more
+                members stop mattering long before the floor moves.
+              </p>
+              <VarianceFloorChart />
             </>
           ),
         },

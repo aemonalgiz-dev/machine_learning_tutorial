@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { BoostingPlayground } from "@/components/widgets/BoostingPlayground";
+import { DescentChart } from "@/components/widgets/DescentChart";
 
 export const metadata: Metadata = {
   title: "Gradient Boosting · oop_ml",
@@ -151,6 +152,13 @@ export default function GradientBoostingPage() {
                 6 and 10, each round correcting a piece of what remained,
                 which is the entire method seen whole.
               </p>
+              <p>
+                The bars below carry the same run onward. Round zero is the
+                flat mean&rsquo;s leftover of 32, one round cuts it to 14,
+                two leave 3.875, and the later rounds grind away at what
+                remains.
+              </p>
+              <DescentChart />
             </>
           ),
         },

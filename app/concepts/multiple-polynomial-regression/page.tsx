@@ -4,6 +4,7 @@ import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { PlanePlayground3D } from "@/components/widgets/PlanePlayground3D";
 import { PolynomialPlayground } from "@/components/widgets/PolynomialPlayground";
+import { DegreeSweepChart } from "@/components/widgets/DegreeSweepChart";
 
 export const metadata: Metadata = {
   title: "Multiple & Polynomial Regression · oop_ml",
@@ -215,6 +216,12 @@ export default function MultiplePolynomialRegressionPage() {
                 fit the data at least as well, and by degree 8 or 9 the curve
                 passes close to nearly every point.
               </p>
+              <p>
+                That climb is drawn below, one refit per degree. The bars can
+                only rise or hold still as the degree grows, which is exactly
+                why the training score cannot be the judge of where to stop.
+              </p>
+              <DegreeSweepChart />
               <p>
                 Look at the curve rather than the score, though. Between the
                 points it swings in ways no thrown ball ever moved, diving and

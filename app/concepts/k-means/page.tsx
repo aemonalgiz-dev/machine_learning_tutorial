@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { KMeansPlayground } from "@/components/widgets/KMeansPlayground";
+import { InertiaChart } from "@/components/widgets/InertiaChart";
 
 export const metadata: Metadata = {
   title: "k-Means Clustering · oop_ml",
@@ -220,6 +221,13 @@ export default function KMeansPage() {
                 derivation does not promise is which rest, the two-valley
                 caution again, and the restarts exist for precisely that gap.
               </p>
+              <p>
+                The staircase below watches the seeded walk on the crowd. The
+                total falls, then holds, and where it holds the walk has come
+                to rest, though nothing in the picture says which valley it
+                rests in.
+              </p>
+              <InertiaChart />
             </>
           ),
         },

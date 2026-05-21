@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { LineFitPlayground } from "@/components/widgets/LineFitPlayground";
 import { LossBowlPlayground } from "@/components/widgets/LossBowlPlayground";
+import { SquaresChart } from "@/components/widgets/SquaresChart";
 
 export const metadata: Metadata = {
   title: "Simple linear regression · oop_ml",
@@ -274,6 +275,14 @@ export default function SimpleLinearRegressionPage() {
                 widget&rsquo;s R² readout on the measured five shows 0.909,
                 matching the arithmetic above.
               </p>
+              <p>
+                The chart below draws that arithmetic literally. Each miss is
+                a box whose side is the miss itself, the left panel squaring
+                the gaps to the flat average and the right squaring the gaps
+                to the line, and R² is nothing more than how much smaller the
+                right panel&rsquo;s total is.
+              </p>
+              <SquaresChart />
             </>
           ),
         },

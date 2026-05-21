@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { PenaltyPlayground } from "@/components/widgets/PenaltyPlayground";
+import { ShrinkagePathChart } from "@/components/widgets/ShrinkagePathChart";
 
 export const metadata: Metadata = {
   title: "Ridge & Lasso · oop_ml",
@@ -287,6 +288,13 @@ export default function RidgeLassoPage() {
                 by sweeping one coefficient at a time rather than by a
                 formula.
               </p>
+              <p>
+                Both behaviours are traced below on the worked five. The
+                ridge curve is the table&rsquo;s formula at every penalty,
+                gliding toward zero without arriving, and the lasso path
+                walks straight into it at 400 and stays.
+              </p>
+              <ShrinkagePathChart />
             </>
           ),
         },

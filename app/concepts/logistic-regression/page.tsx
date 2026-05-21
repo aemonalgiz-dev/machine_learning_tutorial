@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { LogisticPlayground } from "@/components/widgets/LogisticPlayground";
+import { BalanceChart } from "@/components/widgets/BalanceChart";
 
 export const metadata: Metadata = {
   title: "Logistic Regression · oop_ml",
@@ -249,6 +250,12 @@ export default function LogisticRegressionPage() {
                 isolates β, and that is the honest reason this page climbs
                 where the straight line solved.
               </p>
+              <p>
+                The bars below are the gaps on the worked crowd at the calm
+                rate. The above cancels the below to within a rounding, the
+                balance conditions holding on real numbers.
+              </p>
+              <BalanceChart />
             </>
           ),
         },

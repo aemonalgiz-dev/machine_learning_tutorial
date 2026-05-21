@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { CommitteePlayground } from "@/components/widgets/CommitteePlayground";
+import { LeaveOutChart } from "@/components/widgets/LeaveOutChart";
 
 export const metadata: Metadata = {
   title: "Bagging · oop_ml",
@@ -194,6 +195,12 @@ export default function BaggingPage() {
                 0.368, which is why every bootstrap, whatever its size,
                 leaves out roughly the same third.
               </p>
+              <p>
+                The curve below traces the expression for every crowd size.
+                By a couple of dozen people it is already circling 1/e, and
+                it never strays far again.
+              </p>
+              <LeaveOutChart />
               <p>
                 The second is why averaging helps, and by exactly how much.
                 Borrow one fact beyond the statistics primer, that variances
