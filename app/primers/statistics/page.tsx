@@ -249,7 +249,10 @@ export default function StatisticsPrimerPage() {
           Keep drawing and two things happen at once. The sample mean stops
           swinging and settles against the dashed line of the true mean, and the
           pile of bars takes on a shape, tall in the middle, falling away
-          evenly, the bell.
+          evenly, the bell. That bell is drawn over the bars from the start,
+          sized to however many people have been measured, so every draw is a
+          small test of whether the pile is filling the shape the population
+          promised.
         </p>
         <PrimerPlayground>
           <SamplingPlayground />

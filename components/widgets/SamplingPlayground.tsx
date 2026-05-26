@@ -5,11 +5,13 @@
 // Each press measures more people from an imagined population whose true mean
 // height is 170 cm with a standard deviation of 7 cm. The bars pile the
 // measurements into bins, the solid line marks the sample mean where it
-// currently stands, and the dashed line marks the true mean underneath. A few
-// draws scatter anywhere; hundreds settle into the bell. The draws and the
-// binning happen in the API, not the browser.
+// currently stands, the dashed line marks the true mean underneath, and the
+// curve is the bell itself, scaled to the people drawn so far, so the bars
+// can be watched filling it. The widget starts with a seeded sample of forty
+// already measured, and starting over returns to that same forty. The draws,
+// the binning and the curve all happen in the API, not the browser.
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError, SampleDraw, drawSample } from "@/lib/api";
 
 const VIEW = { width: 640, height: 320 };
@@ -21,9 +23,14 @@ const PLOT = {
 
 const MAX_SAMPLES = 500;
 
+// The widget loads with this many people already measured, from a fixed seed
+// so every visitor starts at the same lumpy pile.
+const INITIAL_DRAW = 40;
+const INITIAL_SEED = 7;
+
 function statusText(sample: SampleDraw | null): string {
   if (!sample || sample.count === 0) {
-    return "No one measured yet. Draw a person.";
+    return "Measuring the first people now.";
   }
   if (sample.count < 10) {
     return "A handful of people. The mean is still at the mercy of whoever happened to be drawn.";
@@ -54,6 +61,26 @@ export function SamplingPlayground() {
     }
   };
 
+  // An empty widget refills itself with the seeded starting sample, both on
+  // first load and after a press of start over.
+  useEffect(() => {
+    if (sample !== null) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const starting = await drawSample([], INITIAL_DRAW, INITIAL_SEED);
+        if (!cancelled) setSample(starting);
+      } catch (error) {
+        if (cancelled) return;
+        if (error instanceof ApiError) setMessage(error.message);
+        else setMessage("Something went wrong.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [sample]);
+
   const reset = () => {
     setSample(null);
     setMessage(null);
@@ -61,7 +88,11 @@ export function SamplingPlayground() {
 
   const atCapacity = (sample?.count ?? 0) >= MAX_SAMPLES;
   const tallest = sample
-    ? Math.max(1, ...sample.bins.map((bin) => bin.count))
+    ? Math.max(
+        1,
+        ...sample.bins.map((bin) => bin.count),
+        ...sample.bell.map((point) => point.expected_count),
+      )
     : 1;
 
   const binX = (value: number) => {
@@ -115,6 +146,27 @@ export function SamplingPlayground() {
             );
           })}
 
+        {/* the bell itself, scaled by the API to the current head count */}
+        {sample && sample.count > 0 && (
+          <polyline
+            points={sample.bell
+              .map((point) => {
+                const bellX = binX(point.x);
+                const bellY =
+                  PAD.top +
+                  PLOT.height -
+                  (point.expected_count / tallest) * (PLOT.height - 10);
+                return `${bellX},${bellY}`;
+              })
+              .join(" ")}
+            fill="none"
+            stroke="currentColor"
+            className="text-rose-500"
+            strokeWidth={2}
+            strokeLinejoin="round"
+          />
+        )}
+
         {/* the true mean underneath, and the sample mean so far */}
         {sample && sample.count > 0 && (
           <>
@@ -166,8 +218,9 @@ export function SamplingPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The dashed line is the true mean of the population. The solid line is
-        the mean of the people drawn so far.
+        The dashed line is the true mean and the solid line is the mean of
+        the people drawn so far. The curve is the bell itself, sized to the
+        current head count, waiting for the bars to fill it.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
