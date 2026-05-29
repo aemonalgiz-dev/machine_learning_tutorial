@@ -4,6 +4,7 @@ import { ConceptPage } from "@/components/concept/ConceptPage";
 import { Equation } from "@/components/concept/PrimerPage";
 import { TreePlayground } from "@/components/widgets/TreePlayground";
 import { RootGainChart } from "@/components/widgets/RootGainChart";
+import { TreeWalkPlayground } from "@/components/widgets/TreeWalkPlayground";
 
 export const metadata: Metadata = {
   title: "Decision Trees · oop_ml",
@@ -158,6 +159,35 @@ export default function DecisionTreesPage() {
                 match. Every box in the plane is one path down the printed
                 tree, and following a person through the questions lands them
                 in exactly the box that contains them.
+              </p>
+            </>
+          ),
+        },
+        {
+          title: "Walking One Person Down",
+          content: (
+            <>
+              <p>
+                A grown tree is a route map, and the best way to feel that is
+                to send someone down it. The crowd below is sixteen people
+                chosen so both questions matter. Everyone under 153.5 cm is a
+                child here, including two or three stocky ones who weigh more
+                than the lightest adults, so the first question settles them
+                alone and their weight is never consulted. Above that height
+                the crowd is genuinely mixed, slender teenagers standing
+                among the adults, and that is the mixture the second question
+                exists to resolve.
+              </p>
+              <TreeWalkPlayground />
+              <p>
+                Two things are worth noticing on the way down. The stocky
+                child takes one step where the teenager takes two, so
+                different people pay different amounts of attention, which is
+                a tree&rsquo;s quiet efficiency. And the map is the whole
+                model. Nothing is hidden behind the boxes, no coefficients,
+                no curve, just questions a person could ask with a tape
+                measure and a scale, which is why trees are the family
+                doctors and loan officers actually get shown.
               </p>
             </>
           ),

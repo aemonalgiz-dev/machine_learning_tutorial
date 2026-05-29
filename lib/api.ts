@@ -763,3 +763,41 @@ export async function measureLineSlope(
 ): Promise<LineSlope> {
   return postJson<LineSlope>("/primers/calculus/line-slope", { first, second });
 }
+
+export interface WalkNode {
+  id: number;
+  kind: "question" | "answer";
+  samples: number;
+  feature: string | null;
+  threshold: number | null;
+  label: number | null;
+  left: WalkNode | null;
+  right: WalkNode | null;
+}
+
+export interface WalkStep {
+  node_id: number;
+  feature: string;
+  threshold: number;
+  value: number;
+  direction: "left" | "right";
+}
+
+export interface TreeWalk {
+  tree: WalkNode;
+  steps: WalkStep[];
+  leaf_id: number;
+  prediction: number;
+}
+
+export async function walkTree(
+  points: LabelledPoint[],
+  maxDepth: number,
+  visitor: PlanePoint,
+): Promise<TreeWalk> {
+  return postJson<TreeWalk>("/concepts/decision-trees/walk", {
+    points,
+    max_depth: maxDepth,
+    visitor,
+  });
+}
