@@ -232,7 +232,7 @@ export default function RidgeLassoPage() {
               </p>
               <p>
                 What this page cannot tell you is where to set the slider.
-                Judging that honestly needs measurements the fit never saw,
+                Judging that honestly needs <Link href="/concepts/held-out-evaluation" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400">measurements the fit never saw</Link>,
                 held out for scoring, and that idea is large enough to deserve
                 its own page rather than a paragraph here. For now the visual
                 rule serves. The right penalty is the one past the wiggle and

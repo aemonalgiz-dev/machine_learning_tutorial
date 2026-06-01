@@ -120,7 +120,7 @@ export default function BaggingPage() {
             <>
               <p>
                 Several pages now have ended on the same confession, that
-                judging a model honestly needs data the fit never saw, and
+                judging a model honestly needs <Link href="/concepts/held-out-evaluation" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400">data the fit never saw</Link>, and
                 none of them had any. Bagging is the first model on this site
                 that manufactures its own. Every person was left out of about
                 a third of the resamples, so for every person there stands a

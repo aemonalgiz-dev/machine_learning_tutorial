@@ -145,6 +145,19 @@ const CURRICULUM: Bucket[] = [
       },
     ],
   },
+  {
+    heading: "Judging a Model",
+    blurb:
+      "The pages above keep ending on the same warning, and this one delivers on it.",
+    concepts: [
+      {
+        title: "Held-Out Evaluation",
+        href: "/concepts/held-out-evaluation",
+        blurb:
+          "A fit scored on its own training data cannot tell understanding from memorisation, the same way a student scored on the practice booklet cannot. So we hide some rows from the fit and let them judge it afterwards, and with cross-validation every row takes one turn as the judge. This is the score the whole site keeps deferring to, finally given its own machinery.",
+      },
+    ],
+  },
 ];
 
 export default function Home() {
