@@ -3,17 +3,24 @@
 // A search over something that cannot be learned, and what its winner claims.
 //
 // The target here is pure noise, so no setting can genuinely beat a score of
-// zero and every honest answer is negative. The dots are the twenty-five
-// candidates and the ringed one is the winner. The winner's score sits above
-// the mean candidate, which is unremarkable, and above what that same setting
-// scores when the folds are dealt again, which is the point: the maximum of
-// many noisy estimates is higher than any of them deserves. Draw again to see
-// a different set of folds tell the same story. Every score comes from the
-// library through the API.
+// zero and every honest answer is negative. The dots are the candidates and
+// the ringed one is the winner. The winner's score sits above the mean
+// candidate, which is unremarkable, and above what that same setting scores
+// when the folds are dealt again, which is the point: the maximum of many
+// noisy estimates is higher than any of them deserves. The dotted line is
+// what a second layer of folds round the whole search reports. Draw again to
+// see a different set of folds tell the same story, or switch the target to
+// one with signal in it. The API computes every score and the browser draws
+// them.
 
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
-import { OptimismOutcome, measureOptimism } from "@/lib/concepts/grid-search";
+import {
+  OptimismOutcome,
+  SearchTarget,
+  measureOptimism,
+} from "@/lib/concepts/grid-search";
+import { ACTIVE_CLASS, BUTTON_CLASS, formatScore } from "./gridSearchFixtures";
 
 const VIEW = { width: 640, height: 300 };
 const PAD = { left: 58, right: 20, top: 18, bottom: 44 };
@@ -22,14 +29,12 @@ const PLOT = {
   height: VIEW.height - PAD.top - PAD.bottom,
 };
 
-const FIRST_SEED = 4;
+const FIRST_SEED = 12;
 const LAST_SEED = 40;
-
-const BUTTON_CLASS =
-  "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
 
 export function OptimismChart() {
   const [seed, setSeed] = useState(FIRST_SEED);
+  const [target, setTarget] = useState<SearchTarget>("noise");
   const [answer, setAnswer] = useState<OptimismOutcome | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -37,7 +42,7 @@ export function OptimismChart() {
     let cancelled = false;
     (async () => {
       try {
-        const measured = await measureOptimism(seed);
+        const measured = await measureOptimism(seed, 25, target);
         if (cancelled) return;
         setAnswer(measured);
         setMessage(null);
@@ -50,18 +55,20 @@ export function OptimismChart() {
     return () => {
       cancelled = true;
     };
-  }, [seed]);
+  }, [seed, target]);
 
-  // The answer is kept beside the seed it answered, so a stale one is told
-  // apart by comparing seeds rather than by clearing state as the effect
-  // starts.
-  const showing = answer !== null && answer.seed === seed ? answer : null;
+  // The answer is kept beside the request it answered, so a stale one is told
+  // apart by comparing rather than by clearing state as the effect starts.
+  const showing =
+    answer !== null && answer.seed === seed && answer.target === target
+      ? answer
+      : null;
 
   let low = -1;
   let high = 0.2;
   if (showing) {
     const values = showing.candidates.map((candidate) => candidate.score);
-    values.push(showing.refolded_score, 0);
+    values.push(showing.refolded_score, showing.nested_score, 0);
     low = Math.min(...values);
     high = Math.max(...values);
     const pad = 0.1 * (high - low || 1);
@@ -80,13 +87,25 @@ export function OptimismChart() {
 
   return (
     <div className="my-4">
-      <div className="flex flex-wrap items-center gap-3 pb-3 text-sm text-slate-600 dark:text-slate-300">
+      <div className="flex flex-wrap items-center gap-2 pb-3 text-sm text-slate-600 dark:text-slate-300">
         <button onClick={nextDraw} className={BUTTON_CLASS}>
           Draw again
         </button>
-        <span>
+        <button
+          onClick={() => setTarget("noise")}
+          className={target === "noise" ? ACTIVE_CLASS : BUTTON_CLASS}
+        >
+          Pure noise
+        </button>
+        <button
+          onClick={() => setTarget("signal")}
+          className={target === "signal" ? ACTIVE_CLASS : BUTTON_CLASS}
+        >
+          A target with signal
+        </button>
+        <span className="ml-1">
           draw <span className="font-mono">{seed}</span>, twenty-five settings
-          over eighty rows of noise
+          over eighty rows
         </span>
       </div>
 
@@ -118,8 +137,8 @@ export function OptimismChart() {
           );
         })}
 
-        {/* Zero is the ceiling on honest performance here, so it is drawn. */}
-        {showing && high >= 0 && low <= 0 && (
+        {/* Zero is the ceiling on honest performance on noise, so it is drawn. */}
+        {showing && target === "noise" && high >= 0 && low <= 0 && (
           <>
             <line
               x1={PAD.left}
@@ -151,6 +170,15 @@ export function OptimismChart() {
               strokeDasharray="6 4"
               strokeWidth={2}
             />
+            <line
+              x1={PAD.left}
+              x2={PAD.left + PLOT.width}
+              y1={scoreToY(showing.nested_score)}
+              y2={scoreToY(showing.nested_score)}
+              className="stroke-emerald-600 dark:stroke-emerald-400"
+              strokeDasharray="2 4"
+              strokeWidth={2}
+            />
             {showing.candidates.map((candidate, index) => (
               <g key={candidate.n_neighbours}>
                 <circle
@@ -179,33 +207,37 @@ export function OptimismChart() {
           textAnchor="middle"
           className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
         >
-          Twenty-five settings, left to right, with the winner ringed and its
-          re-dealt score dashed
+          Twenty-five settings, left to right, the winner ringed, its re-dealt
+          score dashed amber and the nested figure dotted green
         </text>
       </svg>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Stat
           label="Winner's score"
-          value={showing ? showing.best_score.toFixed(4) : "…"}
+          value={showing ? formatScore(showing.best_score) : "…"}
         />
         <Stat
           label="Mean candidate"
-          value={showing ? showing.mean_candidate_score.toFixed(4) : "…"}
+          value={showing ? formatScore(showing.mean_candidate_score) : "…"}
         />
         <Stat
           label="Same setting, new folds"
-          value={showing ? showing.refolded_score.toFixed(4) : "…"}
+          value={showing ? formatScore(showing.refolded_score) : "…"}
         />
         <Stat
           label="Optimism, this draw"
-          value={showing ? showing.optimism.toFixed(4) : "…"}
+          value={showing ? formatScore(showing.optimism) : "…"}
+        />
+        <Stat
+          label="Nested folds"
+          value={showing ? formatScore(showing.nested_score) : "…"}
         />
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         {showing
-          ? `Averaged over ${showing.n_draws} draws, the winner's score is flattering by ${showing.mean_optimism_over_draws.toFixed(4)}.`
+          ? `Averaged over ${showing.n_draws} draws from this one on, the winner's score is flattering by ${showing.mean_optimism_over_draws.toFixed(4)}.`
           : "…"}
       </p>
 

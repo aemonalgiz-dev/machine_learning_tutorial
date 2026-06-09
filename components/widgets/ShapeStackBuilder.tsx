@@ -79,6 +79,20 @@ const WORKED_CARDS: CardSettings[] = [
   { kind: "dense", n_neurons: 10, readsWidth: null },
 ];
 
+// The chain the rest of the page reads across: two convolutions each followed
+// by a pooling layer, the bridge, and two dense layers, over the twenty-eight
+// by twenty-eight picture of a handwritten digit.
+const DIGIT_INPUT = 1;
+const DIGIT_CARDS: CardSettings[] = [
+  { kind: "conv", n_filters: 8, kernel_size: 3, stride: 1, padding: 0 },
+  { kind: "pool", summary: "max", window: 2, stride: 2 },
+  { kind: "conv", n_filters: 16, kernel_size: 3, stride: 1, padding: 0 },
+  { kind: "pool", summary: "max", window: 2, stride: 2 },
+  { kind: "flatten" },
+  { kind: "dense", n_neurons: 32, readsWidth: null },
+  { kind: "dense", n_neurons: 10, readsWidth: null },
+];
+
 // The case the whole check exists to catch, a convolution answering
 // (8, 26, 26) and a dense layer reading its 5408 numbers as a row.
 const MISSING_FLATTEN_INPUT = 1;
@@ -239,10 +253,16 @@ export function ShapeStackBuilder() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button
+          onClick={() => loadPreset(DIGIT_INPUT, DIGIT_CARDS)}
+          className={BUTTON_CLASS}
+        >
+          The digit chain
+        </button>
+        <button
           onClick={() => loadPreset(WORKED_INPUT, WORKED_CARDS)}
           className={BUTTON_CLASS}
         >
-          The worked stack
+          The small chain
         </button>
         <button
           onClick={() =>

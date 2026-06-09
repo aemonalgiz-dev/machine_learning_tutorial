@@ -58,23 +58,24 @@ interface Draft {
   output: DraftLayer;
 }
 
-// The row (2, 1) through whole-number weights, the example the page works by
-// hand. The third hidden neuron scores minus one, which the rectifier turns
-// to zero, so the output weight of two on it multiplies nothing.
+// The row (1, 2) through whole-number weights, the example the page and the
+// backpropagation page work by hand. The middle hidden neuron scores minus
+// one, which the rectifier turns to zero, so the output weight of minus one
+// on it multiplies nothing.
 const WORKED_EXAMPLE: Draft = {
-  inputs: ["2", "1"],
+  inputs: ["1", "2"],
   hidden: {
     weights: [
-      ["1", "2"],
-      ["-1", "3"],
-      ["1", "-3"],
+      ["1", "1"],
+      ["1", "-1"],
+      ["-1", "1"],
     ],
-    biases: ["0", "1", "0"],
+    biases: ["0", "0", "0"],
     activation: "rectified_linear",
   },
   output: {
     weights: [["1", "-1", "2"]],
-    biases: ["1"],
+    biases: ["0"],
     activation: "identity",
   },
 };
@@ -319,7 +320,7 @@ export function DenseForwardPlayground() {
           onClick={() => setDraft(WORKED_EXAMPLE)}
           className={BUTTON_CLASS}
         >
-          The worked example
+          The tall heavy person
         </button>
         <button
           onClick={() => setDraft((current) => randomDraft(current))}
@@ -495,7 +496,7 @@ export function DenseForwardPlayground() {
         />
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Stat
           label="Hidden scores"
           value={
@@ -511,6 +512,14 @@ export function DenseForwardPlayground() {
           value={
             answer
               ? `${tupleText(answer.shape.reads)} → ${tupleText(answer.shape.answers)}`
+              : "…"
+          }
+        />
+        <Stat
+          label="Parameters, by layer"
+          value={
+            answer
+              ? `${answer.layers.map((layer) => layer.n_parameters).join(" + ")} = ${answer.n_parameters}`
               : "…"
           }
         />

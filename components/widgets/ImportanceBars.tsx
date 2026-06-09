@@ -3,14 +3,15 @@
 // Two questions put to one fitted model, drawn as two rows of bars.
 //
 // The data is the parity puzzle, two coin-flip columns whose disagreement is
-// the class and a third column of pure noise, and the library fits a lone
-// tree and a random forest on every draw of it. The left bars read the fitted
+// the class and a third column of pure noise, and the API fits a lone tree
+// and a random forest on every draw of it. The left bars read the fitted
 // model's own splits, crediting each feature with the impurity its questions
 // removed. The right bars scramble one column at a time and credit each
-// feature with how far the accuracy fell. The noise column is amber so the
-// eye can follow it across the two readings, and the toggle swaps which model
-// is being asked. Every share and every accuracy is the library's through the
-// API; the browser only scales them to pixels.
+// feature with how far the accuracy fell, on the rows the model learned or
+// on as many rows it never saw, whichever the switch says. The noise column
+// is amber so the eye can follow it across the two readings, and the toggle
+// swaps which model is being asked. Every share and every accuracy is the
+// library's through the API; the browser only scales them to pixels.
 
 import { useEffect, useState } from "react";
 import {
@@ -21,15 +22,17 @@ import {
   MAX_SEED,
   MIN_ROWS,
   ModelReport,
+  RowChoice,
   WORKED_ROWS,
   WORKED_SEED,
   measureImportance,
 } from "@/lib/concepts/feature-importance";
+import { fillFor, labelFor } from "./featureImportanceFixtures";
 
 type ModelChoice = "lone_tree" | "forest";
 
 const BAR_VIEW = { width: 320, height: 120 };
-const LABEL_WIDTH = 88;
+const LABEL_WIDTH = 96;
 const VALUE_WIDTH = 52;
 const BAR_HEIGHT = 22;
 const ROW_GAP = 14;
@@ -37,22 +40,13 @@ const TOP = 12;
 const BAR_SPAN = BAR_VIEW.width - LABEL_WIDTH - VALUE_WIDTH;
 
 const ROW_STEP = 50;
-const NOISE_COLUMN = "distractor";
 
 // The rows shown while the first answer is still on its way.
 const EMPTY_ROWS: ImportanceShare[] = [
   { name: "first", share: 0 },
   { name: "second", share: 0 },
-  { name: NOISE_COLUMN, share: 0 },
+  { name: "distractor", share: 0 },
 ];
-
-function fillFor(name: string): string {
-  return name === NOISE_COLUMN ? "fill-amber-500" : "fill-indigo-600";
-}
-
-function shareToWidth(share: number): number {
-  return share * BAR_SPAN;
-}
 
 function ShareBars({
   title,
@@ -91,7 +85,7 @@ function ShareBars({
                     : "fill-slate-500 font-medium dark:fill-slate-400")
                 }
               >
-                {entry.name}
+                {labelFor(entry.name)}
               </text>
               <rect
                 x={LABEL_WIDTH}
@@ -105,7 +99,7 @@ function ShareBars({
                 <rect
                   x={LABEL_WIDTH}
                   y={y}
-                  width={shareToWidth(entry.share)}
+                  width={entry.share * BAR_SPAN}
                   height={BAR_HEIGHT}
                   rx={3}
                   className={fillFor(entry.name)}
@@ -126,10 +120,17 @@ function ShareBars({
   );
 }
 
+const buttonClass = (active: boolean) =>
+  "rounded-md px-3 py-1.5 text-sm font-medium transition " +
+  (active
+    ? "bg-indigo-600 text-white"
+    : "bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700");
+
 export function ImportanceBars() {
   const [rowCount, setRowCount] = useState(WORKED_ROWS);
   const [seed, setSeed] = useState(WORKED_SEED);
   const [choice, setChoice] = useState<ModelChoice>("forest");
+  const [rows, setRows] = useState<RowChoice>("training");
   const [measurement, setMeasurement] = useState<ImportanceMeasurement | null>(
     null,
   );
@@ -153,20 +154,7 @@ export function ImportanceBars() {
       ? measurement.forest
       : measurement.lone_tree
     : null;
-
-  const choiceButton = (value: ModelChoice, label: string) => (
-    <button
-      onClick={() => setChoice(value)}
-      className={
-        "rounded-md px-3 py-1.5 text-sm font-medium transition " +
-        (choice === value
-          ? "bg-indigo-600 text-white"
-          : "bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700")
-      }
-    >
-      {label}
-    </button>
-  );
+  const scramble = report ? report[rows] : null;
 
   return (
     <div>
@@ -187,8 +175,12 @@ export function ImportanceBars() {
           Redraw the rows
         </button>
         <div className="ml-auto flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
-          {choiceButton("lone_tree", "Lone tree")}
-          {choiceButton("forest", "Forest")}
+          <button onClick={() => setChoice("lone_tree")} className={buttonClass(choice === "lone_tree")}>
+            Lone tree
+          </button>
+          <button onClick={() => setChoice("forest")} className={buttonClass(choice === "forest")}>
+            Forest
+          </button>
         </div>
       </div>
 
@@ -209,6 +201,14 @@ export function ImportanceBars() {
         <span>
           Draw <span className="font-mono">{seed}</span>
         </span>
+        <div className="ml-auto flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
+          <button onClick={() => setRows("training")} className={buttonClass(rows === "training")}>
+            Scramble its rows
+          </button>
+          <button onClick={() => setRows("held_out")} className={buttonClass(rows === "held_out")}>
+            Scramble held-out rows
+          </button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -218,9 +218,9 @@ export function ImportanceBars() {
           leading={report?.leading_by_impurity ?? null}
         />
         <ShareBars
-          title="Scrambling a column"
-          shares={report?.permutation ?? null}
-          leading={report?.leading_by_permutation ?? null}
+          title={rows === "training" ? "Scrambling a column, on its rows" : "Scrambling a column, held out"}
+          shares={scramble?.shares ?? null}
+          leading={scramble?.leading ?? null}
         />
       </div>
 
@@ -228,6 +228,13 @@ export function ImportanceBars() {
         Each row of bars sums to one. The amber column is pure noise, and the
         class is 1 exactly when the two coin flips disagree.
       </p>
+
+      {scramble?.refusal && (
+        <p className="mt-2 text-center text-xs text-amber-600 dark:text-amber-400">
+          No column&rsquo;s scramble lowered the score, so there are no shares
+          to report, and the library&rsquo;s own words are &ldquo;{scramble.refusal}&rdquo;.
+        </p>
+      )}
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat
@@ -240,11 +247,11 @@ export function ImportanceBars() {
         />
         <Stat
           label="Leads by the splits"
-          value={report ? report.leading_by_impurity : "…"}
+          value={report ? labelFor(report.leading_by_impurity) : "…"}
         />
         <Stat
           label="Leads by scrambling"
-          value={report ? report.leading_by_permutation : "…"}
+          value={scramble ? (scramble.leading ? labelFor(scramble.leading) : "none") : "…"}
         />
       </div>
 

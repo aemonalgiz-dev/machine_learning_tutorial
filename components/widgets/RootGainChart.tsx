@@ -70,20 +70,22 @@ function isWinner(candidate: RootCandidate, search: RootSearch): boolean {
   );
 }
 
-export function RootGainChart() {
+// The crowd defaults to the clean worked set; a page can hand over another,
+// which is how the greedy section shows a root with nothing worth asking.
+export function RootGainChart({ points = WORKED_PEOPLE }: { points?: LabelledPoint[] }) {
   const [search, setSearch] = useState<RootSearch | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        setSearch(await searchRootCandidates(WORKED_PEOPLE));
+        setSearch(await searchRootCandidates(points));
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
         else setMessage("Something went wrong.");
       }
     })();
-  }, []);
+  }, [points]);
 
   const losingCandidates = search
     ? search.candidates.filter((candidate) => !isWinner(candidate, search))
@@ -247,13 +249,15 @@ export function RootGainChart() {
           label="The winning question"
           value={
             search
-              ? `${search.best_feature} at or below ${search.best_threshold.toFixed(1)}`
+              ? search.best_threshold === null
+                ? "no question earns anything"
+                : `${search.best_feature} at or below ${search.best_threshold.toFixed(1)}`
               : "…"
           }
         />
         <Stat
           label="The winning gain"
-          value={search ? search.best_gain.toFixed(3) : "…"}
+          value={search ? (search.best_gain === null ? "0.000" : search.best_gain.toFixed(3)) : "…"}
         />
         <Stat
           label="Candidates scanned"

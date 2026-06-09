@@ -9,18 +9,23 @@
 // library makes. The bar from dot to dashed line is the drop, which is the
 // raw quantity the permutation reading normalises. A column the model leans
 // on sends its dot a long way left; a column it never consulted leaves its
-// dot on the line. Every score, drop and total is the library's through the
-// API; the browser only places them on the axis.
+// dot on the line, and a column the model was slightly better off without
+// puts its dot to the right of it. The switch chooses whether the rows
+// scrambled are the ones the model learned or the ones it never saw. Every
+// score, drop and total is the library's through the API; the browser only
+// places them on the axis.
 
 import { useEffect, useState } from "react";
 import {
   ApiError,
   ImportanceMeasurement,
-  ModelReport,
+  RowChoice,
+  ScrambleReading,
   WORKED_ROWS,
   WORKED_SEED,
   measureImportance,
 } from "@/lib/concepts/feature-importance";
+import { labelFor } from "./featureImportanceFixtures";
 
 const VIEW = { width: 640, height: 320 };
 const PAD = { left: 104, right: 28 };
@@ -34,7 +39,6 @@ const ROW_SPACING = 30;
 const LANE_TOPS = [24, 164];
 const LANE_TITLES = ["Lone tree", "Forest"];
 const AXIS_Y = 278;
-const NOISE_COLUMN = "distractor";
 
 function scoreToX(score: number): number {
   const clamped = Math.min(SCORE_HIGH, Math.max(SCORE_LOW, score));
@@ -44,27 +48,27 @@ function scoreToX(score: number): number {
 }
 
 function strokeFor(name: string): string {
-  return name === NOISE_COLUMN
+  return name === "distractor"
     ? "text-amber-500 dark:text-amber-400"
     : "text-indigo-600 dark:text-indigo-400";
 }
 
-function fillFor(name: string): string {
-  return name === NOISE_COLUMN ? "fill-amber-500" : "fill-indigo-600";
+function dotFor(name: string): string {
+  return name === "distractor" ? "fill-amber-500" : "fill-indigo-600";
 }
 
 function Lane({
-  report,
+  reading,
   top,
   title,
 }: {
-  report: ModelReport;
+  reading: ScrambleReading;
   top: number;
   title: string;
 }) {
-  const intactX = scoreToX(report.intact_score);
+  const intactX = scoreToX(reading.intact_score);
   const firstRowY = top + 24;
-  const lastRowY = firstRowY + (report.shuffles.length - 1) * ROW_SPACING;
+  const lastRowY = firstRowY + (reading.steps.length - 1) * ROW_SPACING;
 
   return (
     <g>
@@ -81,7 +85,7 @@ function Lane({
         textAnchor="middle"
         className="fill-slate-500 font-mono text-[10px] dark:fill-slate-400"
       >
-        {`intact ${report.intact_score.toFixed(3)}`}
+        {`intact ${reading.intact_score.toFixed(3)}`}
       </text>
       <line
         x1={intactX}
@@ -93,9 +97,10 @@ function Lane({
         className="text-slate-500 dark:text-slate-400"
         strokeWidth={1.5}
       />
-      {report.shuffles.map((step, index) => {
+      {reading.steps.map((step, index) => {
         const y = firstRowY + index * ROW_SPACING;
         const dotX = scoreToX(step.shuffled_score);
+        const leftOfLine = dotX <= intactX;
         return (
           <g key={step.name}>
             <text
@@ -104,7 +109,7 @@ function Lane({
               textAnchor="end"
               className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
             >
-              {step.name}
+              {labelFor(step.name)}
             </text>
             <line
               x1={PAD.left}
@@ -129,15 +134,13 @@ function Lane({
               cx={dotX}
               cy={y}
               r={5}
-              className={
-                fillFor(step.name) + " stroke-white dark:stroke-slate-900"
-              }
+              className={dotFor(step.name) + " stroke-white dark:stroke-slate-900"}
               strokeWidth={1.5}
             />
             <text
-              x={dotX - 10}
+              x={leftOfLine ? dotX - 10 : dotX + 10}
               y={y + 4}
-              textAnchor="end"
+              textAnchor={leftOfLine ? "end" : "start"}
               className="fill-slate-700 font-mono text-[10px] dark:fill-slate-200"
             >
               {`drop ${step.drop.toFixed(4)}`}
@@ -149,7 +152,14 @@ function Lane({
   );
 }
 
-export function ScrambleLadder() {
+const buttonClass = (active: boolean) =>
+  "rounded-md px-3 py-1.5 text-sm font-medium transition " +
+  (active
+    ? "bg-indigo-600 text-white"
+    : "bg-white text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700");
+
+export function ScrambleLadder({ initialRows = "training" }: { initialRows?: RowChoice }) {
+  const [rows, setRows] = useState<RowChoice>(initialRows);
   const [measurement, setMeasurement] = useState<ImportanceMeasurement | null>(
     null,
   );
@@ -166,22 +176,34 @@ export function ScrambleLadder() {
     })();
   }, []);
 
-  const forest = measurement?.forest ?? null;
-  const forestNoiseShare = forest
-    ? forest.permutation.find((entry) => entry.name === NOISE_COLUMN)?.share
+  const forest = measurement ? measurement.forest[rows] : null;
+  const forestNoiseShare = forest?.shares
+    ? forest.shares.find((entry) => entry.name === "distractor")?.share
     : undefined;
 
   return (
     <div>
+      <div className="flex flex-wrap items-center gap-2 pb-3">
+        <span className="text-sm text-slate-600 dark:text-slate-300">Rows scrambled</span>
+        <div className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
+          <button onClick={() => setRows("training")} className={buttonClass(rows === "training")}>
+            The rows it learned
+          </button>
+          <button onClick={() => setRows("held_out")} className={buttonClass(rows === "held_out")}>
+            Rows it never saw
+          </button>
+        </div>
+      </div>
+
       <svg
         viewBox={`0 0 ${VIEW.width} ${VIEW.height}`}
         className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950"
       >
         {measurement &&
-          [measurement.lone_tree, measurement.forest].map((report, index) => (
+          [measurement.lone_tree[rows], measurement.forest[rows]].map((reading, index) => (
             <Lane
               key={LANE_TITLES[index]}
-              report={report}
+              reading={reading}
               top={LANE_TOPS[index]}
               title={LANE_TITLES[index]}
             />
@@ -223,13 +245,16 @@ export function ScrambleLadder() {
           textAnchor="middle"
           className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
         >
-          Accuracy on the training rows, one column scrambled
+          {rows === "training"
+            ? "Accuracy on the rows the model learned, one column scrambled"
+            : "Accuracy on rows the model never saw, one column scrambled"}
         </text>
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         The dashed line is the intact score, each dot is the score with that
-        column scrambled, and the bar between them is the drop.
+        column scrambled, and the bar between them is the drop. A dot to the
+        right of the line is a negative drop, which the reading clamps to zero.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">
@@ -238,7 +263,7 @@ export function ScrambleLadder() {
           value={forest ? forest.intact_score.toFixed(3) : "…"}
         />
         <Stat
-          label="Forest, drops summed"
+          label="Forest, clamped drops summed"
           value={forest ? forest.drop_total.toFixed(4) : "…"}
         />
         <Stat

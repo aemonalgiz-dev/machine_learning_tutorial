@@ -19,6 +19,14 @@ export interface ClassFitDocument {
   converged: boolean;
 }
 
+// One class's score as an intercept and a weight per standardised column.
+export interface ClassCoefficients {
+  class_index: number;
+  intercept: number;
+  height: number;
+  weight: number;
+}
+
 export interface MulticlassAnswer {
   route: MulticlassRoute;
   predictions: number[];
@@ -30,14 +38,46 @@ export interface MulticlassAnswer {
   converged: boolean | null;
   class_fits: ClassFitDocument[];
   regions: RegionGrid;
+  standardised_points: number[][];
+  class_coefficients: ClassCoefficients[];
+  // [class][row][column], the linear score at each cell of the region lattice.
+  score_lattice: number[][][];
+  correct_class_scores: number[];
+  log_loss: number;
+  coefficient_norm: number;
 }
 
 export async function classifyAmongThree(
   points: ClassedPoint[],
   route: MulticlassRoute,
+  maxEpochs?: number,
 ): Promise<MulticlassAnswer> {
   return postJson<MulticlassAnswer>(
     "/concepts/multiclass-classification/classify",
-    { points, route },
+    maxEpochs === undefined ? { points, route } : { points, route, max_epochs: maxEpochs },
   );
+}
+
+export interface SoftmaxPass {
+  pass_number: number;
+  coefficient_norm: number;
+  log_loss: number;
+  accuracy: number;
+  correct_class_probabilities: number[];
+}
+
+export interface SoftmaxWalk {
+  passes: SoftmaxPass[];
+  converged: boolean;
+  passes_run: number;
+}
+
+export async function walkSoftmax(
+  points: ClassedPoint[],
+  maxEpochs: number,
+): Promise<SoftmaxWalk> {
+  return postJson<SoftmaxWalk>("/concepts/multiclass-classification/walk", {
+    points,
+    max_epochs: maxEpochs,
+  });
 }

@@ -1,24 +1,41 @@
 "use client";
 
-// A net of units draped over unlabelled people.
+// A net of cells draped over unlabelled people.
 //
-// Nothing here carries a label. Each small square is a unit of the map, the
+// Nothing here carries a label. Each small square is one cell of the map, the
 // lines join it to its neighbours on a grid that never changes, and fitting
-// drapes that net over the people, every person pulling the nearest unit and
-// its grid neighbours toward them. Each dot takes the colour of the unit that
+// drapes that net over the people, every person pulling the nearest cell and
+// its grid neighbours toward them. Each dot takes the colour of the cell that
 // won it, and the colours run with the grid, hue along the columns and shade
-// down the rows, so squares that are neighbours on the grid wear neighbouring
-// colours and the arrangement can be read off the picture. The sliders set
-// the grid and the epoch budget, and every move of one is a fresh fit from
-// the same seed rather than a step of one fit, because the schedules that
-// drive the walk are fractions of the budget. Click to add people, drag them,
-// double-click to remove. Every unit position and every winner is the
-// library's through the API, not the browser's.
+// down the rows, so cells that are neighbours on the grid wear neighbouring
+// colours and the arrangement can be read off the picture. The reach control
+// is the page's central claim made adjustable: shrinking is the ordinary
+// schedule, held wide leaves every cell moving with every winner all the way
+// through, and switched off leaves only winners moving, which is the plain
+// grouping method. Every change of a slider or a dot is a fresh fit from the
+// same seed rather than a step of one fit, because the two schedules are
+// fractions of the epoch budget. Click to add people, drag them, double-click
+// to remove. The API computes every cell position and every winner; the
+// browser only draws them.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ApiError, OrganisedMap, Point, organiseMap } from "@/lib/api";
+import { ApiError, Point } from "@/lib/api";
+import {
+  FittedMap,
+  ReachSetting,
+  fitMap,
+} from "@/lib/concepts/self-organising-map";
+import {
+  ARCH,
+  BUTTON_CLASS,
+  CROWD,
+  DOMAIN,
+  SLIDER_LABEL_CLASS,
+  TWO_CLUMPS,
+  cellColour,
+  randomCrowd,
+} from "./selfOrganisingMapFixtures";
 
-const DOMAIN = { xMin: 100, xMax: 200, yMin: 10, yMax: 100 };
 const VIEW = { width: 640, height: 460 };
 const PAD = { left: 56, right: 16, top: 16, bottom: 50 };
 const PLOT = {
@@ -26,64 +43,34 @@ const PLOT = {
   height: VIEW.height - PAD.top - PAD.bottom,
 };
 
-// Eight people in two tight clumps whose group means are whole numbers, the
-// k-means page's worked example, which this page drapes a one-by-two map over.
-const WORKED_PEOPLE: Point[] = [
-  { x: 118, y: 24 },
-  { x: 120, y: 25 },
-  { x: 122, y: 28 },
-  { x: 124, y: 27 },
-  { x: 178, y: 78 },
-  { x: 180, y: 80 },
-  { x: 182, y: 83 },
-  { x: 184, y: 79 },
-];
-
-// The classification pages' crowd with its labels stripped away.
-const CROWD: Point[] = [
-  { x: 147, y: 41 },
-  { x: 156, y: 53 },
-  { x: 145, y: 57 },
-  { x: 159, y: 57 },
-  { x: 162, y: 61 },
-  { x: 120, y: 25 },
-  { x: 122, y: 28 },
-  { x: 118, y: 24 },
-  { x: 180, y: 80 },
-  { x: 183, y: 83 },
-  { x: 178, y: 78 },
-];
-
 const MAX_POINTS = 100;
 
 const MIN_SIDE = 1;
 const MAX_SIDE = 6;
 const MIN_EPOCHS = 1;
 const MAX_EPOCHS = 200;
-const DEFAULT_WIDTH = 2;
+const DEFAULT_WIDTH = 4;
 const DEFAULT_HEIGHT = 1;
 const DEFAULT_EPOCHS = 100;
 
 const UNIT_SIZE = 12;
 
-const BUTTON_CLASS =
-  "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
+// A reach held at ten never falls below the diagonal of the largest grid the
+// API will build, so every cell moves with every winner for the whole walk.
+const HELD_WIDE = 10;
 
-const SLIDER_LABEL_CLASS =
-  "flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300";
+type ReachChoice = "shrinking" | "wide" | "off";
 
-// A colour for each place on the grid rather than a palette cycled by index,
-// so the colours carry the arrangement. The hue runs along the columns from
-// indigo, and the shade darkens down the rows.
-function unitColour(
-  row: number,
-  column: number,
-  width: number,
-  height: number,
-): string {
-  const hue = (230 + (300 * column) / width) % 360;
-  const lightness = height > 1 ? 60 - (22 * row) / (height - 1) : 50;
-  return `hsl(${hue.toFixed(0)} 65% ${lightness.toFixed(0)}%)`;
+const REACH_CHOICES: { key: ReachChoice; label: string }[] = [
+  { key: "shrinking", label: "shrinking" },
+  { key: "wide", label: "held wide" },
+  { key: "off", label: "switched off" },
+];
+
+function reachFor(choice: ReachChoice): ReachSetting | undefined {
+  if (choice === "wide") return { start: HELD_WIDE, end: HELD_WIDE };
+  if (choice === "off") return { start: 0, end: 0 };
+  return undefined;
 }
 
 function toPixel(point: Point) {
@@ -101,7 +88,8 @@ function toData(px: number, py: number): Point {
     Math.min(high, Math.max(low, Math.round(value)));
   return {
     x: clamp(
-      DOMAIN.xMin + ((px - PAD.left) / PLOT.width) * (DOMAIN.xMax - DOMAIN.xMin),
+      DOMAIN.xMin +
+        ((px - PAD.left) / PLOT.width) * (DOMAIN.xMax - DOMAIN.xMin),
       DOMAIN.xMin,
       DOMAIN.xMax,
     ),
@@ -120,27 +108,25 @@ interface NetLine {
   to: Point;
 }
 
-// The joins of the net, each unit to the unit on its right and the unit
-// below it, read from the row-major order the units arrive in.
-function netLines(answer: OrganisedMap): NetLine[] {
+// The joins of the net, each cell to the cell on its right and the cell below
+// it, read from the row-major order the cells arrive in.
+function netLines(answer: FittedMap): NetLine[] {
   const lines: NetLine[] = [];
-  const unitAt = (row: number, column: number) =>
+  const cellAt = (row: number, column: number) =>
     answer.units[row * answer.grid_width + column];
-  for (const unit of answer.units) {
-    if (unit.column + 1 < answer.grid_width) {
-      const right = unitAt(unit.row, unit.column + 1);
+  for (const cell of answer.units) {
+    if (cell.column + 1 < answer.grid_width) {
       lines.push({
-        key: `h${unit.row}-${unit.column}`,
-        from: unit,
-        to: right,
+        key: `h${cell.row}-${cell.column}`,
+        from: cell,
+        to: cellAt(cell.row, cell.column + 1),
       });
     }
-    if (unit.row + 1 < answer.grid_height) {
-      const below = unitAt(unit.row + 1, unit.column);
+    if (cell.row + 1 < answer.grid_height) {
       lines.push({
-        key: `v${unit.row}-${unit.column}`,
-        from: unit,
-        to: below,
+        key: `v${cell.row}-${cell.column}`,
+        from: cell,
+        to: cellAt(cell.row + 1, cell.column),
       });
     }
   }
@@ -148,11 +134,12 @@ function netLines(answer: OrganisedMap): NetLine[] {
 }
 
 export function SelfOrganisingMapPlayground() {
-  const [points, setPoints] = useState<Point[]>(WORKED_PEOPLE);
+  const [points, setPoints] = useState<Point[]>(CROWD);
   const [gridWidth, setGridWidth] = useState(DEFAULT_WIDTH);
   const [gridHeight, setGridHeight] = useState(DEFAULT_HEIGHT);
   const [epochs, setEpochs] = useState(DEFAULT_EPOCHS);
-  const [answer, setAnswer] = useState<OrganisedMap | null>(null);
+  const [reach, setReach] = useState<ReachChoice>("shrinking");
+  const [answer, setAnswer] = useState<FittedMap | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragging = useRef<number | null>(null);
@@ -160,7 +147,9 @@ export function SelfOrganisingMapPlayground() {
   useEffect(() => {
     const timer = setTimeout(async () => {
       try {
-        setAnswer(await organiseMap(points, gridWidth, gridHeight, epochs));
+        setAnswer(
+          await fitMap(points, gridWidth, gridHeight, epochs, reachFor(reach)),
+        );
         setMessage(null);
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
@@ -168,7 +157,7 @@ export function SelfOrganisingMapPlayground() {
       }
     }, 150);
     return () => clearTimeout(timer);
-  }, [points, gridWidth, gridHeight, epochs]);
+  }, [points, gridWidth, gridHeight, epochs, reach]);
 
   const eventToData = useCallback((clientX: number, clientY: number) => {
     const svg = svgRef.current!;
@@ -217,11 +206,20 @@ export function SelfOrganisingMapPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <button onClick={() => setPoints(WORKED_PEOPLE)} className={BUTTON_CLASS}>
+        <button onClick={() => setPoints(ARCH)} className={BUTTON_CLASS}>
           An Ideal Case
         </button>
         <button onClick={() => setPoints(CROWD)} className={BUTTON_CLASS}>
           The crowd, unlabelled
+        </button>
+        <button onClick={() => setPoints(TWO_CLUMPS)} className={BUTTON_CLASS}>
+          Two clumps of four
+        </button>
+        <button
+          onClick={() => setPoints(randomCrowd())}
+          className={BUTTON_CLASS}
+        >
+          A fresh crowd
         </button>
       </div>
 
@@ -265,6 +263,25 @@ export function SelfOrganisingMapPlayground() {
           />
           <span className="w-8 font-mono text-sm">{epochs}</span>
         </label>
+        <span className={SLIDER_LABEL_CLASS}>
+          Reach
+          <span className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
+            {REACH_CHOICES.map((choice) => (
+              <button
+                key={choice.key}
+                onClick={() => setReach(choice.key)}
+                className={
+                  "rounded px-2 py-0.5 text-xs font-medium transition " +
+                  (reach === choice.key
+                    ? "bg-indigo-600 text-white"
+                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800")
+                }
+              >
+                {choice.label}
+              </button>
+            ))}
+          </span>
+        </span>
       </div>
 
       <svg
@@ -276,7 +293,6 @@ export function SelfOrganisingMapPlayground() {
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
       >
-        {/* the net, each unit joined to its grid neighbours */}
         {lines.map((line) => {
           const from = toPixel(line.from);
           const to = toPixel(line.to);
@@ -305,7 +321,7 @@ export function SelfOrganisingMapPlayground() {
               r={6}
               fill={
                 winner && answer
-                  ? unitColour(
+                  ? cellColour(
                       winner.row,
                       winner.column,
                       answer.grid_width,
@@ -324,19 +340,18 @@ export function SelfOrganisingMapPlayground() {
           );
         })}
 
-        {/* the units, where each came to rest */}
-        {answer?.units.map((unit) => {
-          const { px, py } = toPixel(unit);
+        {answer?.units.map((cell) => {
+          const { px, py } = toPixel(cell);
           return (
             <rect
-              key={`u${unit.row}-${unit.column}`}
+              key={`u${cell.row}-${cell.column}`}
               x={px - UNIT_SIZE / 2}
               y={py - UNIT_SIZE / 2}
               width={UNIT_SIZE}
               height={UNIT_SIZE}
-              fill={unitColour(
-                unit.row,
-                unit.column,
+              fill={cellColour(
+                cell.row,
+                cell.column,
                 answer.grid_width,
                 answer.grid_height,
               )}
@@ -345,7 +360,7 @@ export function SelfOrganisingMapPlayground() {
               strokeWidth={2}
             >
               <title>
-                {`unit (${unit.row}, ${unit.column}) at (${unit.x.toFixed(1)}, ${unit.y.toFixed(1)})`}
+                {`cell (${cell.row}, ${cell.column}) at (${cell.x.toFixed(1)}, ${cell.y.toFixed(1)})`}
               </title>
             </rect>
           );
@@ -371,8 +386,9 @@ export function SelfOrganisingMapPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Each square is a unit, joined to its neighbours on the grid, and each
-        person wears the colour of the unit that won them. Every change here is
+        Each square is a cell, joined to its neighbours on the grid, and each
+        person wears the colour of the cell that won them. Switch the reach off
+        and the net falls apart into an ordinary grouping. Every change here is
         a fresh fit from the same seed, not a step of one fit. Hover a square
         for where it rests.
       </p>

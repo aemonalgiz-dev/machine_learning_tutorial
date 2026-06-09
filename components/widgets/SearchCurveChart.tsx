@@ -2,21 +2,27 @@
 
 // Every setting tried, scored, and the winner marked.
 //
-// Each dot is one neighbour count, and its height is that setting's
-// cross-validated score, the mean of the fold scores drawn faintly behind it.
-// The winner is ringed. The dashed line is what that same winner scores on the
-// quarter of the people held back from the search entirely, which is the only
-// number on the chart that nothing chose. The gap between the ringed dot and
-// the dashed line is the thing the page is about. Every score comes from the
-// library through the API.
+// Each indigo dot is one neighbour count, and its height is that setting's
+// cross-validated score, the mean of the fold scores drawn faintly behind
+// it. The winner is ringed. The grey line above is what each setting scores
+// on the very rows it was fitted to, which only ever falls as the count
+// rises and starts at exactly one. The dashed amber line is what the winner
+// scores on the quarter of the people held back from the search entirely,
+// the only number on the chart that nothing chose. The API computes every
+// score and the browser draws them.
 
 import { useEffect, useState } from "react";
-import { ApiError } from "@/lib/api";
+import { ApiError, Point } from "@/lib/api";
+import { SearchOutcome, searchNeighbourCounts } from "@/lib/concepts/grid-search";
 import {
-  SearchOutcome,
-  SearchPoint,
-  searchNeighbourCounts,
-} from "@/lib/concepts/grid-search";
+  ACTIVE_CLASS,
+  BUTTON_CLASS,
+  CrowdName,
+  IDEAL_CASE,
+  TWELVE_PEOPLE,
+  formatScore,
+  randomCrowd,
+} from "./gridSearchFixtures";
 
 const VIEW = { width: 640, height: 330 };
 const PAD = { left: 54, right: 20, top: 18, bottom: 48 };
@@ -27,57 +33,54 @@ const PLOT = {
 
 const DEBOUNCE_MS = 160;
 
-// Twelve people along a line, the page's worked search.
-const TWELVE_ALONG_A_LINE: SearchPoint[] = [
-  { x: 0.5, y: 2 },
-  { x: 1.4, y: 3 },
-  { x: 2.6, y: 6 },
-  { x: 3.1, y: 5 },
-  { x: 4.7, y: 10 },
-  { x: 5.2, y: 11 },
-  { x: 6.8, y: 13 },
-  { x: 7.3, y: 16 },
-  { x: 8.9, y: 17 },
-  { x: 9.6, y: 20 },
-  { x: 10.4, y: 21 },
-  { x: 11.5, y: 22 },
-];
-
-const BUTTON_CLASS =
-  "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
-
 export function SearchCurveChart() {
+  const [crowd, setCrowd] = useState<CrowdName>("twelve");
+  const [points, setPoints] = useState<Point[]>(TWELVE_PEOPLE);
   const [largest, setLargest] = useState(5);
   const [folds, setFolds] = useState(3);
   const [answer, setAnswer] = useState<SearchOutcome | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const timer = setTimeout(async () => {
       try {
-        setAnswer(
-          await searchNeighbourCounts(TWELVE_ALONG_A_LINE, largest, folds),
-        );
+        const searched = await searchNeighbourCounts(points, largest, folds);
+        if (cancelled) return;
+        setAnswer(searched);
         setMessage(null);
       } catch (error) {
+        if (cancelled) return;
         if (error instanceof ApiError) setMessage(error.message);
         else setMessage("Something went wrong.");
       }
     }, DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [largest, folds]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [points, largest, folds]);
+
+  const choose = (name: CrowdName) => {
+    setCrowd(name);
+    if (name === "twelve") setPoints(TWELVE_PEOPLE);
+    else if (name === "ideal") setPoints(IDEAL_CASE);
+    else setPoints(randomCrowd());
+  };
 
   // The drawn window covers every fold score as well as the candidate means,
-  // since a single bad fold can sit well below the mean it belongs to.
+  // since a single bad fold can sit well below the mean it belongs to. A
+  // ruinous fold is clipped at minus one so the rest stays legible.
   let low = 0;
   let high = 1;
   if (answer) {
     const values = answer.candidates.flatMap((candidate) => [
       candidate.score,
+      candidate.training_score,
       ...candidate.fold_scores,
     ]);
     values.push(answer.honest_score);
-    low = Math.min(...values);
+    low = Math.max(-1, Math.min(...values));
     high = Math.max(...values);
     const pad = 0.08 * (high - low || 1);
     low -= pad;
@@ -88,19 +91,42 @@ export function SearchCurveChart() {
     PAD.left +
     (largest === 1 ? 0.5 : (count - 1) / (largest - 1)) * PLOT.width;
   const scoreToY = (score: number) =>
-    PAD.top + ((high - score) / (high - low || 1)) * PLOT.height;
+    PAD.top +
+    ((high - Math.max(score, low)) / (high - low || 1)) * PLOT.height;
 
   const ticks = [0, 1, 2, 3, 4].map(
     (step) => low + (step / 4) * (high - low),
   );
 
+  const linePath = (read: (candidate: SearchOutcome["candidates"][number]) => number) =>
+    answer
+      ? answer.candidates
+          .map((candidate, index) => {
+            const command = index === 0 ? "M" : "L";
+            return `${command}${countToX(candidate.n_neighbours).toFixed(1)},${scoreToY(read(candidate)).toFixed(1)}`;
+          })
+          .join(" ")
+      : "";
+
   return (
     <div className="my-4">
-      <div className="flex flex-wrap items-center gap-4 pb-3 text-sm text-slate-600 dark:text-slate-300">
-        <button onClick={() => { setLargest(5); setFolds(3); }} className={BUTTON_CLASS}>
-          The worked search
+      <div className="flex flex-wrap items-center gap-2 pb-3 text-sm text-slate-600 dark:text-slate-300">
+        <button
+          onClick={() => choose("twelve")}
+          className={crowd === "twelve" ? ACTIVE_CLASS : BUTTON_CLASS}
+        >
+          Twelve people
         </button>
-        <label className="flex items-center gap-2">
+        <button
+          onClick={() => choose("ideal")}
+          className={crowd === "ideal" ? ACTIVE_CLASS : BUTTON_CLASS}
+        >
+          An Ideal Case
+        </button>
+        <button onClick={() => choose("random")} className={BUTTON_CLASS}>
+          Random crowd
+        </button>
+        <label className="ml-2 flex items-center gap-2">
           largest k
           <input
             type="range"
@@ -155,6 +181,12 @@ export function SearchCurveChart() {
 
         {answer && (
           <>
+            <path
+              d={linePath((candidate) => candidate.training_score)}
+              fill="none"
+              strokeWidth={1.5}
+              className="stroke-slate-400 dark:stroke-slate-500"
+            />
             <line
               x1={PAD.left}
               x2={PAD.left + PLOT.width}
@@ -165,12 +197,7 @@ export function SearchCurveChart() {
               strokeWidth={2}
             />
             <path
-              d={answer.candidates
-                .map((candidate, index) => {
-                  const command = index === 0 ? "M" : "L";
-                  return `${command}${countToX(candidate.n_neighbours).toFixed(1)},${scoreToY(candidate.score).toFixed(1)}`;
-                })
-                .join(" ")}
+              d={linePath((candidate) => candidate.score)}
               fill="none"
               strokeWidth={2}
               className="stroke-indigo-600 dark:stroke-indigo-400"
@@ -186,6 +213,12 @@ export function SearchCurveChart() {
                     className="fill-slate-400 dark:fill-slate-500"
                   />
                 ))}
+                <circle
+                  cx={countToX(candidate.n_neighbours)}
+                  cy={scoreToY(candidate.training_score)}
+                  r={2.5}
+                  className="fill-slate-500 dark:fill-slate-400"
+                />
                 <circle
                   cx={countToX(candidate.n_neighbours)}
                   cy={scoreToY(candidate.score)}
@@ -220,27 +253,31 @@ export function SearchCurveChart() {
           textAnchor="middle"
           className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
         >
-          Neighbours asked for, with the winner ringed and the held-out score
-          dashed
+          Neighbours asked for. Indigo is the cross-validated score, grey the
+          score on the fitted rows, dashed the held-out quarter
         </text>
       </svg>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
         <Stat
           label="Winner"
           value={answer ? `k = ${answer.best_n_neighbours}` : "…"}
         />
         <Stat
           label="Its search score"
-          value={answer ? answer.best_score.toFixed(4) : "…"}
+          value={answer ? formatScore(answer.best_score) : "…"}
         />
         <Stat
           label="On the held-out quarter"
-          value={answer ? answer.honest_score.toFixed(4) : "…"}
+          value={answer ? formatScore(answer.honest_score) : "…"}
+        />
+        <Stat
+          label="On its own fitted rows"
+          value={answer ? formatScore(answer.same_rows_score) : "…"}
         />
         <Stat
           label="Spread across candidates"
-          value={answer ? answer.score_spread.toFixed(4) : "…"}
+          value={answer ? formatScore(answer.score_spread) : "…"}
         />
       </div>
 

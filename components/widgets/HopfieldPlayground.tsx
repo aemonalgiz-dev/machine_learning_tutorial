@@ -15,48 +15,19 @@
 // lays the answer out.
 
 import { useEffect, useRef, useState } from "react";
-import { ApiError, Recall, recallPattern } from "@/lib/api";
-
-const SIDE = 5;
-const CELL_COUNT = SIDE * SIDE;
-
-function shape(rows: string[]): number[] {
-  return rows.flatMap((row) =>
-    Array.from(row, (cell) => (cell === "#" ? 1 : -1)),
-  );
-}
-
-interface StoredShape {
-  name: string;
-  cells: number[];
-}
-
-// The three shapes the widget opens with, chosen to overlap as little as
-// twenty-five cells allow, so the load of 0.12 sits comfortably under the
-// capacity the page discusses.
-const THREE_SHAPES: StoredShape[] = [
-  { name: "the T", cells: shape(["#####", "..#..", "..#..", "..#..", "..#.."]) },
-  { name: "the L", cells: shape(["#....", "#....", "#....", "#....", "#####"]) },
-  {
-    name: "the cross",
-    cells: shape(["#...#", ".#.#.", "..#..", ".#.#.", "#...#"]),
-  },
-];
-
-// Three more, which take the load to 0.24. Every one of the six is still a
-// resting state, but the valleys around them have shrunk, and the first
-// scramble of the T now settles somewhere nobody stored.
-const THREE_MORE_SHAPES: StoredShape[] = [
-  {
-    name: "the square",
-    cells: shape(["#####", "#...#", "#...#", "#...#", "#####"]),
-  },
-  { name: "the Z", cells: shape(["#####", "...#.", "..#..", ".#...", "#####"]) },
-  {
-    name: "the diamond",
-    cells: shape(["..#..", ".#.#.", "#...#", ".#.#.", "..#.."]),
-  },
-];
+import { ApiError, Recall, recallPattern } from "@/lib/concepts/hopfield-network";
+import { Failure, PatternGrid, Stat } from "./HopfieldGrid";
+import {
+  BUTTON_CLASS,
+  CELL_COUNT,
+  PRIMARY_BUTTON_CLASS,
+  SMALL_BUTTON_CLASS,
+  StoredShape,
+  THREE_MORE_SHAPES,
+  THREE_SHAPES,
+  cellsOf,
+  settledLabel,
+} from "./hopfieldFixtures";
 
 // Which five cells a scramble flips comes from a fixed sequence rather than
 // from Math.random, so the first press flips the same five for every reader
@@ -96,21 +67,9 @@ const CHART_PLOT = {
   height: CHART.height - CHART_PAD.top - CHART_PAD.bottom,
 };
 
-const BUTTON_CLASS =
-  "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:disabled:hover:bg-slate-800";
-
-const PRIMARY_BUTTON_CLASS =
-  "rounded-md border border-indigo-600 bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-40 dark:border-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400";
-
-const SMALL_BUTTON_CLASS =
-  "rounded border border-slate-300 bg-white px-2 text-sm font-medium leading-6 text-slate-700 transition hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 dark:disabled:hover:bg-slate-800";
-
-function settledLabel(answer: Recall, stored: StoredShape[]): string {
+function restLabel(answer: Recall, stored: StoredShape[]): string {
   if (!answer.settled) return "still moving at the pass limit";
-  const into = answer.settled_into;
-  if (into.pattern_index === null) return "no stored shape";
-  const name = stored[into.pattern_index].name;
-  return into.flipped ? `${name}, inverted` : name;
+  return settledLabel(answer.settled_into, stored);
 }
 
 export function HopfieldPlayground() {
@@ -122,9 +81,7 @@ export function HopfieldPlayground() {
   const [message, setMessage] = useState<string | null>(null);
   const scrambleState = useRef(SCRAMBLE_SEED);
 
-  const stored = storeMore
-    ? [...THREE_SHAPES, ...THREE_MORE_SHAPES]
-    : THREE_SHAPES;
+  const stored = storeMore ? [...THREE_SHAPES, ...THREE_MORE_SHAPES] : THREE_SHAPES;
 
   // A fresh answer plays itself through, one pass every seven tenths of a
   // second, and the step control takes over from wherever it stops.
@@ -144,9 +101,7 @@ export function HopfieldPlayground() {
   }, [answer]);
 
   const flipCell = (index: number) => {
-    setProbe((current) =>
-      current.map((value, position) => (position === index ? -value : value)),
-    );
+    setProbe((current) => current.map((value, position) => (position === index ? -value : value)));
     setAnswer(null);
   };
 
@@ -159,11 +114,7 @@ export function HopfieldPlayground() {
   const scramble = () => {
     const drawn = drawScramble(scrambleState.current);
     scrambleState.current = drawn.state;
-    setProbe((current) =>
-      current.map((value, position) =>
-        drawn.cells.includes(position) ? -value : value,
-      ),
-    );
+    setProbe((current) => current.map((value, position) => (drawn.cells.includes(position) ? -value : value)));
     setAnswer(null);
   };
 
@@ -175,10 +126,7 @@ export function HopfieldPlayground() {
   const recall = async () => {
     setRecalling(true);
     try {
-      const result = await recallPattern(
-        stored.map((entry) => entry.cells),
-        probe,
-      );
+      const result = await recallPattern(cellsOf(stored), probe);
       setPassIndex(0);
       setAnswer(result);
       setMessage(null);
@@ -191,19 +139,11 @@ export function HopfieldPlayground() {
   };
 
   const passCount = answer ? answer.passes.length : 0;
-  const shownState =
-    answer && passIndex > 0 ? answer.passes[passIndex - 1].state : probe;
-  const previousState =
-    answer && passIndex > 1 ? answer.passes[passIndex - 2].state : probe;
+  const shownState = answer && passIndex > 0 ? answer.passes[passIndex - 1].state : probe;
+  const previousState = answer && passIndex > 1 ? answer.passes[passIndex - 2].state : probe;
   const changedCells =
-    answer && passIndex > 0
-      ? shownState.map((value, position) => value !== previousState[position])
-      : shownState.map(() => false);
-  const energyNow = answer
-    ? passIndex > 0
-      ? answer.passes[passIndex - 1].energy_after
-      : answer.initial_energy
-    : null;
+    answer && passIndex > 0 ? shownState.map((value, position) => value !== previousState[position]) : shownState.map(() => false);
+  const energyNow = answer ? (passIndex > 0 ? answer.passes[passIndex - 1].energy_after : answer.initial_energy) : null;
 
   return (
     <div>
@@ -215,19 +155,14 @@ export function HopfieldPlayground() {
             title={`Start the probe from ${entry.name}`}
             className="group flex flex-col items-center gap-1"
           >
-            <PatternGrid cells={entry.cells} small />
+            <PatternGrid cells={entry.cells} size="small" />
             <span className="text-xs text-slate-500 group-hover:text-indigo-600 dark:text-slate-400 dark:group-hover:text-indigo-400">
               {entry.name}
             </span>
           </button>
         ))}
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-          <input
-            type="checkbox"
-            checked={storeMore}
-            onChange={toggleStoreMore}
-            className="accent-indigo-600"
-          />
+          <input type="checkbox" checked={storeMore} onChange={toggleStoreMore} className="accent-indigo-600" />
           Store three more shapes
         </label>
       </div>
@@ -236,11 +171,7 @@ export function HopfieldPlayground() {
         <button onClick={scramble} className={BUTTON_CLASS}>
           Scramble five cells
         </button>
-        <button
-          onClick={recall}
-          disabled={recalling}
-          className={PRIMARY_BUTTON_CLASS}
-        >
+        <button onClick={recall} disabled={recalling} className={PRIMARY_BUTTON_CLASS}>
           Recall
         </button>
       </div>
@@ -248,9 +179,7 @@ export function HopfieldPlayground() {
       <div className="flex flex-wrap items-start justify-center gap-6 rounded-lg bg-slate-50 p-4 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-2">
           <PatternGrid cells={probe} onFlip={flipCell} />
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            The probe. Click a cell to flip it.
-          </span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">The probe. Click a cell to flip it.</span>
         </div>
 
         <div className="flex flex-col items-center gap-2">
@@ -264,16 +193,10 @@ export function HopfieldPlayground() {
               ◀
             </button>
             <span className="w-28 text-center font-mono text-xs text-slate-600 dark:text-slate-300">
-              {answer
-                ? passIndex === 0
-                  ? "the probe"
-                  : `pass ${passIndex} of ${passCount}`
-                : "not yet recalled"}
+              {answer ? (passIndex === 0 ? "the probe" : `pass ${passIndex} of ${passCount}`) : "not yet recalled"}
             </span>
             <button
-              onClick={() =>
-                setPassIndex((current) => Math.min(passCount, current + 1))
-              }
+              onClick={() => setPassIndex((current) => Math.min(passCount, current + 1))}
               disabled={!answer || passIndex >= passCount}
               className={SMALL_BUTTON_CLASS}
             >
@@ -286,124 +209,51 @@ export function HopfieldPlayground() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The right-hand grid is the network&rsquo;s state after each pass, with
-        the cells that moved outlined, and the staircase is its energy, which
-        only ever steps down.
+        The right-hand grid is the network&rsquo;s state after each pass, with the cells that moved outlined, and the
+        staircase is its energy, which only ever steps down.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat
-          label="Settled into"
-          value={answer ? settledLabel(answer, stored) : "…"}
-        />
-        <Stat
-          label="Load, patterns per cell"
-          value={answer ? answer.load.toFixed(2) : "…"}
-        />
+        <Stat label="Settled into" value={answer ? restLabel(answer, stored) : "…"} />
+        <Stat label="Load, patterns per cell" value={answer ? answer.load.toFixed(2) : "…"} />
         <Stat label="Passes to rest" value={answer ? String(passCount) : "…"} />
-        <Stat
-          label="Energy"
-          value={energyNow === null ? "…" : energyNow.toFixed(2)}
-        />
+        <Stat label="Energy" value={energyNow === null ? "…" : energyNow.toFixed(2)} />
       </div>
 
-      {message && (
-        <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">
-          {message}
-        </p>
-      )}
+      <Failure message={message} />
     </div>
   );
 }
 
-function PatternGrid({
-  cells,
-  onFlip,
-  changed,
-  small = false,
-}: {
-  cells: number[];
-  onFlip?: (index: number) => void;
-  changed?: boolean[];
-  small?: boolean;
-}) {
-  const size = small ? "h-3.5 w-3.5" : "h-8 w-8";
-  return (
-    <div
-      className={
-        "grid gap-0.5 " + (small ? "grid-cols-5" : "grid-cols-5 gap-1")
-      }
-    >
-      {cells.map((value, index) => {
-        const lit = value > 0;
-        const outlined = changed?.[index] ?? false;
-        const className =
-          size +
-          " rounded-sm " +
-          (lit ? "bg-indigo-600" : "bg-slate-200 dark:bg-slate-700") +
-          (outlined ? " ring-2 ring-amber-500" : "") +
-          (onFlip ? " cursor-pointer hover:opacity-80" : "");
-        if (onFlip) {
-          return (
-            <button
-              key={index}
-              type="button"
-              aria-label={`cell ${index + 1}, ${lit ? "lit" : "dark"}`}
-              onClick={() => onFlip(index)}
-              className={className}
-            />
-          );
-        }
-        return <div key={index} className={className} />;
-      })}
-    </div>
-  );
-}
-
-function EnergyStaircase({
-  answer,
-  passIndex,
-}: {
-  answer: Recall | null;
-  passIndex: number;
-}) {
-  const energies = answer
-    ? [
-        answer.initial_energy,
-        ...answer.passes.map((recallPass) => recallPass.energy_after),
-      ]
-    : [];
+function EnergyStaircase({ answer, passIndex }: { answer: Recall | null; passIndex: number }) {
+  const energies = answer ? [answer.initial_energy, ...answer.passes.map((recallPass) => recallPass.energy_after)] : [];
   const lastPass = Math.max(1, energies.length - 1);
   const highest = energies.length ? Math.max(...energies) : 0;
   const lowest = energies.length ? Math.min(...energies) : 0;
   const span = highest - lowest || 1;
 
-  const passToX = (passNumber: number) =>
-    CHART_PAD.left + (passNumber / lastPass) * CHART_PLOT.width;
-  const energyToY = (energy: number) =>
-    CHART_PAD.top + ((highest - energy) / span) * CHART_PLOT.height;
+  const passToX = (passNumber: number) => CHART_PAD.left + (passNumber / lastPass) * CHART_PLOT.width;
+  const energyToY = (energy: number) => CHART_PAD.top + ((highest - energy) / span) * CHART_PLOT.height;
 
   const stepPath = energies
     .map((energy, passNumber) =>
-      passNumber === 0
-        ? `M ${passToX(0)} ${energyToY(energy)}`
-        : `H ${passToX(passNumber)} V ${energyToY(energy)}`,
+      passNumber === 0 ? `M ${passToX(0)} ${energyToY(energy)}` : `H ${passToX(passNumber)} V ${energyToY(energy)}`,
     )
     .join(" ");
 
+  const axisClass = "text-slate-300 dark:text-slate-700";
+  const labelClass = "fill-slate-500 text-[10px] font-medium dark:fill-slate-400";
+
   return (
     <div className="flex flex-col items-center gap-2">
-      <svg
-        viewBox={`0 0 ${CHART.width} ${CHART.height}`}
-        className="w-72 select-none"
-      >
+      <svg viewBox={`0 0 ${CHART.width} ${CHART.height}`} className="w-72 select-none">
         <line
           x1={CHART_PAD.left}
           y1={CHART_PAD.top}
           x2={CHART_PAD.left}
           y2={CHART_PAD.top + CHART_PLOT.height}
           stroke="currentColor"
-          className="text-slate-300 dark:text-slate-700"
+          className={axisClass}
           strokeWidth={1}
         />
         <line
@@ -412,35 +262,19 @@ function EnergyStaircase({
           x2={CHART_PAD.left + CHART_PLOT.width}
           y2={CHART_PAD.top + CHART_PLOT.height}
           stroke="currentColor"
-          className="text-slate-300 dark:text-slate-700"
+          className={axisClass}
           strokeWidth={1}
         />
 
         {energies.length > 0 && (
           <>
-            <text
-              x={CHART_PAD.left - 6}
-              y={CHART_PAD.top + 4}
-              textAnchor="end"
-              className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
-            >
+            <text x={CHART_PAD.left - 6} y={CHART_PAD.top + 4} textAnchor="end" className={labelClass}>
               {highest.toFixed(2)}
             </text>
-            <text
-              x={CHART_PAD.left - 6}
-              y={CHART_PAD.top + CHART_PLOT.height + 4}
-              textAnchor="end"
-              className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
-            >
+            <text x={CHART_PAD.left - 6} y={CHART_PAD.top + CHART_PLOT.height + 4} textAnchor="end" className={labelClass}>
               {lowest.toFixed(2)}
             </text>
-            <path
-              d={stepPath}
-              fill="none"
-              stroke="currentColor"
-              className="text-slate-400 dark:text-slate-500"
-              strokeWidth={1.5}
-            />
+            <path d={stepPath} fill="none" stroke="currentColor" className="text-slate-400 dark:text-slate-500" strokeWidth={1.5} />
             {energies.map((energy, passNumber) => (
               <circle
                 key={passNumber}
@@ -448,36 +282,21 @@ function EnergyStaircase({
                 cy={energyToY(energy)}
                 r={passNumber === passIndex ? 6 : 4}
                 className={
-                  (passNumber === passIndex
-                    ? "fill-amber-500"
-                    : passNumber <= passIndex
-                      ? "fill-indigo-600"
-                      : "fill-slate-300 dark:fill-slate-600") +
+                  (passNumber === passIndex ? "fill-amber-500" : passNumber <= passIndex ? "fill-indigo-600" : "fill-slate-300 dark:fill-slate-600") +
                   " stroke-white dark:stroke-slate-900"
                 }
                 strokeWidth={1.5}
               />
             ))}
             {energies.map((_, passNumber) => (
-              <text
-                key={`t${passNumber}`}
-                x={passToX(passNumber)}
-                y={CHART_PAD.top + CHART_PLOT.height + 14}
-                textAnchor="middle"
-                className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
-              >
+              <text key={`t${passNumber}`} x={passToX(passNumber)} y={CHART_PAD.top + CHART_PLOT.height + 14} textAnchor="middle" className={labelClass}>
                 {passNumber}
               </text>
             ))}
           </>
         )}
 
-        <text
-          x={CHART_PAD.left + CHART_PLOT.width / 2}
-          y={CHART.height - 4}
-          textAnchor="middle"
-          className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
-        >
+        <text x={CHART_PAD.left + CHART_PLOT.width / 2} y={CHART.height - 4} textAnchor="middle" className={labelClass}>
           Pass
         </text>
         <text
@@ -485,25 +304,12 @@ function EnergyStaircase({
           y={CHART_PAD.top + CHART_PLOT.height / 2}
           textAnchor="middle"
           transform={`rotate(-90 12 ${CHART_PAD.top + CHART_PLOT.height / 2})`}
-          className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
+          className={labelClass}
         >
           Energy
         </text>
       </svg>
-      <span className="text-xs text-slate-500 dark:text-slate-400">
-        The energy after each pass.
-      </span>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">
-      <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
-      <div className="font-mono text-lg font-semibold text-slate-900 dark:text-slate-100">
-        {value}
-      </div>
+      <span className="text-xs text-slate-500 dark:text-slate-400">The energy after each pass.</span>
     </div>
   );
 }

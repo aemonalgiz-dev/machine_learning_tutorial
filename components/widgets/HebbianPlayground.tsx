@@ -11,12 +11,15 @@
 // slider sets the epoch budget, and every move of it is a fresh fit from the
 // same seed rather than a step of one fit, because the rate schedule is a
 // fraction of the budget. The picture it makes is the bold line swinging
-// into the faint one as the budget grows. Click to add people, drag them,
-// double-click to remove. Every direction and every angle is the library's
-// through the API, not the browser's.
+// into the faint one as the budget grows. The circle button loads eight
+// people whose two eigenvalues tie, where the faint lines are one arbitrary
+// choice and the bold lines another, and neither is wrong. Click to add
+// people, drag them, double-click to remove. Every direction and every angle
+// is the library's through the API, not the browser's.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, HebbianLearning, Point, learnHebbianDirections } from "@/lib/api";
+import { CIRCLE, CROWD, IDEAL_CASE, WORKED_PEOPLE } from "./hebbianPcaFixtures";
 
 const DOMAIN = { xMin: 100, xMax: 200, yMin: 10, yMax: 100 };
 const VIEW = { width: 640, height: 460 };
@@ -25,50 +28,6 @@ const PLOT = {
   width: VIEW.width - PAD.left - PAD.right,
   height: VIEW.height - PAD.top - PAD.bottom,
 };
-
-// The four people whose deviation sums the PCA page works by hand, and whose
-// first step of Oja's rule this page works by hand.
-const WORKED_PEOPLE: Point[] = [
-  { x: 180, y: 78 },
-  { x: 160, y: 58 },
-  { x: 175, y: 63 },
-  { x: 165, y: 73 },
-];
-
-// The classification pages' crowd with its labels stripped away.
-const CROWD: Point[] = [
-  { x: 147, y: 41 },
-  { x: 156, y: 53 },
-  { x: 145, y: 57 },
-  { x: 159, y: 57 },
-  { x: 162, y: 61 },
-  { x: 120, y: 25 },
-  { x: 122, y: 28 },
-  { x: 118, y: 24 },
-  { x: 180, y: 80 },
-  { x: 183, y: 83 },
-  { x: 178, y: 78 },
-];
-
-// Fifteen people hugging one diagonal, the ideal case, nearly all of the
-// spread carried by a single direction.
-const IDEAL_CASE: Point[] = [
-  { x: 152, y: 51 },
-  { x: 155, y: 52 },
-  { x: 158, y: 56.5 },
-  { x: 161, y: 58.5 },
-  { x: 164, y: 62 },
-  { x: 167, y: 66 },
-  { x: 170, y: 67 },
-  { x: 173, y: 71.5 },
-  { x: 176, y: 73.5 },
-  { x: 179, y: 77 },
-  { x: 182, y: 81 },
-  { x: 185, y: 82 },
-  { x: 188, y: 86.5 },
-  { x: 191, y: 88.5 },
-  { x: 194, y: 92 },
-];
 
 function randomPeople(): Point[] {
   const slope = 0.3 + Math.random() * 0.6;
@@ -293,6 +252,9 @@ export function HebbianPlayground() {
         </button>
         <button onClick={() => setPoints(CROWD)} className={BUTTON_CLASS}>
           The crowd, unlabelled
+        </button>
+        <button onClick={() => setPoints(CIRCLE)} className={BUTTON_CLASS}>
+          The circle
         </button>
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
           Epochs

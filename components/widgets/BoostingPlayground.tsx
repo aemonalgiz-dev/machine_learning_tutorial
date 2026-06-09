@@ -1,63 +1,33 @@
 "use client";
 
-// Gradient boosting assembling a fit one stump at a time.
+// Gradient boosting assembling a fit one small tree at a time.
 //
-// The points are the thrown ball, the members are depth-one stumps, and the
-// rounds slider is the thing to drag. One round is a flat shelf or two, ten
+// The points are the thrown ball, the members are shallow trees, and the
+// rounds slider is the thing to drag. One round is a shelf or two, ten
 // rounds rough out the arc, and hundreds trace the noise. The learning rate
-// sets how much of each stump's correction is kept. Every fit is the
-// library's through the API, not the browser's.
+// sets how much of each member's correction is kept, and the depth how many
+// shelves each round may add. Every fit is the library's through the API,
+// not the browser's.
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ApiError, BoostingAnswer, Point, fitBoosting } from "@/lib/api";
+import { ApiError, Point } from "@/lib/api";
+import { BoostedModel, fitBoostedModel } from "@/lib/concepts/gradient-boosting";
+import {
+  IDEAL_THROW,
+  NOISY_THROW,
+  SIXTY_THROW,
+  THREE_READINGS,
+  THROW_DOMAIN,
+  randomThrow,
+} from "./gradientBoostingFixtures";
 
-const DOMAIN = { xMin: 0, xMax: 4, yMin: -2, yMax: 26 };
+const DOMAIN = THROW_DOMAIN;
 const VIEW = { width: 640, height: 440 };
 const PAD = { left: 52, right: 16, top: 16, bottom: 52 };
 const PLOT = {
   width: VIEW.width - PAD.left - PAD.right,
   height: VIEW.height - PAD.top - PAD.bottom,
 };
-
-// The same fifteen noisy measurements the polynomial and penalty pages fit.
-const NOISY_THROW: Point[] = [
-  { x: 0.0, y: 0.7 },
-  { x: 0.29, y: 5.2 },
-  { x: 0.57, y: 9.5 },
-  { x: 0.86, y: 13.0 },
-  { x: 1.14, y: 16.9 },
-  { x: 1.43, y: 18.1 },
-  { x: 1.71, y: 19.4 },
-  { x: 2.0, y: 21.0 },
-  { x: 2.29, y: 19.6 },
-  { x: 2.57, y: 19.1 },
-  { x: 2.86, y: 16.8 },
-  { x: 3.14, y: 13.6 },
-  { x: 3.43, y: 11.1 },
-  { x: 3.71, y: 6.2 },
-  { x: 4.0, y: 1.2 },
-];
-
-// The three points the page works two rounds on by hand.
-const WORKED_POINTS: Point[] = [
-  { x: 1, y: 2 },
-  { x: 2, y: 6 },
-  { x: 3, y: 10 },
-];
-
-
-function randomThrow(): Point[] {
-  const launch = 17 + Math.random() * 5;
-  return Array.from({ length: 15 }, (_, index) => {
-    const t = Math.round(((index * 4) / 14) * 100) / 100;
-    const noise = (Math.random() - 0.5) * 9;
-    const h = Math.max(
-      DOMAIN.yMin,
-      Math.min(DOMAIN.yMax, launch * t - 4.9 * t * t + noise),
-    );
-    return { x: t, y: Math.round(h * 10) / 10 };
-  });
-}
 
 const MAX_POINTS = 100;
 
@@ -89,13 +59,16 @@ function toData(px: number, py: number): Point {
   };
 }
 
-function statusText(answer: BoostingAnswer | null, rounds: number): string {
+function statusText(answer: BoostedModel | null, rounds: number, depth: number): string {
   if (!answer) return "…";
   if (rounds <= 2) {
     return "A round or two in, the fit is a shelf or three, the first rough corrections.";
   }
   if (answer.r_squared > 0.999) {
     return "R² has reached 1 to three decimals, which by now you know to read as a warning rather than a triumph.";
+  }
+  if (depth > 1) {
+    return `Each round adds up to ${2 ** depth} shelves, so the arc is roughed out in fewer rounds and the noise is reached sooner.`;
   }
   return "Each round fits a stump to whatever the fit still gets wrong, and the shelves accumulate into the arc.";
 }
@@ -104,7 +77,8 @@ export function BoostingPlayground() {
   const [points, setPoints] = useState<Point[]>(NOISY_THROW);
   const [rounds, setRounds] = useState(10);
   const [learningRate, setLearningRate] = useState(0.3);
-  const [answer, setAnswer] = useState<BoostingAnswer | null>(null);
+  const [depth, setDepth] = useState(1);
+  const [answer, setAnswer] = useState<BoostedModel | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragging = useRef<number | null>(null);
@@ -112,7 +86,7 @@ export function BoostingPlayground() {
   useEffect(() => {
     const timer = setTimeout(async () => {
       try {
-        setAnswer(await fitBoosting(points, rounds, learningRate));
+        setAnswer(await fitBoostedModel(points, rounds, learningRate, depth));
         setMessage(null);
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
@@ -120,7 +94,7 @@ export function BoostingPlayground() {
       }
     }, 150);
     return () => clearTimeout(timer);
-  }, [points, rounds, learningRate]);
+  }, [points, rounds, learningRate, depth]);
 
   const eventToData = useCallback((clientX: number, clientY: number): Point => {
     const svg = svgRef.current!;
@@ -174,27 +148,28 @@ export function BoostingPlayground() {
         .join(" ")
     : "";
 
+  const datasets: { label: string; points: () => Point[] }[] = [
+    { label: "Full throw", points: () => NOISY_THROW },
+    { label: "An Ideal Case", points: () => IDEAL_THROW },
+    { label: "Random throw", points: () => randomThrow() },
+    { label: "Sixty measurements", points: () => SIXTY_THROW },
+    { label: "Three readings", points: () => THREE_READINGS },
+  ];
+
   return (
     <div>
       <div className="flex flex-wrap items-center gap-3 pb-3">
-        <button
-          onClick={() => setPoints(NOISY_THROW)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          Full throw
-        </button>
-        <button
-          onClick={() => setPoints(WORKED_POINTS)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          An Ideal Case
-        </button>
-        <button
-          onClick={() => setPoints(randomThrow())}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
-          Random throw
-        </button>
+        {datasets.map((dataset) => (
+          <button
+            key={dataset.label}
+            onClick={() => setPoints(dataset.points())}
+            className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          >
+            {dataset.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-3 pb-3">
         <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
           Rounds
           <input
@@ -208,7 +183,7 @@ export function BoostingPlayground() {
           />
           <span className="w-8 font-mono text-sm">{rounds}</span>
         </label>
-        <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
           Learning rate
           <input
             type="range"
@@ -222,6 +197,19 @@ export function BoostingPlayground() {
           <span className="w-10 font-mono text-sm">
             {learningRate.toFixed(2)}
           </span>
+        </label>
+        <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          Depth
+          <input
+            type="range"
+            min={1}
+            max={4}
+            step={1}
+            value={depth}
+            onChange={(event) => setDepth(Number(event.target.value))}
+            className="w-20 accent-indigo-600"
+          />
+          <span className="w-4 font-mono text-sm">{depth}</span>
         </label>
       </div>
 
@@ -253,7 +241,7 @@ export function BoostingPlayground() {
               key={index}
               cx={px}
               cy={py}
-              r={7}
+              r={points.length > 30 ? 5 : 7}
               className="cursor-grab fill-slate-700 stroke-white dark:fill-slate-200 dark:stroke-slate-900"
               strokeWidth={2}
               onPointerDown={onPointPointerDown(index)}
@@ -263,14 +251,15 @@ export function BoostingPlayground() {
         })}
       </svg>
 
-      <div className="mt-3 grid grid-cols-3 gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Rounds" value={String(rounds)} />
         <Stat label="Learning rate" value={learningRate.toFixed(2)} />
+        <Stat label="Shelves in all" value={answer ? String(answer.total_leaves) : "…"} />
         <Stat label="R²" value={answer ? answer.r_squared.toFixed(3) : "…"} />
       </div>
 
       <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-        {message ? message : statusText(answer, rounds)}
+        {message ? message : statusText(answer, rounds, depth)}
       </p>
     </div>
   );

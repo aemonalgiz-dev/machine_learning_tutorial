@@ -72,8 +72,12 @@ function statusText(fit: SplitFit | null, degree: number): string {
   return "The shares are parting. The extra bends are starting to chase measurement noise.";
 }
 
-export function HoldOutPlayground() {
+// With ``concealable`` the held-out points start hidden, so a reader can
+// choose a degree, guess where the missing measurements fall, and only then
+// reveal them. The held-out score stays hidden with them.
+export function HoldOutPlayground({ concealable = false }: { concealable?: boolean }) {
   const [degree, setDegree] = useState(2);
+  const [revealed, setRevealed] = useState(!concealable);
   const [fit, setFit] = useState<SplitFit | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -146,6 +150,7 @@ export function HoldOutPlayground() {
         {NOISY_THROW.map((point, pointIndex) => {
           const { pixelX, pixelY } = toPixel(point);
           const isHeldOut = heldOutIndexSet.has(pointIndex);
+          if (isHeldOut && !revealed) return null;
           return isHeldOut ? (
             <circle
               key={`pt-${pointIndex}`}
@@ -200,9 +205,21 @@ export function HoldOutPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The amber points were hidden from the fit and only asked to judge it
-        afterwards.
+        {revealed
+          ? "The amber points were hidden from the fit and only asked to judge it afterwards."
+          : "Four of the fifteen measurements are hidden. Pick a degree, decide where you think they fall, then reveal them."}
       </p>
+
+      {!revealed && (
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={() => setRevealed(true)}
+            className="rounded-md border border-amber-400 bg-amber-50 px-3 py-1.5 text-sm font-medium text-amber-800 transition hover:bg-amber-100 dark:border-amber-500/70 dark:bg-amber-950/30 dark:text-amber-200 dark:hover:bg-amber-950/50"
+          >
+            Reveal the held-out points
+          </button>
+        </div>
+      )}
 
       <div className="mt-3 grid grid-cols-3 gap-3">
         <Stat
@@ -211,19 +228,21 @@ export function HoldOutPlayground() {
         />
         <Stat
           label="R² on the held-out share"
-          value={fit ? formatScore(fit.held_out_r_squared) : "…"}
+          value={fit && revealed ? formatScore(fit.held_out_r_squared) : revealed ? "…" : "hidden"}
         />
         <Stat
           label="The gap"
           value={
-            fit
+            fit && revealed
               ? formatScore(fit.train_r_squared - fit.held_out_r_squared)
-              : "…"
+              : revealed
+                ? "…"
+                : "hidden"
           }
         />
       </div>
 
-      {!message && (
+      {!message && revealed && (
         <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
           {statusText(fit, degree)}
         </p>

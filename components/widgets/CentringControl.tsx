@@ -1,96 +1,41 @@
 "use client";
 
-// Three lines through three points, two of them right and one of them the
+// Three lines through the crowd, two of them right and one of them the
 // mistake the library made and recorded.
 //
 // Ridge regression and kernel ridge under the linear kernel are the same fit,
 // so their lines lie exactly on top of one another and both pass through the
 // mean point, drawn as a ring. The third line centred the target and left the
-// inputs alone, which is close enough to read as rounding on a casual glance
-// and is wrong. Drag the penalty down toward nothing and watch the two right
-// lines climb toward the slope the points really have while the third stays
-// where it is. Every line comes from the library through the API.
+// heights where they were, at a hundred and seventy centimetres from the
+// origin, and it comes out flat. Drag the penalty down toward nothing and the
+// two right lines climb toward the slope the people really have while the
+// third stays where it is. Every line comes from the library through the API.
 
 import { useEffect, useState } from "react";
-import {
-  ApiError,
-  CentringControl as CentringAnswer,
-  KernelRidgePoint,
-  fitCentringControl,
-} from "@/lib/concepts/kernel-ridge";
+import { Point } from "@/lib/api";
+import { ApiError, CentringControl as CentringAnswer, fitCentringControl } from "@/lib/concepts/kernel-ridge";
+import { ACTIVE_CLASS, BUTTON_CLASS, CROWD, KERNEL_COLOUR, MEAN_COLOUR, NOISY_THROW, RIDGE_COLOUR, WRONG_COLOUR, boundsOf, formatSmall, scalesOf } from "./kernelRidgeFixtures";
 
-const VIEW = { width: 640, height: 300 };
-const PAD = { left: 48, right: 18, top: 14, bottom: 46 };
-const PLOT = {
-  width: VIEW.width - PAD.left - PAD.right,
-  height: VIEW.height - PAD.top - PAD.bottom,
-};
-
+const FRAME = { width: 640, height: 300, left: 48, right: 18, top: 14, bottom: 46 };
 const DEBOUNCE_MS = 140;
 
-// The same three points the page works by hand, on the line y = 6x.
-const WORKED_THREE: KernelRidgePoint[] = [
-  { x: 1, y: 6 },
-  { x: 2, y: 12 },
-  { x: 3, y: 18 },
+const DATASETS: { label: string; points: Point[]; axis: string }[] = [
+  { label: "The crowd", points: CROWD, axis: "height, cm" },
+  { label: "The thrown ball", points: NOISY_THROW, axis: "time, s" },
 ];
 
-interface Bounds {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
-}
-
-function boundsOf(answer: CentringAnswer | null): Bounds {
-  const xs = WORKED_THREE.map((point) => point.x);
-  const ys = WORKED_THREE.map((point) => point.y);
-  if (answer) {
-    for (const line of [answer.ridge, answer.kernel_ridge, answer.target_only]) {
-      for (const sample of line.curve) {
-        xs.push(sample.x);
-        ys.push(sample.y);
-      }
-    }
-  }
-  const yMin = Math.min(...ys);
-  const yMax = Math.max(...ys);
-  const yPad = 0.08 * (yMax - yMin || 1);
-  return {
-    xMin: Math.min(...xs),
-    xMax: Math.max(...xs),
-    yMin: yMin - yPad,
-    yMax: yMax + yPad,
-  };
-}
-
-function toPixel(point: KernelRidgePoint, bounds: Bounds) {
-  const spanX = bounds.xMax - bounds.xMin || 1;
-  const spanY = bounds.yMax - bounds.yMin || 1;
-  return {
-    px: PAD.left + ((point.x - bounds.xMin) / spanX) * PLOT.width,
-    py: PAD.top + (1 - (point.y - bounds.yMin) / spanY) * PLOT.height,
-  };
-}
-
-function pathOf(samples: KernelRidgePoint[], bounds: Bounds): string {
-  return samples
-    .map((sample, index) => {
-      const { px, py } = toPixel(sample, bounds);
-      return `${index === 0 ? "M" : "L"}${px.toFixed(1)},${py.toFixed(1)}`;
-    })
-    .join(" ");
-}
-
 export function CentringControl() {
-  const [penalty, setPenalty] = useState(1);
+  const [which, setWhich] = useState(0);
+  const [logPenalty, setLogPenalty] = useState(0);
   const [answer, setAnswer] = useState<CentringAnswer | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const penalty = 10 ** logPenalty;
+  const points = DATASETS[which].points;
 
   useEffect(() => {
     const timer = setTimeout(async () => {
       try {
-        setAnswer(await fitCentringControl(WORKED_THREE, penalty));
+        setAnswer(await fitCentringControl(points, penalty));
         setMessage(null);
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
@@ -98,113 +43,49 @@ export function CentringControl() {
       }
     }, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [penalty]);
+  }, [points, penalty]);
 
-  const bounds = boundsOf(answer);
-  const meanPixel = answer ? toPixel(answer.mean, bounds) : null;
+  const bounds = boundsOf(points, answer ? [answer.ridge.curve, answer.kernel_ridge.curve, answer.target_only.curve] : []);
+  const { plotX, plotY, pathOf } = scalesOf(bounds, FRAME);
 
   return (
     <div className="my-4">
-      <label className="flex items-center gap-3 pb-2 text-sm text-slate-600 dark:text-slate-300">
-        penalty
-        <input
-          type="range"
-          min={-3}
-          max={2}
-          step={0.25}
-          value={Math.log10(penalty)}
-          onChange={(event) =>
-            setPenalty(Number(10 ** Number(event.target.value)))
-          }
-          className="w-40 accent-indigo-600"
-        />
-        <span className="w-16 font-mono text-sm">{penalty.toPrecision(3)}</span>
-      </label>
-
-      <svg
-        viewBox={`0 0 ${VIEW.width} ${VIEW.height}`}
-        className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950"
-      >
-        {answer && (
-          <>
-            <path
-              d={pathOf(answer.ridge.curve, bounds)}
-              fill="none"
-              strokeWidth={6}
-              className="stroke-slate-400 dark:stroke-slate-500"
-            />
-            <path
-              d={pathOf(answer.kernel_ridge.curve, bounds)}
-              fill="none"
-              strokeWidth={2.5}
-              className="stroke-indigo-600 dark:stroke-indigo-400"
-            />
-            <path
-              d={pathOf(answer.target_only.curve, bounds)}
-              fill="none"
-              strokeWidth={2.5}
-              strokeDasharray="6 4"
-              className="stroke-rose-500"
-            />
-            {meanPixel && (
-              <circle
-                cx={meanPixel.px}
-                cy={meanPixel.py}
-                r={7}
-                fill="none"
-                strokeWidth={2}
-                className="stroke-amber-500"
-              />
-            )}
-          </>
-        )}
-        {WORKED_THREE.map((point) => {
-          const { px, py } = toPixel(point, bounds);
-          return (
-            <circle
-              key={point.x}
-              cx={px}
-              cy={py}
-              r={4}
-              className="fill-slate-800 stroke-white dark:fill-slate-100 dark:stroke-slate-900"
-              strokeWidth={1.5}
-            />
-          );
-        })}
-        <text
-          x={PAD.left}
-          y={VIEW.height - 26}
-          className="fill-slate-500 text-xs dark:fill-slate-400"
-        >
-          grey and indigo, the two right fits · rose, the target centred alone ·
-          ring, the mean point
-        </text>
-      </svg>
-
-      <div className="mt-3 grid grid-cols-3 gap-3">
-        <Stat
-          label="Ridge slope"
-          value={answer ? answer.ridge.slope.toFixed(3) : "…"}
-        />
-        <Stat
-          label="Kernel ridge slope"
-          value={answer ? answer.kernel_ridge.slope.toFixed(3) : "…"}
-        />
-        <Stat
-          label="Target centred alone"
-          value={answer ? answer.target_only.slope.toFixed(3) : "…"}
-        />
+      <div className="flex flex-wrap items-center gap-4 pb-2 text-sm text-slate-600 dark:text-slate-300">
+        <span className="flex gap-2">
+          {DATASETS.map((each, index) => (
+            <button key={each.label} onClick={() => setWhich(index)} className={index === which ? ACTIVE_CLASS : BUTTON_CLASS}>{each.label}</button>
+          ))}
+        </span>
+        <label className="flex items-center gap-2">
+          penalty
+          <input type="range" min={-3} max={2} step={0.25} value={logPenalty} onChange={(event) => setLogPenalty(Number(event.target.value))} className="w-32 accent-indigo-600" />
+          <span className="w-16 font-mono text-sm">{formatSmall(penalty)}</span>
+        </label>
       </div>
 
-      <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        {answer
-          ? `The two right fits answer ${answer.ridge.at_mean.toFixed(2)} at the mean point, where the target-only fit answers ${answer.target_only.at_mean.toFixed(2)}.`
-          : "…"}
-      </p>
+      <svg viewBox={`0 0 ${FRAME.width} ${FRAME.height}`} className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950">
+        {answer && (
+          <>
+            <path d={pathOf(answer.ridge.curve)} fill="none" strokeWidth={6} stroke={RIDGE_COLOUR} />
+            <path d={pathOf(answer.kernel_ridge.curve)} fill="none" strokeWidth={2.5} stroke={KERNEL_COLOUR} />
+            <path d={pathOf(answer.target_only.curve)} fill="none" strokeWidth={2.5} strokeDasharray="6 4" stroke={WRONG_COLOUR} />
+            <circle cx={plotX(answer.mean.x)} cy={plotY(answer.mean.y)} r={7} fill="none" strokeWidth={2} stroke={MEAN_COLOUR} />
+          </>
+        )}
+        {points.map((point, index) => (
+          <circle key={index} cx={plotX(point.x)} cy={plotY(point.y)} r={4} className="fill-slate-800 stroke-white dark:fill-slate-100 dark:stroke-slate-900" strokeWidth={1.5} />
+        ))}
+        <text x={FRAME.left} y={FRAME.height - 26} className="fill-slate-500 text-xs dark:fill-slate-400">grey and indigo, the two right fits · rose, the target centred alone · ring, the mean point</text>
+        <text x={FRAME.left} y={FRAME.height - 10} className="fill-slate-500 text-xs dark:fill-slate-400">{DATASETS[which].axis}</text>
+      </svg>
 
-      {message && (
-        <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{message}</p>
-      )}
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="ridge slope" value={answer ? answer.ridge.slope.toFixed(4) : "…"} />
+        <Stat label="kernel ridge slope" value={answer ? answer.kernel_ridge.slope.toFixed(4) : "…"} />
+        <Stat label="target centred alone" value={answer ? answer.target_only.slope.toFixed(4) : "…"} />
+        <Stat label="at the mean, right and wrong" value={answer ? `${answer.ridge.at_mean.toFixed(2)}, ${answer.target_only.at_mean.toFixed(2)}` : "…"} />
+      </div>
+      {message && <p className="mt-2 text-sm text-rose-600 dark:text-rose-400">{message}</p>}
     </div>
   );
 }
@@ -213,9 +94,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">
       <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
-      <div className="font-mono text-base font-semibold text-slate-900 dark:text-slate-100">
-        {value}
-      </div>
+      <div className="font-mono text-base font-semibold text-slate-900 dark:text-slate-100">{value}</div>
     </div>
   );
 }

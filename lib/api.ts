@@ -74,6 +74,25 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
   return (await response.json()) as T;
 }
 
+// The GET twin, for the handful of endpoints that take no input at all.
+export async function getJson<T>(path: string): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`);
+  } catch {
+    throw new ApiError(
+      "The compute API is not reachable. Is it running?",
+      "unreachable",
+    );
+  }
+
+  if (!response.ok) {
+    throw new ApiError("The API could not compute this input.", "refused");
+  }
+
+  return (await response.json()) as T;
+}
+
 export async function fitSimpleLinearRegression(
   points: Point[],
 ): Promise<LineFit> {
@@ -260,27 +279,49 @@ export interface PolynomialFit {
   coefficients: NamedCoefficient[];
   intercept: number;
   r_squared: number;
+  residual_sum_of_squares: number;
+  fitted: number[];
+  residuals: number[];
   curve: CurvePoint[];
+}
+
+// The interval the fitted curve is sampled over. Unset, the curve spans the
+// data and stops; set, it runs on past the last measurement, which is the
+// only way to see what a high degree does out there.
+export interface CurveRange {
+  from: number;
+  to: number;
 }
 
 export async function fitPolynomial(
   points: Point[],
   degree: number,
+  curveRange?: CurveRange,
 ): Promise<PolynomialFit> {
   return postJson<PolynomialFit>("/concepts/multiple-polynomial-regression/fit", {
     points,
     degree,
+    ...(curveRange ? { curve_from: curveRange.from, curve_to: curveRange.to } : {}),
   });
 }
 
 export type PenaltyModel = "ridge" | "lasso";
 
+export interface TermContribution {
+  name: string;
+  values: number[];
+}
+
 export interface PenalisedFit {
   coefficients: NamedCoefficient[];
   intercept: number;
   r_squared: number;
+  residual_sum_of_squares: number;
+  penalty_cost: number;
+  objective: number;
   nonzero_count: number;
   curve: CurvePoint[];
+  term_contributions: TermContribution[];
 }
 
 export async function fitPenalised(
@@ -302,6 +343,11 @@ export interface Outcome {
   label: number;
 }
 
+export interface StraightLine {
+  slope: number;
+  intercept: number;
+}
+
 export interface LogisticFit {
   slope: number;
   intercept: number;
@@ -310,6 +356,95 @@ export interface LogisticFit {
   curve: CurvePoint[];
   gaps: number[];
   gap_total: number;
+  probabilities: number[];
+  log_likelihood: number;
+  log_loss: number;
+  likelihood: number;
+  epochs_run: number;
+  converged: boolean;
+  odds_multiplier: number;
+  probability_at_zero: number;
+  straight_line: StraightLine;
+}
+
+// One student under a named curve: score, probability, decision and loss.
+export interface ScoredOutcome {
+  x: number;
+  label: number;
+  score: number;
+  probability: number;
+  predicted: number;
+  correct: boolean;
+  assigned_probability: number;
+  loss_contribution: number;
+  gap: number;
+  weighted_gap: number;
+}
+
+export interface ConfusionCounts {
+  true_positives: number;
+  true_negatives: number;
+  false_positives: number;
+  false_negatives: number;
+}
+
+export interface LogisticEvaluation {
+  outcomes: ScoredOutcome[];
+  confusion: ConfusionCounts;
+  accuracy: number;
+  boundary: number | null;
+  log_likelihood: number;
+  log_loss: number;
+  likelihood: number;
+  gap_total: number;
+  weighted_gap_total: number;
+  curve: CurvePoint[];
+}
+
+export async function evaluateLogistic(
+  points: Outcome[],
+  slope: number,
+  intercept: number,
+  threshold = 0.5,
+): Promise<LogisticEvaluation> {
+  return postJson<LogisticEvaluation>("/concepts/logistic-regression/evaluate", {
+    points,
+    slope,
+    intercept,
+    threshold,
+  });
+}
+
+export interface LogisticPass {
+  pass_number: number;
+  intercept: number;
+  slope: number;
+  log_loss: number;
+  accuracy: number;
+  gradient_intercept: number;
+  gradient_slope: number;
+}
+
+export interface LogisticWalk {
+  passes: LogisticPass[];
+  start_log_loss: number;
+  converged: boolean;
+  passes_run: number;
+  intercept_axis: number[];
+  slope_axis: number[];
+  log_losses: number[][];
+}
+
+export async function walkLogistic(
+  points: Outcome[],
+  learningRate: number,
+  maxEpochs: number,
+): Promise<LogisticWalk> {
+  return postJson<LogisticWalk>("/concepts/logistic-regression/walk", {
+    points,
+    learning_rate: learningRate,
+    max_epochs: maxEpochs,
+  });
 }
 
 export async function fitLogistic(
@@ -380,6 +515,136 @@ export interface TreeFit {
   regions: RegionGrid;
 }
 
+// One side of a candidate question, counted and scored.
+export interface NodeMixture {
+  children: number;
+  adults: number;
+  n_samples: number;
+  child_share: number;
+  adult_share: number;
+  gini: number;
+}
+
+export interface SplitInspection {
+  parent: NodeMixture;
+  left: NodeMixture;
+  right: NodeMixture;
+  weighted_after: number;
+  gain: number;
+  candidates: number[];
+}
+
+export async function inspectSplit(
+  points: LabelledPoint[],
+  feature: "height" | "weight",
+  threshold: number,
+): Promise<SplitInspection> {
+  return postJson<SplitInspection>("/concepts/decision-trees/split-inspector", {
+    points,
+    feature,
+    threshold,
+  });
+}
+
+// One node of a grown tree, laid out for a step-through. `split_order`
+// numbers the splits breadth first and is null on a leaf; `bounds` is the
+// rectangle the node owns, as [x_min, x_max, y_min, y_max].
+export interface GrownNode {
+  id: number;
+  parent_id: number | null;
+  depth: number;
+  split_order: number | null;
+  feature: string | null;
+  threshold: number | null;
+  gain: number | null;
+  children: number;
+  adults: number;
+  majority: number;
+  left_id: number | null;
+  right_id: number | null;
+  bounds: number[];
+}
+
+export interface TreeGrowth {
+  nodes: GrownNode[];
+  n_splits: number;
+  depth: number;
+  n_leaves: number;
+  accuracy: number;
+  x_min: number;
+  x_max: number;
+  y_min: number;
+  y_max: number;
+}
+
+export interface GrowthControls {
+  maxDepth?: number;
+  minSamplesSplit?: number;
+  minSamplesLeaf?: number;
+  minImpurityDecrease?: number;
+  // The forest's rule. Set maxFeatures and every split is offered that
+  // many features, drawn under randomSeed.
+  maxFeatures?: number;
+  randomSeed?: number;
+}
+
+export async function growTree(
+  points: LabelledPoint[],
+  controls: GrowthControls = {},
+): Promise<TreeGrowth> {
+  return postJson<TreeGrowth>("/concepts/decision-trees/growth", {
+    points,
+    ...(controls.maxDepth !== undefined ? { max_depth: controls.maxDepth } : {}),
+    ...(controls.minSamplesSplit !== undefined ? { min_samples_split: controls.minSamplesSplit } : {}),
+    ...(controls.minSamplesLeaf !== undefined ? { min_samples_leaf: controls.minSamplesLeaf } : {}),
+    ...(controls.minImpurityDecrease !== undefined ? { min_impurity_decrease: controls.minImpurityDecrease } : {}),
+    ...(controls.maxFeatures !== undefined ? { max_features: controls.maxFeatures } : {}),
+    ...(controls.randomSeed !== undefined ? { random_seed: controls.randomSeed } : {}),
+  });
+}
+
+export interface DepthScore {
+  max_depth: number;
+  depth_reached: number;
+  n_leaves: number;
+  train_accuracy: number;
+  held_out_accuracy: number;
+  regions: RegionGrid;
+}
+
+export interface TreeDepthSweep {
+  held_out_indices: number[];
+  scores: DepthScore[];
+}
+
+export async function sweepTreeDepth(
+  points: LabelledPoint[],
+  maxDepth: number,
+): Promise<TreeDepthSweep> {
+  return postJson<TreeDepthSweep>("/concepts/decision-trees/depth-sweep", {
+    points,
+    max_depth: maxDepth,
+  });
+}
+
+export interface VersusLogistic {
+  tree_regions: RegionGrid;
+  tree_accuracy: number;
+  tree_leaves: number;
+  logistic_regions: RegionGrid;
+  logistic_accuracy: number;
+}
+
+export async function compareTreeWithLogistic(
+  points: LabelledPoint[],
+  maxDepth: number,
+): Promise<VersusLogistic> {
+  return postJson<VersusLogistic>("/concepts/decision-trees/versus-logistic", {
+    points,
+    max_depth: maxDepth,
+  });
+}
+
 export async function fitTree(
   points: LabelledPoint[],
   maxDepth: number,
@@ -398,6 +663,225 @@ export interface CommitteeAnswer {
   roots_on_height: number;
   roots_on_weight: number;
   regions: RegionGrid;
+}
+
+// One member of a bagged committee, as the bagging page reads it.
+export interface MemberDocument {
+  position: number;
+  draws: number[];
+  multiplicities: number[];
+  distinct_rows: number;
+  omitted_rows: number;
+  root_feature: string | null;
+  root_threshold: number | null;
+  depth: number;
+  n_leaves: number;
+  predictions: number[];
+  regions: RegionGrid;
+}
+
+export interface CommitteeSize {
+  n_members: number;
+  train_accuracy: number;
+  out_of_bag_accuracy: number | null;
+  out_of_bag_covered: number;
+  changed_cells: number;
+  regions: RegionGrid;
+  vote_share: number[][];
+}
+
+export interface OutOfBagRow {
+  label: number;
+  eligible: number[];
+  out_of_bag_adult_votes: number;
+  out_of_bag_prediction: number | null;
+  full_adult_votes: number;
+  full_prediction: number;
+}
+
+export interface BaggingAnatomy {
+  n_rows: number;
+  members: MemberDocument[];
+  sizes: CommitteeSize[];
+  out_of_bag: OutOfBagRow[];
+  roots_on_height: number;
+  roots_on_weight: number;
+  expected_omitted: number;
+  expected_distinct: number;
+  // Each member scored on the rows its own sample omitted, and how alike
+  // the members are, measured pairwise on rows both omitted.
+  member_strengths: (number | null)[];
+  mean_strength: number | null;
+  pairwise_agreement: number | null;
+  error_correlation: number | null;
+}
+
+export interface AnatomyOptions {
+  memberDepth?: number;
+  maxFeatures?: number;
+  seed?: number;
+}
+
+// Several widgets on the bagging page read the same seeded committee, and
+// the endpoint refits it at every size, so one page-load shares one answer
+// per distinct request rather than asking six times.
+const anatomyCache = new Map<string, Promise<BaggingAnatomy>>();
+
+export async function fetchBaggingAnatomy(
+  points: LabelledPoint[],
+  nMembers: number,
+  memberDepth?: number,
+  options: AnatomyOptions = {},
+): Promise<BaggingAnatomy> {
+  const body = {
+    points,
+    n_members: nMembers,
+    ...(memberDepth === undefined ? {} : { member_depth: memberDepth }),
+    ...(options.maxFeatures === undefined ? {} : { max_features: options.maxFeatures }),
+    ...(options.seed === undefined ? {} : { seed: options.seed }),
+  };
+  const key = JSON.stringify(body);
+  const cached = anatomyCache.get(key);
+  if (cached) return cached;
+  const pending = postJson<BaggingAnatomy>("/concepts/ensembles/bagging-anatomy", body).catch((error) => {
+    anatomyCache.delete(key);
+    throw error;
+  });
+  anatomyCache.set(key, pending);
+  return pending;
+}
+
+export interface FeatureBest {
+  feature: string;
+  threshold: number;
+  gain: number;
+}
+
+export interface LotteryDraw {
+  offered: string[];
+  withheld: string[];
+  winner: string;
+  winner_gain: number;
+  best_denied: boolean;
+}
+
+export interface Lottery {
+  board: FeatureBest[];
+  draws: LotteryDraw[];
+}
+
+export async function drawForestLottery(
+  points: LabelledPoint[],
+  maxFeatures: number,
+  nDraws: number,
+  seed = 7,
+): Promise<Lottery> {
+  return postJson<Lottery>("/concepts/ensembles/forest-lottery", {
+    points,
+    max_features: maxFeatures,
+    n_draws: nDraws,
+    seed,
+  });
+}
+
+export interface SampleCompetition {
+  position: number;
+  distinct_rows: number;
+  board: FeatureBest[];
+  winner: string | null;
+}
+
+export interface SplitCompetition {
+  samples: SampleCompetition[];
+  wins: Record<string, number>;
+}
+
+export async function holdSplitCompetition(
+  points: LabelledPoint[],
+  nSamples: number,
+  seed = 7,
+): Promise<SplitCompetition> {
+  return postJson<SplitCompetition>("/concepts/ensembles/split-competition", {
+    points,
+    n_samples: nSamples,
+    seed,
+  });
+}
+
+export interface SameSampleTree {
+  seed: number;
+  root_feature: string | null;
+  root_threshold: number | null;
+  depth: number;
+  n_leaves: number;
+  predictions: number[];
+  regions: RegionGrid;
+}
+
+export interface SameSample {
+  multiplicities: number[];
+  unrestricted_root: string | null;
+  trees: SameSampleTree[];
+  agreement: number;
+}
+
+export async function growOnSameSample(
+  points: LabelledPoint[],
+  seeds: number[],
+): Promise<SameSample> {
+  return postJson<SameSample>("/concepts/ensembles/forest-same-sample", {
+    points,
+    seeds,
+  });
+}
+
+export interface SeedResult {
+  seed: number;
+  bagging_out_of_bag: number;
+  forest_out_of_bag: number;
+  bagging_roots_on_height: number;
+  forest_roots_on_height: number;
+}
+
+export interface SeedComparison {
+  results: SeedResult[];
+  mean_difference: number;
+}
+
+export async function compareAcrossSeeds(
+  points: LabelledPoint[],
+  nSeeds: number,
+  nMembers: number,
+): Promise<SeedComparison> {
+  return postJson<SeedComparison>("/concepts/ensembles/forest-seeds", {
+    points,
+    n_seeds: nSeeds,
+    n_members: nMembers,
+  });
+}
+
+export interface WorldPoint {
+  max_features: number;
+  mean_strength: number | null;
+  error_correlation: number | null;
+  out_of_bag: number;
+}
+
+export interface SignalWorld {
+  name: string;
+  description: string;
+  sweep: WorldPoint[];
+}
+
+export interface SignalWorlds {
+  n_rows: number;
+  n_features: number;
+  n_members: number;
+  worlds: SignalWorld[];
+}
+
+export async function fetchSignalWorlds(): Promise<SignalWorlds> {
+  return getJson<SignalWorlds>("/concepts/ensembles/signal-worlds");
 }
 
 export async function fitCommittee(
@@ -442,6 +926,7 @@ export interface PlaneFit3d {
   age_coefficient: number;
   intercept: number;
   r_squared: number;
+  fitted: number[];
   heights_axis: number[];
   ages_axis: number[];
   surface: number[][];
@@ -620,6 +1105,56 @@ export async function traceShrinkage(points: Point[]): Promise<ShrinkagePath> {
   });
 }
 
+export interface PathStep {
+  penalty: number;
+  coefficients: number[];
+  nonzero_count: number;
+  residual_sum_of_squares: number;
+  penalty_cost: number;
+  objective: number;
+  train_r_squared: number;
+  held_out_r_squared: number;
+}
+
+export interface RegularisationPath {
+  names: string[];
+  steps: PathStep[];
+}
+
+export async function traceRegularisationPath(
+  points: Point[],
+  model: PenaltyModel,
+): Promise<RegularisationPath> {
+  return postJson<RegularisationPath>("/concepts/ridge-lasso/regularisation-path", {
+    points,
+    model,
+  });
+}
+
+export interface CoefficientPair {
+  first: number;
+  second: number;
+}
+
+export interface GeometrySolutions {
+  least_squares: CoefficientPair;
+  ridge: CoefficientPair[];
+  lasso: CoefficientPair[];
+}
+
+export interface PenaltyGeometry {
+  first_axis: number[];
+  second_axis: number[];
+  rss: number[][];
+  penalties: number[];
+  original: GeometrySolutions;
+  perturbed: GeometrySolutions;
+}
+
+export async function fetchPenaltyGeometry(): Promise<PenaltyGeometry> {
+  return getJson<PenaltyGeometry>("/concepts/ridge-lasso/penalty-geometry");
+}
+
 export interface RootCandidate {
   feature: string;
   threshold: number;
@@ -629,9 +1164,10 @@ export interface RootCandidate {
 
 export interface RootSearch {
   candidates: RootCandidate[];
-  best_feature: string;
-  best_threshold: number;
-  best_gain: number;
+  // Null when no question improves on the parent, which a crossed crowd does.
+  best_feature: string | null;
+  best_threshold: number | null;
+  best_gain: number | null;
 }
 
 export async function searchRootCandidates(

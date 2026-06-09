@@ -2,15 +2,17 @@
 
 // The leak, measured rather than feared.
 //
-// Two transformers, three row counts, thirty seeds each. In every pair the
-// amber bar is the mean held-out R squared when the transformer was fitted on
-// every row before the folds were dealt, the indigo bar when it was refitted
-// inside each fold, and the figure over the pair is amber less indigo. The
-// upper panel is a standardizer, which never reads the target, and its gap
-// sits within noise of zero with about half the seeds flattered. The lower
-// panel is a column chosen by its correlation with a target of pure noise,
-// and there the gap is a bias that survives every family of seeds. Every
-// score is the library's through the API. The browser only draws the bars.
+// Two transformers, three crowd sizes, thirty seeds each. In every pair the
+// amber bar is the mean held-out R squared when the transformer was fitted
+// on every person before the folds were dealt, the indigo bar when it was
+// refitted inside each fold, and the figure over the pair is amber less
+// indigo. The upper panel is a standardizer over people measured by height,
+// age and daily walk, which never reads the weight it is helping to predict,
+// and its gap is within noise of zero with about half the seeds flattered.
+// The lower panel is a column chosen by its correlation with a target of
+// pure noise, and there the gap is a bias that survives every family of
+// seeds. Every score is the library's through the API. The browser only
+// draws the bars.
 
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
@@ -19,6 +21,7 @@ import {
   LeakMeasurement,
   measureLeak,
 } from "@/lib/concepts/pipelines";
+import { BUTTON_CLASS, signed } from "./pipelinesFixtures";
 
 const ROW_COUNTS = [30, 60, 200];
 const FIRST_SEED = 0;
@@ -47,11 +50,6 @@ function pixelForScore(score: number): number {
 
 function centreForGroup(groupIndex: number): number {
   return PAD.left + ((groupIndex + 0.5) / ROW_COUNTS.length) * PLOT.width;
-}
-
-function signed(value: number, digits: number): string {
-  const sign = value < 0 ? "−" : "+";
-  return sign + Math.abs(value).toFixed(digits);
 }
 
 function Bar({
@@ -160,7 +158,7 @@ function Panel({
                 textAnchor="middle"
                 className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
               >
-                {rowCount} rows
+                {rowCount} people
               </text>
             </g>
           );
@@ -213,16 +211,13 @@ export function LeakageBarsPlayground() {
 
   const smallest = measurements ? measurements[0] : null;
 
-  const buttonClass =
-    "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
-
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <button onClick={() => setFirstSeed(FIRST_SEED)} className={buttonClass}>
+        <button onClick={() => setFirstSeed(FIRST_SEED)} className={BUTTON_CLASS}>
           The first thirty seeds
         </button>
-        <button onClick={nextFamily} className={buttonClass}>
+        <button onClick={nextFamily} className={BUTTON_CLASS}>
           Another thirty seeds
         </button>
         <span className="ml-auto font-mono text-sm text-slate-600 dark:text-slate-300">
@@ -232,7 +227,7 @@ export function LeakageBarsPlayground() {
 
       <div className="space-y-4">
         <Panel
-          heading="A standardizer, which never reads the target"
+          heading="A standardizer over height, age and daily walk, which never reads the weight"
           gaps={ROW_COUNTS.map((_, index) =>
             measurements ? measurements[index].scaling : null,
           )}
@@ -246,7 +241,7 @@ export function LeakageBarsPlayground() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Amber is the transformer fitted on every row before the folds were
+        Amber is the transformer fitted on every person before the folds were
         dealt, indigo is the same transformer refitted inside each fold, and
         the figure over each pair is amber less indigo, averaged over thirty
         seeds of five-fold k-nearest neighbours.
@@ -254,7 +249,7 @@ export function LeakageBarsPlayground() {
 
       <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat
-          label="Standardizer gap, 30 rows"
+          label="Standardizer gap, 30 people"
           value={smallest ? signed(smallest.scaling.flattered_by, 4) : "…"}
         />
         <Stat
@@ -266,7 +261,7 @@ export function LeakageBarsPlayground() {
           }
         />
         <Stat
-          label="Chosen-column gap, 30 rows"
+          label="Chosen-column gap, 30 people"
           value={smallest ? signed(smallest.selection.flattered_by, 4) : "…"}
         />
         <Stat
@@ -281,7 +276,7 @@ export function LeakageBarsPlayground() {
 
       {smallest && (
         <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-500">
-          One pipeline object was handed to every fold of every seed. Afterwards
+          One chain object was handed to every fold of every seed. Afterwards
           it is {smallest.pipeline_fitted_after_folds ? "fitted" : "unfitted"},
           to the last fold it saw, and the steps and model it was configured
           with are{" "}

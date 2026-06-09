@@ -9,8 +9,9 @@
 // table underneath ranks everyone by that metric with the voters marked. The
 // strip at the bottom measures the query against its nearest person under all
 // six at once, and sweeps the p-norm of that one gap from Manhattan to
-// Chebyshev. Every distance is the library's through the API, not the
-// browser's.
+// Chebyshev. Two other crowds are a click away, the ideal case where every
+// metric agrees and a random one. Every distance is the library's through
+// the API, not the browser's.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, LabelledPoint, Point } from "@/lib/api";
@@ -23,32 +24,25 @@ import {
   measurePair,
   neighboursUnder,
 } from "@/lib/concepts/distance-metrics";
+import {
+  IDEAL_PEOPLE,
+  IDEAL_QUERY,
+  WORKED_PEOPLE,
+  WORKED_QUERY,
+  formatDistance,
+  randomCrowd,
+} from "./distanceMetricsFixtures";
 
 const DOMAIN = { xMin: 100, xMax: 200, yMin: 10, yMax: 100 };
+
+const buttonClass =
+  "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
 const VIEW = { width: 640, height: 460 };
 const PAD = { left: 56, right: 16, top: 16, bottom: 50 };
 const PLOT = {
   width: VIEW.width - PAD.left - PAD.right,
   height: VIEW.height - PAD.top - PAD.bottom,
 };
-
-// The k-nearest page's borderline case, five children and six adults, with a
-// query whose nearest three sit at Euclidean distances 5, 10 and 13.
-const WORKED_PEOPLE: LabelledPoint[] = [
-  { x: 147, y: 41, label: 0 },
-  { x: 156, y: 53, label: 1 },
-  { x: 145, y: 57, label: 0 },
-  { x: 159, y: 57, label: 1 },
-  { x: 162, y: 61, label: 1 },
-  { x: 120, y: 25, label: 0 },
-  { x: 122, y: 28, label: 0 },
-  { x: 118, y: 24, label: 0 },
-  { x: 180, y: 80, label: 1 },
-  { x: 183, y: 83, label: 1 },
-  { x: 178, y: 78, label: 1 },
-];
-
-const WORKED_QUERY: Point = { x: 150, y: 45 };
 
 function toPixel(point: Point) {
   const px =
@@ -76,13 +70,6 @@ function toData(px: number, py: number): Point {
       DOMAIN.yMax,
     ),
   };
-}
-
-// Three significant figures, so 5 reads as 5.00, 13 as 13.0 and a cosine
-// distance of 0.000189 keeps the digits that distinguish it from its
-// neighbours.
-function formatDistance(value: number): string {
-  return value.toPrecision(3);
 }
 
 export function MetricNeighboursPlayground() {
@@ -175,12 +162,30 @@ export function MetricNeighboursPlayground() {
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button
           onClick={() => {
+            setPoints(IDEAL_PEOPLE);
+            setQuery(IDEAL_QUERY);
+          }}
+          className={buttonClass}
+        >
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => {
             setPoints(WORKED_PEOPLE);
             setQuery(WORKED_QUERY);
           }}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          className={buttonClass}
         >
           The borderline case
+        </button>
+        <button
+          onClick={() => {
+            setPoints(randomCrowd());
+            setQuery(WORKED_QUERY);
+          }}
+          className={buttonClass}
+        >
+          Random crowd
         </button>
         <div className="flex flex-wrap gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {METRIC_NAMES.map((name) => (

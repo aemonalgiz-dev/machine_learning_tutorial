@@ -11,7 +11,7 @@
 // the browser only scales pixels and clamps lines to the window edges.
 
 import { useEffect, useState } from "react";
-import { ApiError, KernelSimilarity, traceKernelSimilarity } from "@/lib/api";
+import { ApiError, KernelSimilarity, traceSimilarity } from "@/lib/concepts/kernel-trick";
 
 const VIEW_WIDTH = 560;
 const VIEW_HEIGHT = 300;
@@ -58,6 +58,12 @@ function pathForCurve(positions: number[], values: number[]): string {
     .join(" ");
 }
 
+let pending: Promise<KernelSimilarity> | null = null;
+function traceOnce(): Promise<KernelSimilarity> {
+  if (!pending) pending = traceSimilarity();
+  return pending;
+}
+
 export function KernelSimilarityChart() {
   const [similarity, setSimilarity] = useState<KernelSimilarity | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -65,8 +71,9 @@ export function KernelSimilarityChart() {
   useEffect(() => {
     (async () => {
       try {
-        setSimilarity(await traceKernelSimilarity());
+        setSimilarity(await traceOnce());
       } catch (error) {
+        pending = null;
         if (error instanceof ApiError) setMessage(error.message);
         else setMessage("Something went wrong.");
       }

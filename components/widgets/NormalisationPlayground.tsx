@@ -14,38 +14,24 @@
 // them out.
 
 import { useEffect, useRef, useState } from "react";
+import { ApiError, NormalisationLayer, ReducedStatistic } from "@/lib/api";
 import {
-  ApiError,
-  Normalisation,
-  NormalisationLayer,
-  ReducedStatistic,
+  NormalisedBlock,
   normaliseBlock,
-} from "@/lib/api";
+} from "@/lib/concepts/normalisation-layers";
+import {
+  PLAYGROUND_MAX_ROWS,
+  THREE_FEATURES,
+  TWENTY_OF_THE_CROWD,
+  WORKED_BLOCK,
+  randomPeople,
+} from "./normalisationLayersFixtures";
 
 const MIN_ROWS = 2;
-const MAX_ROWS = 20;
+const MAX_ROWS = PLAYGROUND_MAX_ROWS;
 const MIN_FEATURES = 2;
 const MAX_FEATURES = 6;
 const MAX_MAGNITUDE = 1_000_000;
-
-// Four rows of three features whose column means and deviations are whole,
-// 8, 6 and 10 over 3, 2 and 5, the block the page opens on.
-const THREE_FEATURES: number[][] = [
-  [5, 4, 3],
-  [7, 4, 9],
-  [7, 8, 11],
-  [13, 8, 17],
-];
-
-// The worked example. Down each column the mean and deviation are whole, 8
-// and 9 then 6 and 3, and across the first row they are whole as well, a mean
-// of 4, a deviation of 3 and a root mean square of 5.
-const WORKED_BLOCK: number[][] = [
-  [1, 7],
-  [1, 9],
-  [7, 1],
-  [23, 7],
-];
 
 type Mode = "training" | "predicting";
 
@@ -84,10 +70,10 @@ function captionFor(layer: NormalisationLayer, mode: Mode): string {
 }
 
 export function NormalisationPlayground() {
-  const [rows, setRows] = useState<number[][]>(THREE_FEATURES);
+  const [rows, setRows] = useState<number[][]>(WORKED_BLOCK);
   const [layer, setLayer] = useState<NormalisationLayer>("batch");
   const [mode, setMode] = useState<Mode>("training");
-  const [answer, setAnswer] = useState<Normalisation | null>(null);
+  const [answer, setAnswer] = useState<NormalisedBlock | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -162,8 +148,20 @@ export function NormalisationPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
+        <button
+          onClick={() => setRows(TWENTY_OF_THE_CROWD)}
+          className={BUTTON_CLASS}
+        >
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => setRows(randomPeople())}
+          className={BUTTON_CLASS}
+        >
+          Random people
+        </button>
         <button onClick={() => setRows(WORKED_BLOCK)} className={BUTTON_CLASS}>
-          Worked example
+          The whole-number four
         </button>
         <button
           onClick={() => setRows(THREE_FEATURES)}
