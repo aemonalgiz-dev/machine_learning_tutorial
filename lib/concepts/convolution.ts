@@ -295,16 +295,21 @@ export interface CostRow {
   answers: number[];
   n_inputs: number;
   n_outputs: number;
+  n_terms: number;
   convolution_parameters: number;
   dense_parameters: number;
   sweep_milliseconds: number;
+  loop_milliseconds: number;
   dense_milliseconds: number;
   ratio: number;
+  loop_over_sweep: number;
+  largest_disagreement: number;
 }
 
 export interface Cost {
   repeats: number;
   rows: CostRow[];
+  largest_disagreement_anywhere: number;
 }
 
 let costRequest: Promise<Cost> | null = null;
