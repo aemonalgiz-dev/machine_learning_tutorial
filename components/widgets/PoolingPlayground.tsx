@@ -22,41 +22,11 @@ import {
   PoolingKind,
   applyPooling,
 } from "@/lib/concepts/pooling";
+import { FLAT_PATCH, PATCH, randomPatch, verticalStroke } from "./poolingFixtures";
 
 const SMALLEST_SIDE = 2;
 const LARGEST_SIDE = 8;
 const LARGEST_VALUE = 1_000_000;
-
-// The worked example. Four windows of two, summing to 12, 8, 4 and 16 and
-// each holding one largest value, so a maximum answers 5, 4, 2 and 7 and an
-// average answers 3, 2, 1 and 4.
-const WORKED_PICTURE: Grid = [
-  [1, 5, 1, 3],
-  [4, 2, 4, 0],
-  [0, 1, 3, 1],
-  [2, 1, 7, 5],
-];
-
-// Sixteen equal cells. Every window is a four-way tie, and the layer sends
-// the whole slope to the first cell in row-major order.
-const FLAT_PATCH: Grid = Array.from({ length: 4 }, () =>
-  Array.from({ length: 4 }, () => 5),
-);
-
-// One bright column on an eight by eight, for watching what a nudge does to
-// the pooled map. It starts in the third column, so under a window of two at
-// a stride of two the first nudge keeps it inside the same windows and the
-// second carries it across a boundary.
-const STROKE_COLUMN = 2;
-const STROKE_VALUE = 9;
-
-function verticalStroke(): Grid {
-  return Array.from({ length: LARGEST_SIDE }, () =>
-    Array.from({ length: LARGEST_SIDE }, (_, column) =>
-      column === STROKE_COLUMN ? STROKE_VALUE : 0,
-    ),
-  );
-}
 
 // Every row shifted one cell to the right, a zero entering on the left and
 // the last cell falling off the edge.
@@ -93,7 +63,8 @@ function formatBlame(value: number): string {
 }
 
 export function PoolingPlayground() {
-  const [picture, setPicture] = useState<Grid>(WORKED_PICTURE);
+  const [picture, setPicture] = useState<Grid>(PATCH);
+  const [draw, setDraw] = useState(1);
   const [windowSide, setWindowSide] = useState(2);
   const [stride, setStride] = useState(2);
   const [kind, setKind] = useState<PoolingKind>("max");
@@ -171,11 +142,8 @@ export function PoolingPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <button
-          onClick={() => startFrom(WORKED_PICTURE)}
-          className={BUTTON_CLASS}
-        >
-          The worked example
+        <button onClick={() => startFrom(PATCH)} className={BUTTON_CLASS}>
+          A four by four patch
         </button>
         <button
           onClick={() => startFrom(verticalStroke())}
@@ -185,6 +153,15 @@ export function PoolingPlayground() {
         </button>
         <button onClick={() => startFrom(FLAT_PATCH)} className={BUTTON_CLASS}>
           A flat patch
+        </button>
+        <button
+          onClick={() => {
+            setDraw((count) => count + 1);
+            startFrom(randomPatch(side, draw));
+          }}
+          className={BUTTON_CLASS}
+        >
+          A random patch
         </button>
         <button onClick={nudge} className={BUTTON_CLASS}>
           Nudge right
