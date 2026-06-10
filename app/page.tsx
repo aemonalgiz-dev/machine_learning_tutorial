@@ -234,6 +234,7 @@ const CURRICULUM: Part[] = [
         concepts: [
           {
             title: "Markov Chains",
+            href: "/concepts/markov-chains",
             blurb:
               "A model whose next state depends on the current one and on nothing before it, which is a strong claim about the world and the reason the arithmetic stays small. Counting the transitions is the whole of the fit, and the assumption is exactly what it throws away.",
           },
@@ -265,8 +266,9 @@ const CURRICULUM: Part[] = [
           },
           {
             title: "Centring on the Mean",
+            href: "/concepts/centring-on-the-mean",
             blurb:
-              "Move a column so its typical value sits at zero and divide by the range it covers, which bounds the values without claiming anything about their shape.",
+              "Subtract each column’s mean and divide by nothing, and every method that was measuring from a zero nobody in the data is near starts measuring from the average person instead.",
           },
         ],
       },
@@ -468,11 +470,13 @@ const CURRICULUM: Part[] = [
           },
           {
             title: "Convolutional Networks",
+            href: "/concepts/convolutional-networks",
             blurb:
               "Convolution and pooling stacked so that early layers see small patterns and later ones see arrangements of those patterns, ending in an answer about the whole picture. What each part contributes, and why depth buys a wider view than any single layer has.",
           },
           {
             title: "U-Net",
+            href: "/concepts/u-net",
             blurb:
               "An architecture that shrinks a picture down to work out what is in it and grows it back to say where, carrying the fine detail across on connections that skip the middle. A worked example of a network that answers for every pixel rather than for the picture.",
           },
@@ -485,16 +489,19 @@ const CURRICULUM: Part[] = [
         concepts: [
           {
             title: "A Vector for a Picture",
+            href: "/concepts/a-vector-for-a-picture",
             blurb:
               "Train a network to name what it sees, then throw away the naming and keep the layer before it. What is left is a position for the picture, and pictures of the same thing land near each other without anyone having asked for that.",
           },
           {
             title: "Learning the Metric Itself",
+            href: "/concepts/learning-the-metric-itself",
             blurb:
               "Rather than hoping nearness falls out of a model trained for something else, train on the nearness directly by showing the model pairs that should be close and pairs that should not. What that needs is examples of sameness rather than labels.",
           },
           {
             title: "Searching a Collection of Pictures",
+            href: "/concepts/searching-a-collection-of-pictures",
             blurb:
               "Once every picture is a position, finding the ones like this is a nearest-neighbour query, and doing it exactly means touching every picture there is. What the exact answer costs, and what is given up to avoid paying it.",
           },

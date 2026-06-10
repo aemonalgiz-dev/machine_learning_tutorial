@@ -29,6 +29,19 @@ const nextConfig: NextConfig = {
   // ever talks to one origin. Set NEXT_PUBLIC_API_BASE_URL to /backend to use
   // it; unset, the site still calls the API directly, which is what a local
   // developer wants.
+  // How long the /backend proxy waits for an answer before giving up.
+  //
+  // The default is 30 seconds, and a few pages train several small networks
+  // on their first visit after the API starts. Asked for together while cold
+  // they can take longer than that, the proxy answers 500 while the API is
+  // still working, and the widget reports a failure for a page that is fine.
+  // The API warms those answers as it starts, so this only matters in the
+  // first minute or two, but that is exactly when a visitor arrives after a
+  // deploy.
+  experimental: {
+    proxyTimeout: 120_000,
+  },
+
   async rewrites() {
     return [
       {
