@@ -297,7 +297,7 @@ export default function GradientDescentRegressionPage() {
                 </p>
                 <PassInspector />
                 <p>
-                  The inspector starts where the library starts, a flat line at
+                  The inspector starts where the fit starts, a flat line at
                   zero, which is deliberately poor rather than the worst line
                   there is, since arbitrarily bad lines exist. Step through the
                   stages with the buttons, then make the new line current and
@@ -402,9 +402,8 @@ export default function GradientDescentRegressionPage() {
             <>
               <SubSection title="14. Following the complete walk">
                 <p>
-                  The library records every pass of one walk, and the
-                  dashboard below reads that record off every instrument at
-                  once. The scrubber picks a pass and every panel follows it.
+                  Every pass of one walk is recorded, and the dashboard below
+                  reads that record off every instrument at once. The scrubber picks a pass and every panel follows it.
                 </p>
                 <TrajectoryDashboard />
                 <p>
@@ -468,8 +467,8 @@ export default function GradientDescentRegressionPage() {
                   is at 65.94 with a loss of 2.004, close enough that the
                   difference is the fourth decimal. At 0.07 the slope is at
                   −19 million and the record had to stop before the numbers
-                  overflowed. The table below asks the library itself for a
-                  plain fit at eight rates and reports what it said.
+                  overflowed. The table below asks for a plain fit at eight
+                  rates and reports what came back.
                 </p>
                 <RateSweepTable />
               </SubSection>
@@ -765,13 +764,13 @@ export default function GradientDescentRegressionPage() {
                   ]}
                 />
                 <p>
-                  The library&rsquo;s verdicts in section 16&rsquo;s table draw
+                  The verdicts in section 16&rsquo;s table draw
                   these lines exactly where they fall. At 0.07 and 0.1 the walk
                   is doomed and has not yet overflowed, so it runs out of its
                   500 passes holding numbers that are large and useless, and
                   the verdict is that the passes ran out. Only at 0.2 do the
                   coefficients stop being finite inside the budget, and only
-                  then does the library refuse by name. Non-finite arithmetic
+                  then is the fit refused by name. Non-finite arithmetic
                   detects the wreck, not the beginning of the skid, which can
                   be many passes earlier. A run should be read by its loss and
                   gradient over time, which is the dashboard&rsquo;s middle row,
@@ -781,7 +780,7 @@ export default function GradientDescentRegressionPage() {
 
               <SubSection title="28. Honest stopping criteria">
                 <p>
-                  The library stops when no coefficient moved more than 10⁻⁸ in
+                  The walk stops when no coefficient moved more than 10⁻⁸ in
                   a whole pass. That is a movement tolerance, and a movement is
                   the rate times the gradient.
                 </p>

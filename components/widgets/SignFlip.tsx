@@ -80,7 +80,7 @@ export function SignFlip() {
         </div>
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The library reported ({first.dx.toFixed(2)}, {first.dy.toFixed(2)}), pointing toward shorter and lighter. Flipped, the arrow points the other way along the same dashed line, every score changes sign, and the green shadows do not move.
+        The fitted direction came back as ({first.dx.toFixed(2)}, {first.dy.toFixed(2)}), pointing toward shorter and lighter. Flipped, the arrow points the other way along the same dashed line, every score changes sign, and the green shadows do not move.
       </p>
     </div>
   );

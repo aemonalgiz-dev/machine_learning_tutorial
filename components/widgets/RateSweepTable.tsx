@@ -60,7 +60,7 @@ export function RateSweepTable() {
           <thead>
             <tr className="text-left text-xs text-slate-500 dark:text-slate-400">
               <th className="py-1 pr-3 font-medium">step size</th>
-              <th className="py-1 pr-3 font-medium">what the library said</th>
+              <th className="py-1 pr-3 font-medium">what happened</th>
               <th className="py-1 pr-3 font-medium">passes</th>
               <th className="py-1 pr-3 font-medium">slope reached</th>
               <th className="py-1 font-medium">error kept per pass</th>
@@ -87,7 +87,7 @@ export function RateSweepTable() {
                   </span>
                   {verdict.error_name && (
                     <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
-                      {verdict.error_name}
+                      the weights stopped being finite
                     </span>
                   )}
                 </td>

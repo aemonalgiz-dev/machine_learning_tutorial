@@ -226,9 +226,9 @@ export default function GridSearchPage() {
                   every other setting copied from the prototype, so that a
                   value the model would refuse is refused here too, and a
                   name the model does not have is refused before a single fold
-                  is fitted. The library checks the dial&rsquo;s name against
-                  the model&rsquo;s declared fields when the range is written
-                  down, and the widget below lets you misspell it.
+                  is fitted. The dial&rsquo;s name is checked against the
+                  model&rsquo;s declared fields at the moment the range is
+                  written down, and the widget below lets you misspell it.
                 </p>
                 <SpaceBuilder />
                 <p>
@@ -289,8 +289,8 @@ export default function GridSearchPage() {
                 <p>
                   The product that makes the grid thorough is also its bill.
                   Twelve candidates on three folds is thirty-six fitted
-                  models, and the readout in the lattice counts them as the
-                  library counts them, before any of them is run. Widen the
+                  models, and the readout in the lattice counts them the
+                  same way, before any of them is run. Widen the
                   ranges to four degrees and six penalties and the count is
                   twenty-four candidates and seventy-two fits, with the winner
                   unchanged at degree 1 and penalty 0.1, so the extra
@@ -476,10 +476,10 @@ export default function GridSearchPage() {
                   the range and guesses the same two-person average for all
                   three, 60 kilograms for the people weighing 50, 52 and 55.
                   A search comparing candidates
-                  across deals like these would be comparing deals. The
-                  library once did exactly that, because an unseeded
-                  shuffling splitter deals fresh folds on every call and the
-                  search handed the same splitter to every candidate without
+                  across deals like these would be comparing deals. That
+                  is exactly what happened here once, because an unseeded
+                  shuffling deals fresh folds on every call and the
+                  search handed the same shuffling to every candidate without
                   noticing. It now draws one seed per search and pins it, and
                   the detector for the bug is the left-hand panel, two copies
                   of one configuration in a single search must tie to the
@@ -555,9 +555,9 @@ export default function GridSearchPage() {
 
               <SubSection title="14. The losing scores are kept">
                 <p>
-                  The library scores every candidate and only then looks for
-                  the winner, rather than tracking a best-so-far and
-                  discarding the rest, because the losing scores are what the
+                  Every candidate is scored and the winner is looked for only
+                  afterwards, rather than a best-so-far being tracked and the
+                  rest discarded, because the losing scores are what the
                   spread is made of and what the ranking is made of. On the
                   twelve people the ranking is two, one, three, four, five,
                   and the runner-up at 0.8944 is close enough to the winner
@@ -842,9 +842,9 @@ export default function GridSearchPage() {
                   preference from a coin toss, and a score from rows that took
                   no part in the choosing, whether that is the quarter held
                   out before the search or the mean over a second layer of
-                  folds. The library documents the bias with the measurement
-                  in section 16 and offers the honest score, and nothing in it
-                  yet stops a caller from quoting the flattering one.
+                  folds. Section 16 measures that bias and the honest score
+                  sits beside it, and nothing about the procedure stops a
+                  reader from quoting the flattering number instead.
                 </p>
                 <NumberTable
                   headings={["number", "on the twelve people", "what it is"]}

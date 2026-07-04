@@ -124,9 +124,9 @@ export default function PipelinesPage() {
                   arrives to be scored. Their height has to be standardized
                   before the model can read it, and the question is what
                   centre and what spread to subtract and divide by. Their own
-                  are no use. One height has no spread at all, and the library
-                  says so when asked to standardize a single person, refusing
-                  because the column is constant.
+                  are no use. One height has no spread at all, so asking to
+                  standardize a single person is refused, because the column
+                  is constant.
                 </p>
                 <ChainTrace />
                 <p>
@@ -472,8 +472,8 @@ export default function PipelinesPage() {
 
               <SubSection title="11. A step that reads the target leaks the target">
                 <p>
-                  The lower panel of the playground fits something the library
-                  deliberately does not ship, a step that keeps whichever of
+                  The lower panel of the playground fits something
+                  deliberately not built here, a step that keeps whichever of
                   twenty noise columns correlates best with a target that is
                   itself noise. No column deserves any score above zero, and a
                   neighbours fit on any one of them should do worse than
@@ -522,8 +522,8 @@ export default function PipelinesPage() {
                 <p>
                   It would be easy to read Part 3 as saying the chain matters
                   only for a step that reads the target, and that reading is
-                  half right. The library has no such step today, and for the
-                  steps it does have the leak is within noise of zero. The
+                  half right. No step on this page reads the target, and for
+                  the steps that are here the leak is within noise of zero. The
                   argument for the object was never the size of the penalty
                   for getting the fold wrong. It is that the question stops
                   being the caller&rsquo;s to remember, at every fold, every
@@ -897,7 +897,7 @@ export default function PipelinesPage() {
                   nothing checks that the object can transform, so a ridge
                   model handed in as a step is accepted and fails inside fit
                   with a bare attribute error about a missing method, which is
-                  not one of the library&rsquo;s named refusals. And an
+                  not one of the named refusals. And an
                   expansion met by a column it never saw ignores the column
                   rather than refusing it, so a chain whose first step is an
                   expansion will quietly predict for a row carrying an extra

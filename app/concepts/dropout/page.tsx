@@ -452,7 +452,7 @@ export default function DropoutPage() {
                 <p>
                   Both agree in expectation, by the same cancellation, and the
                   right-hand bars at the top of the page are the proof that
-                  this library does the inverted form. The predicting pass
+                  the inverted form is the one running here. The predicting pass
                   returns the row bit for bit, and the endpoint behind the
                   widget returns that answer rather than asserting it.
                 </p>
@@ -928,7 +928,7 @@ export default function DropoutPage() {
 
               <SubSection title="26. The edges, probed">
                 <p>
-                  Every row below was run through the library. A refusal is a
+                  Every row below was run rather than reasoned about. A refusal is a
                   typed error with a message written to be read; an acceptance
                   is what the layer did instead.
                 </p>

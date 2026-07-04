@@ -103,7 +103,7 @@ export function ExtentProbe() {
 
         {answer !== null && answer.refusal !== null && (
           <div className="mt-3 rounded-md border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200">
-            No shape was built. The library&rsquo;s words are{" "}
+            No shape was built. The refusal reads{" "}
             <span className="font-mono">{answer.refusal}</span>
           </div>
         )}

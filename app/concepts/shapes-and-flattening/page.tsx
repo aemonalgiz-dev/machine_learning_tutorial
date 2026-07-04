@@ -893,7 +893,7 @@ export default function ShapesAndFlatteningPage() {
                 <WhyThisWorks>
                   <p>
                     The builder at the top of this page can show you a red seam
-                    and the library cannot be made to run one, and both
+                    and a chain carrying one cannot be made to run, and both
                     statements are true at once. The builder asks the seam
                     question directly, one seam at a time, which is why it can
                     report a verdict on a chain that does not exist. Building
@@ -1026,7 +1026,7 @@ export default function ShapesAndFlatteningPage() {
                   was written to do.
                 </p>
                 <p>
-                  Nothing in the library does this today, and it is recorded
+                  Nothing here does this today, and it is recorded
                   rather than repaired because the repair is a real piece of
                   design. Gradients would have to be grouped by which set of
                   parameters they describe rather than by which position they
@@ -1078,8 +1078,8 @@ export default function ShapesAndFlatteningPage() {
 
               <SubSection title="30. The edges, probed">
                 <p>
-                  Each row below was asked of the library and reports what came
-                  back, whether that was a refusal, an acceptance, or something
+                  Each row below was asked rather than reasoned about, and
+                  reports what came back, whether that was a refusal, an acceptance, or something
                   documented and left alone.
                 </p>
                 <DerivationTable

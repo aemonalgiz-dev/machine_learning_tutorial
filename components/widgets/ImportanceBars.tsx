@@ -232,7 +232,7 @@ export function ImportanceBars() {
       {scramble?.refusal && (
         <p className="mt-2 text-center text-xs text-amber-600 dark:text-amber-400">
           No column&rsquo;s scramble lowered the score, so there are no shares
-          to report, and the library&rsquo;s own words are &ldquo;{scramble.refusal}&rdquo;.
+          to report, and the refusal reads &ldquo;{scramble.refusal}&rdquo;.
         </p>
       )}
 

@@ -133,7 +133,7 @@ export default function FeatureImportancePage() {
                 />
                 <InAModel title="On a crowd of two hundred people, one forest, three answers">
                   <p>
-                    The API draws a crowd of two hundred people with heights
+                    This page draws a crowd of two hundred people with heights
                     and weights, where the rule that assigns adult reads
                     height alone and weight follows height only through
                     overall body size, and grows a forest of thirty trees on
@@ -202,8 +202,8 @@ export default function FeatureImportancePage() {
 
               <SubSection title="3. Shares of an explanation, not measurements of the world">
                 <p>
-                  Whichever question is asked, the library reports the answer
-                  the same way, as one non-negative number per column that
+                  Whichever question is asked, the answer comes back the
+                  same way, as one non-negative number per column that
                   the model was fitted on, scaled so that the numbers sum to
                   one. Every column is included, a column that earned nothing
                   at zero, because a zero is a finding rather than an absence.
@@ -221,8 +221,8 @@ export default function FeatureImportancePage() {
                   The raw score is the quantity each measure produces, impurity
                   removed for the first and accuracy lost for the second. A
                   model whose raw scores all come to zero has no shares to
-                  report, and rather than divide zero by zero the library
-                  refuses, in words the last Part quotes.
+                  report, and rather than divide zero by zero the reading is
+                  refused, in words the last Part quotes.
                 </p>
                 <KeepInMind>
                   A share of 0.52 does not say a column explains half of
@@ -344,9 +344,9 @@ export default function FeatureImportancePage() {
                   9.702 / 12.48 = 0.777 for height and 2.778 / 12.48 = 0.223
                   for weight, which is what the model reports for itself. A
                   column that won no split appends nothing to the ledger and
-                  would be missing from it entirely, so the library is told the
-                  full list of columns separately and writes a zero for any
-                  that never appear. On the parity puzzle the lone tree never
+                  would be missing from it entirely, so the full list of
+                  columns is supplied separately and a zero is written for
+                  any that never appear. On the parity puzzle the lone tree never
                   asks about the first coin, and its share is exactly 0, in the
                   report and not merely absent from it.
                 </p>
@@ -611,7 +611,7 @@ export default function FeatureImportancePage() {
                 <p>
                   One shuffle is one draw from a noisy quantity, and a column
                   that happens to shuffle into nearly its original order will
-                  understate itself. The library shuffles each column five
+                  understate itself. The measure here shuffles each column five
                   times from one seeded generator and averages the drops. A
                   drop can come out negative, when the model was slightly
                   better off without the column, and the average is clamped
@@ -660,9 +660,9 @@ export default function FeatureImportancePage() {
                   out, 0.497, so there is nothing to lose, and its dots stay
                   within 0.012 of the line. Breiman&rsquo;s recipe scrambles each
                   member&rsquo;s own out-of-bag rows, which costs no held-out
-                  set at all. The library&rsquo;s measure scrambles whichever
-                  rows it is handed and offers no per-member out-of-bag
-                  variant, so this page uses held-out rows where the forests
+                  set at all. The scramble here takes whichever rows it is
+                  handed and has no per-member out-of-bag variant, so this
+                  page uses held-out rows where the forests
                   page would have used the rows each member left out.
                 </p>
                 <NumberTable
@@ -673,7 +673,7 @@ export default function FeatureImportancePage() {
                     ["ticket's drop, scrambled held out", "−0.004"],
                     ["ticket's share, scrambled held out", "refused, no column earned anything"],
                   ]}
-                  caption="Thirty trees on two hundred raffle numbers. On the rows it memorised the scramble credits the ticket with everything; on rows it never saw no column's scramble lowers the score, and the library declines to report shares."
+                  caption="Thirty trees on two hundred raffle numbers. On the rows it memorised the scramble credits the ticket with everything; on rows it never saw no column's scramble lowers the score, and shares are refused rather than reported."
                 />
                 <KeepInMind>
                   Which rows are scrambled is part of the measurement. A
@@ -977,9 +977,9 @@ export default function FeatureImportancePage() {
 
               <SubSection title="28. The edges, tried rather than remembered">
                 <p>
-                  Every row below was run through the API against the library
-                  before it was written down, and the words in the right
-                  column are the library&rsquo;s own where it refused.
+                  Every row below was run before it was written down, and the
+                  words in the right column are the refusal&rsquo;s own where
+                  the edge was refused.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"
@@ -993,14 +993,14 @@ export default function FeatureImportancePage() {
                     { expression: "one constant column beside two real ones", reason: "accepted; the constant column wins no split and its share is exactly 0.0." },
                     { expression: "every column constant, then the scramble", reason: "refused with the same words; a model that never consulted a column cannot lose anything by its scramble." },
                     { expression: "a scramble of zero repeats", reason: "refused at construction, before any data is seen, since the repeat count must be at least one." },
-                    { expression: "either reading before fit", reason: "refused with the library's not-fitted error, from the tree's own guard, before any private state is touched." },
+                    { expression: "either reading before fit", reason: "refused by name as not yet fitted, from the tree's own guard, before any private state is touched." },
                     { expression: "a scramble with a column renamed", reason: "refused; the fit expected height and weight and was handed stature and weight." },
                     { expression: "a scramble with the columns reordered", reason: "accepted, matched by name, and the shares come back in the order handed." },
                     { expression: "a share asked for by a name the fit never saw", reason: "refused, naming the known features." },
                     { expression: "two columns of one name", reason: "refused at the fit, since feature names must be unique." },
                     { expression: "more features per split than there are features", reason: "accepted; every split is offered every column, which is bagging, and the shares are reported as usual." },
                     { expression: "a committee whose members have no splits to read", reason: "refused; a bagged ridge model cannot report impurity shares and is told to use the scramble instead." },
-                    { expression: "a forest member that grew no split", reason: "the library refuses in words about one member; the parity endpoint checks first and refuses in a sentence about the draw, which four of one hundred and eighty draws needed." },
+                    { expression: "a forest member that grew no split", reason: "the refusal underneath speaks about one member; this page checks first and refuses in a sentence about the draw, which four of one hundred and eighty draws needed." },
                     { expression: "a negative drop", reason: "clamped to zero after the average, documented rather than defended, with the raw drop reported beside the share." },
                     { expression: "a border of tie-breaking between correlated columns", reason: "documented rather than defended; which of two near-identical columns takes a node is settled by the split search's tie rule and the lottery, and the shares say so by moving." },
                   ]}
@@ -1009,8 +1009,8 @@ export default function FeatureImportancePage() {
                   The refusal worth remembering is the one for a model that
                   never used its columns. A vector of zeros would type-check
                   and sum to nothing, and a reader would take it for an
-                  answer; the library declines to produce one and says why,
-                  and the ticket-only forest in section 17 is that refusal on
+                  answer; it is refused with a reason instead, and the
+                  ticket-only forest in section 17 is that refusal on
                   real rows.
                 </p>
               </SubSection>

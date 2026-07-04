@@ -71,7 +71,7 @@ export function FoldPinningTable() {
             {answer
               ? answer.scores_tie
                 ? "Equal to the last bit, and the deal itself was drawn fresh for this search."
-                : "The two copies differ, which the library promises cannot happen."
+                : "The two copies differ, which the pinned deal is meant to make impossible."
               : "…"}
           </p>
         </div>

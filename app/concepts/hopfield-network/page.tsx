@@ -559,7 +559,7 @@ export default function HopfieldNetworkPage() {
 
               <SubSection title="20. Capacity measured on twenty-five cells">
                 <p>
-                  I measured it rather than quoting it. At the playground&rsquo;s size, twenty-five cells, the API stores
+                  I measured it rather than quoting it. At the playground&rsquo;s size, twenty-five cells, the measurement stores
                   from one to twelve random bipolar patterns, ten independent sets at each count, and asks two questions
                   of every stored pattern, whether it comes back unchanged when presented exactly and whether it comes
                   back when five cells are reversed first, which is what the scramble does.
@@ -605,7 +605,7 @@ export default function HopfieldNetworkPage() {
               <SubSection title="22. Shapes against random patterns, and what overlap did not predict">
                 <p>
                   The derivation says crosstalk is overlap, so patterns that resemble one another should recall worse than
-                  patterns that do not. The API measures the mean absolute overlap of each pair of stored patterns, their
+                  patterns that do not. The measurement takes the mean absolute overlap of each pair of stored patterns, their
                   inner product over the cell count, so 0 is orthogonal and 1 is identical or opposite, beside how often
                   a five-cell corruption of each pattern settles back into it, twenty corruptions per pattern.
                 </p>
@@ -724,7 +724,7 @@ export default function HopfieldNetworkPage() {
                   visiting order and its seed under the first; what a weighted sum of exactly zero does; the stopping
                   condition and the pass limit, and which of the two ended a given recall; the energy and its sign
                   convention; and how new patterns are matched to the fitted cells, by name or by position. Every row
-                  below was run against the library, and the table reports what it did.
+                  below was run, and the table reports what came back.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"
@@ -741,7 +741,7 @@ export default function HopfieldNetworkPage() {
                     { expression: "more patterns than cells", reason: "fits, at a load of 1.5 for six patterns on four cells, and 5 of the 6 stored patterns are still fixed points. Nothing warns." },
                     { expression: "the same pattern stored twice", reason: "fits; every weight is exactly doubled, so the answers are unchanged and the load is not." },
                     { expression: "a pattern and its negation stored together", reason: "fits, with weights exactly those of storing the first pattern twice, since the negation contributes the same products; the second pattern recalls as the first, reversed." },
-                    { expression: "recall before fit", reason: "refused as not fitted, in the library’s words rather than as an attribute error." },
+                    { expression: "recall before fit", reason: "refused as not fitted, in a sentence rather than as an attribute error." },
                     { expression: "a probe of the wrong width", reason: "refused, naming both widths." },
                     { expression: "a table missing a fitted cell, or with an unknown one", reason: "refused, listing the fitted cells against the supplied ones; a missing cell leaves a row of the matrix with nothing to read." },
                     { expression: "a table with the cells reordered", reason: "accepted; the cells are matched by name and come back in the fitted order." },

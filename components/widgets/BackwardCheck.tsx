@@ -93,16 +93,16 @@ export function BackwardCheck({
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Grid title="the block, and the slope arriving" rows={rows} second={reading?.arriving ?? null} raw />
-        <Grid title="passed down, the library" rows={reading?.passed_down ?? null} accent="text-indigo-700 dark:text-indigo-300" />
+        <Grid title="passed down, the three-route form" rows={reading?.passed_down ?? null} accent="text-indigo-700 dark:text-indigo-300" />
         <Grid title="naive, slope over deviation" rows={reading?.naive ?? null} accent="text-rose-600 dark:text-rose-400" />
         <Grid title="finite difference" rows={reading?.finite_difference ?? null} accent="text-emerald-700 dark:text-emerald-400" />
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         <Stat label="largest true slope" value={reading ? reading.largest_true_slope.toFixed(4) : "…"} />
-        <Stat label="library to finite difference" value={reading ? formatMagnitude(reading.largest_gap) : "…"} />
+        <Stat label="three-route form to finite difference" value={reading ? formatMagnitude(reading.largest_gap) : "…"} />
         <Stat label="naive to finite difference" value={reading ? reading.largest_naive_gap.toFixed(4) : "…"} />
-        <Stat label={`largest ${bandWord} sum, library`} value={reading ? formatMagnitude(reading.largest_band_sum) : "…"} />
+        <Stat label={`largest ${bandWord} sum, three-route form`} value={reading ? formatMagnitude(reading.largest_band_sum) : "…"} />
         <Stat label={`largest ${bandWord} sum, naive`} value={reading ? reading.largest_naive_band_sum.toFixed(4) : "…"} />
         <Stat label="scale slope, shift slope" value={reading ? `${reading.scale_slope.map((value) => formatSigned(value, 2)).join(" ")} · ${reading.shift_slope.map((value) => formatSigned(value, 0)).join(" ")}` : "…"} />
       </div>

@@ -282,7 +282,7 @@ export default function BaggingPage() {
                   aggregating its members&rsquo; decisions, and voting is one
                   way to aggregate. Averaging the members&rsquo; class
                   probabilities and taking the largest is another, and it is
-                  the one this library uses, which matters for ties.
+                  the one used here, which matters for ties.
                 </p>
               </SubSection>
 
@@ -301,9 +301,10 @@ export default function BaggingPage() {
                     and an even committee can always. An implementation has
                     to say what happens then, whether it averages
                     probabilities, prefers a fixed class order, applies some
-                    other deterministic rule, or reports the tie. This library
-                    averages the members&rsquo; probability matrices and takes
-                    the largest, with the earlier class winning an exact tie.
+                    other deterministic rule, or reports the tie. Every
+                    committee on this page averages the members&rsquo;
+                    probabilities and takes the largest, with the earlier class
+                    winning an exact tie.
                   </p>
                 </KeepInMind>
               </SubSection>

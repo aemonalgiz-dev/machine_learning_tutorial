@@ -432,7 +432,7 @@ export default function KMeansPage() {
                   middle people, at (145, 57), pulled into the short group;
                   and two rest at 3141.7, the three short people alone
                   against everyone else.
-                  The fit the playground shows is the library&rsquo;s usual
+                  The fit the playground shows is the usual
                   ten starts from one seed, and it keeps the lowest by a
                   strict comparison, so a later start that only ties an
                   earlier one does not replace it. At three groups the same
@@ -528,8 +528,8 @@ export default function KMeansPage() {
                 <KeepInMind>
                   Inertia compares groupings of the same people at the same k.
                   Across different k it always prefers more groups, so it
-                  cannot select k, and the library reports it and selects
-                  nothing on it.
+                  cannot select k, and it is reported here rather than
+                  selected on.
                 </KeepInMind>
               </SubSection>
 
@@ -630,7 +630,7 @@ export default function KMeansPage() {
                   describe an elongated group and still does not find one
                   here, because it starts from the nearest-centre grouping
                   and only ever climbs; its answer is the same cut, person
-                  for person. The library documents that as measured, and I
+                  for person. That is recorded elsewhere as measured, and I
                   found the same.
                 </p>
                 <KeepInMind>
@@ -732,7 +732,7 @@ export default function KMeansPage() {
                 </p>
                 <p>
                   Replacing the mean with the median gives a real method with
-                  its own name, k-medians, which this library does not have,
+                  its own name, k-medians, which is not offered here,
                   so the fits on this page take no distance choice at all. On
                   the tall four alone the two candidates nearly tie, 34.0
                   against 35.0 for squared distance and 14.0 against 14.0 for

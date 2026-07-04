@@ -133,7 +133,7 @@ export function ChainLedger() {
               {broken && (
                 <p className="my-1 rounded border border-rose-300 bg-rose-50 px-2 py-1 text-xs text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-200">
                   {seam.message ??
-                    "this seam fails too, and the library stops at the first one that does"}
+                    "this seam fails too, and the check stops at the first one that does"}
                 </p>
               )}
               <div className="flex items-center gap-2 py-1.5 text-xs">

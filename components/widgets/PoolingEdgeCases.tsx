@@ -91,7 +91,7 @@ export function PoolingEdgeCases() {
           value={probed ? `${probed.n_accepted} of ${probed.cases.length}` : "…"}
         />
         <Stat
-          label="Refusals in the library’s own words"
+          label="Refusals in words written to be read"
           value={
             probed
               ? `${probed.cases.filter((entry) => entry.library_error).length} of ${probed.n_refused}`

@@ -237,8 +237,8 @@ export default function HeldOutEvaluationPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  The library&rsquo;s own splitter rounds the wanted share to a
-                  row count and clamps it so that neither side is ever empty,
+                  The split here rounds the wanted share to a row count and
+                  clamps it so that neither side is ever empty,
                   which is why a half of fifteen rows comes out as eight held
                   out and seven kept rather than the other way round, since
                   seven and a half rounds to the even neighbour. It also cuts
@@ -471,7 +471,7 @@ export default function HeldOutEvaluationPage() {
                   metres near the top of the arc, and it is the one that
                   scores lowest, for the reason section 10 gave. Fifteen rows
                   do not always divide evenly, and when they do not the
-                  library gives the extra rows to the earlier folds, so ten
+                  extra rows go to the earlier folds, so ten
                   folds of fifteen are five folds of two and five of one.
                 </p>
                 <KeepInMind>
@@ -483,7 +483,7 @@ export default function HeldOutEvaluationPage() {
 
               <SubSection title="12. The mean across folds">
                 <p>
-                  The library&rsquo;s summary of five fold scores is their
+                  The summary of five fold scores on this page is their
                   mean, and read across every degree it is the validation
                   curve, the chart on this site that every dial is set by.
                   The candidate at each degree is the whole pipeline, the
@@ -512,8 +512,8 @@ export default function HeldOutEvaluationPage() {
 
               <SubSection title="13. The spread, and what it is not">
                 <p>
-                  The second number the library reports is the spread, the
-                  best fold&rsquo;s score less the worst&rsquo;s. At degree 2
+                  The second number reported is the spread, the best
+                  fold&rsquo;s score less the worst&rsquo;s. At degree 2
                   it is 0.032, so the five verdicts nearly agree and the mean
                   stands on firm ground. At degree 8 the five folds read
                   0.979, −10.29, 0.828, 0.916 and 0.369, a spread of 11.27,
@@ -575,7 +575,7 @@ export default function HeldOutEvaluationPage() {
                   against −2.76.
                 </p>
                 <KeepInMind>
-                  The library reports the mean across folds for a regressor,
+                  The mean across folds is what a regressor reports here,
                   and the pooled score is computed for this page from the
                   same fifteen held-out predictions. Neither is wrong; they
                   answer with different yardsticks, and the difference is the
@@ -601,8 +601,8 @@ export default function HeldOutEvaluationPage() {
                   the folds hold a single measurement, and at fifteen every
                   fold does, which is leave-one-out. A fold of one row has no
                   spread about its own mean, so its R squared is a ratio with
-                  zero underneath, and the library refuses it by name rather
-                  than reporting a number. The mean across folds therefore
+                  zero underneath, and it is refused by name rather than
+                  reported as a number. The mean across folds therefore
                   stops existing at ten folds, while the pooled score carries
                   on, 0.993 at ten and 0.993 at fifteen, because pooling
                   measures the misses against the spread of all fifteen rows
@@ -656,8 +656,8 @@ export default function HeldOutEvaluationPage() {
                 <p>
                   Under the plain deal the five folds hold 1, 2, 2, 0 and 1
                   adults, so the fourth fold holds two children and no adult
-                  and the third holds two adults and no child, and the library
-                  counts two folds missing a class. A tree two questions deep
+                  and the third holds two adults and no child, so the count
+                  of folds missing a class is two. A tree two questions deep
                   is refitted inside each fold. On the third fold it gets
                   neither adult right, because the two it was denied, at 150
                   and 159 centimetres, are exactly the two adults inside the
@@ -691,15 +691,15 @@ export default function HeldOutEvaluationPage() {
                   what does not. Relabel the crowd so that only one adult
                   remains and deal it stratified, and four of the five folds
                   hold no adult whatever the seed, because one person can only
-                  be in one fold. The library reports the count of folds
-                  missing a class rather than assuming the stratified deal
-                  made it zero, and on this page that count is 0 for the
+                  be in one fold. The count of folds missing a class is
+                  reported rather than assumed to be zero once the deal is
+                  stratified, and on this page that count is 0 for the
                   twelve with six adults and 4 for the twelve with one.
                 </p>
                 <KeepInMind>
-                  Stratification is off by default in the library because it
-                  is meaningless on a continuous target, and on a
-                  classification target it is close to mandatory. Turn it on
+                  Stratification is off by default because it is meaningless
+                  on a continuous target, and on a classification target it
+                  is close to mandatory. Turn it on
                   and still read the count of folds missing a class.
                 </KeepInMind>
               </SubSection>
@@ -726,10 +726,10 @@ export default function HeldOutEvaluationPage() {
                   gives 0.5 here, or invent a value. Pooling adds zero to the
                   top of the ratio and zero to the bottom and needs no
                   convention, and it reads 2 of 6 adults found, 0.3333, which
-                  is the number the twelve people actually earned. The library
-                  pools for a classifier for exactly this reason, and reports
-                  a spread only for accuracy, which is the one rate that is
-                  defined on any fold with people in it.
+                  is the number the twelve people actually earned. A classifier
+                  here is scored by pooling for exactly this reason, with a
+                  spread reported only for accuracy, which is the one rate that
+                  is defined on any fold with people in it.
                 </p>
                 <KeepInMind>
                   Pooled rates weight each fold by its own size, which is the
@@ -771,8 +771,8 @@ export default function HeldOutEvaluationPage() {
                 </p>
                 <KeepInMind>
                   A spread is only honest over rates that exist on every fold.
-                  Accuracy always does, so it is the one the library ranges
-                  across folds, and even that range is coarse when a fold
+                  Accuracy always does, so it is the one ranged across
+                  folds, and even that range is coarse when a fold
                   holds two people.
                 </KeepInMind>
               </SubSection>
@@ -916,23 +916,23 @@ export default function HeldOutEvaluationPage() {
 
               <SubSection title="25. The edges, each one run">
                 <p>
-                  What follows is what the library and this page actually do
-                  at every edge a reader might hand them, each row run against
-                  the API rather than read off a docstring. Most are refused
-                  by name, a few are refused at the door before any library
-                  code runs, two are accepted with a fact reported beside the
-                  answer, and one is documented rather than defended.
+                  What follows is what the code behind this page actually
+                  does at every edge a reader might hand it, each row run
+                  rather than remembered. Most are refused by name, a few are
+                  refused at the door before any fitting begins, two are
+                  accepted with a fact reported beside the answer, and one is
+                  documented rather than defended.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"
                   reasonHeading="the behaviour"
                   rows={[
-                    { expression: "empty data, or one row", reason: "refused at the door, since a split needs a row on each side; the library itself refuses a split of fewer than two rows by name." },
+                    { expression: "empty data, or one row", reason: "refused at the door, since a split needs a row on each side; a split of fewer than two rows is refused by name underneath as well." },
                     { expression: "two rows, one held out", reason: "the deal succeeds and the fit is refused, because one training row cannot pin even a straight line, with both counts named." },
                     { expression: "a single held-out row", reason: "its R squared is refused by name, since one row has no spread about its own mean; the fold endpoint reports that fold as undefined and pools the rest, which is how leave-one-out is scored." },
                     { expression: "a constant target", reason: "refused by name, because the yardstick is the target's spread and there is none." },
                     { expression: "a constant input column", reason: "refused by name at the fit, since a column with no spread makes the design singular." },
-                    { expression: "a non-finite or enormous coordinate", reason: "a non-finite value cannot be written in the request at all, and a coordinate beyond a million is refused at the door before any library code runs." },
+                    { expression: "a non-finite or enormous coordinate", reason: "a non-finite value cannot be written in the request at all, and a coordinate beyond a million is refused at the door before any fitting begins." },
                     { expression: "more folds than rows", reason: "refused by name, 16 folds need at least 16 rows to give each one something to score on." },
                     { expression: "one fold, or a share of zero or one", reason: "refused at the door; a share so large that one training row remains is refused for the degree it cannot pin." },
                     { expression: "a training fold too small for the degree", reason: "refused with the counts named, so the fold sweep stops where the next degree cannot be pinned." },
@@ -940,14 +940,14 @@ export default function HeldOutEvaluationPage() {
                     { expression: "a classifier's crowd of one class", reason: "accepted; a tree told the class count answers that class everywhere, scores an accuracy of 1.0, and recall is reported as undefined rather than as zero." },
                     { expression: "one adult among twelve, stratified", reason: "accepted, and four of five folds still hold no adult, because stratifying cannot manufacture a class; the count of folds missing a class says so." },
                     { expression: "a label other than 0 or 1, or an unknown keyword", reason: "refused at the door." },
-                    { expression: "reading a score before a fit", reason: "refused by name in the library and unreachable through this page, which never scores an unfitted curve." },
+                    { expression: "reading a score before a fit", reason: "refused by name underneath, and unreachable through this page, which never scores an unfitted curve." },
                     { expression: "a held-out share whose column names differ from the fit's", reason: "refused by name, the expansion needs t and got time; a share missing a manufactured term is refused the same way." },
                     { expression: "predictions and truth of different lengths", reason: "refused by name before any metric is read." },
                   ]}
                 />
                 <p>
-                  Every row of that table was run against the API for this
-                  page. The one behaviour documented rather than defended is
+                  Every row of that table was run for this page. The one
+                  behaviour documented rather than defended is
                   the rounding of the held-out share, which follows the
                   round-half-to-even rule the language uses, so a reader who
                   expects a half of fifteen to hold out seven should read the

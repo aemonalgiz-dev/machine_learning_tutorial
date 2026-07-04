@@ -107,9 +107,9 @@ export function KernelIdentityCheck() {
       </div>
 
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The lift is φ(x) = (x₁², √2·x₁x₂, x₂²). Both routes are computed by the
-        library&rsquo;s own kernels, the plain inner product on the lifted
-        vectors and the squared kernel on the raw ones.
+        The lift is φ(x) = (x₁², √2·x₁x₂, x₂²). Both routes are computed the same
+        way, the plain inner product on the lifted vectors and the squared
+        kernel on the raw ones.
       </p>
 
       {message && (
