@@ -47,7 +47,7 @@ export class ApiError extends Error {
 
 // One POST, one place to turn a non-2xx into a readable ApiError. Every call
 // below is a thin wrapper over this.
-async function postJson<T>(path: string, body: unknown): Promise<T> {
+export async function postJson<T>(path: string, body: unknown): Promise<T> {
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
@@ -862,4 +862,255 @@ export async function traceKernelSimilarity(): Promise<KernelSimilarity> {
     "/concepts/kernel-trick/similarity-curve",
     {},
   );
+}
+
+// --- Feature scaling: five readings of one column's centre and spread ------
+
+export type ScalingMethod =
+  | "standardize"
+  | "min_max"
+  | "max_abs"
+  | "robust"
+  | "root_mean_square";
+
+export interface MethodScaling {
+  centre: number;
+  spread: number;
+  scaled: number[];
+}
+
+export interface FeatureScalings {
+  scalings: Record<ScalingMethod, MethodScaling>;
+}
+
+export async function scaleFeature(values: number[]): Promise<FeatureScalings> {
+  return postJson<FeatureScalings>("/concepts/feature-scaling/scale", {
+    values,
+  });
+}
+
+// --- Normalisation layers: the same standardising move, inside a model -----
+
+export type NormalisationLayer = "batch" | "layer" | "rms";
+
+// What one band of the block was standardised by. Under the batch layer there
+// is one per feature, under the other two one per row. The mean is null for
+// the RMS layer, which subtracts nothing, and the deviation is the figure the
+// layer divided by, epsilon included.
+export interface ReducedStatistic {
+  mean: number | null;
+  deviation: number;
+}
+
+export interface Normalisation {
+  layer: NormalisationLayer;
+  normalised: number[][];
+  statistics: ReducedStatistic[];
+  as_predicting: number[][] | null;
+  predicting_statistics: ReducedStatistic[] | null;
+}
+
+export async function normaliseBlock(
+  rows: number[][],
+  layer: NormalisationLayer,
+): Promise<Normalisation> {
+  return postJson<Normalisation>("/concepts/normalisation-layers/normalise", {
+    rows,
+    layer,
+  });
+}
+
+// --- Hopfield networks: store patterns, then settle back into one ----------
+
+// One sweep of the update rule over every unit. The state is where the sweep
+// left the network; the sweep started from the previous pass's state, or from
+// the probe for the first pass.
+export interface RecallPassDocument {
+  pass_number: number;
+  state: number[];
+  energy_before: number;
+  energy_after: number;
+  units_changed: number;
+}
+
+// Which stored pattern the network came to rest in. The index is null when
+// the resting state equals nothing that was stored, and flipped marks a rest
+// in a stored pattern's negation, which the network holds without being asked.
+export interface SettledInto {
+  pattern_index: number | null;
+  flipped: boolean;
+}
+
+export interface Recall {
+  n_units: number;
+  n_stored_patterns: number;
+  load: number;
+  weights: number[][];
+  initial_energy: number;
+  passes: RecallPassDocument[];
+  settled_state: number[];
+  settled: boolean;
+  is_fixed_point: boolean;
+  settled_into: SettledInto;
+}
+
+export async function recallPattern(
+  patterns: number[][],
+  probe: number[],
+): Promise<Recall> {
+  return postJson<Recall>("/concepts/hopfield/recall", { patterns, probe });
+}
+
+// --- Restricted Boltzmann machines: learn what the patterns have in common --
+
+// One row as the fitted machine reads it. The hidden probabilities are one per
+// hidden unit, the reconstruction one per visible cell, both in [0, 1]. The
+// free energy is the machine's figure for the row after learning, the initial
+// free energy the same figure before any, and the reconstruction error is the
+// row's own mean squared distance from its reconstruction.
+export interface BoltzmannRowDocument {
+  hidden_probabilities: number[];
+  reconstruction: number[];
+  free_energy: number;
+  initial_free_energy: number;
+  reconstruction_error: number;
+}
+
+// Everything the machine learned and how it now reads each stored pattern.
+// The weights have one row per visible cell and one column per hidden unit,
+// and converged means the weights stopped moving before the epoch cap, which
+// is all it can mean under contrastive divergence.
+export interface BoltzmannFit {
+  n_visible_units: number;
+  n_hidden_units: number;
+  epochs_run: number;
+  converged: boolean;
+  reconstruction_error: number;
+  patterns: BoltzmannRowDocument[];
+  weights: number[][];
+  visible_bias: number[];
+  hidden_bias: number[];
+}
+
+export async function fitBoltzmann(
+  patterns: number[][],
+  hiddenUnits: number,
+  maxEpochs: number,
+): Promise<BoltzmannFit> {
+  return postJson<BoltzmannFit>("/concepts/rbm/fit", {
+    patterns,
+    n_hidden_units: hiddenUnits,
+    max_epochs: maxEpochs,
+  });
+}
+
+// The probe as the machine reads it, beside the stored patterns' free energies
+// from the same fit, one per pattern in the order they were sent.
+export interface BoltzmannReconstruction {
+  probe: BoltzmannRowDocument;
+  stored_free_energies: number[];
+  epochs_run: number;
+  reconstruction_error: number;
+}
+
+export async function reconstructWithBoltzmann(
+  patterns: number[][],
+  hiddenUnits: number,
+  maxEpochs: number,
+  probe: number[],
+): Promise<BoltzmannReconstruction> {
+  return postJson<BoltzmannReconstruction>("/concepts/rbm/reconstruct", {
+    patterns,
+    n_hidden_units: hiddenUnits,
+    max_epochs: maxEpochs,
+    probe,
+  });
+}
+
+// --- Self-organising maps: a grid of units draped over the people ----------
+
+// One unit of the fitted map, its place on the grid and where its weights
+// came to rest in the plane. The units arrive in row-major order, the first
+// grid_width of them the top row.
+export interface MapUnitDocument {
+  row: number;
+  column: number;
+  x: number;
+  y: number;
+}
+
+// The place on the grid of the unit that won one person.
+export interface WinningUnit {
+  row: number;
+  column: number;
+}
+
+// The resting map. Winners has one entry per person in the order they were
+// sent, epochs_run is how many passes the walk took, final_movement is the
+// furthest any unit moved on the last of them, and quantisation_error is the
+// mean distance from each person to the unit that won them.
+export interface OrganisedMap {
+  grid_width: number;
+  grid_height: number;
+  units: MapUnitDocument[];
+  winners: WinningUnit[];
+  epochs_run: number;
+  final_movement: number;
+  quantisation_error: number;
+}
+
+export async function organiseMap(
+  points: Point[],
+  gridWidth: number,
+  gridHeight: number,
+  maxEpochs: number,
+): Promise<OrganisedMap> {
+  return postJson<OrganisedMap>("/concepts/self-organising-map/fit", {
+    points,
+    grid_width: gridWidth,
+    grid_height: gridHeight,
+    max_epochs: maxEpochs,
+  });
+}
+
+// --- Hebbian principal components: the PCA answer reached by a local rule --
+
+// One direction the rule learned, at unit length, with the cloud's variance
+// along it and that variance's share of the total, both comparable with the
+// eigen twin's. The length is how long the learned weight vector was left by
+// the walk, which Oja's rule drives to one and nothing normalises, so it is
+// the report on whether this direction settled.
+export interface HebbianDirectionDocument {
+  dx: number;
+  dy: number;
+  variance: number;
+  share: number;
+  length: number;
+}
+
+// Both answers to one question. The Hebbian and eigen directions are in
+// matching order, and angles_degrees holds the angle between each pair, from
+// zero to ninety because a direction and its negative are the same direction.
+// epochs_run is how many passes the walk took before its weights stopped
+// moving or the budget ran out, worst_orthogonality the largest dot product
+// between two learned directions, and starting_rate the rate the first epoch
+// ran at, which the page works one step of by hand.
+export interface HebbianLearning {
+  mean: Point;
+  hebbian: HebbianDirectionDocument[];
+  eigen: ComponentDocument[];
+  angles_degrees: number[];
+  epochs_run: number;
+  worst_orthogonality: number;
+  starting_rate: number;
+}
+
+export async function learnHebbianDirections(
+  points: Point[],
+  maxEpochs: number,
+): Promise<HebbianLearning> {
+  return postJson<HebbianLearning>("/concepts/hebbian-pca/learn", {
+    points,
+    max_epochs: maxEpochs,
+  });
 }
