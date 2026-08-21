@@ -4,49 +4,29 @@
 //
 // Every patient from the clinic is carried through the worked mapping, their
 // standardized vitals squared and crossed into three coordinates, and up here
-// the two classes come apart. The wireframe is a genuinely flat plane, found
-// by an ordinary linear fit in the lifted space, and it slides between the
-// healthy and the unwell that no straight line could separate below. Drag to
-// orbit. The lift and the plane come from the API; only the rotation happens
-// in the browser.
+// the two classes come apart. The wireframe is a genuinely flat plane, the
+// boundary the same classifier drew on the three lifted columns under the
+// plain inner product, and it slides between the healthy and the unwell that
+// no straight line could separate below. The readouts compare that route
+// with the kernel's route on the raw columns, which never built the room.
+// Drag to orbit. The lift, both fits and the gaps come from the API; only
+// the rotation happens in the browser.
 
 import { useEffect, useRef, useState } from "react";
-import { ApiError, ClinicLift, LabelledPoint, liftClinic } from "@/lib/api";
+import { ApiError, ClinicLift, liftClinic } from "@/lib/concepts/kernel-trick";
 import { CUBE_EDGES, Orbit, Point3, project } from "@/lib/threeD";
+import { CLINIC } from "./kernelTrickFixtures";
 
 const VIEW = 520;
 const HALF = VIEW / 2;
 const SCALE = 190;
-
-// The kernel page's clinic, unchanged.
-const CLINIC: LabelledPoint[] = [
-  { x: 36.6, y: 68, label: 1 },
-  { x: 36.8, y: 74, label: 1 },
-  { x: 37.0, y: 70, label: 1 },
-  { x: 37.2, y: 78, label: 1 },
-  { x: 36.9, y: 64, label: 1 },
-  { x: 37.1, y: 84, label: 1 },
-  { x: 36.7, y: 80, label: 1 },
-  { x: 37.3, y: 72, label: 1 },
-  { x: 36.5, y: 76, label: 1 },
-  { x: 37.0, y: 88, label: 1 },
-  { x: 35.2, y: 48, label: 0 },
-  { x: 35.5, y: 120, label: 0 },
-  { x: 36.0, y: 130, label: 0 },
-  { x: 38.9, y: 132, label: 0 },
-  { x: 39.5, y: 120, label: 0 },
-  { x: 40.2, y: 110, label: 0 },
-  { x: 39.8, y: 66, label: 0 },
-  { x: 40.5, y: 90, label: 0 },
-  { x: 35.4, y: 90, label: 0 },
-  { x: 38.8, y: 50, label: 0 },
-  { x: 35.8, y: 58, label: 0 },
-  { x: 39.9, y: 140, label: 0 },
-  { x: 35.1, y: 72, label: 0 },
-  { x: 38.5, y: 44, label: 0 },
-];
-
 const PLANE_STEPS = 6;
+
+let pending: Promise<ClinicLift> | null = null;
+function liftOnce(): Promise<ClinicLift> {
+  if (!pending) pending = liftClinic(CLINIC);
+  return pending;
+}
 
 export function KernelLiftPlayground() {
   const [lift, setLift] = useState<ClinicLift | null>(null);
@@ -57,8 +37,9 @@ export function KernelLiftPlayground() {
   useEffect(() => {
     (async () => {
       try {
-        setLift(await liftClinic(CLINIC));
+        setLift(await liftOnce());
       } catch (error) {
+        pending = null;
         if (error instanceof ApiError) setMessage(error.message);
         else setMessage("Something went wrong.");
       }
@@ -84,7 +65,7 @@ export function KernelLiftPlayground() {
   };
 
   let projectedPlane: { a: ReturnType<typeof project>; b: ReturnType<typeof project> }[] = [];
-  let projectedPatients: { point: ReturnType<typeof project>; label: number }[] = [];
+  let projectedPatients: { point: ReturnType<typeof project>; label: number; support: boolean }[] = [];
 
   if (lift) {
     const us = lift.points.map((point) => point.u);
@@ -92,6 +73,7 @@ export function KernelLiftPlayground() {
     const ws = lift.points.map((point) => point.w);
     const low = { u: Math.min(...us), v: Math.min(...vs), w: Math.min(...ws) };
     const high = { u: Math.max(...us), v: Math.max(...vs), w: Math.max(...ws) };
+    const support = new Set(lift.lifted.support_positions);
 
     const cubePoint = (u: number, v: number, w: number): Point3 => ({
       x: ((u - low.u) / (high.u - low.u)) * 2 - 1,
@@ -100,9 +82,10 @@ export function KernelLiftPlayground() {
     });
 
     projectedPatients = lift.points
-      .map((point) => ({
+      .map((point, index) => ({
         point: project(cubePoint(point.u, point.v, point.w), orbit, HALF, SCALE),
         label: point.label,
+        support: support.has(index),
       }))
       .sort((first, second) => second.point.depth - first.point.depth);
 
@@ -110,10 +93,7 @@ export function KernelLiftPlayground() {
     // keeping only the patches that stay inside the drawn room.
     const { a, b, c, d } = lift.plane;
     if (Math.abs(c) > 1e-6) {
-      const planeCorner = (
-        uStep: number,
-        vStep: number,
-      ): Point3 | null => {
+      const planeCorner = (uStep: number, vStep: number): Point3 | null => {
         const u = low.u + ((high.u - low.u) * uStep) / PLANE_STEPS;
         const v = low.v + ((high.v - low.v) * vStep) / PLANE_STEPS;
         const w = (d - a * u - b * v) / c;
@@ -185,18 +165,29 @@ export function KernelLiftPlayground() {
         ))}
 
         {projectedPatients.map((patient, index) => (
-          <circle
-            key={`p${index}`}
-            cx={patient.point.px}
-            cy={patient.point.py}
-            r={5.5}
-            className={
-              patient.label === 1
-                ? "fill-indigo-600 stroke-white dark:stroke-slate-900"
-                : "fill-amber-500 stroke-white dark:stroke-slate-900"
-            }
-            strokeWidth={1.5}
-          />
+          <g key={`p${index}`}>
+            {patient.support && (
+              <circle
+                cx={patient.point.px}
+                cy={patient.point.py}
+                r={9}
+                fill="none"
+                className="stroke-emerald-500"
+                strokeWidth={1.5}
+              />
+            )}
+            <circle
+              cx={patient.point.px}
+              cy={patient.point.py}
+              r={5.5}
+              className={
+                patient.label === 1
+                  ? "fill-indigo-600 stroke-white dark:stroke-slate-900"
+                  : "fill-amber-500 stroke-white dark:stroke-slate-900"
+              }
+              strokeWidth={1.5}
+            />
+          </g>
         ))}
 
         <text x={uLabel.px} y={uLabel.py} textAnchor="middle" className="fill-slate-500 font-mono text-xs dark:fill-slate-400">
@@ -211,16 +202,27 @@ export function KernelLiftPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Drag to turn the room. Indigo is healthy, amber is unwell, and the
-        green wireframe is a flat plane.
+        Drag to turn the room. Indigo is healthy, amber is unwell, the green
+        wireframe is a flat plane, and a green ring marks a support vector.
       </p>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat
           label="Accuracy of the flat plane"
-          value={lift ? lift.accuracy.toFixed(3) : "…"}
+          value={lift ? lift.lifted.accuracy.toFixed(3) : "…"}
         />
-        <Stat label="Patients lifted" value={String(CLINIC.length)} />
+        <Stat
+          label="Support vectors, either route"
+          value={lift ? `${lift.lifted.n_support_vectors} and ${lift.kernel.n_support_vectors}` : "…"}
+        />
+        <Stat
+          label="Largest multiplier gap"
+          value={lift ? lift.multiplier_gap.toExponential(1) : "…"}
+        />
+        <Stat
+          label="Largest decision gap"
+          value={lift ? lift.decision_gap.toExponential(1) : "…"}
+        />
       </div>
 
       {message && (

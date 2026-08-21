@@ -1,18 +1,19 @@
 "use client";
 
-// Two rings, and the plane a kernel rearranges them into.
+// A cloud of people, and the plane a kernel rearranges them into.
 //
-// The left panel is the cloud as measured, and its points can be dragged. The
-// right panel is the same points placed by their first two kernel components,
-// the directions of most spread in a space the kernel only implies, and under
-// the radial kernel the inner ring lands to one side of the outer along the
-// first of them. The buttons choose the kernel, the slider sharpens it, and
-// the toggle swaps the right panel for ordinary PCA's rotation of the same
-// cloud, which keeps the rings nested whatever the kernel. The worked five are
-// the library's own tilted ellipse, whose every figure the page checks by
-// hand. Every coordinate, eigenvalue, variance, share and coefficient is the
-// library's through the API. The browser scales them to pixels and nothing
-// more.
+// The left panel is the cloud as measured, height across and weight up, and
+// its people can be dragged. The right panel is the same people placed by
+// their first two kernel components, the directions of most spread in a
+// space the kernel only implies, and under the radial kernel the typical
+// twelve of the ring land to one side of the twenty-four around them along
+// the first of those directions. The buttons choose the cloud and the
+// kernel, the slider sets the kernel's reach, and the toggle swaps the right
+// panel for ordinary PCA's rotation of the same cloud, which keeps the ring
+// nested whatever the kernel. The measured four are the PCA page's, whose
+// every figure the page checks by hand. Every coordinate, eigenvalue,
+// variance, share and coefficient is the library's through the API; the
+// browser scales them to pixels and nothing more.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -23,6 +24,22 @@ import {
   Point,
   analyzeThroughKernel,
 } from "@/lib/concepts/kernel-pca";
+import {
+  ARC,
+  ARC_GAMMA,
+  GAMMA_STOPS,
+  IDEAL_CASE,
+  IDEAL_INNER_COUNT,
+  INNER,
+  INNER_COUNT,
+  MEASURED_FOUR,
+  OUTER,
+  RING,
+  RING_GAMMA,
+  gammaIndex,
+  heightShade,
+  randomRing,
+} from "./kernelPcaFixtures";
 
 const PANEL = { width: 320, height: 320 };
 const PAD = { left: 40, right: 14, top: 14, bottom: 36 };
@@ -31,67 +48,13 @@ const PLOT = {
   height: PANEL.height - PAD.top - PAD.bottom,
 };
 
-// A little air around the furthest placed point, so nothing sits on the frame.
+// A little air around the furthest placed person, so nothing sits on the frame.
 const REACH_MARGIN = 1.15;
 
-const INNER_RING_COUNT = 12;
-
-// Twelve points near radius one, then twenty-four near radius three, each
-// ring wobbled a little so it reads as data rather than a diagram.
-const RINGS: Point[] = [
-  { x: 0.968, y: 0.029 },
-  { x: 0.717, y: 0.511 },
-  { x: 0.477, y: 0.968 },
-  { x: 0.06, y: 0.915 },
-  { x: -0.432, y: 0.839 },
-  { x: -0.99, y: 0.459 },
-  { x: -0.995, y: 0.119 },
-  { x: -0.894, y: -0.612 },
-  { x: -0.452, y: -0.93 },
-  { x: -0.008, y: -1.058 },
-  { x: 0.414, y: -0.802 },
-  { x: 0.847, y: -0.551 },
-  { x: 3.0, y: -0.118 },
-  { x: 3.012, y: 0.779 },
-  { x: 2.561, y: 1.481 },
-  { x: 2.124, y: 2.16 },
-  { x: 1.233, y: 2.589 },
-  { x: 0.633, y: 2.898 },
-  { x: -0.058, y: 2.946 },
-  { x: -0.966, y: 2.729 },
-  { x: -1.424, y: 2.748 },
-  { x: -1.979, y: 2.207 },
-  { x: -2.75, y: 1.523 },
-  { x: -2.859, y: 0.995 },
-  { x: -3.023, y: 0.225 },
-  { x: -2.936, y: -0.794 },
-  { x: -2.652, y: -1.512 },
-  { x: -1.906, y: -2.179 },
-  { x: -1.437, y: -2.613 },
-  { x: -0.75, y: -2.824 },
-  { x: -0.001, y: -2.971 },
-  { x: 0.632, y: -2.809 },
-  { x: 1.353, y: -2.834 },
-  { x: 1.957, y: -2.16 },
-  { x: 2.688, y: -1.444 },
-  { x: 2.8, y: -0.896 },
-];
-
-// The library's tilted ellipse, five points whose centred rows are (2, 2),
-// (-2, -2), (1, -1), (-1, 1) and (0, 0), the worked example the page sums by
-// hand.
-const WORKED_FIVE: Point[] = [
-  { x: 12, y: 102 },
-  { x: 8, y: 98 },
-  { x: 11, y: 99 },
-  { x: 9, y: 101 },
-  { x: 10, y: 100 },
-];
-
-type Cloud = "rings" | "worked";
+type Cloud = "ring" | "arc" | "four" | "ideal" | "random";
 
 // The measured plane keeps one scale on both axes, so a ring stays round, and
-// the window is fixed per cloud so dragging a point never rescales the rest.
+// the window is fixed per cloud so dragging a person never rescales the rest.
 interface SquareWindow {
   centreX: number;
   centreY: number;
@@ -99,8 +62,11 @@ interface SquareWindow {
 }
 
 const WINDOWS: Record<Cloud, SquareWindow> = {
-  rings: { centreX: 0, centreY: 0, half: 3.6 },
-  worked: { centreX: 10, centreY: 100, half: 3 },
+  ring: { centreX: 160, centreY: 60, half: 40 },
+  arc: { centreX: 160, centreY: 56.5, half: 45 },
+  four: { centreX: 170, centreY: 68, half: 15 },
+  ideal: { centreX: 160, centreY: 60, half: 40 },
+  random: { centreX: 160, centreY: 60, half: 40 },
 };
 
 const KERNELS: { key: KernelName; label: string }[] = [
@@ -109,41 +75,27 @@ const KERNELS: { key: KernelName; label: string }[] = [
   { key: "rbf", label: "Radial" },
 ];
 
-const GAMMA = { min: 0.1, max: 5, step: 0.1 };
-const SPLITTING_GAMMA = 0.5;
-
-const RING_FILLS = ["fill-indigo-600", "fill-amber-500"];
-
 function toPixel(x: number, y: number, frame: SquareWindow) {
   const px = PAD.left + ((x - frame.centreX) / (2 * frame.half) + 0.5) * PLOT.width;
-  const py =
-    PAD.top + (0.5 - (y - frame.centreY) / (2 * frame.half)) * PLOT.height;
+  const py = PAD.top + (0.5 - (y - frame.centreY) / (2 * frame.half)) * PLOT.height;
   return { px, py };
 }
 
 function toData(px: number, py: number, frame: SquareWindow): Point {
-  const clamp = (value: number, low: number, high: number) =>
-    Math.min(high, Math.max(low, value));
+  const clamp = (value: number, low: number, high: number) => Math.min(high, Math.max(low, value));
   const x = frame.centreX + ((px - PAD.left) / PLOT.width - 0.5) * 2 * frame.half;
   const y = frame.centreY + (0.5 - (py - PAD.top) / PLOT.height) * 2 * frame.half;
   return {
-    x: Number(
-      clamp(x, frame.centreX - frame.half, frame.centreX + frame.half).toFixed(3),
-    ),
-    y: Number(
-      clamp(y, frame.centreY - frame.half, frame.centreY + frame.half).toFixed(3),
-    ),
+    x: Number(clamp(x, frame.centreX - frame.half, frame.centreX + frame.half).toFixed(1)),
+    y: Number(clamp(y, frame.centreY - frame.half, frame.centreY + frame.half).toFixed(1)),
   };
 }
 
 // The component plane is centred at zero by construction, and its two axes
 // carry different spreads, so each is scaled on its own.
 function placedPixel(entry: PlaneCoordinates, placed: PlaneCoordinates[]) {
-  const firstReach =
-    Math.max(...placed.map((each) => Math.abs(each.first)), 1e-9) * REACH_MARGIN;
-  const secondReach =
-    Math.max(...placed.map((each) => Math.abs(each.second)), 1e-9) *
-    REACH_MARGIN;
+  const firstReach = Math.max(...placed.map((each) => Math.abs(each.first)), 1e-9) * REACH_MARGIN;
+  const secondReach = Math.max(...placed.map((each) => Math.abs(each.second)), 1e-9) * REACH_MARGIN;
   const px = PAD.left + (entry.first / (2 * firstReach) + 0.5) * PLOT.width;
   const py = PAD.top + (0.5 - entry.second / (2 * secondReach)) * PLOT.height;
   return { px, py };
@@ -156,15 +108,17 @@ function tidy(value: number, digits: number): string {
 }
 
 export function KernelPcaPlayground() {
-  const [cloud, setCloud] = useState<Cloud>("rings");
-  const [points, setPoints] = useState<Point[]>(RINGS);
+  const [cloud, setCloud] = useState<Cloud>("ring");
+  const [points, setPoints] = useState<Point[]>(RING);
+  const [innerCount, setInnerCount] = useState<number | null>(INNER_COUNT);
   const [kernel, setKernel] = useState<KernelName>("rbf");
-  const [gamma, setGamma] = useState(SPLITTING_GAMMA);
+  const [gammaStop, setGammaStop] = useState(gammaIndex(RING_GAMMA));
   const [showOrdinary, setShowOrdinary] = useState(false);
   const [answer, setAnswer] = useState<KernelPcaAnalysis | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const leftSvgRef = useRef<SVGSVGElement | null>(null);
   const dragging = useRef<number | null>(null);
+  const gamma = GAMMA_STOPS[gammaStop];
 
   useEffect(() => {
     const timer = setTimeout(async () => {
@@ -202,56 +156,72 @@ export function KernelPcaPlayground() {
     if (dragging.current === null) return;
     const moved = eventToData(event.clientX, event.clientY);
     const index = dragging.current;
-    setPoints((current) =>
-      current.map((point, each) => (each === index ? moved : point)),
-    );
+    setPoints((current) => current.map((point, each) => (each === index ? moved : point)));
   };
 
   const onPointerUp = () => {
     dragging.current = null;
   };
 
-  const loadRings = () => {
-    setCloud("rings");
-    setPoints(RINGS);
+  const load = (next: Cloud) => {
+    setCloud(next);
+    if (next === "ring") {
+      setPoints(RING);
+      setInnerCount(INNER_COUNT);
+      setKernel("rbf");
+      setGammaStop(gammaIndex(RING_GAMMA));
+    } else if (next === "arc") {
+      setPoints(ARC);
+      setInnerCount(null);
+      setKernel("rbf");
+      setGammaStop(gammaIndex(ARC_GAMMA));
+    } else if (next === "four") {
+      setPoints(MEASURED_FOUR);
+      setInnerCount(null);
+      setKernel("linear");
+    } else if (next === "ideal") {
+      setPoints(IDEAL_CASE);
+      setInnerCount(IDEAL_INNER_COUNT);
+      setKernel("rbf");
+      setGammaStop(gammaIndex(RING_GAMMA));
+    } else {
+      const drawn = randomRing();
+      setPoints(drawn.points);
+      setInnerCount(drawn.innerCount);
+      setKernel("rbf");
+      setGammaStop(gammaIndex(RING_GAMMA));
+    }
   };
 
-  const loadWorkedFive = () => {
-    setCloud("worked");
-    setPoints(WORKED_FIVE);
-    setKernel("linear");
+  const fillFor = (index: number) => {
+    if (innerCount !== null) return index < innerCount ? INNER : OUTER;
+    if (cloud === "arc") return heightShade(points[index].x);
+    return "#475569";
   };
 
-  const fillFor = (index: number) =>
-    cloud === "rings"
-      ? RING_FILLS[index < INNER_RING_COUNT ? 0 : 1]
-      : "fill-slate-600 dark:fill-slate-300";
+  const rowLabel = (index: number) => (cloud === "four" ? String(index + 1) : null);
 
-  const rowLabel = (index: number) =>
-    cloud === "worked" ? String(index + 1) : null;
-
-  const placed = answer
-    ? showOrdinary
-      ? answer.ordinary.coordinates
-      : answer.coordinates
-    : null;
-
+  const placed = answer ? (showOrdinary ? answer.ordinary.coordinates : answer.coordinates) : null;
   const first = answer?.components[0];
   const second = answer?.components[1];
   const divisor = answer ? answer.n_rows - 1 : null;
 
+  const clouds: { key: Cloud; label: string }[] = [
+    { key: "ring", label: "The ring" },
+    { key: "arc", label: "The arc" },
+    { key: "four", label: "The measured four" },
+    { key: "ideal", label: "An Ideal Case" },
+    { key: "random", label: "Random people" },
+  ];
+
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <button onClick={loadRings} className={cloudButtonClass(cloud === "rings")}>
-          Two rings
-        </button>
-        <button
-          onClick={loadWorkedFive}
-          className={cloudButtonClass(cloud === "worked")}
-        >
-          The worked five
-        </button>
+        {clouds.map((choice) => (
+          <button key={choice.key} onClick={() => load(choice.key)} className={cloudButtonClass(cloud === choice.key)}>
+            {choice.label}
+          </button>
+        ))}
         <div className="ml-auto flex items-center gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {KERNELS.map((choice) => (
             <button
@@ -259,9 +229,7 @@ export function KernelPcaPlayground() {
               onClick={() => setKernel(choice.key)}
               className={
                 "rounded px-2.5 py-1 text-sm font-medium transition " +
-                (kernel === choice.key
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700")
+                (kernel === choice.key ? "bg-indigo-600 text-white" : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700")
               }
             >
               {choice.label}
@@ -275,23 +243,19 @@ export function KernelPcaPlayground() {
           gamma
           <input
             type="range"
-            min={GAMMA.min}
-            max={GAMMA.max}
-            step={GAMMA.step}
-            value={gamma}
+            min={0}
+            max={GAMMA_STOPS.length - 1}
+            step={1}
+            value={gammaStop}
             disabled={kernel === "linear"}
-            onChange={(event) => setGamma(Number(event.target.value))}
+            onChange={(event) => setGammaStop(Number(event.target.value))}
             className="w-40 accent-indigo-600 disabled:opacity-40"
           />
-          <span className="w-8 font-mono text-sm">{gamma.toFixed(1)}</span>
+          <span className="w-16 font-mono text-sm">{gamma}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">reach {(1 / Math.sqrt(gamma)).toFixed(1)}</span>
         </label>
         <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-          <input
-            type="checkbox"
-            checked={showOrdinary}
-            onChange={(event) => setShowOrdinary(event.target.checked)}
-            className="accent-indigo-600"
-          />
+          <input type="checkbox" checked={showOrdinary} onChange={(event) => setShowOrdinary(event.target.checked)} className="accent-indigo-600" />
           Ordinary PCA on the right
         </label>
       </div>
@@ -310,76 +274,31 @@ export function KernelPcaPlayground() {
             const { px, py } = toPixel(point.x, point.y, frame);
             return (
               <g key={index}>
-                <circle
-                  cx={px}
-                  cy={py}
-                  r={5}
-                  className={
-                    "cursor-grab stroke-white dark:stroke-slate-900 " +
-                    fillFor(index)
-                  }
-                  strokeWidth={1.5}
-                  onPointerDown={onPointPointerDown(index)}
-                />
+                <circle cx={px} cy={py} r={5} fill={fillFor(index)} className="cursor-grab stroke-white dark:stroke-slate-900" strokeWidth={1.5} onPointerDown={onPointPointerDown(index)} />
                 {rowLabel(index) && (
-                  <text
-                    x={px + 8}
-                    y={py - 6}
-                    className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
-                  >
+                  <text x={px + 8} y={py - 6} className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400">
                     {rowLabel(index)}
                   </text>
                 )}
               </g>
             );
           })}
-          <AxisLabels horizontal="x" vertical="y" />
+          <AxisLabels horizontal="height, cm" vertical="weight, kg" />
         </svg>
 
-        <svg
-          viewBox={`0 0 ${PANEL.width} ${PANEL.height}`}
-          className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950"
-        >
+        <svg viewBox={`0 0 ${PANEL.width} ${PANEL.height}`} className="w-full select-none rounded-lg bg-slate-50 dark:bg-slate-950">
           <Frame />
           {placed && (
             <>
-              <line
-                x1={PAD.left}
-                y1={PAD.top + PLOT.height / 2}
-                x2={PAD.left + PLOT.width}
-                y2={PAD.top + PLOT.height / 2}
-                stroke="currentColor"
-                className="text-slate-200 dark:text-slate-800"
-                strokeWidth={1}
-              />
-              <line
-                x1={PAD.left + PLOT.width / 2}
-                y1={PAD.top}
-                x2={PAD.left + PLOT.width / 2}
-                y2={PAD.top + PLOT.height}
-                stroke="currentColor"
-                className="text-slate-200 dark:text-slate-800"
-                strokeWidth={1}
-              />
+              <line x1={PAD.left} y1={PAD.top + PLOT.height / 2} x2={PAD.left + PLOT.width} y2={PAD.top + PLOT.height / 2} stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth={1} />
+              <line x1={PAD.left + PLOT.width / 2} y1={PAD.top} x2={PAD.left + PLOT.width / 2} y2={PAD.top + PLOT.height} stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth={1} />
               {placed.map((entry, index) => {
                 const { px, py } = placedPixel(entry, placed);
                 return (
                   <g key={index}>
-                    <circle
-                      cx={px}
-                      cy={py}
-                      r={5}
-                      className={
-                        "stroke-white dark:stroke-slate-900 " + fillFor(index)
-                      }
-                      strokeWidth={1.5}
-                    />
+                    <circle cx={px} cy={py} r={5} fill={fillFor(index)} className="stroke-white dark:stroke-slate-900" strokeWidth={1.5} />
                     {rowLabel(index) && (
-                      <text
-                        x={px + 8}
-                        y={py - 6}
-                        className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
-                      >
+                      <text x={px + 8} y={py - 6} className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400">
                         {rowLabel(index)}
                       </text>
                     )}
@@ -388,18 +307,12 @@ export function KernelPcaPlayground() {
               })}
             </>
           )}
-          <AxisLabels
-            horizontal={showOrdinary ? "component 1" : "kernel component 1"}
-            vertical={showOrdinary ? "component 2" : "kernel component 2"}
-          />
+          <AxisLabels horizontal={showOrdinary ? "component 1" : "kernel component 1"} vertical={showOrdinary ? "component 2" : "kernel component 2"} />
         </svg>
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Left, the cloud as measured, with every point draggable. Right, the
-        same points placed by their first two directions. The colours are the
-        rings, and the numbers are the worked five&rsquo;s rows. A sign on
-        either axis is the solver&rsquo;s choice, not the data&rsquo;s.
+        Left, the people as measured, every one draggable. Right, the same people placed by their first two directions. Indigo is the inner group and amber the outer; the arc is shaded by height; the numbers are the measured four. A sign on either axis is the solver&rsquo;s choice, not the data&rsquo;s.
       </p>
 
       <div className="mt-3 overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">
@@ -408,9 +321,7 @@ export function KernelPcaPlayground() {
             <tr className="text-left text-xs text-slate-500 dark:text-slate-400">
               <th className="py-1 font-normal">Direction</th>
               <th className="py-1 text-right font-normal">Raw eigenvalue</th>
-              <th className="py-1 text-right font-normal">
-                Over n &minus; 1{divisor !== null ? ` = ${divisor}` : ""}
-              </th>
+              <th className="py-1 text-right font-normal">Over n &minus; 1{divisor !== null ? ` = ${divisor}` : ""}</th>
               <th className="py-1 text-right font-normal">Variance</th>
               <th className="py-1 text-right font-normal">Share</th>
             </tr>
@@ -418,23 +329,11 @@ export function KernelPcaPlayground() {
           <tbody className="font-mono text-slate-900 dark:text-slate-100">
             {[first, second].map((component, index) => (
               <tr key={index}>
-                <td className="py-1 font-sans text-slate-700 dark:text-slate-300">
-                  {index === 0 ? "First" : "Second"}
-                </td>
-                <td className="py-1 text-right">
-                  {component ? tidy(component.raw_eigenvalue, 4) : "…"}
-                </td>
-                <td className="py-1 text-right">
-                  {component && divisor !== null
-                    ? tidy(component.raw_eigenvalue / divisor, 4)
-                    : "…"}
-                </td>
-                <td className="py-1 text-right">
-                  {component ? tidy(component.variance, 4) : "…"}
-                </td>
-                <td className="py-1 text-right">
-                  {component ? tidy(component.share, 3) : "…"}
-                </td>
+                <td className="py-1 font-sans text-slate-700 dark:text-slate-300">{index === 0 ? "First" : "Second"}</td>
+                <td className="py-1 text-right">{component ? tidy(component.raw_eigenvalue, 4) : "…"}</td>
+                <td className="py-1 text-right">{component && divisor !== null ? tidy(component.raw_eigenvalue / divisor, 4) : "…"}</td>
+                <td className="py-1 text-right">{component ? tidy(component.variance, 4) : "…"}</td>
+                <td className="py-1 text-right">{component ? tidy(component.share, 3) : "…"}</td>
               </tr>
             ))}
           </tbody>
@@ -442,39 +341,20 @@ export function KernelPcaPlayground() {
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Rows, n" value={answer ? String(answer.n_rows) : "…"} />
-        <Stat
-          label="Total variance"
-          value={answer ? tidy(answer.total_variance, 4) : "…"}
-        />
-        <Stat
-          label="Row 1's coefficient, first direction"
-          value={first ? tidy(first.row_coefficients[0], 4) : "…"}
-        />
-        <Stat
-          label="Row 1 along the first"
-          value={answer ? tidy(answer.coordinates[0].first, 4) : "…"}
-        />
+        <Stat label="People, n" value={answer ? String(answer.n_rows) : "…"} />
+        <Stat label="Total variance" value={answer ? tidy(answer.total_variance, 4) : "…"} />
+        <Stat label="Person 1's coefficient, first direction" value={first ? tidy(first.row_coefficients[0], 4) : "…"} />
+        <Stat label="Person 1 along the first" value={answer ? tidy(answer.coordinates[0].first, 4) : "…"} />
       </div>
 
       {answer && answer.n_rows <= 8 && (
         <div className="mt-3 rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">
-          <div className="text-xs text-slate-500 dark:text-slate-400">
-            Centred kernel row of row 1, one value per row
-          </div>
-          <div className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">
-            {answer.first_row_kernel_values
-              .map((value) => tidy(value, 4))
-              .join("   ")}
-          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">Centred kernel row of person 1, one value per person</div>
+          <div className="font-mono text-sm font-semibold text-slate-900 dark:text-slate-100">{answer.first_row_kernel_values.map((value) => tidy(value, 4)).join("   ")}</div>
         </div>
       )}
 
-      {message && (
-        <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">
-          {message}
-        </p>
-      )}
+      {message && <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">{message}</p>}
     </div>
   );
 }
@@ -489,44 +369,16 @@ function cloudButtonClass(active: boolean): string {
 }
 
 function Frame() {
-  return (
-    <rect
-      x={PAD.left}
-      y={PAD.top}
-      width={PLOT.width}
-      height={PLOT.height}
-      fill="none"
-      stroke="currentColor"
-      className="text-slate-300 dark:text-slate-700"
-      strokeWidth={1}
-    />
-  );
+  return <rect x={PAD.left} y={PAD.top} width={PLOT.width} height={PLOT.height} fill="none" stroke="currentColor" className="text-slate-300 dark:text-slate-700" strokeWidth={1} />;
 }
 
-function AxisLabels({
-  horizontal,
-  vertical,
-}: {
-  horizontal: string;
-  vertical: string;
-}) {
+function AxisLabels({ horizontal, vertical }: { horizontal: string; vertical: string }) {
   return (
     <>
-      <text
-        x={PAD.left + PLOT.width / 2}
-        y={PANEL.height - 8}
-        textAnchor="middle"
-        className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
-      >
+      <text x={PAD.left + PLOT.width / 2} y={PANEL.height - 8} textAnchor="middle" className="fill-slate-500 text-xs font-medium dark:fill-slate-400">
         {horizontal}
       </text>
-      <text
-        x={14}
-        y={PAD.top + PLOT.height / 2}
-        textAnchor="middle"
-        transform={`rotate(-90 14 ${PAD.top + PLOT.height / 2})`}
-        className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
-      >
+      <text x={14} y={PAD.top + PLOT.height / 2} textAnchor="middle" transform={`rotate(-90 14 ${PAD.top + PLOT.height / 2})`} className="fill-slate-500 text-xs font-medium dark:fill-slate-400">
         {vertical}
       </text>
     </>
@@ -537,9 +389,7 @@ function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">
       <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
-      <div className="font-mono text-lg font-semibold text-slate-900 dark:text-slate-100">
-        {value}
-      </div>
+      <div className="font-mono text-lg font-semibold text-slate-900 dark:text-slate-100">{value}</div>
     </div>
   );
 }

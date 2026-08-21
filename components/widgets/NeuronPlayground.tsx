@@ -2,56 +2,52 @@
 
 // One neuron with two inputs, drawn three ways at once.
 //
-// The diagram is the model, two inputs weighed and summed with a bias, the
-// total bent by whichever activation is chosen. The shaded square is that
-// neuron's output at every cell of a lattice over the plane its inputs span,
-// with the line where the score is zero drawn dashed, and the dot is a probe
-// the reader drags to read the score, the output and the bend's slope at any
-// point. The curve beside it is the chosen bend across a range of scores,
-// with its slope drawn under it and a marker at the probe's score. The
-// sliders set the two weights and the bias, which are the whole of what a
-// neuron learns. Every score, output, slope and lattice cell is the library's
-// through the API. The browser scales them to pixels and to shades.
+// The diagram is the model, a person's standardised height and weight
+// weighed and summed with a bias, the total bent by whichever activation is
+// chosen. The shaded square is that neuron's output at every cell of a
+// lattice over the plane its inputs span, with the line where the score is
+// zero drawn dashed, and the dot is a probe the reader drags to read the
+// score, the output and the bend's slope at any person. The curve beside it
+// is the chosen bend across a range of scores, with its slope drawn under it
+// and a marker at the probe's score. The sliders set the two weights and
+// the bias, which are the whole of what a neuron learns, and one button
+// loads the three numbers the logistic model fitted to the crowd, with the
+// crowd drawn over the surface it produces. Every score, output, slope,
+// lattice cell and fitted number is the library's through the API. The
+// browser scales them to pixels and to shades.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import {
   ACTIVATION_NAMES,
   ActivationName,
-  Lattice,
+  LogisticTwin,
   NeuronResponse,
   PlanePoint,
+  fetchLogisticTwin,
   respondNeuron,
 } from "@/lib/concepts/neurons-and-activations";
-
-// The window the surface covers, and twenty-five cells across it so the
-// lattice steps by a quarter and the worked input (1, 1) is a cell of it.
-const WINDOW = { low: -3, high: 3 };
-const LATTICE: Lattice = {
-  first_input_low: WINDOW.low,
-  first_input_high: WINDOW.high,
-  second_input_low: WINDOW.low,
-  second_input_high: WINDOW.high,
-  cells: 25,
-};
-
-// The worked example the page reads its numbers from, weights (2, -1), bias
-// one half, and the probe at (1, 1), which every bend scores at 1.5.
-const WORKED_WEIGHTS: [number, number] = [2, -1];
-const WORKED_BIAS = 0.5;
-const WORKED_PROBE: PlanePoint = { first_input: 1, second_input: 1 };
-
-const PARAMETER_RANGE = { min: -4, max: 4, step: 0.25 };
-
-// The range the API samples the bend over.
-const CURVE_RANGE = { low: -6, high: 6 };
-
-const ACTIVATION_LABELS: Record<ActivationName, string> = {
-  identity: "Identity",
-  rectified_linear: "ReLU",
-  sigmoid: "Sigmoid",
-  hyperbolic_tangent: "tanh",
-};
+import {
+  ACTIVATION_LABELS,
+  ADULT,
+  BUTTON_CLASS,
+  CHILD,
+  CURVE_RANGE,
+  LATTICE,
+  NEGATIVE_FILL,
+  PARAMETER_RANGE,
+  POSITIVE_FILL,
+  SELECTED_BUTTON_CLASS,
+  SHORT_HEAVY,
+  TALL_HEAVY,
+  WINDOW,
+  WORKED_BIAS,
+  WORKED_WEIGHTS,
+  latticeValue,
+  planeX,
+  planeY,
+  signed,
+} from "./neuronFixtures";
 
 const DIAGRAM = { width: 640, height: 200 };
 const INPUT_NODES = [
@@ -66,35 +62,11 @@ const OUTPUT_NODE = { x: 590, y: 104 };
 const PANEL = { width: 320, height: 320 };
 const PANEL_PAD = { left: 40, right: 12, top: 12, bottom: 34 };
 const PANEL_PLOT = {
+  left: PANEL_PAD.left,
+  top: PANEL_PAD.top,
   width: PANEL.width - PANEL_PAD.left - PANEL_PAD.right,
   height: PANEL.height - PANEL_PAD.top - PANEL_PAD.bottom,
 };
-
-// Indigo for a positive output, amber for a negative one, the two colours
-// the site uses for the two sides of anything.
-const POSITIVE_FILL = "rgb(79 70 229)";
-const NEGATIVE_FILL = "rgb(217 119 6)";
-
-const BUTTON_CLASS =
-  "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
-
-const SELECTED_BUTTON_CLASS =
-  "rounded-md border border-indigo-600 bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700 dark:border-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400";
-
-function surfaceX(firstInput: number): number {
-  return (
-    PANEL_PAD.left +
-    ((firstInput - WINDOW.low) / (WINDOW.high - WINDOW.low)) * PANEL_PLOT.width
-  );
-}
-
-function surfaceY(secondInput: number): number {
-  return (
-    PANEL_PAD.top +
-    (1 - (secondInput - WINDOW.low) / (WINDOW.high - WINDOW.low)) *
-      PANEL_PLOT.height
-  );
-}
 
 function curveX(score: number): number {
   return (
@@ -108,11 +80,6 @@ function curveY(value: number, low: number, high: number): number {
   return PANEL_PAD.top + ((high - value) / (high - low)) * PANEL_PLOT.height;
 }
 
-// Where the lattice's index-th cell sits along one side of the window.
-function latticeValue(index: number, cells: number): number {
-  return WINDOW.low + (index / (cells - 1)) * (WINDOW.high - WINDOW.low);
-}
-
 function roundToTenth(value: number): number {
   return Math.round(value * 10) / 10;
 }
@@ -121,15 +88,13 @@ function clampToWindow(value: number): number {
   return Math.min(WINDOW.high, Math.max(WINDOW.low, value));
 }
 
-function signed(value: number, decimals: number): string {
-  return (value < 0 ? "−" : "") + Math.abs(value).toFixed(decimals);
-}
-
 export function NeuronPlayground() {
   const [weights, setWeights] = useState<[number, number]>(WORKED_WEIGHTS);
   const [bias, setBias] = useState(WORKED_BIAS);
   const [activation, setActivation] = useState<ActivationName>("sigmoid");
-  const [probe, setProbe] = useState<PlanePoint>(WORKED_PROBE);
+  const [probe, setProbe] = useState<PlanePoint>(TALL_HEAVY);
+  const [showCrowd, setShowCrowd] = useState(false);
+  const [twin, setTwin] = useState<LogisticTwin | null>(null);
   const [answer, setAnswer] = useState<NeuronResponse | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const surfaceRef = useRef<SVGSVGElement | null>(null);
@@ -155,6 +120,16 @@ export function NeuronPlayground() {
     }, 60);
     return () => clearTimeout(timer);
   }, [weights, bias, activation, probe]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setTwin(await fetchLogisticTwin());
+      } catch (error) {
+        if (error instanceof ApiError) setMessage(error.message);
+      }
+    })();
+  }, []);
 
   const eventToProbe = useCallback(
     (clientX: number, clientY: number): PlanePoint => {
@@ -190,10 +165,18 @@ export function NeuronPlayground() {
     dragging.current = false;
   };
 
-  const resetToWorked = () => {
+  const loadWorked = (person: PlanePoint) => {
     setWeights(WORKED_WEIGHTS);
     setBias(WORKED_BIAS);
-    setProbe(WORKED_PROBE);
+    setProbe(person);
+  };
+
+  const loadFitted = () => {
+    if (!twin) return;
+    setWeights([twin.fitted_weights[0], twin.fitted_weights[1]]);
+    setBias(twin.fitted_bias);
+    setActivation("sigmoid");
+    setShowCrowd(true);
   };
 
   const setWeight = (index: 0 | 1) => (value: number) => {
@@ -262,9 +245,26 @@ export function NeuronPlayground() {
             {ACTIVATION_LABELS[name]}
           </button>
         ))}
-        <button onClick={resetToWorked} className={"ml-auto " + BUTTON_CLASS}>
-          Worked example
+      </div>
+      <div className="flex flex-wrap items-center gap-2 pb-3">
+        <button onClick={() => loadWorked(TALL_HEAVY)} className={BUTTON_CLASS}>
+          A tall heavy person
         </button>
+        <button onClick={() => loadWorked(SHORT_HEAVY)} className={BUTTON_CLASS}>
+          A short heavy person
+        </button>
+        <button onClick={loadFitted} className={BUTTON_CLASS} disabled={!twin}>
+          The fitted neuron
+        </button>
+        <label className="ml-auto flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <input
+            type="checkbox"
+            checked={showCrowd}
+            onChange={(event) => setShowCrowd(event.target.checked)}
+            className="accent-indigo-600"
+          />
+          Show the crowd
+        </label>
       </div>
 
       <div className="grid grid-cols-1 gap-3 pb-3 sm:grid-cols-3">
@@ -345,6 +345,14 @@ export function NeuronPlayground() {
               className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
             >
               {index === 0 ? "x₁" : "x₂"}
+            </text>
+            <text
+              x={node.x - 34}
+              y={node.y + 16}
+              textAnchor="middle"
+              className="fill-slate-400 text-[9px] dark:fill-slate-500"
+            >
+              {index === 0 ? "height" : "weight"}
             </text>
             <circle
               cx={node.x}
@@ -471,8 +479,11 @@ export function NeuronPlayground() {
         >
           {surface?.outputs.map((row, rowIndex) =>
             row.map((output, columnIndex) => {
-              const px = surfaceX(latticeValue(columnIndex, surface.cells));
-              const py = surfaceY(latticeValue(rowIndex, surface.cells));
+              const px = planeX(
+                latticeValue(columnIndex, surface.cells),
+                PANEL_PLOT,
+              );
+              const py = planeY(latticeValue(rowIndex, surface.cells), PANEL_PLOT);
               const left = Math.max(PANEL_PAD.left, px - cellSpan / 2);
               const right = Math.min(
                 PANEL_PAD.left + PANEL_PLOT.width,
@@ -513,10 +524,10 @@ export function NeuronPlayground() {
           {/* where the score is exactly zero */}
           {answer?.zero_line && (
             <line
-              x1={surfaceX(answer.zero_line.start.first_input)}
-              y1={surfaceY(answer.zero_line.start.second_input)}
-              x2={surfaceX(answer.zero_line.end.first_input)}
-              y2={surfaceY(answer.zero_line.end.second_input)}
+              x1={planeX(answer.zero_line.start.first_input, PANEL_PLOT)}
+              y1={planeY(answer.zero_line.start.second_input, PANEL_PLOT)}
+              x2={planeX(answer.zero_line.end.first_input, PANEL_PLOT)}
+              y2={planeY(answer.zero_line.end.second_input, PANEL_PLOT)}
               stroke="currentColor"
               className="text-slate-700 dark:text-slate-200"
               strokeWidth={1.5}
@@ -524,9 +535,23 @@ export function NeuronPlayground() {
             />
           )}
 
+          {/* the crowd, in standard units, amber for a child, indigo for an adult */}
+          {showCrowd &&
+            twin?.people.map((person, index) => (
+              <circle
+                key={`person${index}`}
+                cx={planeX(person.standardised_height, PANEL_PLOT)}
+                cy={planeY(person.standardised_weight, PANEL_PLOT)}
+                r={4}
+                fill={person.is_adult === 1 ? ADULT : CHILD}
+                stroke="white"
+                strokeWidth={1}
+              />
+            ))}
+
           <circle
-            cx={surfaceX(probe.first_input)}
-            cy={surfaceY(probe.second_input)}
+            cx={planeX(probe.first_input, PANEL_PLOT)}
+            cy={planeY(probe.second_input, PANEL_PLOT)}
             r={7}
             className="cursor-grab fill-slate-900 stroke-white dark:fill-slate-100 dark:stroke-slate-900"
             strokeWidth={2}
@@ -535,7 +560,7 @@ export function NeuronPlayground() {
           {[WINDOW.low, 0, WINDOW.high].map((tick) => (
             <text
               key={`sx${tick}`}
-              x={surfaceX(tick)}
+              x={planeX(tick, PANEL_PLOT)}
               y={PANEL_PAD.top + PANEL_PLOT.height + 14}
               textAnchor="middle"
               className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
@@ -547,7 +572,7 @@ export function NeuronPlayground() {
             <text
               key={`sy${tick}`}
               x={PANEL_PAD.left - 6}
-              y={surfaceY(tick) + 3}
+              y={planeY(tick, PANEL_PLOT) + 3}
               textAnchor="end"
               className="fill-slate-500 text-[10px] font-medium dark:fill-slate-400"
             >
@@ -560,7 +585,7 @@ export function NeuronPlayground() {
             textAnchor="middle"
             className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
           >
-            x₁, the first input
+            x₁, height in standard units
           </text>
           <text
             x={12}
@@ -569,7 +594,7 @@ export function NeuronPlayground() {
             transform={`rotate(-90 12 ${PANEL_PAD.top + PANEL_PLOT.height / 2})`}
             className="fill-slate-500 text-xs font-medium dark:fill-slate-400"
           >
-            x₂, the second input
+            x₂, weight in standard units
           </text>
         </svg>
 
@@ -701,10 +726,10 @@ export function NeuronPlayground() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Left, the neuron&rsquo;s output over the plane of its two inputs, the
-        dashed line where its score is zero, and the probe you can drag. Right,
-        the chosen bend in indigo and its slope in amber, marked at the
-        probe&rsquo;s score.
+        Left, the neuron&rsquo;s output over the plane of standardised height
+        and weight, the dashed line where its score is zero, and the probe you
+        can drag. Right, the chosen bend in indigo and its slope in amber,
+        marked at the probe&rsquo;s score.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

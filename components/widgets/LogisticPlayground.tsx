@@ -94,7 +94,9 @@ function statusText(fit: LogisticFit | null, learningRate: number): string {
 
 export function LogisticPlayground() {
   const [points, setPoints] = useState<Outcome[]>(WORKED_OUTCOMES);
-  const [rateExponent, setRateExponent] = useState(-1);
+  // Opens at a rate of 0.5, where the climb meets its tolerance in a few
+  // thousand passes; at 0.1 it runs out of passes still creeping.
+  const [rateExponent, setRateExponent] = useState(-0.3);
   const [fit, setFit] = useState<LogisticFit | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);

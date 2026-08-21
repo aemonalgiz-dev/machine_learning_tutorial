@@ -25,44 +25,11 @@ import {
   fitBoltzmann,
   reconstructWithBoltzmann,
 } from "@/lib/api";
-
-function shape(rows: string[]): number[] {
-  return rows.flatMap((row) =>
-    Array.from(row, (cell) => (cell === "#" ? 1 : 0)),
-  );
-}
-
-interface StoredShape {
-  name: string;
-  label: string;
-  cells: number[];
-}
-
-// The Hopfield page's three shapes, written as 0 and 1 rather than -1 and 1,
-// because a Boltzmann unit is off or on rather than down or up.
-const THREE_SHAPES: StoredShape[] = [
-  {
-    name: "the T",
-    label: "T",
-    cells: shape(["#####", "..#..", "..#..", "..#..", "..#.."]),
-  },
-  {
-    name: "the L",
-    label: "L",
-    cells: shape(["#....", "#....", "#....", "#....", "#####"]),
-  },
-  {
-    name: "the cross",
-    label: "cross",
-    cells: shape(["#...#", ".#.#.", "..#..", ".#.#.", "#...#"]),
-  },
-];
-
-const PATTERNS = THREE_SHAPES.map((entry) => entry.cells);
-
-// The five cells the damage button flips, the same five the Hopfield page's
-// first scramble flips, so the two pages meet the same damaged T.
-const DAMAGED_CELLS = [5, 7, 8, 23, 24];
+import {
+  DAMAGED_CELLS,
+  PATTERNS,
+  THREE_SHAPES,
+} from "./boltzmannFixtures";
 
 const MIN_HIDDEN_UNITS = 1;
 const MAX_HIDDEN_UNITS = 8;

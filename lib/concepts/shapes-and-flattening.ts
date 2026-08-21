@@ -84,3 +84,95 @@ export function formatExtents(extents: number[] | null): string {
   if (extents.length === 1) return `(${extents[0]},)`;
   return `(${extents.join(", ")})`;
 }
+
+// One shape built on its own, with no layer around it. This is the only route
+// that can be handed an extent of zero or a side with no extents at all, since
+// a layer constructor would never get that far.
+export interface ExtentsCheck {
+  reads: number[] | null;
+  answers: number[] | null;
+  n_reads: number | null;
+  n_answers: number | null;
+  refusal: string | null;
+}
+
+export async function checkExtents(
+  reads: number[],
+  answers: number[],
+): Promise<ExtentsCheck> {
+  return postJson<ExtentsCheck>("/concepts/shapes/extents", { reads, answers });
+}
+
+// One seam asked in isolation. `counts_agree` is reported beside `holds`
+// rather than folded into it, because the pair is the page's subject.
+export interface JoinCheck {
+  beneath: number[];
+  above: number[];
+  n_beneath: number;
+  n_above: number;
+  counts_agree: boolean;
+  holds: boolean;
+  refusal: string | null;
+}
+
+export async function checkJoin(
+  beneath: number[],
+  above: number[],
+): Promise<JoinCheck> {
+  return postJson<JoinCheck>("/concepts/shapes/join", { beneath, above });
+}
+
+// One square layer standing at two positions of one chain, stepped once. The
+// two identity flags are the finding, and the weights are what shows it.
+export interface TiedWeightsStep {
+  width: number;
+  loss: number;
+  same_object_before: boolean;
+  same_object_after: boolean;
+  weights_before: number[][];
+  first_after: number[][];
+  second_after: number[][];
+  largest_gap: number;
+}
+
+export interface TiedWeightsRequest {
+  weights: number[][];
+  biases: number[];
+  rows: number[][];
+  targets: number[][];
+  learning_rate: number;
+}
+
+export async function stepTiedWeights(
+  request: TiedWeightsRequest,
+): Promise<TiedWeightsStep> {
+  return postJson<TiedWeightsStep>("/concepts/shapes/tied-weights", request);
+}
+
+// Numbers as they were asked for and as a layer answered with them. Both sides
+// are text, because a whole number past 2^53 cannot survive a browser's own
+// numbers either and the page has to show two of them apart.
+export interface NumberReport {
+  asked: string;
+  answered: string;
+  unchanged: boolean;
+  whole: boolean;
+}
+
+export interface WholeNumberProbe {
+  whole_numbers: NumberReport[];
+  fractional_values: NumberReport[];
+  n_whole_asked: number;
+  n_distinct_after: number;
+  refusal: string | null;
+}
+
+export async function probeWholeNumbers(
+  wholeNumbers: (number | string)[],
+  fractionalValues: number[],
+): Promise<WholeNumberProbe> {
+  return postJson<WholeNumberProbe>("/concepts/shapes/whole-numbers", {
+    whole_numbers: wholeNumbers,
+    fractional_values: fractionalValues,
+  });
+}

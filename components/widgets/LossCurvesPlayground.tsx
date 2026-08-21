@@ -7,9 +7,13 @@
 // number and compare it to the target; the other two squash it into a
 // probability first and compare that to a yes or a no. The upper chart draws
 // what each loss costs across the whole range and the lower chart draws which
-// way each one pushes, with the slider's position marked on every curve. The
-// table underneath is the readout the page's worked example quotes. Every
-// number here comes from the library through the API; the browser only draws.
+// way each one pushes, with the slider's position marked on every curve. A
+// sixth, dashed grey curve can be switched on, a sigmoid output scored by
+// squared error, which is the pairing the page argues against. The table
+// underneath is the readout the page quotes, and its last column is the slope
+// found by nudging the raw output either side and dividing, so the reader can
+// see that the gradient really is the slope of the cost. Every number here
+// comes from the library through the API; the browser only draws.
 
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
@@ -18,11 +22,12 @@ import {
   LOSS_NAMES,
   LossCurves,
   LossMeasurement,
-  LossName,
+  ReadingName,
   YesOrNo,
   measureLosses,
   traceLossCurves,
 } from "@/lib/concepts/loss-functions";
+import { show } from "./lossFixtures";
 
 const VIEW = { width: 640, height: 250 };
 const PAD = { left: 56, right: 16, top: 14, bottom: 34 };
@@ -36,41 +41,46 @@ const RAW_HIGH = 5;
 const SAMPLE_COUNT = 101;
 const DEBOUNCE_MS = 120;
 
-// The page's worked example: a regression truth of one half, a class label of
-// yes, and the raw output at zero, where three of the five pulls coincide.
+// The page's slider example: a regression truth of one half, a class label
+// of yes, and the raw output at zero, where three of the five pulls coincide.
 const WORKED_TARGET = 0.5;
 const WORKED_LABEL: YesOrNo = 1;
 const WORKED_THRESHOLD = 1.0;
 const WORKED_RAW_OUTPUT = 0;
 
-const LABELS: Record<LossName, string> = {
+const LABELS: Record<ReadingName, string> = {
   squared_error: "Squared error",
   absolute_error: "Absolute error",
   huber_error: "Huber",
   binary_cross_entropy: "Binary cross-entropy",
   softmax_cross_entropy: "Softmax cross-entropy",
+  sigmoid_then_squared: "Sigmoid, then squared error",
 };
 
-const STROKES: Record<LossName, string> = {
+const STROKES: Record<ReadingName, string> = {
   squared_error: "stroke-indigo-600",
   absolute_error: "stroke-amber-500",
   huber_error: "stroke-emerald-600",
   binary_cross_entropy: "stroke-rose-500",
   softmax_cross_entropy: "stroke-sky-500",
+  sigmoid_then_squared: "stroke-slate-400",
 };
 
-const FILLS: Record<LossName, string> = {
+const FILLS: Record<ReadingName, string> = {
   squared_error: "fill-indigo-600",
   absolute_error: "fill-amber-500",
   huber_error: "fill-emerald-600",
   binary_cross_entropy: "fill-rose-500",
   softmax_cross_entropy: "fill-sky-500",
+  sigmoid_then_squared: "fill-slate-400",
 };
 
 // The softmax curve sits exactly on the binary cross-entropy curve, by the
-// identity the page proves, so it is dashed to stay visible.
-const DASHES: Partial<Record<LossName, string>> = {
+// identity the page proves, so it is dashed to stay visible; the mismatched
+// pairing is dashed because it is the one that is not a recommendation.
+const DASHES: Partial<Record<ReadingName, string>> = {
   softmax_cross_entropy: "6 4",
+  sigmoid_then_squared: "3 3",
 };
 
 function rawToX(rawOutput: number): number {
@@ -101,24 +111,21 @@ function niceTicks(low: number, high: number, count: number): number[] {
   return Array.from({ length: count }, (_, index) => low + index * step);
 }
 
-function format(value: number | null, digits = 4): string {
-  if (value === null) return "";
-  return value.toFixed(digits);
-}
-
 interface ChartProps {
   title: string;
+  names: ReadingName[];
   curves: LossCurves | null;
   read: (sample: CurveSample) => number;
   low: number;
   high: number;
   rawOutput: number;
   measurement: LossMeasurement | null;
-  readPoint: (reading: LossMeasurement["readings"][LossName]) => number;
+  readPoint: (reading: LossMeasurement["readings"][ReadingName]) => number;
 }
 
 function Chart({
   title,
+  names,
   curves,
   read,
   low,
@@ -204,7 +211,7 @@ function Chart({
         strokeWidth={1}
       />
       {curves &&
-        LOSS_NAMES.map((name) => (
+        names.map((name) => (
           <path
             key={name}
             d={pathOf(curves[name], read, low, high)}
@@ -215,7 +222,7 @@ function Chart({
           />
         ))}
       {measurement &&
-        LOSS_NAMES.map((name) => (
+        names.map((name) => (
           <circle
             key={`point-${name}`}
             cx={rawToX(measurement.raw_output)}
@@ -233,9 +240,14 @@ export function LossCurvesPlayground() {
   const [target, setTarget] = useState<number>(WORKED_TARGET);
   const [label, setLabel] = useState<YesOrNo>(WORKED_LABEL);
   const [threshold, setThreshold] = useState<number>(WORKED_THRESHOLD);
+  const [showMismatched, setShowMismatched] = useState(false);
   const [curves, setCurves] = useState<LossCurves | null>(null);
   const [measurement, setMeasurement] = useState<LossMeasurement | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  const names: ReadingName[] = showMismatched
+    ? [...LOSS_NAMES, "sigmoid_then_squared"]
+    : LOSS_NAMES;
 
   // The curves depend on the setting and not on the slider, so they are
   // fetched only when the setting changes; the slider's readout is cheaper
@@ -308,6 +320,12 @@ export function LossCurvesPlayground() {
     setThreshold(WORKED_THRESHOLD);
   };
 
+  const largestDisagreement = measurement
+    ? Math.max(
+        ...names.map((name) => measurement.readings[name].disagreement ?? 0),
+      )
+    : null;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
@@ -316,7 +334,7 @@ export function LossCurvesPlayground() {
           onClick={resetToWorked}
           className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:border-indigo-400 dark:border-slate-700 dark:hover:border-indigo-500"
         >
-          Worked example
+          The halfway guess
         </button>
         <label className="flex items-center gap-2">
           target
@@ -355,6 +373,15 @@ export function LossCurvesPlayground() {
           />
           <span className="w-8 font-mono text-sm">{threshold.toFixed(1)}</span>
         </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={showMismatched}
+            onChange={(event) => setShowMismatched(event.target.checked)}
+            className="accent-slate-500"
+          />
+          also draw a sigmoid output scored by squared error
+        </label>
       </div>
 
       <label className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
@@ -373,6 +400,7 @@ export function LossCurvesPlayground() {
 
       <Chart
         title="what the miss costs"
+        names={names}
         curves={curves}
         read={(sample) => sample.value}
         low={0}
@@ -383,6 +411,7 @@ export function LossCurvesPlayground() {
       />
       <Chart
         title="which way it pushes, the gradient at the raw output"
+        names={names}
         curves={curves}
         read={(sample) => sample.gradient}
         low={-5.5}
@@ -400,11 +429,12 @@ export function LossCurvesPlayground() {
               <th className="py-1 pr-3 font-medium">reads the raw output as</th>
               <th className="py-1 pr-3 font-medium">probability</th>
               <th className="py-1 pr-3 font-medium">cost</th>
-              <th className="py-1 font-medium">gradient</th>
+              <th className="py-1 pr-3 font-medium">gradient</th>
+              <th className="py-1 font-medium">slope by nudging</th>
             </tr>
           </thead>
           <tbody className="font-mono">
-            {LOSS_NAMES.map((name) => {
+            {names.map((name) => {
               const reading = measurement?.readings[name];
               const squashes = reading?.probability !== null && reading !== undefined;
               return (
@@ -421,15 +451,19 @@ export function LossCurvesPlayground() {
                   <td className="py-1 pr-3 font-sans text-slate-500 dark:text-slate-400">
                     {squashes ? "a score to squash" : "the prediction itself"}
                   </td>
-                  <td className="py-1 pr-3">{format(reading?.probability ?? null)}</td>
-                  <td className="py-1 pr-3">{reading ? format(reading.value) : ""}</td>
-                  <td className="py-1">{reading ? format(reading.gradient) : ""}</td>
+                  <td className="py-1 pr-3">{reading?.probability == null ? "" : show(reading.probability)}</td>
+                  <td className="py-1 pr-3">{show(reading?.value)}</td>
+                  <td className="py-1 pr-3">{show(reading?.gradient)}</td>
+                  <td className="py-1">{show(reading?.slope_by_nudging)}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
+      <p className="text-xs text-slate-500 dark:text-slate-400">
+        The last column nudges the raw output by {measurement ? measurement.nudge.toExponential(0) : "…"} either side, measures the cost at both, and divides the difference by the gap. The largest disagreement with the gradient across the rows shown is {largestDisagreement === null ? "…" : largestDisagreement.toExponential(1)}.
+      </p>
 
       {message && (
         <p className="text-sm text-rose-600 dark:text-rose-400">{message}</p>

@@ -24,125 +24,15 @@ import {
   Sweep,
   sweepKernel,
 } from "@/lib/concepts/convolution";
-
-function drawn(rows: string[]): Grid {
-  return rows.map((row) => Array.from(row, (cell) => (cell === "#" ? 1 : 0)));
-}
-
-interface PicturePreset {
-  name: string;
-  cells: Grid;
-}
-
-// A four by four square in the middle, whose left edge the page works by
-// hand.
-const SQUARE: Grid = drawn([
-  "........",
-  "........",
-  "..####..",
-  "..####..",
-  "..####..",
-  "..####..",
-  "........",
-  "........",
-]);
-
-const PICTURE_PRESETS: PicturePreset[] = [
-  { name: "A square", cells: SQUARE },
-  {
-    name: "A bar",
-    cells: drawn([
-      "...##...",
-      "...##...",
-      "...##...",
-      "...##...",
-      "...##...",
-      "...##...",
-      "...##...",
-      "...##...",
-    ]),
-  },
-  {
-    name: "A diagonal",
-    cells: drawn([
-      "#.......",
-      ".#......",
-      "..#.....",
-      "...#....",
-      "....#...",
-      ".....#..",
-      "......#.",
-      ".......#",
-    ]),
-  },
-  {
-    name: "Clear",
-    cells: drawn([
-      "........",
-      "........",
-      "........",
-      "........",
-      "........",
-      "........",
-      "........",
-      "........",
-    ]),
-  },
-];
-
-interface KernelPreset {
-  name: string;
-  weights: Grid;
-}
-
-const NINTH = 1 / 9;
-
-// The two edge kernels are Sobel's, and the vertical one is the kernel the
-// page works by hand. Blur and sharpen are the ones a reader will have met in
-// an image editor, and identity is there to show a kernel that changes
-// nothing.
-const KERNEL_PRESETS: KernelPreset[] = [
-  {
-    name: "Vertical edge",
-    weights: [
-      [-1, 0, 1],
-      [-2, 0, 2],
-      [-1, 0, 1],
-    ],
-  },
-  {
-    name: "Horizontal edge",
-    weights: [
-      [-1, -2, -1],
-      [0, 0, 0],
-      [1, 2, 1],
-    ],
-  },
-  {
-    name: "Blur",
-    weights: [
-      [NINTH, NINTH, NINTH],
-      [NINTH, NINTH, NINTH],
-      [NINTH, NINTH, NINTH],
-    ],
-  },
-  {
-    name: "Sharpen",
-    weights: [
-      [0, -1, 0],
-      [-1, 5, -1],
-      [0, -1, 0],
-    ],
-  },
-  {
-    name: "Identity",
-    weights: [
-      [0, 0, 0],
-      [0, 1, 0],
-      [0, 0, 0],
-    ],
-  },
-];
+import {
+  KERNEL_PRESETS,
+  KernelPreset,
+  PICTURE_PRESETS,
+  SQUARE,
+  answerShade,
+  formatValue,
+  sameGrid,
+} from "./convolutionFixtures";
 
 // The answer cell the page works by hand, shown whenever nothing is hovered.
 const WORKED_CELL = { row: 2, column: 0 };
@@ -159,11 +49,6 @@ const SMALL_BUTTON_CLASS =
 const SMALL_ACTIVE_BUTTON_CLASS =
   "rounded border border-indigo-600 bg-indigo-600 px-2 py-0.5 text-xs font-medium text-white transition dark:border-indigo-500 dark:bg-indigo-500";
 
-function formatValue(value: number): string {
-  if (Number.isInteger(value)) return String(value);
-  return value.toFixed(2);
-}
-
 // The kernel boxes hold text rather than numbers, so that a half-typed entry
 // such as a lone minus sign can sit in the box while the last complete value
 // is what goes to the API.
@@ -175,12 +60,6 @@ function asText(weights: Grid): string[][] {
   );
 }
 
-function sameGrid(first: Grid, second: Grid): boolean {
-  return first.every((row, rowIndex) =>
-    row.every((value, columnIndex) => value === second[rowIndex][columnIndex]),
-  );
-}
-
 function replaced<T>(grid: T[][], row: number, column: number, value: T): T[][] {
   return grid.map((gridRow, rowIndex) =>
     rowIndex === row
@@ -189,16 +68,6 @@ function replaced<T>(grid: T[][], row: number, column: number, value: T): T[][] 
         )
       : gridRow,
   );
-}
-
-// Indigo for a positive answer and amber for a negative one, at a strength
-// proportional to the cell's share of the largest magnitude on the map.
-function answerShade(value: number, largest: number): string {
-  if (largest === 0 || value === 0) return "transparent";
-  const strength = 0.15 + 0.75 * (Math.abs(value) / largest);
-  return value > 0
-    ? `rgba(79, 70, 229, ${strength.toFixed(3)})`
-    : `rgba(245, 158, 11, ${strength.toFixed(3)})`;
 }
 
 interface Cell {

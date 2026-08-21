@@ -11,23 +11,9 @@
 // library through the API.
 
 import { useEffect, useState } from "react";
-import { ApiError, LabelledPoint } from "@/lib/api";
+import { ApiError } from "@/lib/api";
 import { FoldedScores, foldTheCrowd } from "@/lib/concepts/judging-a-classifier";
-
-const OVERLAPPING_CROWD: LabelledPoint[] = [
-  { x: 118, y: 24, label: 0 },
-  { x: 120, y: 25, label: 0 },
-  { x: 122, y: 28, label: 0 },
-  { x: 125, y: 31, label: 0 },
-  { x: 140, y: 45, label: 0 },
-  { x: 168, y: 66, label: 0 },
-  { x: 150, y: 50, label: 1 },
-  { x: 159, y: 57, label: 1 },
-  { x: 162, y: 61, label: 1 },
-  { x: 178, y: 78, label: 1 },
-  { x: 180, y: 80, label: 1 },
-  { x: 183, y: 83, label: 1 },
-];
+import { OVERLAPPING_CROWD } from "./judgingAClassifierFixtures";
 
 interface Deal {
   folds: number;

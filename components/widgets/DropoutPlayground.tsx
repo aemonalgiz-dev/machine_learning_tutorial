@@ -20,13 +20,17 @@ import {
   applyDropout,
   failureMessage,
 } from "@/lib/concepts/dropout";
+import {
+  BUTTON_CLASS,
+  DRAW_COUNT,
+  UNIT_FILLS,
+  UNIT_STROKES,
+  WORKED_PROBABILITY,
+  WORKED_SEED,
+  WORKED_VALUES,
+  formatValue,
+} from "./dropoutFixtures";
 
-// The page's worked example, four units at a drop probability of one half
-// under the seed whose first draw keeps the first and third.
-const WORKED_VALUES = [1, 2, 3, 4];
-const WORKED_PROBABILITY = 0.5;
-const WORKED_SEED = 10;
-const DRAW_COUNT = 400;
 const MAX_UNITS = 8;
 const VALUE_LIMIT = 100;
 
@@ -42,31 +46,6 @@ const CHART_PLOT = {
   width: CHART.width - CHART_PAD.left - CHART_PAD.right,
   height: CHART.height - CHART_PAD.top - CHART_PAD.bottom,
 };
-
-const UNIT_FILLS = [
-  "fill-indigo-600",
-  "fill-amber-500",
-  "fill-emerald-600",
-  "fill-rose-500",
-  "fill-sky-500",
-  "fill-violet-500",
-  "fill-orange-500",
-  "fill-teal-600",
-];
-
-const UNIT_STROKES = [
-  "stroke-indigo-600",
-  "stroke-amber-500",
-  "stroke-emerald-600",
-  "stroke-rose-500",
-  "stroke-sky-500",
-  "stroke-violet-500",
-  "stroke-orange-500",
-  "stroke-teal-600",
-];
-
-const BUTTON_CLASS =
-  "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
 
 interface Span {
   low: number;
@@ -89,10 +68,6 @@ function valueToY(
   height: number,
 ): number {
   return top + ((span.high - value) / (span.high - span.low)) * height;
-}
-
-function formatValue(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
 function clampValue(value: number): number {
@@ -407,7 +382,7 @@ export function DropoutPlayground() {
         nothing.
       </p>
 
-      <div className="mt-3 grid grid-cols-3 gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat
           label="Scale, 1 / (1 − p)"
           value={answer ? formatValue(answer.scale) : "…"}
@@ -415,6 +390,14 @@ export function DropoutPlayground() {
         <Stat
           label="Kept this draw"
           value={answer ? `${keptThisDraw} of ${unitCount}` : "…"}
+        />
+        <Stat
+          label="One draw sends, per unit"
+          value={
+            answer
+              ? `${formatValue(Math.min(...answer.single_draw_low))} to ${formatValue(Math.max(...answer.single_draw_high))}`
+              : "…"
+          }
         />
         <Stat
           label={`Largest gap after ${DRAW_COUNT} draws`}

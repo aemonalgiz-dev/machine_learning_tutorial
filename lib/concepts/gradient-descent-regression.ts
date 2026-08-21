@@ -81,3 +81,79 @@ export async function sweepRates(
     { points, learning_rates: learningRates, max_epochs: maxEpochs },
   );
 }
+
+// One line the reader holds: scored, differentiated, and stepped once.
+export interface ObservationContribution {
+  centred_height: number;
+  weight: number;
+  prediction: number;
+  residual: number;
+  squared_residual: number;
+  level_share: number;
+  slope_share: number;
+}
+
+export interface LossSlice {
+  axis: number[];
+  losses: number[];
+}
+
+export interface Candidate {
+  mean_height: number;
+  standing: LinePosition;
+  observations: ObservationContribution[];
+  gradient_level: number;
+  gradient_slope: number;
+  next_position: LinePosition;
+  level_slice: LossSlice;
+  slope_slice: LossSlice;
+  closed_form: LinePosition;
+}
+
+export async function scoreCandidate(
+  points: Point[],
+  level: number,
+  slope: number,
+  learningRate: number,
+): Promise<Candidate> {
+  return postJson<Candidate>(
+    "/concepts/gradient-descent-regression/candidate",
+    { points, level, slope, learning_rate: learningRate },
+  );
+}
+
+export type Parameterisation = "raw" | "centred" | "scaled";
+
+export interface ParameterPair {
+  first: number;
+  second: number;
+  loss: number;
+}
+
+// The loss over both parameters, its curvatures, and one walk across it.
+export interface LossSurface {
+  first_name: string;
+  second_name: string;
+  first_axis: number[];
+  second_axis: number[];
+  losses: number[][];
+  optimum: ParameterPair;
+  smallest_curvature: number;
+  largest_curvature: number;
+  condition_number: number;
+  divergence_threshold: number;
+  walk: ParameterPair[];
+  outcome: WalkOutcome;
+}
+
+export async function sampleLossSurface(
+  points: Point[],
+  parameterisation: Parameterisation,
+  learningRate: number,
+  maxEpochs: number,
+): Promise<LossSurface> {
+  return postJson<LossSurface>(
+    "/concepts/gradient-descent-regression/loss-surface",
+    { points, parameterisation, learning_rate: learningRate, max_epochs: maxEpochs },
+  );
+}

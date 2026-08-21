@@ -5,96 +5,45 @@
 // The patients are placed by temperature and heart rate, the healthy in a band
 // of ordinary vitals with the unwell on every side of them. The machinery
 // underneath never changes. The kernel buttons only swap which inner product
-// it reads the data through, and the shaded regions show the boundary each
-// reading produces, a straight cut under the linear kernel and a closed curve
-// once the kernel carries the data somewhere roomier. Every fit is the
-// library's through the API, not the browser's.
+// it reads the data through, the shaded regions show the boundary each
+// reading produces, and the ringed patients are the support vectors, the
+// rows the boundary actually depends on. The reach slider is the radial
+// kernel's gamma and the capacity buttons are the price of a margin
+// violation. Every fit is the library's through the API, not the browser's.
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ApiError,
-  KernelAnswer,
+  ClassifyAnswer,
   KernelChoice,
   LabelledPoint,
-  classifyWithKernel,
-} from "@/lib/api";
+  classifyClinic,
+} from "@/lib/concepts/kernel-trick";
+import { CLINIC, DOMAIN, FEVER_ONLY, randomClinic } from "./kernelTrickFixtures";
 
-const DOMAIN = { xMin: 35, xMax: 41, yMin: 40, yMax: 140 };
 const VIEW = { width: 640, height: 460 };
 const PAD = { left: 56, right: 16, top: 16, bottom: 50 };
 const PLOT = {
   width: VIEW.width - PAD.left - PAD.right,
   height: VIEW.height - PAD.top - PAD.bottom,
 };
-
-// The clinic. Healthy vitals sit in a middle band, and the unwell surround
-// them, feverish, hypothermic, racing and slow all at once.
-const CLINIC: LabelledPoint[] = [
-  { x: 36.6, y: 68, label: 1 },
-  { x: 36.8, y: 74, label: 1 },
-  { x: 37.0, y: 70, label: 1 },
-  { x: 37.2, y: 78, label: 1 },
-  { x: 36.9, y: 64, label: 1 },
-  { x: 37.1, y: 84, label: 1 },
-  { x: 36.7, y: 80, label: 1 },
-  { x: 37.3, y: 72, label: 1 },
-  { x: 36.5, y: 76, label: 1 },
-  { x: 37.0, y: 88, label: 1 },
-  { x: 35.2, y: 48, label: 0 },
-  { x: 35.5, y: 120, label: 0 },
-  { x: 36.0, y: 130, label: 0 },
-  { x: 38.9, y: 132, label: 0 },
-  { x: 39.5, y: 120, label: 0 },
-  { x: 40.2, y: 110, label: 0 },
-  { x: 39.8, y: 66, label: 0 },
-  { x: 40.5, y: 90, label: 0 },
-  { x: 35.4, y: 90, label: 0 },
-  { x: 38.8, y: 50, label: 0 },
-  { x: 35.8, y: 58, label: 0 },
-  { x: 39.9, y: 140, label: 0 },
-  { x: 35.1, y: 72, label: 0 },
-  { x: 38.5, y: 44, label: 0 },
-];
-
-// A clinic a straight line can handle, everyone unwell running a fever.
-const FEVER_ONLY: LabelledPoint[] = [
-  ...CLINIC.filter((point) => point.label === 1),
-  { x: 38.9, y: 132, label: 0 },
-  { x: 39.5, y: 120, label: 0 },
-  { x: 40.2, y: 110, label: 0 },
-  { x: 39.8, y: 96, label: 0 },
-  { x: 40.5, y: 90, label: 0 },
-  { x: 39.2, y: 118, label: 0 },
-  { x: 39.9, y: 140, label: 0 },
-  { x: 38.6, y: 104, label: 0 },
-];
-
-
-function randomClinic(): LabelledPoint[] {
-  const healthy: LabelledPoint[] = Array.from({ length: 9 }, () => ({
-    x: Math.round((36.2 + Math.random() * 1.4) * 10) / 10,
-    y: Math.round(56 + Math.random() * 38),
-    label: 1,
-  }));
-  const unwell: LabelledPoint[] = Array.from({ length: 12 }, () => {
-    const angle = Math.random() * Math.PI * 2;
-    const reach = 0.55 + Math.random() * 0.45;
-    return {
-      x: Math.round((37.7 + Math.cos(angle) * 2.6 * reach) * 10) / 10,
-      y: Math.round(88 + Math.sin(angle) * 46 * reach),
-      label: 0,
-    };
-  });
-  return [...healthy, ...unwell];
-}
-
 const MAX_POINTS = 100;
+const GAMMA_STEPS = [0.03, 0.1, 0.3, 1, 3, 10, 30, 100];
+const CAPACITIES = [0.1, 1, 10, 100];
 
-const KERNELS: { key: KernelChoice; label: string }[] = [
+type KernelName = "linear" | "polynomial" | "rbf";
+
+const KERNELS: { key: KernelName; label: string }[] = [
   { key: "linear", label: "Linear" },
   { key: "polynomial", label: "Squared" },
   { key: "rbf", label: "Radial" },
 ];
+
+function choiceFor(name: KernelName, gamma: number): KernelChoice {
+  if (name === "linear") return { name: "linear" };
+  if (name === "polynomial") return { name: "polynomial", degree: 2, constant: 1 };
+  return { name: "rbf", gamma };
+}
 
 function toPixel(point: { x: number; y: number }) {
   const px =
@@ -126,30 +75,36 @@ function toData(px: number, py: number) {
   };
 }
 
-function statusText(answer: KernelAnswer | null, kernel: KernelChoice): string {
+function statusText(answer: ClassifyAnswer | null, kernel: KernelName): string {
   if (!answer) return "…";
-  if (kernel === "linear" && answer.accuracy < 0.9) {
+  if (kernel === "linear" && answer.fit.accuracy < 0.9) {
     return "A straight boundary cannot wrap around anyone, so the best it can do is give up one side of the unwell.";
   }
   if (kernel === "linear") {
     return "A straight boundary suffices for this data, and no kernel was needed.";
+  }
+  if (answer.fit.support_share >= 0.999) {
+    return "Every patient is a support vector, which is the fit keeping one island per row rather than finding a shape.";
   }
   return "The machinery is unchanged, only its reading of similarity was swapped, and the boundary now closes.";
 }
 
 export function KernelPlayground() {
   const [points, setPoints] = useState<LabelledPoint[]>(CLINIC);
-  const [kernel, setKernel] = useState<KernelChoice>("linear");
+  const [kernel, setKernel] = useState<KernelName>("linear");
+  const [gammaIndex, setGammaIndex] = useState(3);
+  const [capacity, setCapacity] = useState(1);
   const [addClass, setAddClass] = useState(0);
-  const [answer, setAnswer] = useState<KernelAnswer | null>(null);
+  const [answer, setAnswer] = useState<ClassifyAnswer | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragging = useRef<number | null>(null);
+  const gamma = GAMMA_STEPS[gammaIndex];
 
   useEffect(() => {
     const timer = setTimeout(async () => {
       try {
-        setAnswer(await classifyWithKernel(points, kernel));
+        setAnswer(await classifyClinic(points, choiceFor(kernel, gamma), capacity));
         setMessage(null);
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
@@ -157,7 +112,7 @@ export function KernelPlayground() {
       }
     }, 150);
     return () => clearTimeout(timer);
-  }, [points, kernel]);
+  }, [points, kernel, gamma, capacity]);
 
   const eventToData = useCallback((clientX: number, clientY: number) => {
     const svg = svgRef.current!;
@@ -204,6 +159,7 @@ export function KernelPlayground() {
   const regions = answer?.regions;
   const cellWidth = regions ? PLOT.width / regions.cells : 0;
   const cellHeight = regions ? PLOT.height / regions.cells : 0;
+  const support = new Set(answer?.fit.support_positions ?? []);
 
   const regionPixel = (column: number, row: number) => {
     if (!regions) return { px: 0, py: 0 };
@@ -216,25 +172,24 @@ export function KernelPlayground() {
     return toPixel({ x, y });
   };
 
+  const buttonClass =
+    "rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700";
+  const toggleClass = (active: boolean) =>
+    "rounded px-3 py-1 text-sm font-medium transition " +
+    (active
+      ? "bg-indigo-600 text-white"
+      : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800");
+
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <button
-          onClick={() => setPoints(CLINIC)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
+        <button onClick={() => setPoints(CLINIC)} className={buttonClass}>
           The clinic
         </button>
-        <button
-          onClick={() => setPoints(FEVER_ONLY)}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
+        <button onClick={() => setPoints(FEVER_ONLY)} className={buttonClass}>
           An Ideal Case
         </button>
-        <button
-          onClick={() => setPoints(randomClinic())}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-        >
+        <button onClick={() => setPoints(randomClinic())} className={buttonClass}>
           Random clinic
         </button>
         <div className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
@@ -263,17 +218,48 @@ export function KernelPlayground() {
             <button
               key={option.key}
               onClick={() => setKernel(option.key)}
-              className={
-                "rounded px-3 py-1 text-sm font-medium transition " +
-                (kernel === option.key
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800")
-              }
+              className={toggleClass(kernel === option.key)}
             >
               {option.label}
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-3 text-sm text-slate-600 dark:text-slate-300">
+        <label className={"flex flex-1 items-center gap-2 " + (kernel === "rbf" ? "" : "opacity-40")}>
+          reach, gamma
+          <input
+            type="range"
+            min={0}
+            max={GAMMA_STEPS.length - 1}
+            step={1}
+            value={gammaIndex}
+            disabled={kernel !== "rbf"}
+            onChange={(event) => setGammaIndex(Number(event.target.value))}
+            className="flex-1 accent-indigo-600"
+          />
+          <span className="w-10 text-right font-mono">{gamma}</span>
+        </label>
+        <span className="flex items-center gap-2">
+          capacity
+          <span className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
+            {CAPACITIES.map((option) => (
+              <button
+                key={option}
+                onClick={() => setCapacity(option)}
+                className={
+                  "rounded px-2 py-0.5 text-xs font-medium transition " +
+                  (capacity === option
+                    ? "bg-indigo-600 text-white"
+                    : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800")
+                }
+              >
+                {option}
+              </button>
+            ))}
+          </span>
+        </span>
       </div>
 
       <svg
@@ -306,20 +292,31 @@ export function KernelPlayground() {
         {points.map((point, index) => {
           const { px, py } = toPixel(point);
           return (
-            <circle
-              key={index}
-              cx={px}
-              cy={py}
-              r={6}
-              className={
-                point.label === 1
-                  ? "cursor-grab fill-indigo-600 stroke-white dark:stroke-slate-900"
-                  : "cursor-grab fill-amber-500 stroke-white dark:stroke-slate-900"
-              }
-              strokeWidth={1.5}
-              onPointerDown={onPointPointerDown(index)}
-              onDoubleClick={removePoint(index)}
-            />
+            <g key={index}>
+              {support.has(index) && (
+                <circle
+                  cx={px}
+                  cy={py}
+                  r={10}
+                  fill="none"
+                  className="stroke-emerald-500"
+                  strokeWidth={2}
+                />
+              )}
+              <circle
+                cx={px}
+                cy={py}
+                r={6}
+                className={
+                  point.label === 1
+                    ? "cursor-grab fill-indigo-600 stroke-white dark:stroke-slate-900"
+                    : "cursor-grab fill-amber-500 stroke-white dark:stroke-slate-900"
+                }
+                strokeWidth={1.5}
+                onPointerDown={onPointPointerDown(index)}
+                onDoubleClick={removePoint(index)}
+              />
+            </g>
           );
         })}
 
@@ -343,16 +340,36 @@ export function KernelPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Indigo is healthy, amber is unwell. The shading is the fitted
-        boundary&rsquo;s answer at every spot.
+        Indigo is healthy, amber is unwell, and a green ring marks a support
+        vector. The shading is the fitted boundary&rsquo;s answer at every
+        spot. Click to add a patient, drag to move one, double-click to remove.
       </p>
 
-      <div className="mt-3 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat
-          label="Kernel"
-          value={KERNELS.find((each) => each.key === kernel)?.label ?? "…"}
+          label="Training accuracy"
+          value={answer ? answer.fit.accuracy.toFixed(3) : "…"}
         />
-        <Stat label="Accuracy" value={answer ? answer.accuracy.toFixed(3) : "…"} />
+        <Stat
+          label="Held out, on a second clinic"
+          value={answer ? answer.held_out_accuracy.toFixed(3) : "…"}
+        />
+        <Stat
+          label="Support vectors"
+          value={
+            answer
+              ? `${answer.fit.n_support_vectors} of ${points.length}`
+              : "…"
+          }
+        />
+        <Stat
+          label="Ascent steps"
+          value={
+            answer
+              ? `${answer.fit.epochs_run}${answer.fit.converged ? "" : ", at the ceiling"}`
+              : "…"
+          }
+        />
       </div>
 
       <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">

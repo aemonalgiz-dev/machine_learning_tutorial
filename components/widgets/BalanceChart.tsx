@@ -27,7 +27,7 @@ const PLOT = {
 const GAP_LIMIT = 1;
 const GRID_LEVELS = [1, 0.5, 0, -0.5, -1];
 const BAR_WIDTH = 12;
-const LEARNING_RATE = 0.1;
+const LEARNING_RATE = 0.5;
 
 // The logistic page's twelve worked students, the set its arithmetic uses.
 const WORKED_OUTCOMES: Outcome[] = [

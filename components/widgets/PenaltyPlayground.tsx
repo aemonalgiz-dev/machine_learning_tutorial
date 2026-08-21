@@ -290,12 +290,18 @@ export function PenaltyPlayground() {
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">
-        <Stat label="Penalty" value={formatPenalty(penalty)} />
+        <Stat label="Penalty λ" value={formatPenalty(penalty)} />
         <Stat label="R²" value={fit ? fit.r_squared.toFixed(3) : "…"} />
         <Stat
           label="Terms still on"
           value={fit ? `${fit.nonzero_count} of 9` : "…"}
         />
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-3">
+        <Stat label="RSS" value={fit ? fit.residual_sum_of_squares.toFixed(2) : "…"} />
+        <Stat label="λ × penalty" value={fit ? fit.penalty_cost.toFixed(2) : "…"} />
+        <Stat label="Total objective" value={fit ? fit.objective.toFixed(2) : "…"} />
       </div>
 
       <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">

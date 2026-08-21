@@ -15,9 +15,16 @@ import { ApiError } from "@/lib/api";
 import {
   ACTIVATION_NAMES,
   ActivationCurve,
-  ActivationName,
-  respondNeuron,
+  ResponsesByActivation,
+  fetchWorkedResponses,
 } from "@/lib/concepts/neurons-and-activations";
+import {
+  ACTIVATION_LABELS,
+  ACTIVATION_STROKES,
+  ACTIVATION_SWATCHES,
+  CURVE_RANGE,
+  TALL_HEAVY,
+} from "./neuronFixtures";
 
 const VIEW = { width: 640, height: 320 };
 const PAD = { left: 48, right: 20, top: 16, bottom: 44 };
@@ -26,49 +33,12 @@ const PLOT = {
   height: VIEW.height - PAD.top - PAD.bottom,
 };
 
-const SCORE_RANGE = { low: -6, high: 6 };
 const SLOPE_RANGE = { low: 0, high: 1.05 };
-
-// The curve does not depend on the neuron, so the request carries the page's
-// worked neuron and the smallest lattice the API accepts.
-const WORKED_REQUEST = {
-  weights: [2, -1] as [number, number],
-  bias: 0.5,
-  probe: { first_input: 1, second_input: 1 },
-  lattice: {
-    first_input_low: -3,
-    first_input_high: 3,
-    second_input_low: -3,
-    second_input_high: 3,
-    cells: 2,
-  },
-};
-
-const LABELS: Record<ActivationName, string> = {
-  identity: "Identity",
-  rectified_linear: "ReLU",
-  sigmoid: "Sigmoid",
-  hyperbolic_tangent: "tanh",
-};
-
-const STROKES: Record<ActivationName, string> = {
-  identity: "text-slate-400 dark:text-slate-500",
-  rectified_linear: "text-indigo-600 dark:text-indigo-400",
-  sigmoid: "text-amber-500",
-  hyperbolic_tangent: "text-emerald-600 dark:text-emerald-400",
-};
-
-const SWATCHES: Record<ActivationName, string> = {
-  identity: "bg-slate-400 dark:bg-slate-500",
-  rectified_linear: "bg-indigo-600 dark:bg-indigo-400",
-  sigmoid: "bg-amber-500",
-  hyperbolic_tangent: "bg-emerald-600 dark:bg-emerald-400",
-};
 
 function scoreToX(score: number): number {
   return (
     PAD.left +
-    ((score - SCORE_RANGE.low) / (SCORE_RANGE.high - SCORE_RANGE.low)) *
+    ((score - CURVE_RANGE.low) / (CURVE_RANGE.high - CURVE_RANGE.low)) *
       PLOT.width
   );
 }
@@ -81,25 +51,16 @@ function slopeToY(slope: number): number {
   );
 }
 
-type Curves = Record<ActivationName, ActivationCurve>;
-
 export function ActivationSlopeChart() {
-  const [curves, setCurves] = useState<Curves | null>(null);
+  const [responses, setResponses] = useState<ResponsesByActivation | null>(
+    null,
+  );
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const answers = await Promise.all(
-          ACTIVATION_NAMES.map((activation) =>
-            respondNeuron({ ...WORKED_REQUEST, activation }),
-          ),
-        );
-        const gathered = {} as Curves;
-        ACTIVATION_NAMES.forEach((activation, index) => {
-          gathered[activation] = answers[index].curve;
-        });
-        setCurves(gathered);
+        setResponses(await fetchWorkedResponses(TALL_HEAVY));
       } catch (error) {
         if (error instanceof ApiError) setMessage(error.message);
         else setMessage("Something went wrong.");
@@ -162,14 +123,14 @@ export function ActivationSlopeChart() {
           strokeWidth={1}
         />
 
-        {curves &&
+        {responses &&
           ACTIVATION_NAMES.map((activation) => (
             <path
               key={activation}
-              d={pathOf(curves[activation])}
+              d={pathOf(responses[activation].curve)}
               fill="none"
               stroke="currentColor"
-              className={STROKES[activation]}
+              className={ACTIVATION_STROKES[activation]}
               strokeWidth={2.5}
             />
           ))}
@@ -206,7 +167,7 @@ export function ActivationSlopeChart() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         The factor a gradient keeps on its way back through one neuron, for
-        each of the four bends. Where a curve sits near the floor, the neurons
+        each of the four bends. Where a curve runs along the floor, the neurons
         below stop learning.
       </p>
 
@@ -219,13 +180,16 @@ export function ActivationSlopeChart() {
             <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span
                 className={
-                  "inline-block h-2 w-4 rounded-sm " + SWATCHES[activation]
+                  "inline-block h-2 w-4 rounded-sm " +
+                  ACTIVATION_SWATCHES[activation]
                 }
               />
-              Peak slope, {LABELS[activation]}
+              Peak slope, {ACTIVATION_LABELS[activation]}
             </div>
             <div className="font-mono text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {curves ? curves[activation].peak_slope.toFixed(2) : "…"}
+              {responses
+                ? responses[activation].curve.peak_slope.toFixed(2)
+                : "…"}
             </div>
           </div>
         ))}
