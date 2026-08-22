@@ -20,8 +20,16 @@ import {
   ScalingMethod,
   scaleFeature,
 } from "@/lib/api";
+import {
+  CROWD_HEIGHTS,
+  FIVE_READINGS,
+  IDEAL_HEIGHTS,
+  TALLEST_INDEX,
+  WITH_AN_OUTLIER,
+  randomHeights,
+} from "./featureScalingFixtures";
 
-const DOMAIN = { min: 0, max: 100 };
+const DOMAIN = { min: 0, max: 200 };
 const VIEW = { width: 640 };
 const PAD = { left: 20, right: 20 };
 const PLOT = { width: VIEW.width - PAD.left - PAD.right };
@@ -36,14 +44,7 @@ const STACK_STEP = 9;
 const MAX_VALUES = 30;
 const MIN_VALUES = 2;
 
-// Five whole numbers whose every centre and spread comes out whole, the worked
-// example the page sums by hand.
-const TIDY_SAMPLE = [9, 19, 24, 29, 39];
-
-// The same five with the largest dragged to the far right of the line.
-const WITH_AN_OUTLIER = [9, 19, 24, 29, 99];
-
-const RAW_TICKS = [0, 25, 50, 75, 100];
+const RAW_TICKS = [0, 50, 100, 150, 200];
 
 interface Ruler {
   method: ScalingMethod;
@@ -117,8 +118,8 @@ function formatNumber(value: number): string {
 }
 
 export function FeatureScalingPlayground() {
-  const [values, setValues] = useState<number[]>(TIDY_SAMPLE);
-  const [activeIndex, setActiveIndex] = useState(TIDY_SAMPLE.length - 1);
+  const [values, setValues] = useState<number[]>(FIVE_READINGS);
+  const [activeIndex, setActiveIndex] = useState(FIVE_READINGS.length - 1);
   const [answer, setAnswer] = useState<FeatureScalings | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -147,9 +148,9 @@ export function FeatureScalingPlayground() {
     return Math.min(DOMAIN.max, Math.max(DOMAIN.min, Math.round(raw)));
   }, []);
 
-  const showSample = (sample: number[]) => {
+  const showSample = (sample: number[], active = sample.length - 1) => {
     setValues(sample);
-    setActiveIndex(sample.length - 1);
+    setActiveIndex(active);
   };
 
   const onBackgroundPointerDown = (event: React.PointerEvent) => {
@@ -201,14 +202,29 @@ export function FeatureScalingPlayground() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
-        <button onClick={() => showSample(TIDY_SAMPLE)} className={BUTTON_CLASS}>
-          Tidy sample
+        <button onClick={() => showSample(FIVE_READINGS)} className={BUTTON_CLASS}>
+          Five readings
         </button>
         <button
           onClick={() => showSample(WITH_AN_OUTLIER)}
           className={BUTTON_CLASS}
         >
           With an outlier
+        </button>
+        <button
+          onClick={() => showSample(CROWD_HEIGHTS, TALLEST_INDEX)}
+          className={BUTTON_CLASS}
+        >
+          The crowd&rsquo;s heights
+        </button>
+        <button onClick={() => showSample(IDEAL_HEIGHTS)} className={BUTTON_CLASS}>
+          An Ideal Case
+        </button>
+        <button
+          onClick={() => showSample(randomHeights())}
+          className={BUTTON_CLASS}
+        >
+          Random heights
         </button>
         <span className="ml-auto text-sm text-slate-600 dark:text-slate-300">
           {values.length} of {MAX_VALUES} values
