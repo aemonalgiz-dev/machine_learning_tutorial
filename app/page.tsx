@@ -20,11 +20,13 @@ interface Part {
   topics: Topic[];
 }
 
-// The site as a curriculum in five parts. A part holds topics and a topic
+// The site as a curriculum in seven parts. A part holds topics and a topic
 // holds pages; a part with a single topic named after itself is a flat list
-// of pages and is drawn without the topic heading. Foundational Mathematics
-// stays deliberately short: only the parts of each subject the later concepts
-// lean on, not a course in their own right.
+// of pages and is drawn without the topic heading. Computer vision and
+// natural language are parts rather than topics inside Neural Networks,
+// because each is a subject with its own progression rather than a corner of
+// one. Foundational Mathematics stays deliberately short: only the parts of
+// each subject the later concepts lean on, not a course in their own right.
 const CURRICULUM: Part[] = [
   {
     title: "Foundational Mathematics",
@@ -33,7 +35,8 @@ const CURRICULUM: Part[] = [
     topics: [
       {
         heading: "Foundational Mathematics",
-        blurb: "",
+        blurb:
+          "",
         concepts: [
           {
             title: "Calculus Primer",
@@ -60,11 +63,12 @@ const CURRICULUM: Part[] = [
   {
     title: "Classical Machine Learning",
     intro:
-      "The models that were the field before networks took it over, and that still do most of its work. Predicting a number, predicting a category, letting a crowd of models vote, finding structure with no answers given, and two ideas about what near means that every one of them borrows.",
+      "The models that were the field before networks took it over, and that still do most of its work. Predicting a number, predicting a category, letting a crowd of models vote, finding structure with no answers given, and the ideas about nearness and about state that every one of them borrows.",
     topics: [
       {
         heading: "Regression",
-        blurb: "Predicting a number from other numbers.",
+        blurb:
+          "Predicting a number from other numbers.",
         concepts: [
           {
             title: "Simple Linear Regression",
@@ -94,7 +98,8 @@ const CURRICULUM: Part[] = [
       },
       {
         heading: "Classification",
-        blurb: "Predicting which group something belongs to.",
+        blurb:
+          "Predicting which of a fixed set of categories a row belongs to.",
         concepts: [
           {
             title: "Logistic Regression",
@@ -124,7 +129,8 @@ const CURRICULUM: Part[] = [
       },
       {
         heading: "Ensembles",
-        blurb: "Many models combined, so no single model's mistakes decide the answer.",
+        blurb:
+          "Many weak models, combined into one that is better than any of them.",
         concepts: [
           {
             title: "Bagging",
@@ -148,7 +154,8 @@ const CURRICULUM: Part[] = [
       },
       {
         heading: "Clustering",
-        blurb: "Finding structure in data that carries no labels.",
+        blurb:
+          "Finding groups when nobody has said what the groups are.",
         concepts: [
           {
             title: "k-Means Clustering",
@@ -156,18 +163,12 @@ const CURRICULUM: Part[] = [
             blurb:
               "Here no one has labelled the data, so we look for the groups ourselves. We put each point with the nearest group centre, recompute each centre from the points it now holds, and repeat until nothing moves.",
           },
-          {
-            title: "Principal Component Analysis",
-            href: "/concepts/pca",
-            blurb:
-              "Data with many features usually varies along only a few real directions. We find those directions and describe each point by where it falls along them, so many correlated numbers collapse into a few independent ones.",
-          },
         ],
       },
       {
         heading: "Learnable Features",
         blurb:
-          "Everything above learns by descending a loss. These four learn by a local rule instead, each unit adjusting itself from what its neighbours are doing, with no loss written down at all.",
+          "Models that learn what to represent rather than being told, by a rule local enough that a single unit could follow it.",
         concepts: [
           {
             title: "Hopfield Networks",
@@ -198,7 +199,7 @@ const CURRICULUM: Part[] = [
       {
         heading: "Distance Metrics",
         blurb:
-          "Every model here has an opinion about what near means. Six ways to measure a distance, and the trick that lets a model work in a space it never builds.",
+          "What near means, and the trick that lets a model work in a space it never builds.",
         concepts: [
           {
             title: "What Near Means",
@@ -222,7 +223,19 @@ const CURRICULUM: Part[] = [
             title: "Kernel Principal Components",
             href: "/concepts/kernel-pca",
             blurb:
-              "PCA finds straight directions. Kernelised, it finds directions in the mapped space, so two rings that no straight axis can separate come apart along the first kernel component.",
+              "PCA finds straight directions. Kernelised, it finds directions in the mapped space, so a group of people sitting inside a ring of others, which no straight axis separates, comes apart along the first kernel component.",
+          },
+        ],
+      },
+      {
+        heading: "Markov Chains",
+        blurb:
+          "A process that remembers only where it is, which is the weakest assumption that still lets a sequence be modelled at all.",
+        concepts: [
+          {
+            title: "Markov Chains",
+            blurb:
+              "A model whose next state depends on the current one and on nothing before it, which is a strong claim about the world and the reason the arithmetic stays small. Counting the transitions is the whole of the fit, and the assumption is exactly what it throws away.",
           },
         ],
       },
@@ -231,11 +244,12 @@ const CURRICULUM: Part[] = [
   {
     title: "Data Preparation",
     intro:
-      "The scale of a column is an accident of its units, and most models cannot tell an accident from a fact. These are the moves that put every feature on the same footing before a model sees it, and the ones that build new columns out of the ones we have.",
+      "Before a model sees a row, somebody decides what its columns mean. Putting columns on a common scale, and building new ones out of the ones there are, are both choices made ahead of any fitting, and both put a ceiling on what the fit can find.",
     topics: [
       {
-        heading: "Data Preparation",
-        blurb: "",
+        heading: "Normalisation",
+        blurb:
+          "Putting columns on a footing where a distance between rows means something, rather than reflecting whichever column was recorded in the larger unit.",
         concepts: [
           {
             title: "Feature Scaling",
@@ -244,9 +258,34 @@ const CURRICULUM: Part[] = [
               "Height in centimetres and weight in kilograms sit on different scales for no reason a model should care about, so we subtract a centre from each column and divide by a spread to put them on the same footing. Five different scalings answer five different worries about what that centre and that spread should be.",
           },
           {
-            title: "Feature Engineering",
+            title: "The Standard Score",
+            href: "/concepts/the-standard-score",
             blurb:
-              "Building new columns out of the ones we have, powers and products and indicators, so that a straight-line model has something to bend along. The polynomial page already does one kind of it, and this page will collect the rest.",
+              "Subtract a column’s mean and divide by its spread, so every column arrives measured in its own deviations and none can dominate a distance for reasons of unit alone.",
+          },
+          {
+            title: "Centring on the Mean",
+            blurb:
+              "Move a column so its typical value sits at zero and divide by the range it covers, which bounds the values without claiming anything about their shape.",
+          },
+        ],
+      },
+      {
+        heading: "Feature Engineering",
+        blurb:
+          "Making the columns a model reads different from the columns that were recorded, either by combining them or by finding the few directions they really vary along.",
+        concepts: [
+          {
+            title: "Principal Component Analysis",
+            href: "/concepts/pca",
+            blurb:
+              "Data with many features usually varies along only a few real directions. We find those directions and describe each point by where it falls along them, so many correlated numbers collapse into a few independent ones.",
+          },
+          {
+            title: "Polynomial Features",
+            href: "/concepts/polynomial-features",
+            blurb:
+              "Building new columns out of the ones we have, powers and products and indicators, so that a straight-line model has something to bend along.",
           },
         ],
       },
@@ -255,12 +294,12 @@ const CURRICULUM: Part[] = [
   {
     title: "Neural Networks",
     intro:
-      "A network is a chain of small layers, each one a few lines of arithmetic, and the whole of deep learning is those layers, a loss at the end, and a gradient walked backward through the chain.",
+      "One unit is a weighted sum and a bend. Everything after that is about how the units are arranged, how the arrangement is corrected against its mistakes, and what has to be added to stop it memorising. The two domains at the end are the same machinery pointed at pictures and at text.",
     topics: [
       {
-        heading: "Fundamentals",
+        heading: "Foundation",
         blurb:
-          "One neuron, then a row of them, then what they are trying to make small, then the walk backward that teaches them, then all of it run in a loop.",
+          "The unit everything else is built out of.",
         concepts: [
           {
             title: "A Neuron",
@@ -268,12 +307,53 @@ const CURRICULUM: Part[] = [
             blurb:
               "One neuron is a weighted sum and a bend. The weights are the whole of what it learns, and the bend is chosen from a short list whose members differ in what they do to a gradient.",
           },
+        ],
+      },
+      {
+        heading: "Layers",
+        blurb:
+          "A layer is a rule for turning one block of numbers into another. They differ in what they assume about the block they read.",
+        concepts: [
           {
             title: "A Dense Layer and the Forward Pass",
             href: "/concepts/dense-layers",
             blurb:
               "Stack neurons side by side and the weighted sums become one matrix multiply. A layer knows the width it reads and the width it answers with, and a chain of layers is a chain of those agreements.",
           },
+          {
+            title: "Convolution",
+            href: "/concepts/convolution",
+            blurb:
+              "A small kernel swept across a picture, one set of weights reused at every position. Locality, weight sharing, and a parameter count tens of thousands of times smaller than a dense layer of the same width.",
+          },
+          {
+            title: "The Shape Guarantee",
+            href: "/concepts/shapes-and-flattening",
+            blurb:
+              "A network that cannot work is refused before it reads a single row, in integer comparisons, and the refusal names both arrangements. Flatten is the bridge from a picture to a row, and forgetting it is the case the whole check exists to catch.",
+          },
+          {
+            title: "Recurrent Layers",
+            blurb:
+              "A layer that reads a sequence one step at a time, carrying a running summary forward. What that buys, why the summary fades, and the two gated cells built to stop it fading.",
+          },
+          {
+            title: "Radial Basis Networks",
+            blurb:
+              "A unit that holds a centre and a width and answers by how near a row is to that centre, rather than by a weighted sum and a bend. The bell curve replaces the hyperplane.",
+          },
+          {
+            title: "Attention",
+            blurb:
+              "Every step reads every other step directly and takes a weighted average of what it finds, with the weights computed from the content rather than fixed by position. The route from the last step to the first is one multiplication rather than twenty.",
+          },
+        ],
+      },
+      {
+        heading: "Training a Model",
+        blurb:
+          "What it means for an answer to be wrong, and how the blame for being wrong is shared out among the weights.",
+        concepts: [
           {
             title: "Loss Functions",
             href: "/concepts/loss-functions",
@@ -295,34 +375,9 @@ const CURRICULUM: Part[] = [
         ],
       },
       {
-        heading: "Computer Vision",
-        blurb:
-          "A picture is not a row of numbers, and the layers that read one know it. What that buys, and the check that refuses a network that would read a picture sideways.",
-        concepts: [
-          {
-            title: "Convolution",
-            href: "/concepts/convolution",
-            blurb:
-              "A small kernel swept across a picture, one set of weights reused at every position. Locality, weight sharing, and a parameter count tens of thousands of times smaller than a dense layer of the same width.",
-          },
-          {
-            title: "Pooling",
-            href: "/concepts/pooling",
-            blurb:
-              "Shrink a picture by summarising each window, keeping the largest value or the average. The two differ by one function, and it decides which inputs get any correction at all.",
-          },
-          {
-            title: "The Shape Guarantee",
-            href: "/concepts/shapes-and-flattening",
-            blurb:
-              "A network that cannot work is refused before it reads a single row, in integer comparisons, and the refusal names both arrangements. Flatten is the bridge from a picture to a row, and forgetting it is the case the whole check exists to catch.",
-          },
-        ],
-      },
-      {
         heading: "Regularisation",
         blurb:
-          "Two layers that learn nothing about the data and change how everything else learns, one by silencing units at random and one by standardising what flows through.",
+          "Two layers that exist to stop a network leaning too hard on any one thing, and that behave differently while learning.",
         concepts: [
           {
             title: "Dropout",
@@ -338,16 +393,385 @@ const CURRICULUM: Part[] = [
           },
         ],
       },
+      {
+        heading: "Embedding Spaces",
+        blurb:
+          "A network's real product is rarely its answer. It is the arrangement it puts things into on the way there, where being near means being alike. That idea belongs to no one domain, so it is stated here and then used on pictures and on text.",
+        concepts: [
+          {
+            title: "Distance and Similarity",
+            href: "/concepts/distance-and-similarity",
+            blurb:
+              "What it means for two positions to be near, which is the premise every embedding rests on. The angle between two directions against the straight-line gap, and why the two part company once lengths differ.",
+          },
+          {
+            title: "The Embedding Layer",
+            blurb:
+              "A table with one row per item and a lookup instead of a multiply, which is the layer every learned position on this site is eventually stored in. It is the one layer that reads a whole number rather than a measurement, and that changes what has to be checked at its door.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Computer Vision",
+    intro:
+      "A picture is a grid of numbers, and a model that reads one row at a time has already thrown away the fact that neighbouring pixels belong together. The first half here is what people built by hand once they knew that, and the second is what happened when the same sweeping operation was learned from examples instead.",
+    topics: [
+      {
+        heading: "Classical Methods",
+        blurb:
+          "For decades vision ran on features somebody designed. What each one measures, why it was chosen, and what it holds on to when the lighting or the position changes.",
+        concepts: [
+          {
+            title: "Template Matching",
+            href: "/concepts/template-matching",
+            blurb:
+              "Slide a small picture across a larger one and score how well it fits at every position. The idea a convolution generalises, with the weights chosen by hand rather than learned, and it fails the moment the thing being looked for turns or changes size.",
+          },
+          {
+            title: "Filters and Edges",
+            href: "/concepts/filters-and-edges",
+            blurb:
+              "A small grid of weights swept over a picture, chosen so the answer is large wherever the brightness changes sharply. Edges are what most of classical vision was built on, because they survive a change in lighting where raw brightness does not.",
+          },
+          {
+            title: "Histogram of Oriented Gradients",
+            href: "/concepts/histogram-of-oriented-gradients",
+            blurb:
+              "Describe a patch by which directions its edges point in, counted over small cells, rather than by its pixels. A description built by hand to hold still under a shift in position or lighting, and the one that found pedestrians before anything was learned.",
+          },
+          {
+            title: "Keypoints and Descriptors",
+            href: "/concepts/keypoints-and-descriptors",
+            blurb:
+              "Rather than describing a whole picture, find the few places worth describing and record what surrounds each one. Two pictures of a scene then match through those places, which is what lets a match survive rotation and a change of scale.",
+          },
+          {
+            title: "Haar Cascades",
+            href: "/concepts/haar-cascades",
+            blurb:
+              "Thousands of crude rectangular tests, ordered so the cheap ones throw away most of the picture before an expensive one ever runs. The ordering is the idea, and it is what put face detection inside a camera two decades ago.",
+          },
+        ],
+      },
+      {
+        heading: "Convolutional Networks",
+        blurb:
+          "The same sweeping operation with the weights learned rather than designed, and what has to be stacked around it before a picture can be read end to end.",
+        concepts: [
+          {
+            title: "Pooling",
+            href: "/concepts/pooling",
+            blurb:
+              "Shrink a picture by summarising each window, keeping the largest value or the average. The two differ by one function, and it decides which inputs get any correction at all.",
+          },
+          {
+            title: "Convolutional Networks",
+            blurb:
+              "Convolution and pooling stacked so that early layers see small patterns and later ones see arrangements of those patterns, ending in an answer about the whole picture. What each part contributes, and why depth buys a wider view than any single layer has.",
+          },
+          {
+            title: "U-Net",
+            blurb:
+              "An architecture that shrinks a picture down to work out what is in it and grows it back to say where, carrying the fine detail across on connections that skip the middle. A worked example of a network that answers for every pixel rather than for the picture.",
+          },
+        ],
+      },
+      {
+        heading: "Embedding Pictures",
+        blurb:
+          "The same idea as the language section's vectors, pointed at pictures. A network trained to name what it sees arranges pictures on the way to naming them, and that arrangement turns out to be the more useful half.",
+        concepts: [
+          {
+            title: "A Vector for a Picture",
+            blurb:
+              "Train a network to name what it sees, then throw away the naming and keep the layer before it. What is left is a position for the picture, and pictures of the same thing land near each other without anyone having asked for that.",
+          },
+          {
+            title: "Learning the Metric Itself",
+            blurb:
+              "Rather than hoping nearness falls out of a model trained for something else, train on the nearness directly by showing the model pairs that should be close and pairs that should not. What that needs is examples of sameness rather than labels.",
+          },
+          {
+            title: "Searching a Collection of Pictures",
+            blurb:
+              "Once every picture is a position, finding the ones like this is a nearest-neighbour query, and doing it exactly means touching every picture there is. What the exact answer costs, and what is given up to avoid paying it.",
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Natural Language Processing",
+    intro:
+      "Every model on this site reads numbers, and text is not numbers. Something has to decide where one piece of writing ends and the next begins, hand each piece a number, and then give that number a position so that nearness means something. Those decisions are made before any model sees a word, they are never neutral, and they put a ceiling on everything downstream.",
+    topics: [
+      {
+        heading: "Tokens, and the Vocabulary",
+        blurb:
+          "What a token is, what a vocabulary promises, and what it does with a piece it has never seen.",
+        concepts: [
+          {
+            title: "What a Token Is",
+            href: "/concepts/what-a-token-is",
+            blurb:
+              "Text goes in and a list of whole numbers comes out. What sits between them is a vocabulary, and the two things it has to promise: that a piece always gets the same number, and that the numbers turn back into the text.",
+          },
+        ],
+      },
+      {
+        heading: "Classical Token Construction",
+        blurb:
+          "Rules written by people, for a script that puts spaces between its words. Each one repairs something the rule before it got wrong.",
+        concepts: [
+          {
+            title: "N-Grams",
+            href: "/concepts/n-grams",
+            blurb:
+              "Cut a text into every run of a fixed number of pieces and count them. The oldest way of giving a model something wider than one word to read, and the counts grow faster than any corpus can fill.",
+          },
+          {
+            title: "Splitting on Spaces",
+            href: "/concepts/splitting-on-spaces",
+            blurb:
+              "The simplest rule there is, and the one every other rule on these pages exists to repair. What it gets right, and the six kinds of writing it mangles.",
+          },
+          {
+            title: "Unicode Word Boundaries",
+            href: "/concepts/unicode-word-boundaries",
+            blurb:
+              "A standard that says where a word breaks, written by a committee that had to consider every writing system at once. What it buys over a space, and what it still leaves undecided.",
+          },
+          {
+            title: "Penn Treebank Rules",
+            href: "/concepts/penn-treebank-rules",
+            blurb:
+              "The rule list a generation of English language research was annotated with. It splits contractions, separates punctuation, and rewrites quotation marks into something that no longer matches the source.",
+          },
+          {
+            title: "Moses Rules",
+            href: "/concepts/moses-rules",
+            blurb:
+              "A rule list built for translation rather than for parsing, which changes what it protects. Abbreviations it must not split, and the general shape of a rule with a list of exceptions bolted to it.",
+          },
+          {
+            title: "The Pattern Language Models Use",
+            href: "/concepts/the-pattern-language-models-use",
+            blurb:
+              "One regular expression, used before almost every modern language model, that keeps the space attached to the word after it. Why that detail matters, and where a faithful translation of it is impossible.",
+          },
+        ],
+      },
+      {
+        heading: "Scripts Without Spaces",
+        blurb:
+          "Chinese and Japanese put nothing between their words, so the split has to be inferred rather than read.",
+        concepts: [
+          {
+            title: "Maximum Matching",
+            href: "/concepts/maximum-matching",
+            blurb:
+              "Take the longest thing in the dictionary that fits, cut there, and repeat. The oldest answer, still used, and wrong in a way that a single example makes obvious.",
+          },
+          {
+            title: "The Word Lattice",
+            href: "/concepts/the-word-lattice",
+            blurb:
+              "Rather than committing at each step, lay out every reading the dictionary permits and take the best whole path. What a path costs, and why adding one word changes the cut of text that does not contain it.",
+          },
+          {
+            title: "Segmenting With a Hidden Model",
+            href: "/concepts/segmenting-with-a-hidden-model",
+            blurb:
+              "Tag every character with where it sits in a word, beginning, middle, end or alone, and the boundaries fall out of the tags. Learned from examples rather than given a dictionary.",
+          },
+          {
+            title: "Learning Boundaries From Examples",
+            href: "/concepts/learning-boundaries-from-examples",
+            blurb:
+              "Ask one yes-or-no question at every gap, and answer it from the characters either side. No dictionary, no sequence model, and a decision that can be read.",
+          },
+        ],
+      },
+      {
+        heading: "Modern Methods",
+        blurb:
+          "Rather than deciding what a piece is, learn it from what a corpus contains. This is what almost every current language model actually uses.",
+        concepts: [
+          {
+            title: "Byte Pair Encoding",
+            href: "/concepts/byte-pair-encoding",
+            blurb:
+              "Start from single characters and repeatedly join the commonest adjacent pair. The merges in the order they were learned are the model, and three variants change one thing each: the alphabet, whether a piece may cross a space, and whether a cut has to respect a word's joints.",
+          },
+          {
+            title: "WordPiece",
+            href: "/concepts/wordpiece",
+            blurb:
+              "The same merging, scored differently. A pair is judged by how much more often it occurs than its two halves would predict, which prefers a pair of rare symbols over a pair of common ones and changes the vocabulary from the very first merge.",
+          },
+          {
+            title: "The Unigram Language Model",
+            href: "/concepts/the-unigram-language-model",
+            blurb:
+              "Start from a large vocabulary and remove what is least missed, which is the opposite direction from merging. Every piece carries a probability, so a word has many possible cuts and one of them is most likely.",
+          },
+          {
+            title: "SentencePiece",
+            href: "/concepts/sentencepiece",
+            blurb:
+              "Treat the space as an ordinary character and learn the pieces from raw text with no splitting at all. What that buys is a scheme that needs to know nothing about the language, and a round trip that is exact.",
+          },
+          {
+            title: "Greedy Coverage",
+            href: "/concepts/greedy-coverage",
+            blurb:
+              "Choose the pieces that cover the most text rather than the ones that merge most often, which is a different objective and produces a different vocabulary. The unit the covering is counted in decides the first pick.",
+          },
+          {
+            title: "Moving a Vocabulary",
+            href: "/concepts/moving-a-vocabulary",
+            blurb:
+              "A vocabulary learned once and carried to a model that was trained with a different one. What survives the move, and why a piece from the middle of a word arrives as a whole word.",
+          },
+        ],
+      },
+      {
+        heading: "Pieces a Language Is Built From",
+        blurb:
+          "A learned vocabulary cuts wherever the counts say, which lands mid-morpheme as often as not. These cut where a language is actually jointed.",
+        concepts: [
+          {
+            title: "Morfessor",
+            href: "/concepts/morfessor",
+            blurb:
+              "Search for the set of pieces that describes the corpus in the fewest bits, counting both the list of pieces and the text spelled with them. A principle rather than a heuristic, and a greedy search that visibly stalls.",
+          },
+          {
+            title: "Finite-State Morphology",
+            href: "/concepts/finite-state-morphology",
+            blurb:
+              "Write the language's stems and endings down as a machine that reads a word and says how it was assembled. What a written grammar buys over a learned one, and what it costs to produce.",
+          },
+        ],
+      },
+      {
+        heading: "No Learned Vocabulary at All",
+        blurb:
+          "A learned vocabulary can be wrong, can go stale, and cannot represent what it never saw. Three ways of doing without one, and the length each pays.",
+        concepts: [
+          {
+            title: "Bytes and Characters",
+            href: "/concepts/bytes-and-characters",
+            blurb:
+              "Read the units the text is already made of and never meet an unknown piece again. What that costs is length, and the cost is not shared evenly between languages.",
+          },
+          {
+            title: "Hashing Characters",
+            href: "/concepts/hashing-characters",
+            blurb:
+              "Give up on storing a table at all and hash every character into a fixed number of buckets, so the width is chosen rather than discovered. What a collision costs, and why the usual defence against one can buy nothing.",
+          },
+          {
+            title: "Patching Without a Vocabulary",
+            href: "/concepts/patching-without-a-vocabulary",
+            blurb:
+              "Group bytes back into larger pieces by cutting where the text becomes hard to predict, so the boundaries come from a model rather than from a list. What that needs before it means anything.",
+          },
+        ],
+      },
+      {
+        heading: "The Same Question, Asked of Numbers",
+        blurb:
+          "A picture and a sound are already numbers, and turning them into tokens asks what a vocabulary asks.",
+        concepts: [
+          {
+            title: "Codebook Quantisation",
+            href: "/concepts/codebook-quantisation",
+            blurb:
+              "Keep a table of representative vectors and answer with whichever is nearest. You have met this idea before under another name, and the rounding cost is a number rather than an argument.",
+          },
+          {
+            title: "Finite Scalar Quantisation",
+            href: "/concepts/finite-scalar-quantisation",
+            blurb:
+              "Squash each coordinate and round it to one of a few levels, so the set of codes is a product rather than a learned list. Nothing to fit, and a rounding rule that is easy to get wrong at even level counts.",
+          },
+        ],
+      },
+      {
+        heading: "Embedding Words",
+        blurb:
+          "A token number says which piece it is and nothing about what it means. These give every piece a position instead, worked out from how it is used, so that nearness becomes a fact about meaning.",
+        concepts: [
+          {
+            title: "A Vector for a Word",
+            href: "/concepts/a-vector-for-a-word",
+            blurb:
+              "Replace a word's number with a handful of coordinates, and questions that could not be asked of a number become arithmetic. Which words are nearest this one, how alike are two, and the analogy that made the idea famous.",
+          },
+          {
+            title: "Word2vec",
+            href: "/concepts/word2vec",
+            blurb:
+              "Train a model to predict a word from its neighbours, or its neighbours from the word, then throw the model away and keep the weights it needed. Two architectures, and two ways of making the arithmetic affordable.",
+          },
+          {
+            title: "FastText",
+            href: "/concepts/fasttext",
+            blurb:
+              "The same training, with each word also standing for the pieces of its spelling. What that buys is an answer for a word the corpus never contained, and it reduces to the plain method exactly when no piece is short enough to exist.",
+          },
+          {
+            title: "GloVe",
+            href: "/concepts/glove",
+            blurb:
+              "Go back to counting, but fit the counts rather than sweeping the corpus. One objective over a table built once, and a published step rule that does not do what its name says on a small corpus.",
+          },
+          {
+            title: "Latent Semantic Analysis",
+            href: "/concepts/latent-semantic-analysis",
+            blurb:
+              "Build a table of which word appears in which document, weight it so a common word cannot dominate, and squeeze it down. The oldest method here, and the first component cannot separate anything.",
+          },
+          {
+            title: "Pointwise Mutual Information",
+            href: "/concepts/pointwise-mutual-information",
+            blurb:
+              "Score a pair of words by how much more often they occur together than chance would explain. The score for a pair that never met is undefined rather than very negative, which is why the negative half is usually thrown away.",
+          },
+          {
+            title: "Random Indexing",
+            href: "/concepts/random-indexing",
+            blurb:
+              "Never build the table at all. Give every context a random direction, add up the directions a word is seen in, and rely on random directions in many dimensions being very nearly perpendicular.",
+          },
+          {
+            title: "Paragraph Vectors",
+            href: "/concepts/paragraph-vectors",
+            blurb:
+              "Give a whole text a coordinate of its own and learn it alongside the words. A held-out text then has to be inferred by an optimisation rather than computed, and the published number of passes is far too few.",
+          },
+          {
+            title: "Pooling a Text",
+            href: "/concepts/pooling-a-text",
+            blurb:
+              "Three ways of turning a text into one position by combining the positions of its words. All three are blind to order by construction, which is the sharpest thing that can be said about what pooling discards.",
+          },
+        ],
+      },
     ],
   },
   {
     title: "Judging a Model",
     intro:
-      "The pages above keep ending on the same warning, and this part delivers on it. How to score a model honestly, and how to choose between models without fooling yourself.",
+      "A number a model reports about itself is usually flattering. These are the ways of getting an honest one, and the ways each of them can still mislead.",
     topics: [
       {
         heading: "Judging a Model",
-        blurb: "",
+        blurb:
+          "",
         concepts: [
           {
             title: "Held-Out Evaluation",
@@ -517,9 +941,7 @@ export default function Home() {
                           )}
                         </>
                       )}
-                      <div
-                        className={`grid gap-4 md:grid-cols-2 ${flat ? "" : "mt-5"}`}
-                      >
+                      <div className={`space-y-4 ${flat ? "" : "mt-5"}`}>
                         {topic.concepts.map((concept) => (
                           <ConceptCard key={concept.title} concept={concept} />
                         ))}
