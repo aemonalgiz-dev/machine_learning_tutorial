@@ -12,7 +12,7 @@ import {
   WorkedExample,
 } from "@/components/concept/Treatments";
 import { Word2vecCombinations } from "@/components/widgets/Word2vecCombinations";
-import { Word2vecCountingTable } from "@/components/widgets/Word2vecCountingTable";
+import { Word2vecBookSpace } from "@/components/widgets/Word2vecBookSpace";
 import { Word2vecLongerTraining } from "@/components/widgets/Word2vecLongerTraining";
 import { Word2vecPairStep } from "@/components/widgets/Word2vecPairStep";
 import { Word2vecPlayground } from "@/components/widgets/Word2vecPlayground";
@@ -166,7 +166,6 @@ export default function Word2vecPage() {
                   description.
                 </p>
                 <Equation>{"row(w)[v] = how often v occurred within reach of w, discounted by how far"}</Equation>
-                <Word2vecCountingTable />
                 <p>
                   Two things about that table matter for the rest of the page.
                   The first is that it works. Comparing two whole rows by the
@@ -175,8 +174,29 @@ export default function Word2vecPage() {
                   two words from different lists have no neighbour in common at
                   all and their rows are perpendicular. The second is its shape.
                   It has 961 cells, 440 of which are zero, which is 45.8% of the
-                  table holding no information at all, and the blank quarters
-                  are exactly the two lists never meeting.
+                  table holding no information at all.
+                </p>
+                <p>
+                  Thirty one words is too few to see the shape, though, and a
+                  corpus built to have two lists is too tidy to be believed
+                  about it. So the same counting is done below on the first
+                  three chapters of a real book, where the vocabulary is 364
+                  words and nobody arranged anything. A row of that table is
+                  still a word&rsquo;s description, and a description is a
+                  direction, so the honest picture is not the table but where
+                  the words end up.
+                </p>
+                <Word2vecBookSpace />
+                <p>
+                  The toggle is the rest of this page in one control. The same
+                  words are drawn twice, once from a row of 364 counts and once
+                  from a vector of 24 numbers that a fit produced, and the
+                  figure to watch is how much of the spread three directions can
+                  hold. For the counted rows it is 19.8%, so the picture is
+                  showing a fifth of what is there and the description really is
+                  as wide as it looks. For the learned vectors it is 76.4%. The
+                  second description was small all along; the first was merely
+                  large.
                 </p>
                 <KeepInMind>
                   Counting works, and on a corpus this size it works very well.

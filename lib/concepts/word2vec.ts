@@ -355,3 +355,45 @@ export function fetchRareWord(): Promise<RareWord> {
   if (!rareWordPromise) rareWordPromise = getJson<RareWord>("/concepts/word2vec/rare-word");
   return rareWordPromise;
 }
+
+// --- The book's words as a space, projected to something drawable ----------
+
+export interface PlacedWord {
+  word: string;
+  count: number;
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface SpaceProjection {
+  name: string;
+  width: number;
+  kept_share: number;
+  words: PlacedWord[];
+}
+
+export interface BookSpace {
+  corpus: string;
+  n_sentences: number;
+  n_tokens: number;
+  n_distinct: number;
+  minimum_count: number;
+  window: number;
+  n_words: number;
+  n_cells: number;
+  n_zero_cells: number;
+  zero_share: number;
+  toy_n_words: number;
+  toy_n_cells: number;
+  toy_zero_share: number;
+  counted: SpaceProjection;
+  learned: SpaceProjection;
+}
+
+let bookSpacePromise: Promise<BookSpace> | null = null;
+
+export function fetchBookSpace(): Promise<BookSpace> {
+  bookSpacePromise ??= getJson<BookSpace>("/concepts/word2vec/book-space");
+  return bookSpacePromise;
+}
