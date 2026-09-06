@@ -1201,8 +1201,9 @@ export default function ConvolutionPage() {
                   border off the blame shows up. Two channels at a stride of two is
                   where an implementation walking the input rather than the output
                   positions loses terms. On the run behind these figures the worst
-                  disagreement anywhere across the three fixtures was 5.3 × 10
-                  <sup>&minus;9</sup>, against reported slopes as large as 13.9.
+                  disagreement anywhere across the three fixtures was 7.8 × 10
+                  <sup>&minus;9</sup>, on the inputs of the padded fixture,
+                  against reported slopes as large as 13.9.
                 </p>
                 <WhyThisWorks title="Why the difference is taken from both sides">
                   <p>
@@ -1211,7 +1212,7 @@ export default function ConvolutionPage() {
                     halving the step halves the error. Measuring at plus a step and
                     minus a step and dividing by twice the step cancels the leading
                     error term, and what is left falls as the square of the step.
-                    That is what makes an agreement of nine decimal places evidence
+                    That is what makes an agreement of eight decimal places evidence
                     about the implementation rather than evidence about how the
                     difference was taken.
                   </p>
@@ -1230,50 +1231,85 @@ export default function ConvolutionPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="28. Seven nested loops, timed">
+              <SubSection title="28. Seven nested loops, and the same sum as one multiply">
                 <p>
-                  Now the honest part. The forward pass behind this page is written
-                  as seven nested loops, over the rows of the batch, the filters,
-                  the two output axes, the input channels and the two kernel axes,
-                  which is the definition written down and readable line by line.
-                  It is also slow, and the page has no business claiming the
-                  parameter saving is a speed saving.
+                  Written the way the definition reads, the sweep is seven nested
+                  loops, over the rows of the batch, the filters, the two output
+                  axes, the input channels and the two kernel axes, with one
+                  product added at the innermost step. That version can be checked
+                  line by line against the equation, and on the page&rsquo;s
+                  eight by eight picture it adds up 324 products, nine for each of
+                  the thirty-six answer cells. Through eight filters on a picture
+                  twenty-eight on a side it adds up 48,672, one at a time.
                 </p>
                 <p>
-                  Timed against a dense layer reading the same numbers and
-                  answering the same numbers, the sweep is the slower of the two at
-                  every size measured. On the runs behind this page the ratio came
-                  out between about 19 and 65 times slower across the three sizes,
-                  moving by a few times between one run and the next, since these
-                  are a measurement of whichever machine served the request rather
-                  than a property of the arrangement. The widget prints whatever it
-                  measures now.
+                  None of those products depends on any other, so the order they
+                  are added in is ours to choose. Lay every window of the picture
+                  out as one row of a table, nine numbers long for a three by three
+                  kernel on one channel, and the thirty-six windows of our square
+                  become a table of thirty-six rows and nine columns. Write the
+                  kernel bank as a table of nine rows with one column per filter,
+                  and the whole sweep is the first table times the second, which
+                  is a matrix multiply, the operation numerical routines have been
+                  tuned hardest for. The windows do not even have to be copied to
+                  be laid out this way, since each one is the same stretch of the
+                  picture read from a different starting cell, so the table of
+                  windows is a way of reading the picture and costs no copy.
+                </p>
+                <Equation>
+                  {
+                    "answer[f, i, j]  =  bias[f] + Σ over c, u, v of  kernel[f, c, u, v] · picture[c, i·s + u, j·s + v]\n\n(windows × c·k·k)  ·  (c·k·k × filters)  =  (windows × filters)"
+                  }
+                </Equation>
+                <p>
+                  The widget runs both versions on the machine serving this page,
+                  at three sizes, beside a dense layer reading the same numbers and
+                  answering the same numbers, and it compares the two
+                  versions&rsquo; answers. They agree to 1.8 × 10
+                  <sup>&minus;15</sup> at the largest size, a few rounding steps,
+                  which is what adding the same products in a different order
+                  costs and nothing more. On the runs I made behind this page the
+                  loops took between about 115 and 330 times as long as the
+                  multiply at the largest size, and only one to two times as long
+                  on the page&rsquo;s own picture, where there are too few
+                  products for the multiply&rsquo;s fixed setup to be repaid.
                 </p>
                 <SweepCostTable />
                 <p>
-                  The gap is an implementation gap rather than an algorithmic one.
-                  The usual repair is to lay every window out as a row of a large
-                  matrix, so that the whole sweep becomes one matrix multiply and
-                  the highly tuned routine underneath does the work; a production
-                  framework does that or something better on dedicated hardware.
-                  The correct and slow version is what such a rewrite would be
-                  measured against, which is why it is here rather than replaced.
+                  The dense layer is kept beside them because it corrects an easy
+                  reading of the parameter count. On the page&rsquo;s picture the
+                  sweep holds 10 parameters against the dense layer&rsquo;s 2,340
+                  and is still the slower of the two, between about six and
+                  sixteen times on my runs, since multiplying a row of sixty-four
+                  by a table of sixty-four by thirty-six is almost nothing and
+                  laying the windows out costs more than that. At twenty-eight on a
+                  side through eight filters the dense layer has 4,245,280
+                  parameters to work through against the sweep&rsquo;s 48,672
+                  products, and the order reverses, the sweep taking between about
+                  a tenth and two fifths of the dense layer&rsquo;s time. That is
+                  far less than the eighty-seven-fold gap in arithmetic would
+                  suggest, because at these sizes most of the sweep&rsquo;s time
+                  is fixed overhead and the widget shows it barely moving from the
+                  smallest picture to the largest.
                 </p>
                 <InAModel>
                   <p>
-                    Holding fewer parameters buys three things, and speed is not
-                    reliably one of them. It buys a model that can be estimated
-                    from less data, a model that fits in less memory, and a
-                    constraint that happens to match how pictures work. What it
-                    costs in arithmetic depends entirely on how the sweep is
-                    implemented.
+                    Holding fewer parameters buys a model that can be estimated
+                    from less data, fits in less memory, and carries a constraint
+                    that matches how pictures work. What it costs to run is a
+                    separate question, decided by how the sum is arranged and how
+                    large the picture is, and on this page the same layer is the
+                    slower of the two on an eight by eight picture and the quicker
+                    at twenty-eight by twenty-eight.
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Fewer parameters and less arithmetic are different claims, and
-                  only the first of them is being made here. The sweep as written
-                  is slower than the layer it holds tens of thousands fewer
-                  parameters than, and the widget above prints by how much.
+                  The seven loops and the single multiply add up the same products
+                  in a different order, and their answers differ by a few rounding
+                  steps. A convolution holding 234 times fewer parameters than a
+                  dense layer can still take longer to run on a small picture, so
+                  the saving in parameters and the saving in time have to be
+                  measured separately.
                 </KeepInMind>
               </SubSection>
             </>

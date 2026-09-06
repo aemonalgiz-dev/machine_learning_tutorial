@@ -1,14 +1,18 @@
 "use client";
 
-// What the sweep costs in time, beside the layer it saves parameters against.
+// What the sweep costs in time, beside its own definition and beside the layer
+// it saves parameters against.
 //
-// The API times one forward pass through a convolution and one through a dense
-// layer reading the same numbers and answering the same numbers, at three
-// picture sizes, and reports the median of five runs of each. The bars are on a
-// log scale, since the two figures are an order of magnitude apart at every
-// size. These are a measurement of whichever machine served the request and
-// will differ a little on each page load, which is why the widget prints the
-// figures rather than the page quoting them. The browser draws the bars.
+// The API times three forward passes over a single picture at three sizes: the
+// convolution as a view of every window and one contraction, the same
+// arithmetic written as the seven nested loops of the definition, and a dense
+// layer reading the same numbers and answering the same numbers. It reports
+// the median of five runs of each, and the largest gap between the loops'
+// answer and the sweep's. The bars are on a log scale, since the three figures
+// span more than two orders of magnitude at the largest size. The times are a
+// measurement of whichever machine served the request and differ a little on
+// each page load, which is why the widget prints them rather than the page
+// quoting them. The browser draws the bars.
 
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
@@ -21,6 +25,22 @@ function barShare(milliseconds: number, largest: number): number {
   const floor = 0.001;
   const span = Math.log10(largest / floor);
   return Math.max(2, (FULL_BAR * Math.log10(milliseconds / floor)) / span);
+}
+
+function againstDense(ratio: number): string {
+  if (ratio >= 1) return `the sweep ${ratio.toFixed(1)} times slower than the dense layer`;
+  return `the sweep ${(1 / ratio).toFixed(1)} times quicker than the dense layer`;
+}
+
+function Gap({ value }: { value: number }) {
+  if (value === 0) return <>0</>;
+  const [mantissa, exponent] = value.toExponential(1).split("e");
+  return (
+    <>
+      {mantissa} × 10
+      <sup>{String(Number(exponent)).replace("-", "−")}</sup>
+    </>
+  );
 }
 
 export function SweepCostTable() {
@@ -39,7 +59,13 @@ export function SweepCostTable() {
   }, []);
 
   const largest = cost
-    ? Math.max(...cost.rows.map((row) => row.sweep_milliseconds))
+    ? Math.max(
+        ...cost.rows.flatMap((row) => [
+          row.sweep_milliseconds,
+          row.loop_milliseconds,
+          row.dense_milliseconds,
+        ]),
+      )
     : 0;
 
   return (
@@ -50,11 +76,18 @@ export function SweepCostTable() {
             <p className="text-xs font-medium text-slate-700 dark:text-slate-300">
               {row.side} by {row.side} through {row.n_filters}{" "}
               {row.n_filters === 1 ? "filter" : "filters"}, answering (
-              {row.answers.join(", ")})
+              {row.answers.join(", ")}), {row.n_terms.toLocaleString("en-US")}{" "}
+              products a pass
             </p>
             <div className="mt-1 space-y-1">
               <Bar
-                label="the sweep"
+                label="the seven loops"
+                milliseconds={row.loop_milliseconds}
+                share={barShare(row.loop_milliseconds, largest)}
+                fill="bg-slate-500"
+              />
+              <Bar
+                label="the view and one multiply"
                 milliseconds={row.sweep_milliseconds}
                 share={barShare(row.sweep_milliseconds, largest)}
                 fill="bg-indigo-600"
@@ -67,9 +100,11 @@ export function SweepCostTable() {
               />
             </div>
             <p className="mt-1 text-right text-[11px] text-slate-500 dark:text-slate-400">
-              {row.ratio.toFixed(1)} times slower, holding{" "}
-              {row.convolution_parameters.toLocaleString("en-US")} parameters
-              against {row.dense_parameters.toLocaleString("en-US")}
+              loops {row.loop_over_sweep.toFixed(0)} times the sweep, answers{" "}
+              <Gap value={row.largest_disagreement} /> apart;{" "}
+              {againstDense(row.ratio)},
+              holding {row.convolution_parameters.toLocaleString("en-US")}{" "}
+              parameters against {row.dense_parameters.toLocaleString("en-US")}
             </p>
           </div>
         ))}
@@ -80,7 +115,7 @@ export function SweepCostTable() {
 
       <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-500">
         {cost
-          ? `Each figure is the median of ${cost.repeats} forward passes over a single picture, measured on the machine that served this page. The bars are on a log scale.`
+          ? `Each time is the median of ${cost.repeats} forward passes over a single picture, measured on the machine that served this page, so the figures move a little on every load. The bars are on a log scale.`
           : "…"}
       </p>
 
