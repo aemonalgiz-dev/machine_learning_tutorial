@@ -45,6 +45,16 @@ export class ApiError extends Error {
   }
 }
 
+// What a reader sees when no refusal of the calculation's own came back. These
+// are page text like any other, so they name what happened rather than the
+// machinery behind the page. A first visit after a restart can meet the second
+// one while a large fit is still being worked out, which is why it suggests a
+// reload rather than blaming the input.
+const UNREACHABLE =
+  "The calculation behind this could not be reached. Reloading the page usually brings it back.";
+const NOT_WORKED_OUT =
+  "This could not be worked out just now. Reloading the page usually fixes it.";
+
 // One POST, one place to turn a non-2xx into a readable ApiError. Every call
 // below is a thin wrapper over this.
 export async function postJson<T>(path: string, body: unknown): Promise<T> {
@@ -56,10 +66,7 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
       body: JSON.stringify(body),
     });
   } catch {
-    throw new ApiError(
-      "The compute API is not reachable. Is it running?",
-      "unreachable",
-    );
+    throw new ApiError(UNREACHABLE, "unreachable");
   }
 
   if (!response.ok) {
@@ -67,7 +74,7 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
     const detail =
       errorBody?.detail && typeof errorBody.detail === "string"
         ? errorBody.detail
-        : "The API could not compute this input.";
+        : NOT_WORKED_OUT;
     throw new ApiError(detail, "refused");
   }
 
@@ -80,14 +87,11 @@ export async function getJson<T>(path: string): Promise<T> {
   try {
     response = await fetch(`${API_BASE_URL}${path}`);
   } catch {
-    throw new ApiError(
-      "The compute API is not reachable. Is it running?",
-      "unreachable",
-    );
+    throw new ApiError(UNREACHABLE, "unreachable");
   }
 
   if (!response.ok) {
-    throw new ApiError("The API could not compute this input.", "refused");
+    throw new ApiError(NOT_WORKED_OUT, "refused");
   }
 
   return (await response.json()) as T;
