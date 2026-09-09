@@ -622,7 +622,7 @@ export default function LogisticRegressionPage() {
                   surface over the pair, and fitting is the fitting-by-walking
                   page&rsquo;s search across it. The surface below is the log
                   loss over intercept and slope, and the path is the
-                  library&rsquo;s climb recorded pass by pass.
+                  climb itself, recorded pass by pass.
                 </p>
                 <LogisticWalkPlayground panels={["surface", "curve"]} maxEpochs={300} />
                 <p>
@@ -759,7 +759,7 @@ export default function LogisticRegressionPage() {
                   cannot in general be rearranged into a formula for β and α.
                   The equations exist, and they are the right ones. They do
                   not have a closed-form solution, and that is why the model
-                  is fitted by walking. The library climbs the log-likelihood
+                  is fitted by walking. The fit here climbs the log-likelihood
                   by gradient ascent, which is the same thing as descending
                   the log loss, and reports how many passes it took and
                   whether it met its tolerance.
@@ -797,8 +797,8 @@ export default function LogisticRegressionPage() {
                     coefficient. On separated data, or on data where one class
                     can be separated on part of the range, the maximum
                     likelihood is only approached and never reached, and what
-                    the library reports at the end is wherever its pass budget
-                    ran out, honestly labelled as not converged. Overlap is not
+                    is reported at the end is wherever the pass budget ran
+                    out, honestly labelled as not converged. Overlap is not
                     a nuisance to logistic regression. It is what holds the
                     answer finite.
                   </p>
@@ -821,12 +821,11 @@ export default function LogisticRegressionPage() {
                 </p>
                 <InAModel>
                   <p>
-                    This library&rsquo;s logistic regression carries no
-                    penalty yet, so the toggle that would set the penalised
-                    climb beside the unpenalised one above is not built here.
-                    What it has instead is the pass budget and the honest
-                    verdict, which is the minimum a separated fit should come
-                    with.
+                    No penalised climb is fitted on this page, so the toggle
+                    that would set one beside the unpenalised climb above is
+                    not here. What the page shows instead is the pass budget
+                    and the honest verdict, which is the minimum a separated
+                    fit should come with.
                   </p>
                 </InAModel>
               </SubSection>

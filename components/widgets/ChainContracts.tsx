@@ -79,7 +79,7 @@ export function ChainContracts() {
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         {contracts.probes.length} edges asked on this load, {refused} refused by name,{" "}
         {contracts.probes.length - refused - escaped} accepted and {escaped} escaped as a
-        failure the library did not name.
+        failure with no message written to be read.
       </p>
     </div>
   );

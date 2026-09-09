@@ -160,7 +160,7 @@ export function SeamChecker() {
                 {answer.counts_agree
                   ? ", and both sides hold the same count of numbers. "
                   : ". "}
-                The library&rsquo;s words are{" "}
+                The refusal reads{" "}
                 <span className="font-mono">{answer.refusal}</span>
               </>
             )}

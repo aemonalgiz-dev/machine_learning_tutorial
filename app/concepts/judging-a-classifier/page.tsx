@@ -331,8 +331,8 @@ export default function JudgingAClassifierPage() {
                   than any chance in the crowd, and the model calls nobody an
                   adult. Its precision is then zero over zero. That is not a
                   precision of zero, since a model that made no positive
-                  claims has not made a wrong one, and the library says so by
-                  refusing to return a number rather than by returning 0.
+                  claims has not made a wrong one, and the difference is kept
+                  by refusing to return a number rather than by returning 0.
                 </p>
                 <Equation>{"precision at 0.99   =   0 / (0 + 0)     undefined, nobody was called adult\nrecall on a fold with no adults   =   0 / (0 + 0)     undefined, there was nobody to find\nF1 with precision 0 and recall 0   =   2 · 0 · 0 / (0 + 0)     undefined"}</Equation>
                 <p>
@@ -794,7 +794,7 @@ export default function JudgingAClassifierPage() {
                 </p>
                 <DerivationTable
                   expressionHeading="the judged rows, and whether the width is stated"
-                  reasonHeading="what the library does"
+                  reasonHeading="what happens"
                   rows={[
                     { expression: "everybody, width inferred", reason: "the true classes run 0, 1, 2 and the table is three by three; identical to stating it." },
                     { expression: "without the adults, width inferred", reason: "refused. The rows’ true classes run 0 and 1, so the inferred table has two columns, and the tall teenager is called class 2, which the table has no column for." },
@@ -812,9 +812,9 @@ export default function JudgingAClassifierPage() {
                   back two by two with no adult column and every figure
                   defined, a table that is silently the wrong shape. Stating
                   the width turns that into a three-by-three table with an
-                  empty row, whose recall is undefined and says so. The
-                  library therefore lets a caller state the width and holds
-                  the rows to it, which is the rule the fold endpoint of
+                  empty row, whose recall is undefined and says so. So the
+                  width is stated up front and the rows are held to it,
+                  which is the rule the fold endpoint of
                   Part 7 uses on every fold.
                 </p>
                 <KeepInMind>
@@ -945,8 +945,8 @@ export default function JudgingAClassifierPage() {
                   model with a high area can still be untrustworthy when its
                   0.7 is read as seven in ten. The repair for that is a
                   second, small fit that maps the model&rsquo;s chances onto
-                  observed frequencies on held-out rows, which this library
-                  does not provide and which this page therefore only names.
+                  observed frequencies on held-out rows, which is not built
+                  here and which this page therefore only names.
                   What it does provide is the diagram and the two scores,
                   which say whether such a repair is needed.
                 </p>
@@ -1027,10 +1027,11 @@ export default function JudgingAClassifierPage() {
                   fold has to contribute something and whatever is chosen is a
                   convention. Pooled, it adds nothing to either side of the
                   ratio, which is right, because a fold with no adults in it
-                  has no evidence about finding adults. So the library pools
-                  a classifier&rsquo;s folds, and reports a spread across
-                  folds only for accuracy, which is defined on any fold with
-                  anybody in it and reads 0.5 here on every deal.
+                  has no evidence about finding adults. So a
+                  classifier&rsquo;s folds are pooled, and a spread across
+                  folds is reported only for accuracy, which is defined on
+                  any fold with anybody in it and reads 0.5 here on every
+                  deal.
                 </p>
                 <Equation>{"pooled     ( Σ TPₖ ) / ( Σ (TPₖ + FNₖ) )      a fold with no adults adds 0 to both\naveraged   (1/k) Σ  TPₖ / (TPₖ + FNₖ)        a fold with no adults has no term to add"}</Equation>
                 <KeepInMind>
@@ -1084,9 +1085,8 @@ export default function JudgingAClassifierPage() {
 
               <SubSection title="26. The edges, each one run">
                 <p>
-                  Every row below was run against the library, through the
-                  API where the page can reach it and directly where it
-                  cannot.
+                  Every row below was run, through this page where it can
+                  reach the case and directly on the model where it cannot.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"

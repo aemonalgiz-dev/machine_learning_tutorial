@@ -231,8 +231,8 @@ export default function HebbianPcaPage() {
                   the right one. At the constant rate the weights after twenty epochs
                   point 0.0006 degrees from the eigen direction while being seven
                   million long. The rule finds the direction and then runs along it
-                  forever, which is what the record in the library&rsquo;s own notes
-                  calls exploding along a direction rather than converging to one.
+                  forever, which is what my own notes on it call exploding along a
+                  direction rather than converging to one.
                 </p>
                 <KeepInMind>
                   Every update from Hebb&rsquo;s rule has a part along the current
@@ -532,8 +532,8 @@ export default function HebbianPcaPage() {
                   the output is itself the person times the weights, so the update
                   carries the square of whatever unit the people are measured in.
                   A rate that behaves on data spread about one is a hundred times too
-                  large on data spread about ten, and the library&rsquo;s own default
-                  of 0.05, which is right for its test fixtures, overflows on the
+                  large on data spread about ten, and the default rate of 0.05,
+                  which suits data spread about one, overflows on the
                   measured four in centimetres on the third epoch. So the endpoint
                   sets the rate from the cloud rather than fixing it.
                 </p>
@@ -1011,16 +1011,16 @@ export default function HebbianPcaPage() {
                   expressionHeading="the edge"
                   reasonHeading="the behaviour"
                   rows={[
-                    { expression: "no features, or a non-finite value", reason: "refused at the boundary every feature passes through; the endpoint refuses a non-finite coordinate before the library sees it." },
+                    { expression: "no features, or a non-finite value", reason: "refused at the boundary every feature passes through; the endpoint refuses a non-finite coordinate before any fit begins." },
                     { expression: "one person", reason: "refused by name, since one row has no spread to find a direction in; the endpoint refuses fewer than two a layer earlier." },
                     { expression: "two people", reason: "accepted; the first direction is the line through them and the second eigenvalue is zero." },
                     { expression: "every person on one spot", reason: "refused by name, since every share would divide by zero; the endpoint's eigensolver refuses the same cloud first." },
                     { expression: "one feature", reason: "accepted, with one direction carrying a share of one." },
                     { expression: "a constant column beside a varying one", reason: "accepted; the first direction is the varying column exactly and the second unit shrinks to 0.24 rather than pointing anywhere." },
                     { expression: "more directions asked for than features", reason: "refused at the fit, since a direction beyond the last has nothing left to see." },
-                    { expression: "a rate too large for the data's scale", reason: "refused on the epoch a weight overflows, naming the epoch; four times the endpoint's rate on the four, the library's own default on centimetres." },
+                    { expression: "a rate too large for the data's scale", reason: "refused on the epoch a weight overflows, naming the epoch; four times the endpoint's rate on the four, and the default rate of 0.05 on centimetres." },
                     { expression: "a rate that never falls", reason: "accepted as a legitimate configuration; measured to settle on the four and to wobble forever on the crowd." },
-                    { expression: "reading directions or transforming before fitting", reason: "refused by name, in the library's words." },
+                    { expression: "reading directions or transforming before fitting", reason: "refused by name, as not fitted rather than as an attribute error." },
                     { expression: "new people with reordered columns", reason: "matched by name and accepted; a column missing or unknown is refused." },
                     { expression: "directions not perpendicular, not unit length, or not in order of variance", reason: "accepted and reported, as the worst orthogonality, the lengths and an ordering flag, since refusing them would refuse a correct fit stopped early." },
                     { expression: "a learned vector of length under a trillionth", reason: "refused, since a vector that short names no direction." },
@@ -1030,7 +1030,7 @@ export default function HebbianPcaPage() {
                 />
                 <p>
                   Every row of that table was probed, on this page&rsquo;s own people
-                  where an endpoint reaches the case and against the library directly
+                  where an endpoint reaches the case and against the model directly
                   where none does. The two that deserve the most care are the
                   refusals that are not refusals. A constant rate is accepted because
                   a walk that never settles is worth being able to demonstrate, and a

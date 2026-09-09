@@ -89,7 +89,7 @@ export function ConvolutionEdgeCases() {
           value={probed ? `${probed.n_accepted} of ${probed.cases.length}` : "…"}
         />
         <Stat
-          label="Refusals in the library’s own words"
+          label="Refusals in words written to be read"
           value={
             probed
               ? `${probed.n_in_the_library_words} of ${probed.n_refused}`

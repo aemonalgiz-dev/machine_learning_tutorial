@@ -502,7 +502,7 @@ export default function MulticlassClassificationPage() {
                   constant it chooses is the one that makes the three outcomes
                   most likely. One yes in three people makes that q = 1/3, and
                   the intercept that produces it is ln(1/2) = −0.6931. Both
-                  numbers are in the library&rsquo;s fit, which converged in 49
+                  numbers are in the fit itself, which converged in 49
                   passes by discovering it should ignore its inputs.
                 </p>
                 <WhyThisWorks title="Why a third">
@@ -698,8 +698,8 @@ export default function MulticlassClassificationPage() {
                   The usual repairs are to pick one reference class and fix its
                   coefficients at zero, to constrain the class parameters to
                   sum to zero, or to add a penalty that prefers one finite
-                  parameterisation among the equals. This library takes the
-                  first. That is why the child row of section 3&rsquo;s table is
+                  parameterisation among the equals. The fit on this page takes
+                  the first. That is why the child row of section 3&rsquo;s table is
                   all zeros, and why pinning it there loses nothing. It is a
                   choice about naming, not about the model.
                 </p>
@@ -753,8 +753,8 @@ export default function MulticlassClassificationPage() {
                   is 2.3 at pass 10, 7.1 at pass 100 and 11.4 at pass 500, and
                   it is still growing. The loss is 0.43, then 0.08, then 0.016,
                   still falling. The probability each person&rsquo;s own class
-                  receives climbs toward one and never arrives, and the library
-                  reports the run as not converged, because no finite set of
+                  receives climbs toward one and never arrives, and the run
+                  is reported as not converged, because no finite set of
                   coefficients reaches the maximum. Perfect multiclass
                   classification and an unbounded likelihood problem sit
                   together comfortably.
@@ -785,8 +785,8 @@ export default function MulticlassClassificationPage() {
                 </p>
                 <InAModel>
                   <p>
-                    Neither of this library&rsquo;s multiclass models carries a
-                    penalty yet, so the four-way comparison of regularised and
+                    Neither multiclass model here carries a penalty yet, so
+                    the four-way comparison of regularised and
                     unregularised fits under both routes is not built here.
                     What is built is the pass cap and the honest verdict per
                     fit, which is the minimum a separated fit should report.
@@ -797,13 +797,14 @@ export default function MulticlassClassificationPage() {
           ),
         },
         {
-          title: "Part 11. Type and API Design",
+          title: "Part 11. Type and Interface Design",
           content: (
             <SubSection title="30. Encoding output guarantees in types">
               <p>
                 Everything above comes down to two guarantees a model can
-                make about a table of class scores, and this library keeps them
-                apart in its types rather than in prose.
+                make about a table of class scores, and the two are kept
+                apart by the kind of answer a fit returns rather than by
+                prose.
               </p>
               <NumberTable
                 headings={["guarantee", "what a caller may assume", "returned by"]}

@@ -699,8 +699,8 @@ export default function SimpleLinearRegressionPage() {
                   computable and almost entirely noise.
                 </p>
                 <p>
-                  It is also why the library refuses a constant column outright
-                  rather than returning a number nobody should use.
+                  It is also why a constant column is refused outright
+                  rather than answered with a number nobody should use.
                 </p>
               </InAModel>
             </SubSection>

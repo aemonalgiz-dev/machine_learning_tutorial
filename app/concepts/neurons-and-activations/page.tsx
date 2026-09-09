@@ -448,7 +448,7 @@ export default function NeuronsAndActivationsPage() {
                 <p>
                   At a score of exactly zero the slope is undefined, since
                   the two sides disagree, and an implementation has to pick
-                  one. The library picks 0, the negative side&rsquo;s
+                  one. The choice made here is 0, the negative side&rsquo;s
                   answer, and the curve the box draws reports 0 at its
                   middle sample. An exact zero score is rare enough in
                   floating point that the choice never shows in a fit, and
@@ -479,7 +479,7 @@ export default function NeuronsAndActivationsPage() {
                 <p>
                   The formula as written overflows for a large negative
                   score, since e to the 800 is beyond what a double can
-                  hold, and the library computes the sigmoid in a form that
+                  hold, and the sigmoid here is computed in a form that
                   does not. I checked it at the edge of what the box can
                   reach. A neuron with both weights at 10 and a bias of −10,
                   shown the corner ten deviations short and ten light, scores
@@ -894,7 +894,7 @@ export default function NeuronsAndActivationsPage() {
                   No function of one number can do that, and no single
                   neuron can hold it, since a neuron has no neighbours to
                   normalise against. Softmax belongs to an output layer,
-                  where the whole row exists, and the library keeps it there
+                  where the whole row exists, and it is kept there
                   beside the multi-class loss rather than on the list of
                   bends a neuron may own.
                 </p>
@@ -932,18 +932,18 @@ export default function NeuronsAndActivationsPage() {
                 <p>
                   Every row below was probed. The playground&rsquo;s request
                   refuses some of these at the door, with its own bounds,
-                  before the library is reached, and where that happens the
-                  row says what the library itself does when asked directly.
+                  before the neuron is reached, and where that happens the
+                  row says what the neuron itself does when asked directly.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"
                   reasonHeading="the behaviour"
                   rows={[
-                    { expression: "a neuron with no weights", reason: "refused; a neuron with no inputs is a constant wearing a neuron’s name, and the request asks for exactly two weights before the library sees any." },
-                    { expression: "a neuron with one weight", reason: "accepted by the library, and it is the logistic page’s single-input model; the playground’s request asks for two because its plane has two axes." },
-                    { expression: "a non-finite weight or bias", reason: "refused by the library in words, and it cannot be written in a request at all, since JSON has no way to spell infinity or a non-number." },
+                    { expression: "a neuron with no weights", reason: "refused; a neuron with no inputs is a constant wearing a neuron’s name, and the request asks for exactly two weights before any neuron is built." },
+                    { expression: "a neuron with one weight", reason: "accepted, and it is the logistic page’s single-input model; the playground’s request asks for two because its plane has two axes." },
+                    { expression: "a non-finite weight or bias", reason: "refused in words, and it cannot be written in a request at all, since JSON has no way to spell infinity or a non-number." },
                     { expression: "a row of the wrong length", reason: "refused; the weight count is the input width, and three values against two weights is named as a length mismatch." },
-                    { expression: "an empty row, or a non-finite or non-numeric value in it", reason: "refused, each by the same guard every column in the library passes through." },
+                    { expression: "an empty row, or a non-finite or non-numeric value in it", reason: "refused, each by the same guard every column passes through." },
                     { expression: "integers, or booleans, as inputs", reason: "accepted and coerced to floating point, so true reads as 1 and false as 0; documented rather than defended." },
                     { expression: "one person", reason: "answered; a neuron responds to a row and has no notion of a dataset, so one row is the ordinary case." },
                     { expression: "both weights zero, a constant column", reason: "accepted; the score is the bias everywhere, 0.5 at every cell, and there is no zero line to draw." },
@@ -958,8 +958,8 @@ export default function NeuronsAndActivationsPage() {
                   ]}
                 />
                 <p>
-                  The two rows that deserve a second look are the ones the
-                  library accepts. Booleans coerce quietly, so a column of
+                  The two rows that deserve a second look are the ones that
+                  are accepted. Booleans coerce quietly, so a column of
                   yes-and-no flags becomes ones and zeros without anyone
                   saying so, and the positional weights mean a row handed
                   over with its height and weight swapped is scored wrongly

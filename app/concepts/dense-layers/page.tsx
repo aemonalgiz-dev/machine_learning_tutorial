@@ -295,11 +295,11 @@ export default function DenseLayersPage() {
                   2&rsquo;s agreement about width said in the primer&rsquo;s
                   vocabulary. The hidden layer&rsquo;s W is (3, 2) and reads a
                   row of two; the output layer&rsquo;s is (1, 3) and reads the
-                  three hidden outputs. The library stores each neuron as its
-                  own object, because the neuron is the unit that was learned
-                  about, and assembles the matrix once when the layer is
-                  built, so a pass is one multiply per layer rather than a
-                  loop over neurons.
+                  three hidden outputs. Each neuron is kept as its own object,
+                  because the neuron is the unit that was learned about, and
+                  the matrix is assembled once when the layer is built, so a
+                  pass is one multiply per layer rather than a loop over
+                  neurons.
                 </p>
                 <KeepInMind>
                   Rows are neurons, columns are inputs, and the shape (m, n)
@@ -341,7 +341,7 @@ export default function DenseLayersPage() {
                   request lets it through on purpose, so that the layer meets
                   it, and the layer refuses it with &ldquo;this layer reads
                   (2,), got a block arranged (3,)&rdquo;. That sentence is
-                  the library&rsquo;s own, and Part 4 says why it is phrased
+                  quoted word for word, and Part 4 says why it is phrased
                   in terms of an arrangement rather than a count.
                 </p>
                 <KeepInMind>
@@ -364,9 +364,9 @@ export default function DenseLayersPage() {
                 <Equation>{"a = f(z), entry by entry\n\nrectifier   (3, −1, 1) → (3, 0, 1)\nsigmoid     (3, −1, 1) → (0.9526, 0.2689, 0.7311)\ntangent     (3, −1, 1) → (0.9951, −0.7616, 0.7616)"}</Equation>
                 <p>
                   Each neuron carries its own bend, so nothing in the
-                  mathematics stops a layer from mixing them, and the library
-                  accepts a layer whose first neuron is straight and whose
-                  second is a sigmoid; I checked, and it answers (3, 0.9526)
+                  mathematics stops a layer from mixing them, and a layer
+                  whose first neuron is straight and whose second is a sigmoid
+                  is accepted; I checked, and it answers (3, 0.9526)
                   at the row. A uniform layer is a fact about ordinary
                   practice rather than a law, and it is the case a vectorised
                   pass can exploit, since one bend over a whole block is one
@@ -437,8 +437,8 @@ export default function DenseLayersPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  The library keeps one response per layer and hands the
-                  whole list back, with the last layer&rsquo;s outputs
+                  One response is kept per layer and the whole list handed
+                  back, with the last layer&rsquo;s outputs
                   reachable directly so that an ordinary caller never indexes
                   into the list at all. A deeper network is the same
                   alternation continued, an affine map, a bend, an affine
@@ -477,7 +477,7 @@ export default function DenseLayersPage() {
                   back down this same network, and it is not repeated here.
                   What belongs here is only the design decision that makes it
                   a plain reversed loop rather than a reconstruction of what
-                  each layer once read. An earlier version of the library kept
+                  each layer once read. An earlier version of this design kept
                   only the scores and outputs, and the backward walk had to
                   rebuild the list of inputs by shifting the outputs down one
                   and pushing the caller&rsquo;s row on the front, which was
@@ -528,7 +528,7 @@ export default function DenseLayersPage() {
                 <p>
                   The definition of a layer is a loop, ask each neuron in
                   turn, and the matrix multiply is that loop written as one
-                  call. The library keeps both, the multiply for every fit and
+                  call. Both are kept, the multiply for every fit and
                   the loop as an observed route for anyone who wants to see
                   one neuron&rsquo;s arithmetic, and a test asserts that they
                   agree, because a fast path and a slow path with nothing
@@ -570,7 +570,7 @@ export default function DenseLayersPage() {
                 <p>
                   A dense layer knows two things about itself before any data
                   arrives, the width it reads and the width it answers with,
-                  and the library records each as a tuple of extents rather
+                  and each is recorded as a tuple of extents rather
                   than as a number. For a dense layer the tuple has one
                   entry, (2,) or (3,), and the distinction looks pedantic. It
                   stops being pedantic the moment a layer answers with
@@ -593,7 +593,7 @@ export default function DenseLayersPage() {
                   this page every tuple has one entry, and the refusals still
                   print the tuples, because a refusal that printed
                   &ldquo;5408 and 5408&rdquo; on the case the check exists to
-                  catch would send a reader looking for a bug in the library
+                  catch would send a reader looking for a bug in the check
                   rather than for the missing layer.
                 </p>
                 <KeepInMind>
@@ -610,7 +610,7 @@ export default function DenseLayersPage() {
                   two shapes, so it belongs to the shape rather than to
                   whichever loop is assembling a network. The two boxes
                   below state their four widths and nothing else. Set them,
-                  and the verdict comes back from the library with no row
+                  and the verdict comes back with no row
                   sent, in the same words a real mismatch would produce hours
                   into a training run if nobody had checked first.
                 </p>
@@ -636,7 +636,7 @@ export default function DenseLayersPage() {
                   An answer nobody is obliged to read is not a guarantee. A
                   caller can ask whether two layers join, discard the answer,
                   and discover the disagreement inside a matrix multiply
-                  later. So the library does not leave the check to the
+                  later. So the check is not left to the
                   caller. A stack of layers refuses to exist unless every
                   seam holds, and a stack that has been built is one whose
                   shape is already known to be sound, so no forward pass
@@ -650,8 +650,8 @@ export default function DenseLayersPage() {
                     Layers reading 2 and answering 3, reading 3 and answering
                     4, reading 4 and answering 1 make a stack that reads (2,)
                     and answers (1,) across two seams, holding thirty
-                    parameters. Change the last layer to read 5 and the
-                    library refuses with &ldquo;layer 1 answers with (4,) and
+                    parameters. Change the last layer to read 5 and the stack
+                    refuses to be built, with &ldquo;layer 1 answers with (4,) and
                     layer 2 reads (5,)&rdquo;. Break the first seam as well and
                     it is the first that is named, since the walk stops at
                     the first seam that fails.
@@ -734,8 +734,8 @@ export default function DenseLayersPage() {
                     (−2, 4), and the bias is zero. At (1, 2) that answers
                     −2 + 8 = 6, and setting both bends to identity in the
                     playground makes the output readout say 6 as well, since
-                    the API reports the collapsed map beside every pass and
-                    checks it against a bendless stack.
+                    the collapsed map is reported beside every pass and
+                    checked against a bendless stack.
                   </p>
                 </WorkedExample>
                 <p>
@@ -952,8 +952,8 @@ export default function DenseLayersPage() {
                 <p>
                   Every row below was probed. The playground&rsquo;s request
                   refuses some of these at the door, with its own bounds,
-                  before the library is reached, and where that happens the
-                  row says what the library itself does when asked directly.
+                  before the layer is reached, and where that happens the
+                  row says what the layer itself does when asked directly.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"

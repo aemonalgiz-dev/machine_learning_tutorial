@@ -557,7 +557,8 @@ export default function KernelTrickPage() {
                   its 24 eigenvalues are negative, the smallest at −13.371.
                   No lift produces that table, so an optimisation built on it
                   is no longer climbing a hill with a top. Two things in the
-                  library meet that matrix and they respond differently.
+                  models on this page meet that matrix and they respond
+                  differently.
                 </p>
                 <InAModel title="Two responses to the same bad table">
                   <p>
@@ -828,8 +829,7 @@ export default function KernelTrickPage() {
                   offset would be free. At a small capacity that holds the
                   boundary nearer the origin of the lifted space than the
                   data alone would put it, and raising the capacity releases
-                  it. The library&rsquo;s own four-reading fixture shows the
-                  movement.
+                  it. A four-reading fixture shows the movement.
                 </p>
                 <AbsorbedInterceptTable />
                 <p>
@@ -918,7 +918,7 @@ export default function KernelTrickPage() {
                 <p>
                   It is correct and it is slow, and the step size matters
                   more than it looks. I first ran every fit on this page at
-                  the library&rsquo;s default step of 0.001 and ceiling of
+                  the default step of 0.001 and ceiling of
                   1,000 steps, and every fit stopped at the ceiling with
                   every multiplier still moving, so all 24 patients reported
                   as support vectors under the linear and radial kernels, 16
@@ -1044,9 +1044,9 @@ export default function KernelTrickPage() {
 
               <SubSection title="26. The edges, each one probed">
                 <p>
-                  Every row below was run against the library, most of them
-                  through this page&rsquo;s own endpoints, and the behaviour
-                  recorded is what came back.
+                  Every row below was run, most of them through this
+                  page&rsquo;s own endpoints, and the behaviour recorded is
+                  what came back.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"
@@ -1057,16 +1057,16 @@ export default function KernelTrickPage() {
                     { expression: "two patients, one of each class", reason: "accepted and fits, standardized, at an accuracy of 1.000 with both as support vectors." },
                     { expression: "one class", reason: "refused; there is nothing to separate." },
                     { expression: "three classes, or a label of 0.5", reason: "refused before the sign encoding, because folding every class above zero into +1 would silently learn the wrong question." },
-                    { expression: "a constant column", reason: "refused by the standardizer, whose division by a zero spread has no answer; fitted raw and unstandardized, the library accepts it and the column contributes nothing." },
+                    { expression: "a constant column", reason: "refused by the standardizer, whose division by a zero spread has no answer; fitted raw and unstandardized, it is accepted and the column contributes nothing." },
                     { expression: "a non-finite value", reason: "refused at the boundary; the endpoints refuse it earlier still, since a NaN cannot be written as JSON." },
                     { expression: "more than 100 patients", reason: "refused by the endpoints with the limit named, before any fit." },
-                    { expression: "predicting before fitting, or reading the support vectors", reason: "refused with the library's own not-fitted message." },
+                    { expression: "predicting before fitting, or reading the support vectors", reason: "refused as not fitted, in a sentence rather than as an attribute error." },
                     { expression: "predicting with a feature missing, or under another name", reason: "refused; a kernel pairs rows over exactly the fitted features. The same features in another order are matched by name and accepted." },
                     { expression: "gamma of 0, capacity of 0, degree of 0, or a negative polynomial constant", reason: "refused at construction, since each makes the kernel or the objective degenerate; at a gamma of 0 every pair has kernel value 1 and there is nothing to fit." },
-                    { expression: "a polynomial kernel of degree 200 on raw vitals", reason: "the powers overflow to infinity and the library refuses the Gram matrix for holding a non-finite value, naming unscaled features as the usual cause; the endpoints cap the degree at 6." },
+                    { expression: "a polynomial kernel of degree 200 on raw vitals", reason: "the powers overflow to infinity and the Gram matrix is refused for holding a non-finite value, naming unscaled features as the usual cause; the endpoints cap the degree at 6." },
                     { expression: "a sigmoid kernel that is not a kernel", reason: "the Gram matrix has negative eigenvalues; kernel ridge refuses it through its Cholesky solve and this classifier runs on it and reports a fit. Documented rather than defended, in section 13." },
                     { expression: "a gamma too large", reason: "accepted, and the fit memorises: 1.000 on the clinic, all 24 patients kept, and 0.571 held out at a gamma of 1000, which is the all-unwell guess. Nothing raises; the held-out score and the support vector count are the only witnesses." },
-                    { expression: "the ascent stopped by its ceiling", reason: "accepted, and the model reports the step count so a caller can see it; at the library's defaults the clinic stops at 1,000 steps under every kernel, and under the radial one every row reads as a support vector." },
+                    { expression: "the ascent stopped by its ceiling", reason: "accepted, and the model reports the step count so a caller can see it; at the default step and ceiling the clinic stops at 1,000 steps under every kernel, and under the radial one every row reads as a support vector." },
                     { expression: "the squashed decision value read as a probability", reason: "accepted by the type system and wrong; a perfect fit on the clinic never squashes above 0.794." },
                   ]}
                 />

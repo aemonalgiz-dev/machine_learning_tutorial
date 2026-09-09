@@ -205,15 +205,15 @@ export default function LossFunctionsPage() {
                   side, measures the cost at both, and divides the difference
                   by the gap, which is the calculus primer&rsquo;s definition
                   of a slope. At the halfway guess the largest disagreement
-                  between the slope the library reports and the slope found by
-                  nudging is 2.3 parts in a trillion, and across the whole
+                  between the slope reported alongside the value and the slope
+                  found by nudging is 2.3 parts in a trillion, and across the whole
                   slider it never passes 2.1 parts in ten billion.
                 </p>
                 <InAModel title="Where the check is allowed to disagree">
                   <p>
                     Drag the raw output to the target, one half. Absolute error
-                    has a corner there, no slope exists, and the library commits
-                    to zero; the nudge, straddling the corner symmetrically,
+                    has a corner there, no slope exists, and the slope reported
+                    is zero; the nudge, straddling the corner symmetrically,
                     also finds zero to within 3 parts in a trillion. Drag it to
                     1.5, which is exactly the Huber knee. The two pieces of the
                     Huber loss meet at a value of 0.5 and a slope of 1, and the
@@ -297,8 +297,8 @@ export default function LossFunctionsPage() {
                 </WorkedExample>
                 <p>
                   The corner at zero is the price of that. Where the guess
-                  equals the truth no slope exists, and the library commits to
-                  zero there, which on the playground is the one point where
+                  equals the truth no slope exists, and the slope reported there
+                  is zero, which on the playground is the one point where
                   the amber dot on the gradient chart is neither at 1 nor at
                   −1. It also means the slope never shrinks as the guess gets
                   close, so a walk under absolute error keeps stepping at full
@@ -352,8 +352,8 @@ export default function LossFunctionsPage() {
                     four and none of them is inside it, the batch costs 5.5,
                     and every pull is a quarter in size, which is absolute error
                     wearing a different name. A knee has to be chosen against
-                    the size of the misses it will meet, and the library&rsquo;s
-                    Huber regression, on its own page, estimates a scale from
+                    the size of the misses it will meet, and the Huber
+                    regression on its own page estimates a scale from
                     the residuals and measures its knee in multiples of that;
                     the network loss here takes a fixed number and leaves the
                     choice to you.
@@ -475,9 +475,9 @@ export default function LossFunctionsPage() {
                   A sigmoid pushed far enough saturates to exactly zero or
                   exactly one in double precision, and the logarithm of exactly
                   zero is minus infinity, which would poison the average for a
-                  row that was merely very wrong. So the library clips the
-                  probability away from both ends before taking the logarithm,
-                  by one machine epsilon, and the price stops growing at the
+                  row that was merely very wrong. So the probability is clipped
+                  away from both ends before the logarithm is taken, by one
+                  machine epsilon, and the price stops growing at the
                   negative logarithm of that, which is 36.0437.
                 </p>
                 <InAModel title="Measured on one row">
@@ -531,8 +531,8 @@ export default function LossFunctionsPage() {
                   Tick the box that adds a hundred to every score and nothing
                   changes, the same probabilities, the same price, the same
                   pulls to the last digit. The softmax only ever reads the
-                  differences between the scores, which is why the library
-                  subtracts the row maximum before raising e to anything;
+                  differences between the scores, which is why the row maximum
+                  is subtracted before e is raised to anything;
                   written literally, e to the hundred-and-three overflows
                   nothing but e to a thousand does.
                 </p>
@@ -621,7 +621,7 @@ export default function LossFunctionsPage() {
                   appears, a sigmoid output scored by squared error, which is
                   the pairing a reader might reach for first, since it is a
                   probability compared to a label by the loss that has been on
-                  every page. The library computes it through a one-neuron
+                  every page. It is computed here through a one-neuron
                   layer that bends by the sigmoid, so the number is measured
                   rather than argued. At the halfway guess it costs 0.125 and
                   pulls by −0.125, a quarter of what cross-entropy pulls.
@@ -972,40 +972,40 @@ export default function LossFunctionsPage() {
 
               <SubSection title="24. The edges, probed">
                 <p>
-                  Each row below was tried against the library rather than
-                  reasoned about, and the page&rsquo;s own endpoints refuse at
-                  the door the cases the library lets through.
+                  Each row below was tried rather than reasoned about, and the
+                  page&rsquo;s own request refuses at the door the cases the
+                  arithmetic lets through.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"
                   reasonHeading="the behaviour"
                   rows={[
-                    { expression: "an empty batch", reason: "the library's own docstring promises a refusal, and the code divides by zero rows and answers not-a-number with a warning; recorded rather than repaired, and the API refuses it before the library is asked." },
+                    { expression: "an empty batch", reason: "the documented contract promises a refusal, and the arithmetic divides by zero rows and answers not-a-number with a warning; recorded rather than repaired, and the request refuses it at the door before the batch is ever measured." },
                     { expression: "one row", reason: "accepted; the division is by one and the batch value is the row's own price, 32 for a miss of eight under squared error." },
                     { expression: "outputs and truths of different shapes", reason: "refused by name, since the two blocks describe the same rows." },
                     { expression: "a not-a-number in the outputs", reason: "passes through; the value and the gradient are not-a-number and nothing is raised. The layers check finiteness on the way in; the losses do not." },
                     { expression: "an infinite output", reason: "squared error answers infinity; cross-entropy saturates to its 36.04 ceiling with a gradient of exactly one, since the stable sigmoid handles the overflow." },
                     { expression: "a Huber knee of zero, negative, or not finite", reason: "refused at construction; at zero it is absolute error with an extra branch and below zero it is nothing at all." },
-                    { expression: "absolute error at an exact tie", reason: "accepted, gradient zero; no slope exists and the library commits to the branch that pulls nowhere." },
+                    { expression: "absolute error at an exact tie", reason: "accepted, gradient zero; no slope exists and the branch taken is the one that pulls nowhere." },
                     { expression: "Huber exactly at the knee", reason: "both pieces answer a price of 0.5 at a knee of one and a slope of one, to the last bit on one side and to one part in a trillion on the other." },
-                    { expression: "a label of one half", reason: "accepted by the library, which reads it as a soft label; at the halfway guess it costs the logarithm of two and pulls nowhere. The API refuses anything but zero and one." },
-                    { expression: "a label of two", reason: "accepted by the library and nonsense, a pull of minus 1.5 at the halfway guess; the API refuses it." },
-                    { expression: "a class index beyond the row", reason: "the one-hot builder raises a bare index error the library never typed; the API refuses it with the width named." },
-                    { expression: "a negative class index", reason: "wraps silently to the last column, since that is what a negative index does to a numpy block; the API refuses it." },
+                    { expression: "a label of one half", reason: "accepted, and read as a soft label; at the halfway guess it costs the logarithm of two and pulls nowhere. The request refuses anything but zero and one." },
+                    { expression: "a label of two", reason: "accepted, and nonsense, a pull of minus 1.5 at the halfway guess; the request refuses it." },
+                    { expression: "a class index beyond the row", reason: "the one-hot builder raises a bare index error, written for an interpreter rather than for a reader; the request refuses it with the width named." },
+                    { expression: "a negative class index", reason: "wraps silently to the last column, since that is what a negative index does to a numpy block; the request refuses it." },
                     { expression: "a softmax row of one class", reason: "accepted; the probability is always one, the price always zero, and nothing is learned." },
-                    { expression: "every height the same, in the descent", reason: "refused by the line fit in the library's own words, feature values must not be constant, before the standardising would divide by a spread of zero." },
+                    { expression: "every height the same, in the descent", reason: "refused by the line fit before the standardising could divide by a spread of zero, because a column carrying no variation has nothing to divide by." },
                     { expression: "unfitted use, or mismatched feature names", reason: "not applicable; a loss holds no fitted state and reads no names, only two blocks of the same shape." },
                   ]}
                 />
                 <p>
                   The empty batch is the one worth dwelling on, because it is
-                  the case where the library&rsquo;s documentation and its
+                  the case where the documented contract and the actual
                   behaviour disagree. The contract says an empty block is
                   refused, and the arithmetic divides a sum of nothing by zero
                   rows, which numpy answers with not-a-number and a warning
                   rather than an exception. It is documented here rather than
-                  defended, the API refuses the case at the door, and nothing
-                  in the library was changed to serve this page.
+                  defended, the request refuses the case at the door, and
+                  nothing behind this page was changed to serve it.
                 </p>
               </SubSection>
             </>

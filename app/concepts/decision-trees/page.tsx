@@ -481,8 +481,9 @@ export default function DecisionTreesPage() {
                   different trees with identical immediate gain, and the
                   multiclass and ensemble pages both met cases where two
                   implementations broke a tie differently and grew apart from
-                  there. This library keeps the first candidate scanned, with a
-                  small tolerance so that two gains reached by different
+                  there. Every tree on this page keeps the first candidate
+                  scanned, with a small tolerance so that two gains reached by
+                  different
                   arithmetic and differing in the last bits count as a tie.
                 </p>
               </SubSection>
@@ -671,9 +672,9 @@ export default function DecisionTreesPage() {
                 </p>
                 <InAModel>
                   <p>
-                    This library grows under the controls of section 24 and
-                    does not yet prune, so the pruning sequence is described
-                    here rather than drawn. It sits on the roadmap beside the
+                    Every tree on this page grows under the controls of section
+                    24 and none of them prunes, so the pruning sequence is
+                    described here rather than drawn. It sits on the roadmap beside the
                     ensembles, which are the other answer to the same problem.
                   </p>
                 </InAModel>
@@ -844,8 +845,8 @@ export default function DecisionTreesPage() {
                   partitioned natively. Missing values may be imputed, sent a
                   learned default direction, routed by a surrogate question, or
                   given a branch of their own. How a tree handles them is a
-                  decision an implementation has to make explicitly, and this
-                  library&rsquo;s trees take finite numeric columns only.
+                  decision an implementation has to make explicitly, and the
+                  trees here take finite numeric columns only.
                 </p>
               </SubSection>
             </>
@@ -978,8 +979,8 @@ export default function DecisionTreesPage() {
               <p>
                 The comparison convention is the one people forget. An
                 observation exactly equal to a threshold has to go the same
-                way every time, in growth and in prediction, and this library
-                sends strictly-less-than to the left and everything else to the
+                way every time, in growth and in prediction, and here
+                strictly-less-than goes to the left and everything else to the
                 right, through the one routing rule both the walk in section 3
                 and the bulk prediction call. It also refuses the empty and
                 non-finite cases by name rather than growing a tree on nothing.

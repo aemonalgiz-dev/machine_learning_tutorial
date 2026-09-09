@@ -605,9 +605,8 @@ export default function GradientBoostingPage() {
                   just fitted and the leftover still shrinks, though by
                   reflection rather than approach; past two the leftover
                   grows every round and the fit runs away, which is the
-                  calculus primer&rsquo;s runaway in prediction space. The
-                  library will not construct a committee with a rate above
-                  one at all, so the playground slider hands you its refusal
+                  calculus primer&rsquo;s runaway in prediction space. No
+                  committee is built with a rate above one at all, so the playground slider hands you its refusal
                   in words when you cross that mark rather than a diverging
                   curve. The primer&rsquo;s descent slider is where the
                   runaway itself can be watched.
@@ -795,8 +794,8 @@ export default function GradientBoostingPage() {
                   0.8761, and the boosted stumps can report only the second.
                 </p>
                 <p>
-                  The library builds the plain form of the method and not
-                  the stochastic one, where each round is fitted on a random
+                  Every committee on this page is the plain form of the method
+                  and not the stochastic one, where each round is fitted on a random
                   fraction of the rows and the rest can judge it, so there
                   is no out-of-bag estimate to show here, and the page says
                   so rather than inventing one.
@@ -824,9 +823,8 @@ export default function GradientBoostingPage() {
                 <KeepInMind>
                   More rounds is cheap to try, since a committee of k rounds
                   is the first k members of a longer one and the whole curve
-                  comes from one fit. The API draws every curve on this page
-                  that way, fitting once at 300 rounds and scoring each
-                  prefix.
+                  comes from one fit. Every curve on this page is drawn that
+                  way, fitting once at 300 rounds and scoring each prefix.
                 </KeepInMind>
               </SubSection>
             </>
@@ -931,8 +929,8 @@ export default function GradientBoostingPage() {
                   stagewise additive fitting under the exponential loss, and
                   seen from the gradient view the reweighting is what that
                   loss&rsquo;s negative gradient looks like when the members
-                  are classifiers. The library&rsquo;s AdaBoost is a
-                  classifier and the throw is a regression, so there is no
+                  are classifiers. AdaBoost here is a classifier and the throw
+                  is a regression, so there is no
                   side-by-side fit to show on this page, and the contrast is
                   stated rather than measured.
                 </p>
@@ -987,24 +985,24 @@ export default function GradientBoostingPage() {
 
               <SubSection title="26. The edges, probed">
                 <p>
-                  Every row below was tried against the library and, where
-                  the API&rsquo;s door lets it through, against the API. Some
-                  are refused, some are accepted with an answer worth
-                  knowing, and some are accepted and documented rather than
-                  defended.
+                  Every row below was tried on the model itself and, where
+                  this page&rsquo;s door lets it through, through the page as
+                  well. Some are refused, some are accepted with an answer
+                  worth knowing, and some are accepted and documented rather
+                  than defended.
                 </p>
                 <DerivationTable
                   expressionHeading="the edge"
                   reasonHeading="the behaviour"
                   rows={[
                     { expression: "no features, or an empty column", reason: "refused by name before any round runs, by the guard every model here shares." },
-                    { expression: "a single reading", reason: "accepted by the library. The mean is the reading, every member is one leaf, the committee answers that height everywhere, and asking for R² is refused because a single height has no spread to explain. The API's door refuses it a layer earlier, at two readings." },
+                    { expression: "a single reading", reason: "accepted. The mean is the reading, every member is one leaf, the committee answers that height everywhere, and asking for R² is refused because a single height has no spread to explain. This page's door refuses it a layer earlier, at two readings." },
                     { expression: "two readings", reason: "accepted. At a rate of one the first stump reproduces both exactly and R² is 1.0 after one round." },
-                    { expression: "every height the same", reason: "accepted as a fit, the committee predicts that height and every member is a single leaf; scoring it is refused, since R² is undefined with nothing to explain. The API returns that refusal in the library's words." },
+                    { expression: "every height the same", reason: "accepted as a fit, the committee predicts that height and every member is a single leaf; scoring it is refused, since R² is undefined with nothing to explain. That refusal reaches the page unchanged, in the words it was raised in." },
                     { expression: "every time the same", reason: "accepted. No question can separate the readings, every member is a single leaf answering zero, the committee predicts the mean height and R² is exactly 0.0." },
                     { expression: "two readings at one time with different heights", reason: "accepted, and the pair share their mean for ever. Forty rounds on heights of 4 and 8 at two seconds predict 6.0 for both and leave R² at 0.8." },
-                    { expression: "a non-finite height or time", reason: "refused by the library as not finite. The API's door refuses it first, since a non-finite number fails its magnitude bound." },
-                    { expression: "a learning rate above 1, or of 0", reason: "refused when the committee is constructed, before any data is seen. That refusal is a construction error rather than a library error, which is why the API refuses a rate past 1 in its own words rather than handing it on." },
+                    { expression: "a non-finite height or time", reason: "refused as not finite. This page's door refuses it first, since a non-finite number fails its magnitude bound." },
+                    { expression: "a learning rate above 1, or of 0", reason: "refused when the committee is constructed, before any data is seen. That refusal comes from construction rather than from reading data, which is why a rate past 1 is refused in this page's own words rather than handed on." },
                     { expression: "zero rounds, or a depth of 0", reason: "refused at construction for the same reason." },
                     { expression: "a leaf minimum larger than the reading count", reason: "accepted, and documented rather than defended. Every member becomes a single leaf answering zero, the committee is the flat mean and R² is 0.0, with nothing raised." },
                     { expression: "more rounds than the door allows", reason: "refused at the door, at 300 for a fit and at 60 for the stepper, which lays every round out and is about the early ones." },
@@ -1017,13 +1015,13 @@ export default function GradientBoostingPage() {
                 <p>
                   Two of those deserve the extra sentence. The leaf-minimum
                   row is the case where a model fits, predicts and scores
-                  without ever having learned anything, and nothing in the
-                  library or the API says so, since a flat mean is a legal
-                  answer; that one is on the reader to notice. And the
+                  without ever having learned anything, and nothing anywhere
+                  says so, since a flat mean is a legal answer; that one is
+                  on the reader to notice. And the
                   learning rate&rsquo;s bound is enforced by the constructor
                   rather than by a data check, which is the right place for
                   a setting whose failure does not depend on the data, and
-                  it means the refusal is not one the API can translate,
+                  it means the refusal is not one this page can translate,
                   only anticipate.
                 </p>
               </SubSection>

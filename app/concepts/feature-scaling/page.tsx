@@ -452,7 +452,7 @@ export default function FeatureScalingPage() {
                 <p>
                   A quarter of the way along a sorted list is rarely a whole
                   position, so a rule is needed for what the first quartile of
-                  eleven values means. The rule this library follows, and most
+                  eleven values means. The rule followed here, and by most
                   others, reads the quartiles at a quarter, a half and three
                   quarters of the last index, interpolating between two
                   neighbours when the position is not whole. Five values have
@@ -641,8 +641,8 @@ export default function FeatureScalingPage() {
                   rules follow, and they differ from the rule a model&rsquo;s
                   predict follows. A scaler fitted on height and weight will
                   transform height alone, since scaling one column of a
-                  held-out set is a legitimate thing to want, and the library
-                  answered a one-column request with one column. It refuses a
+                  held-out set is a legitimate thing to want, and measured, a
+                  one-column request came back with one column. It refuses a
                   column called age that it never saw, because a column the fit
                   never saw has no centre and no spread, and inventing one
                   would answer a question nobody asked.

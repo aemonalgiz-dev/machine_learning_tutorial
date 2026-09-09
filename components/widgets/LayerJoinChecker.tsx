@@ -179,7 +179,7 @@ export function LayerJoinChecker() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         No row was sent. The verdict came from the four widths alone, and a
-        red sentence is the library&rsquo;s own refusal, word for word.
+        red sentence is the refusal itself, word for word.
       </p>
 
       <div className="mt-3 grid grid-cols-2 gap-3">

@@ -64,7 +64,7 @@ function BarRow({
       {refusal ? (
         <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-amber-600 dark:bg-slate-950 dark:text-amber-400">
           No column&rsquo;s scramble lowered the score, so there are no shares
-          to report, and the library&rsquo;s own words are &ldquo;{refusal}&rdquo;.
+          to report, and the refusal reads &ldquo;{refusal}&rdquo;.
         </p>
       ) : (
         <svg

@@ -563,7 +563,7 @@ export default function NormalisationLayersPage() {
                   which here is the arriving slope times the outputs, summed.
                   The widget does that for every cell of the whole-number four
                   under a slope that counts up from one across the block, and
-                  puts the library&rsquo;s passed-down block, the naive block
+                  puts the passed-down block, the naive block
                   and the finite difference side by side.
                 </p>
                 <BackwardCheck initialLayer="batch" initialBlock={0} />
@@ -599,7 +599,7 @@ export default function NormalisationLayersPage() {
                   train, with plausible magnitudes and a falling loss, on a
                   gradient that is not the gradient of the loss for every
                   layer beneath. That is why the check has to be on the block
-                  passed down, and why the library&rsquo;s own spec runs the
+                  passed down, and why the tests behind this page run the
                   finite difference rather than trusting the derivation.
                 </p>
                 <KeepInMind>
@@ -688,7 +688,7 @@ export default function NormalisationLayersPage() {
                   a person&rsquo;s height and weight. Twenty of the crowd go
                   in and twenty rows of 1.0000 and −1.0000 come out, every
                   person&rsquo;s height being the larger number, and the
-                  library&rsquo;s slope through it is zero in every cell, so a
+                  slope through it is zero in every cell, so a
                   network below could not learn anything either.
                 </p>
                 <RowAxisDemo />
@@ -822,7 +822,7 @@ export default function NormalisationLayersPage() {
                   report. And there is a structural check here too. Scaling a
                   stored direction by any positive constant leaves every answer
                   unchanged, so the loss is flat along the direction itself and
-                  the slope can have no part along it. The library&rsquo;s
+                  the slope can have no part along it. The projected
                   direction slope dotted with the direction is 8.9e−16, and
                   the unprojected form&rsquo;s is 3.6914.
                 </p>
@@ -1026,7 +1026,7 @@ export default function NormalisationLayersPage() {
 
               <SubSection title="26. The edges, each one probed">
                 <p>
-                  Every row below was run against the library, and the
+                  Every row below was run rather than reasoned about, and the
                   behaviours fall into three kinds, refused with a typed error,
                   accepted with an answer that follows from the arithmetic, and
                   accepted with an answer worth knowing about.
@@ -1053,7 +1053,7 @@ export default function NormalisationLayersPage() {
                     { expression: "a direction of all zeros, for weight normalisation", reason: "refused at construction, and a step that lands a direction exactly on zero is refused the same way, since both slopes divide by its length." },
                     { expression: "a negative magnitude", reason: "accepted; the neuron faces the other way, which is a direction and not an error." },
                     { expression: "a batch layer of the wrong width in a stack", reason: "refused when the stack is built, before any row is read." },
-                    { expression: "a ragged block sent to the API", reason: "refused in words, naming the row whose width differs." },
+                    { expression: "a ragged block in a request", reason: "refused in words, naming the row whose width differs." },
                   ]}
                 />
                 <p>

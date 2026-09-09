@@ -51,8 +51,8 @@ export function LossStart() {
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="the loss, the height of the curve" value={show(loss)} colour={INDIGO} />
         <Stat label="the slope of the loss, ŷ − y" value={show(slope)} colour={AMBER} />
-        <Stat label="worked example loss, from the API" value={step ? show(step.loss_before) : "…"} colour={INDIGO} />
-        <Stat label="worked example slope, from the API" value={step ? show(step.loss_gradient) : "…"} colour={AMBER} />
+        <Stat label="worked example loss, measured" value={step ? show(step.loss_before) : "…"} colour={INDIGO} />
+        <Stat label="worked example slope, measured" value={step ? show(step.loss_gradient) : "…"} colour={AMBER} />
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         At a prediction of 5 the loss is 8 and its slope is 4. The 8 is how wrong the network is; the 4 is how fast that wrongness changes if the prediction moves, and it is the 4 that travels backward, not the 8.

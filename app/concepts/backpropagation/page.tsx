@@ -493,7 +493,7 @@ export default function BackpropagationPage() {
                   parameters have parameter gradients. Dense and
                   convolutional layers return both. Flattening, pooling and
                   dropout return an input gradient and no parameter gradient,
-                  and the library says so with None rather than a block of
+                  and they say so with None rather than a block of
                   zeros.
                 </p>
                 <p>

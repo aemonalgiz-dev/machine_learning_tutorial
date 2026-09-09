@@ -225,8 +225,8 @@ export default function RandomForestsPage() {
                   With one feature offered per split, half the draws offer
                   weight alone, and at those nodes the tree settles for the
                   weaker question with the stronger one sitting hidden on
-                  the board. The library does not keep a record of the draws
-                  it made inside a grown tree, so the draws above replay the
+                  the board. The draws made inside a grown tree are not
+                  recorded anywhere, so the draws above replay the
                   rule from a seeded generator rather than recount a
                   particular tree. What they show is the rule itself.
                 </p>
@@ -1020,8 +1020,8 @@ export default function RandomForestsPage() {
                   ]}
                 />
                 <p>
-                  Several of those are the library&rsquo;s own answers on
-                  this crowd. A single-class target is refused with a named
+                  Several of those were measured on this crowd. A
+                  single-class target is refused with a named
                   error, max_features of zero is refused when the forest is
                   constructed, and asking for three features of two is
                   accepted and offers both, which is the bagging column of

@@ -257,9 +257,9 @@ export default function KernelRidgePage() {
                     right answer to compare a kernel fit against, so a bug
                     that produced a plausible curve would go unseen. Under
                     the linear kernel there is one, and it is ridge exactly.
-                    Section 17 shows the bug that this control found in the
-                    library, which came within two percent of the right slope
-                    and was wrong for a reason.
+                    Section 17 shows the bug that this control found, which
+                    came within two percent of the right slope and was wrong
+                    for a reason.
                   </p>
                 </InAModel>
               </SubSection>
@@ -454,7 +454,7 @@ export default function KernelRidgePage() {
                   degree one is not the linear kernel, because the plus one
                   adds a constant to every entry of the Gram matrix and a
                   constant entry is a feature that is always one. I measured
-                  it and found the two fits identical on this library. On the
+                  it and found the two fits identical here. On the
                   throw at a penalty of one the two curves part by 2.0e−14,
                   and on the three people by 3.9e−12, which is the arithmetic
                   of a solve and not a difference of model.
@@ -647,7 +647,7 @@ export default function KernelRidgePage() {
                   The penalty is not optional here in the way it is optional
                   for least squares. At zero the radial solve is numerically
                   hopeless and the fit passes through every training row,
-                  and the library refuses a zero penalty at construction
+                  and a zero penalty is refused at construction
                   rather than at the solve.
                 </KeepInMind>
               </SubSection>
@@ -690,7 +690,7 @@ export default function KernelRidgePage() {
                 <p>
                   The derivation in section 2 holds on centred data. Both
                   the target and the rows have to have their means removed,
-                  and when this model was first built in the library only
+                  and when this model was first built here only
                   the target was. The result is the most instructive kind of
                   bug, a fit that still ran, still drew a plausible line and
                   agreed with ridge to within two percent, 4.2841 against
@@ -732,8 +732,8 @@ export default function KernelRidgePage() {
                   claim about time, so it was timed. Both fits run on drawn
                   data, first with the rows doubling at two features and then
                   with the features doubling at two hundred rows, each timing
-                  the median of five runs through the library&rsquo;s own
-                  fit, boundary checks included.
+                  the median of five runs through the whole fit,
+                  boundary checks included.
                 </p>
                 <CostChart />
                 <p>
@@ -859,8 +859,8 @@ export default function KernelRidgePage() {
                   On the throws at gamma 1 and a constant of −0.5 the
                   smallest eigenvalue of the Gram matrix is −4.313. At every
                   penalty up to 4.3 the sum with the smallest eigenvalue is
-                  negative and the fit is refused in the library&rsquo;s
-                  words. At 4.4 the sum is positive, the factorisation goes
+                  negative and the fit is refused, in a message naming
+                  Mercer&rsquo;s condition. At 4.4 the sum is positive, the factorisation goes
                   through, and the fit is accepted with a score of −228,
                   which is a curve far worse than answering the mean; at 5
                   it scores −4.49, at 10 −0.069, and at 100 it is 0.006, the
@@ -890,9 +890,9 @@ export default function KernelRidgePage() {
                 </p>
                 <Equation>{"λ = 0:  K a = y_centred has no unique a when K is singular"}</Equation>
                 <p>
-                  The library refuses a penalty of zero when the model is
-                  constructed, before any data is seen, and so does this
-                  page&rsquo;s API a layer earlier. The sweep in section 15
+                  A penalty of zero is refused when the model is
+                  constructed, before any data is seen, and this page
+                  refuses it a layer earlier still. The sweep in section 15
                   stops at a billionth for the same reason, since that is
                   where the solve still completes and the condition number
                   is already 6.2e8.
@@ -926,7 +926,7 @@ export default function KernelRidgePage() {
                   penalty it will accept.
                 </p>
                 <p>
-                  This library centres both, adds the penalty everywhere,
+                  The model here centres both, adds the penalty everywhere,
                   solves by Cholesky, keeps the rows, matches features by
                   name, exposes the dual weights and the training rows as
                   copies, and refuses a penalty that is not positive at
@@ -940,18 +940,18 @@ export default function KernelRidgePage() {
                   expressionHeading="the edge"
                   reasonHeading="the behaviour"
                   rows={[
-                    { expression: "empty data, or a missing or non-finite value", reason: "refused at the boundary, in the same words every feature here is refused with; the page's API refuses fewer than two points a layer earlier." },
-                    { expression: "one row", reason: "accepted by the library; the centred row is zero, its dual weight is zero, and every prediction is the one target value. The API refuses it before the fit." },
+                    { expression: "empty data, or a missing or non-finite value", reason: "refused at the boundary, in the same words every feature here is refused with; this page refuses fewer than two points a layer earlier." },
+                    { expression: "one row", reason: "accepted by the model; the centred row is zero, its dual weight is zero, and every prediction is the one target value. The page refuses it a layer earlier, before the fit." },
                     { expression: "two rows", reason: "accepted; on the first two throws the radial fit scores 0.144 with weights of ±2.082." },
-                    { expression: "a constant column", reason: "accepted by the kernel model, whose Gram matrix is all zeros so the weights are the centred targets over the penalty and every prediction is the mean; the page's API refuses it, because the ridge control fitted beside it refuses a zero-variance column." },
+                    { expression: "a constant column", reason: "accepted by the kernel model, whose Gram matrix is all zeros so the weights are the centred targets over the penalty and every prediction is the mean; this page refuses it, because the ridge control fitted beside it refuses a zero-variance column." },
                     { expression: "a constant target", reason: "fits, with every dual weight exactly zero and every prediction the constant; the score is refused as undefined, since R² divides by the target's variance." },
                     { expression: "two rows at the same input", reason: "accepted; the Gram matrix has two equal rows and a zero eigenvalue at 2.4e−17, and the penalty makes the system solvable." },
                     { expression: "a penalty of zero or below, a gamma of zero, a negative polynomial constant", reason: "refused at construction, by the model's own field bounds, before any data is seen." },
                     { expression: "a sigmoid kernel whose Gram matrix is indefinite", reason: "refused at the solve, when the Cholesky factorisation meets a non-positive pivot, with a message naming Mercer's condition; a penalty larger than the negative eigenvalue lets it through, documented in section 22." },
                     { expression: "a polynomial kernel overflowing on large raw inputs", reason: "at inputs near 1e5 and degree 6 the table loses positive definiteness to rounding and is refused with the Mercer message, which names the wrong cause; only at absurd magnitudes does the non-finite guard fire and name overflow. Documented rather than defended." },
-                    { expression: "unfitted use", reason: "reading the dual weights, the training rows or a prediction before fit raises the library's not-fitted error." },
+                    { expression: "unfitted use", reason: "reading the dual weights, the training rows or a prediction before fit is refused as not fitted, in a sentence rather than as an attribute error." },
                     { expression: "a query with a feature missing, renamed or added", reason: "refused; prediction demands exactly the fitted feature names, in any order." },
-                    { expression: "more than a hundred points, or a curve range that runs backward", reason: "refused by the page's API with the limit named, before the library is called." },
+                    { expression: "more than a hundred points, or a curve range that runs backward", reason: "refused with the limit named, a layer before any fit." },
                   ]}
                 />
                 <p>

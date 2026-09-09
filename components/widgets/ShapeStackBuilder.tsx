@@ -368,7 +368,7 @@ export function ShapeStackBuilder() {
               </>
             ) : (
               <>
-                The stack is refused. The library&rsquo;s words are{" "}
+                The stack is refused. The refusal reads{" "}
                 <span className="font-mono">{current.refusal}</span>
               </>
             )}
@@ -378,7 +378,7 @@ export function ShapeStackBuilder() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         A green seam is a layer reading exactly what the layer beneath answers.
-        A red one carries the library&rsquo;s refusal. No row was sent.
+        A red one carries the refusal it drew. No row was sent.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">
@@ -448,7 +448,7 @@ function Seam({
         )}
         {verdict === "fails" && !join?.message && (
           <span className="mt-0.5">
-            fails too, but the library stops at the first seam that does
+            fails too, but the check stops at the first seam that does
           </span>
         )}
         {verdict === "unsettled" && join !== undefined && (

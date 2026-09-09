@@ -978,7 +978,7 @@ export default function KernelPcaPage() {
 
               <SubSection title="24. The edges, each one probed">
                 <p>
-                  Every row below was run against the library through this
+                  Every row below was run through this
                   page&rsquo;s own endpoints, and the behaviour recorded is
                   what came back rather than what the documentation
                   promises. Where a number appears it was read from the
@@ -998,7 +998,7 @@ export default function KernelPcaPage() {
                     { expression: "four directions asked of four people on a plane", reason: "accepted, and two come back; the other two eigenvalues are the zeros centring and a plane leave behind, and asking past the rank is answered with what exists rather than refused." },
                     { expression: "twelve directions asked of the twelve on the arc", reason: "accepted, and eleven come back, one fewer than the people, because centring removes one." },
                     { expression: "zero directions, a gamma of zero, or a negative polynomial constant", reason: "refused at construction, before any data is seen; at a gamma of zero every pair scores one and there is nothing to fit." },
-                    { expression: "transform before fit", reason: "refused with the library's own not-fitted message." },
+                    { expression: "transform before fit", reason: "refused as not fitted, in a sentence rather than as an attribute error." },
                     { expression: "transform with a feature missing, or under another name", reason: "refused; a kernel pairs rows over exactly the fitted features. The same features in another order are matched by name and accepted, and the coordinates agree to 0.0." },
                     { expression: "a polynomial kernel of degree 200 on raw units", reason: "the powers overflow and the table is refused for holding a non-finite value, naming unscaled features as the usual cause; the endpoints fix the degree at two." },
                     { expression: "a sigmoid kernel that is not a kernel", reason: "accepted, and quietly. On the arc at a gamma of 0.0001 the centred table has five negative eigenvalues, the most negative at −0.0365 against a largest of 0.0140, and the fit clamps them to zero and reports a first share of 0.9989. Documented rather than defended." },
