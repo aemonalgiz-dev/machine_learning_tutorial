@@ -11,8 +11,9 @@ when their ideas become useful.
 
 ## Why it is a separate repository
 
-The library, API and website are separate repositories. The site calls the API
-and never imports the Python library. It is nested inside the library's project
+The library, API and website are separate repositories. Visual playgrounds call
+the API; coding challenges run Python locally in the reader's browser. The
+website is nested inside the library's project
 folder for convenience, with its own Git history and remote.
 
 ## Stack
@@ -91,11 +92,63 @@ supervised fine-tuning, LoRA, reinforcement learning, RAG, and evaluation.
 `ModernLearningExample` uses the typed controls in `lib/concepts/modern-learning.ts`
 to call `/concepts/modern/<slug>`. It renders labeled calculation tables and
 handles loading, stale responses, API errors, retries, and empty retrieval.
-The API calls `oop_ml.numpy.modern`; the website performs no model arithmetic.
+The playground API calls `oop_ml.numpy.modern`; the interface displays its results.
 These examples expose individual operations, a small scalar GAN, and a
 one-state policy that learns from sampled actions and rewards. The reinforcement
 lesson also explains delayed returns, RLHF, and the relationship to LoRA.
 The examples do not train full language or image-generation systems.
+
+## Coding challenges
+
+Every lesson and primer has a practice section with a stated challenge, an
+editable Python workspace, hints, and a worked solution. The section controls
+also provide a direct coding jump. CodeMirror provides editing, indentation,
+line numbers and keyboard shortcuts. Drafts and previous passing results are stored
+in localStorage, with storage failures handled without disabling the editor.
+
+The three mathematics primers use direct NumPy calculations: readers build
+statistics from deviations, matrix operations from weighted sums, and gradient
+updates from derivatives. Use oop_ml when applying an already explained model
+is the objective. Do not hide the operation being taught behind SDK properties
+or a fit call. Local installation instructions follow each exercise's needs.
+
+Run code executes the program. Run tests executes it in a fresh namespace and
+then runs Python assertions for successful execution, the number of result
+lines, and each expected line's text and numerical values. Whitespace and
+rounding at the displayed precision are accepted. These are output tests,
+not source-code checks or proof against hard-coded answers. Results show
+passed and failed counters, skipped counts when applicable, and individual
+assertions with expected/actual values.
+Reading a solution does not mark its tests as passed. The existing local course
+progress is preserved. Exercises do not use accounts, rewards or locked steps.
+
+Python runs in a dedicated [Pyodide worker](https://pyodide.org/en/stable/usage/webworker.html).
+The engine is pinned to 314.0.7. It loads only on Run, downloads NumPy, and
+loads the SDK, SciPy and Pydantic only for scripts importing oop_ml. The first
+run needs network access to the pinned Pyodide package CDN. User code is never
+sent to the compute API. Stop terminates the worker; loading times out after
+three minutes, execution after one minute, and each output stream is limited
+to 20,000 characters. Variables reset between runs. Python modules and its
+temporary filesystem remain in the worker until it is stopped or the reader
+leaves the coding section. This is a learning workspace, not a hostile-code
+security boundary inside the reader's browser.
+
+`npm run prepare:python` runs before dev/build. It copies the pinned runtime
+from node_modules and packages the SDK's core and NumPy Python sources plus
+its MIT license. Those source files are intentionally public website assets.
+Optional PyTorch/scikit backends, API files, tests, local data, and Git metadata
+are excluded. The archive has a SHA-256 manifest checked before importing.
+A website-only checkout or Docker build uses the checked-in SDK archive;
+set `OOP_ML_SOURCE` to refresh it from another SDK checkout.
+
+`npm run test:practice` runs all reference solutions in the same WebAssembly
+Python engine and checks every assertion. A small number of unstable fits,
+solver sign choices, and platform representations differ from the original
+desktop outputs. `lib/practice-fixtures.json` records measured browser results
+for these exercises, keyed by a signature of the starter and solution. To
+update them after a deliberate SDK/runtime change, run `npm run record:practice`,
+review the generated output changes, and then run `npm run test:practice`.
+Never record a failing Python program as a reference output.
 
 ## Validation
 
@@ -103,6 +156,10 @@ The examples do not train full language or image-generation systems.
 npm run lint
 npx tsc --noEmit
 npm run build
+npm run test:runner
+npm run test:practice
+npx playwright install chromium
+npm run test:browser
 ```
 
 For navigation changes, also check a technical jump, a pasted section URL and

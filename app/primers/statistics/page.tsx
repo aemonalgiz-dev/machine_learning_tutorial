@@ -1231,38 +1231,56 @@ export default function StatisticsPrimerPage() {
       />
 
       <PrimerPractice
-        title="Practice. Summarising the Five People With the Library"
+        id="practice-summarising-the-five-people-with-the-library"
+        title="Practice. Calculating the Five People's Statistics With NumPy"
         exercises={[
           exercise(
             "Take one column apart around its mean",
-            ["Build a Feature for each column and read its column object, which owns the arithmetic of sections 3 to 7. Print the deviations, their total, the sum of squared deviations, the variance and the standard deviation, for height and then for weight.", "Sections 3 to 7 arrived at 170, 250, 50 and 7.07 for height. Weight should come out at 68, 176, 35.2 and 5.93, which are the figures sections 7 and 9 use, and both deviation totals should be exactly zero."],
-            `from oop_ml import Feature
+            [
+              "We have five heights and five weights. A mean gives us a centre, but it does not tell us how far each person sits from it. Work through the same steps as sections 3 to 7 using the two NumPy arrays below.",
+              "For each column, add the values and divide by the count to find the mean. Subtract that mean from every value, square the deviations, and add those squares. Divide by the count for the population variance, then take its square root for the standard deviation. Here the five people are the whole group we are describing.",
+              "Replace the missing calculations. The print statements are supplied so you can concentrate on where the numbers come from. Use array arithmetic, np.sum and np.sqrt here, rather than np.mean, np.var or np.std. Both deviation totals should be zero, even though the spreads are different.",
+            ],
+            `import numpy as np
 
-people = [
-    Feature("height", [160, 165, 170, 175, 180]),
-    Feature("weight", [58, 66, 68, 74, 74]),
-]
+people = {
+    "height": np.array([160, 165, 170, 175, 180], dtype=float),
+    "weight": np.array([58, 66, 68, 74, 74], dtype=float),
+}
 
-for feature in people:
-    column = feature.column
-    print(feature.name)
-    # Print the deviations, the mean and the deviation total, the sum of
-    # squared deviations, the variance and the standard deviation.`,
-            `from oop_ml import Feature
+for name, values in people.items():
+    mean = None  # TODO: total divided by count
+    deviations = None  # TODO: each value's distance from the mean
+    squared_total = None  # TODO: square first, then add
+    variance = None  # TODO: population variance
+    standard_deviation = None  # TODO: back to the original units
 
-people = [
-    Feature("height", [160, 165, 170, 175, 180]),
-    Feature("weight", [58, 66, 68, 74, 74]),
-]
+    print(name)
+    print("  deviations " + " ".join(f"{value:.0f}" for value in deviations))
+    print(f"  mean {mean:.1f}, deviation total {np.sum(deviations):.1f}")
+    print(f"  sum of squared deviations {squared_total:.1f}")
+    print(f"  variance {variance:.1f}")
+    print(f"  standard deviation {standard_deviation:.2f}")`,
+            `import numpy as np
 
-for feature in people:
-    column = feature.column
-    print(feature.name)
-    print("  deviations " + " ".join(f"{deviation:.0f}" for deviation in column.deviations))
-    print(f"  mean {column.mean:.1f}, deviation total {sum(column.deviations):.1f}")
-    print(f"  sum of squared deviations {column.sum_of_squared_deviations:.1f}")
-    print(f"  variance {column.sum_of_squared_deviations / column.n_samples:.1f}")
-    print(f"  standard deviation {column.standard_deviation:.2f}")`,
+people = {
+    "height": np.array([160, 165, 170, 175, 180], dtype=float),
+    "weight": np.array([58, 66, 68, 74, 74], dtype=float),
+}
+
+for name, values in people.items():
+    mean = np.sum(values) / values.size
+    deviations = values - mean
+    squared_total = np.sum(deviations ** 2)
+    variance = squared_total / values.size
+    standard_deviation = np.sqrt(variance)
+
+    print(name)
+    print("  deviations " + " ".join(f"{value:.0f}" for value in deviations))
+    print(f"  mean {mean:.1f}, deviation total {np.sum(deviations):.1f}")
+    print(f"  sum of squared deviations {squared_total:.1f}")
+    print(f"  variance {variance:.1f}")
+    print(f"  standard deviation {standard_deviation:.2f}")`,
             `height
   deviations -10 -5 0 5 10
   mean 170.0, deviation total 0.0
@@ -1275,117 +1293,230 @@ weight
   sum of squared deviations 176.0
   variance 35.2
   standard deviation 5.93`,
-            { hints: ["A Feature carries a validated column behind it, reached through its column property, and that column is where the mean and the deviations live.", "The column’s properties are named for what they are, mean, deviations, sum_of_squared_deviations and standard_deviation. There is no variance property, so divide the sum of squared deviations by n_samples yourself.", "The library’s standard deviation divides by the count rather than by one fewer, which is the primer’s own choice in section 6, so 7.07 and not 7.91 is what should come back."], check: numberCheck("What variance does the weight column come to?", 35.2, 0.05, "The weight deviations are −10, −2, 0, 6 and 6, whose squares sum to 176, and 176 over the five people is 35.2 square kilograms. Its square root, 5.93 kg, is the standard deviation section 7 reports, and dividing by five rather than four is the same choice the primer makes throughout.") },
+            {
+              question: "How spread out are the five people around their mean?",
+              hints: [
+                "np.sum adds the entries of an array, and values.size gives their count. Subtracting a single number from an array subtracts it from every entry.",
+                "Square each deviation before adding. Squaring their total would give zero and discard the spread we are trying to measure.",
+                "The variance is in squared units. np.sqrt returns to centimetres or kilograms, which lets the standard deviation be read alongside the original measurements.",
+              ],
+              check: numberCheck("What is the population variance of weight?", 35.2, 0.05, "Both columns balance around their means, so their signed deviations cancel. Their squared deviations do not cancel. That is why variance can distinguish spreads that the deviation total cannot."),
+            },
           ),
           exercise(
-            "Standardise both columns and average the products",
-            ["Use a Standardizer to turn each column into counts of standard deviations from its mean, multiply the two person by person and average the five products. Then fit the line, evaluate it on the same five people, and print r squared beside the R squared it reports.", "Section 11 says correlation is covariance computed after both columns have had their units removed, and section 12 works the five products by hand. Section 15 says R² is r² under four conditions, and every one of them holds here, so the two figures should agree to every printed place."],
-            `from oop_ml import Feature, SimpleLinearRegression, Standardizer
+            "Build a slope from paired deviations",
+            [
+              "The first challenge measured each column on its own. Now keep each person's height beside their weight. We want to know whether being above the mean in one column tends to go with being above the mean in the other.",
+              "Centre both columns, multiply the paired deviations, and average those products to find the population covariance. Also calculate the population variance of height from its squared deviations. Use their ratio for the slope, as section 14 does, and choose the intercept so the line passes through the two means.",
+              "Complete each step below, then use your slope and intercept to predict the weight at 172 cm. No regression object is needed: the coefficients come from the quantities you have just calculated.",
+            ],
+            `import numpy as np
 
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
+heights = np.array([160, 165, 170, 175, 180], dtype=float)
+weights = np.array([58, 66, 68, 74, 74], dtype=float)
+count = heights.size
 
-scaler = Standardizer()
-# Fit the scaler to both columns and transform them, print each standardised
-# column to three places, multiply them person by person and print the
-# products, then print their mean as r. Fit the line, evaluate it on the
-# same five people, and print r squared beside the R squared it reports.`,
-            `from oop_ml import Feature, SimpleLinearRegression, Standardizer
+mean_height = None  # TODO: mean height
+mean_weight = None  # TODO: mean weight
+height_deviations = None  # TODO: centre height
+weight_deviations = None  # TODO: centre weight
+products = None  # TODO: multiply each person's two deviations
+covariance = None  # TODO: average the products
+height_variance = None  # TODO: average squared height deviations
+slope = None  # TODO: covariance relative to height variance
+intercept = None  # TODO: make the line pass through the two means
+prediction = None  # TODO: apply your line to the new height
 
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
+print("paired products " + " ".join(f"{value:.0f}" for value in products))
+print(f"covariance {covariance:.1f}, height variance {height_variance:.1f}")
+print(f"slope {slope:.4f}, intercept {intercept:.1f}")
+print(f"prediction at mean height {slope * mean_height + intercept:.1f}")
+print(f"prediction at 172 cm {prediction:.1f}")`,
+            `import numpy as np
 
-scaler = Standardizer()
-standard_height, standard_weight = scaler.fit_transform(
-    [Feature("height", heights), Feature("weight", weights)]
-)
-print("height in standard deviations " + " ".join(f"{value:.3f}" for value in standard_height.values))
-print("weight in standard deviations " + " ".join(f"{value:.3f}" for value in standard_weight.values))
+heights = np.array([160, 165, 170, 175, 180], dtype=float)
+weights = np.array([58, 66, 68, 74, 74], dtype=float)
+count = heights.size
 
-products = standard_height.values * standard_weight.values
-print("products " + " ".join(f"{product:.3f}" for product in products))
-correlation = float(products.mean())
+mean_height = np.sum(heights) / count
+mean_weight = np.sum(weights) / count
+height_deviations = heights - mean_height
+weight_deviations = weights - mean_weight
+products = height_deviations * weight_deviations
+covariance = np.sum(products) / count
+height_variance = np.sum(height_deviations ** 2) / count
+slope = covariance / height_variance
+intercept = mean_weight - slope * mean_height
+prediction = slope * 172 + intercept
+
+print("paired products " + " ".join(f"{value:.0f}" for value in products))
+print(f"covariance {covariance:.1f}, height variance {height_variance:.1f}")
+print(f"slope {slope:.4f}, intercept {intercept:.1f}")
+print(f"prediction at mean height {slope * mean_height + intercept:.1f}")
+print(f"prediction at 172 cm {prediction:.1f}")`,
+            `paired products 100 10 0 30 60
+covariance 40.0, height variance 50.0
+slope 0.8000, intercept -68.0
+prediction at mean height 68.0
+prediction at 172 cm 69.6`,
+            {
+              question: "How can the way height and weight vary together give us a line?",
+              hints: [
+                "Multiply the centred arrays element by element. A positive product means the person's two measurements sit on the same side of their respective means.",
+                "Covariance averages the paired products. Height variance averages the squared height deviations. Use the same count for both.",
+                "The slope comes from dividing covariance by height variance. To find the intercept, start with mean weight and subtract the contribution of mean height to the prediction.",
+              ],
+              check: numberCheck("What slope comes from the paired deviations?", 0.8, 0.00005, "The paired deviations supply the slope, and the two means position the line. The prediction at mean height returns mean weight, which checks that the intercept does the job we chose it for."),
+            },
+          ),
+          exercise(
+            "Remove the units and compare two measures of fit",
+            [
+              "Covariance changes when we change the units. To compare the relationship without centimetres or kilograms, express every deviation as a number of standard deviations. This is the standardisation from sections 11 and 12.",
+              "Calculate the population standard deviation of each column from its squared deviations, then divide the deviations by that value. Multiply the two standardised columns person by person and average the products to get correlation. Do this with NumPy arithmetic rather than np.corrcoef or a scaler object.",
+              "Then build the line using the paired deviations from the previous challenge. Calculate its predictions, squared errors and R squared yourself. Compare that with squared correlation. We are fitting an intercept and one predictor by least squares, then scoring on the same people, so the conditions from section 15 hold.",
+            ],
+            `import numpy as np
+
+heights = np.array([160, 165, 170, 175, 180], dtype=float)
+weights = np.array([58, 66, 68, 74, 74], dtype=float)
+count = heights.size
+height_mean = np.sum(heights) / count
+weight_mean = np.sum(weights) / count
+dh = heights - height_mean
+dw = weights - weight_mean
+
+height_sd = None  # TODO: population standard deviation
+weight_sd = None  # TODO: population standard deviation
+standard_height = None  # TODO: remove the height units
+standard_weight = None  # TODO: remove the weight units
+products = None  # TODO: pair the standardised values
+correlation = None  # TODO: average their products
+
+slope = None  # TODO: the line from paired deviations
+intercept = None  # TODO: pass through the means
+predictions = None  # TODO: one predicted weight per person
+errors = None  # TODO: observed minus predicted weight
+rss = None  # TODO: squared misses from the line
+tss = None  # TODO: squared misses from the mean
+r_squared = None  # TODO: the share of baseline error removed
+
+print("height in standard deviations " + " ".join(f"{value:.3f}" for value in standard_height))
+print("weight in standard deviations " + " ".join(f"{value:.3f}" for value in standard_weight))
+print("products " + " ".join(f"{value:.3f}" for value in products))
 print(f"correlation r {correlation:.4f}")
-
-evaluation = SimpleLinearRegression().fit(heights, weights).evaluate(heights, weights)
+print(f"RSS {rss:.1f}, TSS {tss:.1f}")
 print(f"r squared {correlation ** 2:.4f}")
-print(f"R squared {evaluation.r2_score:.4f}")`,
+print(f"R squared {r_squared:.4f}")`,
+            `import numpy as np
+
+heights = np.array([160, 165, 170, 175, 180], dtype=float)
+weights = np.array([58, 66, 68, 74, 74], dtype=float)
+count = heights.size
+height_mean = np.sum(heights) / count
+weight_mean = np.sum(weights) / count
+dh = heights - height_mean
+dw = weights - weight_mean
+
+height_sd = np.sqrt(np.sum(dh ** 2) / count)
+weight_sd = np.sqrt(np.sum(dw ** 2) / count)
+standard_height = dh / height_sd
+standard_weight = dw / weight_sd
+products = standard_height * standard_weight
+correlation = np.sum(products) / count
+
+slope = np.sum(dh * dw) / np.sum(dh ** 2)
+intercept = weight_mean - slope * height_mean
+predictions = slope * heights + intercept
+errors = weights - predictions
+rss = np.sum(errors ** 2)
+tss = np.sum(dw ** 2)
+r_squared = 1 - rss / tss
+
+print("height in standard deviations " + " ".join(f"{value:.3f}" for value in standard_height))
+print("weight in standard deviations " + " ".join(f"{value:.3f}" for value in standard_weight))
+print("products " + " ".join(f"{value:.3f}" for value in products))
+print(f"correlation r {correlation:.4f}")
+print(f"RSS {rss:.1f}, TSS {tss:.1f}")
+print(f"r squared {correlation ** 2:.4f}")
+print(f"R squared {r_squared:.4f}")`,
             `height in standard deviations -1.414 -0.707 0.000 0.707 1.414
 weight in standard deviations -1.685 -0.337 0.000 1.011 1.011
 products 2.384 0.238 0.000 0.715 1.430
 correlation r 0.9535
+RSS 16.0, TSS 176.0
 r squared 0.9091
 R squared 0.9091`,
-            { hints: ["fit_transform takes a list of Features and answers a list of Features in the same order, so the two standardised columns can be unpacked straight into two names.", "A Feature’s values is an array, so the two columns multiply element by element and the product’s mean is one call, with no loop.", "evaluate answers an object whose r2_score is a property. Scoring the line on the five people it was fitted to is one of the four conditions, and one predictor, one response and a fitted intercept are the other three."], check: numberCheck("What correlation does the average of the five products come to?", 0.9535, 0.001, "The products pair each person’s standardised height with their standardised weight, 2.384, 0.238, 0, 0.715 and 1.430, which sum to 4.767, and 4.767 over 5 is 0.9535. Squared it is 0.9091, exactly the R squared the evaluation reports, because the four conditions of section 15 all hold for this fit.") },
+            {
+              question: "Does removing the units let us compare how strongly the columns move together?",
+              hints: [
+                "The first challenge already gave you the steps for standard deviation. Divide the centred values by it to express their distances without the original units.",
+                "The products compare matching people, so ordinary array multiplication is what you need. Keep their full precision until printing.",
+                "RSS compares the observed weights with the line's predictions. TSS compares them with mean weight. R squared is one minus the fraction of baseline squared error that remains.",
+              ],
+              check: numberCheck("What correlation comes from the standardised products?", 0.9535, 0.00005, "The two scores agree here because of how this line was fitted and where it was evaluated. That agreement is a property of this least-squares setup, not a rule for every model or for new data."),
+            },
           ),
           exercise(
-            "Collect the debt from section 14",
-            ["Ask the model for its least_squares_line, which keeps the two sums the fit is built from rather than only the slope. Divide each by five and show that covariance over variance is the slope the library reports.", "Section 10 noted that the regression page built the sum of 200 without naming it, and section 14 collects the debt. The intercept should land the line on the pair of means, the point the cross in the box in section 7 marks."],
-            `from oop_ml import SimpleLinearRegression
+            "Leave one person out and rebuild the line",
+            [
+              "A fitted slope describes the people used to calculate it. Section 23 asks what might change with a different sample. We can make that question concrete by leaving out one of our five people at a time.",
+              "Complete fit_line using the means, paired deviations and squared height deviations from challenge 2. Return a slope and an intercept. The loop then removes the same person's row from both arrays and calls your calculation again.",
+              "Collect those five slopes and print the smallest, largest and their difference. Recalculate both means inside the function on every call: keeping the means from all five people would answer a different question.",
+            ],
+            `import numpy as np
 
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
+heights = np.array([160, 165, 170, 175, 180], dtype=float)
+weights = np.array([58, 66, 68, 74, 74], dtype=float)
 
-line = SimpleLinearRegression().least_squares_line(heights, weights)
-count = len(heights)
-# Divide the two sums on the line by the count to get the covariance and the
-# variance of height, print both with the sums they came from, print
-# covariance over variance beside the slope the line reports, and print
-# the intercept with the pair of means the line is anchored at.`,
-            `from oop_ml import SimpleLinearRegression
+def fit_line(x, y):
+    # TODO: centre these rows and calculate the slope and intercept.
+    raise NotImplementedError("Calculate the line from these arrays")
 
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
-
-line = SimpleLinearRegression().least_squares_line(heights, weights)
-count = len(heights)
-
-covariance = line.covariation / count
-variance = line.input_variation / count
-print(f"sum of products {line.covariation:.1f}, covariance {covariance:.1f}")
-print(f"sum of squared height deviations {line.input_variation:.1f}, variance {variance:.1f}")
-print(f"covariance over variance {covariance / variance:.4f}")
-print(f"slope the library reports {line.slope:.4f}")
-print(f"intercept {line.intercept:.1f}, anchored at the means ({line.input_mean:.0f}, {line.target_mean:.0f})")`,
-            `sum of products 200.0, covariance 40.0
-sum of squared height deviations 250.0, variance 50.0
-covariance over variance 0.8000
-slope the library reports 0.8000
-intercept -68.0, anchored at the means (170, 68)`,
-            { hints: ["least_squares_line takes the same two lists fit does but records the stages instead of fitting, so the model is not fitted afterwards and only the line object is needed here.", "Its properties are covariation and input_variation, the two sums, with input_mean and target_mean giving the point the line is anchored at and slope and intercept the result.", "Covariance and variance are the two sums over the same count, so the count cancels in the ratio and the slope is 200 over 250 as much as it is 40 over 50."], check: numberCheck("What covariance does the sum of products give once divided by five?", 40.0, 0.05, "The five paired products sum to 200, and 200 over five is the covariance of 40 from section 10. The variance of height is 250 over five, which is 50, and 40 over 50 is the slope of 0.8, so the regression was computing a covariance over a variance the whole time.") },
-          ),
-          exercise(
-            "Leave one person out and refit",
-            ["Fit the line five more times, each time with one of the five people left out, and print the slope each fit reports. Then print the smallest and largest of the five slopes and the spread between them.", "Section 23 says the slope of 0.8 was computed from five people and that five different people would have given a different number. These are not even different people, only four of the same five, and the lesson does not print what they do to the slope."],
-            `from oop_ml import SimpleLinearRegression
-
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
-
-everyone = SimpleLinearRegression().fit(heights, weights)
-print(f"all five: slope {everyone.slope:.4f}")
+all_slope, _ = fit_line(heights, weights)
+print(f"all five: slope {all_slope:.4f}")
 
 slopes = []
-# For each person in turn, fit a fresh model on the other four, print the
-# slope and intercept it reports, and collect the slope. Then print the
-# smallest and largest slope and the spread between them.`,
-            `from oop_ml import SimpleLinearRegression
+for left_out in range(heights.size):
+    four_heights = np.delete(heights, left_out)
+    four_weights = np.delete(weights, left_out)
+    slope, intercept = fit_line(four_heights, four_weights)
+    slopes.append(slope)
+    print(f"without the {heights[left_out]:.0f} cm person: slope {slope:.4f}, intercept {intercept:.1f}")
 
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
+smallest = None  # TODO: smallest of the five slopes
+largest = None  # TODO: largest of the five slopes
+spread = None  # TODO: how far apart are the extremes?
+print(f"smallest {smallest:.4f}, largest {largest:.4f}, spread {spread:.4f}")`,
+            `import numpy as np
 
-everyone = SimpleLinearRegression().fit(heights, weights)
-print(f"all five: slope {everyone.slope:.4f}")
+heights = np.array([160, 165, 170, 175, 180], dtype=float)
+weights = np.array([58, 66, 68, 74, 74], dtype=float)
+
+def fit_line(x, y):
+    mean_x = np.sum(x) / x.size
+    mean_y = np.sum(y) / y.size
+    dx = x - mean_x
+    dy = y - mean_y
+    slope = np.sum(dx * dy) / np.sum(dx ** 2)
+    intercept = mean_y - slope * mean_x
+    return slope, intercept
+
+all_slope, _ = fit_line(heights, weights)
+print(f"all five: slope {all_slope:.4f}")
 
 slopes = []
-for left_out in range(len(heights)):
-    four_heights = [height for index, height in enumerate(heights) if index != left_out]
-    four_weights = [weight for index, weight in enumerate(weights) if index != left_out]
-    four = SimpleLinearRegression().fit(four_heights, four_weights)
-    slopes.append(four.slope)
-    print(f"without the {heights[left_out]} cm person: slope {four.slope:.4f}, intercept {four.intercept:.1f}")
+for left_out in range(heights.size):
+    four_heights = np.delete(heights, left_out)
+    four_weights = np.delete(weights, left_out)
+    slope, intercept = fit_line(four_heights, four_weights)
+    slopes.append(slope)
+    print(f"without the {heights[left_out]:.0f} cm person: slope {slope:.4f}, intercept {intercept:.1f}")
 
-print(f"smallest {min(slopes):.4f}, largest {max(slopes):.4f}, spread {max(slopes) - min(slopes):.4f}")`,
+smallest = np.min(slopes)
+largest = np.max(slopes)
+spread = largest - smallest
+print(f"smallest {smallest:.4f}, largest {largest:.4f}, spread {spread:.4f}")`,
             `all five: slope 0.8000
 without the 160 cm person: slope 0.6000, intercept -33.0
 without the 165 cm person: slope 0.8571, intercept -78.3
@@ -1393,7 +1524,15 @@ without the 170 cm person: slope 0.8000, intercept -68.0
 without the 175 cm person: slope 0.7429, intercept -58.9
 without the 180 cm person: slope 1.0000, intercept -101.0
 smallest 0.6000, largest 1.0000, spread 0.4000`,
-            { hints: ["A list comprehension over enumerate can drop the person at one index from both lists, and the two lists have to lose the same person or the pairs no longer match.", "Each refit is a fresh SimpleLinearRegression, since fitting the same object again would overwrite the slope it already holds.", "Leaving out the 170 cm person, who sits exactly on both means, changes neither mean and gives the same 0.8, which is a good check that the loop is doing what it should."], check: numberCheck("What slope comes back when the 180 cm person is left out?", 1.0, 0.0005, "Without the tallest person the four left have mean height 167.5 and mean weight 66.5, their paired products sum to 125 and so do their squared height deviations, so the slope is exactly 1. One person out of five moves the slope from 0.8 up to 1.0, or down to 0.6 when the shortest is left out instead, which is sampling variability acting on a fitted coefficient exactly as it acts on a mean.") },
+            {
+              question: "How much can one person change the slope we report?",
+              hints: [
+                "The function receives only the rows to use in that fit. Find the two means there, then subtract them from x and y.",
+                "Divide the sum of paired deviations by the sum of squared x deviations for the slope. The intercept positions the line at the two means.",
+                "np.delete removes one position from an array. Removing that same position from both arrays keeps each remaining person's measurements paired.",
+              ],
+              check: numberCheck("What is the largest of the five slopes?", 1, 0.00005, "Removing either end of this small sample changes the slope noticeably. These overlapping subsets illustrate sensitivity to individual observations; they are not independent new samples or a confidence interval."),
+            },
           ),
         ]}
       />

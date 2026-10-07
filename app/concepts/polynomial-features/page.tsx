@@ -977,8 +977,9 @@ export default function PolynomialFeaturesPage() {
           practice: [
             exercise(
               "Build the columns, and meet one that duplicates another",
-              ["Part 3 hands the fit four people, the corners of the twelve builds, and every column a degree-two expansion makes from their height and girth. Build that expansion with PolynomialFeatures and print the columns, then build the same expansion with the products left out and print only its column names.", "Part 6 says a column that takes only two values announces itself, because its square is the column over again. Expand the height of eight people beside a column that records whether each one swims as 0 or 1, print the swims column next to its square, and then try to fit MultipleLinearRegression on the result, catching what the library raises."],
-              `from oop_ml import Feature, MLLibError, MultipleLinearRegression, PolynomialFeatures
+              ["Part 3 hands the fit four people, the corners of the twelve builds, and every column a degree-two expansion makes from their height and girth. Build that expansion with PolynomialFeatures and print the columns, then build the same expansion with the products left out and print only its column names.","A column containing only zero and one is unchanged by squaring. Expand the height of eight people beside the column recording whether each person swims. Print swims and swims^2, then use NumPy to check whether those columns are identical. A duplicated column gives a fit no new information, even if a numerical solver happens to return coefficients for it."],
+              `import numpy as np
+from oop_ml import Feature, PolynomialFeatures
 
 corners = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
 expansion = PolynomialFeatures(degree=2).fit(corners)
@@ -987,11 +988,10 @@ expansion = PolynomialFeatures(degree=2).fit(corners)
 # include_interactions=False.
 
 people = [Feature("height", [150, 160, 170, 180, 155, 165, 175, 185]), Feature("swims", [0, 1, 0, 1, 1, 0, 1, 0])]
-weight = Feature("weight", [50, 62, 70, 84, 54, 63, 77, 88])
 # Expand people to degree two, print the swims column and the swims^2 column,
-# and try to fit a MultipleLinearRegression on all the columns, printing the
-# name of the error the library raises.`,
-              `from oop_ml import Feature, MLLibError, MultipleLinearRegression, PolynomialFeatures
+# then print whether those two arrays are identical.`,
+              `import numpy as np
+from oop_ml import Feature, PolynomialFeatures
 
 corners = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
 expansion = PolynomialFeatures(degree=2).fit(corners)
@@ -1002,15 +1002,12 @@ powers_only = PolynomialFeatures(degree=2, include_interactions=False).fit(corne
 print(f"powers alone: {powers_only.terms.names}")
 
 people = [Feature("height", [150, 160, 170, 180, 155, 165, 175, 185]), Feature("swims", [0, 1, 0, 1, 1, 0, 1, 0])]
-weight = Feature("weight", [50, 62, 70, 84, 54, 63, 77, 88])
 columns = PolynomialFeatures(degree=2).fit(people).transform(people)
 for column in columns:
     if column.name in ("swims", "swims^2"):
         print(f"  {column.name}: {[int(value) for value in column.values]}")
-try:
-    MultipleLinearRegression().fit(columns, weight)
-except MLLibError as refusal:
-    print(f"the fit is refused with {type(refusal).__name__}")`,
+values = {column.name: column.values for column in columns}
+print("identical columns", bool(np.array_equal(values["swims"], values["swims^2"])))`,
               `5 columns
   height: [150, 150, 180, 180]
   girth: [66, 96, 66, 96]
@@ -1020,8 +1017,8 @@ except MLLibError as refusal:
 powers alone: ('height', 'girth', 'height^2', 'girth^2')
   swims: [0, 1, 0, 1, 1, 0, 1, 0]
   swims^2: [0, 1, 0, 1, 1, 0, 1, 0]
-the fit is refused with CollinearFeaturesError`,
-              { hints: ["fit fixes the list of terms from the column names and transform builds the columns, so the four values of every term come from transform, one Feature per term, each carrying its name.", "The learned list of terms is on terms, which has n_terms and names, and the names are written with ^ for a power and * for a product.", "The refusal comes from the fit, not from the expansion, which builds the duplicate without complaint. Every refusal the library makes derives from MLLibError, so catching that is enough."], check: numberCheck("What does the product column hold for the person 180 tall with a girth of 96?", 17280, 0.5, "The product column holds each person's height multiplied by their girth, and 180 times 96 is 17,280, where Part 3 gave the 150 by 66 person's 9,900 and the 180 by 66 person's 11,880. The fit treats it like any measurement. The two-valued column is the other half of the lesson, since 0 squared is 0 and 1 squared is 1, so swims^2 is swims over again and a fit handed two identical columns has no unique answer, which the library refuses rather than picking one.") },
+identical columns True`,
+              {"hints":["fit fixes the list of terms from the column names and transform builds the columns, so the four values of every term come from transform, one Feature per term, each carrying its name.","The learned list of terms is on terms, which has n_terms and names, and the names are written with ^ for a power and * for a product.","np.array_equal checks every entry of the two arrays. Equal arrays cannot supply two independent pieces of information to the fit."],"check":{"prompt":"What does the product column hold for the person 180 tall with a girth of 96?","answer":17280,"tolerance":0.5,"because":"The product column gives 17,280 for that person. The swims column and its square are identical, so the second adds no new information. A fit using both cannot uniquely separate their coefficients."}},
             ),
             exercise(
               "Hold seven back and bend the line through the fifteen",

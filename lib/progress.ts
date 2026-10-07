@@ -1,7 +1,7 @@
 // What the reader has finished, kept in their own browser.
 //
 // A quiz records itself when its last card is answered and a set of problems
-// when its last problem is checked or its solution shown. A lesson records how
+// when every coding challenge has passed its output check. A lesson records how
 // many of those it holds when it opens, and counts as finished once every one
 // of them has been. The home page and the section pages read the same record
 // to mark lessons off and to fill the progress bars.

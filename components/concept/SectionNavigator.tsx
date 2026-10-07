@@ -40,7 +40,7 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 import { QuizDeck, RevisitLink } from "./QuizDeck";
-import { PracticeDeck, PracticeSetup } from "./PracticeDeck";
+import { PracticeDeck } from "./PracticeDeck";
 import { declareRequired, markFinished } from "@/lib/progress";
 import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
@@ -229,7 +229,7 @@ export function SectionNavigator({
           >
             {kind !== "prose" && (
               <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-0.5 font-mono text-xs text-accent">
-                {kind === "quiz" ? "Check yourself" : "Practice with the library"}
+                {kind === "quiz" ? "Check yourself" : "Write and run Python"}
               </p>
             )}
             <h2
@@ -252,13 +252,12 @@ export function SectionNavigator({
               />
             )}
             {kind === "practice" && (
-              <>
-                <PracticeSetup />
-                <PracticeDeck
-                  exercises={entry.practice as Exercise[]}
-                  onFinished={() => lesson && markFinished(lesson, entry.id)}
-                />
-              </>
+              <PracticeDeck
+                exercises={entry.practice as Exercise[]}
+                lesson={lesson}
+                active={index === current}
+                onFinished={() => lesson && markFinished(lesson, entry.id)}
+              />
             )}
           </section>
         );
@@ -278,6 +277,7 @@ function Controls({
 }) {
   const first = current === 0;
   const last = current === sections.length - 1;
+  const coding = sections.findIndex((entry) => kindOf(entry) === "practice");
 
   return (
     <div className="py-4">
@@ -344,9 +344,11 @@ function Controls({
           />
         ))}
       </ol>
-      <p className="mt-2 hidden font-mono text-xs text-muted sm:block">
-        The arrow keys move between sections too.
-      </p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
+        <p className="hidden font-mono sm:block">The arrow keys move between sections too.</p>
+        {coding >= 0 && coding !== current && <button type="button" onClick={() => onGo(coding)} className="font-semibold text-accent underline underline-offset-4">Go to the coding challenges →</button>}
+        {coding === current && <button type="button" onClick={() => onGo(0)} className="font-semibold text-accent underline underline-offset-4">Revisit the explanation</button>}
+      </div>
     </div>
   );
 }

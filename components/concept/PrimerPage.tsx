@@ -30,6 +30,7 @@ interface PrimerQuizProps {
 }
 
 interface PrimerPracticeProps {
+  id?: string;
   title: string;
   exercises: Exercise[];
 }
@@ -70,8 +71,8 @@ export function PrimerPage({
       return { title, id: sectionId(title), quiz: questions };
     }
     if (child.type === PrimerPractice) {
-      const { title, exercises } = child.props as PrimerPracticeProps;
-      return { title, id: sectionId(title), practice: exercises };
+      const { id, title, exercises } = child.props as PrimerPracticeProps;
+      return { title, id: id ?? sectionId(title), practice: exercises };
     }
 
     const { title, children: body } = child.props as PrimerSectionProps;
@@ -120,9 +121,9 @@ export function PrimerQuiz({ title, questions }: PrimerQuizProps) {
 }
 
 // Declares a set of problems as a section of a primer, read the same way.
-export function PrimerPractice({ title, exercises }: PrimerPracticeProps) {
+export function PrimerPractice({ id, title, exercises }: PrimerPracticeProps) {
   return (
-    <section id={sectionId(title)} data-problems={exercises.length} tabIndex={-1}>
+    <section id={id ?? sectionId(title)} data-problems={exercises.length} tabIndex={-1}>
       <h2 className="mb-3 text-2xl font-semibold text-foreground">{title}</h2>
     </section>
   );

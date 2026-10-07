@@ -5,6 +5,7 @@ import { CourseBreadcrumbs } from "@/components/course/CourseBreadcrumbs";
 import { LessonFooter } from "@/components/course/LessonFooter";
 import { ProgressPill } from "@/components/site/ProgressPill";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+import { SupportMessage } from "@/components/site/SupportMessage";
 import { lessonLocations, lessonOrder } from "@/lib/course-navigation";
 import { REPOSITORY } from "@/lib/site";
 import "./globals.css";
@@ -63,7 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: restoreTheme }} />
 
         <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
-          <nav className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3">
+          <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3">
             <Link
               href="/"
               className="flex items-center gap-2 font-mono text-base font-bold tracking-tight text-foreground"
@@ -91,6 +92,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <ProgressPill lessons={lessonOrder} />
               <ThemeToggle />
             </div>
+            <SupportMessage />
           </nav>
         </header>
 
@@ -102,7 +104,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
         <footer className="border-t border-line">
           <div className="mx-auto max-w-5xl px-6 py-6 text-sm text-muted">
-            Every example on this site is computed by{" "}
+            The examples use NumPy and{" "}
             <a
               href={REPOSITORY}
               target="_blank"

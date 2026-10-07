@@ -63,7 +63,7 @@ export function LessonMeta({
   const pieces = [
     `${parts} ${parts === 1 ? "section" : "sections"}`,
     questions > 0 ? `${questions} ${questions === 1 ? "question" : "questions"}` : null,
-    problems > 0 ? `${problems} ${problems === 1 ? "problem" : "problems"} to work through` : null,
+    problems > 0 ? `${problems} coding ${problems === 1 ? "challenge" : "challenges"}` : null,
   ].filter((piece): piece is string => piece !== null);
   return <p className="mt-4 font-mono text-xs text-muted">{pieces.join(" · ")}</p>;
 }

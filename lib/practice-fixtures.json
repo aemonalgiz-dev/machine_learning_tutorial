@@ -1,0 +1,86 @@
+{
+  "runtime": "314.0.7",
+  "sdk": "7e0ad65e8f318b4a0b3fbbae5033a5ef973e0bd39e331aba78a4614fc9353e4c",
+  "outputs": {
+    "Fit the twenty-four documents and stand at sail": {
+      "signature": "1y85oml",
+      "output": "23 words, 4 numbers each\nsail = [0.5369, -0.5223, 0.269, 0.2075]\n  rope  0.9825\n  mast  0.9445\n  deck  0.9421\n  crew  0.9361\n  and   0.6946\nsail and rope: 0.9825\nsail and boat: 0.3638\nsail and flour: 0.0661\nsail and oven: -0.0518\noven and bake: 0.9267\nboat and harbour: 0.9919"
+    },
+    "Turn the whole table and ask again": {
+      "signature": "1tp5xzq",
+      "output": "90 degrees: sail's first coordinate 0.5223\n  largest change in a cosine over 253 pairs: 2.2e-16\n  words keeping their nearest word: 23 of 23\n30 degrees: sail's first coordinate 0.7261\n  largest change in a cosine over 253 pairs: 3.3e-16\n  words keeping their nearest word: 23 of 23"
+    },
+    "Ask every rule for every word’s nearest neighbour": {
+      "signature": "km9kl8",
+      "output": "euclidean sail -> mast  at 0.2750\nmanhattan sail -> mast  at 0.4799\nchebyshev sail -> mast  at 0.1990\ncosine    sail -> rope  at 0.0175\nhamming   sail -> and   at 1.0000\ncanberra  sail -> rope  at 0.7160\neuclidean agrees with the straight line on 23, with the angle on 15\nmanhattan agrees with the straight line on 23, with the angle on 15\nchebyshev agrees with the straight line on 21, with the angle on 15\ncosine    agrees with the straight line on 15, with the angle on 23\nhamming   agrees with the straight line on  2, with the angle on  0\ncanberra  agrees with the straight line on 19, with the angle on 18"
+    },
+    "Scale every position to length one": {
+      "signature": "1ct5ctm",
+      "output": "largest gap in the identity: 4.5e-15\nsame nearest word as the angle: 15 before scaling, 23 after\nsail to rope on the unit sphere: 0.1872"
+    },
+    "Move two words far from the origin and measure the same gap": {
+      "signature": "1uialai",
+      "output": "          0 out: direct 0.2750  expanded 0.2750  library 0.2750  step 1.1e-16\n     10,000 out: direct 0.2750  expanded 0.2750  library 0.2750  step 6.0e-08\n  1,000,000 out: direct 0.2750  expanded 0.2733  library 0.2750  step 4.9e-04\n100,000,000 out: direct 0.2750  expanded 0.0000  library 0.2750  step 8.0e+00"
+    },
+    "Sweep the rate across the threshold": {
+      "signature": "9qrlwc",
+      "output": "rate 0.005: passes ran out after 500 passes, level 65.57, slope 0.6\nrate 0.02: converged after 477 passes, level 66, slope 0.6\nrate 0.055: converged after 177 passes, level 66, slope 0.6\nrate 0.0566: converged after 172 passes, level 66, slope 0.6\nrate 0.06: passes ran out after 500 passes, level 66, slope -2.665e-15\nrate 0.07: passes ran out after 500 passes, level 61.32, slope -1.768e+62\nrate 0.1: passes ran out after 500 passes, level 60.5, slope -5.842e+183\nrate 0.2: refused, DivergenceError"
+    },
+    "Fold the throw five ways": {
+      "signature": "13p7f5z",
+      "output": "degree 2: fold scores 0.992, 0.992, 0.998, 0.966, 0.996\n  mean 0.989  spread 0.032\ndegree 8: fold scores 0.979, -10.291, 0.828, 0.916, 0.369\n  mean -1.440  spread 11.270"
+    },
+    "Relight the scene and turn it, and measure both at each stage": {
+      "signature": "15gn638",
+      "output": "none length 221.49\n  shift moves it 8.01238e-14\n  scale moves it 132.894\n  both moves it 132.894\n  turn moves it 265.588\nl2_clipped length 5\n  shift moves it 1.96162e-15\n  scale moves it 2.1793e-15\n  both moves it 2.34404e-15\n  turn moves it 5.23308"
+    },
+    "Recover a planted move from three points": {
+      "signature": "eko98w",
+      "output": "scale 1.300000\nturn 0.600000 radians, 34.38 degrees\nshift 4.000000 down, -2.000000 right\nlargest gap from the planted numbers 8.88e-16"
+    },
+    "Fold new texts into a fitted collection": {
+      "signature": "1jahuid",
+      "output": "3.7471 -1.9689  we bake the dough and whisk the eggs\n3.3330  2.0586  the crew sail the boat past the harbour\n0.0000  0.0000  a quiet afternoon\n3.2910  0.0000  whisk the eggs on the deck of the boat\nfitted documents folded back in move by at most 4.7e-14\nwhisk -2.3562\neggs  -3.1580\ndeck   2.3562\nboat   3.1580"
+    },
+    "Walk one pair down both towers and add the slopes": {
+      "signature": "17ajt3n",
+      "output": "position biases through the first cross [-0.0917  0.1554 -0.0964 -0.3105 -0.6528  0.1559 -0.2921 -0.2988]\nposition biases through the second cross [ 0.0917 -0.1554  0.0964  0.3105  0.6528 -0.1559  0.2921  0.2988]\nsummed [0. 0. 0. 0. 0. 0. 0. 0.]\nlargest bias slope through one tower 0.6528\nhidden weight (np.int32(2), np.int32(115)): summed -0.3928, first tower 0.0814, second tower -0.4743"
+    },
+    "Trace both scores across every degree": {
+      "signature": "dvq3me",
+      "output": "degree 1: training R squared 0.222, held-out R squared -2.971\ndegree 2: training R squared 0.995, held-out R squared 0.989\ndegree 3: training R squared 0.996, held-out R squared 0.966\ndegree 4: training R squared 0.996, held-out R squared 0.993\ndegree 5: training R squared 0.996, held-out R squared 0.986\ndegree 6: training R squared 0.996, held-out R squared 0.693\ndegree 7: training R squared 0.997, held-out R squared -1.396\ndegree 8: training R squared 0.997, held-out R squared -104.095\ndegree 9: training R squared 0.999, held-out R squared -5796.348"
+    },
+    "Check that one pass does the work of four": {
+      "signature": "19ct33c",
+      "output": "prefix of 1: largest difference 0.0e+00, same to 12 places True\nprefix of 2: largest difference 0.0e+00, same to 12 places True\nprefix of 3: largest difference 0.0e+00, same to 12 places True\nprefix of 4: largest difference 0.0e+00, same to 12 places True"
+    },
+    "Run the degree up to fourteen, with and without a penalty": {
+      "signature": "64m5mh",
+      "output": "degree 9: fitted 0.9874, held back 0.91, the 131 cm person 25.45 kg\ndegree 10: fitted 0.9881, held back 0.98, the 131 cm person 21.56 kg\ndegree 11: fitted 0.9888, held back 0.36, the 131 cm person 2.83 kg\ndegree 12: fitted 0.9970, held back -36.35, the 131 cm person -261.97 kg\ndegree 14: fitted 0.9997, held back -22218.79, the 131 cm person -8490.18 kg\ndegree 4 with the penalty: held back 0.9761\ndegree 14 with the penalty: held back 0.9631"
+    },
+    "Tame the degree-9 curve": {
+      "signature": "tsm4v7",
+      "output": "penalty 0.0: R squared 0.997, largest coefficient 85,258.17, intercept 12.76\n  RSS 1.68 + penalty cost 0.00 = objective 1.68\npenalty 1.0: R squared 0.846, largest coefficient 7.64, intercept 12.76\n  RSS 101.04 + penalty cost 79.17 = objective 180.21"
+    },
+    "Find where the held-out score turns": {
+      "signature": "1j1hiy2",
+      "output": "penalty 0: training R squared 0.999, held-out R squared -5298.137\npenalty 1e-05: training R squared 0.996, held-out R squared 0.984\npenalty 0.0001: training R squared 0.996, held-out R squared 0.993\npenalty 0.001: training R squared 0.996, held-out R squared 0.992\npenalty 0.01: training R squared 0.993, held-out R squared 0.936\npenalty 0.1: training R squared 0.975, held-out R squared 0.638\npenalty 1: training R squared 0.876, held-out R squared -0.317\npenalty 10: training R squared 0.731, held-out R squared -1.405"
+    },
+    "Move one reading and refit": {
+      "signature": "1hl3j4b",
+      "output": "sample A, the noisy throw, penalty 0.0: training R squared 0.997, largest coefficient 85,258.17\nsample A, the noisy throw, penalty 1.0: training R squared 0.846, largest coefficient 7.64\nsample B, one reading moved, penalty 0.0: training R squared 0.993, largest coefficient 76,520.32\nsample B, one reading moved, penalty 1.0: training R squared 0.840, largest coefficient 7.80"
+    },
+    "Switch the reach off and compare with the grouping method": {
+      "signature": "10at4x3",
+      "output": "chain labels    [0, 0, 0, 0, 0, 2, 2, 2, 1, 1, 1]\ngrouping labels [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2]\ncell (119.9996, 25.6656) beside centre (120.0000, 25.6667)\ncell (153.8233, 53.7996) beside centre (153.8000, 53.8000)\ncell (180.3333, 80.3333) beside centre (180.3333, 80.3333)\nfurthest-separated pair 0.0233 apart"
+    },
+    "Watch a rate of twenty thrash": {
+      "signature": "1rqb8vl",
+      "output": "readings that rose 100 of 199\nlowest reading 0.604412 at epoch 127\nlast reading 13.216079\nloss of the finished chain 3.514182"
+    },
+    "Train a small U with its skip and without it": {
+      "signature": "luxtnr",
+      "output": "with the skip: pixels right 1.000, overlap 1.000, pixels called shape 640\nwithout it: pixels right 0.913, overlap 0.447, pixels called shape 661\ncalling every pixel ground gets 0.889 of pixels right"
+    }
+  }
+}

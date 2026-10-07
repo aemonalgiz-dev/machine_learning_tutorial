@@ -1241,29 +1241,25 @@ degree 9: training R squared 0.999, held-out R squared -5479.352`,
             ),
             exercise(
               "Hand the fit a column it cannot tell apart",
-              ["Section 26 says the fit behind this page refuses a table holding a column that is an exact copy of another, rather than picking one of the infinitely many answers. Hand it t and 2t for the ideal throw and see what comes back.", "Catch the library’s own error, and print the name of its class and its message."],
-              `from oop_ml import Feature, MultipleLinearRegression, MLLibError
+              ["Suppose we give the fit a time column and a second column containing twice every time. We have added a column, but have we added any information? Build the two columns for the five times below. Include the constant column used for the intercept, then ask NumPy how many independent columns the resulting table has.","Print the number of columns, the number of independent columns, and whether they are equal. That comparison tells us whether these measurements can determine one unique set of coefficients. We check the table directly because a numerical solver can sometimes return coefficients for a singular table without raising an error."],
+              `import numpy as np
 
-times = [0, 1, 2, 3, 4]
-heights = [0, 15.1, 20.4, 15.9, 1.6]
-columns = [Feature("t", times), Feature("twice_t", [2 * time for time in times])]
+times = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+# Stack a constant column, times, and twice times as columns of one table.
+# Print its column count, its matrix rank, and whether the rank equals
+# the number of columns.`,
+              `import numpy as np
 
-# Try to fit the two columns. Catch the library's own error, and print
-# the name of its class and its message.`,
-              `from oop_ml import Feature, MultipleLinearRegression, MLLibError
-
-times = [0, 1, 2, 3, 4]
-heights = [0, 15.1, 20.4, 15.9, 1.6]
-columns = [Feature("t", times), Feature("twice_t", [2 * time for time in times])]
-
-try:
-    MultipleLinearRegression().fit(columns, Feature("h", heights))
-except MLLibError as refusal:
-    print(type(refusal).__name__)
-    print(refusal)`,
-              `CollinearFeaturesError
-the features are collinear -- some column is (nearly) a linear combination of the others -- so the normal equations have no unique solution (condition number 7.78e+32). Remove or combine the duplicated columns, or use RidgeRegression, whose penalty makes the system solvable`,
-              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal this turns out to be.", "The second column is exactly twice the first, so XᵀX has no inverse and the normal equations have infinitely many solutions. The refusal reports a condition number rather than picking one of them."] },
+times = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+design = np.column_stack([np.ones(len(times)), times, 2 * times])
+rank = np.linalg.matrix_rank(design)
+print("columns", design.shape[1])
+print("independent columns", rank)
+print("unique coefficients", bool(rank == design.shape[1]))`,
+              `columns 3
+independent columns 2
+unique coefficients False`,
+              {"hints":["np.column_stack puts the three arrays beside each other. Its shape tells you the row and column counts.","np.linalg.matrix_rank counts independent columns. The time column and twice-time column contribute only one independent direction between them."],"question":"Can the fit tell time apart from twice the same time?"},
             ),
           ],
         },

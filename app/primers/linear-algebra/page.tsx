@@ -1120,169 +1120,261 @@ export default function LinearAlgebraPrimerPage() {
       />
 
       <PrimerPractice
-        title="Practice. Vectors and Matrices in the Library"
+        id="practice-vectors-and-matrices-in-the-library"
+        title="Practice. Building Vector and Matrix Operations With NumPy"
         exercises={[
           exercise(
-            "Measure the two arrows of section 5",
-            ["Section 5 subtracts a = (1, 2) from b = (4, 6) to get the movement (3, 4) and measures its length. Do the subtraction and the length with numpy, to four places, then ask the library’s Euclidean distance for the same number. The distance class takes blocks of rows rather than single arrows, because section 6’s models measure a query against many stored rows at once, so each arrow goes in as a block of one row with its two columns named.", "Then take the dot product from section 8 and the two cosine pairs from section 9, and finish with a number the primer never prints, the cosine between a and b themselves."],
+            "Measure movement and compare directions",
+            [
+              "The arrows from section 5 end at a and b below. Subtract their coordinates to find the movement from a to b. Square that movement's entries, add them, and take the square root to find its length.",
+              "Distance is one question; direction is another. Complete a cosine function by multiplying matching coordinates and adding them for the dot product, then dividing by both vector lengths. Use np.sum, np.sqrt and array arithmetic so each operation remains visible.",
+              "Run it on the two pairs from section 9 and on a and b themselves. The last pair has different lengths but nearly the same direction. Its cosine is a number the primer has not worked out for you.",
+            ],
             `import numpy as np
-from oop_ml import EuclideanDistance, RowBlock, cosine_similarity
 
 a = np.array([1.0, 2.0])
 b = np.array([4.0, 6.0])
 
-# Print b - a and its length to four places, then the Euclidean distance
-# from a to b as the library computes it. Then print (3, 4) . (4, 3), the
-# cosines of the two pairs from section 9, and the cosine of a and b.`,
+movement = None  # TODO: movement from a to b
+distance = None  # TODO: length of that movement
+
+def cosine(u, v):
+    # TODO: calculate a dot product and divide out both lengths.
+    raise NotImplementedError("Compare the two directions")
+
+print(f"b - a = ({movement[0]:.0f}, {movement[1]:.0f})")
+print(f"length of b - a {distance:.4f}")
+u = np.array([3.0, 4.0])
+v = np.array([4.0, 3.0])
+print(f"(3, 4) . (4, 3) = {np.sum(u * v):.0f}")
+print(f"cosine of (10, 0) and (10, 10) {cosine(np.array([10.0, 0.0]), np.array([10.0, 10.0])):.4f}")
+print(f"cosine of (2, 0) and (2, 0) {cosine(np.array([2.0, 0.0]), np.array([2.0, 0.0])):.4f}")
+print(f"cosine of a and b {cosine(a, b):.4f}")`,
             `import numpy as np
-from oop_ml import EuclideanDistance, RowBlock, cosine_similarity
 
 a = np.array([1.0, 2.0])
 b = np.array([4.0, 6.0])
 
 movement = b - a
+distance = np.sqrt(np.sum(movement ** 2))
+
+def cosine(u, v):
+    dot = np.sum(u * v)
+    length_u = np.sqrt(np.sum(u ** 2))
+    length_v = np.sqrt(np.sum(v ** 2))
+    return dot / (length_u * length_v)
+
 print(f"b - a = ({movement[0]:.0f}, {movement[1]:.0f})")
-print(f"length of b - a {np.sqrt(np.sum(movement ** 2)):.4f}")
-
-names = ["east", "north"]
-distances = EuclideanDistance().between(RowBlock(a.reshape(1, 2), names), RowBlock(b.reshape(1, 2), names))
-print(f"library distance from a to b {float(distances[0, 0]):.4f}")
-
-print(f"(3, 4) . (4, 3) = {np.dot([3.0, 4.0], [4.0, 3.0]):.0f}")
-print(f"cosine of (10, 0) and (10, 10) {cosine_similarity(np.array([10.0, 0.0]), np.array([10.0, 10.0])):.4f}")
-print(f"cosine of (2, 0) and (2, 0) {cosine_similarity(np.array([2.0, 0.0]), np.array([2.0, 0.0])):.4f}")
-print(f"cosine of a and b {cosine_similarity(a, b):.4f}")`,
+print(f"length of b - a {distance:.4f}")
+u = np.array([3.0, 4.0])
+v = np.array([4.0, 3.0])
+print(f"(3, 4) . (4, 3) = {np.sum(u * v):.0f}")
+print(f"cosine of (10, 0) and (10, 10) {cosine(np.array([10.0, 0.0]), np.array([10.0, 10.0])):.4f}")
+print(f"cosine of (2, 0) and (2, 0) {cosine(np.array([2.0, 0.0]), np.array([2.0, 0.0])):.4f}")
+print(f"cosine of a and b {cosine(a, b):.4f}")`,
             `b - a = (3, 4)
 length of b - a 5.0000
-library distance from a to b 5.0000
 (3, 4) . (4, 3) = 24
 cosine of (10, 0) and (10, 10) 0.7071
 cosine of (2, 0) and (2, 0) 1.0000
 cosine of a and b 0.9923`,
-            { hints: ["Subtracting two numpy arrays subtracts entry by entry, and the length is the square root of the sum of the squared entries, which is section 4’s formula written in code.", "A RowBlock is a two-dimensional array paired with one name per column, so a single arrow is reshaped to one row of two columns. between answers a table with one row per query and one column per remembered row, and the single distance sits at position [0, 0].", "cosine_similarity takes two numpy arrays of one length and answers the cosine alone, which is the dot product with both lengths divided out."], check: numberCheck("What cosine does the library report between a = (1, 2) and b = (4, 6)?", 0.9923, 0.0005, "The dot product of a and b is 1 times 4 plus 2 times 6, which is 16, and their lengths are the square roots of 5 and 52. Dividing the size out leaves 0.9923, so the two arrows point almost the same way even though b is more than three times as long as a, which is section 9’s point that the dot product on its own cannot tell alignment from length.") },
+            {
+              question: "How far apart are the two arrows, and do they point the same way?",
+              hints: [
+                "Subtracting arrays subtracts matching entries. The resulting vector describes a movement, so its length is the distance between the two endpoints.",
+                "Array multiplication gives the coordinate products. np.sum combines them into the dot product. Length uses the same operation with a vector multiplied by itself, followed by a square root.",
+                "Divide the dot product by the product of both lengths. The supplied vectors are nonzero; a zero vector has no direction and its cosine would be undefined.",
+              ],
+              check: numberCheck("What is the cosine between a and b?", 0.9923, 0.00005, "The endpoints are five units apart, yet their arrows point almost the same way. Distance and cosine answer different questions: one measures separation, the other compares direction after removing length."),
+            },
           ),
           exercise(
-            "Run the worked matrix as a layer of two neurons",
-            ["Section 10 said a matrix is a container holding one weighted sum per output. Build that container the way the library does, as a dense layer of two neurons whose weights are the rows (2, 1) and (1, 2) of the worked matrix, with a bias of zero and an activation that leaves the score alone, and read its shape and its weight matrix back.", "Then push the primer’s arrows through it as one block, (3, 1) from section 12, the basis vectors from section 13, the two eigenvectors from section 15, and (3, 4), which the primer never sends through. Finish by asking numpy for the eigenvalues of the weight matrix. The matrix is symmetric, so eigh is the solver to use, and it answers the eigenvalues in ascending order with the eigenvectors as the columns of a second array."],
+            "Apply a matrix one weighted sum at a time",
+            [
+              "Section 10 describes a matrix as one weighted sum per output. Build those sums directly for the worked matrix below. Multiply every row by the input vector, then add across the columns to get one answer per row.",
+              "Complete apply_by_rows using multiplication and np.sum before using the matrix multiplication operator. Send the six supplied arrows through it and print each result. Then compare your answers with NumPy's @ operator using np.allclose.",
+              "Notice the basis vectors, which reveal the matrix's columns, and the two eigenvector directions from section 15. Those directions keep their orientation while other arrows can change direction. The final input is one the primer did not calculate.",
+            ],
             `import numpy as np
-from oop_ml import DenseLayer, Identity, Neuron
 
-# Build a DenseLayer of two neurons with weights (2, 1) and (1, 2), a bias
-# of 0 and the Identity activation, then print what it reads and answers
-# and its weight matrix.
+matrix = np.array([[2.0, 1.0], [1.0, 2.0]])
+inputs = np.array([[3.0, 1.0], [1.0, 0.0], [0.0, 1.0],
+                   [1.0, 1.0], [1.0, -1.0], [3.0, 4.0]])
 
-inputs = np.array([[3.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, -1.0], [3.0, 4.0]])
-# Push the block through the layer and print each arrow with its answer.
-# Then print the eigenvalues and the eigenvectors that eigh reports for
-# the weight matrix.`,
+def apply_by_rows(matrix, vector):
+    # TODO: multiply by the input coordinates, then add along each row.
+    raise NotImplementedError("Build one weighted sum per output")
+
+print(f"matrix has {matrix.shape[0]} rows and {matrix.shape[1]} columns")
+agrees = True
+for vector in inputs:
+    answer = apply_by_rows(matrix, vector)
+    print(f"({vector[0]:.0f}, {vector[1]:.0f}) -> ({answer[0]:.0f}, {answer[1]:.0f})")
+    agrees = agrees and np.allclose(answer, matrix @ vector)
+print(f"all row sums agree with @ {bool(agrees)}")`,
             `import numpy as np
-from oop_ml import DenseLayer, Identity, Neuron
 
-layer = DenseLayer([
-    Neuron([2.0, 1.0], bias=0.0, activation=Identity()),
-    Neuron([1.0, 2.0], bias=0.0, activation=Identity()),
-])
-print(f"reads {layer.shape.reads}, answers {layer.shape.answers}")
-print(f"weight matrix rows {layer.weight_matrix.tolist()}")
+matrix = np.array([[2.0, 1.0], [1.0, 2.0]])
+inputs = np.array([[3.0, 1.0], [1.0, 0.0], [0.0, 1.0],
+                   [1.0, 1.0], [1.0, -1.0], [3.0, 4.0]])
 
-inputs = np.array([[3.0, 1.0], [1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, -1.0], [3.0, 4.0]])
-response = layer.respond_to(inputs)
-for row, answer in zip(inputs, response.outputs):
-    print(f"({row[0]:.0f}, {row[1]:.0f}) -> ({answer[0]:.0f}, {answer[1]:.0f})")
+def apply_by_rows(matrix, vector):
+    products = matrix * vector
+    return np.sum(products, axis=1)
 
-values, directions = np.linalg.eigh(layer.weight_matrix)
-print(f"eigenvalues {values.tolist()}")
-print(f"eigenvectors as columns {np.round(directions, 4).tolist()}")`,
-            `reads (2,), answers (2,)
-weight matrix rows [[2.0, 1.0], [1.0, 2.0]]
+print(f"matrix has {matrix.shape[0]} rows and {matrix.shape[1]} columns")
+agrees = True
+for vector in inputs:
+    answer = apply_by_rows(matrix, vector)
+    print(f"({vector[0]:.0f}, {vector[1]:.0f}) -> ({answer[0]:.0f}, {answer[1]:.0f})")
+    agrees = agrees and np.allclose(answer, matrix @ vector)
+print(f"all row sums agree with @ {bool(agrees)}")`,
+            `matrix has 2 rows and 2 columns
 (3, 1) -> (7, 5)
 (1, 0) -> (2, 1)
 (0, 1) -> (1, 2)
 (1, 1) -> (3, 3)
 (1, -1) -> (1, -1)
 (3, 4) -> (10, 11)
-eigenvalues [1.0, 3.0]
-eigenvectors as columns [[-0.7071, 0.7071], [0.7071, 0.7071]]`,
-            { hints: ["A Neuron takes its weights, a bias and an activation. Identity is the activation that leaves the score alone, so with a bias of zero the neuron’s output is exactly the dot product of section 8.", "A DenseLayer takes a list of neurons. Its shape has reads and answers, which are the column count and the row count of section 11, and its weight_matrix is the neurons’ weights stacked as rows.", "respond_to takes a block whose first axis is the rows, so the six arrows go in as a 6 by 2 array, and the answers are the outputs of the response, one row per arrow.", "The eigenvectors numpy reports are unit length, so (1, 1) comes back as (0.7071, 0.7071) and (1, −1) as (−0.7071, 0.7071). Section 16 says it is the line that is preserved, and each pair names the same line."], check: numberCheck("What does the first neuron answer for the input (3, 4)?", 10, 0.05, "The first row of the matrix is (2, 1), and (2, 1) dotted with (3, 4) is 2 times 3 plus 1 times 4, which is 10. The second row gives 3 plus 8, which is 11, so the layer sends (3, 4) to (10, 11), an arrow pointing a different way from the one that went in, which is what section 15 says happens to every arrow not on one of the two dashed lines.") },
+all row sums agree with @ True`,
+            {
+              question: "What does each row of a matrix do to an arrow?",
+              hints: [
+                "NumPy can multiply each row of a matrix by the same one-dimensional vector. Each column is multiplied by its matching input coordinate.",
+                "np.sum with axis=1 adds across columns, leaving one value for each row. Without an axis it would combine every product into a single number.",
+                "The @ operator does matrix multiplication. Comparing it with your explicit row sums checks that the shorter notation performs the operation you have just written.",
+              ],
+              check: numberCheck("What is the first output for the input (3, 4)?", 10, 0.05, "Every output is a weighted sum of the same input coordinates. The basis vectors select individual columns, while the two eigenvector directions remain on their original lines."),
+            },
           ),
           exercise(
-            "Read a shape off a layer, then break a join",
-            ["Section 11 says a 3 × 2 matrix takes a two-entry vector and returns a three-entry one. Build it as a layer of three neurons with the rows (1, 0), (0, 1) and (1, 1), read its shape, and apply it to (3, 1).", "Then build a second layer whose one neuron reads two entries and try to stack it after the first. The first layer answers with three numbers and the second reads two, so the join cannot work, and the library refuses it when the stack is built, before any row is read. Catch the refusal and print its name and its message."],
+            "Join two transformations with matching shapes",
+            [
+              "The first matrix below takes two coordinates and produces three. Apply it to the arrow from section 11, then read how many coordinates the result contains.",
+              "The proposed next matrix has only two columns. Before trying the multiplication, compare its column count with the number of outputs from the first matrix. Print whether those counts match.",
+              "Replace that next matrix with one row of three ones so it can add all three intermediate coordinates. Calculate the final answer in two stages, then compose the matrices with @ and check that the composed transformation gives the same result.",
+            ],
             `import numpy as np
-from oop_ml import DenseLayer, Identity, LayerStack, MLLibError, Neuron
 
-# Build a layer of three neurons with weights (1, 0), (0, 1) and (1, 1),
-# print what it reads and answers, and apply it to (3, 1).
+tall = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+vector = np.array([3.0, 1.0])
+proposed_next = np.array([[1.0, 1.0]])
 
-# Build a second layer of one neuron reading two inputs and print what it
-# reads. Then try to stack the two layers, catch the refusal, and print
-# the name of its class and its message.`,
+intermediate = None  # TODO: apply the first transformation
+compatible = None  # TODO: compare the joining dimensions
+next_matrix = None  # TODO: a matrix that adds three coordinates
+answer = None  # TODO: apply the second transformation
+combined = None  # TODO: compose them in the correct order
+
+print(f"first matrix shape {tall.shape}")
+print(f"intermediate coordinates {intermediate.tolist()}")
+print(f"proposed next matrix compatible {compatible}")
+print(f"corrected next matrix shape {next_matrix.shape}")
+print(f"two-stage answer {answer.tolist()}")
+print(f"combined matrix {combined.tolist()}")
+print(f"same answer {np.allclose(combined @ vector, answer)}")`,
             `import numpy as np
-from oop_ml import DenseLayer, Identity, LayerStack, MLLibError, Neuron
 
-tall = DenseLayer([
-    Neuron([1.0, 0.0], bias=0.0, activation=Identity()),
-    Neuron([0.0, 1.0], bias=0.0, activation=Identity()),
-    Neuron([1.0, 1.0], bias=0.0, activation=Identity()),
-])
-print(f"tall layer reads {tall.shape.reads} and answers {tall.shape.answers}")
-print(f"tall layer applied to (3, 1) gives {tall.respond_to(np.array([[3.0, 1.0]])).outputs[0].tolist()}")
+tall = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+vector = np.array([3.0, 1.0])
+proposed_next = np.array([[1.0, 1.0]])
 
-two_in = DenseLayer([Neuron([1.0, 1.0], bias=0.0, activation=Identity())])
-print(f"next layer reads {two_in.shape.reads}")
+intermediate = tall @ vector
+compatible = proposed_next.shape[1] == tall.shape[0]
+next_matrix = np.array([[1.0, 1.0, 1.0]])
+answer = next_matrix @ intermediate
+combined = next_matrix @ tall
 
-try:
-    LayerStack([tall, two_in])
-except MLLibError as refusal:
-    print(type(refusal).__name__)
-    print(refusal)`,
-            `tall layer reads (2,) and answers (3,)
-tall layer applied to (3, 1) gives [3.0, 1.0, 4.0]
-next layer reads (2,)
-ShapeMismatchError
-layer 0 answers with (3,) and layer 1 reads (2,)`,
-            { hints: ["Every neuron in a layer reads the same row, so each of the three holds two weights, and the layer’s shape reads (2,) and answers (3,).", "LayerStack takes the layers in order and makes the check in its constructor, so there is nothing to call afterwards. The error derives from MLLibError, like every refusal the library makes."] },
+print(f"first matrix shape {tall.shape}")
+print(f"intermediate coordinates {intermediate.tolist()}")
+print(f"proposed next matrix compatible {compatible}")
+print(f"corrected next matrix shape {next_matrix.shape}")
+print(f"two-stage answer {answer.tolist()}")
+print(f"combined matrix {combined.tolist()}")
+print(f"same answer {np.allclose(combined @ vector, answer)}")`,
+            `first matrix shape (3, 2)
+intermediate coordinates [3.0, 1.0, 4.0]
+proposed next matrix compatible False
+corrected next matrix shape (1, 3)
+two-stage answer [8.0]
+combined matrix [[2.0, 2.0]]
+same answer True`,
+            {
+              question: "What has to match before one matrix can follow another?",
+              hints: [
+                "A matrix's column count says how many coordinates it reads. Its row count says how many weighted sums it returns. NumPy lists rows first in shape.",
+                "The intermediate vector has three entries, so the next matrix needs three columns. Keep it two-dimensional by putting the row inside an outer list.",
+                "With a vector on the right, the matrix nearest it acts first. Put next_matrix on the left of tall when composing their actions.",
+              ],
+              check: numberCheck("What is the final output of the composed transformation?", 8, 0.05, "The intermediate coordinates connect the two transformations. Matching that dimension makes composition possible, and the composed matrix packages both steps into a single operation."),
+            },
           ),
           exercise(
-            "Find the eigenvectors of a covariance matrix",
-            ["Section 18 says principal component analysis builds a covariance matrix from how each pair of features varies together, and that its eigenvectors are the directions the data varies along. Take the five people from the simple linear regression lesson, heights 160 to 180 and weights 58 to 74, build their covariance matrix with numpy, and hand it to eigh.", "Then fit the library’s principal component analysis on the same two features and compare. Each component’s loadings are an eigenvector and its variance is the eigenvalue, and the share of the first component is a number the primer never prints. Section 18 said the direction of greatest variation runs diagonally between the height and weight axes, so check that the two loadings of the first component are of a similar size."],
+            "Build a covariance matrix and find its main direction",
+            [
+              "Section 18 connects eigenvectors with the directions in which a dataset varies. Start with the five paired height and weight measurements below. Subtract each column's mean so the arrows describe deviations rather than positions far from the origin.",
+              "Multiply the transpose of that centred table by the table itself. Each entry then sums the products for one pair of columns. Divide by one fewer than the row count to get the sample covariance matrix. The diagonal measures variation within a column; the other entries describe how the columns vary together.",
+              "Use np.linalg.eigh for the eigenvalue calculation. It returns values in ascending order and directions as columns. Choose the direction belonging to the largest value, report its share of the total, and check the eigenvector equation with np.allclose. For consistent printing, point the chosen direction toward increasing height by flipping the whole vector if its first entry is negative.",
+            ],
             `import numpy as np
-from oop_ml import Feature, PrincipalComponentAnalysis
 
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
+people = np.array([[160, 58], [165, 66], [170, 68],
+                   [175, 74], [180, 74]], dtype=float)
+count = people.shape[0]
+means = None  # TODO: one mean per column
+centred = None  # TODO: deviations from those means
+covariance = None  # TODO: paired products, with the sample denominator
+values, directions = None, None  # TODO: solve the symmetric matrix
+main_value = None  # TODO: largest eigenvalue
+main_direction = None  # TODO: its corresponding column
+if main_direction[0] < 0:
+    main_direction = -main_direction
+share = None  # TODO: fraction of total variance
+eigenvector_check = None  # TODO: compare matrix action with scalar multiplication
 
-# Build the covariance matrix of the two columns with numpy and print it,
-# then print the eigenvalues and eigenvectors that eigh reports for it.
-
-# Fit a PrincipalComponentAnalysis on the two features and print the
-# loadings and variance of each component, the total variance, and the
-# share of the first component, all to four places.`,
-            `import numpy as np
-from oop_ml import Feature, PrincipalComponentAnalysis
-
-heights = [160, 165, 170, 175, 180]
-weights = [58, 66, 68, 74, 74]
-
-covariance = np.cov(np.column_stack([heights, weights]), rowvar=False)
 print(f"covariance matrix {np.round(covariance, 2).tolist()}")
-values, directions = np.linalg.eigh(covariance)
-print(f"numpy eigenvalues {np.round(values, 4).tolist()}")
-print(f"numpy eigenvectors as columns {np.round(directions, 4).tolist()}")
+print(f"eigenvalues {np.round(values, 4).tolist()}")
+print(f"main direction {np.round(main_direction, 4).tolist()}")
+print(f"total variance {np.sum(values):.4f}")
+print(f"share of the main direction {share:.4f}")
+print(f"eigenvector equation holds {eigenvector_check}")`,
+            `import numpy as np
 
-model = PrincipalComponentAnalysis().fit([Feature("height", heights), Feature("weight", weights)])
-for component in model.components:
-    print(f"{component.name}: height loading {component.loadings['height']:.4f}, weight loading {component.loadings['weight']:.4f}, variance {component.variance:.4f}")
-print(f"total variance {model.components.total_variance:.4f}")
-print(f"share of the first component {model.components.variance_shares[0]:.4f}")`,
+people = np.array([[160, 58], [165, 66], [170, 68],
+                   [175, 74], [180, 74]], dtype=float)
+count = people.shape[0]
+means = np.sum(people, axis=0) / count
+centred = people - means
+covariance = (centred.T @ centred) / (count - 1)
+values, directions = np.linalg.eigh(covariance)
+main_value = values[-1]
+main_direction = directions[:, -1]
+if main_direction[0] < 0:
+    main_direction = -main_direction
+share = main_value / np.sum(values)
+eigenvector_check = np.allclose(covariance @ main_direction, main_value * main_direction)
+
+print(f"covariance matrix {np.round(covariance, 2).tolist()}")
+print(f"eigenvalues {np.round(values, 4).tolist()}")
+print(f"main direction {np.round(main_direction, 4).tolist()}")
+print(f"total variance {np.sum(values):.4f}")
+print(f"share of the main direction {share:.4f}")
+print(f"eigenvector equation holds {eigenvector_check}")`,
             `covariance matrix [[62.5, 50.0], [50.0, 44.0]]
-numpy eigenvalues [2.4016, 104.0984]
-numpy eigenvectors as columns [[0.6396, -0.7687], [-0.7687, -0.6396]]
-component_1: height loading -0.7687, weight loading -0.6396, variance 104.0984
-component_2: height loading 0.6396, weight loading -0.7687, variance 2.4016
+eigenvalues [2.4016, 104.0984]
+main direction [0.7687, 0.6396]
 total variance 106.5000
-share of the first component 0.9775`,
-            { hints: ["np.cov wants the observations as rows, so stack the two lists as columns and pass rowvar=False. The diagonal holds each feature’s own variance and the off-diagonal entry is how the two vary together.", "The model takes a list of Feature objects, one per column, each a name paired with its values. Its components property iterates them largest variance first, where eigh answered smallest first.", "A component’s loadings are indexed by feature name. A direction and its negative name the same line, so a sign that differs between numpy and the library is not a disagreement, which is section 16’s point about lines rather than headings."], check: numberCheck("What share of the total variance does the first component carry?", 0.9775, 0.0005, "The two eigenvalues are 104.0984 and 2.4016, and their total of 106.5 is also the sum of the covariance matrix’s diagonal, 62.5 plus 44. The first direction carries 104.0984 of it, which is 0.9775 of the whole, so one number per person along that diagonal direction keeps nearly all of the variation, which is the whole of what the PCA page does.") },
+share of the main direction 0.9775
+eigenvector equation holds True`,
+            {
+              question: "Which direction contains most of the variation in the five people?",
+              hints: [
+                "Summing with axis=0 adds down the people and leaves one total per column. The two means then subtract from every row through broadcasting.",
+                "centred.T puts the columns into rows. Matrix multiplication pairs each of them with every original column, including itself.",
+                "The last eigenvalue is the largest. The last column of directions belongs to it. A vector and its negative describe the same line, so reversing the whole direction does not change the result being checked.",
+              ],
+              check: numberCheck("What share of the total variance belongs to the main direction?", 0.9775, 0.00005, "Most of the variation lies along a direction where height and weight increase together. The large variance share describes this table in these units; changing the relative scaling of the columns can change the main direction."),
+            },
           ),
         ]}
       />

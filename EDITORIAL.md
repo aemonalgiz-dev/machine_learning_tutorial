@@ -56,12 +56,28 @@ Keep hand-built illustrations clearly distinct from trained model results.
   roughly half of true-or-false claims to be true, and vary how many options
   of a `several` question hold.
 - A practice section comes last, titled `Practice. ...` in the register of
-  the part titles, and holds two to four problems worked in Python against
-  the library. It is the one place on a lesson that may name the library's
+  the part titles, and holds two to four problems worked in Python with
+  NumPy or oop_ml. It is the one place on a lesson that may name the library's
   classes and methods. Every output shown is what the solution printed when
   it was run, and every number a problem checks is one the solution prints.
   At least one problem per lesson asks for a number the lesson itself does
   not quote.
+- Coding challenges state a concrete question in the lesson's voice, followed
+  by the information needed to solve it and then an editable Python workspace.
+  Keep practice after the explanation it depends on. Use NumPy for direct
+  calculations. When the operation itself is what the reader needs to learn,
+  have them implement its steps with NumPy arrays, arithmetic and reductions.
+  In the mathematics primers, calculate statistics, vector operations and
+  gradient updates directly rather than reading them from model properties.
+  Use oop_ml when applying an already explained model is the challenge and
+  its internal operations are not the learning objective.
+  A reader can jump directly to coding from the section controls.
+- Every coding challenge has runnable Python tests. State the required output
+  clearly, expose expected and actual results, and allow rounding at the stated
+  precision. Test the meaningful result, not one spelling of the solution.
+  Report test results as feedback on the work. Do not add rewards, achievement
+  language or locked steps. Viewing a solution does not mark tests as passed.
+  Run reference solutions in browser Python before publishing.
 - Match instructions to actual controls, fixtures and defaults. Do not ask a
   reader to move a slider that is absent, or describe one dataset while the
   widget loads another without explaining how to select it.
