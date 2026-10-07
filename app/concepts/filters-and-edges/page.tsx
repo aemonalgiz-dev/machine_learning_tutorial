@@ -35,6 +35,7 @@ const link =
 export default function FiltersAndEdgesPage() {
   return (
     <ConceptPage
+      lessonId="filters-and-edges"
       intuition={lessonIntuitions["filters-and-edges"]}
       technicalStart="Part 2. Carrying a Grid of Weights Across a Picture"
       openingTitle="The Brightness Changed; the Edge Stayed Put"

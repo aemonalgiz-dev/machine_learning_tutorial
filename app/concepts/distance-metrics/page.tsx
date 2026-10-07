@@ -40,6 +40,7 @@ const linkClass =
 export default function DistanceMetricsPage() {
   return (
     <ConceptPage
+      lessonId="distance-metrics"
       intuition={lessonIntuitions["distance-metrics"]}
       technicalStart="Part 2. One Formula, One Dial"
       openingTitle="Near According to Which Rule?"

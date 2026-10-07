@@ -38,6 +38,7 @@ const link =
 export default function DenseLayersPage() {
   return (
     <ConceptPage
+      lessonId="dense-layers"
       intuition={lessonIntuitions["dense-layers"]}
       technicalStart="Part 2. The Matrix Form"
       openingTitle="Several Neurons Read the Same Example"

@@ -196,7 +196,7 @@ export function SectionNavigator({
   if (sections.length === 0) return null;
 
   return (
-    <div className="border-t border-line">
+    <div className="min-w-0">
       <Controls sections={sections} current={current} onGo={goTo} />
 
       {/*
@@ -223,7 +223,7 @@ export function SectionNavigator({
           <section
             key={entry.id}
             id={entry.id}
-            className="py-6"
+            className={"mx-auto min-w-0 py-6" + (kind === "practice" ? " w-full" : " max-w-[45rem]")}
             style={index === current ? undefined : { display: "none" }}
             aria-hidden={index === current ? undefined : true}
           >
@@ -280,8 +280,8 @@ function Controls({
   const coding = sections.findIndex((entry) => kindOf(entry) === "practice");
 
   return (
-    <div className="py-4">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+    <div className="mx-auto max-w-[45rem] border-t border-line py-4">
+      <div className="flex items-center gap-3">
         <ArrowButton
           direction="back"
           disabled={first}
@@ -294,7 +294,7 @@ function Controls({
           <select
             value={current}
             onChange={(event) => onGo(Number(event.target.value))}
-            className="min-w-0 flex-1 truncate rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium text-foreground"
+            className="h-11 min-w-0 flex-1 truncate rounded-md border border-line bg-surface px-3 text-sm font-medium text-foreground"
           >
             {sections.map((entry, index) => {
               const kind = kindOf(entry);
@@ -316,7 +316,7 @@ function Controls({
           </select>
         </label>
 
-        <span className="shrink-0 font-mono text-xs tabular-nums text-muted">
+        <span className="w-[7ch] shrink-0 whitespace-nowrap text-center font-mono text-xs tabular-nums text-muted">
           {current + 1} / {sections.length}
         </span>
 
@@ -371,9 +371,9 @@ function ArrowButton({
       disabled={disabled}
       aria-label={label}
       title={label}
-      className="shrink-0 rounded-md border border-line bg-surface px-3 py-2 text-foreground transition hover:bg-raised disabled:opacity-40 disabled:hover:bg-surface"
+      className="flex size-11 shrink-0 items-center justify-center rounded-md border border-line bg-surface text-foreground transition hover:bg-raised disabled:opacity-40 disabled:hover:bg-surface"
     >
-      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="h-5 w-5">
+      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="size-5 shrink-0">
         {direction === "back" ? (
           <path
             fillRule="evenodd"

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="sampling-and-temperature"
     title="Sampling and Temperature"
     tagline="Control how predictions become choices while keeping the model's learned weights fixed."
     openingTitle="Must a Model Always Choose Its Favorite Word?"

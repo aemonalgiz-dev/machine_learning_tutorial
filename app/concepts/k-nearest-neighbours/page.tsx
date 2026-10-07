@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 export default function KNearestNeighboursPage() {
   return (
     <ConceptPage
+      lessonId="k-nearest-neighbours"
       intuition={lessonIntuitions["k-nearest-neighbours"]}
       technicalStart="The Mechanism"
       openingTitle="Ask the Examples That Look Most Alike"

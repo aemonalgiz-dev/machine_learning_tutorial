@@ -32,6 +32,7 @@ const link =
 export default function SplittingOnSpacesPage() {
   return (
     <ConceptPage
+      lessonId="splitting-on-spaces"
       intuition={lessonIntuitions["splitting-on-spaces"]}
       technicalStart="Part 2. A Piece, and the Place It Came From"
       openingTitle="The Simplest Word Rule Already Makes a Choice"

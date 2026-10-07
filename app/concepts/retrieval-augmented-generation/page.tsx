@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="retrieval-augmented-generation"
     title="Retrieval-Augmented Generation"
     tagline="Find relevant source material, place it in context, and check the answer against that evidence."
     openingTitle="What If the Answer Lives in a Document the Model Needs to Read?"

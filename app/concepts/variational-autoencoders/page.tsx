@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="variational-autoencoders"
     title="Variational Autoencoders"
     tagline="Train reconstruction together with a distribution from which new latent codes can be drawn."
     openingTitle="Which Hidden Codes Should We Use to Create Something New?"

@@ -38,6 +38,7 @@ const linkClass =
 export default function MultiplePolynomialRegressionPage() {
   return (
     <ConceptPage
+      lessonId="multiple-polynomial-regression"
       intuition={lessonIntuitions["multiple-polynomial-regression"]}
       technicalStart="Part 3. Features Can Be Constructed"
       openingTitle="When One Input Cannot Explain Enough"

@@ -39,6 +39,7 @@ const linkClass =
 export default function LogisticRegressionPage() {
   return (
     <ConceptPage
+      lessonId="logistic-regression"
       intuition={lessonIntuitions["logistic-regression"]}
       technicalStart="Part 2. Score, Probability, and Decision"
       openingTitle="A Prediction Between Yes and No"

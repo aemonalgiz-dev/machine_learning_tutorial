@@ -31,6 +31,7 @@ const link =
 export default function FiniteScalarQuantisationPage() {
   return (
     <ConceptPage
+      lessonId="finite-scalar-quantisation"
       intuition={lessonIntuitions["finite-scalar-quantisation"]}
       technicalStart="Part 2. Squashing and Rounding, One Coordinate at a Time"
       openingTitle="Round Each Coordinate Instead of Learning a Table"

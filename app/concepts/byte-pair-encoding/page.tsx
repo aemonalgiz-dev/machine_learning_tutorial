@@ -35,6 +35,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function BytePairEncodingPage() {
   return (
     <ConceptPage
+      lessonId="byte-pair-encoding"
       intuition={lessonIntuitions["byte-pair-encoding"]}
       technicalStart="Part 2. Growing a Vocabulary One Pair at a Time"
       openingTitle="A New Word Can Be Made from Familiar Pieces"

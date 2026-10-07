@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 export default function SegmentingWithAHiddenModelPage() {
   return (
     <ConceptPage
+      lessonId="segmenting-with-a-hidden-model"
       intuition={lessonIntuitions["segmenting-with-a-hidden-model"]}
       technicalStart="Part 2. Four Places, and Why Four Are Enough"
       openingTitle="A Word the Dictionary Has Never Seen"

@@ -38,6 +38,7 @@ const link =
 export default function Word2vecPage() {
   return (
     <ConceptPage
+      lessonId="word2vec"
       intuition={lessonIntuitions["word2vec"]}
       technicalStart="Part 3. Which Side Predicts Which"
       openingTitle="Learn a Word by Trying to Predict Its Neighbours"

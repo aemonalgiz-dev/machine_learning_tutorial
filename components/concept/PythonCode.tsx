@@ -92,7 +92,7 @@ export function PythonCode({
           )}
         </div>
       )}
-      <pre className="overflow-x-auto px-4 py-3 font-mono text-[13px] leading-6 text-foreground">
+      <pre className="max-h-96 overflow-auto px-4 py-3 font-mono text-[13px] leading-6 text-foreground">
         <code>
           {tokenise(source).map((token, index) =>
             token.kind === "plain" ? (
@@ -116,7 +116,7 @@ export function ProgramOutput({ output }: { output: string }) {
       <div className="border-b border-line bg-raised px-3 py-1.5 font-mono text-xs text-muted">
         Output
       </div>
-      <pre className="overflow-x-auto px-4 py-3 font-mono text-[13px] leading-6 text-foreground">
+      <pre className="max-h-80 overflow-auto px-4 py-3 font-mono text-[13px] leading-6 text-foreground">
         <code>{output}</code>
       </pre>
     </div>

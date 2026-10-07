@@ -34,6 +34,7 @@ const link =
 export default function ShapesAndFlatteningPage() {
   return (
     <ConceptPage
+      lessonId="shapes-and-flattening"
       intuition={lessonIntuitions["shapes-and-flattening"]}
       technicalStart="Part 3. One Seam, Settled in Integers"
       openingTitle="The Right Number of Values Can Still Be the Wrong Shape"

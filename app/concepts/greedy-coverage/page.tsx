@@ -33,6 +33,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function GreedyCoveragePage() {
   return (
     <ConceptPage
+      lessonId="greedy-coverage"
       intuition={lessonIntuitions["greedy-coverage"]}
       technicalStart="Part 2. One Turn at a Time"
       openingTitle="Which New Piece Covers the Most Text?"

@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 export default function LinearAlgebraPrimerPage() {
   return (
     <PrimerPage
+      lessonId="linear-algebra"
       technicalStart="12. Matrix-Vector Multiplication"
       title="Linear Algebra Primer"
       tagline="Build vectors and matrices from small examples, then use them to describe model calculations."

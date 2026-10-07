@@ -32,6 +32,7 @@ const link =
 export default function CentringOnTheMeanPage() {
   return (
     <ConceptPage
+      lessonId="centring-on-the-mean"
       intuition={lessonIntuitions["centring-on-the-mean"]}
       technicalStart="Part 1. Moving the Zero to the Average Person"
       openingTitle="Move Zero to Somewhere Useful"

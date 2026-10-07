@@ -33,6 +33,7 @@ const link =
 export default function SearchingACollectionOfPicturesPage() {
   return (
     <ConceptPage
+      lessonId="searching-a-collection-of-pictures"
       intuition={lessonIntuitions["searching-a-collection-of-pictures"]}
       technicalStart="Part 2. What the Exact Answer Costs"
       openingTitle="A Useful Similarity Measure Still Has to Search the Collection"

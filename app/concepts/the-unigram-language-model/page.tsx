@@ -33,6 +33,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function UnigramLanguageModelPage() {
   return (
     <ConceptPage
+      lessonId="the-unigram-language-model"
       intuition={lessonIntuitions["the-unigram-language-model"]}
       technicalStart="Part 3. Finding the Likeliest Cut"
       openingTitle="Keep the Pieces Whose Removal Would Hurt Most"

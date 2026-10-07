@@ -30,6 +30,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function MaximumMatchingPage() {
   return (
     <ConceptPage
+      lessonId="maximum-matching"
       intuition={lessonIntuitions["maximum-matching"]}
       technicalStart="Part 2. Take the Longest Entry That Fits"
       openingTitle="Where Do the Words End When There Are No Spaces?"

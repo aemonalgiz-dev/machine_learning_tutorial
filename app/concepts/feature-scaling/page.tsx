@@ -34,6 +34,7 @@ const link =
 export default function FeatureScalingPage() {
   return (
     <ConceptPage
+      lessonId="feature-scaling"
       intuition={lessonIntuitions["feature-scaling"]}
       technicalStart="Part 2. One Map, Two Numbers"
       openingTitle="The Same Person, a Different Unit, a Different Answer"

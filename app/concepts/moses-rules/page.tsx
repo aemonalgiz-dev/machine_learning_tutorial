@@ -33,6 +33,7 @@ const link =
 export default function MosesRulesPage() {
   return (
     <ConceptPage
+      lessonId="moses-rules"
       intuition={lessonIntuitions["moses-rules"]}
       technicalStart="Part 2. The Full Stop, and the List It Cannot Do Without"
       openingTitle="A Full Stop Does Not Always End a Sentence"

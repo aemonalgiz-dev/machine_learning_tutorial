@@ -17,6 +17,8 @@ import { GuidedIntuition, IntuitionConnection } from "./GuidedIntuition";
 import type { LessonIntuition } from "@/lib/intuition/types";
 import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
+import { lessonHistories, type HistoryLessonId } from "@/lib/history";
+import { HistoricalContext } from "./HistoricalContext";
 
 export interface ConceptSection {
   title: string;
@@ -32,6 +34,7 @@ export interface ConceptSection {
 }
 
 interface ConceptPageProps {
+  lessonId: HistoryLessonId;
   title: string;
   tagline: string;
   openingTitle: string;
@@ -69,6 +72,7 @@ export function LessonMeta({
 }
 
 export function ConceptPage({
+  lessonId,
   title,
   tagline,
   openingTitle,
@@ -123,6 +127,11 @@ export function ConceptPage({
   };
 
   const all: NavigableSection[] = [
+    {
+      title: lessonHistories[lessonId].title,
+      id: "history",
+      content: <HistoricalContext lesson={lessonHistories[lessonId]} />,
+    },
     opening,
     workedExample,
     ...sections.map((section) => ({
@@ -136,8 +145,8 @@ export function ConceptPage({
   const { questions, problems } = lessonSummary(sections);
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-12">
-      <header className="mb-6">
+    <article className="mx-auto max-w-7xl px-6 py-12">
+      <header className="mx-auto mb-6 max-w-[45rem]">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{title}</h1>
         <p className="mt-3 text-lg text-muted">{tagline}</p>
         <LessonMeta parts={all.length} questions={questions} problems={problems} />

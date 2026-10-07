@@ -37,6 +37,7 @@ const linkClass =
 export default function BaggingPage() {
   return (
     <ConceptPage
+      lessonId="bagging"
       intuition={lessonIntuitions["bagging"]}
       technicalStart="Part 3. Building the Bagged Ensemble"
       openingTitle="When One Tree Changes Its Mind"

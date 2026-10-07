@@ -33,6 +33,7 @@ const caption = "text-sm text-slate-500 dark:text-slate-400";
 export default function PictureVectorPage() {
   return (
     <ConceptPage
+      lessonId="a-vector-for-a-picture"
       intuition={lessonIntuitions["a-vector-for-a-picture"]}
       technicalStart="Part 2. Reading A Vector Off A Network That Names"
       openingTitle="Pictures Can Look Alike Without Matching Pixel for Pixel"

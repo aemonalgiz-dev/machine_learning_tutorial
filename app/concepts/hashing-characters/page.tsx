@@ -34,6 +34,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function HashingCharactersPage() {
   return (
     <ConceptPage
+      lessonId="hashing-characters"
       intuition={lessonIntuitions["hashing-characters"]}
       technicalStart="Part 2. One Character, Eight Numbers"
       openingTitle="Choose the Table Size Before Seeing the Alphabet"

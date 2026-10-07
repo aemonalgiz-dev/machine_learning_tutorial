@@ -35,6 +35,7 @@ const link =
 export default function PolynomialFeaturesPage() {
   return (
     <ConceptPage
+      lessonId="polynomial-features"
       intuition={lessonIntuitions["polynomial-features"]}
       technicalStart="Part 3. Powers and Products"
       openingTitle="Give a Straight-Line Model Something Curved to Read"

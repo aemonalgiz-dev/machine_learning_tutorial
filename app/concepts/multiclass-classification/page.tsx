@@ -37,6 +37,7 @@ const linkClass =
 export default function MulticlassClassificationPage() {
   return (
     <ConceptPage
+      lessonId="multiclass-classification"
       intuition={lessonIntuitions["multiclass-classification"]}
       technicalStart="Part 3. Softmax"
       openingTitle="More Than Two Possible Answers"

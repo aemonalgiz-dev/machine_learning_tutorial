@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="supervised-fine-tuning"
     title="Supervised Fine-Tuning"
     tagline="Use prompt-response examples to adapt the behavior of an already trained model."
     openingTitle="How Do We Teach a Text Predictor to Respond the Way We Need?"

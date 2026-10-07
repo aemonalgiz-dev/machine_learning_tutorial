@@ -39,6 +39,7 @@ const linkClass =
 export default function BackpropagationPage() {
   return (
     <ConceptPage
+      lessonId="backpropagation"
       intuition={lessonIntuitions["backpropagation"]}
       technicalStart="Part 2. Backward Through the Output Neuron"
       openingTitle="Which Weight Should Change?"

@@ -35,6 +35,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function HeldOutEvaluationPage() {
   return (
     <ConceptPage
+      lessonId="held-out-evaluation"
       intuition={lessonIntuitions["held-out-evaluation"]}
       technicalStart="Part 4. Every Row Takes a Turn"
       openingTitle="The Model Has Already Seen the Answers"

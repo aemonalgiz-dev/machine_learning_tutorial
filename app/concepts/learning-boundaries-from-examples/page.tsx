@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 export default function LearningBoundariesFromExamplesPage() {
   return (
     <ConceptPage
+      lessonId="learning-boundaries-from-examples"
       intuition={lessonIntuitions["learning-boundaries-from-examples"]}
       technicalStart="Part 2. What a Gap Is Asked"
       openingTitle="Ask Each Gap Whether a Word Ends Here"

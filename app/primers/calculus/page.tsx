@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 export default function CalculusPrimerPage() {
   return (
     <PrimerPage
+      lessonId="calculus"
       technicalStart="7. Deriving the Slope Function"
       title="Calculus Primer"
       tagline="Build derivatives from changes you can measure, then use them to guide small improvements."

@@ -34,6 +34,7 @@ const link =
 export default function TrainingANetworkPage() {
   return (
     <ConceptPage
+      lessonId="training-a-network"
       intuition={lessonIntuitions["training-a-network"]}
       technicalStart="Part 2. The Size of the Step"
       openingTitle="One Better Guess Is Only the Beginning"

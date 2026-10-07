@@ -35,6 +35,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function NormalisationLayersPage() {
   return (
     <ConceptPage
+      lessonId="normalisation-layers"
       intuition={lessonIntuitions["normalisation-layers"]}
       technicalStart="Part 2. Standardise Inside the Model"
       openingTitle="The Inputs Keep Changing While the Layer Learns"

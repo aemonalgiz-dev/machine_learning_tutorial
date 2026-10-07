@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="diffusion-models"
     title="Diffusion Models"
     tagline="Create a learning task from controlled corruption, then use a trained reverse process to generate."
     openingTitle="Can Learning to Remove Noise Teach a Model to Create?"

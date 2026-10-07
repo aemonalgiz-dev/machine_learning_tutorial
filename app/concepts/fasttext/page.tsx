@@ -35,6 +35,7 @@ const link =
 export default function FasttextPage() {
   return (
     <ConceptPage
+      lessonId="fasttext"
       intuition={lessonIntuitions["fasttext"]}
       technicalStart="Part 2. A Word Made of Its Spelling"
       openingTitle="An Unfamiliar Word May Have Familiar Parts"

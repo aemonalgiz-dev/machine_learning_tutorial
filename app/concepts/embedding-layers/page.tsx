@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Embedding Layers · oop_ml", descrip
 
 export default function EmbeddingLayersPage() {
   return <ConceptPage
+      lessonId="embedding-layers"
       intuition={lessonIntuitions["embedding-layers"]} title="Embedding Layers" tagline="Give each token a vector that the training process can change."
     openingTitle="An ID Tells Us Which Word, but What Can We Do with It?"
     technicalStart="Part 2. Training the Table"

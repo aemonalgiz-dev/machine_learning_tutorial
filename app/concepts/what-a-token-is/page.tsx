@@ -31,6 +31,7 @@ const link =
 export default function WhatATokenIsPage() {
   return (
     <ConceptPage
+      lessonId="what-a-token-is"
       intuition={lessonIntuitions["what-a-token-is"]}
       technicalStart="Part 2. What a Vocabulary Promises"
       openingTitle="How Can Our Models Read Language?"

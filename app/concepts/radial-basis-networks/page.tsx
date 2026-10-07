@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Radial Basis Networks · oop_ml", de
 
 export default function RadialBasisNetworksPage() {
   return <ConceptPage
+      lessonId="radial-basis-networks"
       intuition={lessonIntuitions["radial-basis-networks"]} title="Radial Basis Networks" tagline="Represent an input by how strongly it matches several local regions."
     openingTitle="What If a Pattern Matters Only Nearby?"
     technicalStart="Part 2. Calculating and Learning the Response"

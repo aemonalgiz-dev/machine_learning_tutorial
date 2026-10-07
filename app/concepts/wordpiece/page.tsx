@@ -32,6 +32,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function WordPiecePage() {
   return (
     <ConceptPage
+      lessonId="wordpiece"
       intuition={lessonIntuitions["wordpiece"]}
       technicalStart="Part 2. The Score That Replaces the Count"
       openingTitle="A Common Pair May Only Have Common Halves"

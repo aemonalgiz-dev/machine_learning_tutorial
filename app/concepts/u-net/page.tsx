@@ -32,6 +32,7 @@ const link =
 export default function UNetPage() {
   return (
     <ConceptPage
+      lessonId="u-net"
       intuition={lessonIntuitions["u-net"]}
       technicalStart="Part 2. The Shape of the U"
       openingTitle="Knowing What Is There Does Not Tell Us Where"

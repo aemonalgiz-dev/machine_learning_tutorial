@@ -33,6 +33,7 @@ const link =
 export default function ImageAlignmentPage() {
   return (
     <ConceptPage
+      lessonId="image-alignment"
       intuition={lessonIntuitions["image-alignment"]}
       technicalStart="Part 2. A Direction That Belongs To The Corner"
       openingTitle="Two Photographs Of One Scene"

@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 export default function StatisticsPrimerPage() {
   return (
     <PrimerPage
+      lessonId="statistics"
       technicalStart="10. Covariance"
       title="Statistics and Probability Primer"
       tagline="Describe a sample, compare variables, and separate the observed pattern from uncertainty about new data."

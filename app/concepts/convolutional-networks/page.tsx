@@ -34,6 +34,7 @@ const link =
 export default function ConvolutionalNetworksPage() {
   return (
     <ConceptPage
+      lessonId="convolutional-networks"
       intuition={lessonIntuitions["convolutional-networks"]}
       technicalStart="Part 2. Training It End to End"
       openingTitle="From Local Patterns to a Name for the Picture"

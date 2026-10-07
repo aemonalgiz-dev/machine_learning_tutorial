@@ -32,6 +32,7 @@ const link =
 export default function PennTreebankRulesPage() {
   return (
     <ConceptPage
+      lessonId="penn-treebank-rules"
       intuition={lessonIntuitions["penn-treebank-rules"]}
       technicalStart="Part 2. The Contraction, Cut Where the Grammar Wants It"
       openingTitle="A Written Word Can Contain More Than One Grammatical Piece"

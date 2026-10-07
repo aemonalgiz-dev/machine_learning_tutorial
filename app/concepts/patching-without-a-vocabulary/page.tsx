@@ -31,6 +31,7 @@ const link =
 export default function PatchingWithoutAVocabularyPage() {
   return (
     <ConceptPage
+      lessonId="patching-without-a-vocabulary"
       intuition={lessonIntuitions["patching-without-a-vocabulary"]}
       technicalStart="Part 2. Cutting at a Fixed Size"
       openingTitle="Bytes Solve Coverage and Create a Length Problem"

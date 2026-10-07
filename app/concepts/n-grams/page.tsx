@@ -34,6 +34,7 @@ const link =
 export default function NGramsPage() {
   return (
     <ConceptPage
+      lessonId="n-grams"
       intuition={lessonIntuitions["n-grams"]}
       technicalStart="Part 2. From Counts to a Prediction"
       openingTitle="One Previous Word May Not Be Enough"

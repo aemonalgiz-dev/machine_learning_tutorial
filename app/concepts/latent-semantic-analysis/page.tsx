@@ -35,6 +35,7 @@ const link =
 export default function LatentSemanticAnalysisPage() {
   return (
     <ConceptPage
+      lessonId="latent-semantic-analysis"
       intuition={lessonIntuitions["latent-semantic-analysis"]}
       technicalStart="Part 3. Squeezing The Table"
       openingTitle="A Large Word Table May Have a Smaller Pattern Inside It"

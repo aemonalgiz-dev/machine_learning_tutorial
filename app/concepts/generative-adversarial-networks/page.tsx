@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="generative-adversarial-networks"
     title="Generative Adversarial Networks"
     tagline="Learn a generator by training another model to distinguish its outputs from real examples."
     openingTitle="Who Can Tell a Generator What It Is Getting Wrong?"

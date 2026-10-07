@@ -29,6 +29,7 @@ export const metadata: Metadata = {
 export default function TheWordLatticePage() {
   return (
     <ConceptPage
+      lessonId="the-word-lattice"
       intuition={lessonIntuitions["the-word-lattice"]}
       technicalStart="Part 2. What a Whole Reading Is Worth"
       openingTitle="A Good First Word Can Leave a Bad Ending"

@@ -34,6 +34,7 @@ const link =
 export default function PoolingATextPage() {
   return (
     <ConceptPage
+      lessonId="pooling-a-text"
       intuition={lessonIntuitions["pooling-a-text"]}
       technicalStart="Part 3. Averaging The Positions Instead"
       openingTitle="One Vector for a Sentence Full of Words"

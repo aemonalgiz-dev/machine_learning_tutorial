@@ -32,6 +32,7 @@ const link =
 export default function TemplateMatchingPage() {
   return (
     <ConceptPage
+      lessonId="template-matching"
       intuition={lessonIntuitions["template-matching"]}
       technicalStart="Part 2. Three Ways To Score A Fit"
       openingTitle="Find This Small Picture Inside That Larger One"

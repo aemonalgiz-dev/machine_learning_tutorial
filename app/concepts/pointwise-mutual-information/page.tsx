@@ -33,6 +33,7 @@ const link =
 export default function PointwiseMutualInformationPage() {
   return (
     <ConceptPage
+      lessonId="pointwise-mutual-information"
       intuition={lessonIntuitions["pointwise-mutual-information"]}
       technicalStart="Part 2. The Score, On One Pair"
       openingTitle="Together More Often Than We Would Expect"

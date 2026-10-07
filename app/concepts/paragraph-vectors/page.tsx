@@ -33,6 +33,7 @@ const link =
 export default function ParagraphVectorsPage() {
   return (
     <ConceptPage
+      lessonId="paragraph-vectors"
       intuition={lessonIntuitions["paragraph-vectors"]}
       technicalStart="Part 2. A Document As A Word That Is Always There"
       openingTitle="Give the Whole Document Something to Learn"

@@ -31,6 +31,7 @@ const link =
 export default function FeatureImportancePage() {
   return (
     <ConceptPage
+      lessonId="feature-importance"
       intuition={lessonIntuitions["feature-importance"]}
       technicalStart="Part 4. Breaking a Column on Purpose"
       openingTitle="What Did the Model Actually Use?"

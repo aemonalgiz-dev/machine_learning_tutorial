@@ -2,10 +2,9 @@
 
 export const REPOSITORY = "https://github.com/aemonalgiz-dev/oop_ml";
 
-// The optional coffee link on the home page. Empty until there is somewhere
-// to send people, so the line stays as plain words rather than a broken link.
-export const COFFEE_URL = "";
+// The shared support destination, with an optional deployment override.
+export const PATREON_URL =
+  process.env.NEXT_PUBLIC_PATREON_URL?.trim() || "https://www.patreon.com/JeffreyGordon";
 
-// Set this when the Patreon page is ready. Until then the header displays
-// the support message as text, without sending readers to an unfinished page.
-export const PATREON_URL = process.env.NEXT_PUBLIC_PATREON_URL?.trim() ?? "";
+// The home page's coffee invitation leads to the same Patreon memberships.
+export const COFFEE_URL = PATREON_URL;

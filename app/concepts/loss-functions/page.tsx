@@ -32,6 +32,7 @@ const link =
 export default function LossFunctionsPage() {
   return (
     <ConceptPage
+      lessonId="loss-functions"
       intuition={lessonIntuitions["loss-functions"]}
       technicalStart="Part 2. Three Ways to Price a Miss in Kilograms"
       openingTitle="How Wrong Was That Prediction?"

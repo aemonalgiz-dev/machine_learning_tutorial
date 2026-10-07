@@ -35,6 +35,7 @@ const link =
 export default function KeypointsAndDescriptorsPage() {
   return (
     <ConceptPage
+      lessonId="keypoints-and-descriptors"
       intuition={lessonIntuitions["keypoints-and-descriptors"]}
       technicalStart="Part 3. Scoring A Corner"
       openingTitle="Find Places You Can Recognise Again"

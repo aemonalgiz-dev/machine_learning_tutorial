@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="low-rank-adaptation"
     title="Low-Rank Adaptation"
     tagline="Express a trainable correction through a narrow pair of matrices while freezing the base projection."
     openingTitle="Do We Need to Change Every Weight to Teach a New Task?"

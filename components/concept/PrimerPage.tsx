@@ -17,6 +17,8 @@ import { sectionId } from "./sectionId";
 import { LessonMeta, lessonSummary } from "./ConceptPage";
 import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
+import { lessonHistories, type HistoryLessonId } from "@/lib/history";
+import { HistoricalContext } from "./HistoricalContext";
 export { Equation } from "./Equation";
 
 interface PrimerSectionProps {
@@ -38,11 +40,13 @@ interface PrimerPracticeProps {
 type PrimerChild = React.ReactElement<PrimerSectionProps | PrimerQuizProps | PrimerPracticeProps>;
 
 export function PrimerPage({
+  lessonId,
   title,
   tagline,
   prerequisites,
   children,
 }: {
+  lessonId: HistoryLessonId;
   title: string;
   tagline: string;
   technicalStart: string;
@@ -94,11 +98,16 @@ export function PrimerPage({
         ),
     };
   });
+  sections.unshift({
+    title: lessonHistories[lessonId].title,
+    id: "history",
+    content: <HistoricalContext lesson={lessonHistories[lessonId]} />,
+  });
   const { questions, problems } = lessonSummary(sections);
 
   return (
-    <article className="mx-auto max-w-3xl px-6 py-12">
-      <header className="mb-6">
+    <article className="mx-auto max-w-7xl px-6 py-12">
+      <header className="mx-auto mb-6 max-w-[45rem]">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{title}</h1>
         <p className="mt-3 text-lg text-muted">{tagline}</p>
         <LessonMeta parts={sections.length} questions={questions} problems={problems} />

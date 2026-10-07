@@ -33,6 +33,7 @@ export const metadata: Metadata = {
 export default function OrientedGradientsPage() {
   return (
     <ConceptPage
+      lessonId="histogram-of-oriented-gradients"
       intuition={lessonIntuitions["histogram-of-oriented-gradients"]}
       technicalStart="Part 2. Counting Directions Inside A Cell"
       openingTitle="Describe Which Way the Edges Point"

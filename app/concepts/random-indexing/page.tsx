@@ -35,6 +35,7 @@ const link =
 export default function RandomIndexingPage() {
   return (
     <ConceptPage
+      lessonId="random-indexing"
       intuition={lessonIntuitions["random-indexing"]}
       technicalStart="Part 2. A Direction For Every Word"
       openingTitle="Keep a Sketch Instead of the Whole Count Table"

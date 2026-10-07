@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Attention · oop_ml", description: "
 
 export default function AttentionPage() {
   return <ConceptPage
+      lessonId="attention"
       intuition={lessonIntuitions["attention"]} title="Attention" tagline="Let each token gather the information it needs from the surrounding tokens."
     openingTitle="Which Words Help Us Understand This One?"
     technicalStart="Part 2. Calculating Attention"

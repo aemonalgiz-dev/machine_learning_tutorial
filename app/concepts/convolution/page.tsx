@@ -36,6 +36,7 @@ const link =
 export default function ConvolutionPage() {
   return (
     <ConceptPage
+      lessonId="convolution"
       intuition={lessonIntuitions["convolution"]}
       technicalStart="Part 2. One Kernel, Swept"
       openingTitle="Look for the Same Pattern in More Than One Place"

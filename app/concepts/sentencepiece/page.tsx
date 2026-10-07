@@ -36,6 +36,7 @@ const MARK = "▁";
 export default function SentencePiecePage() {
   return (
     <ConceptPage
+      lessonId="sentencepiece"
       intuition={lessonIntuitions["sentencepiece"]}
       technicalStart="Part 2. The Space as a Symbol"
       openingTitle="Learn the Pieces Before Deciding Where the Words Are"

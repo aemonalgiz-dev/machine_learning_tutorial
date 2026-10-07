@@ -35,6 +35,7 @@ const link =
 export default function GlovePage() {
   return (
     <ConceptPage
+      lessonId="glove"
       intuition={lessonIntuitions["glove"]}
       technicalStart="Part 3. What The Vectors Are Asked To Reproduce"
       openingTitle="Count the Neighbours Once, Then Fit Their Relationships"

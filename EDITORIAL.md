@@ -29,6 +29,14 @@ Keep hand-built illustrations clearly distinct from trained model results.
   metadata, labels and documentation.
 - Open with a concrete problem and a heading specific to it. Do not reuse
   "Where This Came From" as a template heading.
+- Every lesson has a historical opening in `lib/history/`, selected by its
+  `lessonId`. Start with the problem people faced, explain the documented
+  contribution, then give an intuitive account of why it helps. Link primary
+  sources. Distinguish an influential example from an invention or priority
+  claim, and distinguish the original method from this site's teaching variant.
+  Use topic-specific headings and preserve the existing section and practice
+  links when adding history. Dates and names should support the explanation,
+  not replace it.
 - Introduce components before combining them. For a neuron, explain weights,
   bias and activation individually before calculating a score and output.
 - Explain what an operation does and why it matters. Do not use "bend" as

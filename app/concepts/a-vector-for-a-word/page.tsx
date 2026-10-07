@@ -34,6 +34,7 @@ export const metadata: Metadata = {
 export default function WordVectorPage() {
   return (
     <ConceptPage
+      lessonId="a-vector-for-a-word"
       intuition={lessonIntuitions["a-vector-for-a-word"]}
       technicalStart="Part 2. Nearness Measured As An Angle"
       openingTitle="A Word's ID Cannot Tell Us What It Resembles"

@@ -35,6 +35,7 @@ const link =
 export default function RestrictedBoltzmannMachinePage() {
   return (
     <ConceptPage
+      lessonId="restricted-boltzmann-machine"
       intuition={lessonIntuitions["restricted-boltzmann-machine"]}
       technicalStart="Part 2. What the Word Restricted Buys"
       openingTitle="Learn What the Patterns Have in Common"

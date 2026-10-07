@@ -18,11 +18,11 @@ const courseHighlighting = syntaxHighlighting(HighlightStyle.define([
 ]));
 
 const courseTheme = EditorView.theme({
-  "&": { color: "var(--foreground)", backgroundColor: "var(--surface)", fontSize: "13px" },
+  "&": { height: "clamp(20rem, 52vh, 32rem)", color: "var(--foreground)", backgroundColor: "var(--surface)", fontSize: "13px" },
   "&.cm-focused": { outline: "2px solid var(--accent-fill)", outlineOffset: "-2px" },
-  ".cm-content": { fontFamily: "var(--font-geist-mono), monospace", padding: "14px 0", minHeight: "260px", caretColor: "var(--foreground)" },
+  ".cm-content": { fontFamily: "var(--font-geist-mono), monospace", padding: "14px 0", caretColor: "var(--foreground)" },
   ".cm-line": { padding: "0 16px 0 10px" },
-  ".cm-scroller": { overflow: "auto", lineHeight: "1.7", maxHeight: "520px" },
+  ".cm-scroller": { overflow: "auto", minHeight: "0", lineHeight: "1.7" },
   ".cm-gutters": { backgroundColor: "var(--raised)", color: "var(--muted)", borderColor: "var(--line)" },
   ".cm-activeLine, .cm-activeLineGutter": { backgroundColor: "var(--accent-soft)" },
   ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--foreground)" },
@@ -56,7 +56,6 @@ export default function PythonEditor({
         doc: startingValue.current,
         extensions: [
           basicSetup, python(), indentUnit.of("    "), courseTheme, courseHighlighting,
-          EditorView.lineWrapping,
           EditorView.contentAttributes.of({ "aria-label": label, "aria-describedby": helpId, spellcheck: "false" }),
           keymap.of([
             { key: "Mod-Enter", run: () => { actions.current.onRun(); return true; } },

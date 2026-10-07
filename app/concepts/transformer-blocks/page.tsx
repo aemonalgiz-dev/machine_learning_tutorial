@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="transformer-blocks"
     title="Transformer Blocks"
     tagline="Combine attention, residual connections, and local processing into one reusable component."
     openingTitle="How Do We Build a Model Around Attention?"

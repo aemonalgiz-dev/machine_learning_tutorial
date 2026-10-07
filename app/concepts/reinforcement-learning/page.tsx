@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <ConceptPage
+      lessonId="reinforcement-learning"
       title="Reinforcement Learning"
       tagline="Let an agent try an action, observe its consequences, and use that experience to improve its next decision."
       openingTitle="How Can a Model Learn When We Can Judge the Result?"

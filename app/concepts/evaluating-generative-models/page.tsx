@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="evaluating-generative-models"
     title="Evaluating Generative Models"
     tagline="Match the measurement to the task, preserve a held-out comparison, and inspect what averages conceal."
     openingTitle="A Response Looks Convincing. How Do We Know the Model Improved?"

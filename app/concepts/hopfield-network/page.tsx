@@ -34,6 +34,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function HopfieldNetworkPage() {
   return (
     <ConceptPage
+      lessonId="hopfield-network"
       intuition={lessonIntuitions["hopfield-network"]}
       technicalStart="Part 2. Storing Patterns in One Shot"
       openingTitle="Can a Damaged Pattern Find Its Way Back?"

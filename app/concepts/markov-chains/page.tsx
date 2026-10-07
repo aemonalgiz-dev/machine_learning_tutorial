@@ -37,6 +37,7 @@ const link =
 export default function MarkovChainsPage() {
   return (
     <ConceptPage
+      lessonId="markov-chains"
       intuition={lessonIntuitions["markov-chains"]}
       technicalStart="Part 2. Counting Is the Whole Fit"
       openingTitle="How Much of the Past Do We Need?"

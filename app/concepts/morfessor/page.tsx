@@ -32,6 +32,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function MorfessorPage() {
   return (
     <ConceptPage
+      lessonId="morfessor"
       intuition={lessonIntuitions["morfessor"]}
       technicalStart="Part 2. The Shortest Description"
       openingTitle="Where Would the Language Put the Cut?"

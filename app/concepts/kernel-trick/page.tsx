@@ -32,6 +32,7 @@ function PreviousSection({ id }: { id: string }) {
 export default function KernelTrickPage() {
   return (
     <ConceptPage
+      lessonId="kernel-trick"
       title="The Kernel Trick"
       tagline="Change how the points are represented, then look for a simple boundary."
       openingTitle="What If the Middle Belongs to One Class?"

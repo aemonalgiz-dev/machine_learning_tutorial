@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Residual Connections · oop_ml", des
 
 export default function ResidualConnectionsPage() {
   return <ConceptPage
+      lessonId="residual-connections"
       intuition={lessonIntuitions["residual-connections"]} title="Residual Connections" tagline="Carry an input forward while a layer learns what to add to it."
     openingTitle="Do We Need to Rebuild a Useful Representation?"
     technicalStart="Part 2. The Two Routes Through the Calculation"

@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 export default function MovingAVocabularyPage() {
   return (
     <ConceptPage
+      lessonId="moving-a-vocabulary"
       intuition={lessonIntuitions["moving-a-vocabulary"]}
       technicalStart="Part 2. What a Move Has to Decide"
       openingTitle="The Same Token ID Can Mean Something Else"

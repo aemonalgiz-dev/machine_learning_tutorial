@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="next-token-prediction"
     title="Next-Token Prediction"
     tagline="Build the training task behind an autoregressive large language model."
     openingTitle="What Is a Language Model Actually Learning to Predict?"

@@ -34,6 +34,7 @@ const link =
 export default function GridSearchPage() {
   return (
     <ConceptPage
+      lessonId="grid-search"
       intuition={lessonIntuitions["grid-search"]}
       technicalStart="Part 2. The Grid"
       openingTitle="The Fit Cannot Choose Every Setting"

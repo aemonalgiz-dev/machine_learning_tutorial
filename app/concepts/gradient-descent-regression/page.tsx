@@ -36,6 +36,7 @@ const linkClass =
 export default function GradientDescentRegressionPage() {
   return (
     <ConceptPage
+      lessonId="gradient-descent-regression"
       intuition={lessonIntuitions["gradient-descent-regression"]}
       technicalStart="Part 3. The Gradient as a Local Direction"
       openingTitle="Finding the Line Without Knowing the Answer"

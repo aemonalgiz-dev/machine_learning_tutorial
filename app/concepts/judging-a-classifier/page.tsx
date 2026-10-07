@@ -35,6 +35,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function JudgingAClassifierPage() {
   return (
     <ConceptPage
+      lessonId="judging-a-classifier"
       intuition={lessonIntuitions["judging-a-classifier"]}
       technicalStart="Part 2. Two Questions Asked of One Table"
       openingTitle="Two Models Can Be Equally Accurate and Fail Differently"

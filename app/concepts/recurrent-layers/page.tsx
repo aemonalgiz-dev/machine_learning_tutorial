@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Recurrent Layers · oop_ml", descrip
 
 export default function RecurrentLayersPage() {
   return <ConceptPage
+      lessonId="recurrent-layers"
       intuition={lessonIntuitions["recurrent-layers"]} title="Recurrent Layers" tagline="Read a sequence one step at a time and carry information forward."
     openingTitle="How Do We Remember What Came Before?"
     technicalStart="Part 2. Controlling What the State Retains"

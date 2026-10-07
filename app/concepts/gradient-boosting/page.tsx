@@ -37,6 +37,7 @@ const link =
 export default function GradientBoostingPage() {
   return (
     <ConceptPage
+      lessonId="gradient-boosting"
       intuition={lessonIntuitions["gradient-boosting"]}
       technicalStart="Part 1. Fitting What Is Still Wrong"
       openingTitle="Let the Next Tree Work on What Is Still Wrong"

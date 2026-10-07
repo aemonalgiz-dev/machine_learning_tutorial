@@ -36,6 +36,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function KernelRidgePage() {
   return (
     <ConceptPage
+      lessonId="kernel-ridge"
       intuition={lessonIntuitions["kernel-ridge"]}
       technicalStart="Part 2. One Number Per Row"
       openingTitle="Build a Curve from Similarities to the Training Points"

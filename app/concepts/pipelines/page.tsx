@@ -35,6 +35,7 @@ const link =
 export default function PipelinesPage() {
   return (
     <ConceptPage
+      lessonId="pipelines"
       intuition={lessonIntuitions["pipelines"]}
       technicalStart="Part 2. One Chain, One Fit, One Predict"
       openingTitle="The Test Answers Can Leak in Before the Fit"

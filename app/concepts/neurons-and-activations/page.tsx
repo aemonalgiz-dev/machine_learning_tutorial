@@ -33,6 +33,7 @@ const link =
 export default function NeuronsAndActivationsPage() {
   return (
     <ConceptPage
+      lessonId="neurons-and-activations"
       intuition={lessonIntuitions["neurons-and-activations"]}
       technicalStart="Part 3. The Four Activation Functions"
       openingTitle="What Is Inside an Artificial Neuron?"

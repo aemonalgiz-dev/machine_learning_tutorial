@@ -35,6 +35,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function BytesAndCharactersPage() {
   return (
     <ConceptPage
+      lessonId="bytes-and-characters"
       intuition={lessonIntuitions["bytes-and-characters"]}
       technicalStart="Part 2. Reading the Units the Text Is Already Made Of"
       openingTitle="A Tiny Alphabet Can Spell a Very Long Sentence"

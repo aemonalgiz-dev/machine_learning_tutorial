@@ -27,6 +27,7 @@ export const metadata: Metadata = {
 export default function SimpleLinearRegressionPage() {
   return (
     <ConceptPage
+      lessonId="simple-linear-regression"
       intuition={lessonIntuitions["simple-linear-regression"]}
       technicalStart="Part 3. What Best-Fitting Means"
       openingTitle="One Line, Five Different Answers"

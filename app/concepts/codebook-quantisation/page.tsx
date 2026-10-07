@@ -33,6 +33,7 @@ const link =
 export default function CodebookQuantisationPage() {
   return (
     <ConceptPage
+      lessonId="codebook-quantisation"
       intuition={lessonIntuitions["codebook-quantisation"]}
       technicalStart="Part 2. A Table of Positions, and the Nearest One Wins"
       openingTitle="Replace Many Possible Vectors with a Small Set of Representatives"

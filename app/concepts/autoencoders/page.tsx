@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="autoencoders"
     title="Autoencoders"
     tagline="Learn a compact representation by checking whether it can reconstruct its input."
     openingTitle="What Can We Keep When We Cannot Keep Everything?"

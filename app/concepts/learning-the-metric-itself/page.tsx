@@ -36,6 +36,7 @@ const caption = "text-sm text-slate-500 dark:text-slate-400";
 export default function LearningTheMetricPage() {
   return (
     <ConceptPage
+      lessonId="learning-the-metric-itself"
       intuition={lessonIntuitions["learning-the-metric-itself"]}
       technicalStart="Part 2. The Contrastive Loss"
       openingTitle="Teach the Model What Should Count as Similar"

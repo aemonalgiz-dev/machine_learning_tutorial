@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return <ConceptPage
+      lessonId="autoregressive-generation"
     title="Autoregressive Generation"
     tagline="Turn a next-token distribution into a response by extending the context one choice at a time."
     openingTitle="How Does One Predicted Token Become a Paragraph?"

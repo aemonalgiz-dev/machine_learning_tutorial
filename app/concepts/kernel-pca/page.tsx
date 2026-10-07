@@ -34,6 +34,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function KernelPcaPage() {
   return (
     <ConceptPage
+      lessonId="kernel-pca"
       intuition={lessonIntuitions["kernel-pca"]}
       technicalStart="Part 2. PCA Written With Inner Products"
       openingTitle="When the Pattern Follows a Curve"

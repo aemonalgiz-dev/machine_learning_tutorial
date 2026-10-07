@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Positional Encoding · oop_ml", desc
 
 export default function PositionalEncodingPage() {
   return <ConceptPage
+      lessonId="positional-encoding"
       intuition={lessonIntuitions["positional-encoding"]} title="Positional Encoding" tagline="Tell a sequence model where each token occurs."
     openingTitle="The Same Words Can Say Something Different"
     technicalStart="Part 2. Building a Position Vector"

@@ -33,6 +33,7 @@ const link =
 export default function TheStandardScorePage() {
   return (
     <ConceptPage
+      lessonId="the-standard-score"
       intuition={lessonIntuitions["the-standard-score"]}
       technicalStart="Part 2. Subtract the Average, Divide by the Spread"
       openingTitle="How Unusual Is That Number?"

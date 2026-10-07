@@ -50,6 +50,7 @@ const CROSSED_CROWD = [
 export default function DecisionTreesPage() {
   return (
     <ConceptPage
+      lessonId="decision-trees"
       intuition={lessonIntuitions["decision-trees"]}
       technicalStart="Part 5. Scoring One Split"
       openingTitle="Which Question Should Come First?"

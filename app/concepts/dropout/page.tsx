@@ -33,6 +33,7 @@ const link =
 export default function DropoutPage() {
   return (
     <ConceptPage
+      lessonId="dropout"
       intuition={lessonIntuitions["dropout"]}
       technicalStart="Part 2. One Draw"
       openingTitle="What if a Useful Neuron Is Missing?"

@@ -36,6 +36,7 @@ const linkClass =
 export default function RidgeLassoPage() {
   return (
     <ConceptPage
+      lessonId="ridge-lasso"
       intuition={lessonIntuitions["ridge-lasso"]}
       technicalStart="Part 2. Two Goals in One Objective"
       openingTitle="A Better Fit Can Make a Worse Prediction"

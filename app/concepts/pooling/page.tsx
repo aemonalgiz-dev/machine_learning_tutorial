@@ -34,6 +34,7 @@ const link =
 export default function PoolingPage() {
   return (
     <ConceptPage
+      lessonId="pooling"
       intuition={lessonIntuitions["pooling"]}
       technicalStart="Part 2. What Each Kind Keeps"
       openingTitle="Keep a Summary of the Neighbourhood"

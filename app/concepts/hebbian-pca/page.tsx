@@ -31,6 +31,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function HebbianPcaPage() {
   return (
     <ConceptPage
+      lessonId="hebbian-pca"
       intuition={lessonIntuitions["hebbian-pca"]}
       technicalStart="Part 2. Oja’s Subtraction"
       openingTitle="Find a Principal Direction One Observation at a Time"

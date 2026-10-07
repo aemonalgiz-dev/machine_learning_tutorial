@@ -37,6 +37,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function RandomForestsPage() {
   return (
     <ConceptPage
+      lessonId="random-forests"
       intuition={lessonIntuitions["random-forests"]}
       technicalStart="Part 2. The One Rule Random Forests Change"
       openingTitle="A Crowd That Keeps Making the Same Mistake"

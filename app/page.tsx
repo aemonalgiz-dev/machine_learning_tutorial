@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { LegacyCourseLinks } from "@/components/course/LegacyCourseLinks";
-import { SectionProgress } from "@/components/course/LessonMarks";
 import { CURRICULUM } from "@/lib/curriculum";
 import { COFFEE_URL } from "@/lib/site";
 import {
@@ -157,9 +156,6 @@ export default function Home() {
                     {part.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted">{part.intro}</p>
-                  <div className="mt-4">
-                    <SectionProgress lessons={lessons} />
-                  </div>
                 </Link>
               </li>
             );

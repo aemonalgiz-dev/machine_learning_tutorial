@@ -34,6 +34,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function KMeansPage() {
   return (
     <ConceptPage
+      lessonId="k-means"
       intuition={lessonIntuitions["k-means"]}
       technicalStart="Part 2. The Two Steps and the Number They Lower"
       openingTitle="Find the Groups Before Anyone Names Them"

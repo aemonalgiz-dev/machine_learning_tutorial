@@ -36,6 +36,7 @@ const link =
 export default function SelfOrganisingMapPage() {
   return (
     <ConceptPage
+      lessonId="self-organising-map"
       intuition={lessonIntuitions["self-organising-map"]}
       technicalStart="Part 2. One Person, One Presentation"
       openingTitle="A Grouping Is Useful; a Map Can Show More"

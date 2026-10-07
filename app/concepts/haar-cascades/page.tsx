@@ -37,6 +37,7 @@ const link =
 export default function HaarCascadesPage() {
   return (
     <ConceptPage
+      lessonId="haar-cascades"
       intuition={lessonIntuitions["haar-cascades"]}
       technicalStart="Part 2. A Table Where Every Entry Is A Running Total"
       openingTitle="Discard the Easy Negatives First"

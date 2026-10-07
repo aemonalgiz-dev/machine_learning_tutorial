@@ -33,6 +33,7 @@ const link =
 export default function PatternWordsPage() {
   return (
     <ConceptPage
+      lessonId="the-pattern-language-models-use"
       intuition={lessonIntuitions["the-pattern-language-models-use"]}
       technicalStart="Part 2. One Expression, Twelve Branches"
       openingTitle="The Space Has to Belong Somewhere"

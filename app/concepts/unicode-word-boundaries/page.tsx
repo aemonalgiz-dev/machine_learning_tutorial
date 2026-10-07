@@ -32,6 +32,7 @@ const link =
 export default function UnicodeWordBoundariesPage() {
   return (
     <ConceptPage
+      lessonId="unicode-word-boundaries"
       intuition={lessonIntuitions["unicode-word-boundaries"]}
       technicalStart="Part 2. The Classes"
       openingTitle="Spaces Are Only One Clue to a Word Boundary"

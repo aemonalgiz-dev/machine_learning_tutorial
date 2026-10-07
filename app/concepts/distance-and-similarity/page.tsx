@@ -33,6 +33,7 @@ export const metadata: Metadata = {
 export default function DistanceAndSimilarityPage() {
   return (
     <ConceptPage
+      lessonId="distance-and-similarity"
       intuition={lessonIntuitions["distance-and-similarity"]}
       technicalStart="Part 2. Six Rules, Asked of Two Words"
       openingTitle="The Vectors Are Fixed; the Nearest Word Can Still Change"

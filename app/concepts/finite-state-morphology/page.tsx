@@ -32,6 +32,7 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function FiniteStateMorphologyPage() {
   return (
     <ConceptPage
+      lessonId="finite-state-morphology"
       intuition={lessonIntuitions["finite-state-morphology"]}
       technicalStart="Part 2. A Grammar Is a Machine"
       openingTitle="Write Down How the Word Is Built"

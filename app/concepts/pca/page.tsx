@@ -40,6 +40,7 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function PcaPage() {
   return (
     <ConceptPage
+      lessonId="pca"
       intuition={lessonIntuitions["pca"]}
       technicalStart="Part 3. Viewing the Cloud Along One Direction"
       openingTitle="Two Measurements, Much of the Same Information"
