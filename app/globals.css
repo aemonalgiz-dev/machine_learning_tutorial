@@ -1,26 +1,139 @@
 @import "tailwindcss";
 
+/*
+  The dark theme is chosen by an attribute on <html> rather than by the system
+  setting, so that every dark: class on the site follows the toggle in the
+  header. Dark is the default and is rendered by the server; a reader who chose
+  light has that restored by the small script at the top of app/layout.tsx
+  before anything paints.
+*/
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+  The site's own colours. The lesson widgets keep the slate and indigo palette
+  they were drawn in, which reads as the colour of data on these pages; the
+  amber here is reserved for the site itself, which is to say for progress,
+  for marks, for the one action a page is asking for, and for practice.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f6fa;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --raised: #eef1f7;
+  --line: #d9dfea;
+  --muted: #5d6779;
+  --accent: #b45309;
+  --accent-fill: #f59e0b;
+  --accent-ink: #1c1203;
+  --accent-soft: rgba(245, 158, 11, 0.14);
+  --glow: rgba(245, 158, 11, 0.16);
+  --grid: rgba(15, 23, 42, 0.045);
+  --code-keyword: #7c3aed;
+  --code-string: #0f766e;
+  --code-number: #b45309;
+  --code-comment: #6b7280;
+  --code-builtin: #1d4ed8;
+}
+
+:root[data-theme="dark"] {
+  --background: #0a0e1a;
+  --foreground: #e6eaf3;
+  --surface: #10172a;
+  --raised: #172038;
+  --line: rgba(148, 163, 184, 0.18);
+  --muted: #98a3b8;
+  --accent: #fbbf24;
+  --accent-fill: #f5b325;
+  --accent-ink: #1c1203;
+  --accent-soft: rgba(251, 191, 36, 0.14);
+  --glow: rgba(251, 191, 36, 0.11);
+  --grid: rgba(148, 163, 184, 0.07);
+  --code-keyword: #c4b5fd;
+  --code-string: #6ee7b7;
+  --code-number: #fcd34d;
+  --code-comment: #7c879c;
+  --code-builtin: #93c5fd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fill: var(--accent-fill);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* A faint grid under everything, and a warm glow at the top of each page. */
+body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(70rem 28rem at 50% -8rem, var(--glow), transparent 70%),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:
+    auto,
+    36px 36px,
+    36px 36px;
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-fill);
+  outline-offset: 2px;
+}
+
+/* The bar that runs down while a quiz card waits before flipping to the next
+   question. A keyframe rather than a transition, so the bar can be restarted by
+   remounting it with a new key and needs no state of its own. */
+@keyframes quiz-sweep {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.quiz-sweep {
+  animation-name: quiz-sweep;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* The five kinds of token the Python blocks colour. */
+.tok-k {
+  color: var(--code-keyword);
+}
+
+.tok-s {
+  color: var(--code-string);
+}
+
+.tok-n {
+  color: var(--code-number);
+}
+
+.tok-c {
+  color: var(--code-comment);
+  font-style: italic;
+}
+
+.tok-b {
+  color: var(--code-builtin);
 }
