@@ -11,6 +11,7 @@
 // Every row is the API's, refitted per bend.
 
 import { useState } from "react";
+import { Equation } from "@/components/concept/Equation";
 import { HIDDEN_ACTIVATION_LABELS, HiddenActivation } from "@/lib/concepts/backpropagation";
 import { AMBER, HIDDEN_NAMES, show, useWorkedStep, workedRequest } from "./backpropFixtures";
 
@@ -28,7 +29,7 @@ export function ReluGate() {
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-        hidden bend
+        hidden activation function
         <span className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {BENDS.map((name) => (
             <button key={name} onClick={() => setBend(name)} className={"rounded px-2 py-0.5 text-xs font-medium transition " + (bend === name ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800")}>{HIDDEN_ACTIVATION_LABELS[name]}</button>
@@ -42,7 +43,7 @@ export function ReluGate() {
               <th className="py-1 text-left font-medium">neuron</th>
               <th className="py-1 text-right font-medium">arriving ∂L/∂a</th>
               <th className="py-1 text-right font-medium">original score z</th>
-              <th className="py-1 text-right font-medium">bend&rsquo;s slope g′(z)</th>
+              <th className="py-1 text-right font-medium">activation function&rsquo;s slope g′(z)</th>
               <th className="py-1 text-right font-medium" style={{ color: AMBER }}>delta</th>
             </tr>
           </thead>
@@ -59,10 +60,13 @@ export function ReluGate() {
           </tbody>
         </table>
       </div>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">To propagate a gradient through an activation, first inspect its derivative at the score from the forward pass.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{bend === "rectified_linear" ? "The second hidden neuron's score is −1. ReLU has derivative zero there, so this example contributes no gradient to that neuron's weights through this route." : HIDDEN_ACTIVATION_LABELS[bend] + " has nonzero derivatives at these three scores. The first neuron's score is 3, where the displayed derivative is smallest. This activation step therefore reduces that arriving derivative the most."}</p>
+</>
+      <Equation>{`delta for h₂ = arriving gradient × activation derivative\n             = ${show(hidden.arriving[1])} × ${show(hidden.slopes[1])}\n             = ${show(hidden.bias_gradient[1])}`}</Equation>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        {bend === "rectified_linear"
-          ? "The rectifier's slope is 1 where the score was positive and 0 where it was not. h₂ scored −1, so an arriving −4 is multiplied by 0 and nothing passes; the neuron receives no update from this row. The loss on this row is " + show(step.loss_before) + "."
-          : `Under the ${HIDDEN_ACTIVATION_LABELS[bend]} every slope is strictly between 0 and 1, so every neuron receives some of what arrived, and h₁, whose score of 3 sits far out on the flat part of the curve, receives the least. The loss on this row is ${show(step.loss_before)}, since the bend changed the forward pass too.`}
+        The loss is {show(step.loss_before)}. Changing the activation also changes
+        the forward prediction, so it can change the arriving gradients.
       </p>
     </div>
   );

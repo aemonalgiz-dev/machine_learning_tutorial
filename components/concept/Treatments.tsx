@@ -13,6 +13,7 @@
 // In a model          the translation from the small example to the real thing
 
 import { ReactNode } from "react";
+import { sectionId } from "./sectionId";
 
 function Label({ children }: { children: ReactNode }) {
   return (
@@ -37,7 +38,7 @@ export function SubSection({
   children: ReactNode;
 }) {
   return (
-    <section className="mt-8 first:mt-0">
+    <section id={sectionId(title)} tabIndex={-1} className="mt-8 scroll-mt-6 first:mt-0">
       <h3 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">
         {title}
       </h3>

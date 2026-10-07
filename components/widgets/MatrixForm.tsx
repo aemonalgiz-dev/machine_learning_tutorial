@@ -212,7 +212,7 @@ export function MatrixForm() {
         />
         <Stat label="Column names read" value={inputNames.join(", ")} />
         <Stat
-          label="Outputs after the bend"
+          label="Outputs after the activation function"
           value={`(${layer.outputs.map(show).join(", ")})`}
         />
         <Stat

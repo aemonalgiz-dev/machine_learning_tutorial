@@ -176,15 +176,9 @@ export function ByteCharacterExplorer() {
             })}
           </div>
 
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            This text has {seen.n_characters} characters and {seen.n_bytes} bytes.
-            The character table was built from eighteen English sentences and
-            holds {view.n_distinct_characters} characters plus one stand-in; the
-            learned table holds {view.learned_table} entries after{" "}
-            {view.n_merges} merges over the same sentences. A space has nothing
-            visible to stand for it, so the strip names it {"Ġ"} under the byte
-            reading, and everywhere else on this page it is drawn as {"␣"}.
-          </p>
+          <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">A visible character and an encoded byte are different units. This text contains {seen.n_characters} characters and {seen.n_bytes} bytes. Inspect the strip to see where one character occupies several byte positions.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The character vocabulary holds {view.n_distinct_characters} observed characters plus an unknown entry. The learned subword vocabulary has {view.learned_table} entries after {view.n_merges} merges on the same corpus. Space markers make otherwise invisible boundaries inspectable: {"Ġ"} is used in the byte strip and {"␣"} elsewhere on this page.</p>
+</>
         </>
       )}
     </div>

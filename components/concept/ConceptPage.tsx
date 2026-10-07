@@ -1,119 +1,149 @@
 // The reusable shell every concept page is poured into.
 //
-// A concept opens with the problem that forced it, then a shared interactive
-// playground, then its explanations stacked full-width rather than in columns.
-// The explanations are collapsible: the first is open by default, and the rest
-// are folded away for the reader who wants them. A page passes as many sections
-// as its subject needs rather than filling three fixed slots. Native <details>
-// does the folding, so the page stays a server component.
+// A lesson is one flat run of sections, shown one at a time, with the arrows
+// and the section list at the top of the page. The opening, the guided visual
+// introduction and the worked example are the first of those sections rather
+// than a preamble standing above them, so a reader moving to a later part is
+// not made to scroll past the introduction every time.
+//
+// The separate lesson-navigation panel is gone with it. It offered a link to
+// the opening, a link to the mechanism and a collapsed list of every section,
+// and the section list at the top of the page now answers all three.
 
 import { ReactNode } from "react";
+import { SectionNavigator, NavigableSection } from "./SectionNavigator";
+import { sectionId } from "./sectionId";
+import { GuidedIntuition, IntuitionConnection } from "./GuidedIntuition";
+import type { LessonIntuition } from "@/lib/intuition/types";
+import type { QuizQuestion } from "@/lib/quizzes";
+import type { Exercise } from "@/lib/exercises";
 
 export interface ConceptSection {
   title: string;
-  content: ReactNode;
+  // A section holds prose, or a quiz, or a set of problems. A quiz section
+  // supplies questions and no content and sits in the section list beside the
+  // parts it draws on; a practice section supplies problems to work through
+  // with the library. See lib/quizzes.ts and lib/exercises.ts for when each
+  // earns a place.
+  content?: ReactNode;
   defaultOpen?: boolean;
+  quiz?: QuizQuestion[];
+  practice?: Exercise[];
 }
 
 interface ConceptPageProps {
   title: string;
   tagline: string;
-  history: ReactNode;
+  openingTitle: string;
+  technicalStart: string;
+  history?: ReactNode;
+  intuition?: LessonIntuition;
+  playgroundIntro: string;
   playground: ReactNode;
   sections: ConceptSection[];
   prerequisites?: ReactNode;
 }
 
+// What a lesson holds, for the line under its title.
+export function lessonSummary(sections: { quiz?: QuizQuestion[]; practice?: Exercise[] }[]) {
+  const questions = sections.reduce((sum, section) => sum + (section.quiz?.length ?? 0), 0);
+  const problems = sections.reduce((sum, section) => sum + (section.practice?.length ?? 0), 0);
+  return { questions, problems };
+}
+
+export function LessonMeta({
+  parts,
+  questions,
+  problems,
+}: {
+  parts: number;
+  questions: number;
+  problems: number;
+}) {
+  const pieces = [
+    `${parts} ${parts === 1 ? "section" : "sections"}`,
+    questions > 0 ? `${questions} ${questions === 1 ? "question" : "questions"}` : null,
+    problems > 0 ? `${problems} ${problems === 1 ? "problem" : "problems"} to work through` : null,
+  ].filter((piece): piece is string => piece !== null);
+  return <p className="mt-4 font-mono text-xs text-muted">{pieces.join(" · ")}</p>;
+}
+
 export function ConceptPage({
   title,
   tagline,
+  openingTitle,
   history,
+  intuition,
+  playgroundIntro,
   playground,
   sections,
   prerequisites,
 }: ConceptPageProps) {
-  return (
-    <article className="mx-auto max-w-3xl px-6 py-12">
-      <header className="mb-10">
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          {title}
-        </h1>
-        <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
-          {tagline}
-        </p>
-      </header>
+  const opening: NavigableSection = {
+    title: openingTitle,
+    id: sectionId(openingTitle),
+    content: (
+      <>
+        {intuition
+          ? intuition.opening.map((paragraph) => <p key={paragraph}>{paragraph}</p>)
+          : history}
 
-      {prerequisites && (
-        <aside className="mb-10 rounded-lg border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
-          <span className="font-semibold text-slate-700 dark:text-slate-300">
-            Before this:{" "}
-          </span>
-          {prerequisites}
-        </aside>
-      )}
+        {intuition && (
+          <>
+            <div className="my-8" aria-label="Guided visual introduction">
+              <GuidedIntuition lesson={intuition} />
+            </div>
+            <IntuitionConnection lesson={intuition} />
+          </>
+        )}
 
-      <section className="mb-8">
-        <h2 className="mb-3 text-2xl font-semibold text-slate-900 dark:text-slate-100">
-          Where This Came From
-        </h2>
-        <div className="space-y-4 text-slate-700 dark:text-slate-300">
-          {history}
-        </div>
-      </section>
+        {prerequisites && (
+          <aside className="mt-8 rounded-lg border border-line bg-surface px-5 py-4 text-sm text-muted">
+            <span className="font-semibold text-foreground">Before this: </span>
+            {prerequisites}
+          </aside>
+        )}
+      </>
+    ),
+  };
 
-      <section className="my-8">
+  // The worked example keeps the id it had as a details element, so links
+  // written against "full-example" still reach it.
+  const workedExample: NavigableSection = {
+    title: intuition ? "Explore the full example" : "Try it with the example",
+    id: "full-example",
+    content: (
+      <>
+        <p>{playgroundIntro}</p>
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {playground}
         </div>
-      </section>
+      </>
+    ),
+  };
 
-      <div className="border-t border-slate-200 dark:border-slate-800">
-        {sections.map((section) => (
-          <CollapsibleSection
-            key={section.title}
-            title={section.title}
-            defaultOpen={section.defaultOpen}
-          >
-            {section.content}
-          </CollapsibleSection>
-        ))}
-      </div>
-    </article>
-  );
-}
+  const all: NavigableSection[] = [
+    opening,
+    workedExample,
+    ...sections.map((section) => ({
+      title: section.title,
+      id: sectionId(section.title),
+      content: section.content,
+      quiz: section.quiz,
+      practice: section.practice,
+    })),
+  ];
+  const { questions, problems } = lessonSummary(sections);
 
-function CollapsibleSection({
-  title,
-  children,
-  defaultOpen = false,
-}: {
-  title: string;
-  children: ReactNode;
-  defaultOpen?: boolean;
-}) {
   return (
-    <details
-      open={defaultOpen}
-      className="group border-b border-slate-200 dark:border-slate-800"
-    >
-      <summary className="flex cursor-pointer list-none items-center justify-between py-4 text-2xl font-semibold text-slate-900 [&::-webkit-details-marker]:hidden dark:text-slate-100">
-        {title}
-        <svg
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-          className="ml-4 h-5 w-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
-        >
-          <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </summary>
-      <div className="space-y-4 pb-6 text-slate-700 dark:text-slate-300">
-        {children}
-      </div>
-    </details>
+    <article className="mx-auto max-w-3xl px-6 py-12">
+      <header className="mb-6">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{title}</h1>
+        <p className="mt-3 text-lg text-muted">{tagline}</p>
+        <LessonMeta parts={all.length} questions={questions} problems={problems} />
+      </header>
+
+      <SectionNavigator sections={all} />
+    </article>
   );
 }

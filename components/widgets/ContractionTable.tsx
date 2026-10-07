@@ -93,15 +93,9 @@ export function ContractionTable() {
         </table>
       </div>
 
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        Of the {view.n_probes} texts the rules cut {view.n_cut} and leave{" "}
-        {view.n_left_whole} whole, and nothing in the answer distinguishes a
-        text that was examined and left alone from one that no clause covers. An
-        amber piece is one whose text is not the character it came from, and only
-        the quoted row has any. The rules take {view.n_clitic_endings} different
-        endings off the back of a run and carry {view.n_fixed_forms} whole forms
-        by name, and a text has to match one of those to be cut at all.
-      </p>
+      <>
+<p className="mt-2 text-sm text-slate-600 dark:text-slate-400">The rules split {view.n_cut} of the {view.n_probes} examples and leave {view.n_left_whole} whole. An unchanged result alone does not tell us whether a rule examined and preserved the form or no rule matched it.</p><p className="mt-2 text-sm text-slate-600 dark:text-slate-400">The implementation recognizes {view.n_clitic_endings} ending patterns and {view.n_fixed_forms} named forms. Amber marks text that differs from the original characters, letting us distinguish a rewritten piece from a boundary inserted between unchanged characters.</p>
+</>
     </div>
   );
 }

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { SmoothingTracks } from "@/components/widgets/SmoothingTracks";
 export const metadata: Metadata = {
   title: "Pointwise Mutual Information · oop_ml",
   description:
-    "Score a pair of words by how much more often they occurred together than their separate rates alone would predict, and read the sign of that score.",
+    "Compare an observed pair frequency with the frequency predicted by independence.",
 };
 
 const link =
@@ -30,8 +33,12 @@ const link =
 export default function PointwiseMutualInformationPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["pointwise-mutual-information"]}
+      technicalStart="Part 2. The Score, On One Pair"
+      openingTitle="Together More Often Than We Would Expect"
+      playgroundIntro="Compare a pair's observed frequency with its independence baseline. Check how a rare pair can receive a large score despite having little supporting evidence."
       title="Pointwise Mutual Information"
-      tagline="Pointwise mutual information scores a pair of words by how much more often they occurred together than their two separate rates alone would predict, and its zero is the one number on this site that means something exact."
+      tagline="Compare an observed pair frequency with the frequency predicted by independence."
       prerequisites={
         <>
           Every word here ends up as a short list of numbers, and two words are
@@ -58,82 +65,23 @@ export default function PointwiseMutualInformationPage() {
           here, which Part 3 comes back to.
         </>
       }
-      history={
-        <>
-          <p>
-            Lexicographers writing a dictionary in the 1980s wanted to know which
-            words genuinely belong together. Doctor and nurse do; doctor and
-            sofa do not. The evidence available was word association norms
-            collected by asking people what word came to mind, of the kind
-            David Palermo and James Jenkins had gathered from thousands of
-            schoolchildren and students in 1964, and those are expensive, small,
-            and say nothing about the word senses a dictionary has to
-            distinguish. Kenneth Church, at AT&amp;T Bell Laboratories, and
-            Patrick Hanks, a lexicographer, wanted the same evidence from text
-            instead, and the obvious statistic, how often two words appear near
-            each other, is dominated by whichever words are common.
-          </p>
-          <p>
-            Their answer was already in the information theory literature. Robert
-            Fano, in <em>Transmission of Information</em> in 1961, had defined a
-            quantity for one particular pair of outcomes, the logarithm of how
-            likely the two are together against how likely they would be if they
-            had nothing to do with each other. Church and Hanks applied it to
-            pairs of words in a corpus of Associated Press newswire and published
-            it as &ldquo;Word Association Norms, Mutual Information, and
-            Lexicography&rdquo; in 1990, calling their version the association
-            ratio. In the same paper they said plainly that the negative side of
-            the scale is not to be trusted without a very large corpus, since the
-            evidence that two words avoid each other is much thinner than the
-            evidence that they seek each other out. That caution is the reason
-            for the clip in Part 3.
-          </p>
-          <p>
-            What turned a lexicographer&rsquo;s statistic into a way of
-            positioning words was the observation that a whole matrix of these
-            scores can be squeezed. John Bullinaria and Joseph Levy compared a
-            long list of ways of weighting co-occurrence counts in 2007 and found
-            the positive half of this score the best of them. Then Omer Levy and
-            Yoav Goldberg showed in 2014 that word2vec, trained with negative
-            samples, is implicitly factorising this same matrix with a constant
-            subtracted, which connected the two families that had been treated as
-            rivals; and Levy, Goldberg and Ido Dagan followed in 2015 with a
-            paper of adjustments, of which flattening the context rates is the
-            one Part 4 is about, and reported that a plain decomposition of this
-            matrix does as well as word2vec once both are tuned alike.
-          </p>
-          <p>
-            This page asks six questions in order. Why can a raw count not say
-            whether two words have anything to do with each other? What exactly is
-            the score, and what does its sign mean? Why is the negative half
-            almost always thrown away, and what is lost with it? Why does the
-            published adjustment to the context rates move a rare
-            context&rsquo;s score down rather than up? How does a table of scores
-            become a handful of numbers a word, and is that better than reading
-            the table? And where does the score stop being defined?
-          </p>
-        </>
-      }
+
       playground={<MutualInformationPlayground />}
       sections={[
         {
           title: "Part 1. What A Count Cannot Tell You",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Twenty-four short notes, and two halves that never mix">
-                <p>
-                  Everything on this page is measured on one corpus, and it is
-                  worth knowing what is in it before any score touches it.
-                  Twenty-four notes of six words each, twelve about cooking and
-                  twelve about sailing. The cooking half is spelled from flour,
-                  sugar, butter, eggs, oven, bake, stir, whisk, dough and pan;
-                  the sailing half from sail, wind, boat, harbour, anchor, tide,
-                  mast, rope, deck and crew. No word of one half ever appears in
-                  the other. What the two halves do share is three words that
-                  carry no topic at all, and, the and we, and those three turn out
-                  to matter more here than any of the twenty.
+                <>
+<p>
+                  Everything on this page is measured on one corpus, and it is worth knowing what is in it before any score touches it. Twenty-four notes of six words each, twelve about cooking and twelve about sailing. The cooking half is spelled from flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan; the sailing half from sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew.
                 </p>
+                <p>
+                  No word of one half ever appears in the other. What the two halves do share is three words that carry no topic at all, and, the and we, and those three turn out to matter more here than any of the twenty.
+                </p>
+</>
                 <p>
                   That comes to 144 word occurrences over 23 distinct words. The
                   notes are arranged rather than written, so that each note uses
@@ -211,17 +159,14 @@ export default function PointwiseMutualInformationPage() {
                   with each other.
                 </p>
                 <Equation>{"score(w, c) = log( rate of the pair ÷ (rate of w × rate of c) )"}</Equation>
-                <p>
-                  The rate of the pair is how many times the two were counted
-                  together over how many pairings were counted in all; the rate of
-                  a word is how much of that same total the word took on its own.
-                  The division cancels the part of the count that is explained by
-                  either word being common, which is precisely the part that let
-                  and tie with dough. The logarithm is what makes the result a
-                  quantity you can add and subtract rather than a ratio you have
-                  to multiply, and it puts the value at zero exactly where the
-                  ratio is one.
+                <>
+<p>
+                  The rate of the pair is how many times the two were counted together over how many pairings were counted in all; the rate of a word is how much of that same total the word took on its own. The division cancels the part of the count that is explained by either word being common, which is precisely the part that let and tie with dough.
                 </p>
+                <p>
+                  The logarithm is what makes the result a quantity you can add and subtract rather than a ratio you have to multiply, and it puts the value at zero exactly where the ratio is one.
+                </p>
+</>
                 <KeepInMind>
                   Everything else on this page follows from that one line. Part 2
                   works it on a pair small enough to check, Part 3 is about the
@@ -231,7 +176,7 @@ export default function PointwiseMutualInformationPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Score, On One Pair",
@@ -247,17 +192,14 @@ export default function PointwiseMutualInformationPage() {
                   and the resulting square is symmetric.
                 </p>
                 <WorkedExample title="Five words, twelve counted neighbourings">
-                  <p>
-                    The row for the reads cat 2 and dog 1. The row for cat reads
-                    the 2, sat 1 and ran 1. The row for sat reads cat 1 and dog 1.
-                    The row for dog reads the 1 and sat 1, and the row for ran
-                    reads cat 1. Adding each row gives 3, 4, 2, 2 and 1, the
-                    columns give the same five numbers because the square is
-                    symmetric, and everything together adds to 12. Of the 25 cells
-                    the five words can form, 10 hold a count and 15 are empty,
-                    including all five on the diagonal, since no word here is ever
-                    its own neighbour.
+                  <>
+<p>
+                    The row for the reads cat 2 and dog 1. The row for cat reads the 2, sat 1 and ran 1. The row for sat reads cat 1 and dog 1. The row for dog reads the 1 and sat 1, and the row for ran reads cat 1. Adding each row gives 3, 4, 2, 2 and 1, the columns give the same five numbers because the square is symmetric, and everything together adds to 12.
                   </p>
+                  <p>
+                    Of the 25 cells the five words can form, 10 hold a count and 15 are empty, including all five on the diagonal, since no word here is ever its own neighbour.
+                  </p>
+</>
                 </WorkedExample>
                 <AssociationGrid />
                 <p>
@@ -340,19 +282,14 @@ export default function PointwiseMutualInformationPage() {
                   rates, to the last decimal place.
                 </p>
                 <Equation>{"score > 0  more often than chance      score = 0  exactly chance      score < 0  less often"}</Equation>
-                <p>
-                  On the twenty-four notes three pairs make the three regions
-                  legible. Crew beside deck scores +1.5278, which is the highest
-                  score in the corpus, shared with five other pairs of topic
-                  words; the two were counted together four times and both are
-                  among the words that served as company least. And beside anchor
-                  scores +0.0282, which is as close to chance as anything here
-                  gets, and it is exactly the reading you would want for a
-                  function word against a topic word. And beside bake scores
-                  −0.5108, the lowest in the corpus, which says the two occurred
-                  together about three fifths as often as their rates alone would
-                  have predicted.
+                <>
+<p>
+                  On the twenty-four notes three pairs make the three regions legible. Crew beside deck scores +1.5278, which is the highest score in the corpus, shared with five other pairs of topic words; the two were counted together four times and both are among the words that served as company least. And beside anchor scores +0.0282, which is as close to chance as anything here gets, and it is exactly the reading you would want for a function word against a topic word.
                 </p>
+                <p>
+                  And beside bake scores −0.5108, the lowest in the corpus, which says the two occurred together about three fifths as often as their rates alone would have predicted.
+                </p>
+</>
                 <KeepInMind>
                   The sign is interpretable in a way that almost nothing else here
                   is, which is why the rest of the page spends so much effort on
@@ -370,20 +307,14 @@ export default function PointwiseMutualInformationPage() {
                   every score is placed on one line.
                 </p>
                 <ScoreSpectrum />
-                <p>
-                  Of the 529 pairs 23 words can form, 280 were actually seen
-                  together and have a score. Of those, 224 are above chance and 56
-                  below, so four fifths of what the corpus said is a statement
-                  that two words seek each other out. The positive side reaches
-                  +1.5278 and the negative side only −0.5108, and that lopsidedness
-                  is in the arithmetic rather than in this corpus. The smallest
-                  count a pair can carry and still be on the picture at all is one,
-                  so the furthest a score can fall below zero is fixed by how
-                  common its two words are, and on a corpus where nothing is very
-                  common that is not far. Above zero there is no such squeeze, and
-                  two rare words that always occur together can reach a ratio of
-                  hundreds.
+                <>
+<p>
+                  Of the 529 pairs 23 words can form, 280 were actually seen together and have a score. Of those, 224 are above chance and 56 below, so four fifths of what the corpus said is a statement that two words seek each other out. The positive side reaches +1.5278 and the negative side only −0.5108, and that lopsidedness is in the arithmetic rather than in this corpus.
                 </p>
+                <p>
+                  The smallest count a pair can carry and still be on the picture at all is one, so the furthest a score can fall below zero is fixed by how common its two words are, and on a corpus where nothing is very common that is not far. Above zero there is no such squeeze, and two rare words that always occur together can reach a ratio of hundreds.
+                </p>
+</>
                 <KeepInMind>
                   The 249 pairs that were never seen together are on that picture
                   nowhere at all, and they are almost half of everything the
@@ -459,6 +390,54 @@ export default function PointwiseMutualInformationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "By raw count, flour stood beside and three times and beside dough three times. Why does the score pull the two apart?",
+              [
+                "Because and served as company 40 times across the corpus where dough served 25, so and had far more chances to fall beside flour",
+                "Because and is a function word and the score has a list of them",
+                "Because dough is a cooking word and flour is too",
+                "Because the three counts were measured at different reaches",
+              ],
+              0,
+              "The score divides the rate of the pair by the product of the two separate rates, which cancels the part of the count explained by either word being common. Flour with dough comes out at +1.0578 against flour with and at +0.5878, and nothing about the counts changed.",
+            ),
+            trueFalse(
+              "On the three sentences, 10 of the 25 cells hold a count and all five diagonal cells are empty.",
+              true,
+              "No word in those three sentences is ever its own neighbour, so the diagonal is empty, and 15 cells in all hold nothing. The row sums are 3, 4, 2, 2 and 1, the column sums are the same five numbers because every pair is counted from both ends, and everything together adds to 12.",
+            ),
+            choice(
+              "A pair scores 0.693147. What does that say about it?",
+              [
+                "It occurred twice as often as its two separate rates predict",
+                "It occurred 0.693147 times more often than chance",
+                "It occurred in 69 percent of the windows the two words appeared in",
+                "It occurred about seven tenths as often as chance predicts",
+              ],
+              0,
+              "The score is only the logarithm of the multiplier, so reading the ratio rather than the score is the way to feel it. On the three sentences this is the and cat, counted together twice where their separate rates, a quarter of the twelve neighbourings and a third, predict one. Cat and ran were counted once where chance predicts a third of a time, so they score 1.098612, three times as often. Neither number is a count, a share or a fraction of chance.",
+            ),
+            trueFalse(
+              "The zero of this score is a convention about where the scale was placed.",
+              false,
+              "Most quantities on this site have a zero that is a convention or an artefact of where a scale was put. This one has a zero that is a statement about the corpus, namely that the rate of the pair is the product of the two separate rates, to the last decimal place.",
+            ),
+            several(
+              "Which decisions are taken before any score exists, and cannot be revisited afterwards?",
+              [
+                "How far near reaches",
+                "Whether a word further away counts for less",
+                "Whether negative scores are clipped to zero",
+                "How many numbers a word is finally described by",
+              ],
+              [0, 1],
+              "The reach and the weighting are fixed while the corpus is being counted, and changing either means counting the corpus again from the start. The clip and the width are applied to the table after the counting, so both can be changed without a second pass.",
+            ),
+        ],
         },
         {
           title: "Part 3. Throwing Away The Negative Half",
@@ -746,6 +725,54 @@ export default function PointwiseMutualInformationPage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "Subtracting the logarithm of two from every score before the clip leaves 96 entries standing instead of 224, and the two halves of the corpus come apart by 0.5789 instead of 0.6646.",
+              true,
+              "Every amount subtracted made this corpus worse, monotonically. Taking off 1.0 leaves 64 entries and 0.4901, and taking off the logarithm of five, which is 1.6094 and larger than every score in the table, leaves nothing at all, so every word points nowhere. The setting exists for corpora where the matrix is too large to hold and most of its small entries really are noise. On 144 words there is no noise to suppress, so every entry discarded is evidence removed.",
+            ),
+            choice(
+              "After the clip, a cell holding zero can have arrived there two ways. What are they, and what can be done about it?",
+              [
+                "56 pairs scored below chance and 249 were never seen together, and nothing downstream can tell them apart",
+                "56 pairs were never seen and 249 scored below chance, and the two are distinguished by the row sums",
+                "A cell is zero only when the pair was never seen, so there is no ambiguity",
+                "Both groups can be recovered from the counts, which the table keeps alongside the scores",
+              ],
+              0,
+              "A pair below chance is evidence, however thin, that the two words keep apart. A pair never seen together is the absence of evidence, and here that includes flour and bake, both cooking words that simply never landed within five positions of each other. The 56 discarded scores are a fifth of everything the corpus observed and average −0.2562, so they were not all sitting near zero where the loss would be small. Of the 529 cells, 224 keep a score and the other two groups are indistinguishable to everything that comes afterwards.",
+            ),
+            trueFalse(
+              "Flattening the context rates lifts the score of a pair whose context is rare.",
+              false,
+              "It lowers it, and this is the direction that is easy to get backwards. Flattening lifts a rare context’s rate, and the rate sits in the denominator, so the score goes down. Flour and whisk falls from +0.6523 to +0.5933 at the published three quarters while sugar and the rises from +0.4336 to +0.4922, which is the rare context losing and the frequent one gaining.",
+            ),
+            choice(
+              "What does flattening only the context rate do to the table?",
+              [
+                "It breaks the symmetry, so 88 pairs come out with two different scores depending on which word is read as the context",
+                "It leaves the table symmetric, since the counts were made from both ends",
+                "It makes the diagonal non-zero",
+                "It removes the need to clip, since no score falls below chance",
+              ],
+              0,
+              "While nothing is flattened the scores are symmetric, because the same three quantities appear whichever way round the pair is read. Flattening one of the two rates ends that, and 176 of the 224 surviving entries are affected. The largest disagreement is and beside crew, 0.3057 one way and 0.4232 the other, and the count in the numerator is the same both ways.",
+            ),
+            choice(
+              "The 2015 paper called flattening its most useful adjustment. On the twenty-four notes it makes things slightly worse. What explains that?",
+              [
+                "The three shared words are the commonest contexts, so lowering their rates raises exactly the part of two rows that makes words of different topics look alike",
+                "The corpus has too few words for the three quarters power to be computed accurately",
+                "Flattening was applied to the word rate rather than to the context rate",
+                "The clip removes every pair the flattening would have helped",
+              ],
+              0,
+              "Words of different topics come out at 0.0016 with nothing flattened and drift up to 0.0264 as the flattening is pushed, and those three columns are the only company a cooking word and a sailing word have in common. The effect is 0.0072 on a quantity of 0.67, so this reads as a corpus too small and too clean to test the claim on rather than as evidence against it.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. From A Table Of Scores To A Handful Of Numbers",
           content: (
             <>
@@ -854,17 +881,14 @@ export default function PointwiseMutualInformationPage() {
                   it would be dishonest to leave it out.
                 </p>
                 <ReadingComparison />
-                <p>
-                  Compare the first row with the third. Reading a word&rsquo;s raw
-                  counts puts two words of one topic at 0.6629 and a word of each
-                  at 0.1192, a gap of 0.5438. Scoring those same counts drops the
-                  second figure to 0.0292, which is the score doing exactly what it
-                  was invented for, since the three shared words are what made the
-                  two halves look alike and dividing by their rates removed most of
-                  it. But it drops the first figure as well, from 0.6629 to 0.5228,
-                  and the gap narrows to 0.4936. The counts win, at the same width
-                  of 23 numbers a word.
+                <>
+<p>
+                  Compare the first row with the third. Reading a word&rsquo;s raw counts puts two words of one topic at 0.6629 and a word of each at 0.1192, a gap of 0.5438. Scoring those same counts drops the second figure to 0.0292, which is the score doing exactly what it was invented for, since the three shared words are what made the two halves look alike and dividing by their rates removed most of it.
                 </p>
+                <p>
+                  But it drops the first figure as well, from 0.6629 to 0.5228, and the gap narrows to 0.4936. The counts win, at the same width of 23 numbers a word.
+                </p>
+</>
                 <p>
                   What recovers it is the squeeze. Four numbers a word give 0.6732
                   and 0.0086, a gap of 0.6646, better than either 23-wide reading,
@@ -960,18 +984,14 @@ export default function PointwiseMutualInformationPage() {
                   any useful sense either; it is undefined, and every implementation
                   has to decide something in its place.
                 </p>
-                <p>
-                  There are three honest choices and each costs something. Put zero
-                  there, which is what almost everybody does, and the cell then
-                  says the two words are independent, which is a claim the corpus
-                  never made and is the same value a pair scoring slightly below
-                  chance receives. Leave the cell out, keeping only the pairs that
-                  occurred, which is what GloVe does, and the objective then makes
-                  no claim about those pairs at all, though nothing downstream that
-                  wants a square table can be handed the result. Add a small count
-                  to every cell before dividing, which makes every score defined
-                  and makes the rarest pairs the ones the added count moves most.
+                <>
+<p>
+                  There are three honest choices and each costs something. Put zero there, which is what almost everybody does, and the cell then says the two words are independent, which is a claim the corpus never made and is the same value a pair scoring slightly below chance receives. Leave the cell out, keeping only the pairs that occurred, which is what GloVe does, and the objective then makes no claim about those pairs at all, though nothing downstream that wants a square table can be handed the result.
                 </p>
+                <p>
+                  Add a small count to every cell before dividing, which makes every score defined and makes the rarest pairs the ones the added count moves most.
+                </p>
+</>
                 <p>
                   The size of the decision is what makes it worth stating. On the
                   twenty-four notes, 249 of the 529 cells have no score, so 47.1% of
@@ -1105,6 +1125,308 @@ export default function PointwiseMutualInformationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "Flour and bake never once fell within five positions of each other, and four numbers a word place them at a cosine of 1.0000. How does the page read that?",
+              [
+                "As the squeeze earning its keep and overreaching in the same measurement",
+                "As proof that the corpus was arranged badly",
+                "As evidence that four numbers a word is too wide",
+                "As a bug, since an unobserved pair should stay at zero",
+              ],
+              0,
+              "Connecting two words the corpus never put together is the job the decomposition is there for, and concluding they are identical is more than the evidence supports. Their full rows of scores sit at a cosine of 0.5356, so the fit has taken two words that were half alike and declared them the same, and five pairs of cooking words and five of sailing words collapse that way under four numbers.",
+            ),
+            trueFalse(
+              "At a width of 23 numbers a word, scoring the counts separates the two halves of the corpus better than reading the raw counts does.",
+              false,
+              "The counts win at that width. Raw counts give 0.6629 within a topic and 0.1192 across, a gap of 0.5438, while the scores give 0.5228 and 0.0292, a gap of 0.4936. Scoring lowered both figures rather than only the second, because the three shared words are company for every word here and dividing by their rates deflates every angle. What recovers it is the squeeze, which at four numbers a word reaches a gap of 0.6646.",
+            ),
+            choice(
+              "Reconstruction error against half-separation, read together across widths. What do the two columns say?",
+              [
+                "A wider fit reproduces the table more faithfully and separates the two halves less well",
+                "A wider fit improves both, so only the cost of computing it argues for a narrow one",
+                "The two columns move together, since reproducing the table is the goal",
+                "Both turn over at the width that works, which is how the width was chosen",
+              ],
+              0,
+              "At a width of two the fit misses the table by 0.6579 of its own size, at four by 0.5668, at eight by 0.4542, and only at the full 23 does it reproduce the table exactly, where the halves are barely apart at all. Reproducing the table is not the goal, since the table is mostly substituted zeros, and the narrow fits do better precisely because they cannot reproduce them. Nothing computed during the fit turns over at a good width.",
+            ),
+            several(
+              "An implementation meets a pair the corpus never saw together. Which of these are named as honest choices?",
+              [
+                "Put zero there, which says the two words are independent, a claim the corpus never made",
+                "Leave the cell out, which is what GloVe does",
+                "Add a small count to every cell before dividing",
+                "Take the lowest score in the table and use that",
+              ],
+              [0, 1, 2],
+              "The logarithm of zero is undefined rather than large and negative, so something has to be put in its place. Zero gives a pair that was never seen the same value a pair scoring slightly below chance receives; leaving the cell out means nothing downstream that wants a square table can be handed the result; and adding a count makes the rarest pairs the ones it moves most. On these notes 249 of 529 cells have no score, so 47.1 percent of the table is whatever was substituted.",
+            ),
+            trueFalse(
+              "Stir and whisk were counted together four times and score higher than eggs and oven, which were counted together six times.",
+              true,
+              "1.5278 against 1.2603, and the arithmetic is correct. Both words’ rates sit in the denominator, so the score rewards rarity by design, and no amount of evidence about a common pair can match two words counted once each that happened to fall beside one another. Dropping words below a count threshold and flattening the context rates both hold the effect back and neither removes it.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Scoring The Notes With The Library",
+          practice: [
+            exercise(
+              "Score the and cat on the three sentences",
+              ["Part 2 counts the three sentences at a reach of one and scores the and cat at 0.693147 and cat and ran at 1.098612. Fit the library's model to the same three sentences with the reach at one and nothing flattened, read the total of counted neighbourings and the count for the and cat off its count table, and read the two scores off its table of scores.", "Then score cat and sat, a pair the lesson never scores. Cat and sat were counted together once, cat took four of the twelve neighbourings and sat took two, so you can check the number by hand before you print it."],
+              `from oop_ml import PointwiseMutualInformationEmbeddings
+
+sentences = ["the cat sat", "the dog sat", "the cat ran"]
+
+model = PointwiseMutualInformationEmbeddings(
+    dimension=2, window=1, context_distribution_smoothing=1.0
+).fit(sentences)
+counts = model.cooccurrence
+scores = model.pointwise_mutual_information
+# Print the total of counted neighbourings, how many times the stood
+# beside cat, and the scores for the and cat, cat and ran, and cat and sat.`,
+              `from oop_ml import PointwiseMutualInformationEmbeddings
+
+sentences = ["the cat sat", "the dog sat", "the cat ran"]
+
+model = PointwiseMutualInformationEmbeddings(
+    dimension=2, window=1, context_distribution_smoothing=1.0
+).fit(sentences)
+counts = model.cooccurrence
+scores = model.pointwise_mutual_information
+
+print(f"counted neighbourings {counts.total:.0f}")
+print(f"the beside cat, counted {counts.count_between('the', 'cat'):.0f} times")
+print(f"score for the and cat {scores.value_between('the', 'cat'):.6f}")
+print(f"score for cat and ran {scores.value_between('cat', 'ran'):.6f}")
+print(f"score for cat and sat {scores.value_between('cat', 'sat'):.6f}")`,
+              `counted neighbourings 12
+the beside cat, counted 2 times
+score for the and cat 0.693147
+score for cat and ran 1.098612
+score for cat and sat 0.405465`,
+              { hints: ["One fit does the counting and the scoring, and the model keeps both tables. cooccurrence holds the counts and pointwise_mutual_information holds the scores.", "Both tables answer one cell at a time by word rather than by position. count_between(word, context) reads a count and value_between(word, context) reads a score.", "The lesson's three-sentence numbers are at a reach of one with nothing flattened, so window is 1 and context_distribution_smoothing is 1.0. The default of 0.75 would move every score. dimension only sizes the squeeze, which this problem never reads, and it has to fit inside the five words."], check: numberCheck("What does the pair cat and sat score?", 0.405465, 5e-06, "Cat and sat were counted together once out of twelve neighbourings, which is a rate of a twelfth. Cat took four of the twelve and sat took two, so chance alone predicts a third of a sixth, which is an eighteenth. The pair occurred one and a half times as often as chance, and the logarithm of 1.5 is 0.405465.") },
+            ),
+            exercise(
+              "Count what the clip throws away",
+              ["Part 3 splits the 529 cells of the twenty-four notes three ways. 224 keep a positive score, 56 scored below chance and were set to zero, and 249 were never seen together at all. Fit the notes at a reach of five with nothing flattened, read the number of surviving entries off the scored table, and count the pairs the corpus never put together by walking the count table.", "The 56 cannot be read off the scored table, because the clip has already made them zero. Recover them by subtraction, and then confirm the lesson's example that and beside bake, counted once, is kept at exactly zero."],
+              `from oop_ml import PointwiseMutualInformationEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+
+model = PointwiseMutualInformationEmbeddings(
+    dimension=4, window=5, context_distribution_smoothing=1.0
+).fit(notes)
+counts = model.cooccurrence
+scores = model.pointwise_mutual_information
+words = list(counts.vocabulary)
+# Print how many words and cells there are, how many entries kept a positive
+# score, how many pairs were never seen together, how many scored below
+# chance, and the count and the kept score for and beside bake.`,
+              `from oop_ml import PointwiseMutualInformationEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+
+model = PointwiseMutualInformationEmbeddings(
+    dimension=4, window=5, context_distribution_smoothing=1.0
+).fit(notes)
+counts = model.cooccurrence
+scores = model.pointwise_mutual_information
+words = list(counts.vocabulary)
+cells = len(words) ** 2
+never_seen = sum(
+    1 for word in words for context in words if counts.count_between(word, context) == 0
+)
+
+print(f"{len(words)} words, {cells} cells")
+print(f"kept a positive score {scores.n_positive}")
+print(f"never seen together {never_seen}")
+print(f"below chance, set to zero {cells - scores.n_positive - never_seen}")
+print(f"and beside bake, counted {counts.count_between('and', 'bake'):.0f}, kept {scores.value_between('and', 'bake'):.4f}")`,
+              `23 words, 529 cells
+kept a positive score 224
+never seen together 249
+below chance, set to zero 56
+and beside bake, counted 1, kept 0.0000`,
+              { hints: ["The vocabulary on the count table can be iterated, and it lists every distinct word once, so a list of it is the 23 words and its length squared is the 529 cells.", "The scored table reports how many of its entries are positive as n_positive. That is the 224, and everything else in the table is a zero of one kind or the other.", "A pair never seen together has a count of exactly zero, so one loop over every word against every word, asking count_between, counts the 249. The diagonal is in that total, since no word is ever its own neighbour.", "Three groups make up the whole table, so the below-chance group is the cells less the kept entries less the never-seen pairs."], check: numberCheck("How many pairs scored below chance and were set to zero?", 56, 0.5, "Of the 529 cells, 224 keep a positive score and 249 hold a pair the corpus never put together, which leaves 56 that were seen together, scored below chance, and were clipped to zero. The clip has already made those 56 indistinguishable from the 249, which is why they have to be recovered by subtraction rather than read.") },
+            ),
+            exercise(
+              "Flatten the context rates and watch the direction",
+              ["Part 4 says that flattening lifts a rare context's rate, and that because the rate sits in the denominator the score of a pair with a rare context goes down, not up. Fit the notes twice, once with nothing flattened and once at the published three quarters, and read flour beside whisk and sugar beside the off both scored tables.", "Then read and beside crew both ways round under the flattened fit, which Part 4 reports as 0.3057 one way and 0.4232 the other, and read the same pair under the unflattened fit, where the lesson says the two directions agree but does not print the value."],
+              `from oop_ml import PointwiseMutualInformationEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+
+plain = PointwiseMutualInformationEmbeddings(
+    dimension=4, window=5, context_distribution_smoothing=1.0
+).fit(notes).pointwise_mutual_information
+# Fit a second model at the published three quarters and keep its scored
+# table. Print flour beside whisk and sugar beside the under both, then
+# and beside crew in both directions under the flattened fit and under
+# the plain one.`,
+              `from oop_ml import PointwiseMutualInformationEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+
+plain = PointwiseMutualInformationEmbeddings(
+    dimension=4, window=5, context_distribution_smoothing=1.0
+).fit(notes).pointwise_mutual_information
+flattened = PointwiseMutualInformationEmbeddings(
+    dimension=4, window=5, context_distribution_smoothing=0.75
+).fit(notes).pointwise_mutual_information
+
+for word, context in (("flour", "whisk"), ("sugar", "the")):
+    before = plain.value_between(word, context)
+    after = flattened.value_between(word, context)
+    print(f"{word} beside {context}: {before:+.4f} unflattened, {after:+.4f} at three quarters")
+
+print(f"flattened, and beside crew {flattened.value_between('and', 'crew'):.4f}")
+print(f"flattened, crew beside and {flattened.value_between('crew', 'and'):.4f}")
+print(f"unflattened, and beside crew {plain.value_between('and', 'crew'):.4f}")
+print(f"unflattened, crew beside and {plain.value_between('crew', 'and'):.4f}")`,
+              `flour beside whisk: +0.6523 unflattened, +0.5933 at three quarters
+sugar beside the: +0.4336 unflattened, +0.4922 at three quarters
+flattened, and beside crew 0.3057
+flattened, crew beside and 0.4232
+unflattened, and beside crew 0.3646
+unflattened, crew beside and 0.3646`,
+              { hints: ["The flattening power is the field context_distribution_smoothing, and 0.75 is its default, so the second fit can leave it out. Naming it anyway makes the comparison readable.", "value_between takes the word first and the context second. The flattening is applied to the context's rate only, so swapping the two arguments swaps which rate was flattened.", "Whisk served as company 25 times and the 40 times, so whisk is the rare context whose rate is lifted and the is the frequent one whose rate is lowered. Expect the first score to fall and the second to rise."], check: numberCheck("What does flour beside whisk score at the published three quarters?", 0.5933, 5e-05, "Unflattened the pair scores +0.6523. Raising every context count to the three quarters pulls the large counts down towards the small ones, so after renormalising whisk, one of the rarer contexts, holds a larger share than it did. That share is in the denominator, so the ratio shrinks and the score falls to +0.5933. Sugar beside the moves the other way, from +0.4336 to +0.4922, because the is one of the commonest contexts and its share was lowered.") },
+            ),
+            exercise(
+              "Squeeze the table to four numbers a word",
+              ["Part 5 squeezes the scored table to four numbers a word at the published settings and reports the four largest sizes, the nearest words to flour, a cosine of 1.0000 between flour and bake, and a mean of 0.6732 between two words of one topic against 0.0086 between a word of each. Fit the notes at those settings and reproduce each of those from the fitted model.", "Then put numbers on two things the lesson only states. Print the cosine between flour and anchor, a word of each half, and refit with the power at one, which Part 5 says separates the two halves furthest without saying by how much."],
+              `from statistics import mean
+
+from oop_ml import PointwiseMutualInformationEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+cooking = ["flour", "sugar", "butter", "eggs", "oven", "bake", "stir", "whisk", "dough", "pan"]
+sailing = ["sail", "wind", "boat", "harbour", "anchor", "tide", "mast", "rope", "deck", "crew"]
+
+model = PointwiseMutualInformationEmbeddings(dimension=4, window=5).fit(notes)
+# Print the four sizes, the five nearest words to flour, and the cosines
+# between flour and bake and between flour and anchor. Then, for a power
+# of 0.5 and of 1.0, fit the notes and print the mean cosine between two
+# words of one topic, between a word of each topic, and the gap.`,
+              `from statistics import mean
+
+from oop_ml import PointwiseMutualInformationEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+cooking = ["flour", "sugar", "butter", "eggs", "oven", "bake", "stir", "whisk", "dough", "pan"]
+sailing = ["sail", "wind", "boat", "harbour", "anchor", "tide", "mast", "rope", "deck", "crew"]
+
+model = PointwiseMutualInformationEmbeddings(dimension=4, window=5).fit(notes)
+print(f"sizes {' '.join(f'{size:.4f}' for size in model.singular_values)}")
+print(f"nearest to flour {' '.join(model.most_similar('flour', 5).words)}")
+print(f"flour and bake {model.similarity('flour', 'bake'):.4f}")
+print(f"flour and anchor {model.similarity('flour', 'anchor'):.4f}")
+
+for power in (0.5, 1.0):
+    fitted = PointwiseMutualInformationEmbeddings(
+        dimension=4, window=5, singular_value_exponent=power
+    ).fit(notes)
+    within = mean(
+        fitted.similarity(first, second)
+        for group in (cooking, sailing)
+        for position, first in enumerate(group)
+        for second in group[position + 1 :]
+    )
+    across = mean(fitted.similarity(first, second) for first in cooking for second in sailing)
+    print(f"power {power}: within {within:.4f}, across {across:.4f}, gap {within - across:.4f}")`,
+              `sizes 6.6440 6.1406 2.8430 2.8325
+nearest to flour bake sugar oven eggs butter
+flour and bake 1.0000
+flour and anchor 0.0081
+power 0.5: within 0.6732, across 0.0086, gap 0.6646
+power 1.0: within 0.8191, across 0.0428, gap 0.7762`,
+              { hints: ["The published settings are the defaults apart from the width, so dimension=4 and window=5 is the whole configuration. The sizes are the property singular_values, in falling order.", "most_similar(word, n) answers an object whose words property is the names in order, and similarity(first, second) is the cosine between two words' four numbers.", "Two words of one topic means every pair drawn from the cooking list plus every pair drawn from the sailing list, 45 and 45, and a word of each means every cooking word against every sailing word, 100 pairs. The slice group[position + 1 :] is what stops a pair being counted twice or a word being paired with itself.", "The power is the field singular_value_exponent, and 0.5 is its default, which is why the first fit matched the lesson without naming it."], check: numberCheck("What is the gap between the two means at a power of one?", 0.7762, 0.0001, "At the published half the two halves come apart by 0.6646, which is 0.6732 less 0.0086. At a power of one each direction is weighted by its full size rather than the square root of it, so the two directions that stand well clear of the rest dominate every word's four numbers, and the gap widens to 0.7762. That is the setting this corpus prefers and the published paper does not, for the reason Part 5 gives.") },
+            ),
+          ],
         },
       ]}
     />

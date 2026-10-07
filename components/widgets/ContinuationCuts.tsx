@@ -76,14 +76,9 @@ export function ContinuationCuts({ initialIndex = 3 }: { initialIndex?: number }
         <Stat label="glues back exactly" value={cut.round_trip_exact ? "yes" : "no"} />
       </div>
 
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        The sentence is seven words and {cut.n_pieces} pieces here, and{" "}
-        {starts} of those pieces carry no mark, one for each word. The marked
-        ones are the continuations, so gluing is mechanical: strip a mark and
-        join, or start a new word where a mark is absent, which is what makes
-        the sentence come back{" "}
-        {cut.round_trip_exact ? "unchanged" : "changed"}.
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Continuation markers tell the decoder which pieces belong inside an existing word. This sentence has seven words and {cut.n_pieces} pieces; {starts} pieces have no continuation mark.</p><p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Begin a word at an unmarked piece. For a marked piece, remove the marker and attach the text to the current word. Under these rules the displayed sentence returns {cut.round_trip_exact ? "unchanged" : "with a change"}. Compare the decoded text to locate any information the encoding did not preserve.</p>
+</>
     </div>
   );
 }

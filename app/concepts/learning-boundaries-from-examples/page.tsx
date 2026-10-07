@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -18,19 +21,22 @@ import { PerceptronWalk } from "@/components/widgets/PerceptronWalk";
 import { PointwisePlayground } from "@/components/widgets/PointwisePlayground";
 import { WindowReach } from "@/components/widgets/WindowReach";
 
-const TAGLINE =
-  "Pointwise segmentation asks one yes-or-no question at every gap between two characters and answers it from the characters around it, with no dictionary and no model of the sentence as a whole. What a gap is asked, how the answers are learned from marked-up text, and what independence costs.";
+
 
 export const metadata: Metadata = {
   title: "Learning Boundaries From Examples · oop_ml",
-  description: TAGLINE,
+  description: "Learn boundary decisions from local character features in labelled examples.",
 };
 
 export default function LearningBoundariesFromExamplesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["learning-boundaries-from-examples"]}
+      technicalStart="Part 2. What a Gap Is Asked"
+      openingTitle="Ask Each Gap Whether a Word Ends Here"
+      playgroundIntro="Select a gap and examine the neighbouring characters used to classify it. Compare individual boundary decisions with the resulting complete segmentation."
       title="Learning Boundaries From Examples"
-      tagline={TAGLINE}
+      tagline="Learn boundary decisions from local character features in labelled examples."
       prerequisites={
         <>
           The page on segmenting with a hidden model, since this one is the
@@ -41,74 +47,14 @@ export default function LearningBoundariesFromExamplesPage() {
           wrong.
         </>
       }
-      history={
-        <>
-          <p>
-            Graham Neubig, Yosuke Nakata and Shinsuke Mori published Pointwise
-            Prediction for Robust, Adaptable Japanese Morphological Analysis at
-            the Association for Computational Linguistics meeting in Portland in
-            2011, and the system it describes is KyTea, the Kyoto Text Analysis
-            Toolkit. The problem they had was not accuracy on newspaper
-            Japanese, which was already good. It was that a working analyser
-            moved to medical records, or to patents, or to conversation, and got
-            worse, and that fixing it meant somebody sitting down and cutting up
-            enough text in the new domain to retrain the whole thing. Their
-            observation was that a sequence model over a sentence cannot be
-            taught anything by a sentence somebody has only partly marked up,
-            because the label it needs for a character is the character&rsquo;s
-            place inside its word, and that is settled only once the boundaries
-            on both sides of the character are known. An annotator who is sure
-            about one boundary and unsure about the next has produced nothing a
-            sequence model can count.
-          </p>
-          <p>
-            So they moved the question. Instead of asking what place each
-            character occupies in its word, ask of each gap between two adjacent
-            characters whether a boundary sits there, and answer that question
-            with a linear classifier reading only the few characters around the
-            gap. Now one marked gap is one training example and needs no other,
-            an annotator can work through a corpus marking whatever they are
-            confident about, and a model can be pointed at whichever gaps it is
-            currently least sure of. That is the argument the paper makes and it
-            is the reason the tool exists, rather than a claim that independent
-            decisions read text better than joint ones.
-          </p>
-          <p>
-            The classifier they reached for was already old. Frank Rosenblatt
-            built the perceptron at the Cornell Aeronautical Laboratory and
-            described it in the Psychological Review in 1958, as a rule that
-            walks through examples and nudges its weights whenever it gets one
-            wrong. Yoav Freund and Robert Schapire showed in Machine Learning in
-            1999 that answering with the average of every set of weights the walk
-            passed through generalises far better than answering with the last
-            one, for very nearly the same cost, and Michael Collins brought that
-            averaged form into language processing at the Empirical Methods
-            conference in 2002. Everything in this page&rsquo;s learner is those
-            two pieces put together, and the modern descendants of the idea
-            replace the linear classifier with a neural one while leaving the
-            shape of the question alone.
-          </p>
-          <p>
-            This page asks six questions in order. What does the previous
-            method buy by scoring a whole sentence, and what does that cost
-            when you want to look at a single decision? What is a gap actually
-            asked, and why does the kind of character matter as much as which
-            character it is? How are the answers learned from marked-up text,
-            and what does the order of the learning decide? What did a
-            particular gap decide, and what pushed it that way? Is this method
-            better or worse than the one it is set against, measured on the
-            same sentences? And where does independence stop being an
-            approximation and start being false?
-          </p>
-        </>
-      }
+
       playground={<PointwisePlayground />}
       sections={[
         {
           title: "Part 1. One Answer That Cannot Be Taken Apart",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. What scoring a whole sentence at once buys, and where it leaves you">
                 <p>
                   The previous page gave every character of a text one of four
@@ -120,22 +66,17 @@ export default function LearningBoundariesFromExamplesPage() {
                   the answer that comes back is the best reading of the sentence
                   under one account of what sentences look like.
                 </p>
-                <p>
-                  Now ask a narrow question of such an answer. The sentence we
-                  carry through this section is Dr. Alvarez didn&rsquo;t expect
-                  the low-cost re-analysis, and with its spaces taken out it is
-                  forty-five characters with forty-four gaps between them. Point
-                  at the gap between the full stop of Dr. and the A of Alvarez
-                  and ask what decided it. There is no answer, and the reason is
-                  structural rather than a shortcoming of any implementation.
-                  The score being maximised is a sum over the whole run, so the
-                  boundary at that gap was settled by a comparison between two
-                  complete readings of forty-five characters, one of which cut
-                  there and one of which did not, and the difference between
-                  those two totals includes terms drawn from every character in
-                  the sentence. Changing the answer at that gap alone is not
-                  something the method can be asked to do.
+                <>
+<p>
+                  Now ask a narrow question of such an answer. The sentence we carry through this section is Dr. Alvarez didn&rsquo;t expect the low-cost re-analysis, and with its spaces taken out it is forty-five characters with forty-four gaps between them. Point at the gap between the full stop of Dr. and the A of Alvarez and ask what decided it.
                 </p>
+                <p>
+                  There is no answer, and the reason is structural rather than a shortcoming of any implementation. The score being maximised is a sum over the whole run, so the boundary at that gap was settled by a comparison between two complete readings of forty-five characters, one of which cut there and one of which did not, and the difference between those two totals includes terms drawn from every character in the sentence.
+                </p>
+                <p>
+                  Changing the answer at that gap alone is not something the method can be asked to do.
+                </p>
+</>
                 <p>
                   The same holds for correcting it. If a reader sees one gap
                   answered wrongly there is no weight to reach for, because the
@@ -217,6 +158,32 @@ export default function LearningBoundariesFromExamplesPage() {
                   than one. At a fifth marked it is 20.41% against 7.79%, so the
                   gap between them widens as the annotation gets sparser.
                 </p>
+                <WhyThisWorks title="Why the second share is not simply the first one squared">
+                  <p>
+                    A gap is usable when the annotator marked it, which here
+                    happens two times in five. A character in the middle of a
+                    sentence has a gap on each side and needs both of them
+                    marked. A character at either end of a sentence has only
+                    one gap and needs only that one.
+                  </p>
+                  <Equation>
+                    {"a gap, usable                         0.4\n" +
+                      "a character inside a sentence         0.4 × 0.4  =  0.16\n" +
+                      "a character at the end of a sentence  0.4\n" +
+                      "\n" +
+                      "(1,461 × 0.16 + 400 × 0.4) / 1,861  ≈  0.21"}
+                  </Equation>
+                  <p>
+                    The two hundred sentences hold 1,861 characters, and 400 of
+                    them stand at one end or the other, so about 21% of the
+                    places are expected to survive where 40% of the gaps do.
+                    The 19.61% and the 39.49% above are one drawing of the
+                    marks counted, which is why they sit near those figures
+                    and not on them. A language with longer sentences has
+                    fewer end characters for its length, and its share falls
+                    closer to the 16%.
+                  </p>
+                </WhyThisWorks>
                 <InAModel>
                   <p>
                     The implementation this page runs on is handed sentences that
@@ -236,7 +203,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. What a Gap Is Asked",
@@ -294,17 +261,14 @@ export default function LearningBoundariesFromExamplesPage() {
                   namely a Han character, a hiragana, a katakana, any other
                   letter, a digit, a punctuation mark, and everything else.
                 </p>
-                <p>
-                  What that buys is a rule learned once instead of once per pair.
-                  A boundary between a run of one script and a run of another is
-                  a single thing to learn, rather than something that must be
-                  learned separately for every one of the thousands of character
-                  pairs that could sit astride it. And it never goes silent.
-                  Counted over every gap of two hundred held-out sentences of a
-                  generated language, 31,566 questions in all, the ones naming
-                  particular characters carry a weight 79.33% of the time and the
-                  ones naming kinds carry one every time.
+                <>
+<p>
+                  What that buys is a rule learned once instead of once per pair. A boundary between a run of one script and a run of another is a single thing to learn, rather than something that must be learned separately for every one of the thousands of character pairs that could sit astride it. And it never goes silent.
                 </p>
+                <p>
+                  Counted over every gap of two hundred held-out sentences of a generated language, 31,566 questions in all, the ones naming particular characters carry a weight 79.33% of the time and the ones naming kinds carry one every time.
+                </p>
+</>
                 <p>
                   Our own sentence needs both halves, and it is worth being exact
                   about which does what. The full stop that ends Dr. is followed
@@ -479,6 +443,39 @@ export default function LearningBoundariesFromExamplesPage() {
                 <Equation>
                   {"averaged weight  =  ( Σ over steps of the weight at that step ) / number of steps"}
                 </Equation>
+                <WorkedExample title="A walk of two steps, averaged">
+                  <p>
+                    Take one sentence of three characters, a, b and c, marked
+                    as the two words ab and c, with a reach of one and a single
+                    pass that visits the first gap first. The two gaps ask
+                    seven questions each, and four of the seven are the same
+                    four at both, namely whether this is a gap at all and the
+                    three about kinds, since every character here is a letter.
+                  </p>
+                  <NumberTable
+                    headings={[
+                      "weight of",
+                      "after step 1",
+                      "after step 2",
+                      "averaged",
+                    ]}
+                    rows={[
+                      ["the four questions both gaps ask", "−1", "0", "−0.5"],
+                      ["the three naming a and b", "−1", "−1", "−1"],
+                      ["the three naming b and c", "0", "+1", "+0.5"],
+                    ]}
+                    caption="Step 1 meets a score of zero at the gap marked as a join and subtracts one from its seven weights. Step 2 scores the other gap at −4 from the four shared weights, which is wrong for a gap marked as a cut, and adds one to its seven."
+                  />
+                  <p>
+                    The four shared weights finish the walk at zero, as though
+                    nothing had been learned about them, and the average
+                    remembers that they spent half the walk at minus one. That
+                    is where a weight of one half comes from. It also shows
+                    what one pass is worth, since the averaged weights score
+                    the two gaps at −5.0 and −0.5 and the text comes back as
+                    the single piece abc, with the second gap still wrong.
+                  </p>
+                </WorkedExample>
                 <WhyThisWorks>
                   <p>
                     Written that way it looks expensive, since it seems to need
@@ -547,6 +544,54 @@ export default function LearningBoundariesFromExamplesPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            trueFalse(
+              "When the whole-sequence method answers one gap wrongly, a reader can point at the weight that decided that gap and change it.",
+              false,
+              "There is no such weight. The score being maximised is a sum over the whole run, so a single boundary was settled by comparing two complete readings of forty-five characters, and the difference between those totals draws on every character in the sentence. Scoring a whole sentence buys consistency and costs addressability.",
+            ),
+            choice(
+              "An annotator marks only the gaps they are certain of and leaves the arguable ones alone. Why does that corpus cost the whole-sequence learner more than the gap learner?",
+              [
+                "The place a character occupies is known only once the gaps on both sides of it are settled, so one unmarked gap spoils two characters",
+                "The whole-sequence learner needs every sentence marked all the way through or it cannot be run at all",
+                "The gap learner can guess the missing marks from the gaps around them",
+                "Unmarked gaps are counted as joins, which biases the whole-sequence learner towards long words",
+              ],
+              0,
+              "A marked gap is one usable instance to a gap-at-a-time learner and needs no neighbour. A method working in places inside a word needs two settled gaps per character, so it loses roughly twice as much. Counted on two hundred sentences with two fifths of the gaps marked, the gap learner keeps 39.49 percent of its material and the sequence learner 19.61 percent of its own.",
+            ),
+            choice(
+              "Every weight starts at zero, so the first marked gap the walk meets scores exactly zero. What does the learning rule do with it?",
+              [
+                "Counts it as a mistake and moves every weight that gap asked about by one, up for a cut and down for a join",
+                "Leaves the weights alone, since a score of zero is not a cut",
+                "Moves only the weight of the constant question every gap asks",
+                "Skips the gap until some other gap has moved its weights",
+              ],
+              0,
+              "Zero is right for neither answer, so it counts as a mistake while learning, and a gap already answered correctly is never touched. On two characters marked as two words, at a reach of one, that single correction adds one to seven weights and the same gap then scores exactly 7.0. Reading is the other way round, where a score of zero is not a cut, because leaving text whole is the more conservative of the two errors.",
+            ),
+            trueFalse(
+              "Counted over the held-out sentences, a question naming a particular character carried no weight about one time in five, while a question naming a kind carried one every time.",
+              true,
+              "Over 31,566 questions the ones naming particular characters carried a weight 79.33 percent of the time, which leaves 20.67 percent silent, and the ones naming kinds were never silent. That is why both are asked at every offset. Naming the character is exact, and it is what settles the full stop of Dr. almost on its own. Naming the kind is what still answers in a name nobody has written down, where the kinds are all there is.",
+            ),
+            several(
+              "Eight orders of the same eight marked-up sentences were run. Which of these hold?",
+              [
+                "They give five different readings of the same forty-five characters",
+                "All eight are equally right about the 189 gaps they were shown",
+                "One of the eight reproduces the reading a person gives",
+                "Averaging the weights removes the spread on these eight sentences",
+              ],
+              [0, 1],
+              "Each run stops as soon as it is right about everything it was shown, so all eight are right about the same 189 gaps and disagree only about the gaps nobody marked. None of the eight matches a reader, and the disagreement sits in the surname, the one stretch made of characters those sentences never carried. Averaging reduces the spread here and does not remove it.",
+            ),
+        ],
+        },
+        {
           title: "Part 4. Our Own Sentence, Gap by Gap",
           content: (
             <>
@@ -601,32 +646,55 @@ export default function LearningBoundariesFromExamplesPage() {
                 <GapVotes
                   gapKeys={["full-stop", "apostrophe", "hyphen", "script"]}
                 />
-                <p>
-                  The first of those is the gap between the full stop of Dr. and
-                  the A of Alvarez, and it comes to +7.1283. Every question about
-                  the characters after the gap carries a weight of zero, so the
-                  whole of the positive case is made from behind it, and two of
-                  those questions could never have carried a weight at all, since
-                  those eight sentences contain no capital A and no v anywhere.
-                  The single largest contribution is +3.6304, for the full stop
-                  sitting immediately to the left, and the questions about kinds
-                  contribute −0.3188 between them, which is to say almost nothing.
+                <>
+<p>
+                  The first of those is the gap between the full stop of Dr. and the A of Alvarez, and it comes to +7.1283. Every question about the characters after the gap carries a weight of zero, so the whole of the positive case is made from behind it, and two of those questions could never have carried a weight at all, since those eight sentences contain no capital A and no v anywhere.
                 </p>
                 <p>
-                  Now the second and third, which are a letter followed by a
-                  punctuation mark inside didn&rsquo;t and inside low-cost. Both
-                  are kept together, at −17.5093 and −19.7016, and in both the
-                  questions about kinds contribute −12.0563, the same figure to
-                  the last digit, since those two gaps ask exactly the same
-                  questions about kinds. That is the generalisation working, and it
-                  is also why the offsets have to be kept apart, since the full stop
-                  of Dr. carries its punctuation on the other side of the gap, asks
-                  a different set of questions about kinds, and gets −0.3188 out of
-                  them rather than −12.0563. The fourth gap is the opposite case, a
-                  change of script where only one of the eleven questions about
-                  which characters these are carries any weight, and the cut is
-                  made at +0.0367.
+                  The single largest contribution is +3.6304, for the full stop sitting immediately to the left, and the questions about kinds contribute −0.3188 between them, which is to say almost nothing.
                 </p>
+</>
+                <>
+<p>
+                  Now the second and third, which are a letter followed by a punctuation mark inside didn&rsquo;t and inside low-cost. Both are kept together, at −17.5093 and −19.7016, and in both the questions about kinds contribute −12.0563, the same figure to the last digit, since those two gaps ask exactly the same questions about kinds. That is the generalisation working, and it is also why the offsets have to be kept apart, since the full stop of Dr. carries its punctuation on the other side of the gap, asks a different set of questions about kinds, and gets −0.3188 out of them rather than −12.0563.
+                </p>
+                <p>
+                  The fourth gap is the opposite case, a change of script where only one of the eleven questions about which characters these are carries any weight, and the cut is made at +0.0367.
+                </p>
+</>
+                <WorkedExample title="The four gaps, each added up by kind of question">
+                  <p>
+                    A gap in the middle of a run asks twenty-three questions at
+                    this reach. One is whether it is a gap at all, eleven name
+                    particular characters and eleven name kinds, and the score
+                    is the three subtotals added together.
+                  </p>
+                  <NumberTable
+                    headings={[
+                      "the gap",
+                      "being a gap at all",
+                      "which characters",
+                      "what kinds",
+                      "score",
+                    ]}
+                    rows={[
+                      ["after the full stop of Dr.", "−3.0455", "+10.4926", "−0.3188", "+7.1283"],
+                      ["before the apostrophe of didn’t", "−3.0455", "−2.4074", "−12.0563", "−17.5093"],
+                      ["before the hyphen of low-cost", "−3.0455", "−4.5997", "−12.0563", "−19.7016"],
+                      ["the change of script", "−1.0683", "+1.0000", "+0.1050", "+0.0367"],
+                    ]}
+                    caption="Each row adds across to its score, to within the rounding of the figures shown. The last row comes from the fit on the eight sentences that mix two scripts, which is why its first column differs."
+                  />
+                  <p>
+                    Read down the columns. The first is the same number for
+                    every gap of one fit, and it is negative because most gaps
+                    are not boundaries, 155 of the 189 marked ones here. The
+                    third is what the two punctuation marks inside a word have
+                    in common. The second is the only place the full stop of
+                    Dr. gets its cut from, and it is also the only column that
+                    tells the apostrophe from the hyphen.
+                  </p>
+                </WorkedExample>
                 <WhyThisWorks>
                   <p>
                     It is worth being exact about what this is and is not. This is
@@ -716,19 +784,14 @@ export default function LearningBoundariesFromExamplesPage() {
                   over decisively, 0.9650 against 0.9178 at a hundred and sixty
                   and 0.9799 against 0.9223 at three hundred and twenty.
                 </p>
-                <p>
-                  On the English words the picture is not the same picture shifted
-                  along, it is a different picture. The gap method passes the
-                  other one by twenty sentences and then keeps climbing, reaching
-                  0.9057 at 1,280 sentences, while the whole-sequence method peaks
-                  at 0.6087 and then falls back to 0.5186 as more text is added.
-                  The previous page measured why that happens to it, which is that
-                  a single letter of an alphabet says very little about where in
-                  its word it sits and says less as the vocabulary widens. A gap
-                  method never asks a character where it sits; it asks a window of
-                  six characters and five pairs whether a boundary is between the
-                  middle two, and that question keeps its answer.
+                <>
+<p>
+                  On the English words the picture is not the same picture shifted along, it is a different picture. The gap method passes the other one by twenty sentences and then keeps climbing, reaching 0.9057 at 1,280 sentences, while the whole-sequence method peaks at 0.6087 and then falls back to 0.5186 as more text is added.
                 </p>
+                <p>
+                  The previous page measured why that happens to it, which is that a single letter of an alphabet says very little about where in its word it sits and says less as the vocabulary widens. A gap method never asks a character where it sits; it asks a window of six characters and five pairs whether a boundary is between the middle two, and that question keeps its answer.
+                </p>
+</>
                 <InAModel>
                   <p>
                     I went into this expecting the two methods to be close on the
@@ -762,7 +825,11 @@ export default function LearningBoundariesFromExamplesPage() {
                   whole-sequence method recovers 0.6560 of them, two and a half
                   times as many. The table under the widget above carries that
                   split at every size, and the gap method is behind on unfamiliar
-                  words at every size where any remain.
+                  words at every size up to forty sentences. At eighty only
+                  nineteen unfamiliar words are left among the held-out
+                  sentences, and the gap method recovers six of them to the
+                  other method&rsquo;s five, which is too few to rank the two
+                  on.
                 </p>
                 <p>
                   The second is small corpora of a script whose characters are
@@ -828,6 +895,17 @@ export default function LearningBoundariesFromExamplesPage() {
                   The top row then says what independence costs in those terms, a
                   gap of 4.7503 between an answer that maximises that score and
                   one that maximises nothing.
+                </p>
+                <Equation>
+                  {"the best whole sequence, less one answer per gap   −151.0253 − (−155.7756)  =  4.7503\n" +
+                    "the best whole sequence, less what a reader answers  −151.0253 − (−153.9847)  =  2.9594"}
+                </Equation>
+                <p>
+                  Both differences are in the units of that score, which are
+                  logarithms of probabilities, so a larger difference marks a
+                  reading the tables find less likely. The reader&rsquo;s reading sits
+                  between the other two, nearer the maximum than the gap
+                  method&rsquo;s answer is and still short of it.
                 </p>
                 <p>
                   What that looks like in the answer is the single letter a
@@ -1136,6 +1214,299 @@ export default function LearningBoundariesFromExamplesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 to 6",
+          quiz: [
+            choice(
+              "The gap inside didn’t scores minus 17.5093 and the gap inside low-cost scores minus 19.7016, yet the questions about kinds contribute minus 12.0563 to both, to the last digit. Why?",
+              [
+                "The two gaps ask exactly the same questions about kinds, a letter on one side and a punctuation mark on the other, at the same offsets",
+                "The weights for kinds are shared across every gap in the sentence",
+                "Both gaps happen to sit inside words the eight marked-up sentences contained",
+                "The learning rule clamps the contribution from kinds once a gap is answered correctly",
+              ],
+              0,
+              "Kinds are coarse on purpose, so an apostrophe and a hyphen raise the identical questions and get the identical number. That is the generalisation working. It is also why the offsets are kept apart, since the full stop of Dr. carries its punctuation on the other side of the gap and gets minus 0.3188 from kinds rather than minus 12.0563.",
+            ),
+            trueFalse(
+              "On the English words with the spaces taken out, the whole-sequence method finishes below its own best score while the gap method is still climbing.",
+              true,
+              "The whole-sequence method peaks at 0.6087 and falls back to 0.5186 as more text is added, where the gap method reaches 0.9057 at 1,280 sentences. A single letter of an alphabet says little about where in its word it sits and says less as the vocabulary widens. The gap method never asks a character where it sits. It asks a window of six characters and five pairs whether a boundary lies between the middle two, and that question keeps its answer.",
+            ),
+            choice(
+              "On the character language at thirty sentences, recall was split by whether the word had been seen before. Which way did the split go?",
+              [
+                "The gap method recovered more of the unfamiliar words, 0.6560 against 0.2640",
+                "The whole-sequence method recovered more of the unfamiliar words, 0.6560 against 0.2640",
+                "The two methods recovered unfamiliar words at about the same rate",
+                "Neither method recovered any unfamiliar word at that corpus size",
+              ],
+              1,
+              "The whole-sequence method recovers two and a half times as many, and the gap method is behind on unfamiliar words at every size up to forty sentences, after which too few of them remain to rank the two. That is worth stating plainly, because reaching words the corpus never held is the very thing the previous page’s method was built for.",
+            ),
+            choice(
+              "What does answering every gap independently cost, as the page measures it?",
+              [
+                "The answer is the maximum of nothing, and on the running sentence it scores 4.7503 below the best whole sequence by that method’s own tables",
+                "It returns segmentations the whole-sequence method is incapable of returning",
+                "It answers with a piece of a length its corpus never showed more often than the whole-sequence method does",
+                "Its cost of reading a text grows with the amount of marked-up text behind the weights",
+              ],
+              0,
+              "Any set of cuts is a segmentation, so no arrangement of independent answers is beyond the other method. Over all 1,296 four-character texts from a corpus of two-character words, the gap method answered with a piece of odd length 32 times and the whole-sequence method 45 times. Reading a text costs twenty-three additions a gap however much text was marked up, which is not a consideration. What is lost is that no quantity in the method mentions the whole run, so a fact needing two gaps to state has nowhere to be recorded.",
+            ),
+            several(
+              "Which of these are decisions nothing in the method makes for you, rather than limits of what it can express?",
+              [
+                "What to do with a score of exactly zero",
+                "What order to visit the marked gaps in",
+                "Which questions a gap is asked",
+                "That a dependency wider than the reach has nowhere to be written down",
+              ],
+              [0, 1, 2],
+              "The score of exactly zero, the order the gaps are visited in and the questions a gap is asked each have a defensible answer on more than one side, and each changes what comes back, so each belongs in whatever describes a segmenter. A dependency wider than the reach is not a choice at all. A character outside the reach has no place in the question being asked, so the dependency is invisible rather than poorly estimated, and more text cannot supply one.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Scoring Gaps and Opening Them Up",
+          practice: [
+            exercise(
+              "Read our sentence gap by gap",
+              ["Fit the library’s gap segmenter on the eight marked-up sentences of Part 4, with a reach of three, twenty passes and the seed 0, which is the order the page’s widgets use. Segment the running sentence with its spaces taken out, then ask for the score at every gap and compare each sign with the reading a person gives.", "Section 11 arrived at forty-four gaps with three of them wrong, all inside the surname. Print each wrong gap with the two characters either side of it and its score to four places. The page names the three and does not print their scores, so read off how close each one was."],
+              `from oop_ml import PointwiseSegmenter
+
+corpus = [
+    ["Dr.", "Sato", "read", "the", "re-print."],
+    ["Mr.", "Okonkwo", "didn't", "read", "it."],
+    ["the", "high-cost", "test", "didn't", "run."],
+    ["Dr.", "Chen", "wrote", "a", "re-run."],
+    ["we", "can't", "trust", "the", "low-yield", "re-count."],
+    ["Ms.", "Watson", "read", "the", "report."],
+    ["the", "test", "didn't", "need", "a", "re-print."],
+    ["Dr.", "Sato", "wrote", "the", "report."],
+]
+text = "Dr.Alvarezdidn'texpectthelow-costre-analysis."
+reader = ["Dr.", "Alvarez", "didn't", "expect", "the", "low-cost", "re-analysis."]
+
+boundaries = set()
+position = 0
+for word in reader[:-1]:
+    position += len(word)
+    boundaries.add(position - 1)
+
+# Fit a PointwiseSegmenter with window=3, epochs=20 and random_seed=0 on
+# the corpus. Print the pieces it splits the text into. Ask it for the
+# gap scores, and print how many gaps there are and how many have a sign
+# that disagrees with the reader's boundaries, then each such gap.`,
+              `from oop_ml import PointwiseSegmenter
+
+corpus = [
+    ["Dr.", "Sato", "read", "the", "re-print."],
+    ["Mr.", "Okonkwo", "didn't", "read", "it."],
+    ["the", "high-cost", "test", "didn't", "run."],
+    ["Dr.", "Chen", "wrote", "a", "re-run."],
+    ["we", "can't", "trust", "the", "low-yield", "re-count."],
+    ["Ms.", "Watson", "read", "the", "report."],
+    ["the", "test", "didn't", "need", "a", "re-print."],
+    ["Dr.", "Sato", "wrote", "the", "report."],
+]
+text = "Dr.Alvarezdidn'texpectthelow-costre-analysis."
+reader = ["Dr.", "Alvarez", "didn't", "expect", "the", "low-cost", "re-analysis."]
+
+boundaries = set()
+position = 0
+for word in reader[:-1]:
+    position += len(word)
+    boundaries.add(position - 1)
+
+model = PointwiseSegmenter(window=3, epochs=20, random_seed=0).fit(corpus)
+print(" | ".join(model.split(text).texts))
+
+scores = model.gap_scores(text)
+wrong = [gap for gap, score in enumerate(scores) if (score > 0) != (gap in boundaries)]
+print(f"{len(scores)} gaps, {len(wrong)} against the reader")
+for gap in wrong:
+    print(f"between {text[gap]} and {text[gap + 1]}: {scores[gap]:+.4f}")`,
+              `Dr. | Alv | a | rezdidn't | expect | the | low-cost | re-analysis.
+44 gaps, 3 against the reader
+between v and a: +4.3098
+between a and r: +7.3693
+between z and d: -1.3466`,
+              { hints: ["The segmenter takes window, epochs and random_seed when it is constructed and the list of marked-up sentences when it is fitted, each sentence a list of its words.", "gap_scores takes the text and answers one score per gap, in order, where gap number g lies between the characters at positions g and g + 1. A positive score is a cut.", "The loop above the comment has already turned the reader’s words into the set of gaps that carry a boundary, so a gap is wrong when its score being positive disagrees with its being in that set."], check: numberCheck("What score does the gap between the z and the d get, to four places?", -1.3466, 5e-05, "That gap should have been a cut and falls 1.3466 short of one, which makes it the closest call of the forty-four. The questions naming the z carry no weight, since the eight sentences hold no z. The characters after the gap begin a word those sentences hold three times and vote to cut, while the letters two and three places back, the kinds and the constant question all vote to keep going, since most gaps between two letters are not boundaries. The two gaps cut in error score +4.3098 and +7.3693, each defensible alone, which is section 16’s single letter standing as a word.") },
+            ),
+            exercise(
+              "Open up the gap after the full stop",
+              ["Section 12 lists every question the gap between the full stop of Dr. and the A of Alvarez asked, with the weight each one carries. Build that list. Fit the same segmenter as before, ask for the questions of gap number 2 at a reach of three, look up the weight of each, and print the five that count for most. Then add the weights up three ways, over the questions naming characters, over the ones naming kinds, and over all of them.", "The total should be the +7.1283 of section 12 and should equal the score the segmenter itself reports for that gap, with the largest single weight the +3.6304 of the full stop sitting immediately to the left. A question naming a character begins with c and one naming a kind begins with t.", "The function that lists a gap’s questions is not exported from the top of the library, so it is imported here from the module that holds the segmenter."],
+              `from oop_ml import PointwiseSegmenter
+from oop_ml.core.natural_language_processing.tokenization.segmentation.pointwise import gap_features
+
+corpus = [
+    ["Dr.", "Sato", "read", "the", "re-print."],
+    ["Mr.", "Okonkwo", "didn't", "read", "it."],
+    ["the", "high-cost", "test", "didn't", "run."],
+    ["Dr.", "Chen", "wrote", "a", "re-run."],
+    ["we", "can't", "trust", "the", "low-yield", "re-count."],
+    ["Ms.", "Watson", "read", "the", "report."],
+    ["the", "test", "didn't", "need", "a", "re-print."],
+    ["Dr.", "Sato", "wrote", "the", "report."],
+]
+text = "Dr.Alvarezdidn'texpectthelow-costre-analysis."
+model = PointwiseSegmenter(window=3, epochs=20, random_seed=0).fit(corpus)
+questions = gap_features(text, 2, 3)
+
+# Look up the weight of every question with weight_of. Print the five
+# largest by size, each beside its question. Then print the number of
+# questions, the sum over those starting "c[", the sum over those starting
+# "t[", the weight of "bias", the total, and the model's own score at gap 2.`,
+              `from oop_ml import PointwiseSegmenter
+from oop_ml.core.natural_language_processing.tokenization.segmentation.pointwise import gap_features
+
+corpus = [
+    ["Dr.", "Sato", "read", "the", "re-print."],
+    ["Mr.", "Okonkwo", "didn't", "read", "it."],
+    ["the", "high-cost", "test", "didn't", "run."],
+    ["Dr.", "Chen", "wrote", "a", "re-run."],
+    ["we", "can't", "trust", "the", "low-yield", "re-count."],
+    ["Ms.", "Watson", "read", "the", "report."],
+    ["the", "test", "didn't", "need", "a", "re-print."],
+    ["Dr.", "Sato", "wrote", "the", "report."],
+]
+text = "Dr.Alvarezdidn'texpectthelow-costre-analysis."
+model = PointwiseSegmenter(window=3, epochs=20, random_seed=0).fit(corpus)
+questions = gap_features(text, 2, 3)
+
+weights = {question: model.weight_of(question) for question in questions}
+for question in sorted(weights, key=lambda name: -abs(weights[name]))[:5]:
+    print(f"{weights[question]:+.4f}  {question}")
+
+which = sum(weight for question, weight in weights.items() if question.startswith("c["))
+kinds = sum(weight for question, weight in weights.items() if question.startswith("t["))
+print(f"{len(questions)} questions")
+print(f"which characters {which:+.4f}")
+print(f"what kinds {kinds:+.4f}")
+print(f"being a gap at all {weights['bias']:+.4f}")
+print(f"total {sum(weights.values()):+.4f}")
+print(f"the score the segmenter reports {model.gap_scores(text)[2]:+.4f}")`,
+              `+3.6304  c[-1]=.
+-3.0455  bias
++2.6780  c[-3]=D
++2.6780  c[-3..-2]=Dr
++2.6780  c[-2..-1]=r.
+23 questions
+which characters +10.4926
+what kinds -0.3188
+being a gap at all -3.0455
+total +7.1283
+the score the segmenter reports +7.1283`,
+              { hints: ["gap_features takes the run of text, the number of the gap and the reach, and answers the names of the questions that gap asks. weight_of takes one of those names and answers its averaged weight, zero for a question the marked gaps never raised.", "A dictionary from each question to its weight makes both the ranking and the three sums short. Sorting the names by the size of their weight, largest first, puts the questions that count for most at the front.", "The score at a gap is the sum of the weights of the questions it asked and nothing else, so the total of the dictionary’s values and the third entry of gap_scores are the same number reached twice."], check: numberCheck("What do the twenty-three weights at that gap add up to, to four places?", 7.1283, 5e-05, "The eleven questions naming characters come to +10.4926, the eleven naming kinds to −0.3188 and the constant question to −3.0455, and those add to +7.1283, which is exactly what the segmenter reports. Nothing is approximated, because the sum is what the calculation did. Four of the five largest weights read characters behind the gap, the full stop immediately to the left carrying the largest, and the fifth is the constant question pulling the other way. The questions about the characters after the gap carry no weight, and two of them never could, since the eight sentences hold no capital A and no v.") },
+            ),
+            exercise(
+              "Run the same eight sentences in eight orders",
+              ["Section 10 says the order the marked gaps are visited in changes the answer. The seed decides that order, so fit the segmenter eight times on the same eight sentences with the seeds 0 to 7 and segment the running sentence with each. Print how many corrections each run made in all, how many pieces it cut the sentence into, and whether its reading is the one a person gives.", "Every run should stop correcting well before its twenty passes are up, so all eight are right about every marked gap, and still they should not agree. Count the different readings among the eight."],
+              `from oop_ml import PointwiseSegmenter
+
+corpus = [
+    ["Dr.", "Sato", "read", "the", "re-print."],
+    ["Mr.", "Okonkwo", "didn't", "read", "it."],
+    ["the", "high-cost", "test", "didn't", "run."],
+    ["Dr.", "Chen", "wrote", "a", "re-run."],
+    ["we", "can't", "trust", "the", "low-yield", "re-count."],
+    ["Ms.", "Watson", "read", "the", "report."],
+    ["the", "test", "didn't", "need", "a", "re-print."],
+    ["Dr.", "Sato", "wrote", "the", "report."],
+]
+text = "Dr.Alvarezdidn'texpectthelow-costre-analysis."
+reader = ("Dr.", "Alvarez", "didn't", "expect", "the", "low-cost", "re-analysis.")
+
+# For each seed from 0 to 7, fit a segmenter with window=3 and epochs=20,
+# and split the text. Print the seed, the sum of n_updates_by_epoch, the
+# number of pieces and whether the texts equal the reader's. Collect the
+# readings in a set and print how many different ones there are.`,
+              `from oop_ml import PointwiseSegmenter
+
+corpus = [
+    ["Dr.", "Sato", "read", "the", "re-print."],
+    ["Mr.", "Okonkwo", "didn't", "read", "it."],
+    ["the", "high-cost", "test", "didn't", "run."],
+    ["Dr.", "Chen", "wrote", "a", "re-run."],
+    ["we", "can't", "trust", "the", "low-yield", "re-count."],
+    ["Ms.", "Watson", "read", "the", "report."],
+    ["the", "test", "didn't", "need", "a", "re-print."],
+    ["Dr.", "Sato", "wrote", "the", "report."],
+]
+text = "Dr.Alvarezdidn'texpectthelow-costre-analysis."
+reader = ("Dr.", "Alvarez", "didn't", "expect", "the", "low-cost", "re-analysis.")
+
+readings = set()
+for seed in range(8):
+    model = PointwiseSegmenter(window=3, epochs=20, random_seed=seed).fit(corpus)
+    reading = model.split(text).texts
+    readings.add(reading)
+    corrections = sum(model.n_updates_by_epoch)
+    print(f"order {seed}: {corrections} corrections, {len(reading)} pieces, the reader's {reading == reader}")
+
+print(f"{len(readings)} different readings")`,
+              `order 0: 79 corrections, 8 pieces, the reader's False
+order 1: 79 corrections, 6 pieces, the reader's False
+order 2: 78 corrections, 8 pieces, the reader's False
+order 3: 58 corrections, 6 pieces, the reader's False
+order 4: 67 corrections, 8 pieces, the reader's False
+order 5: 76 corrections, 8 pieces, the reader's False
+order 6: 68 corrections, 7 pieces, the reader's False
+order 7: 62 corrections, 6 pieces, the reader's False
+5 different readings`,
+              { hints: ["A fitted segmenter keeps n_updates_by_epoch, the number of corrections it made on each pass, so their sum is the corrections of the whole run and a run of zeros at the end means it had stopped.", "The texts of a split are a tuple, which can be compared with the reader’s tuple and can be put in a set, and a set keeps one copy of each different reading."], check: numberCheck("How many different readings of the sentence do the eight orders give?", 5, 0.0, "Eight orders give five readings and none of them is the reader’s. The runs make between 58 and 79 corrections and then stop, so each is right about all 189 marked gaps, and being right about those does not pin the weights down, since the eight sentences raise 631 questions on 189 gaps. The runs disagree where nobody marked anything, which here is the surname. A segmentation quoted from this method is a segmentation from one order of one corpus.") },
+            ),
+            exercise(
+              "Watch a weight become a half",
+              ["Section 9 walks two steps by hand. Run that walk. Fit the segmenter on the single sentence whose words are ab and c, with a reach of one, one pass and the seed 0, which visits the first gap first. Print the averaged weight of every question each of the two gaps asks, then the scores of the two gaps and the pieces the text abc comes back as.", "Every correction adds or subtracts exactly one, so any weight that is not a whole number is the averaging at work. The four questions the two gaps share should come out at a half below zero, and the text should come back whole, with the second gap still answered wrongly after one pass.", "The function that lists a gap’s questions is not exported from the top of the library, so it is imported here from the module that holds the segmenter."],
+              `from oop_ml import PointwiseSegmenter
+from oop_ml.core.natural_language_processing.tokenization.segmentation.pointwise import gap_features
+
+model = PointwiseSegmenter(window=1, epochs=1, random_seed=0).fit([["ab", "c"]])
+
+# For gap 0 and gap 1 of the text "abc", print each question the gap asks
+# at a reach of one beside its averaged weight. Then print the two gap
+# scores, the pieces the text is split into, and the number of
+# corrections the single pass made.`,
+              `from oop_ml import PointwiseSegmenter
+from oop_ml.core.natural_language_processing.tokenization.segmentation.pointwise import gap_features
+
+model = PointwiseSegmenter(window=1, epochs=1, random_seed=0).fit([["ab", "c"]])
+
+for gap in (0, 1):
+    print(f"gap {gap}")
+    for question in gap_features("abc", gap, 1):
+        print(f"  {model.weight_of(question):+.1f}  {question}")
+
+scores = model.gap_scores("abc")
+print(f"scores {scores[0]:+.1f} and {scores[1]:+.1f}")
+print(" | ".join(model.split("abc").texts))
+print(f"corrections in the pass: {model.n_updates_by_epoch[0]}")`,
+              `gap 0
+  -0.5  bias
+  -1.0  c[-1]=a
+  -0.5  t[-1]=letter
+  -1.0  c[0]=b
+  -0.5  t[0]=letter
+  -1.0  c[-1..0]=ab
+  -0.5  t[-1..0]=letter,letter
+gap 1
+  -0.5  bias
+  +0.5  c[-1]=b
+  -0.5  t[-1]=letter
+  +0.5  c[0]=c
+  -0.5  t[0]=letter
+  +0.5  c[-1..0]=bc
+  -0.5  t[-1..0]=letter,letter
+scores -5.0 and -0.5
+abc
+corrections in the pass: 2`,
+              { hints: ["A sentence is a list of its words, and the corpus is a list of sentences, so one sentence of two words is a list holding one list of two strings.", "gap_features with the text, the gap’s number and a reach of one answers the seven questions of that gap, and weight_of answers the averaged weight of each.", "The question named bias is the constant one every gap asks. It went to minus one at the first step and back to zero at the second, so look at what the average of those two states is."], check: numberCheck("What is the averaged weight of the constant question every gap asks?", -0.5, 0.0, "The constant question was moved to minus one by the first correction and back to zero by the second, and the average of those two states is minus a half. The walk finished with that weight at zero, as though nothing had been learned about it, which is the imprint of the most recent correction that section 9 says the final set of weights carries. The averaged weights score the gaps at −5.0 and −0.5, so the text comes back whole and one pass was not enough to get the second gap right.") },
+            ),
+          ],
         },
       ]}
     />

@@ -129,13 +129,9 @@ export function WordBreakPlayground() {
             />
           </div>
 
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Every segment is drawn, in order, with the half-open span it covers,
-            so the first number is where it starts and the second is one past
-            where it stops. A solid box is a word and a dashed one is a segment
-            the rules found and the answer drops. A space is drawn as {"␣"} and a
-            line break as {"⏎"}.
-          </p>
+          <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Read the segments in their original order. Each span begins at its first character and ends just after its last character; that convention makes adjacent spans easy to connect without counting a boundary twice.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">A solid box marks a retained word. A dashed box marks a segment found by the boundary rules but omitted from the returned word list. Spaces appear as {"␣"} and line breaks as {"⏎"}, so you can inspect boundaries that would otherwise be invisible.</p>
+</>
         </>
       )}
     </div>

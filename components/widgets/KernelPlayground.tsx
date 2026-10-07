@@ -76,17 +76,17 @@ function toData(px: number, py: number) {
 }
 
 function statusText(answer: ClassifyAnswer | null, kernel: KernelName): string {
-  if (!answer) return "…";
+  if (!answer) return "Calculating the fitted boundary…";
   if (kernel === "linear" && answer.fit.accuracy < 0.9) {
-    return "A straight boundary cannot wrap around anyone, so the best it can do is give up one side of the unwell.";
+    return "This fit uses a straight boundary. Compare the background with the dots to see where its predictions disagree with the supplied labels.";
   }
   if (kernel === "linear") {
-    return "A straight boundary suffices for this data, and no kernel was needed.";
+    return "The linear fit classifies most or all of these observations correctly. Extra features may not improve this example; compare performance on the second clinic.";
   }
-  if (answer.fit.support_share >= 0.999) {
-    return "Every patient is a support vector, which is the fit keeping one island per row rather than finding a shape.";
+  if (kernel === "polynomial") {
+    return "Squared allows a quadratic boundary in the original coordinates. The model learns how to combine the resulting features; the kernel supplies their comparisons.";
   }
-  return "The machinery is unchanged, only its reading of similarity was swapped, and the boundary now closes.";
+  return "Radial compares inputs by distance. Larger gamma makes each comparison more local. Check the second clinic as well as the training fit.";
 }
 
 export function KernelPlayground() {
@@ -95,6 +95,7 @@ export function KernelPlayground() {
   const [gammaIndex, setGammaIndex] = useState(3);
   const [capacity, setCapacity] = useState(1);
   const [addClass, setAddClass] = useState(0);
+  const [showSupport, setShowSupport] = useState(false);
   const [answer, setAnswer] = useState<ClassifyAnswer | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -102,16 +103,20 @@ export function KernelPlayground() {
   const gamma = GAMMA_STEPS[gammaIndex];
 
   useEffect(() => {
+    let current = true;
     const timer = setTimeout(async () => {
+      setAnswer(null);
+      setMessage(null);
       try {
-        setAnswer(await classifyClinic(points, choiceFor(kernel, gamma), capacity));
-        setMessage(null);
+        const next = await classifyClinic(points, choiceFor(kernel, gamma), capacity);
+        if (current) setAnswer(next);
       } catch (error) {
+        if (!current) return;
         if (error instanceof ApiError) setMessage(error.message);
         else setMessage("Something went wrong.");
       }
     }, 150);
-    return () => clearTimeout(timer);
+    return () => { current = false; clearTimeout(timer); };
   }, [points, kernel, gamma, capacity]);
 
   const eventToData = useCallback((clientX: number, clientY: number) => {
@@ -200,6 +205,7 @@ export function KernelPlayground() {
             <button
               key={option.value}
               onClick={() => setAddClass(option.value)}
+              aria-pressed={addClass === option.value}
               className={
                 "rounded px-3 py-1 text-sm font-medium transition " +
                 (addClass === option.value
@@ -218,6 +224,7 @@ export function KernelPlayground() {
             <button
               key={option.key}
               onClick={() => setKernel(option.key)}
+              aria-pressed={kernel === option.key}
               className={toggleClass(kernel === option.key)}
             >
               {option.label}
@@ -226,9 +233,12 @@ export function KernelPlayground() {
         </div>
       </div>
 
+      <details className="mb-3 rounded-lg border border-slate-200 p-3 text-sm dark:border-slate-700">
+        <summary className="cursor-pointer font-medium">Advanced kernel settings</summary>
+        <p className="my-3 text-slate-600 dark:text-slate-400">Gamma controls how quickly radial comparisons decrease with distance. C controls the penalty for margin violations during fitting. The later sections explain these settings and support vectors.</p>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pb-3 text-sm text-slate-600 dark:text-slate-300">
         <label className={"flex flex-1 items-center gap-2 " + (kernel === "rbf" ? "" : "opacity-40")}>
-          reach, gamma
+          Gamma
           <input
             type="range"
             min={0}
@@ -242,12 +252,14 @@ export function KernelPlayground() {
           <span className="w-10 text-right font-mono">{gamma}</span>
         </label>
         <span className="flex items-center gap-2">
-          capacity
+          Penalty C
           <span className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
             {CAPACITIES.map((option) => (
               <button
                 key={option}
                 onClick={() => setCapacity(option)}
+                aria-label={`Penalty C ${option}`}
+                aria-pressed={capacity === option}
                 className={
                   "rounded px-2 py-0.5 text-xs font-medium transition " +
                   (capacity === option
@@ -261,11 +273,15 @@ export function KernelPlayground() {
           </span>
         </span>
       </div>
+      <label className="flex items-center gap-2"><input type="checkbox" checked={showSupport} onChange={(event) => setShowSupport(event.target.checked)} />Show support vectors with green rings</label>
+      </details>
 
       <svg
         ref={svgRef}
         viewBox={`0 0 ${VIEW.width} ${VIEW.height}`}
         className="w-full touch-none select-none rounded-lg bg-slate-50 dark:bg-slate-950"
+        role="img"
+        aria-label="Clinic observations and the model's predicted regions, plotted by temperature and heart rate"
         onPointerDown={onBackgroundPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -293,7 +309,7 @@ export function KernelPlayground() {
           const { px, py } = toPixel(point);
           return (
             <g key={index}>
-              {support.has(index) && (
+              {showSupport && support.has(index) && (
                 <circle
                   cx={px}
                   cy={py}
@@ -340,12 +356,13 @@ export function KernelPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Indigo is healthy, amber is unwell, and a green ring marks a support
-        vector. The shading is the fitted boundary&rsquo;s answer at every
-        spot. Click to add a patient, drag to move one, double-click to remove.
+        Indigo means healthy and amber means unwell. A dot shows the supplied
+        label; the background shows the prediction. Click to add an observation,
+        drag to move one, or double-click to remove it.
       </p>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">Accuracy is the fraction of observations classified correctly. The second clinic was excluded from fitting.</p>
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <Stat
           label="Training accuracy"
           value={answer ? answer.fit.accuracy.toFixed(3) : "…"}
@@ -354,6 +371,10 @@ export function KernelPlayground() {
           label="Held out, on a second clinic"
           value={answer ? answer.held_out_accuracy.toFixed(3) : "…"}
         />
+      </div>
+      <details className="mt-3 text-sm">
+        <summary className="cursor-pointer font-medium">Fit diagnostics</summary>
+        <div className="mt-3 grid grid-cols-2 gap-3">
         <Stat
           label="Support vectors"
           value={
@@ -371,6 +392,7 @@ export function KernelPlayground() {
           }
         />
       </div>
+      </details>
 
       <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
         {message ? message : statusText(answer, kernel)}

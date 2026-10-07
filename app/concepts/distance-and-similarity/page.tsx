@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -24,14 +27,18 @@ import { WhereNearnessIsUndefined } from "@/components/widgets/WhereNearnessIsUn
 export const metadata: Metadata = {
   title: "Distance and Similarity · oop_ml",
   description:
-    "A word's position claims nothing until a rule for comparing two positions is fixed, and which rule is fixed decides what the whole space says.",
+    "Compare distances and similarity scores on the same word representations.",
 };
 
 export default function DistanceAndSimilarityPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["distance-and-similarity"]}
+      technicalStart="Part 2. Six Rules, Asked of Two Words"
+      openingTitle="The Vectors Are Fixed; the Nearest Word Can Still Change"
+      playgroundIntro="Choose the same pair under different comparison rules. Check whether a high or low score means a close match and whether vector length affects it."
       title="Distance and Similarity"
-      tagline="Every claim a space of learned positions makes is a claim about the rule that compares two of them, and there is more than one rule."
+      tagline="Compare distances and similarity scores on the same word representations."
       prerequisites={
         <>
           A model that arranges things so that near means alike has to be asked
@@ -60,73 +67,14 @@ export default function DistanceAndSimilarityPage() {
           does.
         </>
       }
-      history={
-        <>
-          <p>
-            The first people to write a claim about meaning as a distance were
-            psychologists rather than computer scientists. Charles Osgood,
-            George Suci and Percy Tannenbaum, at the University of Illinois,
-            published <em>The Measurement of Meaning</em> in 1957 with a
-            practical difficulty in front of them, which was that they wanted to
-            compare what a word meant to one group of people against what it
-            meant to another, and asking either group for a definition gave
-            them prose they could not compare. What they did instead was hand
-            people a concept and a long list of opposed adjective pairs, good
-            against bad, strong against weak, fast against slow, and ask for a
-            rating on each. Factoring the ratings turned up three directions
-            that kept reappearing, which they named evaluation, potency and
-            activity, and every concept then had coordinates along them. Having
-            got that far they needed one number for two concepts, and they took
-            the straight-line distance between the two points, which is the
-            move this page is about. A position had become an answer only
-            because a rule for reading two of them had been chosen.
-          </p>
-          <p>
-            That the straight line is a choice, rather than the meaning of the
-            word distance, had been argued twenty years earlier and in another
-            field entirely. Prasanta Chandra Mahalanobis, working on
-            anthropometric survey data in Bengal, published &ldquo;On the
-            generalised distance in statistics&rdquo; in the Proceedings of the
-            National Institute of Sciences of India in 1936. His objection to
-            the straight line was that two measurements which rise and fall
-            together are not two independent pieces of evidence, so counting
-            each of them at full weight overstates how far apart two people
-            are, and his distance divides the gap by the spread and the
-            correlation of the measurements before adding anything up. Whatever
-            one thinks of that particular answer, the argument underneath it is
-            the one this page keeps returning to, which is that the rule is
-            part of the model and not part of the arithmetic.
-          </p>
-          <p>
-            The sharpest statement of the limit came from Amos Tversky, at
-            Stanford, in &ldquo;Features of similarity&rdquo; in Psychological
-            Review in 1977. He collected the judgements people actually make
-            when asked how similar two things are and found that they are not
-            symmetric, since a small country is judged more like a large one
-            than the large one is like it, and that they can break the rule
-            that a detour is never shorter than the direct route. Since a
-            distance is required to be symmetric and to keep that rule,
-            similarity as people use the word is not a distance, and Tversky
-            built his account out of shared and unshared features instead. The
-            six questions this page works through, in order, are these. What
-            does a table of positions actually claim? What separates a distance
-            from a similarity, given that the two can order things identically?
-            What is each of six rules measuring about two lists of numbers, and
-            which of them make sense for a word? What is in the length of a
-            word&rsquo;s position, as against its direction? When do two rules
-            disagree about which word is nearest, and how often? And what does
-            asking cost, and where does the question stop having an answer at
-            all?
-          </p>
-        </>
-      }
+
       playground={<NearnessPlayground />}
       sections={[
         {
           title: "Part 1. A Position Only Means What a Rule Reads",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. What a table of positions claims">
                 <p>
                   Suppose we have given every word in a collection of texts a
@@ -139,20 +87,13 @@ export default function DistanceAndSimilarityPage() {
                   rows into one verdict.
                 </p>
                 <p>
-                  So the interesting object is not really the positions. It is
-                  the rule, and the positions are worth exactly what the rule
-                  can read out of them. Two people can hold the same table, ask
-                  the same question of it, and get different answers, and
-                  neither of them has made a mistake, because they picked up
-                  different rules. Everything else on this page is an
-                  elaboration of that sentence, and two whole sections of this
-                  site rest on it, since every method that learns positions for
-                  words, and every network that learns them for pictures, is
-                  judged by whether nearness in what it produced turns out to
-                  mean something. Nothing below is a fact about language. The
-                  worked numbers use words because a table of them is small
-                  enough to check by hand, and the same six rules are asked of
-                  a picture in exactly the same way.
+                  So the interesting object is not really the positions. It is the rule, and the positions are worth exactly what the rule can read out of them. Two people can hold the same table, ask the same question of it, and get different answers, and neither of them has made a mistake, because they picked up different rules.
+                </p>
+                <p>
+                  Everything else on this page is an elaboration of that sentence, and two whole sections of this site rest on it, since every method that learns positions for words, and every network that learns them for pictures, is judged by whether nearness in what it produced turns out to mean something. Nothing below is a fact about language.
+                </p>
+                <p>
+                  The worked numbers use words because a table of them is small enough to check by hand, and the same six rules are asked of a picture in exactly the same way.
                 </p>
                 <KeepInMind>
                   <p>
@@ -215,15 +156,10 @@ export default function DistanceAndSimilarityPage() {
                   measure can express.
                 </p>
                 <p>
-                  The boundedness is the difference that matters in practice
-                  rather than the direction. Two words that come back 0.0175
-                  apart under a rule whose gap cannot exceed 2 are plainly near
-                  the top of what that rule can say, and the same pair is 0.3046
-                  apart under the straight line, which means nothing at all
-                  until we know what the typical gap in this table is. So a
-                  similarity can be read on its own and a distance can only be
-                  read against other distances from the same table, which is
-                  why reported figures in this area are usually similarities.
+                  The boundedness is the difference that matters in practice rather than the direction. Two words that come back 0.0175 apart under a rule whose gap cannot exceed 2 are plainly near the top of what that rule can say, and the same pair is 0.3046 apart under the straight line, which means nothing at all until we know what the typical gap in this table is.
+                </p>
+                <p>
+                  So a similarity can be read on its own and a distance can only be read against other distances from the same table, which is why reported figures in this area are usually similarities.
                 </p>
                 <NumberTable
                   headings={["", "a distance", "a bounded similarity"]}
@@ -259,7 +195,11 @@ export default function DistanceAndSimilarityPage() {
                 <Equation>{`gap  =  ceiling  −  similarity`}</Equation>
                 <p>
                   What the conversion does not give us is a distance in the
-                  full sense. Reversing an order preserves which pair is nearer;
+                  full sense. A distance in that sense makes a promise about
+                  three words at once, that going from one to another by way of
+                  a third never comes to less than going straight there, and
+                  this page calls it the detour promise. Reversing an order
+                  preserves which pair is nearer;
                   it does not preserve the arithmetic relations between the
                   numbers, so a rule that fails to keep the detour promise fails
                   it just as badly once it has been subtracted from a ceiling,
@@ -287,7 +227,7 @@ export default function DistanceAndSimilarityPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Six Rules, Asked of Two Words",
@@ -356,6 +296,11 @@ straight line  =  √( (a₁ − b₁)² + (a₂ − b₂)² + … )`}</Equation
                     coordinate in disagreement there is nothing for the squaring
                     to redistribute.
                   </p>
+                  <Equation>{`bake to sail    summed gaps    =  |5 − 0| + |0 − 5|  =  10
+                straight line  =  √( 5² + 5² )  =  √50  ≈  7.0711
+
+bake to stir    summed gaps    =  |5 − 2| + |0 − 0|  =  3
+                straight line  =  √( 3² + 0² )  =  3`}</Equation>
                 </WorkedExample>
                 <p>
                   On the fitted table the two rules almost never part company.
@@ -414,17 +359,18 @@ straight line  =  √( (a₁ − b₁)² + (a₂ − b₂)² + … )`}</Equation
 
 gap         =  1  −  similarity`}</Equation>
                 <WorkedExample>
-                  <p>
-                    <span className="font-mono">bake</span> at (5, 0) and{" "}
-                    <span className="font-mono">stir</span> at (2, 0) have a dot
-                    product of 10 and lengths of 5 and 2, so the similarity is
-                    10 divided by 10, which is 1, and the gap is 0. The two
-                    words are as alike as this rule can say, while every other
-                    rule on the page puts them 3 apart or thereabouts.{" "}
-                    <span className="font-mono">bake</span> against{" "}
-                    <span className="font-mono">sail</span> has a dot product of
-                    0, a similarity of 0 and a gap of 1.
-                  </p>
+                  <>
+                    <p>
+                      Bake and stir point in the same direction even though their
+                      vectors have different lengths. Cosine distance removes that
+                      length difference.
+                    </p>
+                    <Equation>{"cosine similarity = (5 × 2 + 0 × 0) / (5 × 2) = 1\ncosine distance = 1 − 1 = 0"}</Equation>
+                    <p>
+                      Bake and sail point at right angles, so their similarity is zero
+                      and their cosine distance is one.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   Because the answer never leaves a fixed range this is one of
@@ -487,16 +433,17 @@ gap         =  1  −  similarity`}</Equation>
                 </p>
                 <Equation>{`gaps against their size  =  sum over i of  |aᵢ − bᵢ| / (|aᵢ| + |bᵢ|)`}</Equation>
                 <WorkedExample>
-                  <p>
-                    <span className="font-mono">bake</span> at (5, 0) against{" "}
-                    <span className="font-mono">stir</span> at (2, 0) gives 3
-                    divided by 7 in the first coordinate, which is 0.4286, and
-                    nothing in the second, where both numbers are zero and the
-                    two words agree. Against{" "}
-                    <span className="font-mono">sail</span> at (0, 5) both
-                    coordinates give 5 divided by 5, so the answer is 2, which
-                    is the largest a two-coordinate table can produce.
-                  </p>
+                  <>
+                    <p>
+                      Canberra distance measures each coordinate difference relative to
+                      the magnitudes of the two values. The convention used here assigns
+                      zero to a coordinate where both are zero.
+                    </p>
+                    <Equation>{"bake to stir = |5 − 2| / (|5| + |2|) + 0 = 3/7 ≈ 0.4286\nbake to sail = |5 − 0| / 5 + |0 − 5| / 5 = 1 + 1 = 2"}</Equation>
+                    <p>
+                      Two is the largest possible Canberra distance in two coordinates.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   A coordinate where both words hold zero would be zero divided
@@ -560,6 +507,54 @@ gap         =  1  −  similarity`}</Equation>
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "A table of positions, on its own, says that two words near each other in it are alike.",
+              false,
+              "Near is a property of the table together with some rule for turning two rows into one verdict, so only the pair of them says anything. Two people can hold the same table, ask the same question and come away with different answers without either having made a mistake, because they picked up different rules.",
+            ),
+            choice(
+              "Why are figures in this area usually reported as similarities rather than as distances?",
+              [
+                "A similarity is quicker to compute",
+                "The useful similarities are bounded, so a figure can be read on its own",
+                "A distance cannot be computed on a fitted table",
+                "A similarity is symmetric and a distance is not",
+              ],
+              1,
+              "Two words 0.0175 apart under a rule whose gap cannot exceed 2 are plainly near the top of what that rule can say. The same pair is 0.3046 apart under the straight line, which means nothing until the typical gap in this table is known, so a distance can only be read against other distances from the same table.",
+            ),
+            trueFalse(
+              "A nearest-word list computed from a bounded similarity and one computed from the gap made by subtracting it from its ceiling are the same list.",
+              true,
+              "Subtracting from a constant reverses the order and reverses nothing else, and the map is one to one, so no tie is created and none is broken. A page reporting an angle and a page reporting one minus that angle are therefore reporting the same ranking. What the conversion does not give is a distance in the full sense, since a rule that fails the detour promise fails it just as badly after the subtraction.",
+            ),
+            choice(
+              "Under the rule that divides each coordinate’s gap by the size of the two numbers it sits between, bake at (5, 0) and sail at (0, 5) come out at 2. What is that 2?",
+              [
+                "A ceiling the implementation chose",
+                "The largest possible answer in two coordinates",
+                "The same answer the straight line gives",
+                "The answer the summed gaps give for the same pair",
+              ],
+              1,
+              "Each coordinate contributes its gap divided by the size of the two numbers it sits between, which comes to exactly 1 whenever one of the two is zero and can never come to more, so two coordinates give 1 + 1. No single coordinate can take over an answer merely by holding larger numbers. The price is that the rule is most sensitive near zero, since a move from one to two costs the same third as a move from a thousandth to two thousandths. The summed gaps give 10 for this pair and the straight line 7.0711.",
+            ),
+            several(
+              "Which of these does the page report about the rule that reads coordinates as labels?",
+              [
+                "Standing at sail it names flour nearest at 0.5 and every other word at exactly 1.0",
+                "Only six of the 253 pairs share even one coordinate exactly",
+                "Equality is exact, so a coordinate differing in the sixteenth digit counts as a full disagreement",
+                "It is the right rule for a table whose coordinates are quantities",
+              ],
+              [0, 1, 2],
+              "Twenty-one of the twenty-two candidates are tied for last, so the winner won by a coincidence. A rule that reads coordinates as labels has nothing to say about a table whose coordinates are quantities, and it suits codes standing for categories, where there is no sense in which one code is further from another. It is on the page because leaving it out would suggest all six are candidates for a fitted table.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. What the Length of a Position Carries",
           content: (
             <>
@@ -592,6 +587,24 @@ gap         =  1  −  similarity`}</Equation>
                     stays at exactly 0.5000. Four rules of six say the two words
                     have grown apart, and nothing about the way either word was
                     used has changed.
+                  </p>
+                  <p>
+                    Each of the six can be redone with a pencil, with{" "}
+                    <span className="font-mono">bake</span> at (10, 0) and{" "}
+                    <span className="font-mono">stir</span> where it was, at
+                    (2, 0).
+                  </p>
+                  <Equation>{`summed gaps               |10 − 2| + |0 − 0|         =  8
+straight line             √( 8² + 0² )               =  8
+worst coordinate          max( 8, 0 )                =  8
+gaps against their size   8 ∕ (10 + 2) + 0           ≈  0.6667
+angle                     1 − (10 × 2) ∕ (10 × 2)    =  0
+coordinates that differ   1 of 2                     =  0.5`}</Equation>
+                  <p>
+                    The doubled count sits on the top and on the bottom of the
+                    angle&rsquo;s fraction and cancels, and the rule that reads
+                    coordinates as labels never looked at its size in the first
+                    place. Nothing cancels it in the other four.
                   </p>
                 </WorkedExample>
                 <KeepInMind>
@@ -638,16 +651,10 @@ gap         =  1  −  similarity`}</Equation>
                   is <span className="font-mono">+0.7005</span>.
                 </p>
                 <p>
-                  The two signs are both explicable and that is the point. A
-                  method that scores a pairing by how much it beats chance gives
-                  a word occurring everywhere a low score against everything,
-                  since it beats chance nowhere, and a method that nudges a
-                  position once per occurrence moves a common word further from
-                  where it started. So the length of a position records
-                  something about the fitting procedure at least as much as
-                  something about the word, and the standard argument for the
-                  angle is an argument about one family of methods rather than
-                  about word positions in general.
+                  The two signs are both explicable and that is the point. A method that scores a pairing by how much it beats chance gives a word occurring everywhere a low score against everything, since it beats chance nowhere, and a method that nudges a position once per occurrence moves a common word further from where it started.
+                </p>
+                <p>
+                  So the length of a position records something about the fitting procedure at least as much as something about the word, and the standard argument for the angle is an argument about one family of methods rather than about word positions in general.
                 </p>
                 <KeepInMind>
                   <p>
@@ -828,6 +835,54 @@ gap         =  1  −  similarity`}</Equation>
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Counting bake twice over moves it from (5, 0) to (10, 0). Which rules then say it has grown apart from stir?",
+              [
+                "All six of them",
+                "Four of the six, with the angle and the label rule unmoved",
+                "Only the angle",
+                "None, since nothing about how the word was used has changed",
+              ],
+              1,
+              "The gap to stir goes from 3.0000 to 8.0000 under all three of the summed and squared rules, and from 0.4286 to 0.6667 under the rule reading each gap against its size, while the angle stays at exactly 0.0000 and the share of coordinates that differ stays at exactly 0.5000. The two that held still are not invariant to everything, since doubling a whole coordinate across the vocabulary moves the angle too.",
+            ),
+            trueFalse(
+              "The two fits agree that a word used more often ends up with a longer position.",
+              false,
+              "On the counting fit the relationship between how often a word was used and the length of its position is −0.6284, and on the fit that learns by predicting neighbours, over the identical documents, it is +0.7005. A method scoring a pairing by how much it beats chance gives a word occurring everywhere a low score, and a method nudging a position once per occurrence pushes a common word further out. Length records something about the procedure at least as much as about the word.",
+            ),
+            trueFalse(
+              "Once every position has been scaled to length one, choosing between the angle and the ruler is a choice of what to print.",
+              true,
+              "Expanding the squared gap leaves two minus twice the dot product when both lengths are one, and the square root is increasing, so the gap rises exactly as the similarity falls. Checked on the twenty-three words the identity holds to 6.1 × 10⁻¹⁶ and the two orders from sail agree word for word. Neither order is the one the straight line gives before the scaling.",
+            ),
+            choice(
+              "Asked which word is nearest to sail, what do the six rules answer?",
+              [
+                "One answer, since the rules mostly agree",
+                "Three say mast and two say rope, and the two candidates swap places",
+                "Six different words",
+                "Nothing, since sail sits too near the origin",
+              ],
+              1,
+              "Rope at 1.0713 is a good deal longer than sail at 0.8225 while mast at 0.8281 is almost exactly as long, so the ruler charges rope for a length difference the angle refuses to look at. Standing at oven instead, five rules of six agree on eggs, which is the ordinary case and worth knowing before spending time on where they part.",
+            ),
+            several(
+              "Every rule was asked for the nearest word to each of the twenty-three. Which of these does the count show?",
+              [
+                "The summed gaps and the straight line name the same word all twenty-three times",
+                "The angle names the same word as the straight line fifteen times",
+                "All six rules name the same word fourteen times",
+                "The rule reading coordinates as labels agrees with the angle twice",
+              ],
+              [0, 1],
+              "Fourteen is the count for the five rules that read the coordinates as quantities, which is a majority and not a consensus, and the sixth cannot join them, since it agrees with the straight line on two words and with the angle on none at all. Fifteen out of twenty-three is a disagreement rate a reader of a published nearest-word list has no way to see, since the list is printed under one rule and the other answers are never computed.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. What It Costs to Ask",
           content: (
             <>
@@ -926,6 +981,31 @@ gap         =  1  −  similarity`}</Equation>
                   to within four parts in ten thousand million million of the
                   answer.
                 </p>
+                <WhyThisWorks title="Why the wrong answer is 2.8284 and not some other number">
+                  <p>
+                    The wrong answers are not arbitrary, and tracing them shows
+                    what was lost. A machine number carries about sixteen
+                    significant digits, so the larger a number is, the wider
+                    the step to the next number the machine can hold. The
+                    identity adds and subtracts two squared lengths, and what
+                    it is trying to leave behind is the true squared gap, which
+                    for this pair is 0.0756.
+                  </p>
+                  <Equation>{`a hundred million out    squared lengths  ≈ 4 × 10¹⁶     step between machine numbers  8
+                         returned  8                     √8  ≈  2.8284
+
+a million out            squared lengths  ≈ 4 × 10¹²     step between machine numbers  ≈ 0.0005
+                         returned  0.0752                √0.0752  ≈  0.2742`}</Equation>
+                  <p>
+                    At a hundred million out nothing smaller than 8 can come
+                    out of the subtraction except zero, so 0.0756 has no way of
+                    surviving it, and the 2.8284 in the table is the square
+                    root of the smallest step available. At a million out the
+                    steps are fine enough to land within one of them of the
+                    truth, which is why that reading is wrong only in its
+                    fourth digit.
+                  </p>
+                </WhyThisWorks>
                 <KeepInMind>
                   <p>
                     This is a fact about how a gap is computed rather than about
@@ -964,6 +1044,9 @@ gap         =  1  −  similarity`}</Equation>
                   0.4284. The other five rules have not one violation between
                   them.
                 </p>
+                <Equation>{`direct              harbour → crew           1.1066
+by way of mast      harbour → mast → crew    0.4469 + 0.2313  =  0.6782
+saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equation>
                 <InAModel>
                   <p>
                     So a search that prunes on that promise is not available for
@@ -994,15 +1077,10 @@ gap         =  1  −  similarity`}</Equation>
                   documents were never asked.
                 </p>
                 <p>
-                  That is not a counsel of despair, because the choice can be
-                  argued from properties rather than guessed. If a word&rsquo;s
-                  volume in the collection should not affect who its neighbours
-                  are, that argues for the angle and rules out four of the
-                  others, and step 12 makes the argument checkable. If some
-                  coordinate is a category code, that argues for the rule that
-                  reads equality and rules out the rest. What cannot happen is
-                  for the choice to be made by fitting, since every one of the
-                  six will fit any table at all.
+                  That is not a counsel of despair, because the choice can be argued from properties rather than guessed. If a word&rsquo;s volume in the collection should not affect who its neighbours are, that argues for the angle and rules out four of the others, and step 12 makes the argument checkable. If some coordinate is a category code, that argues for the rule that reads equality and rules out the rest.
+                </p>
+                <p>
+                  What cannot happen is for the choice to be made by fitting, since every one of the six will fit any table at all.
                 </p>
                 <KeepInMind>
                   <p>
@@ -1032,17 +1110,10 @@ gap         =  1  −  similarity`}</Equation>
                   and two more have an answer only because somebody chose one.
                 </p>
                 <p>
-                  Where a quantity does not exist there are three things an
-                  implementation can do, and each costs something. It can refuse,
-                  which is honest and forces a caller to decide; it can return a
-                  convention, which keeps a calculation running and puts a
-                  number that was never measured into a list that will be sorted;
-                  or it can return something not a number, which propagates and
-                  makes every later comparison false. The middle one is the
-                  usual choice for a zero position under the angle, where the
-                  convention is that it sits at a right angle to everything, and
-                  it is defensible, though the number it puts into a list that
-                  will be sorted was never measured from anything.
+                  Where a quantity does not exist there are three things an implementation can do, and each costs something. It can refuse, which is honest and forces a caller to decide; it can return a convention, which keeps a calculation running and puts a number that was never measured into a list that will be sorted; or it can return something not a number, which propagates and makes every later comparison false.
+                </p>
+                <p>
+                  The middle one is the usual choice for a zero position under the angle, where the convention is that it sits at a right angle to everything, and it is defensible, though the number it puts into a list that will be sorted was never measured from anything.
                 </p>
                 <KeepInMind>
                   <p>
@@ -1070,17 +1141,10 @@ gap         =  1  −  similarity`}</Equation>
                   shape whose numbers were drawn independently.
                 </p>
                 <p>
-                  On the fitted table the figure falls from 39.42 at two
-                  coordinates to 7.02 at four, 3.51 at eight and 0.63 at sixteen,
-                  so at the widest the farthest word is only about six tenths
-                  further off than the nearest one. The usual demonstration of
-                  this uses positions drawn independently, and the grey bars are
-                  that, and up to eight coordinates the fitted table holds up
-                  substantially better, at 3.51 against 1.04. At sixteen the
-                  advantage reverses and the fitted table reads 0.63 against
-                  0.70, which is a real crossing rather than noise in one seed
-                  and is reported here because the tidier claim would have been
-                  that structure always helps.
+                  On the fitted table the figure falls from 39.42 at two coordinates to 7.02 at four, 3.51 at eight and 0.63 at sixteen, so at the widest the farthest word is only about six tenths further off than the nearest one. The usual demonstration of this uses positions drawn independently, and the grey bars are that, and up to eight coordinates the fitted table holds up substantially better, at 3.51 against 1.04.
+                </p>
+                <p>
+                  At sixteen the advantage reverses and the fitted table reads 0.63 against 0.70, which is a real crossing rather than noise in one seed and is reported here because the tidier claim would have been that structure always helps.
                 </p>
                 <KeepInMind>
                   <p>
@@ -1182,6 +1246,443 @@ gap         =  1  −  similarity`}</Equation>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "Adding a hundred million to every coordinate of sail and mast, whose gap is 0.2750, makes the expanded form of the straight line answer what?",
+              [
+                "0.2750 still, since shifting everything equally moves no pair",
+                "2.8284, ten times too large",
+                "Zero, since the two positions now coincide",
+                "A non-finite value, which is refused",
+              ],
+              1,
+              "The identity recovers a small number by subtracting large nearly equal ones, which is the classic way to lose it. At a million out it still reads 0.2742, wrong in the fourth digit, and a nearest-word list built from readings like that would reorder quietly and raise nothing. The repair is to subtract a common point from both positions first, which changes no gap and brings the squared lengths down to the size of the spread.",
+            ),
+            trueFalse(
+              "On this collection the angle breaks the promise that a detour is never shorter than the direct route, and none of the other five rules breaks it once.",
+              true,
+              "Fifteen hundred and forty of the ten thousand six hundred and twenty-six triples have a shorter detour under the angle, and the worst is far from marginal, since harbour to crew reads 1.1066 directly and 0.6782 by way of mast. The promise is what lets a search discard a whole group of words at once, so a search that prunes on it is not available for the rule this topic most wants to use.",
+            ),
+            choice(
+              "What does a position sitting at the origin have?",
+              [
+                "A straight-line gap to everything and no angle to anything",
+                "Neither a gap nor an angle",
+                "An angle of zero to everything",
+                "A gap of zero to everything",
+              ],
+              0,
+              "A straight line needs no division and the origin is a point like any other, so the gap is just the other word’s own length. The cosine divides by both lengths and one of them is zero, so that quotient does not exist. The usual answer is the convention that the origin sits at a right angle to everything, which has the consequence that it is at gap 1.0000 from itself.",
+            ),
+            trueFalse(
+              "A fitted table escapes the way distance discriminates less as coordinates are added.",
+              false,
+              "On the fitted table the figure falls from 39.42 at two coordinates to 7.02 at four, 3.51 at eight and 0.63 at sixteen. Up to eight coordinates it does hold up substantially better than independently drawn numbers, 3.51 against 1.04, and at sixteen the advantage reverses to 0.63 against 0.70. Twenty-three words in sixteen coordinates is a table with almost as many numbers as it has room for, so the crossing says something about this collection being small as well.",
+            ),
+            trueFalse(
+              "The measure reads the same in both directions, so being the nearest word is mutual.",
+              false,
+              "Reading a pair one way round and the other gives figures 0.0 apart, and the relation built out of it is still not symmetric. Five of the twenty-three words have a nearest word that does not name them back, and mast is the clearest, since its nearest is sail while sail’s nearest is rope. Being the nearest is a comparison against a field of candidates, and the field changes with the word.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Asking Six Rules With the Library",
+          practice: [
+            exercise(
+              "Ask all six rules about three hand-counted words",
+              ["Part 2 counts three words against two contexts and gets bake at (5, 0), stir at (2, 0) and sail at (0, 5). The starter wraps each as a RowBlock of one row, which is what a rule takes, and adds bake counted three times over. Loop over DistanceMetric, which holds the six rules, and print each rule’s answer for bake against stir, for bake against sail, and for the tripled bake against stir, to four places.", "The first two columns should be the table of step 11. Step 12 counts bake twice and watches four rules move and two stay. Counting it three times is not on the page, so the third column is yours, and the same two rules should refuse to move."],
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+
+contexts = ["beside_oven", "beside_wind"]
+bake = RowBlock(np.array([[5.0, 0.0]]), contexts)
+stir = RowBlock(np.array([[2.0, 0.0]]), contexts)
+sail = RowBlock(np.array([[0.0, 5.0]]), contexts)
+tripled = RowBlock(np.array([[15.0, 0.0]]), contexts)
+
+for metric in DistanceMetric:
+    # metric.between takes two blocks and answers a grid with one row per
+    # row of the first and one column per row of the second. Print the
+    # rule's value and its three answers.
+    ...`,
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+
+contexts = ["beside_oven", "beside_wind"]
+bake = RowBlock(np.array([[5.0, 0.0]]), contexts)
+stir = RowBlock(np.array([[2.0, 0.0]]), contexts)
+sail = RowBlock(np.array([[0.0, 5.0]]), contexts)
+tripled = RowBlock(np.array([[15.0, 0.0]]), contexts)
+
+for metric in DistanceMetric:
+    to_stir = metric.between(bake, stir)[0, 0]
+    to_sail = metric.between(bake, sail)[0, 0]
+    after = metric.between(tripled, stir)[0, 0]
+    print(f"{metric.value:9s} bake-stir {to_stir:.4f}  bake-sail {to_sail:.4f}  tripled bake-stir {after:.4f}")`,
+              `euclidean bake-stir 3.0000  bake-sail 7.0711  tripled bake-stir 13.0000
+manhattan bake-stir 3.0000  bake-sail 10.0000  tripled bake-stir 13.0000
+chebyshev bake-stir 3.0000  bake-sail 5.0000  tripled bake-stir 13.0000
+cosine    bake-stir 0.0000  bake-sail 1.0000  tripled bake-stir 0.0000
+hamming   bake-stir 0.5000  bake-sail 1.0000  tripled bake-stir 0.5000
+canberra  bake-stir 0.4286  bake-sail 2.0000  tripled bake-stir 0.7647`,
+              { hints: ["DistanceMetric is an enum, so looping over it visits the six rules, and each one’s value is its name. The page’s summed gaps, straight line, worst coordinate, angle, coordinates that differ and gaps against their size are manhattan, euclidean, chebyshev, cosine, hamming and canberra.", "between answers a grid even for two single rows, so the one number is at [0, 0]."], check: numberCheck("With bake counted three times over, what does the canberra rule answer for bake against stir, to four places?", 0.7647, 5e-05, "The rule reads each gap against the size of the two numbers it sits between, so the first coordinate gives 13 over 17, which is 0.7647, and the second, where both hold zero, gives nothing. It was 3 over 7 at one count and 8 over 12 at two. The angle is still 0 and the share of coordinates that differ is still 0.5, because scaling one word’s own position is exactly what those two ignore, and nothing about how bake was used has changed.") },
+            ),
+            exercise(
+              "Ask every rule for every word’s nearest neighbour",
+              ["The starter fits the table of step 2 and wraps all twenty-three positions as one RowBlock. For each rule, take the grid of gaps between every word and every other, rule out a word being its own neighbour, and record each word’s nearest. Print what each rule names nearest to sail and at what gap, then how many of the twenty-three words each rule agrees with the straight line about, and with the angle.", "The six answers for sail should be step 15, three saying mast and two saying rope, with flour from the rule that reads labels. The agreement with the straight line should be the counts of step 16, which are 23, 21, 19, 15 and 2. The column against the angle is the one to read for the check."],
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+names = ["first", "second", "third", "fourth"]
+rows = RowBlock(np.asarray(space.table), names)
+here = words.index("sail")
+
+nearest = {}
+for metric in DistanceMetric:
+    # Take np.array(metric.between(rows, rows)), put np.inf on its diagonal,
+    # and store the word at each row's argmin under metric.value. Print the
+    # word nearest sail and the smallest gap in sail's row.
+    ...
+
+# For each rule, count the words on which its nearest matches the
+# euclidean one, and the words on which it matches the cosine one.`,
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+names = ["first", "second", "third", "fourth"]
+rows = RowBlock(np.asarray(space.table), names)
+here = words.index("sail")
+
+nearest = {}
+for metric in DistanceMetric:
+    gaps = np.array(metric.between(rows, rows))
+    np.fill_diagonal(gaps, np.inf)
+    nearest[metric.value] = [words[place] for place in gaps.argmin(axis=1)]
+    print(f"{metric.value:9s} sail -> {nearest[metric.value][here]:5s} at {gaps[here].min():.4f}")
+
+for name, answers in nearest.items():
+    line = sum(a == b for a, b in zip(answers, nearest["euclidean"]))
+    angle = sum(a == b for a, b in zip(answers, nearest["cosine"]))
+    print(f"{name:9s} agrees with the straight line on {line:2d}, with the angle on {angle:2d}")`,
+              `euclidean sail -> mast  at 0.2750
+manhattan sail -> mast  at 0.4799
+chebyshev sail -> mast  at 0.1990
+cosine    sail -> rope  at 0.0175
+hamming   sail -> flour at 0.5000
+canberra  sail -> rope  at 0.7160
+euclidean agrees with the straight line on 23, with the angle on 15
+manhattan agrees with the straight line on 23, with the angle on 15
+chebyshev agrees with the straight line on 21, with the angle on 15
+cosine    agrees with the straight line on 15, with the angle on 23
+hamming   agrees with the straight line on  2, with the angle on  0
+canberra  agrees with the straight line on 19, with the angle on 18`,
+              { hints: ["between(rows, rows) is a 23 by 23 grid of gaps. np.array makes a copy that can be written to, and np.fill_diagonal with np.inf stops every word winning its own row.", "argmin(axis=1) is the column of the smallest gap in each row, which indexes the list of words.", "zip pairs two lists of answers word by word, and summing a == b over the pairs counts the agreements."], check: numberCheck("On how many of the twenty-three words do canberra and the angle name the same nearest word?", 18, 0.0, "The rule that reads each gap against its size names rope for sail, as the angle does, and it agrees with the angle on 18 words where the straight line manages 15, while still agreeing with the straight line on 19, so on this table it sits between the two. A published nearest-word list is printed under one rule and the other five answers are never computed, which is why step 16 says the rule is part of the claim.") },
+            ),
+            exercise(
+              "Scale every position to length one",
+              ["Step 14 says that once every position has length one, the straight-line gap is a fixed function of the angle and the two rules rank alike. Divide every row of the table by its own length, take the straight-line gaps on the scaled rows and the angle’s gaps on the original ones, and print the largest difference between the first and the square root of twice the second, over every pair of different words. Then print how many words keep the angle’s nearest word under the straight line, before scaling and after, and the scaled gap from sail to rope.", "The identity should hold to rounding, the two counts should be the 15 of step 16 and all 23, and the last line is a figure the page does not print."],
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+names = ["first", "second", "third", "fourth"]
+table = np.asarray(space.table)
+unit = table / np.linalg.norm(table, axis=1, keepdims=True)
+apart = ~np.eye(len(words), dtype=bool)
+
+# Take the euclidean gaps on RowBlock(unit, names), the euclidean gaps on
+# RowBlock(table, names) and the cosine gaps on RowBlock(table, names), each
+# as np.array.
+
+# Print the largest of |straight on unit - sqrt(2 * angle)| over [apart].
+
+# Put np.inf on each grid's diagonal and count the rows whose argmin
+# matches the angle's, for the unscaled straight line and the scaled one.
+
+# Print the scaled straight-line gap between sail and rope to four places.`,
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+names = ["first", "second", "third", "fourth"]
+table = np.asarray(space.table)
+unit = table / np.linalg.norm(table, axis=1, keepdims=True)
+apart = ~np.eye(len(words), dtype=bool)
+
+scaled = np.array(DistanceMetric.EUCLIDEAN.between(RowBlock(unit, names), RowBlock(unit, names)))
+straight = np.array(DistanceMetric.EUCLIDEAN.between(RowBlock(table, names), RowBlock(table, names)))
+angle = np.array(DistanceMetric.COSINE.between(RowBlock(table, names), RowBlock(table, names)))
+
+print(f"largest gap in the identity: {np.abs(scaled - np.sqrt(2 * angle))[apart].max():.1e}")
+for grid in (scaled, straight, angle):
+    np.fill_diagonal(grid, np.inf)
+before = int(np.sum(straight.argmin(axis=1) == angle.argmin(axis=1)))
+after = int(np.sum(scaled.argmin(axis=1) == angle.argmin(axis=1)))
+print(f"same nearest word as the angle: {before} before scaling, {after} after")
+print(f"sail to rope on the unit sphere: {scaled[words.index('sail'), words.index('rope')]:.4f}")`,
+              `largest gap in the identity: 1.8e-15
+same nearest word as the angle: 15 before scaling, 23 after
+sail to rope on the unit sphere: 0.1872`,
+              { hints: ["A RowBlock is built from an array with one row per word and a name per column, so RowBlock(unit, names) is the scaled table in the form a rule takes.", "The angle’s gap is one minus the cosine, so twice it is 2 minus twice the dot product of the two unit positions, which is what step 14 puts under the square root.", "A boolean grid that is False on the diagonal picks out the pairs of different words. The diagonal is left out because a word’s gap to itself is zero up to rounding, and a square root magnifies rounding near zero."], check: numberCheck("What is the straight-line gap between sail and rope once both have length one, to four places?", 0.1872, 5e-05, "On unit positions the squared gap is 2 minus twice the cosine. sail and rope have a cosine of 0.9825, so the squared gap is about 0.035 and its root is 0.1872. Before scaling the same pair was 0.3046 apart and lost first place to mast, because rope is the longer position. With the lengths divided out the straight line names rope, as the angle does, and it agrees with the angle on all 23 words where it agreed on 15.") },
+            ),
+            exercise(
+              "Move two words far from the origin and measure the same gap",
+              ["Step 20 measures the gap between sail and mast three ways after adding the same amount to every coordinate of both. For amounts of 0, ten thousand, a million and a hundred million, print the gap by subtracting first and squaring afterwards, the gap by the expanded form of step 19, and the gap the library’s euclidean rule returns, each to four places. Print beside them the step between neighbouring machine numbers at the size of the squared length, which np.spacing gives.", "The direct column and the library column should read 0.2750 all the way down. The expanded column should fail the way the page reports, in the fourth digit at a million and completely at a hundred million. Read the last column against it."],
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+names = ["first", "second", "third", "fourth"]
+sail = np.asarray(space.vector_of("sail").values)
+mast = np.asarray(space.vector_of("mast").values)
+
+for shift in (0.0, 1e4, 1e6, 1e8):
+    a, b = sail + shift, mast + shift
+    # direct: the square root of the sum of (a - b) squared.
+    # expanded: the square root of a @ a - 2 * (a @ b) + b @ b, with
+    # anything below zero treated as zero.
+    # library: DistanceMetric.EUCLIDEAN.between on the two as one-row blocks.
+    # Print all three, and np.spacing(a @ a).
+    ...`,
+              `import numpy as np
+from oop_ml.core.data.row_block import RowBlock
+from oop_ml.core.distance.metric import DistanceMetric
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+names = ["first", "second", "third", "fourth"]
+sail = np.asarray(space.vector_of("sail").values)
+mast = np.asarray(space.vector_of("mast").values)
+
+for shift in (0.0, 1e4, 1e6, 1e8):
+    a, b = sail + shift, mast + shift
+    direct = np.sqrt(np.sum((a - b) ** 2))
+    expanded = np.sqrt(max(a @ a - 2 * (a @ b) + b @ b, 0.0))
+    library = DistanceMetric.EUCLIDEAN.between(RowBlock(a[None, :], names), RowBlock(b[None, :], names))[0, 0]
+    print(f"{shift:11,.0f} out: direct {direct:.4f}  expanded {expanded:.4f}  library {library:.4f}  step {np.spacing(a @ a):.1e}")`,
+              `          0 out: direct 0.2750  expanded 0.2750  library 0.2750  step 1.1e-16
+     10,000 out: direct 0.2750  expanded 0.2750  library 0.2750  step 6.0e-08
+  1,000,000 out: direct 0.2750  expanded 0.2742  library 0.2750  step 4.9e-04
+100,000,000 out: direct 0.2750  expanded 2.8284  library 0.2750  step 8.0e+00`,
+              { hints: ["a @ b is the dot product of two arrays, so a @ a is a squared length. The expanded form is the two squared lengths with twice the dot product taken away.", "a[None, :] turns a position into a grid of one row, which is the shape a RowBlock holds, and between then answers a grid of one number."], check: numberCheck("What does the expanded form return for the gap at a hundred million out, to four places?", 2.8284, 5e-05, "At that distance each squared length is near 4 followed by sixteen noughts, where neighbouring machine numbers are 8 apart, so the three terms can only combine to a multiple of 8 and the true squared gap of 0.0756 cannot survive. They came to 8, and its square root is 2.8284. The library’s rule subtracts a common point from both positions before it uses the identity, which is the repair of step 20, and reads 0.2750 at every distance.") },
+            ),
+          ],
         },
       ]}
     />

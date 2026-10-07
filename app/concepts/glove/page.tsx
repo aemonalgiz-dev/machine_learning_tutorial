@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -23,7 +26,7 @@ import { GloveWindowSweep } from "@/components/widgets/GloveWindowSweep";
 export const metadata: Metadata = {
   title: "GloVe · oop_ml",
   description:
-    "Count which words appear near which once, then fit vectors whose dot products reproduce the logarithms of those counts.",
+    "Learn word vectors from a table of co-occurrence counts.",
 };
 
 const link =
@@ -32,8 +35,12 @@ const link =
 export default function GlovePage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["glove"]}
+      technicalStart="Part 3. What The Vectors Are Asked To Reproduce"
+      openingTitle="Count the Neighbours Once, Then Fit Their Relationships"
+      playgroundIntro="Compare an observed pair count with the value reconstructed by the vectors and biases. Inspect how the weighting changes the contribution of rare and frequent pairs."
       title="GloVe"
-      tagline="GloVe counts which words appeared near which, once, and then fits vectors whose dot products have to reproduce the logarithms of those counts."
+      tagline="Learn word vectors from a table of co-occurrence counts."
       prerequisites={
         <>
           Every word here ends up as a short list of numbers, and two words are
@@ -55,99 +62,23 @@ export default function GlovePage() {
           on having read that page.
         </>
       }
-      history={
-        <>
-          <p>
-            By 2013 there were two ways of turning a corpus into word vectors and
-            they had almost nothing in common. The older way builds a table.
-            Zellig Harris in 1954 and J. R. Firth in 1957 had argued that what a
-            linguist can observe about a word&rsquo;s meaning is the company it
-            keeps, and by 1990 Scott Deerwester, Susan Dumais and their colleagues
-            were making that arithmetic in &ldquo;Indexing by latent semantic
-            analysis&rdquo;, counting which word appeared in which document and
-            squeezing the resulting table down; Kevin Lund and Curt Burgess did
-            the same with a sliding window in 1996 under the name Hyperspace
-            Analogue to Language. The complaint against the whole family was that
-            it used the corpus statistics well and did badly on the word analogy
-            question that had just become the standard test, because a plain
-            decomposition tries to reproduce every cell of the table equally and
-            the commonest words own most of the cells.
-          </p>
-          <p>
-            The newer way never builds a table at all. Tomáš Mikolov and
-            colleagues at Google in 2013 slid a window along the corpus and
-            corrected a few vectors at every position, and the vectors that came
-            out answered the analogy question far better. What nobody could say
-            was why. The training touches one window at a time and never consults
-            how often two words co-occurred in all, so the corpus statistics that
-            the older family used directly are, in the newer one, being
-            rediscovered from scratch on every pass. That was the epistemic
-            problem, and it was uncomfortable, since there were two families of
-            method, each using half of the available evidence, and no account at
-            all of which half the analogy result had come out of.
-          </p>
-          <p>
-            Jeffrey Pennington, Richard Socher and Christopher Manning, at
-            Stanford, published &ldquo;GloVe: Global Vectors for Word
-            Representation&rdquo; at the 2014 conference on empirical methods in
-            natural language processing in Doha. Their observation was that the
-            useful thing in the table is not a co-occurrence probability but the
-            ratio of two of them. Their example compares ice with steam through
-            four probe words. Solid is far likelier beside ice, gas far likelier
-            beside steam, water is likely beside both and fashion beside neither,
-            so the two raw probabilities are useless for water and fashion and the
-            ratio is near one for exactly those two and far from one for the other
-            two. Working backwards from a model of ratios pins the objective down
-            to a weighted least squares fit of the logarithm of the counts, which
-            is what the method is. The name says the fit reads a statistic
-            computed over the whole corpus, and the released vector files, trained
-            on six billion tokens of Wikipedia and newswire and later on a much
-            larger crawl of the web, are a large part of why the method spread.
-          </p>
-          <p>
-            The step rule the paper takes is John Duchi, Elad Hazan and Yoram
-            Singer&rsquo;s adaptive method of 2011, chosen because word counts are
-            so unevenly spread that no single step size suits both the commonest
-            word and the rarest. The program the authors released does not
-            implement it quite as the paper describes, and Part 5 measures what
-            that costs on a corpus this size. Omer Levy, Yoav Goldberg and Ido
-            Dagan reported in 2015 that much of the reported gap between this
-            family and the window-sliding one came from preprocessing and
-            hyperparameter choices rather than from the algorithms, which is worth
-            knowing before reading any comparison of the two, including the one in
-            Part 6 of this page.
-          </p>
-          <p>
-            This page asks six questions in order. What does counting a corpus
-            keep that walking it repeatedly does not, and the other way round? How
-            is the table of who appeared near whom actually built, and what do the
-            two decisions inside it settle? What exactly are the vectors asked to
-            reproduce, and why the logarithm of a count? Why can the equations not
-            all count the same, and what does the cap on their weights hold back?
-            What does one pass over a table cost against one pass over the text?
-            And where does the method stop being defined?
-          </p>
-        </>
-      }
+
       playground={<GlovePlayground />}
       sections={[
         {
           title: "Part 1. Counting Or Predicting",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Twenty-four sentences, and two halves that never mix">
-                <p>
-                  Everything on this page is fitted to one small corpus, and it is
-                  worth knowing exactly what is in it before any method touches
-                  it. Twenty-four sentences, twelve about a chef and twelve about
-                  an astronomer. The cooking half uses onion, garlic, flour, salt,
-                  soup, broth and the rest; the astronomy half uses moon, star,
-                  orbit, telescope, comet and nebula. No content word appears in
-                  both halves. What the two halves do share is seven words that
-                  carry no topic at all, the, and, with, in, of, into and for, and
-                  those seven turn out to matter more here than anything else.
+                <>
+<p>
+                  Everything on this page is fitted to one small corpus, and it is worth knowing exactly what is in it before any method touches it. Twenty-four sentences, twelve about a chef and twelve about an astronomer. The cooking half uses onion, garlic, flour, salt, soup, broth and the rest; the astronomy half uses moon, star, orbit, telescope, comet and nebula.
                 </p>
+                <p>
+                  No content word appears in both halves. What the two halves do share is seven words that carry no topic at all, the, and, with, in, of, into and for, and those seven turn out to matter more here than anything else.
+                </p>
+</>
                 <p>
                   That comes to 216 word occurrences over 37 distinct words. The
                   sentences are ordinary English rather than the nonsense a page
@@ -231,16 +162,14 @@ export default function GlovePage() {
                   common that word is on its own.
                 </p>
                 <Equation>{"w(i) · w̃(j) + b(i) + b̃(j)   should equal   log X(ij)"}</Equation>
-                <p>
-                  That is one equation for every pair that ever co-occurred, and
-                  the fit is a weighted least squares problem over those equations
-                  and nothing else. The name is Global Vectors, and the word global
-                  is the claim that the quantity being fitted was computed over the
-                  whole corpus rather than a window at a time. Where the counts on
-                  the right come from is Part 2; why the logarithm rather than the
-                  count is Part 3; why the equations cannot all count the same is
-                  Part 4; and what a walk over them does is Part 5.
+                <>
+<p>
+                  That is one equation for every pair that ever co-occurred, and the fit is a weighted least squares problem over those equations and nothing else. The name is Global Vectors, and the word global is the claim that the quantity being fitted was computed over the whole corpus rather than a window at a time.
                 </p>
+                <p>
+                  Where the counts on the right come from is Part 2; why the logarithm rather than the count is Part 3; why the equations cannot all count the same is Part 4; and what a walk over them does is Part 5.
+                </p>
+</>
                 <InAModel title="On this corpus">
                   <p>
                     The table holds 281 pairs that ever co-occurred, so the fit has
@@ -254,7 +183,7 @@ export default function GlovePage() {
                 </InAModel>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Table, Built Once",
@@ -297,19 +226,14 @@ export default function GlovePage() {
                   the end of the sentence and every cell is settled.
                 </p>
                 <WorkedExample title="Five words, ten filled cells">
-                  <p>
-                    The row for the reads chef 1.5, stirs 1.5, soup 1.0. The row
-                    for chef reads the 1.5, stirs 1.0. The row for stirs reads the
-                    1.5, chef 1.0, soup 0.5. The row for soup reads the 1.0, stirs
-                    0.5. Every pair is counted from both ends, so the table is
-                    symmetric and each of those five numbers appears twice; the ten
-                    filled cells add to 11.0. Two of them are below one, soup
-                    beside stirs in each direction, because those two words met
-                    once and two positions apart. Give every position inside the
-                    reach one full count instead and the same five numbers become
-                    2.0, 2.0, 1.0, 1.0 and 1.0, adding to 14.0, with nothing below
-                    one at all.
+                  <>
+<p>
+                    The row for the reads chef 1.5, stirs 1.5, soup 1.0. The row for chef reads the 1.5, stirs 1.0. The row for stirs reads the 1.5, chef 1.0, soup 0.5. The row for soup reads the 1.0, stirs 0.5. Every pair is counted from both ends, so the table is symmetric and each of those five numbers appears twice; the ten filled cells add to 11.0.
                   </p>
+                  <p>
+                    Two of them are below one, soup beside stirs in each direction, because those two words met once and two positions apart. Give every position inside the reach one full count instead and the same five numbers become 2.0, 2.0, 1.0, 1.0 and 1.0, adding to 14.0, with nothing below one at all.
+                  </p>
+</>
                 </WorkedExample>
                 <GloveCooccurrenceTable />
                 <p>
@@ -360,18 +284,14 @@ export default function GlovePage() {
           content: (
             <>
               <SubSection title="8. Why a ratio rather than a probability">
-                <p>
-                  Suppose we want to know what separates chef from astronomer. The
-                  obvious move is to ask how often each of them is found beside some
-                  probe word, and the raw figures do not answer it. A probe that
-                  stands beside both of them, like the, comes out common beside both
-                  and tells them apart in no way; a probe that stands beside neither
-                  comes out rare beside both and tells them apart in no way either.
-                  What does tell them apart is the ratio of the two figures, since a
-                  probe belonging to one word and not the other gives a ratio far
-                  from one while a probe belonging to both, or to neither, gives a
-                  ratio near one.
+                <>
+<p>
+                  Suppose we want to know what separates chef from astronomer. The obvious move is to ask how often each of them is found beside some probe word, and the raw figures do not answer it. A probe that stands beside both of them, like the, comes out common beside both and tells them apart in no way; a probe that stands beside neither comes out rare beside both and tells them apart in no way either.
                 </p>
+                <p>
+                  What does tell them apart is the ratio of the two figures, since a probe belonging to one word and not the other gives a ratio far from one while a probe belonging to both, or to neither, gives a ratio near one.
+                </p>
+</>
                 <Equation>{"P(k | i) / P(k | j)     far from one where k belongs to one word alone"}</Equation>
                 <p>
                   The ratio cancels what the two words share and what neither has,
@@ -458,16 +378,14 @@ export default function GlovePage() {
               </SubSection>
 
               <SubSection title="10. The two spare numbers, and the sum at the end">
-                <p>
-                  The two spare numbers are doing real work and it is easy to miss
-                  what. A word like the occurs beside almost everything, so every
-                  count in its row is large. Without a spare number to carry that
-                  fact, the dot products in that row would all have to be large, and
-                  the would end up close to every word in the table. The spare number
-                  absorbs the part of a count that is explained by how common the two
-                  words are on their own, and leaves the dot product carrying only
-                  what is particular to the pair.
+                <>
+<p>
+                  The two spare numbers are doing real work and it is easy to miss what. A word like the occurs beside almost everything, so every count in its row is large. Without a spare number to carry that fact, the dot products in that row would all have to be large, and the would end up close to every word in the table.
                 </p>
+                <p>
+                  The spare number absorbs the part of a count that is explained by how common the two words are on their own, and leaves the dot product carrying only what is particular to the pair.
+                </p>
+</>
                 <p>
                   Each word therefore ends the fit with two vectors and two spare
                   numbers, one of each for its role as the word of a pair and one for
@@ -487,6 +405,54 @@ export default function GlovePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            choice(
+              "One walk of the corpus makes 720 readings of a neighbour against a table holding 281 entries. Repeat the corpus eight times over. What happens to those two numbers?",
+              [
+                "The readings reach 5,760 and the table stays at 281",
+                "Both grow eightfold, to 5,760 and 2,248",
+                "The readings stay at 720 and the table reaches 2,248",
+                "Both stay exactly where they were",
+              ],
+              0,
+              "Repeating the corpus adds no new words and no new pairs, so the summary is finished and stays finished, while a window-sliding method pays again on every copy. That gap is the observation GloVe begins from, and it is why the method keeps the table instead of re-deriving it one position at a time.",
+            ),
+            trueFalse(
+              "Every count in the table is a whole number.",
+              false,
+              "A neighbour d positions away adds 1 ÷ d, so the word next door counts once and the word two away counts a half. Of the 281 filled cells, 86 are below one, and a count below one has a negative logarithm, which is the thing Part 5 measures the consequences of.",
+            ),
+            several(
+              "Which of these hold for the table built from the twenty-four sentences?",
+              [
+                "It is symmetric, because every pair is counted from both ends",
+                "281 of its 1,369 cells hold anything at all",
+                "No cell can have the same word for its row and its column",
+                "The largest count is the beside and, at 16.5",
+              ],
+              [0, 1, 3],
+              "The table is counted from both ends and so comes out symmetric, 79.5% of it is blank, and the beside and tops it at 16.5. A word can be its own neighbour, and here it happens exactly once, since and stands two positions from another and in two sentences, which puts 2.0 in the cell whose row and column are both and.",
+            ),
+            choice(
+              "Why does the objective compare the dot product against the logarithm of a count rather than against the count?",
+              [
+                "Because counting multiplies and a dot product adds, and a logarithm is what turns the one into the other",
+                "Because the logarithm keeps every target positive, which the fit requires",
+                "Because it shrinks the largest counts enough that no weighting is needed",
+                "Because only a logarithm makes the table symmetric",
+              ],
+              0,
+              "The method is built backwards from a ratio of two conditional probabilities, and a sum of products can only stand in for a quantity built out of ratios once logarithms have turned the multiplication into addition. That a logarithm keeps every target positive is false on this very corpus, where 86 counts are below one and so have negative logarithms.",
+            ),
+            trueFalse(
+              "Of the 37 words in the vocabulary, exactly one was seen beside both chef and astronomer.",
+              true,
+              "The is the only one, and its ratio of 0.7319 correctly reports that it separates nothing. Eight words were seen beside chef alone, so their ratios divide by zero, three beside astronomer alone, so their ratios are zero, and twenty-five beside neither, which is the quantity the method was designed around running into its own limit at this size.",
+            ),
+        ],
         },
         {
           title: "Part 4. Not Every Pair Is Worth The Same",
@@ -661,20 +627,14 @@ export default function GlovePage() {
                   sentences it never disappears at all.
                 </p>
                 <GloveStepRules />
-                <p>
-                  The two curves come from one walk, with everything identical
-                  except those two lines, so the same counts, the same weights, the
-                  same starting vectors, the same shuffled order and the same
-                  arithmetic for one pair&rsquo;s slopes. Measured at the end of all
-                  twenty-five passes, the largest amount any slope was divided by
-                  under the released rule is 1.0860 and the smallest is 1.0000, and
-                  since a running sum only ever grows those are also the extremes
-                  over the whole fit, so every step the released rule took was the
-                  base rate times the slope to within nine per cent, from the first
-                  pass to the last. Under the accumulating rule the same two figures
-                  are 0.0049 and 1.2331, a factor of two hundred and fifty between
-                  one parameter and another.
+                <>
+<p>
+                  The two curves come from one walk, with everything identical except those two lines, so the same counts, the same weights, the same starting vectors, the same shuffled order and the same arithmetic for one pair&rsquo;s slopes. Measured at the end of all twenty-five passes, the largest amount any slope was divided by under the released rule is 1.0860 and the smallest is 1.0000, and since a running sum only ever grows those are also the extremes over the whole fit, so every step the released rule took was the base rate times the slope to within nine per cent, from the first pass to the last.
                 </p>
+                <p>
+                  Under the accumulating rule the same two figures are 0.0049 and 1.2331, a factor of two hundred and fifty between one parameter and another.
+                </p>
+</>
                 <p>
                   What that costs is not subtle. The accumulating rule takes the
                   objective to 0.5148 and the released rule leaves it at 4.9571, nine
@@ -718,19 +678,17 @@ export default function GlovePage() {
                   ]}
                   caption="Every row is twenty-five passes at a width of eight. The last column is the mean cosine between two words of one half minus the mean cosine between words of different halves, once for each of three starting draws."
                 />
-                <p>
-                  At a reach of one nothing is below one, because every neighbour is
-                  next door and contributes a whole count, and the fit still fails,
-                  since 158 pairs is too little of the corpus to see anything by. At
-                  a reach of five more than half the counts are below one and the
-                  mean logarithm has gone negative. The spare numbers ought to absorb
-                  that mean and after twenty-five passes they have not. The mean
-                  spare number is −0.0169, an order of magnitude too small, and the
-                  mean dot product over the pairs that co-occurred is −0.1359, so the
-                  negative has ended up in the dot products, which is where the
-                  meaning was supposed to be. At a reach of two the same mean dot
-                  product is +0.0510.
+                <>
+<p>
+                  At a reach of one nothing is below one, because every neighbour is next door and contributes a whole count, and the fit still fails, since 158 pairs is too little of the corpus to see anything by. At a reach of five more than half the counts are below one and the mean logarithm has gone negative.
                 </p>
+                <p>
+                  The spare numbers ought to absorb that mean and after twenty-five passes they have not. The mean spare number is −0.0169, an order of magnitude too small, and the mean dot product over the pairs that co-occurred is −0.1359, so the negative has ended up in the dot products, which is where the meaning was supposed to be.
+                </p>
+                <p>
+                  At a reach of two the same mean dot product is +0.0510.
+                </p>
+</>
                 <p>
                   The last column is what that does to the answer. At a reach of two
                   all three starts put words of one half nearer to each other than to
@@ -779,6 +737,54 @@ export default function GlovePage() {
           ),
         },
         {
+          title: "Questions on Parts 4 and 5",
+          quiz: [
+            trueFalse(
+              "On this corpus the cap is what holds the commonest pair back.",
+              false,
+              "The largest count in the table is 16.5 and the published cap is 100, so nothing is common enough to reach it. All of the flattening here comes from the three-quarter power, which takes the ten commonest pairs from 17.57% of the objective down to 12.65%, and the cap contributes nothing until it is moved below the largest count.",
+            ),
+            choice(
+              "Setting the cap exactly at 16.5, the largest count in the table, does what to the shares of the objective?",
+              [
+                "Nothing at all, since the curve only ever flattens what lies beyond the cap",
+                "It halves the share carried by the single commonest pair",
+                "It raises the share carried by the rarest pairs",
+                "It makes every pair count the same",
+              ],
+              0,
+              "Two pairs then sit precisely on the cap and every share is identical to the shares at a cap of 100. Slide it to 7.5 instead and ten pairs reach it, every one of them involving the, and the share carried by the commonest pair falls from 1.90% to 1.08%.",
+            ),
+            trueFalse(
+              "Recomputed where the walk stopped, the objective of the finished fit comes out below the total the last pass recorded.",
+              true,
+              "Each pass accumulates its total while the parameters are still moving, so a pair visited early is scored against different vectors from a pair visited late, and the parameters improve during the pass being measured. The objective at rest is 0.5148 against the 0.5550 the twenty-fifth pass recorded. Running one pass at a base step of a millionth of a millionth brings the two within a billionth of each other, which shows the gap is entirely the movement and not the arithmetic.",
+            ),
+            choice(
+              "The released program starts every running sum at one and adds each new square after taking the step. What did those two lines cost over the same twenty-five passes?",
+              [
+                "The objective stopped at 4.9571 rather than 0.5148, and the halves separated by 0.0306 rather than 0.1966",
+                "Nothing measurable, since the two rules are indistinguishable at every corpus size",
+                "The fit diverged and returned no answer at all",
+                "The same objective, reached nine times more slowly",
+              ],
+              0,
+              "Starting the sums at one means they never grow past it on a corpus this small, so every step the released rule took was the base rate times the slope to within nine per cent and the rule was not adaptive at all. On billions of words the sums leave one within the first few thousand pairs and the two rules agree, which is why a reader who knew only the name of the step rule would never have checked.",
+            ),
+            several(
+              "Which of these are true of the reach on this corpus?",
+              [
+                "It decides how many counts fall below one, and so the sign of most of the logarithms",
+                "At a reach of one nothing is below one, and the fit still fails",
+                "At a reach of five more than half the counts are below one and the mean logarithm has gone negative",
+                "It is settled before the first equation exists, so sweeping it means counting the corpus again for every value",
+              ],
+              [0, 1, 2, 3],
+              "Every one of them holds. A neighbour further away contributes a smaller fraction, so the reach settles what fraction of the counts are below one, none at a reach of one and 51.9% at five, and at a reach of one the 158 pairs left are simply too little of the corpus to see anything by. The reach is baked into the table before a single equation exists, and no quantity the fit produces turns over as it passes a good value, so a sweep is a fresh count of the corpus at every setting.",
+            ),
+        ],
+        },
+        {
           title: "Part 6. What A Table Costs",
           content: (
             <>
@@ -808,17 +814,14 @@ export default function GlovePage() {
                   ]}
                   caption="Repeating the corpus is deliberately artificial. It is the only way to hold the vocabulary fixed while the amount of text grows, and it isolates the claim that a pass over the table costs the number of distinct pairs and nothing else."
                 />
-                <p>
-                  What the repetition hides is that on real text the number of
-                  distinct pairs does keep growing, only far more slowly than the
-                  text does, and that the table itself grows as the square of the
-                  vocabulary whether or not the cells are filled. Here it is 1,369
-                  numbers, of which 1,088 are zero, against the 296 numbers of the
-                  fitted vectors. Thirty-seven words is small enough that holding a
-                  square array is the obvious thing to do; four hundred thousand
-                  words is not, and every implementation at that size holds the
-                  filled cells alone.
+                <>
+<p>
+                  What the repetition hides is that on real text the number of distinct pairs does keep growing, only far more slowly than the text does, and that the table itself grows as the square of the vocabulary whether or not the cells are filled. Here it is 1,369 numbers, of which 1,088 are zero, against the 296 numbers of the fitted vectors.
                 </p>
+                <p>
+                  Thirty-seven words is small enough that holding a square array is the obvious thing to do; four hundred thousand words is not, and every implementation at that size holds the filled cells alone.
+                </p>
+</>
                 <KeepInMind>
                   Two costs are being traded here and they grow differently. Counting
                   is paid once, and what it costs grows as the square of the
@@ -886,17 +889,14 @@ export default function GlovePage() {
                   all, the sum runs over the pairs that were seen, and it says nothing
                   whatever about the rest.
                 </p>
-                <p>
-                  That is a different kind of silence from a term whose target is
-                  zero. A term with a target of zero would be a statement, namely that
-                  those two words should have a dot product cancelling their two spare
-                  numbers; a missing term is no statement, and the fit is free to
-                  place those two words anywhere the other terms leave room for. On
-                  this corpus 1,088 of the 1,369 cells are empty, so 79.5% of the
-                  pairs the vocabulary can form are pairs the objective never
-                  mentions, and every judgement a fitted table makes about one of them
-                  is a side effect of the pairs it did mention.
+                <>
+<p>
+                  That is a different kind of silence from a term whose target is zero. A term with a target of zero would be a statement, namely that those two words should have a dot product cancelling their two spare numbers; a missing term is no statement, and the fit is free to place those two words anywhere the other terms leave room for.
                 </p>
+                <p>
+                  On this corpus 1,088 of the 1,369 cells are empty, so 79.5% of the pairs the vocabulary can form are pairs the objective never mentions, and every judgement a fitted table makes about one of them is a side effect of the pairs it did mention.
+                </p>
+</>
                 <p>
                   The weight is what makes the omission consistent rather than ad hoc.
                   The weight of a count of zero is zero, so writing the sum over all
@@ -916,17 +916,14 @@ export default function GlovePage() {
                   quantity the fit produces turns over as the reach passes a good
                   value.
                 </p>
-                <p>
-                  Both are genuine choices with something measurable turning on them.
-                  The reach settles what fraction of the counts fall below one and so
-                  the sign of most of the logarithms, which Part 5 measured as none of
-                  them at a reach of one and 51.9% of them at a reach of five, with
-                  the answer failing at both ends. The distance rule settles whether a
-                  count is a whole number at all, and a rule giving every position one
-                  full count would remove every fraction and with it every negative
-                  logarithm, at the cost of treating a word five away as the equal of
-                  a word next door.
+                <>
+<p>
+                  Both are genuine choices with something measurable turning on them. The reach settles what fraction of the counts fall below one and so the sign of most of the logarithms, which Part 5 measured as none of them at a reach of one and 51.9% of them at a reach of five, with the answer failing at both ends.
                 </p>
+                <p>
+                  The distance rule settles whether a count is a whole number at all, and a rule giving every position one full count would remove every fraction and with it every negative logarithm, at the cost of treating a word five away as the equal of a word next door.
+                </p>
+</>
                 <KeepInMind>
                   A hyperparameter that can be swept during a fit is a different kind
                   of thing from one baked into the data the fit reads. Sweeping the
@@ -1057,6 +1054,414 @@ export default function GlovePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 6 and 7",
+          quiz: [
+            trueFalse(
+              "On this corpus the fitted vectors beat the raw rows of counts on both of the two questions the page asks.",
+              false,
+              "They win one and lose one. The raw rows put 74.7% of the five nearest content words in the same half against the fit's 67.3%, and they do it with 37 numbers per word where the fit uses 8; the fit separates the halves by 0.1966 against the raw rows' 0.1404.",
+            ),
+            choice(
+              "Why do the raw rows separate the two halves by only 0.1404?",
+              [
+                "Every row is dominated by the seven shared words, so all thirty-seven rows already point broadly the same way",
+                "The rows are too short to carry the distinction",
+                "The rows were counted at a reach too small to reach across a sentence",
+                "The rows were never passed through the three-quarter weighting",
+              ],
+              0,
+              "The seven function words stand beside everything, so they fill every row and the mean cosine across the halves comes out at 0.4756 rather than near zero. That leaves little room above it for a difference between the halves to show in.",
+            ),
+            trueFalse(
+              "A pair of words that never co-occurred contributes no term to the objective at all.",
+              true,
+              "The logarithm of zero is not a number, so the sum runs over the 281 pairs that were seen and says nothing whatever about the other 1,088. A term whose target was zero would be a statement about those two words, namely that their dot product should cancel their spare numbers; a missing term is no statement, and the fit may place them anywhere the other terms leave room for.",
+            ),
+            choice(
+              "The weight of a count of zero is zero. What does that buy?",
+              [
+                "A way of writing the sum over every pair of words that gives the same number as the sum over the filled cells",
+                "A statement that two words which never co-occurred should end up far apart",
+                "A repair for the 1,088 pairs the objective never mentions",
+                "A guarantee that the fit is pinned down by its own objective",
+              ],
+              0,
+              "It makes the omission consistent rather than ad hoc, since the missing logarithms are never evaluated either way. It is a tidy way of stating the silence rather than a way of repairing it, because the objective still has 281 terms however it is written down, against 666 numbers to choose.",
+            ),
+            several(
+              "Turn every vector in both tables by the same rotation. Which of these hold?",
+              [
+                "Every dot product is unchanged, so the rotated answer is exactly as good",
+                "Averaging the rotated table with the original gives a table at least as good as either",
+                "Handing one fit's vectors to something trained on another's is undefined rather than approximate",
+                "The cosine between two words changes, which is why the page reports coordinates instead",
+              ],
+              [0, 2],
+              "A rotation leaves every dot product alone, so it leaves every term of the objective alone and the objective cannot tell the two apart. That is exactly why anything read off these vectors has to survive a rotation, which a cosine does and a coordinate does not. Two tables that were never written in the same coordinates cannot be averaged, so the mean of a table and its rotation is undefined rather than a better table, and the third coordinate of one fit has no relation to the third coordinate of another.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Counting The Table, Then Fitting It",
+          practice: [
+            exercise(
+              "Count the table, once",
+              ["Fit the page’s settings, a width of eight and a reach of two, to the twenty-four sentences, and then read the table the fit was made on rather than the vectors. Part 2 said the table has 1,369 cells of which 281 hold anything, that the counts add to 552.0, that the beside and tops it at 16.5 and that and stands beside itself at 2.0. Confirm each of those, and count how many of the filled cells hold less than one.", "Part 4 said the smallest count earns a weight of 0.0188 and the largest 0.2589, about fourteen times as much. Print the two weights and their ratio, which the lesson rounds and the script does not."],
+              `from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+model = GloVe(dimension=8, window=2, epochs=25, learning_rate=0.05, random_seed=0)
+model.fit(corpus)
+table = model.cooccurrence
+counts = table.counts
+filled = counts[counts > 0]
+# Print the word count, the cell count and the filled count, the total of the
+# counts, the two cells named above, how many filled cells are below one, and
+# the weights of the smallest and largest counts with their ratio.`,
+              `from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+model = GloVe(dimension=8, window=2, epochs=25, learning_rate=0.05, random_seed=0)
+model.fit(corpus)
+table = model.cooccurrence
+counts = table.counts
+filled = counts[counts > 0]
+
+print(f"words {table.n_words}, cells {counts.size}, filled {filled.size}")
+print(f"counts add to {table.total:.1f}")
+print(f"the beside and {table.count_between('the', 'and'):.1f}")
+print(f"and beside and {table.count_between('and', 'and'):.1f}")
+print(f"filled cells below one {int((filled < 1).sum())}")
+
+smallest = model.weight_of_count(float(filled.min()))
+largest = model.weight_of_count(float(filled.max()))
+print(f"weight of {filled.min():.1f} is {smallest:.4f}")
+print(f"weight of {filled.max():.1f} is {largest:.4f}")
+print(f"ratio {largest / smallest:.2f}")`,
+              `words 37, cells 1369, filled 281
+counts add to 552.0
+the beside and 16.5
+and beside and 2.0
+filled cells below one 86
+weight of 0.5 is 0.0188
+weight of 16.5 is 0.2589
+ratio 13.77`,
+              { hints: ["The fitted model keeps the matrix it was fitted on as a property named cooccurrence, and that object answers n_words, total and count_between with two words.", "counts is a square array with a row and a column per word, so counts[counts > 0] is the 281 filled cells and (filled < 1).sum() counts the ones below one.", "weight_of_count is on the model and needs no fit at all. It takes one count and returns the weight Part 4 describes, at the model’s own cap and exponent."], check: numberCheck("What is the ratio of the largest count’s weight to the smallest count’s?", 13.77, 0.01, "Both weights are the count over the cap of 100, raised to three quarters, so the cap cancels out of the ratio and what is left is 33 to the three quarters, which is 13.77. Part 4 rounds that to about fourteen. The cap cancelling is also why moving it to exactly 16.5 changed none of the shares, since every weight scales alike while nothing lies beyond it.") },
+            ),
+            exercise(
+              "Run the fit and read where it stopped",
+              ["Part 5 reported the summed pair terms falling from 18.9335 in the first pass to 0.5550 in the twenty-fifth, and an objective of 0.5148 recomputed where the walk stopped. The library records each pass as a mean over the 281 pairs, so multiply a recorded mean by the number of pairs to get the totals the lesson quotes.", "Print the first and last pass totals, whether the recorded history fell, and the objective at rest, and confirm the objective at rest sits below the last pass’s total for the reason Part 5 gives."],
+              `from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+model = GloVe(dimension=8, window=2, epochs=25, learning_rate=0.05, random_seed=0)
+model.fit(corpus)
+history = model.history
+# Print how many passes ran and how many pairs each visited, the first and
+# last pass totals, whether the history fell, and the objective at rest.`,
+              `from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+model = GloVe(dimension=8, window=2, epochs=25, learning_rate=0.05, random_seed=0)
+model.fit(corpus)
+history = model.history
+n_pairs = history[0].n_pairs
+
+print(f"passes {history.n_epochs}, pairs per pass {n_pairs}")
+print(f"first pass total {history.mean_losses[0] * n_pairs:.4f}")
+print(f"last pass total {history.mean_losses[-1] * n_pairs:.4f}")
+print(f"history fell {history.fell}")
+print(f"objective at rest {model.objective_value():.4f}")`,
+              `passes 25, pairs per pass 281
+first pass total 18.9335
+last pass total 0.5550
+history fell True
+objective at rest 0.5148`,
+              { hints: ["history is a property of the fitted model. It holds one record per pass, and mean_losses is the tuple of their means in order.", "Each record also knows n_pairs, the number of pairs the pass visited, which is the 281 to multiply a mean by.", "objective_value is a method rather than a property, because it recomputes the objective from the fitted parameters at rest instead of reading back a number the walk recorded."], check: numberCheck("What objective does the model report, recomputed where the walk stopped?", 0.5148, 0.0005, "The last pass’s total of 0.5550 was accumulated while the parameters were still moving, so it is not the objective at any one set of parameters. Recomputed at rest the objective is 0.5148, lower, because the parameters improved during the pass being measured, and Part 5 showed the two agree to within a billionth once the walk is made to stand still.") },
+            ),
+            exercise(
+              "Ask the vectors the two questions",
+              ["The page scores every fit on two mean cosines, how alike two content words of one half are and how alike a word of each half are, with the seven shared words left out of both. Compute both means over the thirty content words and print the gap between them, which Part 5 gave as 0.1966.", "Then print the five words nearest moon with their similarities. Part 5 said the list begins with orbits at 0.9826 and that a function word gets in, which is the effect the spare numbers only partly remove."],
+              `from itertools import combinations
+from statistics import mean
+
+from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+cooking = "bakes bread broth butter chef chops flour garlic onion oven pan pepper salt soup stirs".split()
+astronomy = "astronomer charts comet eclipse galaxy gravity meteor moon nebula orbit orbits planet star telescope watches".split()
+
+model = GloVe(dimension=8, window=2, epochs=25, learning_rate=0.05, random_seed=0)
+model.fit(corpus)
+# Print the mean cosine between two words of the same half, the mean cosine
+# between a word of each half, the gap between them, and the five words
+# nearest moon with their similarities.`,
+              `from itertools import combinations
+from statistics import mean
+
+from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+cooking = "bakes bread broth butter chef chops flour garlic onion oven pan pepper salt soup stirs".split()
+astronomy = "astronomer charts comet eclipse galaxy gravity meteor moon nebula orbit orbits planet star telescope watches".split()
+
+model = GloVe(dimension=8, window=2, epochs=25, learning_rate=0.05, random_seed=0)
+model.fit(corpus)
+
+within = mean(model.similarity(a, b) for half in (cooking, astronomy) for a, b in combinations(half, 2))
+across = mean(model.similarity(a, b) for a in cooking for b in astronomy)
+print(f"within a half {within:.4f}")
+print(f"across the halves {across:.4f}")
+print(f"gap {within - across:.4f}")
+
+for near in model.most_similar("moon", 5):
+    print(f"{near.word} {near.similarity:.4f}")`,
+              `within a half 0.1188
+across the halves -0.0778
+gap 0.1966
+orbits 0.9826
+of 0.9799
+planet 0.9536
+astronomer 0.9336
+orbit 0.8815`,
+              { hints: ["similarity takes two words and answers their cosine, so the within mean is the mean over every pair inside each half and the across mean is the mean over every cooking word against every astronomy word.", "combinations from itertools gives each pair of a half once, which is 105 pairs per half, and the fifteen by fifteen cross pairs are a plain double loop.", "most_similar takes a word and how many neighbours to return, and each neighbour it answers has a word and a similarity."], check: numberCheck("What is the mean cosine between two content words of the same half?", 0.1188, 0.0005, "Fifteen words in each half make 105 pairs per half, 210 within-half cosines, and their mean is 0.1188. The 225 cross-half pairs average −0.0778, so words of one half point broadly together and words of different halves point slightly apart, and the gap of 0.1966 between the two means is the one number Parts 5 and 6 compare every fit on.") },
+            ),
+            exercise(
+              "Widen the reach to the published five",
+              ["Part 5 says the reach decides the sign of most of the logarithms, with none of the counts below one at a reach of one and more than half at a reach of five. Fit the corpus at reaches of one, two and five with everything else at the page’s settings, and for each print how many pairs the table holds, what share of them sit below one, the mean logarithm of a count, and the mean of the spare numbers in the word role.", "The mean logarithm at a reach of five is a number the lesson describes only as negative. Part 5 does give the mean spare number there, minus 0.0169, and calls it an order of magnitude too small to absorb the mean it was meant to absorb."],
+              `from math import log
+from statistics import mean
+
+from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+for reach in (1, 2, 5):
+    model = GloVe(dimension=8, window=reach, epochs=25, learning_rate=0.05, random_seed=0)
+    model.fit(corpus)
+    # Collect the filled counts of the table, then print the reach, how many
+    # pairs there are, the share below one, the mean logarithm of a count and
+    # the mean of the word-role spare numbers.`,
+              `from math import log
+from statistics import mean
+
+from oop_ml import GloVe
+
+corpus = """the chef chops onion and garlic
+the chef stirs soup with butter and salt
+the chef stirs onion and garlic in the pan
+the chef bakes bread with flour in the oven
+the chef stirs salt and pepper into the broth
+the chef bakes bread and stirs the broth
+flour and butter and salt in the pan
+the chef chops onion for the soup and the broth
+garlic and pepper in the soup with bread
+the chef bakes flour and butter into bread in the oven
+onion and garlic and salt in the broth
+the chef stirs the soup in the pan with pepper
+the astronomer watches the star and the planet
+the astronomer charts the orbit of the moon
+the comet and the meteor orbit the star
+the telescope watches the galaxy and the nebula
+the moon orbits the planet with gravity
+the astronomer watches the eclipse of the moon with the telescope
+the comet orbits the star and the astronomer charts the orbit
+the telescope watches the nebula and the galaxy
+the astronomer charts the meteor and the comet with the telescope
+the planet orbits the star and the moon orbits the planet
+the eclipse of the star and the eclipse of the moon
+gravity and the orbit of the galaxy and the nebula""".splitlines()
+
+for reach in (1, 2, 5):
+    model = GloVe(dimension=8, window=reach, epochs=25, learning_rate=0.05, random_seed=0)
+    model.fit(corpus)
+    counts = model.cooccurrence.counts
+    filled = [float(count) for count in counts[counts > 0]]
+    below = sum(1 for count in filled if count < 1)
+    print(f"reach {reach}, {len(filled)} pairs, {below / len(filled):.1%} below one")
+    print(f"  mean logarithm {mean(log(count) for count in filled):.4f}")
+    print(f"  mean spare number {float(model.biases.mean()):.4f}")`,
+              `reach 1, 158 pairs, 0.0% below one
+  mean logarithm 0.6623
+  mean spare number 0.1436
+reach 2, 281 pairs, 30.6% below one
+  mean logarithm 0.2617
+  mean spare number 0.0700
+reach 5, 474 pairs, 51.9% below one
+  mean logarithm -0.1523
+  mean spare number -0.0169`,
+              { hints: ["window is the constructor field that sets the reach, and construction configures while fit learns, so a new reach is a new model fitted again.", "The spare numbers of the word role are the model’s biases property, one per word, frozen, and a numpy array answers its own mean.", "The logarithms are of the counts themselves, not of anything the fit produced, so the share below one and the mean logarithm are settled before the first pass and do not change with the seed."], check: numberCheck("What is the mean logarithm of a count at a reach of five?", -0.1523, 0.0005, "At a reach of five a neighbour four or five positions away adds a quarter or a fifth, so 51.9% of the 474 counts are below one and the mean of their logarithms is −0.1523. The spare numbers ought to absorb that mean and after twenty-five passes reach only −0.0169, so the negative ends up in the dot products, where the meaning was supposed to be, and that is why the reach that works on this corpus is two.") },
+            ),
+          ],
         },
       ]}
     />

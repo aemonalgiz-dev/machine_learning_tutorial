@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -22,7 +25,7 @@ import { UnitRivals } from "@/components/widgets/UnitRivals";
 export const metadata: Metadata = {
   title: "Greedy Coverage · oop_ml",
   description:
-    "Choose the pieces that cover the most text rather than the ones that merge most often. The unit the covering is counted in decides which piece is picked.",
+    "Build a vocabulary by repeatedly choosing the candidate with the largest remaining coverage gain.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -30,8 +33,12 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function GreedyCoveragePage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["greedy-coverage"]}
+      technicalStart="Part 2. One Turn at a Time"
+      openingTitle="Which New Piece Covers the Most Text?"
+      playgroundIntro="Inspect each candidate's additional coverage after the earlier choices. Compare what changes when coverage is measured using a different unit."
       title="Greedy Coverage"
-      tagline="Choose the pieces that cover the most text rather than the ones that merge most often, which is a different objective and produces a different vocabulary. The unit the covering is counted in decides the first pick."
+      tagline="Build a vocabulary by repeatedly choosing the candidate with the largest remaining coverage gain."
       prerequisites={
         <>
           Two things from earlier in this section. Something has already decided
@@ -44,59 +51,14 @@ export default function GreedyCoveragePage() {
           about counting them greedily, is the whole of it.
         </>
       }
-      history={
-        <>
-          <p>
-            Every subword scheme before this one decides a piece by what happens
-            at a single step of a loop. Philip Gage&rsquo;s 1994 compression
-            scheme joined the commonest adjacent pair of bytes and repeated;
-            Rico Sennrich, Barry Haddow and Alexandra Birch borrowed that loop
-            for vocabularies in 2016; Mike Schuster and Kaisuke Nakajima had
-            already changed what the loop scores, in 2012, and Taku Kudo ran a
-            comparable loop backwards in 2018, removing pieces instead of adding
-            them. All four ask a local question. None of them ever states what a
-            finished vocabulary is supposed to be good at, and so none of them
-            can be checked against it.
-          </p>
-          <p>
-            The result this page rests on is much older than any of that, and
-            comes from combinatorial optimisation rather than from language.
-            Richard Karp&rsquo;s 1972 list of twenty-one problems shown to be
-            NP-complete includes set covering, so choosing the best few sets to
-            cover as much as possible was known to be intractable long before
-            anybody wanted a tokenizer. Six years later George Nemhauser, Laurence
-            Wolsey and Marshall Fisher published an analysis of approximations
-            for maximising submodular set functions, and proved that the obvious
-            greedy rule, repeatedly taking whatever covers the most that is not
-            yet covered, is guaranteed to reach at least 1 &minus; 1/e of the
-            best possible. In 1998 Uriel Feige showed that no polynomial method
-            does better unless P equals NP, so that fraction is not a gap waiting
-            for a cleverer algorithm.
-          </p>
-          <p>
-            Lim and colleagues put the two halves together in 2024, in the work
-            that named the scheme GreedTok. Their observation was that a subword
-            vocabulary is for covering a corpus, that covering a corpus with a
-            budget of pieces is exactly weighted maximum coverage, and that the
-            approximation for it has been sitting in the literature for
-            forty-six years. So the merging loop can be dropped entirely, and
-            the vocabulary built by the classical rule instead. This page asks
-            five questions in order. What are the merging methods actually
-            maximising, and why is coverage a different thing? What does one turn
-            of this rule look like on four words? What does the guarantee
-            promise, and where does the rule fall short of the best set? Does the
-            unit the covering is counted in change the answer? And what
-            vocabulary comes out of a real corpus, against what it costs.
-          </p>
-        </>
-      }
+
       playground={<GreedyCoveragePlayground />}
       sections={[
         {
           title: "Part 1. What Merging Was Maximising",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The corpus, the sentence, and what is being chosen">
                 <p>
                   We work on the same two corpora the merging pages use, so that
@@ -138,16 +100,18 @@ export default function GreedyCoveragePage() {
                   Nothing longer is in the running, since nothing longer exists
                   yet.
                 </p>
-                <p>
-                  Now score the same corpus by how much text a piece would cover.
-                  The word ending he still leads, because covering two positions
-                  31 times over is worth 62. But second place goes to analys,
-                  which occurs only 7 times and is worth 42, since it is six
-                  positions long. Third is expecte, 5 occurrences and 7 positions,
-                  worth 35. Fourth is re at 17 occurrences and worth 34, which is
-                  the pair merging ranked third. The two orderings agree at the
-                  top and part company immediately afterwards.
-                </p>
+                <>
+                  <p>
+                    Coverage multiplies a candidate’s occurrence count by the number of
+                    symbol positions it covers.
+                  </p>
+                  <Equation>{"he:      31 × 2 = 62\nanalys:   7 × 6 = 42\nexpecte:  5 × 7 = 35\nre:      17 × 2 = 34"}</Equation>
+                  <p>
+                    The most frequent pair still wins here, but the remaining order
+                    changes. Longer pieces can cover more text despite occurring less
+                    often.
+                  </p>
+                </>
                 <NumberTable
                   headings={["candidate", "occurs", "positions each", "covers"]}
                   rows={[
@@ -160,17 +124,14 @@ export default function GreedyCoveragePage() {
                   ]}
                   caption="The first six pieces chosen on the eighteen sentences, with the arithmetic that chose them. A trailing ⎵ marks a piece that ends a word."
                 />
-                <p>
-                  The difference is not a refinement of the same idea. A merge
-                  count answers how many pieces one join removes from the corpus,
-                  which for a pair is how often the pair occurs; a coverage figure
-                  answers how much of the corpus a row of the table would account
-                  for, which is that occurrence count multiplied by the length of
-                  the piece. Merging cannot ask the second question at all,
-                  because it has no candidate longer than two symbols to ask it
-                  about, and reaches analys only by making five separate joins
-                  and scoring each of them on its own.
+                <>
+<p>
+                  The difference is not a refinement of the same idea. A merge count answers how many pieces one join removes from the corpus, which for a pair is how often the pair occurs; a coverage figure answers how much of the corpus a row of the table would account for, which is that occurrence count multiplied by the length of the piece.
                 </p>
+                <p>
+                  Merging cannot ask the second question at all, because it has no candidate longer than two symbols to ask it about, and reaches analys only by making five separate joins and scoring each of them on its own.
+                </p>
+</>
                 <KeepInMind>
                   Frequency and coverage are two different numbers, and on this
                   corpus they disagree from the second candidate onward. A piece
@@ -207,7 +168,7 @@ export default function GreedyCoveragePage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. One Turn at a Time",
@@ -225,17 +186,18 @@ export default function GreedyCoveragePage() {
                   accident of the fit.
                 </p>
                 <WorkedExample title="The word widest, and two candidates for it">
-                  <p>
-                    Spelled out, widest is w, i, d, e, s and the marked t, six
-                    positions, and the corpus holds it three times. The candidate
-                    est with the mark claims three of those six, so on widest
-                    alone it is worth 3 &times; 3 = 9, and since it also occurs in
-                    newest, seen six times, its total is 3 &times; 9 = 27. The
-                    candidate widest with the mark claims all six, so it is worth
-                    6 &times; 3 = 18 and occurs nowhere else. On this corpus the
-                    shorter piece in more words wins, though not by as much as its
-                    higher occurrence count suggests.
-                  </p>
+                  <>
+                    <p>
+                      Widest has six symbol positions and appears three times. The
+                      marked ending est covers three of those positions. It also appears
+                      in newest, which occurs six times.
+                    </p>
+                    <Equation>{"ending in widest = 3 positions × 3 occurrences = 9\nending in both words = 3 × (3 + 6) = 27\nwhole widest = 6 × 3 = 18"}</Equation>
+                    <p>
+                      The shorter piece wins because its coverage across more words
+                      outweighs the extra positions covered by the whole word.
+                    </p>
+                  </>
                 </WorkedExample>
                 <KeepInMind>
                   A candidate is scored against what is left rather than against
@@ -246,26 +208,27 @@ export default function GreedyCoveragePage() {
               </SubSection>
 
               <SubSection title="5. The first pick on four words">
-                <p>
-                  Run the rule on low, lower, newest and widest and the first turn
-                  goes to newest with its mark, six positions in a word seen six
-                  times, which covers 36. Its nearest rivals are ewest with the
-                  mark and newes, both five positions in the same six occurrences
-                  and worth 30, and then est with the mark, three positions across
-                  nine occurrences and worth 27. Merging&rsquo;s own first choice
-                  on this corpus is the pair e followed by s, which appears nine
-                  times; here that pair is not even a separate candidate, since
-                  every run containing it is one.
+                <>
+<p>
+                  Run the rule on low, lower, newest and widest and the first turn goes to newest with its mark, six positions in a word seen six times, which covers 36. Its nearest rivals are ewest with the mark and newes, both five positions in the same six occurrences and worth 30, and then est with the mark, three positions across nine occurrences and worth 27.
                 </p>
+                <p>
+                  Merging&rsquo;s own first choice on this corpus is the pair e followed by s, which appears nine times; here that pair is not even a separate candidate, since every run containing it is one.
+                </p>
+</>
                 <CoverClaims />
-                <p>
-                  Drag the control and watch the positions fill. Nothing about the
-                  first turn is close, which is worth saying because est with the
-                  mark is the piece a reader who has been thinking about suffixes
-                  expects. It loses at 27 to 36, and it loses for a reason with no
-                  linguistics in it, namely that six times six is larger than three
-                  times nine.
-                </p>
+                <>
+                  <p>
+                    Drag the control and watch covered positions fill. The marked ending
+                    est loses the first turn to newest because the complete word covers
+                    more weighted positions.
+                  </p>
+                  <Equation>{"newest = 6 × 6 = 36\nmarked est = 3 × 9 = 27"}</Equation>
+                  <p>
+                    This choice comes from the coverage objective. It makes no judgment
+                    about which candidate is a meaningful word or suffix.
+                  </p>
+                </>
                 <KeepInMind>
                   The first piece chosen on this corpus is a whole common word.
                   That is the objective working correctly rather than a
@@ -275,15 +238,19 @@ export default function GreedyCoveragePage() {
               </SubSection>
 
               <SubSection title="6. The next three, and where the corpus runs out">
-                <p>
-                  With newest taken, its six positions are gone from every
-                  candidate that overlapped them, so est with the mark is now
-                  worth only what it can find in widest, and widest with the mark
-                  wins the second turn at 6 &times; 3 = 18. Then low with its mark
-                  at 3 &times; 5 = 15, and then lower with its mark at 5 &times; 2
-                  = 10. Those four numbers add to 79, which is every weighted
-                  position the corpus has.
-                </p>
+                <>
+                  <p>
+                    Once newest is selected, positions it covers no longer earn credit
+                    for overlapping candidates. The marked ending can now earn credit
+                    only in widest, so the next choice is the whole word. The remaining
+                    choices finish the coverage.
+                  </p>
+                  <Equation>{"newest: 6 × 6 = 36\nwidest: 6 × 3 = 18\nlow:    3 × 5 = 15\nlower:  5 × 2 = 10\ntotal covered = 36 + 18 + 15 + 10 = 79"}</Equation>
+                  <p>
+                    Those four selections cover every weighted symbol position in this
+                    corpus.
+                  </p>
+                </>
                 <DerivationTable
                   expressionHeading="the turn"
                   reasonHeading="what it covered, and why"
@@ -319,17 +286,14 @@ export default function GreedyCoveragePage() {
                   really does occur inside it.
                 </p>
                 <WorkedExample title="lowest, which those four words never contained">
-                  <p>
-                    Spelled out it is l, o, w, e, s and the marked t. None of the
-                    four chosen pieces occurs in it. Low with its mark cannot
-                    apply, since it needs a marked w and lowest carries a bare w in
-                    the middle; lower with its mark needs a marked r; and the two
-                    long pieces are not there at all. So the answer is six single
-                    symbols, none of the six positions covered. A merged
-                    vocabulary of the same size answers the same word in three
-                    pieces, because it built est with the mark on the way to
-                    newest and kept it.
+                  <>
+<p>
+                    Spelled out it is l, o, w, e, s and the marked t. None of the four chosen pieces occurs in it. Low with its mark cannot apply, since it needs a marked w and lowest carries a bare w in the middle; lower with its mark needs a marked r; and the two long pieces are not there at all.
                   </p>
+                  <p>
+                    So the answer is six single symbols, none of the six positions covered. A merged vocabulary of the same size answers the same word in three pieces, because it built est with the mark on the way to newest and kept it.
+                  </p>
+</>
                 </WorkedExample>
                 <p>
                   That is the structural difference between the two methods, and
@@ -352,6 +316,54 @@ export default function GreedyCoveragePage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "How does coverage score a candidate?",
+              [
+                "Its occurrence count multiplied by the number of symbol positions it covers",
+                "How many times its two symbols sit next to each other",
+                "Its occurrence count on its own",
+                "The number of distinct words it turns up in",
+              ],
+              0,
+              "On the eighteen sentences he scores 31 × 2 = 62 and analys scores 7 × 6 = 42, which puts a piece seen 7 times above the pair re seen 17 times. A merge count answers how many pieces one join removes from the corpus; a coverage figure answers how much of the corpus a row of the table would account for.",
+            ),
+            trueFalse(
+              "On the four words the first turn goes to the marked ending est, because it reaches two of them.",
+              false,
+              "Newest with its mark wins, six positions in a word seen six times for 36, against the ending’s 3 × 9 = 27. The first piece chosen is a whole common word, which is the objective working correctly rather than a degenerate case, since a whole word is exactly the piece that covers the most of its own occurrences.",
+            ),
+            trueFalse(
+              "Asking for 300 rows on the four-word corpus gives the same four pieces as asking for 40.",
+              true,
+              "Newest, widest, low and lower cover 36, 18, 15 and 10 positions, which is all 79, so no candidate is left that covers anything and the fit stops at 16 tokens however many were asked for. The size asked for is an upper bound and not a promise. Merging has the same shape of ceiling reached from the other direction, when its loop runs out of pairs seen twice.",
+            ),
+            choice(
+              "Handed lowest, the four chosen pieces answer six single symbols. Why?",
+              [
+                "None of the four occurs in it, since low needs a marked w and lower needs a marked r",
+                "Lowest is longer than any piece in the vocabulary",
+                "The pieces are applied from the right, and lowest ends differently",
+                "Lowest was in the corpus, so its positions had already been claimed",
+              ],
+              0,
+              "A merged vocabulary of the same size answers that word in three pieces, because it built the marked est on the way to newest and kept it. Coverage buys pieces outright and buys no rungs, since a rung covers positions its parent already covers and is therefore worth nothing the moment the parent is in.",
+            ),
+            several(
+              "Which of these follow from scoring a candidate against what is still bare?",
+              [
+                "A piece worth 27 at the first turn can be worth nothing at the third",
+                "The order the pieces were chosen in is part of the model rather than an accident of the fit",
+                "Nothing guarantees that a prefix of a chosen piece is also in the vocabulary",
+                "A bare position can always be bought, since single symbols are candidates too",
+              ],
+              [0, 1, 2],
+              "Already chosen pieces are applied first, in the order they were chosen, and a candidate is worth whatever it can still find, so its value only falls. Single symbols are not candidates at all, because the alphabet is in the vocabulary anyway and a single symbol covers nothing that was not already going to be its own token.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. A Hard Problem With a Known Guarantee",
           content: (
             <>
@@ -363,18 +375,14 @@ export default function GreedyCoveragePage() {
                   the best piece first is one way to build a set of k; there are
                   many others, and no reason yet to think the first is the best.
                 </p>
-                <p>
-                  The question is a known one and the answer is that it cannot be
-                  computed. Choosing k sets to cover as much of a universe as
-                  possible is weighted maximum coverage, whose decision form is
-                  the set covering problem on Karp&rsquo;s 1972 list, and no
-                  method is known that answers it exactly without, in the worst
-                  case, examining a number of subsets that grows exponentially in
-                  the number of candidates. The eighteen sentences supply 815
-                  candidates and the rule runs for 69 turns on them, so the exact
-                  answer would mean weighing 815 things taken 69 at a time, which
-                  is not a search anybody runs.
+                <>
+<p>
+                  The question is a known one and the answer is that it cannot be computed. Choosing k sets to cover as much of a universe as possible is weighted maximum coverage, whose decision form is the set covering problem on Karp&rsquo;s 1972 list, and no method is known that answers it exactly without, in the worst case, examining a number of subsets that grows exponentially in the number of candidates.
                 </p>
+                <p>
+                  The eighteen sentences supply 815 candidates and the rule runs for 69 turns on them, so the exact answer would mean weighing 815 things taken 69 at a time, which is not a search anybody runs.
+                </p>
+</>
                 <KeepInMind>
                   The greedy rule is not a shortcut somebody took to save effort
                   on an easy problem. The exact problem is intractable, and every
@@ -383,43 +391,32 @@ export default function GreedyCoveragePage() {
               </SubSection>
 
               <SubSection title="9. What the guarantee promises, and what it does not">
-                <p>
-                  What makes this particular approximation worth building a method
-                  on is that it is not merely a heuristic. Coverage is a monotone
-                  submodular function of a set of pieces, which means two things.
-                  Adding a piece never lowers the coverage, and a piece added to a
-                  larger set never covers more than the same piece added to a
-                  smaller one, since the larger set has already taken some of what
-                  it would have claimed. For any function with those two
-                  properties, the greedy rule run for k turns reaches at least
-                  1 &minus; 1/e of what the best set of k could reach.
+                <>
+<p>
+                  What makes this particular approximation worth building a method on is that it is not merely a heuristic. Coverage is a monotone submodular function of a set of pieces, which means two things. Adding a piece never lowers the coverage, and a piece added to a larger set never covers more than the same piece added to a smaller one, since the larger set has already taken some of what it would have claimed.
                 </p>
+                <p>
+                  For any function with those two properties, the greedy rule run for k turns reaches at least 1 &minus; 1/e of what the best set of k could reach.
+                </p>
+</>
                 <Equation>{"greedy coverage after k turns   ≥   (1 − 1/e) × best coverage any k pieces reach"}</Equation>
-                <p>
-                  That fraction is 0.632, and Feige&rsquo;s 1998 result says no
-                  polynomial method improves on it in general. So the honest
-                  reading of the guarantee is narrow, and it is worth being exact
-                  about, because it is often quoted as though it said more. It is
-                  a worst case over every possible input, so it promises nothing
-                  about a typical corpus. It bounds coverage and says nothing at
-                  all about sequence length, which is the quantity anything reading
-                  the pieces actually pays. And it compares the rule to the best
-                  set of the same size rather than to any absolute standard, so a
-                  problem on which every set is bad has a guarantee that is
-                  satisfied by something bad.
+                <>
+<p>
+                  That fraction is 0.632, and Feige&rsquo;s 1998 result says no polynomial method improves on it in general. So the honest reading of the guarantee is narrow, and it is worth being exact about, because it is often quoted as though it said more. It is a worst case over every possible input, so it promises nothing about a typical corpus.
                 </p>
+                <p>
+                  It bounds coverage and says nothing at all about sequence length, which is the quantity anything reading the pieces actually pays. And it compares the rule to the best set of the same size rather than to any absolute standard, so a problem on which every set is bad has a guarantee that is satisfied by something bad.
+                </p>
+</>
                 <WhyThisWorks title="Where the fraction comes from">
-                  <p>
-                    Let the best set of k pieces cover a total of B. At any point,
-                    the k pieces of that best set together cover at least B minus
-                    whatever the greedy rule has already taken, so at least one of
-                    them covers a kth of that shortfall, and the greedy rule takes
-                    something at least as good. So the shortfall shrinks by a
-                    factor of at least 1 &minus; 1/k every turn, and after k turns
-                    what is left is at most B(1 &minus; 1/k) raised to the k, which
-                    approaches B/e from below. What has been taken is therefore at
-                    least B(1 &minus; 1/e).
+                  <>
+<p>
+                    Let the best set of k pieces cover a total of B. At any point, the k pieces of that best set together cover at least B minus whatever the greedy rule has already taken, so at least one of them covers a kth of that shortfall, and the greedy rule takes something at least as good.
                   </p>
+                  <p>
+                    So the shortfall shrinks by a factor of at least 1 &minus; 1/k every turn, and after k turns what is left is at most B(1 &minus; 1/k) raised to the k, which approaches B/e from below. What has been taken is therefore at least B(1 &minus; 1/e).
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   Submodularity is what the argument rests on, and here it is
@@ -441,18 +438,14 @@ export default function GreedyCoveragePage() {
                   reaches 33.
                 </p>
                 <BestTwoRows />
-                <p>
-                  The best pair, found by enumerating every pair of candidates
-                  rather than by another heuristic, is the two whole words, which
-                  cover all 39 between them. The rule reaches 84.6% of that, which
-                  is comfortably above the 63.2% the theorem allows and still a
-                  real loss, and the loss was locked in by a first move that was
-                  the best available at the time. The cost in the currency that
-                  matters is larger than the cost in coverage. Under the two pieces
-                  the rule chose, the six word occurrences read as 15 pieces, since
-                  costly comes apart as cost, then l, then a marked y. Under the
-                  best pair they read as 6, one per word.
+                <>
+<p>
+                  The best pair, found by enumerating every pair of candidates rather than by another heuristic, is the two whole words, which cover all 39 between them. The rule reaches 84.6% of that, which is comfortably above the 63.2% the theorem allows and still a real loss, and the loss was locked in by a first move that was the best available at the time.
                 </p>
+                <p>
+                  The cost in the currency that matters is larger than the cost in coverage. Under the two pieces the rule chose, the six word occurrences read as 15 pieces, since costly comes apart as cost, then l, then a marked y. Under the best pair they read as 6, one per word.
+                </p>
+</>
                 <KeepInMind>
                   Greedy choice is optimal at one piece and can be beaten from two
                   onward. Here the shortfall is 6 positions in 39 and 9 pieces in
@@ -495,29 +488,28 @@ export default function GreedyCoveragePage() {
               </SubSection>
 
               <SubSection title="12. The two units on the four words, where I expected a tie">
-                <p>
-                  I had recorded that this was the place the two units part
-                  company, that counting characters would bring est with its mark
-                  up to 4 &times; 9 = 36 and tie it with newest, and that a
-                  lexicographic tie-break would then hand the first turn to the
-                  suffix. Half of that is right. The ending does reach exactly 36
-                  in characters, and so does ewest with its mark. What I had not
-                  done was rescore the winner. Newest with its mark covers seven
-                  characters rather than six, since it ends a word too, so it rises
-                  from 36 to 42 and there is no tie at all.
-                </p>
+                <>
+                  <p>
+                    I originally expected character counting to make the marked ending
+                    tie with newest. That counted the extra end marker for the ending
+                    but forgot to count it for the whole word.
+                  </p>
+                  <Equation>{"marked est, counting characters = 4 × 9 = 36\nmarked newest, counting characters = 7 × 6 = 42"}</Equation>
+                  <p>
+                    There is no tie. The longer word gains from the changed unit too.
+                    The marked ewest candidate also reaches 36, which still leaves it
+                    below newest.
+                  </p>
+                </>
                 <UnitRivals />
-                <p>
-                  The whole run comes out the same four pieces in the same order,
-                  at 42, 21, 20 and 12 rather than 36, 18, 15 and 10. So on this
-                  corpus the unit changes every number and no decision, and the
-                  claim I had written down does not reproduce. The arithmetic of
-                  why is worth following, since it says when the claim would have
-                  been right. Both leading candidates end a word, so both collect
-                  one extra character per occurrence, which is worth 6 to newest
-                  and 9 to the ending. The ending does gain more, and the gap it
-                  had to close was 9, so closing it by 3 leaves it 6 behind.
+                <>
+<p>
+                  The whole run comes out the same four pieces in the same order, at 42, 21, 20 and 12 rather than 36, 18, 15 and 10. So on this corpus the unit changes every number and no decision, and the claim I had written down does not reproduce. The arithmetic of why is worth following, since it says when the claim would have been right.
                 </p>
+                <p>
+                  Both leading candidates end a word, so both collect one extra character per occurrence, which is worth 6 to newest and 9 to the ending. The ending does gain more, and the gap it had to close was 9, so closing it by 3 leaves it 6 behind.
+                </p>
+</>
                 <KeepInMind>
                   Counting characters does not, on these four words, choose a
                   different piece. A shorter candidate gains more from the change
@@ -535,16 +527,19 @@ export default function GreedyCoveragePage() {
                   each, against stem, stop and stub five times each, which is 96
                   positions and 120 characters.
                 </p>
-                <p>
-                  Counting positions, the opening st wins, two positions across
-                  fifteen occurrences for 30, and the ending est with its mark is
-                  second at three positions across nine occurrences for 27.
-                  Counting characters, st is unchanged at 30, because it sits
-                  inside a word and collects nothing, while est with its mark rises
-                  to 4 &times; 9 = 36 and takes the turn outright. Switch the
-                  widget above to the second corpus to read the two columns
-                  together.
-                </p>
+                <>
+                  <p>
+                    The second corpus exposes a difference that the first did not. The
+                    opening st occurs fifteen times, while the marked ending est occurs
+                    nine times. Counting the end marker as a separate character changes
+                    only the latter’s length.
+                  </p>
+                  <Equation>{"symbol positions: st = 2 × 15 = 30; marked est = 3 × 9 = 27\ncharacters:       st = 2 × 15 = 30; marked est = 4 × 9 = 36"}</Equation>
+                  <p>
+                    The winner changes. Switch to the second corpus in the widget to
+                    compare both columns.
+                  </p>
+                </>
                 <NumberTable
                   headings={["candidate", "occurs", "in positions", "in characters"]}
                   rows={[
@@ -572,6 +567,60 @@ export default function GreedyCoveragePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "What exactly does the 1 − 1/e guarantee promise?",
+              [
+                "That after k turns the rule reaches at least 0.632 of what the best set of k pieces could reach",
+                "That the rule covers at least 0.632 of every position in the corpus",
+                "That the resulting text is at most 1/0.632 times the shortest reading possible",
+                "That the rule is within 0.632 of the best set on a typical corpus",
+              ],
+              0,
+              "It is a worst case over every possible input, so it promises nothing about a typical corpus, and it compares the rule to the best set of the same size rather than to any absolute standard, so a problem on which every set is bad has a guarantee satisfied by something bad. It also bounds coverage and says nothing about sequence length, which is the quantity anything reading the pieces actually pays.",
+            ),
+            several(
+              "Coverage is a monotone submodular function of a set of pieces. What do those properties say here?",
+              [
+                "Adding a piece never lowers the coverage",
+                "A piece added to a larger set never covers more than the same piece added to a smaller one",
+                "The bound they give is on how long the resulting text will be",
+                "The greedy rule is therefore optimal at every size",
+              ],
+              [0, 1],
+              "The larger set has already taken some of what the piece would have claimed, and here that is simply the fact that a position can only be covered once. The two properties buy a bound and not optimality, since greedy choice is optimal at one piece and can be beaten from two onward. And the bound is on coverage against the best coverage of the same size. Nothing on the page bounds sequence length, which is what anything reading the pieces pays.",
+            ),
+            choice(
+              "On costing and costly, three times each, the rule spends two pieces and reaches 33 of the 39 positions. What does the best pair do?",
+              [
+                "Covers all 39, and reads the six word occurrences in 6 pieces against the rule’s 15",
+                "Covers all 39, and reads them in 15 pieces as well",
+                "Covers 36, and reads them in 9 pieces",
+                "Covers 33, so the rule was already optimal",
+              ],
+              0,
+              "The best pair, found by enumerating every pair of candidates rather than by another heuristic, is the two whole words. The rule reaches 84.6% of that coverage, comfortably above the 63.2% the theorem allows and still a real loss, and the cost in the currency that matters is larger than the cost in coverage.",
+            ),
+            trueFalse(
+              "Counting characters rather than positions makes the marked ending est tie with newest on the four words.",
+              false,
+              "That was the expectation written down first, and it counted the extra end marker for the ending while forgetting it for the whole word. Both candidates end a word, so newest gains 6 and the ending gains 9, and since the gap to close was 9, closing it by 3 leaves the ending 6 behind at 36 against 42.",
+            ),
+            choice(
+              "Where does the unit genuinely change what gets bought?",
+              [
+                "On test, rest and best against stem, stop and stub, where the opening st and the marked ending est swap places",
+                "On the four words, where the whole run comes out in a different order",
+                "Nowhere, since the extra character is added to every candidate alike",
+                "On the eighteen sentences, where the first turn changes hands",
+              ],
+              0,
+              "The extra character goes to word-final candidates only, so a flip needs a word-final candidate close behind a word-internal one. Counting positions the run is st at 30 then the marked est at 27; counting characters it is the marked est at 36 then st at 30, and both vocabularies hold both pieces in the opposite order, which matters because the order is what encoding replays.",
+            ),
+        ],
         },
         {
           title: "Part 5. The Vocabulary This Produces, and What It Costs",
@@ -670,16 +719,14 @@ export default function GreedyCoveragePage() {
               </SubSection>
 
               <SubSection title="17. What the held-out sentence costs, which is where this is worse">
-                <p>
-                  Switch the widget above to the sentence none of the eighteen
-                  contained and the ordering changes hands. Up to 65 tokens
-                  coverage is still ahead, reading the sentence in 35 pieces at 60
-                  where merging needs 39. At 70 they have crossed, 35 against 32,
-                  and merging leads at every larger size, 32 against 28 at 80, 32
-                  against 27 at 100, and 30 against 25 at 121. This is the place on
-                  the page where the method is worse than the one it is offered
-                  against, and the margin is 5 pieces on a sentence of seven words.
+                <>
+<p>
+                  Switch the widget above to the sentence none of the eighteen contained and the ordering changes hands. Up to 65 tokens coverage is still ahead, reading the sentence in 35 pieces at 60 where merging needs 39. At 70 they have crossed, 35 against 32, and merging leads at every larger size, 32 against 28 at 80, 32 against 27 at 100, and 30 against 25 at 121.
                 </p>
+                <p>
+                  This is the place on the page where the method is worse than the one it is offered against, and the margin is 5 pieces on a sentence of seven words.
+                </p>
+</>
                 <NumberTable
                   headings={["vocabulary", "corpus, by coverage", "corpus, by merging", "sentence, by coverage", "sentence, by merging"]}
                   rows={[
@@ -844,16 +891,14 @@ export default function GreedyCoveragePage() {
                   should be either.
                 </p>
                 <LengthCeiling />
-                <p>
-                  At the same 100 tokens, allowing pieces of any length reads the
-                  corpus in 296 pieces and the held-out sentence in 32. Capping at
-                  five symbols reads the corpus in 324 and the sentence in 28,
-                  which is 28 pieces worse on the corpus and 4 better on the
-                  sentence, and it cuts the rows spent on words seen once from 10 to
-                  2. Capping at three goes too far in that direction, 384 and 29.
-                  Past eight the ceiling stops binding at all, since the pieces the
-                  rule wanted were shorter than that anyway.
+                <>
+<p>
+                  At the same 100 tokens, allowing pieces of any length reads the corpus in 296 pieces and the held-out sentence in 32. Capping at five symbols reads the corpus in 324 and the sentence in 28, which is 28 pieces worse on the corpus and 4 better on the sentence, and it cuts the rows spent on words seen once from 10 to 2.
                 </p>
+                <p>
+                  Capping at three goes too far in that direction, 384 and 29. Past eight the ceiling stops binding at all, since the pieces the rule wanted were shorter than that anyway.
+                </p>
+</>
                 <KeepInMind>
                   The longest piece allowed is a real dial and the objective is
                   silent about it. On this corpus one setting is best for the text
@@ -901,6 +946,223 @@ export default function GreedyCoveragePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            trueFalse(
+              "On the corpus the pieces were chosen from, coverage reads the text in fewer pieces at every size tried.",
+              true,
+              "It reads the 133 word occurrences in 475 pieces at 60 tokens against merging’s 531, 296 against 344 at 100, and 267 against 295 at 121. The page also says that result is not evidence of anything, since covering that corpus is precisely what the rule was maximising and this is the objective reporting on itself.",
+            ),
+            choice(
+              "On the held-out sentence the ordering changes hands at 70 tokens. What is doing that?",
+              [
+                "Coverage buys length and no rungs, so expect matches nothing it holds and comes back as six single letters",
+                "Coverage ran out of positions at 121 tokens and stopped learning",
+                "Merging’s pieces are longer on average, so more of them match",
+                "The sentence holds words the corpus does not, which coverage refuses to encode",
+              ],
+              0,
+              "The corpus uses expected and never the bare stem, so coverage buys expecte and merging keeps exp and ec as rungs it climbed. Across the running sentence 24 of coverage’s 32 pieces are bare single symbols against 17 of merging’s 27, and merging’s mean piece is the shorter of the two at 3.04 characters against 3.77.",
+            ),
+            trueFalse(
+              "The objective has no way to prefer a piece that is a stem or a syllable over one that is not.",
+              true,
+              "It is a statement about positions and counts and has no representation of a prefix, a stem or a syllable, which is why it buys expecte, the stem with the first letter of its ending glued on, and analys, analysis with its last two letters missing. Both are correct answers to the question asked, and the information that would settle them is not in the objective at all, so supplying it means maximising something else.",
+            ),
+            choice(
+              "Why can the rule not tell a word of eight symbols seen once from a pair of symbols seen four times?",
+              [
+                "Length and frequency enter the objective as a product, so they substitute for one another freely",
+                "Both are refused, since a candidate has to occur at least twice",
+                "The rule only ever scores the longest candidate available",
+                "The two cover the same positions as each other",
+              ],
+              0,
+              "Both are worth 8, and nothing in the objective says a piece seen once is worth less. Of the 72 distinct words in the eighteen sentences 54 occur exactly once, and at 100 tokens 10 of the 48 rows coverage chose are whole words seen once, where merging spends none at any of those sizes because its stopping condition refuses a pair seen fewer than twice.",
+            ),
+            several(
+              "At 100 tokens, capping the longest piece allowed at five symbols did which of these?",
+              [
+                "Read the corpus in 324 pieces rather than 296",
+                "Read the held-out sentence in 28 pieces rather than 32",
+                "Cut the rows spent on words seen once from 10 to 2",
+                "Left one setting best for the text the pieces were chosen from and a different one best for the held-out sentence",
+              ],
+              [0, 1, 2, 3],
+              "The cap trades 28 pieces on the corpus for 4 on the sentence, so it does not improve both readings at once, and nothing in the objective says where the limit should be. Capping at three goes too far at 384 and 29, and past eight the ceiling stops binding at all, since the pieces the rule wanted were shorter than that anyway. It is the disagreement between the corpus and the held-out sentence again, arriving through a different door.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Covering, Falling Short and Capping With the Library",
+          practice: [
+            exercise(
+              "Cover the four words, and merge them to the same size",
+              ["Part 2 ran the rule on low, lower, newest and widest and watched four turns cover all 79 positions, 36, then 18, then 15, then 10, with the fit stopping at 16 tokens however many were asked for. Fit the four words asking for 40, and print the rows reached and each chosen piece with what it covered. Then fit merging at 16 rows with its byte rows switched off, and under both print what the corpus costs in pieces and how lower and lowest are cut.", "The lesson gives lowest as six single symbols against three under merging. What it does not give is what the four-word corpus itself costs under a merged vocabulary of the same 16 rows."],
+              `from oop_ml import BytePairEncoding, GreedyCoverageTokenizer
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+
+covering = GreedyCoverageTokenizer(vocabulary_size=40).fit(corpus)
+merging = BytePairEncoding(vocabulary_size=16, byte_fallback=False).fit(corpus)
+# Print the rows the covering fit reached, then each chosen piece with the
+# positions it covered and the total covered.
+# For each fit print what the four texts cost in pieces, then the pieces of
+# lower and of lowest and how many there are.`,
+              `from oop_ml import BytePairEncoding, GreedyCoverageTokenizer
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+
+covering = GreedyCoverageTokenizer(vocabulary_size=40).fit(corpus)
+merging = BytePairEncoding(vocabulary_size=16, byte_fallback=False).fit(corpus)
+print(f"asked 40, reached {covering.vocabulary.n_tokens}")
+for chosen in covering.chosen_pieces:
+    print(f"  {chosen.piece} covers {chosen.coverage}")
+print(f"  total {covering.chosen_pieces.total_coverage}")
+
+for label, model in [("coverage", covering), ("merging", merging)]:
+    pieces = sum(model.encode(text).n_tokens for text in corpus)
+    print(f"{label}: corpus {pieces} pieces")
+    for word in ["lower", "lowest"]:
+        cut = model.encode(word).texts
+        print(f"  {word}: {' '.join(cut)} ({len(cut)})")`,
+              `asked 40, reached 16
+  newest</w> covers 36
+  widest</w> covers 18
+  low</w> covers 15
+  lower</w> covers 10
+  total 79
+coverage: corpus 16 pieces
+  lower: lower</w> (1)
+  lowest: l o w e s t</w> (6)
+merging: corpus 48 pieces
+  lower: lo w e r</w> (4)
+  lowest: lo w est</w> (3)`,
+              { hints: ["chosen_pieces is iterable in the order the pieces were chosen, each with a piece and the coverage it had at the moment it was taken, and it has a total_coverage of its own.", "A corpus costs the sum of what each of its texts encodes to, and encode answers an object with an n_tokens and the texts of its pieces.", "Both fits write the end-of-word mark as </w> on a word’s last symbol, so low</w> is the word low and not the first three letters of lower."], check: numberCheck("How many pieces does the four-word corpus cost under merging at 16 rows?", 48, 0, "At 16 rows merging has made four joins, es, est with its mark, lo and ew, and every one is a rung on the way to a word and not a word, so the sixteen word occurrences still cost 48 pieces. Coverage spent the same four rows on the four whole words and reads the corpus in 16, one piece per occurrence. The price is on the other side. Lowest matches none of the four words and comes back as six symbols, where merging’s rungs read it in three.") },
+            ),
+            exercise(
+              "Spend one, two and three pieces on costing and costly",
+              ["Part 3 took costing three times and costly three times, 39 positions, and showed the rule spending two pieces on cost and the ending ing with its mark, reaching 33 and reading the six words in 15 pieces, where the best pair is the two whole words, covering all 39 and reading them in 6. The two words are spelled in nine symbols, so with the stand-in the alphabet takes ten rows, and asking for 11, 12 and 13 rows buys one, two and three pieces.", "Fit at each of the three sizes and print the pieces chosen with what each covered, the total covered, and what the corpus costs in pieces. The lesson stops at two pieces. The third is where coverage and length come apart most plainly."],
+              `from oop_ml import GreedyCoverageTokenizer
+
+corpus = ["costing costing costing", "costly costly costly"]
+
+for size in [11, 12, 13]:
+    model = GreedyCoverageTokenizer(vocabulary_size=size).fit(corpus)
+    # Print how many pieces were chosen, each piece with its coverage, the
+    # total covered out of 39, and the pieces the two texts cost.`,
+              `from oop_ml import GreedyCoverageTokenizer
+
+corpus = ["costing costing costing", "costly costly costly"]
+
+for size in [11, 12, 13]:
+    model = GreedyCoverageTokenizer(vocabulary_size=size).fit(corpus)
+    chosen = ", ".join(f"{piece.piece} {piece.coverage}" for piece in model.chosen_pieces)
+    covered = model.chosen_pieces.total_coverage
+    pieces = sum(model.encode(text).n_tokens for text in corpus)
+    print(f"{model.n_chosen_pieces} chosen: {chosen}")
+    print(f"  covers {covered} of 39, corpus {pieces} pieces")`,
+              `1 chosen: cost 24
+  covers 24 of 39, corpus 21 pieces
+2 chosen: cost 24, ing</w> 9
+  covers 33 of 39, corpus 15 pieces
+3 chosen: cost 24, ing</w> 9, ly</w> 6
+  covers 39 of 39, corpus 12 pieces`,
+              { hints: ["n_chosen_pieces is how many pieces the fit took, and each chosen piece carries the coverage it had when it was taken, so the figures fall from one piece to the next.", "total_coverage adds those up, and the corpus cost is the sum of encode(text).n_tokens over the two texts."], check: numberCheck("How many pieces does the corpus cost once the rule has chosen three?", 12, 0, "The third piece is the ending ly with its mark, worth 6, and with it every one of the 39 positions is covered, exactly as the best pair covers them. The six words still cost 12 pieces, two each, where the two whole words cost 6. Full coverage only says no symbol is left standing alone. It does not say how many pieces the covering is made of, which is why Part 3 insists that the guarantee bounds coverage and says nothing about how long the text will be.") },
+            ),
+            exercise(
+              "Move the ceiling on how long a piece may be",
+              ["Part 6 fitted the eighteen sentences at 100 tokens under several ceilings on the longest piece. With no ceiling the corpus costs 296 pieces and the held-out sentence 32, and capped at five symbols they cost 324 and 28, against merging’s 344 and 27. Fit coverage with the ceiling at 5, at 6 and at its default of 16, and merging once, all at 100 rows. For each print the first four pieces chosen, what the corpus and the sentence cost, and how the word expect is cut.", "The setting at six is one the lesson’s prose does not quote, and the cut of expect says why the sentence gets shorter where it does."],
+              `from oop_ml import BytePairEncoding, GreedyCoverageTokenizer
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for ceiling in [5, 6, 16]:
+    model = GreedyCoverageTokenizer(vocabulary_size=100, max_piece_length=ceiling).fit(sentences)
+    # Print the ceiling, the first four chosen pieces, the pieces the
+    # eighteen sentences cost, the pieces the sentence costs, and the cut of
+    # the word expect.
+
+merging = BytePairEncoding(vocabulary_size=100, byte_fallback=False).fit(sentences)
+# Print the same three readings under merging.`,
+              `from oop_ml import BytePairEncoding, GreedyCoverageTokenizer
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for ceiling in [5, 6, 16]:
+    model = GreedyCoverageTokenizer(vocabulary_size=100, max_piece_length=ceiling).fit(sentences)
+    first = [chosen.piece for chosen in model.chosen_pieces][:4]
+    corpus_pieces = sum(model.encode(text).n_tokens for text in sentences)
+    print(f"ceiling {ceiling}: first {' '.join(first)}")
+    print(f"  corpus {corpus_pieces}, sentence {model.encode(sentence).n_tokens}, "
+          f"expect: {' '.join(model.encode('expect').texts)}")
+
+merging = BytePairEncoding(vocabulary_size=100, byte_fallback=False).fit(sentences)
+corpus_pieces = sum(merging.encode(text).n_tokens for text in sentences)
+print(f"merging: corpus {corpus_pieces}, sentence {merging.encode(sentence).n_tokens}, "
+      f"expect: {' '.join(merging.encode('expect').texts)}")`,
+              `ceiling 5: first he</w> analy re expec
+  corpus 324, sentence 28, expect: expec t</w>
+ceiling 6: first he</w> analys re expect
+  corpus 304, sentence 32, expect: e x p e c t</w>
+ceiling 16: first he</w> analys expecte re
+  corpus 296, sentence 32, expect: e x p e c t</w>
+merging: corpus 344, sentence 27, expect: exp ec t</w>`,
+              { hints: ["The ceiling is max_piece_length at construction, counted in symbols, and 16 is its default, which the lesson found stops binding past eight.", "chosen_pieces is iterable in the order the pieces were taken, so the first four are the first four turns.", "Each coverage fit takes a couple of seconds, since every run of symbols up to the ceiling is a candidate at every turn."], check: numberCheck("How many pieces does the corpus cost with the longest piece capped at six symbols?", 304, 0, "Six sits between the lesson’s two settings on the corpus, 304 against 296 with no ceiling and 324 at five, and it buys nothing on the sentence, which still costs 32. The cut of expect shows why. At six the rule buys the six unmarked symbols of expect out of expected, and the word expect ends in a marked t, so that piece does not occur in it and the word comes back as six letters. At five it buys expec, which is inside both, and the word costs two pieces. Those four pieces are the whole of the sentence’s gain from 32 to 28.") },
+            ),
+          ],
         },
       ]}
     />

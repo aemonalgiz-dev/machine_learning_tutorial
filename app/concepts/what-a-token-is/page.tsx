@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -19,7 +22,7 @@ import { VocabularyGrowthChart } from "@/components/widgets/VocabularyGrowthChar
 export const metadata: Metadata = {
   title: "What a Token Is · oop_ml",
   description:
-    "Text goes in and a list of whole numbers comes out. What stands between them is a vocabulary, and the two things it has to promise.",
+    "Turn text into pieces with numeric IDs, and examine what those IDs preserve.",
 };
 
 const link =
@@ -28,8 +31,12 @@ const link =
 export default function WhatATokenIsPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["what-a-token-is"]}
+      technicalStart="Part 2. What a Vocabulary Promises"
+      openingTitle="How Can Our Models Read Language?"
+      playgroundIntro="Compare the text pieces with their IDs, then inspect the decoded text. An exact round trip depends on which information the scheme retained."
       title="What a Token Is"
-      tagline="Text goes in, whole numbers come out, and a vocabulary is what stands between them."
+      tagline="Turn text into pieces with numeric IDs, and examine what those IDs preserve."
       prerequisites={
         <>
           Nothing before this, beyond the one fact every page in the rest of
@@ -43,117 +50,56 @@ export default function WhatATokenIsPage() {
           ends with, in a different way.
         </>
       }
-      history={
-        <>
-          <p>
-            Shannon, working at Bell Labs on how much a telephone line could
-            carry, had to make the choice this page is about before he could
-            measure anything. His 1948 paper &ldquo;A Mathematical Theory of
-            Communication&rdquo; builds imitations of English, first by
-            drawing letters one at a time in proportion to how often they
-            appear, then by drawing each letter from the one before it, and
-            then by drawing whole words the same way, and the samples read more
-            like English as the unit gets larger. In &ldquo;Prediction and
-            Entropy of Printed English&rdquo; in 1951 he settled on an alphabet
-            of twenty-seven symbols, the twenty-six letters and the space, and
-            to get there he threw away capitals and every mark of punctuation.
-            That was not carelessness. He needed a finite set of units before he
-            could count anything at all, and the price of a finite set is that
-            some of the writing does not survive it.
-          </p>
-          <p>
-            The price came due once the units were words. Henry Kučera and
-            Nelson Francis assembled the Brown corpus at Brown University in
-            1967, a million words of American prose gathered so that counts
-            could be taken from it, and a list of every distinct form in it is
-            exactly the kind of vocabulary this page describes. Harold Heaps set
-            out in 1978, in <em>Information Retrieval, Computational and
-            Theoretical Aspects</em>, what happens to such a list as more text
-            arrives. The number of distinct forms grows as a power of the number
-            of words read, so it rises more and more slowly and never levels
-            off, and a list drawn from any finite amount of text is therefore
-            incomplete for the next sentence. The growth curve in Part 3 is that
-            claim measured on six sentences rather than on a million words.
-          </p>
-          <p>
-            Thirty years later that incompleteness was still the thing breaking
-            machine translation. A system with a fixed word vocabulary could not
-            emit a word it had never been trained on, so every rare name and
-            every long compound came out as one reserved symbol meaning
-            &ldquo;something else&rdquo;. Rico Sennrich, Barry Haddow and
-            Alexandra Birch, at Edinburgh in 2016, wrote &ldquo;Neural Machine
-            Translation of Rare Words with Subword Units&rdquo; and answered it
-            by refusing to make whole words the unit, borrowing a compression
-            algorithm Philip Gage had published in 1994 to cut words into
-            reusable pieces instead. Almost every scheme in the rest of this
-            section is a descendant of that decision, and none of them can be
-            read without the vocabulary this page sets out.
-          </p>
-          <p>
-            The page answers six questions in order. Why can a model not read
-            writing at all, and what has to happen first? What is a token, and
-            what does its number mean? What does a vocabulary promise, and what
-            does its size cost? What happens at a piece it has never seen, and
-            what does each possible answer cost? What survives a round trip
-            through the numbers, and what cannot? And what must any complete
-            scheme settle, so that the next thirty-one pages can be compared
-            against each other?
-          </p>
-        </>
-      }
+
       playground={<TokenStripExplorer />}
       sections={[
         {
           title: "Part 1. Writing Is Not Numbers",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. One sentence, and what a model can do with it">
                 <p>
-                  We will carry one sentence through this whole page, and
-                  through the thirty-one pages after it, because it is short
-                  enough to check by hand and awkward enough to break things.
+                  We will use one sentence throughout this page and revisit it
+                  in the later tokenization lessons. It contains several useful
+                  boundary cases while remaining short enough to inspect.
                 </p>
                 <Equation>
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
                 </Equation>
                 <p>
-                  It has a full stop that ends an abbreviation rather than the
-                  sentence, an apostrophe standing in for two missing letters, a
-                  hyphen joining two words into one, and a prefix on the front
-                  of a word that some schemes later in this section will cut off
-                  and others will not. Every one of those is a place where two
-                  reasonable people would disagree about where one piece stops
-                  and the next begins.
+                  The full stop after Dr. belongs to an abbreviation. The
+                  apostrophe is part of a contraction. A hyphen joins low-cost,
+                  and re- appears at the start of re-analysis. A splitting rule
+                  must decide how to handle each case. We will begin with spaces
+                  alone so those decisions are easy to see.
                 </p>
                 <p>
-                  A model can do nothing with it as it stands. Everything a
-                  model does is arithmetic, and there is no product defined
-                  between the letter D and a weight, no sum of a hyphen and a
-                  bias, no derivative of a full stop. Before any of the
-                  machinery on the rest of this site can touch the sentence,
-                  somebody has to turn it into a run of whole numbers, and that
-                  somebody is not the model. The turning happens once, before
-                  the training starts, and if it decides that{" "}
+                  The numerical layers on this site need numbers in place of
+                  those text pieces. The tokenizer supplies the IDs, and an
+                  embedding layer can then look up trainable vectors. If{" "}
                   <span className="font-mono">re-analysis.</span> and{" "}
                   <span className="font-mono">re-analysis</span> are two
-                  unrelated things, as the scheme in Part 3 does, then no amount
-                  of training will let the model see that they are the same
-                  word.
+                  separate vocabulary entries, as the scheme in Part 3 makes
+                  them, they start with separate identities. A model can still
+                  learn a relationship between their vectors from context, but
+                  the token IDs do not provide that relationship themselves.
                 </p>
                 <KeepInMind>
-                  The decision that turns writing into numbers is made before
-                  the model exists and is never revised by it. A model can learn
-                  around a bad choice here; it cannot undo one.
+                  In these examples, we fix the tokenizer before training the
+                  model. Information that tokenization actually discards cannot
+                  be recovered exactly from the IDs alone. Giving related forms
+                  different IDs is a different issue: their relationship can
+                  still be learned from suitable examples.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="2. A piece of text with a number beside it">
                 <p>
-                  The whole of the machinery is one small idea. Cut the writing
-                  into pieces, and hand each piece a whole number that always
-                  means that piece. A token is a piece paired with its number,
-                  and a run of tokens is what one text became.
+                  A token is one piece produced by the chosen scheme. For
+                  inspection, the SDK keeps that piece beside its ID. The
+                  encoding records these tokens in the order they occur, so a
+                  reader can check which text each ID represents.
                 </p>
                 <Equation>
                   {"token       =  ( a piece of text ,  a whole number )\n" +
@@ -185,10 +131,9 @@ export default function WhatATokenIsPage() {
                   </p>
                 </WorkedExample>
                 <KeepInMind>
-                  A token is the pair, and it is worth keeping both halves in
-                  hand. The number is what the model reads and the piece is what
-                  a person can check, so a report that gives only one of them
-                  cannot be argued with.
+                  The playground displays both the text piece and its ID.
+                  The model uses the ID, while the displayed piece lets us
+                  verify the segmentation and vocabulary lookup.
                 </KeepInMind>
               </SubSection>
 
@@ -206,12 +151,13 @@ export default function WhatATokenIsPage() {
                   neighbouring numbers hold pieces that happen to share a first
                   letter. That produces both kinds of accident at once. The
                   pieces at 29 and 30 are <span className="font-mono">not</span>{" "}
-                  and <span className="font-mono">notes</span>, which share four
+                  and <span className="font-mono">notes</span>, which share three
                   letters and nothing else, and they are as close as two
                   numbers can be. The word{" "}
                   <span className="font-mono">The</span> is at 6 and the
                   word <span className="font-mono">the</span> is at 43, the same
-                  word with one letter capitalised, thirty-seven places apart.
+                  word with one letter capitalised, at a different position in
+                  the vocabulary.
                 </p>
                 <WhyThisWorks title="Why the ordering can be anything at all">
                   <p>
@@ -230,12 +176,12 @@ export default function WhatATokenIsPage() {
                   Nothing about likeness can be read off these numbers, in
                   either direction, since 29 and 30 hold unrelated words while 6
                   and 43 hold the same one. Giving the pieces positions that do
-                  carry likeness is a separate job, and it is what the last nine
-                  pages of this section are about.
+                  carry useful relationships is a separate job, introduced in
+                  the lessons on word vectors and embedding layers.
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. What a Vocabulary Promises",
@@ -363,11 +309,23 @@ export default function WhatATokenIsPage() {
                 </p>
                 <p>
                   Take a row of 768 numbers, which is an ordinary width. The
-                  whole-word table here has 48 entries and so needs 36,864
-                  numbers; the character table has 38 and needs 29,184. At the
-                  scale of six sentences neither figure means much. What matters
-                  is which of the two grows, and how fast, once the text is not
-                  six sentences, which is section 11.
+                  whole-word table here has 48 entries and the character table
+                  has 38, and each entry needs one such row, so the count of
+                  numbers a model has to learn is the count of entries
+                  multiplied by the width of a row.
+                </p>
+                <Equation>
+                  {"whole words        48 × 768  =  36,864 numbers\n" +
+                    "single characters  38 × 768  =  29,184 numbers\n" +
+                    "\n" +
+                    "36,864 / 29,184  ≈  1.26"}
+                </Equation>
+                <p>
+                  The whole-word table asks for about a quarter more numbers
+                  than the character table, and none of them has been learned
+                  yet. At the scale of six sentences neither figure means much.
+                  What matters is which of the two grows, and how fast, once the
+                  text is not six sentences, which is section 11.
                 </p>
                 <InAModel>
                   <p>
@@ -389,6 +347,55 @@ export default function WhatATokenIsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "Two token numbers that sit next to each other hold pieces that are related.",
+              false,
+              "A token number is a position in a list, and the only question it answers is which entry this piece is. The list here is alphabetical, so 29 and 30 hold not and notes, which share three letters and nothing else, while 6 and 43 hold the same word with one letter capitalised. Nearness between two numbers is an accident of the ordering in both directions.",
+            ),
+            choice(
+              "Why does any one-to-one assignment of numbers to pieces work equally well?",
+              [
+                "The model looks each number up in a table of learned rows and reads the row, so the number is only an address",
+                "The model learns the order of the vocabulary while it trains",
+                "Alphabetical order already puts related pieces near each other",
+                "The embedding layer sorts the rows before reading them",
+              ],
+              0,
+              "Shuffle the numbers and shuffle the rows with them and the model is unchanged. What must not change is the assignment itself once something has been trained against it, since rearranging one without the other points every piece at somebody else’s row.",
+            ),
+            choice(
+              "The word was appears twice in one sentence and is 47 both times, while The is 6 and the is 43. What does that show about the first promise?",
+              [
+                "It is about pieces being identical as strings, and says nothing about their being the same word",
+                "It is broken by the capital, which the table ought to have folded together",
+                "It holds within one sentence and not across sentences",
+                "It holds for words and not for punctuation",
+              ],
+              0,
+              "Identical strings get identical numbers, and that is the whole of it. Whether two strings a reader would call one word come out identical is decided by the cutting rule rather than by the table.",
+            ),
+            choice(
+              "A row of 768 numbers is an ordinary width. What do the 48 entries of the whole-word table cost in parameters?",
+              ["768", "29,184", "36,864", "47,616"],
+              2,
+              "Every entry gets a row of its own, so 48 entries at 768 numbers each come to 36,864. The character table of 38 entries needs 29,184, so a model over the whole-word table carries roughly a quarter more before it has read a word. It also carries a quarter more in the final layer, which has to pick one entry out of all of them.",
+            ),
+            several(
+              "Once something has been trained against a table, which of these change what every number means?",
+              [
+                "Adding an entry",
+                "Removing an entry",
+                "Reordering the list",
+                "Encoding a sentence the table has not seen before",
+              ],
+              [0, 1, 2],
+              "Fixed means fixed. Adding, removing and reordering each move pieces to numbers whose rows were learned for other pieces, and there is no signal that it has happened beyond the answers quietly getting worse. Encoding new text is only using the table, and a piece it does not hold is the separate question Part 4 takes up.",
+            ),
+        ],
         },
         {
           title: "Part 3. Where the Pieces Come From",
@@ -482,12 +489,23 @@ export default function WhatATokenIsPage() {
                   <p>
                     A model that lets every position read every other position
                     does a piece of work for each pair of positions, so its cost
-                    grows with the square of the sequence length. Seven times as
-                    many numbers is roughly fifty times the work by that
-                    measure, on a sentence a person reads in a second. Any fixed
-                    limit on how much text a model can hold at once is also a
-                    limit in numbers rather than in words, so the same limit
-                    holds seven times less writing under the character scheme.
+                    grows with the square of the sequence length. Counting the
+                    pairs for the running sentence under each rule shows what
+                    that does to a ratio of seven.
+                  </p>
+                  <Equation>
+                    {"pairs of positions, by character   51 × 51  =  2,601\n" +
+                      "pairs of positions, by word          7 × 7  =     49\n" +
+                      "\n" +
+                      "2,601 / 49  ≈  53"}
+                  </Equation>
+                  <p>
+                    Seven times as many numbers is roughly fifty times the work
+                    by that measure, on a sentence a person reads in a second.
+                    Any fixed limit on how much text a model can hold at once is
+                    also a limit in numbers rather than in words, so the same
+                    limit holds seven times less writing under the character
+                    scheme.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -507,18 +525,14 @@ export default function WhatATokenIsPage() {
                   each.
                 </p>
                 <VocabularyGrowthChart />
-                <p>
-                  After the first sentence the character table holds 25 entries
-                  and the whole-word table holds 8, so the character table is
-                  three times the size. It stays larger through the fourth
-                  sentence, 37 against 30. Between the fourth and the fifth the
-                  lines cross, and by the sixth they are 38 against 48. The
-                  character line has almost stopped moving, because the six
-                  sentences use 375 characters in all and draw them from an
-                  alphabet that was nearly complete after four of them. The
-                  word line has not slowed at all, and it is still adding eight
-                  entries a sentence at the sixth.
+                <>
+<p>
+                  After the first sentence the character table holds 25 entries and the whole-word table holds 8, so the character table is three times the size. It stays larger through the fourth sentence, 37 against 30. Between the fourth and the fifth the lines cross, and by the sixth they are 38 against 48. The character line has almost stopped moving, because the six sentences use 375 characters in all and draw them from an alphabet that was nearly complete after four of them.
                 </p>
+                <p>
+                  The word line has not slowed at all, and it is still adding eight entries a sentence at the sixth.
+                </p>
+</>
                 <WhyThisWorks title="Why one line flattens and the other does not">
                   <p>
                     The set of characters a language writes with is finite and
@@ -541,6 +555,49 @@ export default function WhatATokenIsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Part 3",
+          quiz: [
+            trueFalse(
+              "Measured on these six sentences, the character table is the larger of the two for four of them.",
+              true,
+              "After the first sentence it holds 25 entries against the whole-word table’s 8, and it stays larger through the fourth at 37 against 30. The lines cross between the fourth and the fifth and finish at 38 against 48, so the claim that character tables are smaller is a claim about the limit rather than about any particular corpus.",
+            ),
+            choice(
+              "Why has the character line almost stopped moving by the sixth sentence while the word line is still adding eight entries a sentence?",
+              [
+                "The set of characters a language writes with is finite and small, where compounds, names, numbers and inflections keep arriving",
+                "The six sentences were chosen to use the same letters throughout",
+                "The character table hands back a stand-in rather than growing",
+                "Spaces and punctuation count as characters, which fills that table at once",
+              ],
+              0,
+              "The 375 characters of these six sentences are drawn from an alphabet that was nearly complete after four of them. Any list of words drawn from a finite corpus is missing the next sentence’s words, which is the growth Heaps described, rising as a power of the amount of text read and slowing without ever flattening.",
+            ),
+            choice(
+              "The running sentence is 51 numbers under the character rule and 7 under the whole-word rule. For a model that lets every position read every other position, what does that ratio cost?",
+              [
+                "Roughly fifty times the work, since the work grows with the square of the sequence length",
+                "About seven times the work",
+                "Nothing, since the work depends on the size of the table",
+                "Roughly seven times the parameters",
+              ],
+              0,
+              "A little over seven times as many numbers is roughly fifty times the work by that measure, on a sentence a person reads in a second. A fixed limit on how much text a model holds at once is a limit in numbers rather than in words, so the same limit holds seven times less writing under the character scheme.",
+            ),
+            several(
+              "Cutting only at spaces leaves which of these as separate entries in the table of 47?",
+              [
+                "re-analysis and re-analysis.",
+                "The and the",
+                "low and cost",
+                "did and n’t",
+              ],
+              [0, 1],
+              "The full stop rides along on the last word and a capital is a different character, so both of those pairs are two entries, as She and she are. Three pairs out of 47 entries hold one word twice over, and each of those six entries has a row learned from half the text it should have had. A hyphen and an apostrophe are not spaces, so low-cost and didn’t each arrive as one piece.",
+            ),
+        ],
         },
         {
           title: "Part 4. The Piece It Has Never Seen",
@@ -718,6 +775,32 @@ export default function WhatATokenIsPage() {
                   in length, 71 numbers against the character table&rsquo;s 69,
                   because the two accented letters take two bytes each.
                 </p>
+                <WorkedExample title="Counting the same sentence both ways">
+                  <p>
+                    A plain English letter, digit, space or mark is stored as
+                    one byte. A letter outside that basic set is stored as
+                    more than one, and the two accented letters here take two
+                    each.
+                  </p>
+                  <Equation>
+                    {"Dr. Alvarez didn't expect the low-cost re-analysis in Ångström units.\n" +
+                      "\n" +
+                      "characters        69\n" +
+                      "Å                 two bytes, 195 and 133\n" +
+                      "ö                 two bytes, 195 and 182\n" +
+                      "everything else   67 characters, one byte each\n" +
+                      "\n" +
+                      "bytes             67 + 2 + 2  =  71"}
+                  </Equation>
+                  <p>
+                    The character table counts 69 pieces and has no entry for
+                    two of them. The byte table counts 71, and every one of the
+                    71 is a value from 0 to 255, which the table held before
+                    it had read anything. Nothing was added to it for this
+                    sentence, and nothing would be added for a sentence in any
+                    other script.
+                  </p>
+                </WorkedExample>
                 <KeepInMind>
                   Coverage can be made a property of the scheme instead of a
                   property of the corpus, and the price is then paid in sequence
@@ -967,6 +1050,273 @@ export default function WhatATokenIsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 to 6",
+          quiz: [
+            choice(
+              "What does the reserved entry at number 0 carry about the word it stood in for?",
+              [
+                "Nothing at all, not its length, not its letters, not whether it was a name or a verb",
+                "A blurred version of the word",
+                "Its first letter, which the alphabetical table preserves",
+                "Enough to tell one unseen word from another when the numbers are read back",
+              ],
+              0,
+              "Two seven-word sentences, each using six words the table holds and one it does not, come out as the identical seven numbers, so a model shown either is shown the same input. Reading the numbers back gives the same sentence for both, with the same gap in the same place. On a word table built from five sentences that gap covered 8 of the next sentence’s 12 words.",
+            ),
+            several(
+              "Which answers to the unseen piece does the page name?",
+              [
+                "Reserve one entry meaning something else, which spends the distinction between everything it stands in for",
+                "Refuse to encode, which makes the piece the caller’s problem",
+                "Make the pieces small enough that the case cannot arise, and pay in sequence length",
+                "Add the unseen piece to the table when it is met",
+              ],
+              [0, 1, 2],
+              "There is no free answer here, and how a scheme answers is most of that scheme’s character. The byte table is the unreachable case, since its 256 entries spell every text, and it pays 71 numbers against the character table’s 69 on the sentence with two accented letters. Adding the piece when it is met is not available, because adding an entry after anything has been trained against the table changes what every number means.",
+            ),
+            choice(
+              "Which of these round-trip failures is a fact about the rule rather than about the corpus?",
+              [
+                "The whole-word rule gives back single spaces everywhere and no line break",
+                "The character rule substitutes for a line break these six sentences never contained",
+                "The character rule substitutes for two accented letters the six sentences never used",
+              ],
+              0,
+              "The character rule could round trip both texts perfectly had its corpus held a line break and an accent, so more text fixes it. The whole-word rule keeps runs of non-space characters and keeps nothing about what lay between them, so the information was discarded at the cut and no amount of text brings it back.",
+            ),
+            trueFalse(
+              "A scheme that folds The and the onto one entry can still fairly describe itself as lossless.",
+              false,
+              "Folding the capitals buys one fewer row of parameters and twice the text to learn it from, and it makes the capital unrecoverable. Normalisation and exact round tripping pull against each other, and a scheme is entitled to choose either, but the honest description says what it discards.",
+            ),
+            trueFalse(
+              "A table of 48 entries owns the numbers 0 to 47, so a model that produces the number 48 has produced something with no piece to decode to.",
+              true,
+              "The number of a piece is its position, and position 48 does not exist in a list of 48. This case has no choice attached, unlike the unseen piece, and it is one a model generating numbers can walk into, since nothing about a generated number guarantees it is in range.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Building the Tables and Reading Them Back",
+          practice: [
+            exercise(
+              "Build the whole-word table and number two sentences",
+              ["Build the table Part 2 reads from. Count the pieces the six sentences give when they are cut at spaces, sort the distinct ones alphabetically, and put the stand-in in front so that it sits at number 0. Then print the numbers the running sentence and the fifth sentence go in as.", "The running sentence should come out as the seven numbers of section 2, and the fifth as the thirteen of section 5 with the at 43 in both. Then count how many of the entries the six sentences use exactly once, which the page does not print and which is what section 7 means by a row learned from very little text."],
+              `from oop_ml import Corpus, Vocabulary, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rule = WhitespacePreTokenizer()
+counts = Corpus.of(notebook).word_counts(rule)
+
+# Build the vocabulary with "[UNK]" first and the sorted distinct pieces
+# after it, and print how many distinct pieces and how many entries there
+# are. Print the numbers of the first and the fifth sentence. Then print
+# how many entries were met exactly once, and how often the was met.`,
+              `from oop_ml import Corpus, Vocabulary, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rule = WhitespacePreTokenizer()
+counts = Corpus.of(notebook).word_counts(rule)
+
+table = Vocabulary(["[UNK]", *sorted(counts.words)], unknown_token="[UNK]")
+print(f"{counts.n_words} distinct pieces, {table.n_tokens} entries")
+
+for sentence in (notebook[0], notebook[4]):
+    numbers = table.ids_of(rule.split(sentence).texts)
+    print(" ".join(str(number) for number in numbers))
+
+once = sum(counts.count_of(word) == 1 for word in counts.words)
+print(f"entries met once: {once} of {counts.n_words}")
+print(f"the is met {counts.count_of('the')} times")`,
+              `47 distinct pieces, 48 entries
+3 2 14 19 43 28 32
+6 15 47 40 44 26 47 27 42 43 17 39 20
+entries met once: 39 of 47
+the is met 9 times`,
+              { hints: ["The counts know their distinct pieces as words, and sorted puts those in alphabetical order with the capitals first, which is the order the page’s numbers assume.", "Vocabulary takes the list of entries and, by keyword, which of them is the unknown_token. Putting the stand-in first in the list is what makes it number 0.", "The rule’s split answers a collection whose texts are the pieces alone, and the table’s ids_of turns a sequence of pieces into their numbers.", "count_of answers how many times one piece occurred, so the entries met once are a sum over the distinct pieces of whether that count equals one."], check: numberCheck("How many of the 47 pieces do the six sentences use exactly once?", 39, 0.0, "Thirty-nine of the 47 entries occur once in the six sentences, so 39 of the 48 rows a model would carry are each learned from a single occurrence, while the is met nine times. That is section 7’s point about a rare entry, and it is the usual shape of a word table, a few entries seen often and most of them seen hardly at all.") },
+            ),
+            exercise(
+              "Grow both tables one sentence at a time",
+              ["Section 11 fed the six sentences in one at a time and measured both tables after each. Do the same. After each sentence, fit the character scheme on the sentences read so far and count the distinct space-delimited pieces in them, and print the size of each table with its stand-in counted.", "The first, fourth and sixth rows should be the 25 against 8, 37 against 30 and 38 against 48 the page quotes. The page says the lines cross between the fourth and the fifth sentence without printing the fifth row, so read off what the whole-word table holds there."],
+              `from oop_ml import CharacterTokenizer, Corpus, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rule = WhitespacePreTokenizer()
+
+# For each size from 1 to 6, take the first size sentences, fit a
+# character tokenizer with "[UNK]" as its unknown token on them, count
+# their distinct pieces under the rule, and print the two table sizes.
+# The whole-word table is the distinct pieces and one stand-in.`,
+              `from oop_ml import CharacterTokenizer, Corpus, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rule = WhitespacePreTokenizer()
+
+for size in range(1, len(notebook) + 1):
+    read = notebook[:size]
+    characters = CharacterTokenizer(unknown_token="[UNK]").fit(read)
+    words = Corpus.of(read).word_counts(rule)
+    character_table = characters.vocabulary.n_tokens
+    word_table = words.n_words + 1
+    print(f"{size} sentences  characters {character_table}  whole words {word_table}")`,
+              `1 sentences  characters 25  whole words 8
+2 sentences  characters 29  whole words 15
+3 sentences  characters 35  whole words 23
+4 sentences  characters 37  whole words 30
+5 sentences  characters 37  whole words 40
+6 sentences  characters 38  whole words 48`,
+              { hints: ["A slice of the list up to size is the sentences read so far, and both the tokenizer’s fit and Corpus.of take that list as it is.", "A fitted tokenizer carries its table as vocabulary, and the table’s n_tokens counts every entry, the stand-in included.", "The word counts know n_words, the number of distinct pieces. The page’s whole-word table has one reserved entry on top of those, so add one."], check: numberCheck("How many entries does the whole-word table hold after the fifth sentence?", 40, 0.0, "After five sentences the whole-word table holds 40 entries against the character table’s 37, which is the first row where it is the larger. The character table gained nothing from the fifth sentence, since its alphabet was nearly complete after four, while the word table gained ten there and eight more at the sixth, the line section 11 says has not slowed.") },
+            ),
+            exercise(
+              "Two sentences, one run of numbers, and a table that refuses",
+              ["Part 4 put two sentences to the whole-word table that differ in one word the six sentences never used. Encode both against the table with a stand-in, print the numbers, and glue the pieces the numbers name back together with single spaces. Then build the same table without a stand-in and put the first sentence to it.", "The two runs of numbers should be identical, with 0 in the second place, and both should read back as the same sentence with the same gap. The table without a stand-in should refuse, and its refusal should name the piece it could not place."],
+              `from oop_ml import Corpus, UnknownTokenError, Vocabulary, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rule = WhitespacePreTokenizer()
+words = sorted(Corpus.of(notebook).word_counts(rule).words)
+texts = [
+    "The calibration drift was larger than expected.",
+    "The temperature drift was larger than expected.",
+]
+
+# Build one table with "[UNK]" in front as its unknown token and one from
+# the words alone. For each text print its numbers under the first table
+# and the text those numbers read back as. Then ask the second table for
+# the numbers of the first text, and print the refusal it raises.`,
+              `from oop_ml import Corpus, UnknownTokenError, Vocabulary, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rule = WhitespacePreTokenizer()
+words = sorted(Corpus.of(notebook).word_counts(rule).words)
+texts = [
+    "The calibration drift was larger than expected.",
+    "The temperature drift was larger than expected.",
+]
+
+substituting = Vocabulary(["[UNK]", *words], unknown_token="[UNK]")
+closed = Vocabulary(words)
+
+for text in texts:
+    numbers = substituting.ids_of(rule.split(text).texts)
+    print(" ".join(str(number) for number in numbers))
+    print(" ".join(substituting.tokens_of(numbers)))
+
+try:
+    closed.ids_of(rule.split(texts[0]).texts)
+except UnknownTokenError as refusal:
+    print(f"refused: {refusal}")`,
+              `6 0 15 47 27 42 20
+The [UNK] drift was larger than expected.
+6 0 15 47 27 42 20
+The [UNK] drift was larger than expected.
+refused: token 'calibration' is not in this vocabulary of 47, which has no unknown token to fall back on`,
+              { hints: ["A Vocabulary given no unknown_token has no entry to fall back on, so the same list of words without the stand-in is the table that refuses.", "ids_of turns pieces into numbers and tokens_of turns numbers back into pieces, and the whole-word scheme’s glue is a single space, so the reading back is one join.", "The refusal is an UnknownTokenError. Catch it by that name around the call on the second table, and print the exception itself, which is its own sentence."] },
+            ),
+            exercise(
+              "Put two awkward texts to the character table and the byte table",
+              ["Fit the character scheme on the six sentences and build the byte scheme, which is fitted on nothing. Encode the sentence with two accented letters and the running sentence with a doubled space and a line break under each, and print how many numbers each text became, how many of them are the stand-in, and whether decoding the numbers gives back the text exactly.", "The character table should substitute twice on the first text and once on the second, as sections 16 and 19 say, and the byte table should come back exact on both. Read off how many numbers the accented sentence costs under bytes."],
+              `from oop_ml import ByteTokenizer, CharacterTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+texts = {
+    "accented": "Dr. Alvarez didn't expect the low-cost re-analysis in Ångström units.",
+    "respaced": "Dr.  Alvarez didn't expect\\nthe low-cost re-analysis.",
+}
+schemes = {
+    "characters": CharacterTokenizer(unknown_token="[UNK]").fit(notebook),
+    "bytes": ByteTokenizer(),
+}
+
+# For each text and each scheme, encode the text, count the tokens whose
+# text is "[UNK]", decode the numbers and compare with the text, and print
+# one line. Then print how many entries the byte table holds.`,
+              `from oop_ml import ByteTokenizer, CharacterTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+texts = {
+    "accented": "Dr. Alvarez didn't expect the low-cost re-analysis in Ångström units.",
+    "respaced": "Dr.  Alvarez didn't expect\\nthe low-cost re-analysis.",
+}
+schemes = {
+    "characters": CharacterTokenizer(unknown_token="[UNK]").fit(notebook),
+    "bytes": ByteTokenizer(),
+}
+
+for label, text in texts.items():
+    for name, scheme in schemes.items():
+        encoding = scheme.encode(text)
+        stand_ins = sum(token.text == "[UNK]" for token in encoding)
+        exact = scheme.decode(encoding.ids) == text
+        print(f"{label}  {name:10s}  {encoding.n_tokens} numbers  {stand_ins} stand-ins  exact {exact}")
+
+print(f"the byte table holds {schemes['bytes'].vocabulary.n_tokens} entries")`,
+              `accented  characters  69 numbers  2 stand-ins  exact False
+accented  bytes       71 numbers  0 stand-ins  exact True
+respaced  characters  52 numbers  1 stand-ins  exact False
+respaced  bytes       52 numbers  0 stand-ins  exact True
+the byte table holds 256 entries`,
+              { hints: ["Both schemes answer encode with an encoding that knows n_tokens and its ids, and iterating over it gives tokens that each carry text and token_id.", "A substituted piece is a token whose text is the stand-in’s own spelling, so counting the tokens whose text equals \"[UNK]\" counts the substitutions.", "decode takes the encoding’s ids and answers a string. Compare that string with the text using ==, which is the test section 17 asks for in place of reading the output."], check: numberCheck("How many numbers does the accented sentence become under the byte table?", 71, 0.0, "The sentence is 69 characters, and 67 of them are one byte each while the two accented letters are two bytes each, which comes to 71. The character table spends 69 numbers and loses both letters, where the byte table spends two more and loses nothing, because its 256 entries were complete before it read any text. That is section 16’s trade, coverage paid for in length.") },
+            ),
+          ],
         },
       ]}
     />

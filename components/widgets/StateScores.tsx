@@ -157,13 +157,9 @@ export function StateScores() {
           );
         })}
       </div>
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        The left grid of each pair is what was put in and the amber grid is what
-        came back. The bar is the score, running left from the upright line as
-        the machine finds the grid more plausible and right as it finds it less.
-        Every grid started within a tenth of every other before any learning, so
-        the whole spread here was made by the five hundred passes.
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">The left grid is the supplied pattern and the amber grid is its reconstruction. Compare those patterns separately from the energy bar: reconstruction and energy are different measurements.</p><p className="mt-3 text-xs text-slate-500 dark:text-slate-400">The bar moves left for a lower energy and right for a higher one. For this fixed fitted model, lower energy corresponds to greater relative probability. The patterns began with scores within a tenth of one another; the displayed separation developed over the five hundred training passes.</p>
+</>
     </div>
   );
 }

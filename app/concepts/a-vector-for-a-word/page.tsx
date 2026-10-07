@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -25,14 +28,18 @@ import { WordSpaceScatter } from "@/components/widgets/WordSpaceScatter";
 export const metadata: Metadata = {
   title: "A Vector for a Word · oop_ml",
   description:
-    "Replace a word's number with a handful of coordinates, and questions that could not be asked of a number become arithmetic.",
+    "Represent words with vectors so their relationships can be compared numerically.",
 };
 
 export default function WordVectorPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["a-vector-for-a-word"]}
+      technicalStart="Part 2. Nearness Measured As An Angle"
+      openingTitle="A Word's ID Cannot Tell Us What It Resembles"
+      playgroundIntro="Compare the nearest vectors for a selected word. Inspect both the similarity values and the source text that gave those relationships meaning."
       title="A Vector for a Word"
-      tagline="Give every word a position instead of a number, so that nearness becomes something we can measure."
+      tagline="Represent words with vectors so their relationships can be compared numerically."
       prerequisites={
         <>
           The tokenizing pages end with a lookup table from a piece of text to a
@@ -42,68 +49,14 @@ export default function WordVectorPage() {
           seen a dot product written out once.
         </>
       }
-      history={
-        <>
-          <p>
-            The idea that a word can be placed, and not merely listed, comes
-            out of linguistics before it comes out of computing. Zellig Harris,
-            at the University of Pennsylvania, argued in &ldquo;Distributional
-            Structure&rdquo; in 1954 that the environments a word occurs in are
-            themselves the evidence about it, so that two words differing in
-            meaning differ in the company they keep, and J. R. Firth put the
-            same claim in a sentence in London in 1957 when he wrote that you
-            shall know a word by the company it keeps. Neither of them had a
-            way to compute anything from that, and the claim sat as a
-            methodological principle for a decade.
-          </p>
-          <p>
-            Gerard Salton&rsquo;s group at Cornell made it arithmetic while
-            building the SMART retrieval system, and in &ldquo;A vector space
-            model for automatic indexing&rdquo; in 1975 Salton, Wong and Yang
-            wrote documents as vectors over a vocabulary and scored two of them
-            by the cosine of the angle between them, which is where the measure
-            this page uses comes from. Their problem was a practical one, since a
-            retrieval system asked to match a query against a collection has to
-            rank its answers, and counting the words two texts share rewards a
-            long text for being long, where an angle does not. Susan Dumais, George Furnas, Thomas Landauer,
-            Richard Harshman and Scott Deerwester, at Bellcore, turned the same
-            table around in &ldquo;Indexing by latent semantic analysis&rdquo;
-            in 1990, reading a row where the retrieval work had read a column, so
-            that the vector belonged to a word, and squeezing the table down so that two words
-            never used in the same document could still come out near each
-            other. That is the first form of what this page calls a position
-            for a word.
-          </p>
-          <p>
-            The arithmetic that made the idea famous outside the field came much
-            later. Tomas Mikolov, Wen-tau Yih and Geoffrey Zweig reported in 2013
-            that in the vector spaces their models produced, the difference
-            between two vectors carried a relation, so that adding the
-            difference between man and woman to king landed near queen, and the
-            observation was startling because nothing in the training had asked
-            for it. Omer Levy and Yoav Goldberg, at Bar-Ilan University, looked
-            hard at that result in 2014, named the usual form of the calculation
-            3CosAdd, and pointed out something the popular accounts had left
-            out, which is that the words in the question are struck off the list
-            of candidate answers before the answer is read. Their point matters
-            for this page, since the exclusion is a convention laid over the
-            arithmetic, and the answer changes when it is dropped. The
-            six questions the page works through, in order, are these. What can
-            a word&rsquo;s number tell us, and what can it not? What does giving
-            a word a position mean, and what does one of its coordinates mean?
-            How should two positions be compared? What questions does a position
-            make possible? What is an analogy, done as arithmetic? And what can
-            one position per word not represent?
-          </p>
-        </>
-      }
+
       playground={<WordPositionPlayground />}
       sections={[
         {
           title: "Part 1. A Number That Only Names",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. What a word’s number can and cannot say">
                 <p>
                   A tokenizer finishes by handing every piece of text a number,
@@ -116,16 +69,10 @@ export default function WordVectorPage() {
                   before we accept it.
                 </p>
                 <p>
-                  The corpus this page works on is twenty-four short documents,
-                  twelve of them about cooking and twelve about sailing, and
-                  they hold twenty-three distinct words between them. The
-                  numbers are dealt out commonest first, so a number does carry
-                  exactly one fact about a word, which is roughly how common it
-                  was. What it does not carry is anything about what the word
-                  means. Over all 253 pairs of words, the correlation between
-                  how far apart two words&rsquo; numbers are and how alike they
-                  later turn out to be is &minus;0.0852, which is small enough
-                  that the scatter of those pairs shows no slope at all.
+                  The corpus this page works on is twenty-four short documents, twelve of them about cooking and twelve about sailing, and they hold twenty-three distinct words between them. The numbers are dealt out commonest first, so a number does carry exactly one fact about a word, which is roughly how common it was. What it does not carry is anything about what the word means.
+                </p>
+                <p>
+                  Over all 253 pairs of words, the correlation between how far apart two words&rsquo; numbers are and how alike they later turn out to be is &minus;0.0852, which is small enough that the scatter of those pairs shows no slope at all.
                 </p>
                 <WordSphere />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -264,7 +211,7 @@ export default function WordVectorPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Nearness Measured As An Angle",
@@ -315,6 +262,17 @@ export default function WordVectorPage() {
                   {"cosine(a, b) = (a · b) / (‖a‖ ‖b‖),   where a · b = Σᵢ aᵢ bᵢ"}
                 </Equation>
                 <p>
+                  The two bars around a letter stand for the length of its
+                  arrow, which is the ordinary distance from the origin out to
+                  the point, the square root of the sum of its squared
+                  coordinates. For <em>sail</em>, whose four numbers Part 1
+                  gave, the length comes out a little under one.
+                </p>
+                <Equation>
+                  {"‖a‖ = √( Σᵢ aᵢ² )\n" +
+                    "‖sail‖ = √( 0.5369² + 0.5223² + 0.2690² + (−0.2075)² ) ≈ √0.6765 ≈ 0.8225"}
+                </Equation>
+                <p>
                   Three things about that formula are worth stating before we
                   use it. It is symmetric, so the order of the two words does
                   not matter. It is entirely blind to length, so doubling every
@@ -362,20 +320,26 @@ export default function WordVectorPage() {
                   caption="Five words placed by hand. Nothing was fitted here; the positions were chosen so the answers are obvious."
                 />
                 <WorkedExample title="Three cosines, worked">
-                  <p>
-                    For <em>king</em> and <em>queen</em> the dot product is 1 x
-                    2 + 0 x 0 = 2, and the lengths are 1 and 2, so the cosine is
-                    2 / (1 x 2) = 1.0000. They lie in exactly the same
-                    direction, and the fact that one is twice as far out makes
-                    no difference.
-                  </p>
-                  <p>
-                    For <em>king</em> and <em>man</em> the dot product is 1 x 0
-                    + 0 x 1 = 0, so the cosine is 0.0000 whatever the lengths
-                    are. For <em>man</em> and <em>woman</em> the dot product is
-                    0 x 0 + 1 x 3 = 3, the lengths are 1 and 3, and the cosine is
-                    3 / 3 = 1.0000 again.
-                  </p>
+                  <>
+                    <p>
+                      Take king and queen first. Their vectors have lengths one and two.
+                      Multiply matching coordinates and add them to get the dot product,
+                      then divide by both lengths.
+                    </p>
+                    <Equation>{"king · queen = 1 × 2 + 0 × 0 = 2\ncosine similarity = 2 / (1 × 2) = 1.0000"}</Equation>
+                    <p>
+                      They point in exactly the same direction. The fact that one is
+                      twice as long makes no difference to cosine similarity.
+                    </p>
+                  </>
+                  <>
+                    <p>
+                      King and man point at right angles. Man and woman point in the
+                      same direction. The same calculation distinguishes those two
+                      cases.
+                    </p>
+                    <Equation>{"king · man = 1 × 0 + 0 × 1 = 0\ncosine(king, man) = 0 / (1 × 1) = 0.0000\n\nman · woman = 0 × 0 + 1 × 3 = 3\ncosine(man, woman) = 3 / (1 × 3) = 1.0000"}</Equation>
+                  </>
                   <p>
                     Now compare that with the ruler. <em>king</em> and{" "}
                     <em>man</em>, which are at right angles, are 1.4142 apart.{" "}
@@ -384,6 +348,15 @@ export default function WordVectorPage() {
                     angle do not merely differ in the fine detail here, they put
                     the pairs in opposite orders.
                   </p>
+                  <p>
+                    Both gaps come straight from the distance formula of
+                    section 5, with the two positions of each pair subtracted
+                    coordinate by coordinate.
+                  </p>
+                  <Equation>
+                    {"distance(king, man) = √( (1 − 0)² + (0 − 1)² ) = √2 ≈ 1.4142\n" +
+                      "distance(man, woman) = √( (0 − 0)² + (1 − 3)² ) = √4 = 2.0000"}
+                  </Equation>
                 </WorkedExample>
                 <KeepInMind>
                   On a table small enough to draw, the angle and the ruler
@@ -414,6 +387,29 @@ export default function WordVectorPage() {
                   <em>sail</em> and <em>mast</em> do, and the question is
                   whether the extra reach is a fact about meaning.
                 </p>
+                <WorkedExample title="The cosine of sail and rope, from their coordinates">
+                  <p>
+                    Part 1 gave the four numbers of <em>sail</em>. Here they
+                    are again with the four of <em>rope</em> under them. The
+                    dot product is the four products of matching coordinates
+                    added up, and the cosine is that sum divided by both
+                    lengths.
+                  </p>
+                  <Equation>
+                    {"sail = (0.5369, 0.5223, 0.2690, −0.2075)     length 0.8225\n" +
+                      "rope = (0.5948, 0.6715, 0.3906, −0.4364)     length 1.0713\n\n" +
+                      "sail · rope ≈ 0.3193 + 0.3507 + 0.1051 + 0.0906 = 0.8657\n" +
+                      "cosine ≈ 0.8657 / (0.8225 × 1.0713) ≈ 0.9825"}
+                  </Equation>
+                  <p>
+                    All four products are positive, which is what pointing the
+                    same way looks like in coordinates. Every coordinate of{" "}
+                    <em>rope</em> sits further from zero than the one it is
+                    paired with, and the ruler measures exactly those four
+                    differences, which is where its 0.3046 comes from. The
+                    cosine divides by 1.0713 and so never charges for them.
+                  </p>
+                </WorkedExample>
                 <AngleAgainstGap word="sail" choices={["sail", "oven", "the", "crew"]} />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   The same word&rsquo;s neighbours ranked twice. Rows in pink
@@ -477,6 +473,54 @@ export default function WordVectorPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "A token number here carries exactly one fact about a word, roughly how common it was.",
+              true,
+              "The numbers are dealt out commonest first, so the number does record that much. What it does not record is anything about meaning. Over all 253 pairs of words the correlation between how far apart two numbers are and how alike the words turn out to be is −0.0852, which is small enough that the scatter shows no slope at all.",
+            ),
+            several(
+              "Which of these hold of cosine similarity?",
+              [
+                "The order of the two words does not matter",
+                "Doubling every coordinate of one word leaves the answer unchanged",
+                "It has no value for a word whose position sits exactly at the origin",
+                "A word at the origin scores zero against every other word",
+              ],
+              [0, 1, 2],
+              "The measure is symmetric, and dividing by both lengths is what removes length from the answer. A point at the origin has no direction to compare, so the comparison is undefined. Answering zero there would be a claim that the word stands at right angles to everything, which is a much stronger statement than the truth, and the correct behaviour is to refuse.",
+            ),
+            choice(
+              "Standing at sail, the two readings of near disagree about first place. Which neighbour wins under each?",
+              [
+                "rope by angle and mast by the ruler",
+                "mast by angle and rope by the ruler",
+                "rope under both readings",
+                "mast under both readings",
+              ],
+              0,
+              "By angle rope leads at 0.9825 against 0.9445 for mast, and by the ruler the order reverses, mast at a gap of 0.2750 against 0.3046 for rope. The whole of the difference is length. sail is 0.8225 long and mast 0.8281, so mast sits at almost the same distance from the origin, while rope at 1.0713 is well beyond it and the ruler charges it for the extra reach.",
+            ),
+            trueFalse(
+              "On this table the more often a word was used, the longer its position came out.",
+              false,
+              "That is the usual expectation and the measurement runs the other way here, at a correlation of −0.6284 between use count and length. The three commonest words, used eight times each, have the three shortest positions at 0.3708, 0.3667 and 0.5770. A word that turns up beside everything is not surprising beside anything, and these coordinates were scored on surprise.",
+            ),
+            choice(
+              "What is the argument for comparing two words by the angle rather than by the ruler?",
+              [
+                "The angle is cheaper to compute than the distance",
+                "Length is answering a question about how ordinary a word is, which is not the question being asked",
+                "The ruler cannot be computed when a word sits at the origin",
+                "The ruler is blind to how often a word was used, and the angle is not",
+              ],
+              1,
+              "Length carries something real, and on this table what it carries is frequency and distinctiveness rather than meaning. Dividing it out is how it is stopped from contributing to an answer it has no business in. It is the angle, not the ruler, that fails at the origin, and it is the length the ruler reads that tracks use count, at −0.6284 here, so blindness to frequency is the angle’s property and not the ruler’s.",
+            ),
+        ],
         },
         {
           title: "Part 3. The Questions A Position Makes Possible",
@@ -645,15 +689,18 @@ export default function WordVectorPage() {
               </SubSection>
 
               <SubSection title="14. What all of this costs">
-                <p>
-                  The table is dense, so the cost of holding it is the number of
-                  words times the number of coordinates. Here that is 23 times
-                  4, which is 92 numbers, against the 23 the numbering scheme
-                  needed. The ratio is the number of coordinates, and it does
-                  not improve with a larger vocabulary, since a table of fifty
-                  thousand words at three hundred coordinates each would come to
-                  fifteen million numbers by the same multiplication.
-                </p>
+                <>
+                  <p>
+                    A dense embedding table stores one row per word and one value per
+                    coordinate.
+                  </p>
+                  <Equation>{"example table = 23 words × 4 coordinates = 92 values\nlarger table = 50,000 × 300 = 15,000,000 values"}</Equation>
+                  <p>
+                    Compared with storing one ID per word, the number of coordinates
+                    determines the storage multiplier. Increasing the vocabulary does
+                    not reduce that multiplier.
+                  </p>
+                </>
                 <p>
                   Answering a question costs the whole table as well. A
                   nearest-neighbour query here scores the word against all 22
@@ -804,16 +851,10 @@ export default function WordVectorPage() {
                   answer itself, and the answer carries no information at all.
                 </p>
                 <p>
-                  This happens because the word that was added first is a whole
-                  unit of the sum, and the other two frequently cancel a good
-                  part of each other. The published accounts of the analogy
-                  result usually say that the question words are excluded and
-                  leave it at that, so I measured how often it actually matters.
-                  Over every ordered triple of the twenty-three words, which is
-                  10,626 questions, the top answer without exclusion is one of
-                  the three words already in the question 4,118 times, a share
-                  of 0.3875. That is often and not always, and it is worth
-                  saying so plainly instead of repeating the stronger claim.
+                  This happens because the word that was added first is a whole unit of the sum, and the other two frequently cancel a good part of each other. The published accounts of the analogy result usually say that the question words are excluded and leave it at that, so I measured how often it actually matters.
+                </p>
+                <p>
+                  Over every ordered triple of the twenty-three words, which is 10,626 questions, the top answer without exclusion is one of the three words already in the question 4,118 times, a share of 0.3875. That is often and not always, and it is worth saying so plainly instead of repeating the stronger claim.
                 </p>
                 <p>
                   The split within those 4,118 is the more interesting half.
@@ -878,6 +919,54 @@ export default function WordVectorPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "A high cosine between two words means the texts often used them near each other.",
+              false,
+              "sail and rope score 0.9825 and never occur within two positions of each other anywhere in the twenty-four documents, so their direct company is exactly 0. What they share is the company they each keep with crew and deck. Two words are placed together when they are used in the same kind of position, whether or not they were ever used in the same breath.",
+            ),
+            choice(
+              "sail and boat do occur together twice and still score only 0.3638. Why?",
+              [
+                "Two occurrences are too few for the window of two positions to notice",
+                "boat is a rarer word, so its position is longer and the cosine is charged for that",
+                "The heaviest company boat keeps is harbour and anchor, neither of which sail ever meets in these texts",
+                "boat belongs to neither topic, so it sits between the two caps",
+              ],
+              2,
+              "The score reads the company each word keeps and never whether they keep each other’s. boat is placed by harbour and anchor, and sail never once appears near either, so the two end up pointing in different directions. Length is divided out by the cosine, so it cannot be the explanation.",
+            ),
+            several(
+              "Which of these questions has no answer on this table?",
+              [
+                "The position of kettle, a word the texts never contained",
+                "The cosine between a word and a position sitting exactly at the origin",
+                "The cosine between two words that never once occurred together",
+                "The cosine between a cooking word and a sailing word",
+              ],
+              [0, 1],
+              "A word the texts never contained has no row to read, since the whole content of a position is what the fit learned about that word. A point at the origin has no direction, so the angle does not exist and the honest response is to refuse. The other two have perfectly ordinary answers, 0.9825 for one pair that never met and −0.0518 for sail against oven.",
+            ),
+            choice(
+              "Why are the three words of an analogy question struck out before the answer is read?",
+              [
+                "Their cosines against the sum are undefined, so they cannot be ranked",
+                "Left in, one of them takes first place in 4,118 of the 10,626 questions, nearly always one of the two that were added",
+                "The arithmetic cannot be carried out until they are removed",
+                "They are the three longest words in the table, and length would decide the answer",
+              ],
+              1,
+              "That is a share of 0.3875, so leaving the question words in changes 39% of the answers, which is often rather than always. The word added first is a whole unit of the sum and the other two frequently cancel a good part of each other, which is why 4,048 of the 4,118 return a word that was added and only 70 the word that was subtracted. The exclusion belongs to how the analogy is evaluated and not to the arithmetic, and length was already taken out when each word was reduced to a unit vector.",
+            ),
+            trueFalse(
+              "The analogy what is to sugar as sail is to flour carries the topic across and misses the designed answer, which is wind.",
+              true,
+              "The sum lands nearest rope at 0.7847, then deck at 0.7323 and mast at 0.7210, all of them sailing words, so the arithmetic moved the answer into the right topic and did not carry the position within the cycle. Twenty-three words fitted to a hundred and forty-four word occurrences do not determine the differences between positions finely enough for that, and the page reports the miss rather than arranging a demonstration to succeed.",
+            ),
+        ],
         },
         {
           title: "Part 5. No Coordinate Means Anything On Its Own",
@@ -1081,16 +1170,10 @@ export default function WordVectorPage() {
                   particular documents were composed.
                 </p>
                 <p>
-                  Scale changes the size of the effect and not its nature. A
-                  much larger collection replaces the artefacts of a designed
-                  corpus with the habits of whoever wrote the collection, and a
-                  habit that shows up consistently in the writing shows up as a
-                  small angle between the words involved. What makes this
-                  awkward is that the resulting opinion is not held anywhere in
-                  particular. It is distributed across every coordinate of every
-                  affected word, so there is no entry to correct, and Part 5 has
-                  already shown why editing coordinates directly is not a
-                  coherent operation.
+                  Scale changes the size of the effect and not its nature. A much larger collection replaces the artefacts of a designed corpus with the habits of whoever wrote the collection, and a habit that shows up consistently in the writing shows up as a small angle between the words involved. What makes this awkward is that the resulting opinion is not held anywhere in particular.
+                </p>
+                <p>
+                  It is distributed across every coordinate of every affected word, so there is no entry to correct, and Part 5 has already shown why editing coordinates directly is not a coherent operation.
                 </p>
                 <DerivationTable
                   expressionHeading="the case"
@@ -1137,6 +1220,494 @@ export default function WordVectorPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            trueFalse(
+              "When a table has taken on a habit of the texts it was fitted to, there is no single entry that could be corrected afterwards.",
+              true,
+              "The opinion is spread across every coordinate of every affected word, and Part 5 showed that a coordinate means nothing on its own, so editing one is not a coherent operation. sail and boat at 0.3638 is the mechanism at a size that can be checked. It is wrong about English and right about these twenty-four documents, where the heaviest company boat keeps is harbour at 6.0 and anchor at 3.0 and sail never once appears near either, and nothing in the fit was mistaken.",
+            ),
+            choice(
+              "One thing does change under the turn. What is it, and why is it not a contradiction?",
+              [
+                "The lengths of the longest words move slightly, because rotation is only approximate in floating point",
+                "The full neighbour ranking survives for 21 of the 23 words, and the two exceptions swap words whose cosines are equal to sixteen digits",
+                "Two words change their nearest word, because their positions crossed during the turn",
+                "The cosines between words of different topics move, because those are the smallest and so the least stable",
+              ],
+              1,
+              "A rotation preserves every dot product, so every length and every cosine stays where it was, the largest change over all 253 pairs being below 1e-15, while sail’s first coordinate swings from 0.5369 to −0.5223. What moved is which of two exactly tied words the sort happened to put first, and a tie has to be broken somehow. All 23 words keep the same nearest word, so nothing about the comparison itself changed, which is the whole point of the demonstration.",
+            ),
+            several(
+              "Which of these does the rotation rule out?",
+              [
+                "Reading a coordinate as a named feature of a word",
+                "Comparing a word’s third coordinate in one table against its third coordinate in another",
+                "Adding one table’s position for a word to another table’s position for it",
+                "Comparing two words by cosine within a single table",
+              ],
+              [0, 1, 2],
+              "A turn destroys any reading of a coordinate without changing anything a reader could measure, and it leaves two tables written along axes that have nothing to do with each other. The cosine within one table is exactly what the turn preserves, so it is the quantity that survives and the one a comparison has to be phrased in.",
+            ),
+            choice(
+              "Every use of pan in the cooking texts and of rope in the sailing texts was respelled sheet. What did the fit then report?",
+              [
+                "sheet took two positions, one per sense",
+                "sheet reached only 0.8635 against its best neighbour, and its pull towards the two topics became nearly equal",
+                "sheet was left out of the table, since its company was contradictory",
+                "sheet kept pan’s position, since cooking words are commoner in the corpus",
+              ],
+              1,
+              "pan scored 0.9981 against its nearest word and rope 0.9825, and the merged spelling reaches 0.8635 with a neighbour list alternating between the two topics. Its mean cosine is 0.3504 to the cooking words and 0.4318 to the sailing ones, where an ordinary cooking word like dough scores 0.4015 to its own topic and 0.1481 to the other. Nothing in the fit reported that anything had gone wrong.",
+            ),
+            trueFalse(
+              "Two fits of the same twenty-four documents from different random starts disagreed about the coordinates but agreed about the neighbour lists.",
+              false,
+              "They share only 28 of the 69 nearest-word places, and the second fit separated the topics more sharply than the first. Both did find the shape that is there, putting two words of one topic nearer each other than two of different topics. The cause is that twenty-four documents do not pin down a table well enough for a random start to be washed out.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Asking The Table With The Library",
+          practice: [
+            exercise(
+              "Fit the twenty-four documents and stand at sail",
+              ["Fit PointwiseMutualInformationEmbeddings to the twenty-four documents with a window of two and four numbers per word, which is the fit behind every figure on the page, and take the table it answers with. Print how many words and coordinates it holds, the four numbers of sail, and the five words nearest sail. Then print the cosine of each of six named pairs to four places.", "The position should be the one section 3 prints, the neighbours should be the list of section 10, and the first five pairs should be the figures of sections 11 and 12. The sixth pair, boat and harbour, is one the page describes and never scores."],
+              `from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+pairs = [
+    ("sail", "rope"),
+    ("sail", "boat"),
+    ("sail", "flour"),
+    ("sail", "oven"),
+    ("oven", "bake"),
+    ("boat", "harbour"),
+]
+
+# Fit the embedder with window=2 and dimension=4 and keep its embeddings.
+# Print n_words and dimension, the values of vector_of("sail") rounded to
+# four places, and the word and similarity of each of most_similar("sail").
+
+# For each pair, print the two words and their similarity to four places.`,
+              `from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+pairs = [
+    ("sail", "rope"),
+    ("sail", "boat"),
+    ("sail", "flour"),
+    ("sail", "oven"),
+    ("oven", "bake"),
+    ("boat", "harbour"),
+]
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+print(f"{space.n_words} words, {space.dimension} numbers each")
+print(f"sail = {[round(float(value), 4) for value in space.vector_of('sail').values]}")
+for neighbour in space.most_similar("sail", n_results=5):
+    print(f"  {neighbour.word:5s} {neighbour.similarity:.4f}")
+
+for first, second in pairs:
+    print(f"{first} and {second}: {space.similarity(first, second):.4f}")`,
+              `23 words, 4 numbers each
+sail = [0.5369, 0.5223, 0.269, -0.2075]
+  rope  0.9825
+  mast  0.9445
+  deck  0.9421
+  crew  0.9361
+  and   0.6946
+sail and rope: 0.9825
+sail and boat: 0.3638
+sail and flour: 0.0661
+sail and oven: -0.0518
+oven and bake: 0.9267
+boat and harbour: 0.9919`,
+              { hints: ["The embedder is constructed with window and dimension, fit takes the list of documents as plain strings and answers the fitted embedder, and its embeddings property is the table of positions.", "The table knows n_words and dimension. vector_of takes a word and answers its position, whose values are the coordinates, and most_similar takes a word and n_results and answers neighbours that each carry a word and a similarity.", "similarity takes two words and answers their cosine as a plain number."], check: numberCheck("What is the cosine between boat and harbour, to four places?", 0.9919, 5e-05, "The sailing documents step through their ten words in a cycle, and harbour is the word after boat in it, so the two are seen beside nearly the same words, and a cosine reads the company two words each keep. sail sits two steps before boat in the same cycle and scores only 0.3638 against it, which section 11 traced to boat being placed by harbour and anchor.") },
+            ),
+            exercise(
+              "Rank by the angle and by the ruler",
+              ["Standing at sail, print for rope, mast, deck and crew the cosine, the ordinary distance between the two positions, and the length of the neighbour’s position, each to four places. Then double every coordinate of rope and print its cosine with sail and its distance from sail again.", "The four rows should be section 8, with rope first by the angle and mast first by the ruler, and the lengths beside them saying why. Section 6 says that doubling a word’s coordinates changes nothing about its cosine. See what the same doubling does to the ruler, which is a figure the page does not give."],
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+from oop_ml.core.natural_language_processing.embeddings.vectors import (
+    cosine_similarity,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+sail = np.asarray(space.vector_of("sail").values)
+
+# For rope, mast, deck and crew, take the word's values as an array and
+# print space.similarity("sail", word), the norm of sail minus the array,
+# and the norm of the array.
+
+# Double rope's array. Print cosine_similarity(sail, doubled) and the norm
+# of sail minus doubled.`,
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+from oop_ml.core.natural_language_processing.embeddings.vectors import (
+    cosine_similarity,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+sail = np.asarray(space.vector_of("sail").values)
+
+for word in ("rope", "mast", "deck", "crew"):
+    other = np.asarray(space.vector_of(word).values)
+    cosine = space.similarity("sail", word)
+    print(f"{word}: cosine {cosine:.4f}, gap {np.linalg.norm(sail - other):.4f}, length {np.linalg.norm(other):.4f}")
+
+doubled = 2 * np.asarray(space.vector_of("rope").values)
+print(f"rope doubled: cosine {cosine_similarity(sail, doubled):.4f}")
+print(f"rope doubled: gap {np.linalg.norm(sail - doubled):.4f}")`,
+              `rope: cosine 0.9825, gap 0.3046, length 1.0713
+mast: cosine 0.9445, gap 0.2750, length 0.8281
+deck: cosine 0.9421, gap 0.4759, length 1.1628
+crew: cosine 0.9361, gap 0.4691, length 1.1392
+rope doubled: cosine 0.9825
+rope doubled: gap 1.3433`,
+              { hints: ["np.linalg.norm of an array is its length, and of the difference of two arrays it is the ordinary distance between the two points.", "The table only scores words it holds, and a doubled rope is not one of them. cosine_similarity is the function underneath, and it takes two arrays."], check: numberCheck("How far is sail from rope with its coordinates doubled, to four places?", 1.3433, 5e-05, "Doubling rope leaves it pointing exactly where it pointed, so the cosine is still 0.9825, while its length goes from 1.0713 to twice that and the ruler now reads 1.3433 where it read 0.3046. Nothing about the direction changed. Length on this table records how ordinary a word is, which is section 9, and a measure that moves this much with it is answering a different question from the one being asked.") },
+            ),
+            exercise(
+              "Put the designed analogy to the table",
+              ["Section 19 asks what is to sugar as sail is to flour, and the corpus was built so that the answer would be wind. Ask the fitted table with its analogy method, adding sail and sugar and subtracting flour, and ask for twenty results, which is every word left once the three of the question are struck out. Print the first five with their cosines, then the place wind came in and its cosine.", "The first three should be rope, deck and mast with the figures of section 19. The page says only that wind is nowhere in the first three, so how far down it actually came is yours to find."],
+              `from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+
+# Call space.analogy with the words to add, the words to subtract and
+# n_results=20. Print the word and similarity of the first five answers.
+
+# Find where wind sits in the ranked words, counting the first as 1, and
+# print that place with wind's similarity to four places.`,
+              `from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+
+ranked = space.analogy(["sail", "sugar"], ["flour"], n_results=20)
+for answer in list(ranked)[:5]:
+    print(f"{answer.word:5s} {answer.similarity:.4f}")
+
+words = list(ranked.words)
+place = words.index("wind") + 1
+print(f"wind came in at place {place} of {len(words)}")
+print(f"wind scored {ranked[place - 1].similarity:.4f}")`,
+              `rope  0.7847
+deck  0.7323
+mast  0.7210
+crew  0.6895
+the   0.5441
+wind came in at place 11 of 20
+wind scored 0.4474`,
+              { hints: ["analogy takes two lists, the words whose directions are added and the words whose directions are subtracted, and n_results. It leaves the question words out of the running on its own.", "What comes back can be looped over, giving answers that each carry a word and a similarity, and its words property is the ranked words alone, which a list can search with index."], check: numberCheck("At what place does wind come in the ranking of twenty?", 11, 0.0, "The arithmetic carried the topic across, which is why four sailing words lead the list, and it did not carry the position within the cycle, so the designed answer sits at a cosine of 0.4474 with five sailing words, the three shared words and two cooking words ahead of it. A hundred and forty-four word occurrences do not determine the differences between positions finely enough to say which step of a cycle a word is at, which is the honest report section 19 gives.") },
+            ),
+            exercise(
+              "Turn the whole table and ask again",
+              ["Part 5 turns every word by the same angle in the plane of its first two coordinates. The starter builds the matrix that does it. For a quarter turn and for a turn of thirty degrees, multiply the table by the matrix, wrap the result in a new WordEmbeddings over the same vocabulary, and print the first coordinate of sail in the turned table, the largest change in any pair’s cosine, and how many of the 23 words keep the same nearest word.", "At the quarter turn the coordinate should be the figure of section 20 and the largest change should be rounding. Thirty degrees is an angle the page does not print, and every answer should survive it just the same."],
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+from oop_ml.core.natural_language_processing.embeddings.vectors import (
+    WordEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+
+for degrees in (90, 30):
+    angle = np.radians(degrees)
+    turn = np.eye(4)
+    turn[:2, :2] = [[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]]
+    # Build the turned table as space.table @ turn and wrap it in a
+    # WordEmbeddings with space.vocabulary. Print sail's first coordinate
+    # there, the largest difference between the two tables' similarity over
+    # every pair of words, and how many words have the same most_similar
+    # word in both.
+    ...`,
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings import (
+    PointwiseMutualInformationEmbeddings,
+)
+from oop_ml.core.natural_language_processing.embeddings.vectors import (
+    WordEmbeddings,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+space = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+words = list(space.vocabulary)
+
+for degrees in (90, 30):
+    angle = np.radians(degrees)
+    turn = np.eye(4)
+    turn[:2, :2] = [[np.cos(angle), np.sin(angle)], [-np.sin(angle), np.cos(angle)]]
+    turned = WordEmbeddings(space.vocabulary, np.asarray(space.table) @ turn)
+    pairs = [(a, b) for place, a in enumerate(words) for b in words[place + 1 :]]
+    change = max(abs(space.similarity(a, b) - turned.similarity(a, b)) for a, b in pairs)
+    kept = sum(space.most_similar(w, n_results=1).words == turned.most_similar(w, n_results=1).words for w in words)
+    print(f"{degrees} degrees: sail's first coordinate {turned.vector_of('sail').values[0]:.4f}")
+    print(f"  largest change in a cosine over {len(pairs)} pairs: {change:.1e}")
+    print(f"  words keeping their nearest word: {kept} of {len(words)}")`,
+              `90 degrees: sail's first coordinate -0.5223
+  largest change in a cosine over 253 pairs: 2.2e-16
+  words keeping their nearest word: 23 of 23
+30 degrees: sail's first coordinate 0.2038
+  largest change in a cosine over 253 pairs: 4.4e-16
+  words keeping their nearest word: 23 of 23`,
+              { hints: ["space.table is the whole table as an array with one row per word, so multiplying it on the right by the matrix turns every word at once. WordEmbeddings takes a vocabulary and a table, and space.vocabulary is the one to reuse.", "Looping over a vocabulary gives its words. Every pair once is each word with each word after it, which is 253 pairs for 23 words.", "most_similar with n_results=1 answers one neighbour, and its words property is a tuple holding that one word, so two of them compare with ==."], check: numberCheck("What is sail’s first coordinate after a turn of thirty degrees, to four places?", 0.2038, 5e-05, "The first coordinate went from 0.5369 to 0.2038, and at the quarter turn to −0.5223, while no cosine moved by more than rounding and all 23 words kept their nearest word. A rotation preserves every dot product, and lengths and cosines are built from dot products, so the turned table answers every question the way the original did. Whatever the fit determined, it was not the number 0.5369.") },
+            ),
+          ],
         },
       ]}
     />

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -23,7 +26,7 @@ import { WidthAgainstTheTable } from "@/components/widgets/WidthAgainstTheTable"
 export const metadata: Metadata = {
   title: "Random Indexing · oop_ml",
   description:
-    "Give every word a fixed random direction, add up the directions a word was seen beside, and never build the table of counts at all.",
+    "Accumulate sparse random context vectors to build fixed-width word representations.",
 };
 
 const link =
@@ -32,8 +35,12 @@ const link =
 export default function RandomIndexingPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["random-indexing"]}
+      technicalStart="Part 2. A Direction For Every Word"
+      openingTitle="Keep a Sketch Instead of the Whole Count Table"
+      playgroundIntro="Follow which context vectors are added for one word. Compare the resulting neighbours at different widths and random seeds."
       title="Random Indexing"
-      tagline="Random indexing gives every word a fixed random direction and adds up the directions a word was seen beside, so the positions come out at whatever width was asked for and the table of counts they would otherwise have been squeezed out of never exists."
+      tagline="Accumulate sparse random context vectors to build fixed-width word representations."
       prerequisites={
         <>
           Every answer on this page is an angle between two lists of numbers,
@@ -51,89 +58,23 @@ export default function RandomIndexingPage() {
           1 immediately, though nothing later depends on having read it.
         </>
       }
-      history={
-        <>
-          <p>
-            Pentti Kanerva had spent the 1980s on a theory of memory built out
-            of very long random vectors, published as{" "}
-            <em>Sparse Distributed Memory</em> by MIT Press in 1988. The
-            property he kept returning to is not obvious and is the whole of
-            what this page rests on. In a space of a few thousand dimensions,
-            two vectors drawn at random are almost always very nearly
-            perpendicular, and almost never close, so a great many items can be
-            given directions of their own without any of them interfering much
-            with any other. That is a fact about high-dimensional geometry
-            rather than about memory, and it had been proved in a sharper form
-            by William Johnson and Joram Lindenstrauss in 1984, who showed that
-            a random linear map into a surprisingly small number of dimensions
-            keeps every distance among a set of points to within a chosen
-            factor.
-          </p>
-          <p>
-            The problem it got applied to was a practical complaint about
-            latent semantic analysis. That method builds a table with a row for
-            every word and a column for every document and then replaces it
-            with the nearest table of low rank, and by the late 1990s the
-            replacement was the expensive part. The table is as wide as the
-            collection and as tall as the vocabulary, it has to exist before
-            anything can be done to it, and a new document arriving means
-            factorising it again. Kanerva, with Jan Kristoferson and Anders
-            Holst, proposed the alternative in &ldquo;Random Indexing of Text
-            Samples for Latent Semantic Analysis&rdquo;, in the proceedings of
-            the 22nd Annual Conference of the Cognitive Science Society in
-            2000. Give every document a fixed random direction, and accumulate,
-            for each word, the directions of the documents it turned up in. No
-            table is built and no decomposition is run, and a new document adds
-            to the existing positions instead of invalidating them.
-          </p>
-          <p>
-            Magnus Sahlgren, then at the Swedish Institute of Computer Science,
-            is the reason the method is a method rather than a note. His
-            &ldquo;An Introduction to Random Indexing&rdquo; in 2005 and his
-            doctoral thesis <em>The Word-Space Model</em> in 2006 set out the
-            version used since, in which the context is a window of neighbours
-            rather than a whole document, and argued the case against the
-            decomposition on its own terms rather than only on cost. Dimitris
-            Achlioptas had supplied the missing piece in 2001, in
-            &ldquo;Database-friendly random projections&rdquo;, by showing that
-            a random map whose entries are only −1, 0 and +1, with most of them
-            zero, does the job as well as one drawn from a bell curve, which is
-            what makes the accumulation cheap enough to be worth doing. The
-            same geometry, under the name hyperdimensional computing, is where
-            Kanerva&rsquo;s line of work went next.
-          </p>
-          <p>
-            This page asks six questions in order. Why does every counting
-            method build something as wide as the vocabulary and then throw
-            most of it away? What exactly does a word&rsquo;s position
-            accumulate, and what makes it the same answer? Why does adding up a
-            few hundred random directions not turn into a smear? Why are those
-            directions almost entirely zeros? What does the shortcut cost
-            against the table it never builds? And where does the method stop
-            being defined?
-          </p>
-        </>
-      }
+
       playground={<RandomIndexingPlayground />}
       sections={[
         {
           title: "Part 1. The Table That Only Exists To Be Thrown Away",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Twenty-four documents, and three sentences small enough to check">
-                <p>
-                  Everything on this page is fitted to one of two collections,
-                  and it is worth knowing what is in them before any method
-                  touches them. The larger one is twenty-four documents, twelve
-                  about cooking and twelve about sailing. The cooking half is
-                  written from ten words, flour, sugar, butter, eggs, oven,
-                  bake, stir, whisk, dough and pan; the sailing half from ten of
-                  its own, sail, wind, boat, harbour, anchor, tide, mast, rope,
-                  deck and crew. No subject word appears in both halves. What
-                  the halves share is three words carrying no subject at all,
-                  and, the and we, and each document uses exactly one of them.
+                <>
+<p>
+                  Everything on this page is fitted to one of two collections, and it is worth knowing what is in them before any method touches them. The larger one is twenty-four documents, twelve about cooking and twelve about sailing. The cooking half is written from ten words, flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan; the sailing half from ten of its own, sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew.
                 </p>
+                <p>
+                  No subject word appears in both halves. What the halves share is three words carrying no subject at all, and, the and we, and each document uses exactly one of them.
+                </p>
+</>
                 <p>
                   Each document is six words long, five consecutive words of its
                   own half taken in a cycle and one of the three shared words,
@@ -177,17 +118,14 @@ export default function RandomIndexingPage() {
                   which is a fact Part 4 comes back to.
                 </p>
                 <WorkedExample title="Three sentences, two positions each side">
-                  <p>
-                    Take the cat sat, the dog sat and the cat ran, and count
-                    everything within two positions. In the first sentence the
-                    is beside cat and two from sat, cat is beside both, and sat
-                    is beside cat and two from the. Do that for all three and
-                    the row of the reads 0, 2, 2, 1, 1 against the vocabulary in
-                    the order the, cat, sat, dog, ran. The row of cat reads 2,
-                    0, 1, 0, 1, and the row of ran reads 1, 1, 0, 0, 0. Twenty
-                    five cells for five words, and the whole thing fits on a
-                    line.
+                  <>
+<p>
+                    Take the cat sat, the dog sat and the cat ran, and count everything within two positions. In the first sentence the is beside cat and two from sat, cat is beside both, and sat is beside cat and two from the. Do that for all three and the row of the reads 0, 2, 2, 1, 1 against the vocabulary in the order the, cat, sat, dog, ran.
                   </p>
+                  <p>
+                    The row of cat reads 2, 0, 1, 0, 1, and the row of ran reads 1, 1, 0, 0, 0. Twenty five cells for five words, and the whole thing fits on a line.
+                  </p>
+</>
                 </WorkedExample>
                 <KeepInMind>
                   A count says how often two words were seen together and
@@ -237,14 +175,17 @@ export default function RandomIndexingPage() {
                 </p>
                 <Equation>{"numbers in the table = V × V"}</Equation>
                 <Equation>{"numbers in the answer = V × d"}</Equation>
-                <p>
-                  So the calculation builds V over d times more numbers than it
-                  intends to keep, where V is how many distinct words there are
-                  and d is how many coordinates a word is wanted to have. Here
-                  that ratio is 23 over 16, which is barely anything, and it is
-                  the ratio rather than the difference that grows. The width d
-                  stays where it was put whatever the collection is; V does not.
-                </p>
+                <>
+                  <p>
+                    Constructing the full co-occurrence representation before reducing
+                    it allocates more coordinates than the final vectors retain.
+                  </p>
+                  <Equation>{"temporary-to-final width ratio = vocabulary size / embedding width\nexample ratio = 23 / 16 ≈ 1.44"}</Equation>
+                  <p>
+                    The ratio is small on this toy corpus. It grows when the vocabulary
+                    grows while the requested embedding width stays fixed.
+                  </p>
+                </>
                 <InAModel>
                   At this size the objection is entirely theoretical, and it is
                   worth saying so plainly. Building 529 numbers to keep 368 is
@@ -263,7 +204,7 @@ export default function RandomIndexingPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Direction For Every Word",
@@ -323,17 +264,14 @@ export default function RandomIndexingPage() {
                 </p>
                 <PositionBuildUp />
                 <WorkedExample title="Cat, over three sentences">
-                  <p>
-                    Cat appears twice, in the cat sat and in the cat ran, and
-                    with a window of two positions it has four neighbours in
-                    all. Adding the direction of the gives 0, 0, 1, −1, −1, 0,
-                    1, 0. Adding sat next cancels the −1 in the fifth position
-                    and leaves 0, 0, 1, −1, 0, 1, 0, −1. The second sentence
-                    contributes the again and then ran, and the total finishes
-                    at 0, 1, 2, −3, 0, 0, 1, −1, which is exactly what the fit
-                    reports as the position of cat. Four additions of eight
-                    numbers each, and no table of any kind was written down.
+                  <>
+<p>
+                    Cat appears twice, in the cat sat and in the cat ran, and with a window of two positions it has four neighbours in all. Adding the direction of the gives 0, 0, 1, −1, −1, 0, 1, 0. Adding sat next cancels the −1 in the fifth position and leaves 0, 0, 1, −1, 0, 1, 0, −1.
                   </p>
+                  <p>
+                    The second sentence contributes the again and then ran, and the total finishes at 0, 1, 2, −3, 0, 0, 1, −1, which is exactly what the fit reports as the position of cat. Four additions of eight numbers each, and no table of any kind was written down.
+                  </p>
+</>
                 </WorkedExample>
                 <KeepInMind>
                   A word with no company at all keeps the total it started with,
@@ -448,6 +386,54 @@ export default function RandomIndexingPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "By the table of counts, the word nearest to flour is one it was never once seen beside.",
+              true,
+              "Flour and bake never appeared in the same document and their cell in the table holds exactly 0, yet comparing their two rows answers 0.7551, higher than any pair flour did meet. What a counting method reads is the angle between two whole rows, not the cell where the two words meet.",
+            ),
+            choice(
+              "What does the direction drawn for a word carry?",
+              [
+                "Identity and nothing else, since it is drawn before any text is read",
+                "A small version of the word’s final position, refined as the reading proceeds",
+                "The word’s own row of the table of counts, already squeezed",
+                "How often the word turned up in the collection",
+              ],
+              0,
+              "A direction is drawn at random and has nothing whatever to do with what the word means or where it appeared, which is why flour and sugar are as unrelated there as flour and anchor. It is the raw material a position gets summed out of rather than a first guess at one.",
+            ),
+            trueFalse(
+              "Fixing the draw of the directions fixes the answer exactly, however many times the reading is run.",
+              true,
+              "The draw is the only randomness in the procedure and it happens before the first word is read. There is no objective being minimised, so no learning rate and no question of convergence, and there is no second pass over the collection.",
+            ),
+            choice(
+              "Why does the second route, multiplying the table of counts by the stacked directions, matter?",
+              [
+                "It states what the accumulating pass computes, which is what lets the geometry of random projections apply to it",
+                "It is the cheaper of the two routes once the vocabulary is large",
+                "It gives a more accurate answer than walking the collection does",
+                "It is the route implementations actually take",
+              ],
+              0,
+              "Nothing forces anybody to take it and in practice nobody does. It matters because a word’s position is then visibly its row of the table projected down by a random map, and a claim about random projections is a claim about a multiplication by a random block. The two routes agree exactly where every weight is held exactly, and a weight of a third moves them apart by 8.88 × 10⁻¹⁶ in a table whose largest entry is 11.25.",
+            ),
+            choice(
+              "Reading the twenty-four documents once costs 2,880 updates to a single number. What does that figure grow with?",
+              [
+                "How long the collection is and how many non-zero entries a direction carries, and not at all with the vocabulary or the width",
+                "The square of the vocabulary, since every word has a direction and every direction is added to every other",
+                "The width of the positions, since each addition touches every coordinate of the running total",
+                "The number of distinct words, since a wider vocabulary means more directions to draw",
+              ],
+              0,
+              "There are 144 word occurrences, and at a window of five positions each side there are 720 occasions where one word is inside another’s window. Each adds a direction with 4 non-zero entries, so the reading is 720 times 4 updates. Making the positions wider changes nothing, because a sparse direction still touches four numbers whatever the width is, which is why a dense direction at 2048 numbers a word would cost five hundred times as much. Building the table instead grows with the square of the vocabulary whatever the collection says.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. Why Adding Up Directions Does Not Turn To Mush",
           content: (
             <>
@@ -532,46 +518,31 @@ export default function RandomIndexingPage() {
               </SubSection>
 
               <SubSection title="12. If they were exactly perpendicular, nothing would be lost">
-                <p>
-                  It is worth being precise about what near-perpendicularity is
-                  buying, because there is a clean statement available and it is
-                  stronger than the usual hand-wave. Suppose for a moment the
-                  drawn directions really were exactly at right angles to each
-                  other and all of the same length. Then multiplying the table of
-                  counts by them would be a rotation of the space the rows live
-                  in, and a rotation changes no angle between any two rows at
-                  all. Every question anybody wanted to ask of the table would
-                  come back identical, and the narrowing would have cost
-                  nothing at all.
+                <>
+<p>
+                  It is worth being precise about what near-perpendicularity is buying, because there is a clean statement available and it is stronger than the usual hand-wave. Suppose for a moment the drawn directions really were exactly at right angles to each other and all of the same length. Then multiplying the table of counts by them would be a rotation of the space the rows live in, and a rotation changes no angle between any two rows at all.
                 </p>
+                <p>
+                  Every question anybody wanted to ask of the table would come back identical, and the narrowing would have cost nothing at all.
+                </p>
+</>
                 <WhyThisWorks>
-                  <p>
-                    They are not exactly at right angles, and they cannot be,
-                    since a space of d numbers holds at most d directions
-                    mutually at right angles and there are usually more words
-                    than that. What Johnson and Lindenstrauss proved in 1984 is
-                    that this hardly matters. A random linear map into
-                    d dimensions keeps every distance among a set of points to
-                    within a factor of one plus or minus epsilon, provided d is
-                    roughly the logarithm of how many points there are divided by
-                    epsilon squared, and crucially that has nothing to do with
-                    how many dimensions the points started in. Achlioptas showed
-                    in 2001 that a sparse map with entries only −1, 0 and +1
-                    satisfies the same bound as one drawn from a bell curve.
+                  <>
+<p>
+                    They are not exactly at right angles, and they cannot be, since a space of d numbers holds at most d directions mutually at right angles and there are usually more words than that. What Johnson and Lindenstrauss proved in 1984 is that this hardly matters. A random linear map into d dimensions keeps every distance among a set of points to within a factor of one plus or minus epsilon, provided d is roughly the logarithm of how many points there are divided by epsilon squared, and crucially that has nothing to do with how many dimensions the points started in.
                   </p>
                   <p>
-                    The claim is checkable here rather than only citable, and
-                    the check produces a result I did not expect. At 2048
-                    numbers a word, one draw happened to give all twenty-three
-                    words non-zero entries that never once landed in the same
-                    position, so the directions really were exactly at right
-                    angles, and every angle in the table came through the
-                    projection with a largest change of 3.8 × 10⁻¹⁷, which is
-                    the rounding of the arithmetic and nothing else. At the same
-                    width, another draw left two pairs sharing a position, and
-                    the angles moved by 0.0109. Exactness is a property of the
-                    draw rather than of the width.
+                    Achlioptas showed in 2001 that a sparse map with entries only −1, 0 and +1 satisfies the same bound as one drawn from a bell curve.
                   </p>
+</>
+                  <>
+<p>
+                    The claim is checkable here rather than only citable, and the check produces a result I did not expect. At 2048 numbers a word, one draw happened to give all twenty-three words non-zero entries that never once landed in the same position, so the directions really were exactly at right angles, and every angle in the table came through the projection with a largest change of 3.8 × 10⁻¹⁷, which is the rounding of the arithmetic and nothing else.
+                  </p>
+                  <p>
+                    At the same width, another draw left two pairs sharing a position, and the angles moved by 0.0109. Exactness is a property of the draw rather than of the width.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   So the interference is entirely the pairs of directions that
@@ -584,18 +555,14 @@ export default function RandomIndexingPage() {
               </SubSection>
 
               <SubSection title="13. Sparse and ternary is a choice about cost, and it turns out to be free">
-                <p>
-                  Nothing so far said the directions had to be mostly zeros. The
-                  original statements of this geometry drew every entry from a
-                  bell curve, and that works. The reason for four non-zero
-                  entries and nothing else is arithmetic in the inner loop.
-                  Adding a direction with four non-zero entries touches four
-                  numbers, and it touches four whatever the width is, so the
-                  reading of the collection does not get more expensive when the
-                  positions get wider. A dense direction touches every position,
-                  so the same reading at 2048 numbers a word would cost five
-                  hundred times what it costs at four.
+                <>
+<p>
+                  Nothing so far said the directions had to be mostly zeros. The original statements of this geometry drew every entry from a bell curve, and that works. The reason for four non-zero entries and nothing else is arithmetic in the inner loop. Adding a direction with four non-zero entries touches four numbers, and it touches four whatever the width is, so the reading of the collection does not get more expensive when the positions get wider.
                 </p>
+                <p>
+                  A dense direction touches every position, so the same reading at 2048 numbers a word would cost five hundred times what it costs at four.
+                </p>
+</>
                 <p>
                   The entries being only −1, 0 and +1 removes the multiplication
                   as well. Adding a direction becomes adding and subtracting
@@ -809,18 +776,14 @@ export default function RandomIndexingPage() {
                   its own, because it makes this error a different kind of thing
                   from most of the errors on this site.
                 </p>
-                <p>
-                  Which pairs share a position is settled by the draw, before any
-                  text is read. So the error it causes is not an error of
-                  estimation and does not shrink as the evidence accumulates.
-                  Write the same twenty-four documents out twice, and every count
-                  doubles; the positions all double with them; and an angle
-                  between two positions is unchanged by a common scale. Measured, the
-                  gap against the whole table is 0.14412102749793634 with
-                  the collection written once, and at 0.14412102749793634 with it
-                  written eight times, and one pair of words comes out at
-                  0.6270095706410385 in both, identical to the last bit.
+                <>
+<p>
+                  Which pairs share a position is settled by the draw, before any text is read. So the error it causes is not an error of estimation and does not shrink as the evidence accumulates. Write the same twenty-four documents out twice, and every count doubles; the positions all double with them; and an angle between two positions is unchanged by a common scale.
                 </p>
+                <p>
+                  Measured, the gap against the whole table is 0.14412102749793634 with the collection written once, and at 0.14412102749793634 with it written eight times, and one pair of words comes out at 0.6270095706410385 in both, identical to the last bit.
+                </p>
+</>
                 <p>
                   Reading more text of course changes the counts, and better
                   counts do give better answers. What does not change is the
@@ -996,6 +959,295 @@ export default function RandomIndexingPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 to 5",
+          quiz: [
+            choice(
+              "At eight positions the rule n over d predicts an overlap of 0.5000 and the measurement is 0.2994. What is the rule missing?",
+              [
+                "The sign of a shared position is a coin toss, so shared positions cancel one another",
+                "At eight positions no two directions share a position at all",
+                "Too few pairs were measured for the figure to settle",
+                "The rule was derived for dense directions and these are sparse",
+              ],
+              0,
+              "The rule counts the shared positions and then treats each as contributing its full weight. Once there are many of them the cancelling dominates, which is the same failure that makes it predict 1.0000 at fifty positions all filled where the measurement is 0.1162.",
+            ),
+            trueFalse(
+              "Writing the same twenty-four documents out eight times lowers the gap between the fit’s angles and the table’s.",
+              false,
+              "Every count doubles, every position doubles with it, and an angle is unchanged by a common scale. Measured, the gap is 0.14412102749793634 with the collection written once and 0.14412102749793634 with it written eight times, and one pair of words comes back at 0.6270095706410385 in both. More text gives better counts; it does nothing to the distortion the projection adds on top of them.",
+            ),
+            several(
+              "Which of these hold on this collection?",
+              [
+                "At 16 numbers a word, 155 of the 253 pairs of drawn directions still share a position",
+                "A fit at 529 numbers a word compresses nothing and its gap is still 0.0181",
+                "Flour’s whole list of six nearest words is recovered at 64 numbers and not before",
+                "The gap against the table turns at a definite width, which says where to cut",
+              ],
+              [0, 1, 2],
+              "The shared positions at 16 numbers, the gap at 529 and flour’s six neighbours at 64 are all measured. A definite turning point is the one thing this method does not offer, since the gap falls from 0.3959 at 8 numbers to 0.0109 at 2048 without turning anywhere, so there is no elbow to find even if somebody went looking. A method that builds the table and squeezes it does produce such a figure; this one produces nothing during the reading that says whether the width was enough.",
+            ),
+            trueFalse(
+              "A word carrying no subject coming out 0.5064 alike to a word that does is damage the projection did.",
+              false,
+              "The whole table of raw counts answers 0.5173 to the same question, so the fit is reporting those counts faithfully, which is what a projection of the raw table should do. The 0.2207 that a reading which first divides out what frequency alone would explain gives is the measure of the problem, and any repair has to reach the counting rule before a single direction is added up.",
+            ),
+            choice(
+              "At a narrow width, which claim read off a single fit is the steadier one?",
+              [
+                "How far apart the two halves of the collection came",
+                "The angle between one named pair of words",
+                "What the fifth coordinate of a word means",
+                "Which single word is nearest to flour",
+              ],
+              0,
+              "An average over many pairs is far steadier than any of the pairs in it. Over twenty draws at 8 numbers a word one pair of cooking words came back anywhere between 0.0189 and 0.9646, while at 16 numbers every one of the twenty draws had the two halves the right way round, with the separation between 0.1735 and 0.8430. A single coordinate means nothing on its own, since the fifth is the total of whichever words happened to be handed a non-zero entry in position five.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Adding Up Directions With The Library",
+          practice: [
+            exercise(
+              "Build the position of cat by hand and compare it with the fit",
+              ["Part 2 follows cat through the three sentences at a window of two positions with eight numbers a word, four of them non-zero in every direction, and arrives at 0, 1, 2, −3, 0, 0, 1, −1 after four additions. Fit the library's model at those settings with the draw fixed at seed 0 and read the drawn directions of the, sat and ran off it.", "Then do the reading yourself. Walk the sentences, and at every occurrence of cat add the direction of each word within two positions onto a running total that starts at eight zeros, in the order the reading meets them. Compare what you end with against the position the fit reports for cat."],
+              `from oop_ml import RandomIndexing
+
+sentences = ["the cat sat", "the dog sat", "the cat ran"]
+
+model = RandomIndexing(dimension=8, n_nonzero=4, window=2, random_seed=0).fit(sentences)
+for word in ("the", "sat", "ran"):
+    direction = model.index_vectors.vector_of(word).values
+    print(f"direction of {word}: {[int(entry) for entry in direction]}")
+# Walk the three sentences. At every occurrence of cat, add the direction
+# of each word within two positions onto a running total of eight zeros,
+# printing the total after each addition. Then print the position the fit
+# reports for cat and whether the two agree.`,
+              `from oop_ml import RandomIndexing
+
+sentences = ["the cat sat", "the dog sat", "the cat ran"]
+
+model = RandomIndexing(dimension=8, n_nonzero=4, window=2, random_seed=0).fit(sentences)
+for word in ("the", "sat", "ran"):
+    direction = model.index_vectors.vector_of(word).values
+    print(f"direction of {word}: {[int(entry) for entry in direction]}")
+
+running = [0] * 8
+for sentence in sentences:
+    words = sentence.split()
+    for position, word in enumerate(words):
+        if word != "cat":
+            continue
+        for other, neighbour in enumerate(words):
+            if other != position and abs(other - position) <= 2:
+                direction = model.index_vectors.vector_of(neighbour).values
+                running = [total + int(entry) for total, entry in zip(running, direction)]
+                print(f"after adding {neighbour}: {running}")
+
+reported = [int(entry) for entry in model.vector_of("cat").values]
+print(f"the fit reports {reported}")
+print(f"agree: {running == reported}")`,
+              `direction of the: [0, 0, 1, -1, -1, 0, 1, 0]
+direction of sat: [0, 0, 0, 0, 1, 1, -1, -1]
+direction of ran: [0, 1, 0, -1, 1, -1, 0, 0]
+after adding the: [0, 0, 1, -1, -1, 0, 1, 0]
+after adding sat: [0, 0, 1, -1, 0, 1, 0, -1]
+after adding the: [0, 0, 2, -2, -1, 1, 1, -1]
+after adding ran: [0, 1, 2, -3, 0, 0, 1, -1]
+the fit reports [0, 1, 2, -3, 0, 0, 1, -1]
+agree: True`,
+              { hints: ["The drawn directions live on the fitted model as index_vectors, and vector_of(word) on them answers an object whose values are the eight entries. The same vector_of on the model itself answers the word's position.", "A neighbour is any word in the same sentence whose distance from cat is one or two, and cat is never its own neighbour. A sentence boundary stops the reach, so the dog sat contributes nothing to cat.", "The entries are whole numbers held as floats, so int() on each keeps the printed lists readable. The order of the additions does not change the total, only the trail of running totals."], check: numberCheck("What does the fourth number of cat's position come to?", -3, 0.5, "The direction of the holds −1 in the fourth position and was added twice, once from each sentence cat appears in, and the direction of ran holds −1 there as well. Sat holds 0 there, so nothing cancels the three subtractions. Every number in the position is a sum of that kind, which is why two words that keep the same company land near each other without a table ever being written down.") },
+            ),
+            exercise(
+              "Reproduce the sixteen-number fit",
+              ["Part 2 reads the twenty-four documents once with sixteen numbers a word and four non-zero entries in every direction, under the draw the whole page uses. It reports that the direction drawn for flour is non-zero at positions 5, 7, 8 and 9, that the six nearest words to flour are eggs, butter, bake, whisk, pan and sugar, and that two words of one subject come out at 0.6399 on average against 0.1247 for a word of each. Fit the model at those settings, with the draw fixed at seed 0, and reproduce all three.", "Then print the two pairs Part 4 builds its argument on, flour against sugar and flour against anchor, and one thing the lesson never prints, the six nearest words to anchor."],
+              `from statistics import mean
+
+from oop_ml import RandomIndexing
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+cooking = ["flour", "sugar", "butter", "eggs", "oven", "bake", "stir", "whisk", "dough", "pan"]
+sailing = ["sail", "wind", "boat", "harbour", "anchor", "tide", "mast", "rope", "deck", "crew"]
+
+model = RandomIndexing(dimension=16, n_nonzero=4, window=5, random_seed=0).fit(notes)
+# Print the positions where flour's drawn direction is non-zero, the six
+# nearest words to flour with their cosines, the mean cosine between two
+# words of one subject and between a word of each, flour against sugar,
+# flour against anchor, and the six nearest words to anchor.`,
+              `from statistics import mean
+
+from oop_ml import RandomIndexing
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+cooking = ["flour", "sugar", "butter", "eggs", "oven", "bake", "stir", "whisk", "dough", "pan"]
+sailing = ["sail", "wind", "boat", "harbour", "anchor", "tide", "mast", "rope", "deck", "crew"]
+
+model = RandomIndexing(dimension=16, n_nonzero=4, window=5, random_seed=0).fit(notes)
+direction = model.index_vectors.vector_of("flour").values
+print(f"flour's direction is non-zero at {[position for position, entry in enumerate(direction) if entry != 0]}")
+for near in model.most_similar("flour", 6):
+    print(f"  {near.word} {near.similarity:.4f}")
+within = mean(
+    model.similarity(first, second)
+    for group in (cooking, sailing)
+    for position, first in enumerate(group)
+    for second in group[position + 1 :]
+)
+across = mean(model.similarity(first, second) for first in cooking for second in sailing)
+print(f"two words of one subject {within:.4f}, a word of each {across:.4f}")
+print(f"flour and sugar {model.similarity('flour', 'sugar'):.4f}")
+print(f"flour and anchor {model.similarity('flour', 'anchor'):.4f}")
+print(f"nearest to anchor {' '.join(model.most_similar('anchor', 6).words)}")`,
+              `flour's direction is non-zero at [5, 7, 8, 9]
+  eggs 0.7909
+  butter 0.7285
+  bake 0.7130
+  whisk 0.7017
+  pan 0.7003
+  sugar 0.6270
+two words of one subject 0.6399, a word of each 0.1247
+flour and sugar 0.6270
+flour and anchor -0.2437
+nearest to anchor boat tide wind crew harbour we`,
+              { hints: ["The page's settings are dimension=16, n_nonzero=4, window=5 and random_seed=0. The seed is the only randomness there is, so leaving it out gives a different draw and different numbers every run.", "most_similar(word, n) answers an object that can be iterated, each entry carrying a word and a similarity, and its words property is the names alone.", "Two words of one subject means every pair drawn from the cooking list plus every pair from the sailing list, 45 and 45. A word of each means every cooking word against every sailing word, 100 pairs. Neither average involves and, the or we."], check: numberCheck("What does the fit put flour and anchor at?", -0.2437, 0.0001, "The table of counts puts the pair at 0.1208, a small positive number from the company both halves share. The fit sends it to −0.2437, and nothing in the collection made anchor the opposite of flour. The interference from a few drawn directions that happened to share positions did, and a pair near zero is where that interference does its worst, because the signal that would hold the answer in place is smallest there.") },
+            ),
+            exercise(
+              "Price the width against the table it avoids",
+              ["Part 4 prices the shortcut by building the table it avoids and asking it the same questions. The fitted model keeps that table of counts on it, and the same value object that holds a fit's positions can hold the table's rows instead, so the table's angles come from the one similarity call rather than from arithmetic of your own. Wrap the counts, and confirm that the table puts flour and bake at 0.7551 although they never met and flour and anchor at 0.1208.", "Then, for widths of 8, 16, 64 and 2048 under the page's draw, average over all 190 pairs of two subject words how far the fit's angle sits from the table's. Part 4 reports 0.3959, 0.1441, 0.0542 and 0.0109. Finish with sixteen numbers under a second draw, seed 1, whose gap the lesson does not print."],
+              `from statistics import mean
+
+from oop_ml import RandomIndexing, WordEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+subject = ["flour", "sugar", "butter", "eggs", "oven", "bake", "stir", "whisk", "dough", "pan",
+           "sail", "wind", "boat", "harbour", "anchor", "tide", "mast", "rope", "deck", "crew"]
+pairs = [(first, second) for position, first in enumerate(subject) for second in subject[position + 1 :]]
+
+fit = RandomIndexing(dimension=16, n_nonzero=4, window=5, random_seed=0).fit(notes)
+# Wrap the fit's table of counts in WordEmbeddings and print the table's
+# cosine for flour and bake, with how often they met, and for flour and
+# anchor. Then for widths 8, 16, 64 and 2048 at seed 0, and width 16 at
+# seed 1, fit and print the mean gap between fit and table over the pairs.`,
+              `from statistics import mean
+
+from oop_ml import RandomIndexing, WordEmbeddings
+
+notes = [
+    "flour sugar and butter eggs oven", "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir", "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough", "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour", "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter", "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven", "we sugar butter eggs oven bake",
+    "sail wind and boat harbour anchor", "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast", "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck", "we tide mast rope deck crew",
+    "mast rope and deck crew sail", "rope deck crew the sail wind",
+    "we deck crew sail wind boat", "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor", "we wind boat harbour anchor tide",
+]
+subject = ["flour", "sugar", "butter", "eggs", "oven", "bake", "stir", "whisk", "dough", "pan",
+           "sail", "wind", "boat", "harbour", "anchor", "tide", "mast", "rope", "deck", "crew"]
+pairs = [(first, second) for position, first in enumerate(subject) for second in subject[position + 1 :]]
+
+fit = RandomIndexing(dimension=16, n_nonzero=4, window=5, random_seed=0).fit(notes)
+table = WordEmbeddings(fit.cooccurrence.vocabulary, fit.cooccurrence.counts)
+met = fit.cooccurrence.count_between("flour", "bake")
+print(f"table: flour and bake {table.similarity('flour', 'bake'):.4f}, met {met:.0f} times")
+print(f"table: flour and anchor {table.similarity('flour', 'anchor'):.4f}")
+
+for width, seed in ((8, 0), (16, 0), (64, 0), (2048, 0), (16, 1)):
+    fit = RandomIndexing(dimension=width, n_nonzero=4, window=5, random_seed=seed).fit(notes)
+    gap = mean(abs(fit.similarity(first, second) - table.similarity(first, second)) for first, second in pairs)
+    print(f"width {width}, draw {seed}: gap {gap:.4f} over {len(pairs)} pairs")`,
+              `table: flour and bake 0.7551, met 0 times
+table: flour and anchor 0.1208
+width 8, draw 0: gap 0.3959 over 190 pairs
+width 16, draw 0: gap 0.1441 over 190 pairs
+width 64, draw 0: gap 0.0542 over 190 pairs
+width 2048, draw 0: gap 0.0109 over 190 pairs
+width 16, draw 1: gap 0.1087 over 190 pairs`,
+              { hints: ["The fitted model's cooccurrence property is the table, with a vocabulary and a counts block of 23 rows by 23 columns. WordEmbeddings takes exactly a vocabulary and a block with one row per word, so the table can be wrapped as if it were a set of 23-number positions.", "Once wrapped, table.similarity(first, second) is the cosine between two rows of counts, which is the reading Part 1 describes and the answer every fit is approximating.", "The gap for one pair is the absolute difference between the fit's cosine and the table's. Averaging over the 190 pairs is what makes it a price for the width rather than a fact about one pair.", "A new fit at each width draws its own directions, so the seed has to be stated every time for the first four rows to be the page's draw. The last row changes only the seed."], check: numberCheck("What is the gap at sixteen numbers a word under the second draw?", 0.1087, 0.0001, "Under the page's draw the gap at sixteen numbers is 0.1441, and under a second draw it is 0.1087. Nothing about the collection changed between the two fits, only which positions each direction was handed, so the difference between them is entirely the draw. Part 5 says the distortion is a fixed function of the draw and the width, and this is that claim with two numbers on it.") },
+            ),
+            exercise(
+              "Ask about a word that kept no company",
+              ["Part 2 says a word with no company at all keeps the total it started with, which is a position of all zeros, and that the origin has no direction. That is the first line of the table at the end of Part 5. Add a one-word sentence to the three sentences, fit, and print the position the fit reports for the new word beside the direction that was drawn for it.", "Then ask the fit how similar that word is to cat, and which words are nearest to it, catching the library's own refusal each time and printing its class and its message. The fit itself does not refuse, which is worth noticing. The position exists; what does not exist is an angle to it."],
+              `from oop_ml import MLLibError, RandomIndexing
+
+sentences = ["the cat sat", "the dog sat", "the cat ran", "lantern"]
+
+model = RandomIndexing(dimension=8, n_nonzero=4, window=2, random_seed=0).fit(sentences)
+# Print the position of lantern and the direction drawn for it. Then ask
+# for its similarity to cat and for its nearest word, catching the
+# library's refusal each time and printing the class name and the message.`,
+              `from oop_ml import MLLibError, RandomIndexing
+
+sentences = ["the cat sat", "the dog sat", "the cat ran", "lantern"]
+
+model = RandomIndexing(dimension=8, n_nonzero=4, window=2, random_seed=0).fit(sentences)
+position = model.vector_of("lantern").values
+direction = model.index_vectors.vector_of("lantern").values
+print(f"position of lantern {[int(entry) for entry in position]}")
+print(f"direction drawn for lantern {[int(entry) for entry in direction]}")
+
+try:
+    model.similarity("lantern", "cat")
+except MLLibError as refusal:
+    print(f"{type(refusal).__name__} {refusal}")
+
+try:
+    model.most_similar("lantern", 1)
+except MLLibError as refusal:
+    print(f"{type(refusal).__name__} {refusal}")`,
+              `position of lantern [0, 0, 0, 0, 0, 0, 0, 0]
+direction drawn for lantern [0, 1, 0, -1, 1, -1, 0, 0]
+UndefinedMetricError cosine similarity is undefined for a zero vector, which has no direction
+UndefinedMetricError the zero vector has no direction, so nothing is similar to it`,
+              { hints: ["A sentence boundary stops the reach, so a word alone in its sentence has no neighbour at all, and nothing is ever added onto its total. It still gets a direction, because every word in the vocabulary is handed one before the reading starts.", "Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal each question turns out to be.", "The two questions are refused with different messages, because one of them asks for a cosine involving the origin and the other asks what is similar to it, and neither is a number."] },
+            ),
+          ],
         },
       ]}
     />

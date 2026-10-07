@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // How many columns an expansion produces, by degree and by how many
 // measurements it started with.
@@ -141,21 +143,9 @@ export function ColumnGrowthGrid() {
         )}
       </svg>
 
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        {chosen && selected !== null ? (
-          <>
-            {chosen.width} measurement{chosen.width === 1 ? "" : "s"} at degree{" "}
-            {chosen.degree} makes {selected} column{selected === 1 ? "" : "s"},
-            so the fit has {selected + 1} numbers to set and needs at least that
-            many people to set them from.
-          </>
-        ) : (
-          <>
-            Each cell is the number of columns the expansion built. Point at one
-            to read how many people it would take to pin them down.
-          </>
-        )}
-      </p>
+      <>
+<p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{chosen && selected !== null ? <>The selected expansion starts with {chosen.width} input measurements and permits degree {chosen.degree}. It produces {selected} feature columns.</> : "Each cell reports the number of feature columns produced by an expansion. Select a cell to inspect the corresponding parameter count."}</p>{chosen && selected !== null && <Equation>{"Coefficients including an intercept:\n" + selected + " + 1 = " + (selected + 1)}</Equation>}<p className="mt-2 text-sm text-slate-600 dark:text-slate-400">At least that many independent constraints are needed to identify an unregularized fit uniquely. Having enough observations by count alone is not sufficient if the resulting columns are dependent.</p>
+</>
     </div>
   );
 }

@@ -109,13 +109,9 @@ export function SweepCost() {
         />
       </div>
 
-      <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-500">
-        The counts are exact and the times are not, since they are a measurement
-        of whichever machine answered this request. What is worth reading off
-        them is that the per-pixel figure at 48 by 48 is roughly twice what it
-        is at 1024 by 1024, because on a small picture most of the time goes on
-        setting the sweep up rather than on doing the arithmetic.
-      </p>
+      <>
+<p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-500">Operation counts describe the requested sweep; timings measure a particular run on the responding machine. Keep those two kinds of evidence separate.</p><p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-500">The displayed small-image run has a higher time per pixel than the large-image run. Fixed setup work is more significant when there are fewer pixels over which to spread it. Compare repeated measurements before treating a timing ratio as a property of the algorithm.</p>
+</>
 
       <Failure message={message} />
     </div>

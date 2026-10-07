@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -19,7 +22,7 @@ import { UncertaintyProfile } from "@/components/widgets/UncertaintyProfile";
 export const metadata: Metadata = {
   title: "Patching Without a Vocabulary · oop_ml",
   description:
-    "Group a text's bytes back into larger pieces by cutting where the next byte is hard to guess, so a model settles the boundaries and no list has to hold them.",
+    "Group byte sequences into patches using fixed sizes or predictability-based boundaries.",
 };
 
 const link =
@@ -28,8 +31,12 @@ const link =
 export default function PatchingWithoutAVocabularyPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["patching-without-a-vocabulary"]}
+      technicalStart="Part 2. Cutting at a Fixed Size"
+      openingTitle="Bytes Solve Coverage and Create a Length Problem"
+      playgroundIntro="Compare the byte count with the patch count. Inspect fixed and adaptive boundaries, especially around stretches whose next bytes are difficult to predict."
       title="Patching Without a Vocabulary"
-      tagline="Group the bytes back into larger pieces by cutting where the next one is hard to guess, so a model settles the boundaries and no list has to hold them."
+      tagline="Group byte sequences into patches using fixed sizes or predictability-based boundaries."
       prerequisites={
         <>
           Two pages from earlier in this section, and this one finishes the
@@ -52,79 +59,14 @@ export default function PatchingWithoutAVocabularyPage() {
           the eighteen English sentences here are the ones both those pages use.
         </>
       }
-      history={
-        <>
-          <p>
-            Zellig Harris had the idea in 1955 and no computer to run it on. He
-            was at the University of Pennsylvania working on how a linguist
-            arriving at an unwritten language could find its units without
-            already knowing them, and in &ldquo;From Phoneme to Morpheme&rdquo;
-            he proposed counting, at each position in a word, how many different
-            sounds could follow what had been heard so far. Inside a word that
-            count is small, since only a few continuations make anything; at the
-            end of one it jumps, because any word at all can come next. He cut
-            where the count rose. Everything on this page is that proposal with
-            the count of possible continuations replaced by a measurement of how
-            uncertain a model is, which Shannon had defined seven years earlier
-            at Bell Labs and which he applied to English himself in 1951, asking
-            people to guess the next letter of a text and reporting that a
-            reader of English is uncertain by around one bit a letter rather
-            than the four and a bit an alphabet of that size allows.
-          </p>
-          <p>
-            The problem that brought it back was arithmetic rather than
-            linguistic. Lili Yu, D&aacute;niel Simig, Colin Flaherty, Armen
-            Aghajanyan, Luke Zettlemoyer and Mike Lewis, at Meta AI in 2023,
-            wanted a model that read raw bytes, which removes the tokenizer and
-            everything wrong with it, and found that the sequences were far too
-            long for a model that compares every position with every other. Their
-            answer in &ldquo;MegaByte: Predicting Million-byte Sequences with
-            Multiscale Transformers&rdquo; was to cut the bytes into blocks of a
-            fixed size, give a small model the bytes inside each block and a
-            large one a single vector per block. Piotr Nawrot and colleagues had
-            done the same partition inside the model the year before in
-            &ldquo;Hierarchical Transformers Are More Efficient Language
-            Models&rdquo;. Neither rule looks at the text, and Part 2 here is
-            what that costs.
-          </p>
-          <p>
-            Artidoro Pagnoni, Ram Pasunuru, Pedro Rodriguez, Lili Yu, Luke
-            Zettlemoyer, Mike Lewis, Ari Holtzman, Srinivasan Iyer and their
-            co-authors put Harris&rsquo;s rule back in 2024. Their Byte Latent
-            Transformer trains a small byte-level language model, asks it at
-            every position how uncertain it is about the next byte, and begins a
-            new block wherever that uncertainty is high, so a stretch the model
-            has seen a thousand times is swallowed into one long block and the
-            positions it cannot call get a block each. The title of the paper,
-            &ldquo;Byte Latent Transformer: Patches Scale Better Than
-            Tokens&rdquo;, is the claim, and the two rules for deciding what
-            counts as high are both theirs. What their small transformer does,
-            the model behind this page does with counts of how often one short
-            stretch of bytes was followed by each of the 256 possible next ones,
-            because the rule for cutting is the idea and the thing doing the
-            guessing is interchangeable.
-          </p>
-          <p>
-            The page answers six questions in order. What exactly does reading
-            bytes cost, and why is the obvious repair the one thing that has been
-            given up? What does the simplest possible grouping do, and where do
-            its cuts actually land when they are counted? What would it mean to
-            let the text choose the boundaries, and what is the quantity that
-            chooses them? What has to be true of the corpus before that quantity
-            says anything at all, which is where my own first attempt at this
-            went wrong? What is the whole arrangement worth in sequence length,
-            and against which alternative? And where does the method stop being
-            defined?
-          </p>
-        </>
-      }
+
       playground={<PatchExplorer />}
       sections={[
         {
           title: "Part 1. The Length the Bytes Cost",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Where this picks up, and the bill it picks up">
                 <p>
                   The previous page ended on a bill. Our sentence about Dr
@@ -221,7 +163,7 @@ export default function PatchingWithoutAVocabularyPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Cutting at a Fixed Size",
@@ -321,17 +263,14 @@ export default function PatchingWithoutAVocabularyPage() {
                   caption="All eighteen sentences, 763 bytes between them. The first row is every position there is, which is where the 65.6 per cent comes from."
                 />
                 <CutLandingChart />
-                <p>
-                  The orange line is the fixed rule at every block size from one
-                  to twelve, and it stays between 57.0 and 74.5 per cent, with
-                  the baseline of 65.6 running through the middle of that range.
-                  Some sizes are a little better than cutting anywhere and some
-                  are worse. That is not a failure of tuning. A rule that does
-                  not read the text cannot know where the words are, so picking a
-                  different block size moves the number of blocks without moving
-                  the quality of a single cut. The blue line, which is the next
-                  Part, is what happens when the text is allowed a say.
+                <>
+<p>
+                  The orange line is the fixed rule at every block size from one to twelve, and it stays between 57.0 and 74.5 per cent, with the baseline of 65.6 running through the middle of that range. Some sizes are a little better than cutting anywhere and some are worse. That is not a failure of tuning.
                 </p>
+                <p>
+                  A rule that does not read the text cannot know where the words are, so picking a different block size moves the number of blocks without moving the quality of a single cut. The blue line, which is the next Part, is what happens when the text is allowed a say.
+                </p>
+</>
                 <KeepInMind>
                   The right way to read the orange line is that it stays around
                   the baseline rather than falling below it, and which side it
@@ -382,6 +321,48 @@ export default function PatchingWithoutAVocabularyPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "A block under this method has an identity and a row the model learns, the way a merged vocabulary’s piece does.",
+              false,
+              "A block is still several byte values, and what the model gets is a single vector it works out from them. Nothing on this page produces a table, a number for a piece, or anything that could be looked up, so two occurrences of the same word are two runs of bytes that happen to agree and no part of the method notices that they do.",
+            ),
+            choice(
+              "Why is the length that matters the number of blocks rather than the number of bytes?",
+              [
+                "Only the large model, which reads the sequence of block vectors, is charged the square of the length",
+                "The small model reading inside a block is the slower of the two",
+                "A block stores fewer bytes than it was handed",
+                "The bytes are discarded once a block has been formed",
+              ],
+              0,
+              "The arrangement has two halves. A small model reads the bytes inside a block and produces one vector for it, and a large model reads the sequence of those vectors and never sees a byte at all.",
+            ),
+            choice(
+              "How often does a cut at a fixed block size land inside a word, across the eighteen sentences?",
+              [
+                "Between 57.0 and 74.5 per cent depending on the size, around a baseline of 65.6 per cent",
+                "28.8 per cent, which is what makes it a real method",
+                "Never, because the cuts are regular",
+                "It falls steadily as the block size rises",
+              ],
+              0,
+              "Of the 745 positions a cut could fall in, 489 have a letter or a digit on both sides, which is the 65.6 per cent an uninformed cut gives. A rule that does not read the text cannot know where the words are, so moving the block size moves the number of blocks without moving the quality of a single cut.",
+            ),
+            trueFalse(
+              "Cutting at a fixed byte offset can split one character across two blocks, and the text still reads back whole.",
+              true,
+              "A character can take more than one byte, and in the sentence with Ångström in it the two bytes of one letter fall either side of the boundary at offset 12, so neither side of that cut spells anything. Every byte is still there in order, and what has happened is that the small model reading one block is sometimes handed half a letter. On the eighteen English sentences the case never arises, which is why a measurement taken only on English reports this cost as zero.",
+            ),
+            trueFalse(
+              "The fixed rule is the one rule here whose sequence length is known before the text is read.",
+              true,
+              "The number of blocks is the number of bytes divided by the size, with nothing to fit, nothing to store and nothing that can go stale. At a size of one it is the byte reading again, 51 blocks for 51 bytes, and past the length of the text it is one block with the whole sentence handed to the small model.",
+            ),
+        ],
         },
         {
           title: "Part 3. Cutting Where the Next Byte Is Hard to Guess",
@@ -482,6 +463,22 @@ export default function PatchingWithoutAVocabularyPage() {
                     because the stretch in front of it never occurred. The other
                     three are within three thousandths of it.
                   </p>
+                  <p>
+                    Here is the first of them written out. One value holds
+                    2∕257 of the probability and each of the other 255 holds
+                    1∕257, and every value contributes its probability times
+                    the logarithm of one over that probability.
+                  </p>
+                  <Equation>
+                    {"H(after the start)  =  (2∕257) × log₂(257∕2)  +  255 × (1∕257) × log₂(257)\n" +
+                      "                    ≈  0.05452  +  7.94332  =  7.99784"}
+                  </Equation>
+                  <p>
+                    The 255 values nobody saw supply 7.94 of those bits between
+                    them. Seeing a once moved one value from one share to two,
+                    and against 255 others holding a share each that is a
+                    change in the third decimal place.
+                  </p>
                 </WorkedExample>
                 <p>
                   So the ordering is right. The position after a is less uncertain
@@ -517,17 +514,14 @@ export default function PatchingWithoutAVocabularyPage() {
                   {"above a level      cut at i  when  H(i) > t\n" +
                     "risen by a step    cut at i  when  H(i) − H(i−1) > t"}
                 </Equation>
-                <p>
-                  On text the model knows well the two usually agree, since a
-                  word start is both high and higher than the letter before it.
-                  They part company on a flat stretch. Where the uncertainty
-                  stays at 8 bits for a long run, which is what happens on writing the
-                  model has never seen, the first rule cuts at every single
-                  position and the second cuts at none of them, because a plateau
-                  has no rises. On our held-out sentence that is 30 blocks under
-                  the first rule and 7 under the second, from the identical set of
-                  numbers.
+                <>
+<p>
+                  On text the model knows well the two usually agree, since a word start is both high and higher than the letter before it. They part company on a flat stretch. Where the uncertainty stays at 8 bits for a long run, which is what happens on writing the model has never seen, the first rule cuts at every single position and the second cuts at none of them, because a plateau has no rises.
                 </p>
+                <p>
+                  On our held-out sentence that is 30 blocks under the first rule and 7 under the second, from the identical set of numbers.
+                </p>
+</>
                 <KeepInMind>
                   These are not two settings of one rule. On the case that
                   actually arises they are opposites, and neither answer is
@@ -614,6 +608,26 @@ export default function PatchingWithoutAVocabularyPage() {
                   position looks equally uncertain, and there is no threshold that
                   separates anything from anything.
                 </p>
+                <WorkedExample title="Solving for nine tenths">
+                  <p>
+                    Set the probability of the value that was seen to nine
+                    tenths and solve for n, the number of times the stretch was
+                    seen with that continuation.
+                  </p>
+                  <Equation>
+                    {"(n + 1) ∕ (n + 256)  =  0.9\n" +
+                      "n + 1  =  0.9 n + 230.4\n" +
+                      "0.1 n  =  229.4\n" +
+                      "n  =  2,294"}
+                  </Equation>
+                  <p>
+                    The 256 in the denominator is what makes the number so
+                    large. Every sighting has to outweigh the one observation
+                    credited to each of the 255 values that never came, and at
+                    a single sighting the same expression is 2∕257, which is
+                    under one per cent.
+                  </p>
+                </WorkedExample>
                 <KeepInMind>
                   This is a property of how much an unseen byte is credited with
                   and of how many byte values there are, rather than of the
@@ -633,17 +647,14 @@ export default function PatchingWithoutAVocabularyPage() {
                   of the word after it.
                 </p>
                 <CorpusConditionChart />
-                <p>
-                  The left panel is the ordinary setting. Twenty copies of the
-                  sentence put the position inside a word at 7.4674 bits and the
-                  word start at 7.5862, a gap of 0.1189 bits at a height where
-                  everything is nearly maximal, and the text comes out as 22
-                  blocks for 22 bytes at every threshold that cuts anything at
-                  all. The right panel credits an unseen byte with a thousandth
-                  instead. At twenty copies the same two positions are 0.106 and
-                  1.099, a gap of nearly a whole bit, and a threshold at half a
-                  bit falls cleanly between them.
+                <>
+<p>
+                  The left panel is the ordinary setting. Twenty copies of the sentence put the position inside a word at 7.4674 bits and the word start at 7.5862, a gap of 0.1189 bits at a height where everything is nearly maximal, and the text comes out as 22 blocks for 22 bytes at every threshold that cuts anything at all.
                 </p>
+                <p>
+                  The right panel credits an unseen byte with a thousandth instead. At twenty copies the same two positions are 0.106 and 1.099, a gap of nearly a whole bit, and a threshold at half a bit falls cleanly between them.
+                </p>
+</>
                 <KeepInMind>
                   I did not expect the difference to be this stark. The two
                   panels come from the same corpus under the same rule, and the
@@ -673,6 +684,27 @@ export default function PatchingWithoutAVocabularyPage() {
                     promises to do.
                   </p>
                 </WorkedExample>
+                <p>
+                  The edge is sharp because of where the threshold of half a
+                  bit happens to sit, and the numbers either side of it show
+                  how little moved. At seven copies twelve of the 22 positions
+                  score 0.5005 bits, which is over the threshold by the
+                  narrowest of margins, and with four word starts at 1.2535
+                  that makes sixteen positions over the line and sixteen
+                  blocks. At eight copies those twelve score 0.4457 and the
+                  word starts 1.2253, so only the four are still above it, at
+                  the first letters of cat, sat, on and mat, and four cuts
+                  make five blocks.
+                </p>
+                <p>
+                  Nothing about the sentence changed between the two. One more
+                  copy lowered every uncertainty a little, and a whole class
+                  of positions crossed the threshold together. A threshold of
+                  0.6 puts the same edge between five copies and six, and one
+                  of 0.4 puts it between nine and ten, which is the sense in
+                  which the edge belongs to the setting rather than to the
+                  writing.
+                </p>
                 <p>
                   Eight copies of one sentence is 176 bytes. It is worth saying
                   plainly how little that is, and how much it depends on the
@@ -743,17 +775,14 @@ export default function PatchingWithoutAVocabularyPage() {
                     no rise for the second rule to find.
                   </p>
                 </WorkedExample>
-                <p>
-                  The reason is that in this corpus the start of a word is exactly
-                  as predictable as the inside of one. After the space in the cat
-                  the only thing that ever came was a c, so the model is as certain
-                  there as it is between the t and the h of the. What made section
-                  15 work was that two different words followed the same short
-                  stretch, since e followed by a space led sometimes to cat and
-                  sometimes to mat. So the uncertainty at a word start measures
-                  how many different words the corpus put after that stretch, and
-                  a corpus with one word there produces none of it.
+                <>
+<p>
+                  The reason is that in this corpus the start of a word is exactly as predictable as the inside of one. After the space in the cat the only thing that ever came was a c, so the model is as certain there as it is between the t and the h of the. What made section 15 work was that two different words followed the same short stretch, since e followed by a space led sometimes to cat and sometimes to mat.
                 </p>
+                <p>
+                  So the uncertainty at a word start measures how many different words the corpus put after that stretch, and a corpus with one word there produces none of it.
+                </p>
+</>
                 <KeepInMind>
                   A corpus can be arbitrarily large and still fail this. The
                   model fits it perfectly and reports low uncertainty everywhere,
@@ -787,17 +816,14 @@ export default function PatchingWithoutAVocabularyPage() {
                   ]}
                   caption="All eighteen sentences at a threshold of one bit. Cutting anywhere at all gives 65.6 per cent, which is where the first row nearly is."
                 />
-                <p>
-                  A byte of context is one letter, and one letter does not tell
-                  you where you are in a word, so the first row is close to the
-                  uninformed rate for the same reason the fixed rule is. By four
-                  bytes the model is looking at most of a short word and the cuts
-                  are more than twice as good, and the fifth byte adds little,
-                  which is roughly where the improvement stops on a corpus this
-                  small. It stops because a longer stretch occurs less often, so
-                  each extra byte of context leaves more of the text scored under
-                  stretches the corpus never contained.
+                <>
+<p>
+                  A byte of context is one letter, and one letter does not tell you where you are in a word, so the first row is close to the uninformed rate for the same reason the fixed rule is. By four bytes the model is looking at most of a short word and the cuts are more than twice as good, and the fifth byte adds little, which is roughly where the improvement stops on a corpus this small.
                 </p>
+                <p>
+                  It stops because a longer stretch occurs less often, so each extra byte of context leaves more of the text scored under stretches the corpus never contained.
+                </p>
+</>
                 <KeepInMind>
                   Every number in this Part is measured on a corpus of 763 bytes,
                   which is small enough that a reader can check any of it and far
@@ -809,6 +835,54 @@ export default function PatchingWithoutAVocabularyPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "What does the uncertainty rule cut on?",
+              [
+                "Positions where the next byte is hard to guess, measured as the entropy of the guesser’s spread over the 256 values",
+                "Positions where a space occurs in the text",
+                "Positions where the byte value itself passes a threshold",
+                "Positions a learned table has marked as boundaries",
+              ],
+              0,
+              "The difficulty of the guess falls through a word and jumps at the join between two, which is Harris’s observation. Nothing about it is specific to words or to English, and it works on a script with no spaces for the same reason it works on one with them. Nothing has to be stored and something has to be trained, which is a swap rather than a saving.",
+            ),
+            trueFalse(
+              "A reading of exactly 8 bits means the text genuinely could go several ways at that position.",
+              false,
+              "A stretch the corpus never contained comes out flat, since after the small amount is added every one of the 256 values has the same probability, and a flat spread over 256 outcomes is 8 bits by the definition. The ceiling means either that anything could come next or that nobody knows, and the method cuts at both and cannot tell them apart.",
+            ),
+            choice(
+              "On a run that stays at 8 bits, how do the two cutting rules differ?",
+              [
+                "The level rule cuts at every position and the rise rule at none, which is 30 blocks against 7 on the held-out sentence",
+                "They agree, since both are read off the same numbers",
+                "The rise rule cuts at every position and the level rule at none",
+                "Neither cuts, because a plateau carries no information",
+              ],
+              0,
+              "On text the model knows well the two usually agree, since a word start is both high and higher than the letter before it. A plateau has no rises, so on the case that actually arises they are opposites, and neither answer is obviously the right one.",
+            ),
+            several(
+              "Which of these hold for the guesser of Part 4?",
+              [
+                "With one observation credited to every unseen value, a stretch has to be seen with the same continuation 2,294 times before the guesser is ninety per cent sure of it",
+                "Twenty copies of the phrase the cat sat score every one of its eleven positions at 0.198144 bits, so the phrase is one block at any threshold",
+                "Reading a hundred times more text repairs the flatness, even for a stretch that is still rare",
+                "Looking back one byte cuts better than looking back four, since a shorter stretch has been seen more often",
+              ],
+              [0, 1],
+              "Seen once with one continuation, the observed value holds two shares against one each for the other 255, which is barely distinguishable from flat. That is a property of the credit and of there being 256 values rather than of the corpus, so more text does not fix it for a stretch that is still rare. The repeated phrase fails the other way, since the start of a word there is exactly as predictable as the inside of one. And on the eighteen sentences context helps, with one byte back putting 63.0 per cent of its cuts inside a word and four bytes back 28.8 per cent.",
+            ),
+            trueFalse(
+              "Reading twenty copies of one sentence gives the guesser something that one copy with a smaller credit for unseen bytes could not.",
+              false,
+              "Multiplying every count by a number and then adding a fixed amount to each gives the same spread as leaving the counts alone and adding that amount divided by the number. Measured, twenty copies with a thousandth credited to each unseen byte and one copy with a twenty thousandth agree at every one of the 22 positions to 1.7 parts in 10¹⁶ and cut the sentence into identical blocks, so the corpus-size axis is the credit axis in disguise.",
+            ),
+        ],
         },
         {
           title: "Part 5. The Bill, and Where It Is Not Worth Paying",
@@ -915,17 +989,14 @@ export default function PatchingWithoutAVocabularyPage() {
                   ]}
                   caption="A sentence none of the three fitted methods was built from, ordered by what it costs."
                 />
-                <p>
-                  I want to be careful about what this does and does not show. The
-                  guesser here read 763 bytes, and a real one reads billions, so
-                  the honest statement is that the method needs a model good
-                  enough that its uncertainty is informative on text it has not
-                  seen, and that nothing on this page establishes how much text
-                  that takes. What the measurement does establish is the direction
-                  of the failure. When the guesser is out of its depth the blocks
-                  get shorter rather than worse, so the cost lands on the sequence
-                  length, which is the one thing the method was bought for.
+                <>
+<p>
+                  I want to be careful about what this does and does not show. The guesser here read 763 bytes, and a real one reads billions, so the honest statement is that the method needs a model good enough that its uncertainty is informative on text it has not seen, and that nothing on this page establishes how much text that takes.
                 </p>
+                <p>
+                  What the measurement does establish is the direction of the failure. When the guesser is out of its depth the blocks get shorter rather than worse, so the cost lands on the sequence length, which is the one thing the method was bought for.
+                </p>
+</>
                 <KeepInMind>
                   A fixed block size is the safe choice in exactly the case the
                   uncertainty rule is worst in, since its sequence length is the
@@ -1126,6 +1197,350 @@ export default function PatchingWithoutAVocabularyPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            trueFalse(
+              "On the eighteen sentences the uncertainty rule produces a shorter sequence than the merged vocabulary does.",
+              true,
+              "763 bytes become 129 blocks, a factor of 5.9, where the merged vocabulary on the same text takes 263 numbers, and the uncertainty rule holds no table at all. A model comparing every position with every other does work in proportion to the square of the length, so 129 against 763 is around 35 times less of it.",
+            ),
+            choice(
+              "On the held-out sentence about Dr Alvarez, how do the three readings compare?",
+              [
+                "The merged vocabulary gives 25 numbers, the fixed rule 13 blocks and the uncertainty rule 30",
+                "The uncertainty rule gives the shortest of the three",
+                "All three come to about the same length",
+                "The fixed rule gives the longest, since it reads nothing",
+              ],
+              0,
+              "26 of the sentence’s 51 positions come out at exactly 8 bits, because the four-byte stretch in front of each never occurred in 763 bytes of text. On text it knows the rule gives 5.9 bytes to a block and here it gives 1.7, so it loses both to the thing it was meant to replace and to a rule with no model behind it at all.",
+            ),
+            trueFalse(
+              "Across the eighteen sentences the rule produces 129 blocks with 77 distinct spellings, and the run The followed by a space is one of those blocks twelve separate times.",
+              true,
+              "Nothing in the method notices. There are twelve runs of four bytes that happen to agree, and each is presented to the model afresh. A vocabulary is exactly the thing that would have said those twelve are one word, which is what makes a frequent piece cheap and what lets a model gather what it has learned about a word into one row.",
+            ),
+            choice(
+              "At a threshold of two bits, not one cut on the eighteen sentences falls inside a word. Why is that not the ideal setting?",
+              [
+                "The eighteen sentences hold 115 word starts and the setting found 39 boundaries, so there are too few cuts for any to be wrong",
+                "Two bits is outside the range the entropy can take",
+                "Those sentences hold no words long enough to cut inside",
+                "Two bits sits below the uninformed baseline of 65.6 per cent",
+              ],
+              0,
+              "The threshold does not merely tune the answer, it spans the whole range of possible answers, taking the total from 188 blocks to 18, where 18 is one block per sentence and the grouping has done nothing at all. There is no setting at which the method reports how confident it is in a boundary.",
+            ),
+            several(
+              "Which of these follow from the pieces being a property of the guesser rather than of the text?",
+              [
+                "A threshold tuned for one model says nothing about what to use for another",
+                "Removing half the corpus can leave the same number of blocks with different pieces",
+                "A guesser’s uncertainty on a stretch cannot be recovered from anything smaller than the whole model",
+                "The text can no longer be read back from its blocks",
+              ],
+              [0, 1, 2],
+              "Nothing here is undefined in the sense of a division by zero, and the bytes are all still there in order. What is undefined is the question of what the pieces of a text are, which has no answer until a model is named and a different answer for every model. A bit of uncertainty means something different for every guesser, so the threshold has no scale attached.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Cutting Bytes Into Blocks With the Library",
+          practice: [
+            exercise(
+              "Cut at a fixed size",
+              ["Cut the running sentence every four bytes with a FixedSizePatcher and print how many blocks it comes to and what they spell. Then cut the sentence with Ångström in it the same way, and print how many blocks it makes and the offsets at which a block, read on its own, is not text. Last, cut all eighteen sentences at block sizes of 4, 6, 8 and 12 and print the total number of blocks at each.", "The first line should be the thirteen blocks of section 5, the offsets should be the two either side of the split letter in section 7, and the totals for 4, 8 and 12 should be the table of section 6. The table has no row for a size of 6."],
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    FixedSizePatcher,
+)
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+accented = "Dr. \\u00c5ngstr\\u00f6m expected the re-analysis."
+
+# Build a FixedSizePatcher with patch_size=4 and patch the sentence.
+# Print n_patches and the text of every block.
+
+# Patch the accented sentence. A block cut part way through a letter
+# decodes with the replacement character "\\ufffd" in its text, so print
+# n_patches and the start of every block whose text holds one.
+
+# For each size in 4, 6, 8 and 12, add up n_patches over the corpus.`,
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    FixedSizePatcher,
+)
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+accented = "Dr. \\u00c5ngstr\\u00f6m expected the re-analysis."
+
+fours = FixedSizePatcher(patch_size=4)
+blocks = fours.patch(sentence)
+print(f"{blocks.n_patches} blocks: {[piece.text for piece in blocks]}")
+
+broken = [piece.start for piece in fours.patch(accented) if "\\ufffd" in piece.text]
+print(f"accented: {fours.patch(accented).n_patches} blocks, not text at offsets {broken}")
+
+for size in (4, 6, 8, 12):
+    cutter = FixedSizePatcher(patch_size=size)
+    total = sum(cutter.patch(text).n_patches for text in corpus)
+    print(f"every {size:2d} bytes: {total} blocks over the eighteen sentences")`,
+              `13 blocks: ['Dr. ', 'Alva', 'rez ', 'didn', "'t e", 'xpec', 't th', 'e lo', 'w-co', 'st r', 'e-an', 'alys', 'is.']
+accented: 10 blocks, not text at offsets [8, 12]
+every  4 bytes: 197 blocks over the eighteen sentences
+every  6 bytes: 135 blocks over the eighteen sentences
+every  8 bytes: 102 blocks over the eighteen sentences
+every 12 bytes: 72 blocks over the eighteen sentences`,
+              { hints: ["FixedSizePatcher takes patch_size and is never fitted. Its patch method takes a text and answers the blocks, which know n_patches and can be looped over.", "Each block carries its text, its start and its end as byte offsets. The accented sentence is written with escapes so that the script holds only plain characters, and nothing here prints a letter a terminal might refuse.", "The corpus total is a sum over the eighteen sentences of each one’s n_patches, with a new patcher for each size."], check: numberCheck("How many blocks do the eighteen sentences come to at a block size of 6?", 135, 0.0, "The number of blocks is the bytes divided by the size and rounded up, taken one sentence at a time. 763 bytes over 6 is a little over 127, and rounding up once for each of the eighteen sentences brings the total to 135. The quality of the cuts has not moved, which is section 6’s point, since a rule that does not read the text only ever changes how many blocks there are.") },
+            ),
+            exercise(
+              "Cut where the next byte is hard to guess, under both rules",
+              ["Fit an EntropyPatcher on twenty copies of the eighteen sentences, looking back four bytes, with a threshold of one bit and a thousandth credited to every unseen byte, which are the settings behind Parts 3 and 5. Do it once for each of the two rules of section 11. For each, print the blocks of the first corpus sentence, the number of blocks the running sentence comes to, and the total over the corpus with the bytes per block to two places. Then print how many of the running sentence’s positions score 8 bits.", "Under the level rule you should get the six blocks of section 12, the 30 of section 20 and the 129 of section 19, and 26 positions at the ceiling. Under the rise rule the running sentence should come to the 7 of section 11. The page never puts the rise rule to the whole corpus."],
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    EntropyPatcher,
+    PatchingRule,
+)
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for rule in (PatchingRule.GLOBAL_THRESHOLD, PatchingRule.RELATIVE_INCREASE):
+    # Build an EntropyPatcher with order=4, threshold=1.0, smoothing=0.001
+    # and this rule, and fit it on corpus * 20. Print the rule's value, the
+    # block texts of corpus[0], n_patches for the sentence, and the corpus
+    # total with 763 divided by it.
+    ...
+
+# entropies_of gives one number per byte. Count the sentence's positions
+# that are at 8 bits, allowing for rounding in the last place.`,
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    EntropyPatcher,
+    PatchingRule,
+)
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for rule in (PatchingRule.GLOBAL_THRESHOLD, PatchingRule.RELATIVE_INCREASE):
+    guesser = EntropyPatcher(order=4, threshold=1.0, smoothing=0.001, rule=rule).fit(corpus * 20)
+    total = sum(guesser.patch(text).n_patches for text in corpus)
+    print(rule.value)
+    print(f"  the sentence it read: {[piece.text for piece in guesser.patch(corpus[0])]}")
+    print(f"  the running sentence: {guesser.patch(sentence).n_patches} blocks")
+    print(f"  the corpus: {total} blocks, {763 / total:.2f} bytes to a block")
+
+entropies = guesser.entropies_of(sentence)
+flat = sum(value > 8.0 - 1e-9 for value in entropies)
+print(f"positions at 8 bits: {flat} of {len(entropies)}")`,
+              `global_threshold
+  the sentence it read: ['The ', 're', 'port was ', 'expected ', 'on ', 'Monday.']
+  the running sentence: 30 blocks
+  the corpus: 129 blocks, 5.91 bytes to a block
+relative_increase
+  the sentence it read: ['The ', 're', 'port was ', 'expected on Monday.']
+  the running sentence: 7 blocks
+  the corpus: 79 blocks, 9.66 bytes to a block
+positions at 8 bits: 26 of 51`,
+              { hints: ["EntropyPatcher takes order, threshold, smoothing and rule as keywords, and fit takes a list of texts and answers the fitted patcher, so the two can be chained. corpus * 20 is the list repeated twenty times.", "patch answers the same kind of blocks the fixed rule does, with n_patches and a text on each. A rule is an enum member, and its value is the readable name.", "The uncertainties do not depend on the rule, only the cuts do, so entropies_of from either fitted patcher gives the same numbers. A stretch the corpus never held scores 8 to within rounding, so compare against 8 less a billionth rather than against 8 exactly."], check: numberCheck("How many blocks do the eighteen sentences come to under the rise rule?", 79, 0.0, "An uncertainty is never negative, so a position that has risen more than a bit above the one before it is also above one bit, and every cut the rise rule makes is one the level rule makes too. It makes 61 of the level rule’s 111, which is 79 blocks against 129. On the sentence the guesser read it joins expected, on and Monday into one block, because the uncertainty at those two word starts was above one bit without being a whole bit above the position before.") },
+            ),
+            exercise(
+              "Look further back, on text the guesser has and has not read",
+              ["Section 18 lengthens the stretch the guess is conditioned on and watches the corpus come out in fewer blocks. Do the same from one byte back to six, and beside the corpus total print what the page does not, which is the number of blocks the running sentence comes to and how many of its 51 positions score 8 bits.", "The corpus column should be the table of section 18 with a sixth row added. Watch the other two columns move the opposite way, and find the context length at which the sentence the guesser never read is shortest."],
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    EntropyPatcher,
+)
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for order in (1, 2, 3, 4, 5, 6):
+    # Fit an EntropyPatcher with this order, threshold=1.0 and
+    # smoothing=0.001 on corpus * 20. Print the order, the corpus total of
+    # n_patches, n_patches for the sentence, and how many of the sentence's
+    # entropies are within a billionth of 8.
+    ...`,
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    EntropyPatcher,
+)
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for order in (1, 2, 3, 4, 5, 6):
+    guesser = EntropyPatcher(order=order, threshold=1.0, smoothing=0.001).fit(corpus * 20)
+    read = sum(guesser.patch(text).n_patches for text in corpus)
+    unread = guesser.patch(sentence).n_patches
+    flat = sum(value > 8.0 - 1e-9 for value in guesser.entropies_of(sentence))
+    print(f"{order} back: corpus {read:3d} blocks, running sentence {unread} blocks, {flat:2d} positions at 8 bits")`,
+              `1 back: corpus 693 blocks, running sentence 44 blocks,  0 positions at 8 bits
+2 back: corpus 338 blocks, running sentence 25 blocks, 10 positions at 8 bits
+3 back: corpus 191 blocks, running sentence 27 blocks, 21 positions at 8 bits
+4 back: corpus 129 blocks, running sentence 30 blocks, 26 positions at 8 bits
+5 back: corpus 110 blocks, running sentence 34 blocks, 31 positions at 8 bits
+6 back: corpus  98 blocks, running sentence 38 blocks, 36 positions at 8 bits`,
+              { hints: ["order is the number of preceding bytes the guess is conditioned on. Everything else stays as it was in the problem before, with the rule left at its default, which is the level rule.", "entropies_of answers one uncertainty per byte of the text. Summing a comparison over them counts the positions for which it holds."], check: numberCheck("How many blocks does the running sentence come to when the guesser looks back two bytes?", 25, 0.0, "Two bytes back is the shortest the sentence gets. From there every byte of context added makes the corpus shorter and this sentence longer, 27, 30, 34 and 38 blocks, because a longer stretch occurs less often and more of an unread text is scored under stretches the corpus never held, 10 positions at 8 bits with two bytes back and 36 of the 51 with six. One byte back is worse again for the opposite reason, since nothing is at the ceiling and a single letter says too little, which is the first row of the table in section 18.") },
+            ),
+            exercise(
+              "Find the edge between seven copies and eight",
+              ["Take the six-word sentence about the cat. For seven, eight and twenty copies of it, fit an EntropyPatcher that looks back two bytes with a threshold of half a bit and a thousandth credited to unseen bytes, and print the blocks it cuts the sentence into, with the uncertainty at the second byte to four places. Then fit one copy with a twenty thousandth credited, and print the largest difference between its uncertainties and those of the twenty copies, and whether the two cut the sentence into the same blocks.", "You should see the sixteen blocks and the five of section 15, and the agreement of section 16 to about sixteen decimal places. Read the uncertainty at the second byte against the threshold at seven copies and at eight, and the sharpness of the edge is explained."],
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    EntropyPatcher,
+)
+
+cat = "the cat sat on the mat"
+
+for copies in (7, 8, 20):
+    # Fit with order=2, threshold=0.5, smoothing=0.001 on [cat] * copies.
+    # Print the copies, n_patches for cat, the entropy at position 1 to
+    # four places, and the block texts.
+    ...
+
+# Fit the same settings on twenty copies, and on one copy with smoothing
+# 0.001 / 20. Print the largest absolute difference between their
+# entropies of cat, and whether their patches of cat are equal.`,
+              `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
+    EntropyPatcher,
+)
+
+cat = "the cat sat on the mat"
+
+for copies in (7, 8, 20):
+    guesser = EntropyPatcher(order=2, threshold=0.5, smoothing=0.001).fit([cat] * copies)
+    blocks = guesser.patch(cat)
+    second = guesser.entropies_of(cat)[1]
+    print(f"{copies:2d} copies: {blocks.n_patches:2d} blocks, second byte at {second:.4f} bits")
+    print(f"           {[piece.text for piece in blocks]}")
+
+many = EntropyPatcher(order=2, threshold=0.5, smoothing=0.001).fit([cat] * 20)
+one = EntropyPatcher(order=2, threshold=0.5, smoothing=0.001 / 20).fit([cat])
+gap = max(abs(a - b) for a, b in zip(many.entropies_of(cat), one.entropies_of(cat)))
+print(f"largest difference {gap:.1e}, same blocks {many.patch(cat) == one.patch(cat)}")`,
+              ` 7 copies: 16 blocks, second byte at 0.5005 bits
+           ['t', 'he ', 'c', 'a', 't ', 's', 'a', 't ', 'o', 'n', ' ', 't', 'he ', 'm', 'a', 't']
+ 8 copies:  5 blocks, second byte at 0.4457 bits
+           ['the ', 'cat ', 'sat ', 'on the ', 'mat']
+20 copies:  5 blocks, second byte at 0.1981 bits
+           ['the ', 'cat ', 'sat ', 'on the ', 'mat']
+largest difference 1.7e-16, same blocks True`,
+              { hints: ["[cat] * copies is a list holding the sentence that many times, which is what fit takes. The settings are order=2, threshold=0.5 and smoothing=0.001.", "entropies_of(cat) is one number per byte, so index 1 is the h of the first word, an ordinary position inside a word.", "Two sets of blocks compare equal with == when they cut the text at the same places, and zip pairs the two lists of uncertainties position by position."], check: numberCheck("What is the uncertainty at the second byte at seven copies, to four places?", 0.5005, 5e-05, "The threshold is half a bit, and at seven copies an ordinary position inside a word scores 0.5005, which is over it by about five ten-thousandths, so the rule cuts there, the eleven other positions at the same figure go the same way, and the sentence is letters and fragments. At eight copies the same position scores 0.4457 and is left alone, and only the four word starts are still above the threshold. The edge is where one class of positions crosses a number somebody chose.") },
+            ),
+          ],
         },
       ]}
     />

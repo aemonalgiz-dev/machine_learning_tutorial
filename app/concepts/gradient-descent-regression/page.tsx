@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -24,7 +27,7 @@ import { TrajectoryDashboard } from "@/components/widgets/TrajectoryDashboard";
 export const metadata: Metadata = {
   title: "Fitting by Walking · oop_ml",
   description:
-    "The line page solved for its answer in one step. This page reaches the same line by walking downhill on the loss, and because the answer is already known, the walk can be judged honestly at every pass.",
+    "Improve a fitted line one small adjustment at a time, using the slope of its error.",
 };
 
 const linkClass =
@@ -33,8 +36,12 @@ const linkClass =
 export default function GradientDescentRegressionPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["gradient-descent-regression"]}
+      technicalStart="Part 3. The Gradient as a Local Direction"
+      openingTitle="Finding the Line Without Knowing the Answer"
+      playgroundIntro="Follow the current line and its error together. Compare a small learning rate with a larger one, and watch whether the error falls or grows."
       title="Fitting by Walking"
-      tagline="The same line as the closed form, reached one small step at a time."
+      tagline="Improve a fitted line one small adjustment at a time, using the slope of its error."
       prerequisites={
         <>
           The line being fitted and the loss being lowered are both from the{" "}
@@ -48,52 +55,14 @@ export default function GradientDescentRegressionPage() {
           &rsquo;s derivative.
         </>
       }
-      history={
-        <>
-          <p>
-            Augustin-Louis Cauchy presented the method to the Paris Academy in
-            1847, in a short note titled &ldquo;Méthode générale pour la
-            résolution des systèmes d&rsquo;équations simultanées&rdquo;, and
-            his problem was astronomical. Fitting an orbit meant solving the
-            normal equations Legendre and Gauss had left behind, and Cauchy
-            wanted a way of reaching their answer without the elimination, by
-            starting anywhere and moving in the direction the sum of squares
-            falls fastest. He gave the direction, the negative of the
-            derivative, and left the size of each step to be chosen, which is
-            still the part that goes wrong. For fitting a straight line the
-            walk is entirely unnecessary, since the formula on the regression
-            page is exact and forty years older than his note, and I fit this
-            page&rsquo;s three people with that formula in one step before
-            letting the walk start.
-          </p>
-          <p>
-            Haskell Curry, doing applied work for the war effort in 1944,
-            wrote up the method of steepest descent for nonlinear problems and
-            noted what wartime computing had made clear, that for large
-            problems the walk is cheaper than the solve. Herbert Robbins and
-            Sutton Monro showed in 1951 that the walk still arrives when each
-            step uses a noisy estimate of the slope rather than the slope
-            itself, which is what stepping on one row at a time does, and
-            Bernard Widrow and Ted Hoff at Stanford in 1960 built a device
-            that fitted a linear unit exactly that way, one measurement at a
-            time, correcting its weights by the error on each. Their rule is
-            this page&rsquo;s update with the mean taken over a single row.
-            For almost every model after this page there is no formula. The
-            logistic page has no closed form and the network pages have
-            nothing like one, so the walk is what they all use, and this page
-            fits the one model where the right answer is independently known,
-            so that we can watch the walk arriving at it and see its failures
-            for what they are.
-          </p>
-        </>
-      }
+
       playground={<DescentWalkPlayground />}
       sections={[
         {
           title: "Part 1. Why Fit by Walking?",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The answer we already know">
                 <p>
                   Three people, at 165 centimetres and 62 kilograms, 170 and 68,
@@ -150,7 +119,7 @@ export default function GradientDescentRegressionPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Every Line Is a Point in Parameter Space",
@@ -162,14 +131,18 @@ export default function GradientDescentRegressionPage() {
                   This page writes the same line a different way.
                 </p>
                 <Equation>{"ŷ = α + β·x                 intercept and slope\nŷ = level + slope·(x − x̄)   level at the mean, and slope"}</Equation>
-                <p>
-                  The level is the prediction at the mean height, 170 here, and
-                  the slope is the predicted change per centimetre either side
-                  of it. The line has not changed. A slope of 0.6 and a level
-                  of 66 is exactly the line with a slope of 0.6 and an
-                  intercept of −36, since 66 − 0.6 × 170 is −36. Only the way
-                  of naming it has changed.
-                </p>
+                <>
+                  <p>
+                    The level is the prediction at the mean height, which is 170
+                    centimetres here. The slope is the predicted change per centimetre.
+                    A level of 66 and a slope of 0.6 describe the same line as an
+                    intercept of −36 and a slope of 0.6.
+                  </p>
+                  <Equation>{"intercept = level − slope × mean height\n          = 66 − 0.6 × 170\n          = −36"}</Equation>
+                  <p>
+                    Only the reference point used to describe the line has changed.
+                  </p>
+                </>
                 <NumberTable
                   headings={["", "intercept and slope", "level and slope"]}
                   rows={[
@@ -397,6 +370,54 @@ export default function GradientDescentRegressionPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 to 4",
+          quiz: [
+            choice(
+              "The regression page’s formula already gives these three people their best line in one step. Why walk to it?",
+              [
+                "Because a known answer is what lets us check whether the walk arrived, how fast, and what went wrong when it did not",
+                "Because the walk reaches a lower loss than the formula does",
+                "Because the formula needs a matrix inverse and the walk does not",
+                "Because three people is too few for the formula to apply",
+              ],
+              0,
+              "Nothing on the page improves on those numbers, which is the point of using the method where it is not needed. The direct route is a system of linear equations solved through a QR or singular value decomposition rather than by forming an inverse, and on the logistic page and every page after it no such check is available at all.",
+            ),
+            trueFalse(
+              "A level of 66 with a slope of 0.6 and an intercept of −36 with a slope of 0.6 are the same line.",
+              true,
+              "Only the reference point used to describe the line has changed. The level is the prediction at the mean height of 170 and the intercept is the prediction at a height of zero, so the intercept is the level less the slope times the mean height, 66 less 0.6 times 170. Every candidate line still earns one loss, whichever pair of numbers describes it.",
+            ),
+            choice(
+              "Why do the uphill and downhill arrows always cross the contours at right angles?",
+              [
+                "Because the direction along a contour is the direction in which the loss does not change at all",
+                "Because the two partial derivatives are always equal in size",
+                "Because the surface is symmetric about its minimum",
+                "Because the learning rate is small enough to keep the step short",
+              ],
+              0,
+              "A contour is where the loss is constant, so moving along one changes nothing and the whole of the change lies across it. The gradient is assembled from the two partial derivatives and points the way the loss increases fastest, and its negative is the direction a pass steps.",
+            ),
+            choice(
+              "At pass zero both settings are 0, the loss is 4364, and the two gradients are −132 and −20. At a rate of 0.02, where does the first pass land?",
+              [
+                "A level of 2.64 and a slope of 0.4, with a loss of 4017.16",
+                "A level of 132 and a slope of 20, with a loss of 0",
+                "A level of 2.64 and a slope of 0.4, with the loss still 4364",
+                "A level of 66 and a slope of 0.6, which is the closed form",
+              ],
+              0,
+              "Each setting steps against its own gradient scaled by the rate, which takes the loss from 4364 to 4017.16. The next pass then reads its gradient at the new line rather than the old one, landing at 5.1744 and 0.5333, and that re-reading is what makes the walk a walk.",
+            ),
+            trueFalse(
+              "Every observation contributes to the gradient, and what each contributes depends on both its residual and its input.",
+              true,
+              "The level reaches a squared residual through a chain whose middle step is −1, so the level gradient is minus two thirds of the summed residuals, which is −132 here. The slope reaches it through that person’s centred height instead, so each residual is weighted by that height before the sum.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. The Complete Walk",
           content: (
             <>
@@ -406,17 +427,14 @@ export default function GradientDescentRegressionPage() {
                   reads that record off every instrument at once. The scrubber picks a pass and every panel follows it.
                 </p>
                 <TrajectoryDashboard />
-                <p>
-                  Four things are visible here that a single loss curve hides.
-                  The two settings move at very different speeds. The slope is
-                  at 0.6 to four decimals by pass 10, while the level is at
-                  22.1 then, 64.9 at pass 100 and 65.98 at pass 200. The loss
-                  drops fast at first and slowly later, and on the log scale
-                  the late part is a straight line, which is geometric
-                  approach. The gradient shrinks with it. And the fit agrees
-                  ever more closely with the closed form, without ever being
-                  told what the closed form is.
+                <>
+<p>
+                  Four things are visible here that a single loss curve hides. The two settings move at very different speeds. The slope is at 0.6 to four decimals by pass 10, while the level is at 22.1 then, 64.9 at pass 100 and 65.98 at pass 200. The loss drops fast at first and slowly later, and on the log scale the late part is a straight line, which is geometric approach.
                 </p>
+                <p>
+                  The gradient shrinks with it. And the fit agrees ever more closely with the closed form, without ever being told what the closed form is.
+                </p>
+</>
               </SubSection>
 
               <SubSection title="15. What convergence means">
@@ -584,6 +602,33 @@ export default function GradientDescentRegressionPage() {
                   heights each has its own curvature.
                 </p>
                 <Equation>{"c_level = 2\nc_slope = 2·Var(x′) = 2 × 50/3 = 100/3"}</Equation>
+                <WhyThisWorks title="Where the two curvatures come from">
+                  <p>
+                    A curvature is how quickly a gradient changes as its own
+                    setting moves, so the two gradients of Part 4 are what to
+                    differentiate once more.
+                  </p>
+                  <DerivationTable
+                    rows={[
+                      { expression: "∂L/∂level = −(2/n) Σ eᵢ", reason: "the level gradient of section 11" },
+                      { expression: "∂eᵢ/∂level = −1", reason: "raising the level by one lowers every residual by one" },
+                      { expression: "∂²L/∂level² = (2/n) Σ 1 = 2", reason: "every person contributes the same 2/n, and there are n of them" },
+                      { expression: "∂L/∂slope = −(2/n) Σ eᵢ·x′ᵢ", reason: "the slope gradient of section 12" },
+                      { expression: "∂²L/∂slope² = (2/n) Σ x′ᵢ² = 2·Var(x′)", reason: "∂eᵢ/∂slope is −x′ᵢ, and a centred input has mean zero, so the average of x′² is its variance" },
+                      { expression: "(2/3)(25 + 0 + 25) = 100/3", reason: "the three people, at centred heights of −5, 0 and 5" },
+                    ]}
+                  />
+                  <p>
+                    The level&rsquo;s gradient changes by the same amount per
+                    person whatever the heights are, which is why its curvature
+                    is 2 for any dataset handed over this way. The slope&rsquo;s
+                    gradient changes by a person&rsquo;s squared centred height,
+                    so its curvature is set by how spread out the inputs are.
+                    That is the fact section 25 uses when it scales the input,
+                    and it is the reason the two directions of one surface can
+                    be curved so differently.
+                  </p>
+                </WhyThisWorks>
                 <p>
                   Each has its own factor, and the rate has to be safe for
                   both. The two number lines below move together as η changes,
@@ -605,34 +650,38 @@ export default function GradientDescentRegressionPage() {
                   one. At η = 0.02 the two factors are
                 </p>
                 <Equation>{"|1 − 0.02 × 2|       = 0.96\n|1 − 0.02 × 100/3|   ≈ 0.333"}</Equation>
-                <p>
-                  so the slope error is cut to a third every pass and the level
-                  error is cut by four percent. The slope has thrown away two
-                  thirds of its error before the level has thrown away four
-                  percent of its, and after the first dozen passes the walk is
-                  entirely a walk in the level direction. The distance panel on
-                  the dashboard in section 14 draws both errors on a log scale,
-                  where each is a straight line and the slope&rsquo;s is far
-                  steeper. The 477 passes are the level&rsquo;s doing, and
-                  nothing is wrong with the slope at all.
+                <>
+<p>
+                  so the slope error is cut to a third every pass and the level error is cut by four percent. The slope has thrown away two thirds of its error before the level has thrown away four percent of its, and after the first dozen passes the walk is entirely a walk in the level direction.
                 </p>
+                <p>
+                  The distance panel on the dashboard in section 14 draws both errors on a log scale, where each is a straight line and the slope&rsquo;s is far steeper. The 477 passes are the level&rsquo;s doing, and nothing is wrong with the slope at all.
+                </p>
+</>
               </SubSection>
 
               <SubSection title="23. The best fixed-rate compromise">
-                <p>
-                  For one direction, η = 1/c sets its factor to zero and lands
-                  on the optimum in a single pass. With two curvatures no one
-                  rate can do that for both, and the best fixed rate is a
-                  compromise between them.
-                </p>
-                <WhyThisWorks title="Where the compromise sits">
+                <>
                   <p>
-                    Call the smallest curvature μ and the largest L. The worst
-                    factor at a rate η is the larger of |1 − ημ| and |1 − ηL|,
-                    and the rate that makes it smallest is the one where the
-                    two are equal in size and opposite in sign, 1 − ημ = −(1 −
-                    ηL).
+                    For a single direction with curvature c, there is a rate that
+                    removes all the remaining error in one step.
                   </p>
+                  <Equation>{"rate η = 1/c\nremaining-error factor = 1 − ηc = 1 − (1/c)c = 0"}</Equation>
+                  <p>
+                    With two different curvatures, one rate cannot do that for both. The
+                    best fixed rate must balance the two directions.
+                  </p>
+                </>
+                <WhyThisWorks title="Where the compromise sits">
+                  <>
+                    <p>
+                      Call the smallest curvature μ and the largest L. The slower
+                      direction determines the worst remaining-error factor. The best
+                      fixed rate makes the two extreme factors equal in size and
+                      opposite in sign.
+                    </p>
+                    <Equation>{"worst factor = max(|1 − ημ|, |1 − ηL|)\nbalance condition: 1 − ημ = −(1 − ηL)"}</Equation>
+                  </>
                   <Equation>{"η* = 2 / (L + μ)\n\nfor the three people:  η* = 2 / (2 + 100/3) ≈ 0.0566\nworst factor there:    1 − 0.0566 × 2 ≈ 0.8868"}</Equation>
                   <p>
                     That is a little below the threshold of 0.06, not
@@ -647,6 +696,60 @@ export default function GradientDescentRegressionPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 6 and 7",
+          quiz: [
+            choice(
+              "At a rate of 0.02 the page quotes a factor of 0.96 per pass for the level direction. What does that factor measure?",
+              [
+                "The share of the level’s distance from the optimum kept after one pass, so that direction’s loss contribution keeps the square, 0.9216",
+                "The share of the loss remaining after one pass",
+                "The share of the slope’s distance from the optimum kept after one pass",
+                "How far below the threshold of 0.06 the rate sits",
+              ],
+              0,
+              "A pass turns the distance from the optimum into 1 − ηc times itself, and for the level 1 − 0.02 × 2 is 0.96, a share of the parameter error in the parameter’s own units. The loss contribution from that direction is quadratic in the distance, so it keeps 0.96 squared. The slope’s own factor at that rate is about 0.333, which is why it arrives long before the level does.",
+            ),
+            choice(
+              "The threshold for these three people is 0.06. Where does that number come from?",
+              [
+                "The slope direction, whose curvature of 100/3 divided into 2 gives 0.06",
+                "The level direction, which tolerates no rate above 0.06",
+                "The mean of the two curvatures",
+                "The rate at which the measured loss stopped falling",
+              ],
+              0,
+              "A pass multiplies the remaining distance in one direction by 1 − ηc, so arriving needs the size of that factor below one, which solves to a bound of two over the curvature. The steepest direction therefore sets the largest safe rate, and the level direction would tolerate any rate below 1 but never gets the chance.",
+            ),
+            several(
+              "Which of these behaviours did the page record for the factor 1 − ηc?",
+              [
+                "Exactly 0 lands on the optimum in one pass",
+                "Between −1 and 0 crosses the optimum and still comes closer",
+                "Exactly −1 hops between two places forever",
+                "Greater than 1 crosses the optimum and comes closer",
+              ],
+              [0, 1, 2],
+              "A factor greater than one moves further away without crossing at all, which is the one behaviour in that list the table does not report. The crossing case is what the parabolas show, since at 0.055 the slope crosses 0.6 on every pass and still arrives because the crossings shrink, where at 0.07 they grow.",
+            ),
+            trueFalse(
+              "The best fixed rate on these three people is the largest one still under the threshold.",
+              false,
+              "The balanced rate is two over the sum of the two curvatures, about 0.0566, which sits a little below the threshold of 0.06 rather than immediately under it. A rate just under the threshold has a slope factor near −1 and spends its passes hopping across the bottom, where the balanced rate puts both factors at 0.887 from opposite sides so neither direction is the bottleneck.",
+            ),
+            choice(
+              "At a rate of 0.02 the two factors are 0.96 and about 0.333. What is the walk doing after the first dozen passes?",
+              [
+                "Walking almost entirely in the level direction",
+                "Walking almost entirely in the slope direction",
+                "Walking in both directions at about the same speed",
+                "Hopping between two places without approaching either",
+              ],
+              0,
+              "The slope error is cut to a third every pass and the level error by four percent, so the slope is at 0.6 to four decimals by pass 10 while the level is at 22.1 then, 64.9 at pass 100 and 65.98 at pass 200. The 477 passes are the level’s doing and nothing is wrong with the slope at all.",
+            ),
+        ],
         },
         {
           title: "Part 8. Centering, Scaling, and Conditioning",
@@ -690,19 +793,14 @@ export default function GradientDescentRegressionPage() {
                   height changes that.
                 </p>
                 <Equation>{"zᵢ = (xᵢ − x̄) / sₓ"}</Equation>
-                <p>
-                  Dividing by the standard deviation changes the numerical
-                  spread of the input, and the slope&rsquo;s curvature is twice
-                  the variance of the input, so it changes that curvature
-                  directly. Switch the playground to centred and scaled. Both
-                  curvatures are now 2, the contours are circles, and the
-                  slope is 2.449 per standard deviation instead of 0.6 per
-                  centimetre, which is the same line described in a different
-                  unit. Set the rate to 0.5 and the walk lands on the optimum
-                  in one pass, because 1/c is the same for both directions and
-                  section 23&rsquo;s compromise no longer has anything to
-                  compromise between.
+                <>
+<p>
+                  Dividing by the standard deviation changes the numerical spread of the input, and the slope&rsquo;s curvature is twice the variance of the input, so it changes that curvature directly. Switch the playground to centred and scaled. Both curvatures are now 2, the contours are circles, and the slope is 2.449 per standard deviation instead of 0.6 per centimetre, which is the same line described in a different unit.
                 </p>
+                <p>
+                  Set the rate to 0.5 and the walk lands on the optimum in one pass, because 1/c is the same for both directions and section 23&rsquo;s compromise no longer has anything to compromise between.
+                </p>
+</>
                 <p>
                   Centring and scaling are related and distinct. Centring
                   removes the coupling between the settings. Scaling evens out
@@ -763,19 +861,14 @@ export default function GradientDescentRegressionPage() {
                     ["the arithmetic failed", "a NaN or an infinity appeared", "the computation cannot continue"],
                   ]}
                 />
-                <p>
-                  The verdicts in section 16&rsquo;s table draw
-                  these lines exactly where they fall. At 0.07 and 0.1 the walk
-                  is doomed and has not yet overflowed, so it runs out of its
-                  500 passes holding numbers that are large and useless, and
-                  the verdict is that the passes ran out. Only at 0.2 do the
-                  coefficients stop being finite inside the budget, and only
-                  then is the fit refused by name. Non-finite arithmetic
-                  detects the wreck, not the beginning of the skid, which can
-                  be many passes earlier. A run should be read by its loss and
-                  gradient over time, which is the dashboard&rsquo;s middle row,
-                  and not by whether it happened to crash.
+                <>
+<p>
+                  The verdicts in section 16&rsquo;s table draw these lines exactly where they fall. At 0.07 and 0.1 the walk is doomed and has not yet overflowed, so it runs out of its 500 passes holding numbers that are large and useless, and the verdict is that the passes ran out. Only at 0.2 do the coefficients stop being finite inside the budget, and only then is the fit refused by name.
                 </p>
+                <p>
+                  Non-finite arithmetic detects the wreck, not the beginning of the skid, which can be many passes earlier. A run should be read by its loss and gradient over time, which is the dashboard&rsquo;s middle row, and not by whether it happened to crash.
+                </p>
+</>
               </SubSection>
 
               <SubSection title="28. Honest stopping criteria">
@@ -809,6 +902,201 @@ export default function GradientDescentRegressionPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 8 and 9",
+          quiz: [
+            choice(
+              "On raw heights a rate of 0.02 runs away in four passes and the largest safe rate is 0.0000346. What has gone wrong?",
+              [
+                "The two settings are strongly coupled, leaving a valley whose two curvatures are 0.00115 and 57,835",
+                "The heights are large enough that the arithmetic overflows",
+                "The loss at the optimum is higher on raw heights than on centred ones",
+                "There is no best line at all when the heights are not centred",
+              ],
+              0,
+              "An intercept is the prediction at a height of zero, so rotating the line about the origin swings its height near 170 by hundreds of kilograms and any change in slope has to be repaid by a change in intercept. Centred, the curvatures are 2 and 33.3 and the same rate arrives in 477 passes, with the same loss of 2.0 at the optimum, so it is one fit under two parameterisations.",
+            ),
+            trueFalse(
+              "Centring makes the two curvatures equal.",
+              false,
+              "Centring removes the coupling, and the centred bowl is still seventeen times steeper along the slope than along the level. Scaling is what evens the curvature out, since the slope’s curvature is twice the variance of the input, and once both curvatures are 2 the contours are circles and a rate of 0.5 lands on the optimum in one pass.",
+            ),
+            several(
+              "Which of these hold for the largest and smallest curvatures of the surface?",
+              [
+                "The largest sets stability, because it decides the threshold",
+                "The smallest sets the late-stage speed, because its direction is the one still crawling when the others have arrived",
+                "The smallest sets the threshold, because it is the direction the walk crawls in",
+                "Centring and scaling always bring their ratio to 1",
+              ],
+              [0, 1],
+              "The threshold is two over the largest curvature, 0.06 for these three people from the slope’s 100/3, and the level’s curvature of 2 never gets a say in it. The ratio of the two is the condition number, and centring and scaling took it from fifty million to one here, which the page is explicit is not a promise. They often improve the conditioning a great deal and do not always repair it, since features can be coupled in ways a shift and a stretch per column cannot undo.",
+            ),
+            choice(
+              "At rates of 0.07 and 0.1 the fit was not refused by name. Why not?",
+              [
+                "The walk is doomed but has not overflowed, so it runs out of its 500 passes holding numbers that are large and useless",
+                "The loss was still falling at both of those rates",
+                "The movement tolerance was met, so the walk reported convergence",
+                "Both rates sit below the threshold of 0.06",
+              ],
+              0,
+              "Only at 0.2 do the coefficients stop being finite inside the budget, and only then is the fit refused by name. Non-finite arithmetic detects the wreck rather than the beginning of the skid, which can be many passes earlier, so a run is read by its loss and gradient over time and not by whether it happened to crash.",
+            ),
+            several(
+              "The walk stops when no coefficient moved more than 10⁻⁸ in a whole pass. Which of these can produce a movement that small?",
+              [
+                "A gradient that is genuinely small, which is what the test is for",
+                "A rate so small that even a large gradient produces a tiny step",
+                "A parameter whose own scale makes 10⁻⁸ a different demand from the one it is on a level of 66",
+                "Coefficients that have stopped being finite",
+              ],
+              [0, 1, 2],
+              "A movement is the rate times the gradient, so three quite different situations give the same reading, and one of them is a walk declaring itself finished halfway down the hill. Keeping a movement tolerance is fine; what makes it honest is showing the movement, the gradient size, the loss change, the pass limit and the reason the run stopped beside it.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Walking to the Known Line With the Library",
+          practice: [
+            exercise(
+              "Take one pass, then two",
+              ["Part 4 worked the first pass by hand, from a flat line at zero to a level of 2.64 and a slope of 0.4 with a loss of 4017.16, and said where the second pass lands. Take both passes with the library by giving the walk a budget of one pass and then of two, at a rate of 0.02, on the heights measured from their mean of 170.", "The second pass should land at 5.1744 and 0.5333. The page does not say what the loss is there, so score that line yourself."],
+              `from oop_ml import Feature, GradientDescentRegression
+
+centred_heights = Feature("height_from_mean", [-5, 0, 5])
+weights = Feature("weight", [62, 68, 68])
+
+for passes in [1, 2]:
+    # Fit a walk allowed exactly this many passes at a rate of 0.02, then
+    # print its level, its slope and the mean squared error of the line
+    # it stopped on.
+    pass`,
+              `from oop_ml import Feature, GradientDescentRegression
+
+centred_heights = Feature("height_from_mean", [-5, 0, 5])
+weights = Feature("weight", [62, 68, 68])
+
+for passes in [1, 2]:
+    model = GradientDescentRegression(learning_rate=0.02, max_epochs=passes).fit([centred_heights], weights)
+    loss = model.evaluate([centred_heights], weights).mean_squared_error
+    print(f"pass {passes}: level {model.intercept:.4f}, slope {model.coefficients['height_from_mean']:.4f}, loss {loss:.2f}")`,
+              `pass 1: level 2.6400, slope 0.4000, loss 4017.16
+pass 2: level 5.1744, slope 0.5333, loss 3701.83`,
+              { hints: ["The budget is max_epochs and the step size is learning_rate, both set at construction. A walk allowed one pass takes exactly one pass from the flat start at zero.", "The heights go in already centred, as the page’s own walk receives them, so the intercept property is the level at the mean height and the coefficient on height_from_mean is the slope.", "evaluate scores whatever line the walk stopped on, and its mean_squared_error is the loss the page quotes, 4017.16 after the first pass."], check: numberCheck("What is the loss after the second pass?", 3701.83, 0.01, "The second pass reads its gradient at the line the first pass produced rather than at the flat start, residuals of 61.36, 65.36 and 63.36 and gradients of −126.72 and −6.667, and steps to 5.1744 and 0.5333. The loss falls again, from 4017.16, because every pass that stays under the threshold lowers it, and the slope has already done most of its travelling while the level has barely begun.") },
+            ),
+            exercise(
+              "Walk to the known line",
+              ["Let the walk run at a rate of 0.02 with a budget of 500 passes, and set the line it reaches beside the closed form that MultipleLinearRegression solves for on the same centred heights.", "Part 5 says the walk arrives in 477 passes, and Part 2 says the level of 66 and slope of 0.6 are the same line as an intercept of −36. Confirm the pass count, confirm that the two fits agree to four decimals, and recover the intercept from the level and the slope."],
+              `from oop_ml import Feature, GradientDescentRegression, MultipleLinearRegression
+
+centred_heights = Feature("height_from_mean", [-5, 0, 5])
+weights = Feature("weight", [62, 68, 68])
+
+# Fit the walk at a rate of 0.02 with 500 passes allowed, fit the closed
+# form, and print whether the walk converged and after how many passes,
+# both fits' level and slope, the intercept at a height of zero, and the
+# loss of the line the walk ended on.`,
+              `from oop_ml import Feature, GradientDescentRegression, MultipleLinearRegression
+
+centred_heights = Feature("height_from_mean", [-5, 0, 5])
+weights = Feature("weight", [62, 68, 68])
+
+walk = GradientDescentRegression(learning_rate=0.02, max_epochs=500).fit([centred_heights], weights)
+closed_form = MultipleLinearRegression().fit([centred_heights], weights)
+
+print(f"converged {walk.converged} after {walk.epochs_run} passes")
+print(f"walk: level {walk.intercept:.4f}, slope {walk.coefficients['height_from_mean']:.4f}")
+print(f"closed form: level {closed_form.intercept:.4f}, slope {closed_form.coefficients['height_from_mean']:.4f}")
+print(f"intercept at a height of zero {walk.intercept - walk.coefficients['height_from_mean'] * 170:.2f}")
+print(f"loss at the end of the walk {walk.evaluate([centred_heights], weights).mean_squared_error:.4f}")`,
+              `converged True after 477 passes
+walk: level 66.0000, slope 0.6000
+closed form: level 66.0000, slope 0.6000
+intercept at a height of zero -36.00
+loss at the end of the walk 2.0000`,
+              { hints: ["Both models take the same list of features and the same target, and both expose intercept and coefficients, so the comparison is two fits read the same way.", "converged and epochs_run are properties of the fitted walk. The walk stops when no coefficient moved more than 10⁻⁸ in a whole pass, or when the budget runs out, and converged says which.", "The intercept is the level less the slope times the mean height, which is section 3’s arithmetic with the fitted numbers in it."], check: numberCheck("After how many passes does the walk at 0.02 report convergence?", 477, 0.5, "The slope’s factor at this rate is about 0.333 and the level’s is 0.96, so the slope is settled to four decimals by pass 10 and every pass after that is the level creeping the last of the way at four percent per pass, until the movement in a whole pass falls under the tolerance. The loss there is 2.0, the floor the closed form sits on, which the walk reaches without ever being told where it is.") },
+            ),
+            exercise(
+              "Sweep the rate across the threshold",
+              ["Section 16 asks the library for a plain fit at several rates with a budget of 500 passes and reports what came back. Do the same at 0.005, 0.02, 0.055, 0.0566, 0.06, 0.07, 0.1 and 0.2, printing for each whether the walk converged, how many passes it took, and where it stood, or the name of the refusal.", "Part 7 puts the threshold at 0.06 and the balanced rate at 0.0566. Part 9 says 0.07 and 0.1 run out of passes holding useless numbers and only 0.2 is refused by name. The page never says how many passes the oscillating rate of 0.055 needs."],
+              `import warnings
+from oop_ml import Feature, GradientDescentRegression, MLLibError
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+centred_heights = Feature("height_from_mean", [-5, 0, 5])
+weights = Feature("weight", [62, 68, 68])
+
+for rate in [0.005, 0.02, 0.055, 0.0566, 0.06, 0.07, 0.1, 0.2]:
+    # Fit a walk at this rate with 500 passes allowed. If the library
+    # refuses, print the rate and the refusal's class name. Otherwise print
+    # whether it converged, the passes it ran, and its level and slope.
+    pass`,
+              `import warnings
+from oop_ml import Feature, GradientDescentRegression, MLLibError
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+centred_heights = Feature("height_from_mean", [-5, 0, 5])
+weights = Feature("weight", [62, 68, 68])
+
+for rate in [0.005, 0.02, 0.055, 0.0566, 0.06, 0.07, 0.1, 0.2]:
+    model = GradientDescentRegression(learning_rate=rate, max_epochs=500)
+    try:
+        model.fit([centred_heights], weights)
+    except MLLibError as refusal:
+        print(f"rate {rate}: refused, {type(refusal).__name__}")
+        continue
+    verdict = "converged" if model.converged else "passes ran out"
+    print(f"rate {rate}: {verdict} after {model.epochs_run} passes, level {model.intercept:.4g}, slope {model.coefficients['height_from_mean']:.4g}")`,
+              `rate 0.005: passes ran out after 500 passes, level 65.57, slope 0.6
+rate 0.02: converged after 477 passes, level 66, slope 0.6
+rate 0.055: converged after 177 passes, level 66, slope 0.6
+rate 0.0566: converged after 172 passes, level 66, slope 0.6
+rate 0.06: passes ran out after 500 passes, level 66, slope 8.66e-15
+rate 0.07: passes ran out after 500 passes, level -1.218e+45, slope -1.768e+62
+rate 0.1: passes ran out after 500 passes, level 3.061e+165, slope -5.842e+183
+rate 0.2: refused, DivergenceError`,
+              { hints: ["A fit that ran out of passes is still a fitted model, holding whatever numbers it stopped on, and converged is the property that says not to trust them. Only a walk whose coefficients stopped being finite raises, and it raises DivergenceError, which derives from MLLibError.", "The two doomed rates overflow on the way to their verdict, and the warnings filter silences the arithmetic’s complaints so the library’s own verdict is what you read. The format :.4g keeps a level of 10⁴⁵ readable.", "At exactly 0.06 the slope’s factor is exactly −1, the row of section 20’s table that hops between two places forever, so the slope you print depends on whether the budget was even or odd."], check: numberCheck("After how many passes does the walk at a rate of 0.055 converge?", 177, 0.5, "At 0.055 the slope’s factor is 1 − 0.055 × 100/3, about −0.83, so the slope crosses 0.6 on every pass and still arrives because the crossings shrink, and the level’s factor is 0.89 rather than 0.96, so the level settles far sooner than at 0.02. The balanced rate of 0.0566 arrives in 172, fewer still, which is what section 23’s compromise promised.") },
+            ),
+            exercise(
+              "Hand the walk the raw heights, then the scaled ones",
+              ["Part 8 says a rate of 0.02 runs away on the raw heights and that centring and scaling make both curvatures 2, so that a rate of 0.5 lands on the optimum in one pass. Try both with the library. Hand the walk the heights as measured, 165, 170 and 175, at 0.02, and catch what it raises. Then standardise the heights with Standardizer and walk at 0.5.", "The scaled slope should come out at 2.449 per standard deviation, the same line as 0.6 per centimetre in a different unit, and the level should still be 66."],
+              `import warnings
+from oop_ml import Feature, GradientDescentRegression, MLLibError, Standardizer
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+heights = Feature("height", [165, 170, 175])
+weights = Feature("weight", [62, 68, 68])
+
+# Fit a walk on the raw heights at a rate of 0.02 and print the name and
+# message of the refusal. Then standardise the heights, print the three
+# scaled values, walk on them at a rate of 0.5, and print whether it
+# converged, after how many passes, and its level and slope.`,
+              `import warnings
+from oop_ml import Feature, GradientDescentRegression, MLLibError, Standardizer
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+heights = Feature("height", [165, 170, 175])
+weights = Feature("weight", [62, 68, 68])
+
+try:
+    GradientDescentRegression(learning_rate=0.02, max_epochs=500).fit([heights], weights)
+except MLLibError as refusal:
+    print(f"raw heights at 0.02: {type(refusal).__name__}: {refusal}")
+
+scaled_heights = Standardizer().fit_transform([heights])
+print(f"scaled heights {[round(float(value), 4) for value in scaled_heights[0].values]}")
+model = GradientDescentRegression(learning_rate=0.5, max_epochs=500).fit(scaled_heights, weights)
+print(f"scaled heights at 0.5: converged {model.converged} after {model.epochs_run} passes")
+print(f"level {model.intercept:.4f}, slope {model.coefficients['height']:.4f} kg per standard deviation")`,
+              `raw heights at 0.02: DivergenceError: the fit diverged: the weights overflowed to non-finite values. Lower the learning rate
+scaled heights [-1.2247, 0.0, 1.2247]
+scaled heights at 0.5: converged True after 2 passes
+level 66.0000, slope 2.4495 kg per standard deviation`,
+              { hints: ["Standardizer learns each feature’s mean and standard deviation, and fit_transform hands back the standardised features under their old names, so the slope is still read as model.coefficients['height'] and is now per standard deviation.", "On raw heights the walk overflows inside the budget and the fit is refused by name rather than returning a model that answers nan to everything. Catch MLLibError, the base of every refusal the library makes.", "The library reports two passes rather than one, because its convergence test needs a whole pass in which nothing moved more than 10⁻⁸. The first pass lands on the optimum and the second is the one that notices."], check: numberCheck("What slope does the scaled walk report, in kilograms per standard deviation?", 2.4495, 0.001, "The standard deviation of 165, 170 and 175 is the square root of 50/3, about 4.08 cm, so one standard deviation of height is worth 0.6 times that in weight. The line has not changed, only the unit its slope is quoted in, and with both curvatures at 2 the rate of 0.5 is 1/c for both directions at once, so one pass lands exactly on it.") },
+            ),
+          ],
         },
       ]}
     />

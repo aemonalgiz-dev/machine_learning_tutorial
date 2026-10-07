@@ -159,15 +159,9 @@ export function SeparationChart() {
         ))}
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Four bars to a row, one per number of hashes. In {alreadyAtTheEdge} of
-        the {view.rows.length} rows the four are the same length, because the
-        first hash already reaches the edge there. The {divided.length} rows
-        where it falls short are the widths the first multiplier{" "}
-        {view.first_multiplier} divides, and in those the second bar{" "}
-        {secondReaches ? "reaches the edge" : "moves and stops short of it"}.
-        Past the second bar nothing moves anywhere on the chart.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Each row compares four hash counts at the same width. In {alreadyAtTheEdge} of {view.rows.length} rows, the first hash already reaches the plotted separation bound, so more hashes cannot increase that displayed measure.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The other {divided.length} widths divide the first multiplier, {view.first_multiplier}. There the second hash {secondReaches ? "reaches the bound" : "improves separation but remains below the bound"}. Later bars do not change the result in this example. The arithmetic structure of the hashes therefore matters alongside their count.</p>
+</>
     </div>
   );
 }

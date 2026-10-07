@@ -14,6 +14,7 @@
 // intercept of ln(1/2), which the page quotes from the API.
 
 import { useState } from "react";
+import { Equation } from "@/components/concept/Equation";
 
 const PEOPLE = [
   { position: -1, name: "child", positive: false },
@@ -99,9 +100,13 @@ export function ImpossibleSeparation() {
           <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">to each no: {(1 - constant).toFixed(2)}</div>
           <div className="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">log loss: {constantLoss(constant).toFixed(4)}</div>
         </div>
-        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
-          Lowest at q = 1/3, one yes in three, and the intercept that produces it is ln(1/3 ÷ 2/3) = ln(1/2) = −0.6931.
-        </p>
+        <>
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+            The lowest loss assigns probability one third to yes, matching one positive
+            outcome among three.
+          </p>
+          <Equation>{"intercept = ln((1/3) / (2/3)) = ln(1/2) ≈ −0.6931"}</Equation>
+        </>
       </div>
     </div>
   );

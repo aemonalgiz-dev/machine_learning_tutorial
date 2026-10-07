@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -19,7 +22,7 @@ import { SpacelessSentence } from "@/components/widgets/SpacelessSentence";
 export const metadata: Metadata = {
   title: "Maximum Matching · oop_ml",
   description:
-    "Take the longest entry of a word list that fits where you are standing, cut there, and go again. The oldest way of finding the words in a script that writes none, and the whole of its interest is in where it goes wrong.",
+    "Use a dictionary to take the longest available word at each position.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -27,8 +30,12 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function MaximumMatchingPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["maximum-matching"]}
+      technicalStart="Part 2. Take the Longest Entry That Fits"
+      openingTitle="Where Do the Words End When There Are No Spaces?"
+      playgroundIntro="Follow the chosen dictionary entry at each position. Compare forward and backward scans and identify the first choice where their segmentations diverge."
       title="Maximum Matching"
-      tagline="Take the longest entry of a word list that fits where you are standing, cut there, and go again. The oldest way of finding the words in a script that writes none, and the whole of its interest is in where it goes wrong."
+      tagline="Use a dictionary to take the longest available word at each position."
       prerequisites={
         <>
           Everything earlier in this section assumed that something in the
@@ -38,60 +45,14 @@ export default function MaximumMatchingPage() {
           only knowledge the method has is a list of words somebody wrote down.
         </>
       }
-      history={
-        <>
-          <p>
-            Chinese, Japanese and Thai are written with nothing between their
-            words, and until a machine is told where the words are it can do
-            almost nothing else with the text. That was the position computing
-            in Chinese was in through the 1980s, when the first systems for
-            indexing and searching Chinese documents were being built, and the
-            first thing every one of them needed was a boundary. The system
-            usually named as the earliest, Liang Nanyuan&rsquo;s CDWS at Peking
-            University, worked by holding a dictionary and taking the longest
-            entry that fitted, which is the method on this page. It is normally
-            called maximum matching, and equally often greedy longest match,
-            since the two names describe the same two-line rule from different
-            sides.
-          </p>
-          <p>
-            The difficulty those systems ran into was not that the rule was
-            crude. It was that there was no settled answer to compare against.
-            Ask two people to mark the words in a Chinese sentence and they will
-            not draw the same lines, because whether a compound is one word or
-            two is a question about grammar that Chinese linguistics has never
-            closed, and the answer differs between one annotated corpus and the
-            next. Richard Sproat and his co-authors made that the opening
-            argument of their 1996 paper in Computational Linguistics on a
-            stochastic segmenter, and when Sproat and Thomas Emerson organised
-            the first international Chinese word segmentation bakeoff in 2003
-            they ran it over several corpora with different standards rather
-            than one, for the same reason. Maximum matching has been the
-            baseline of every one of those evaluations since, which is a
-            peculiar kind of status for a rule this simple.
-          </p>
-          <p>
-            This page asks five questions in order. What is left of the problem
-            of finding words when the writing marks none of them? What is the
-            rule, exactly, and what does it ask at each step? Does it matter
-            which end of the text you start from, and what decides that? What
-            becomes of a stretch of text the word list does not cover? And where
-            does taking the longest match give an answer that is wrong while
-            looking exactly as finished as one that is right? The sentence
-            carried through this section is where the first question is easiest
-            to feel, since taking the spaces out of it leaves English that a
-            reader can still read and no rule from earlier in this section can
-            touch.
-          </p>
-        </>
-      }
+
       playground={<MaximumMatchingPlayground />}
       sections={[
         {
           title: "Part 1. Text With Nothing Between the Words",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Our sentence, with its spaces taken out">
                 <p>
                   We have been carrying one sentence through this section, and
@@ -239,7 +200,7 @@ export default function MaximumMatchingPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Take the Longest Entry That Fits",
@@ -418,6 +379,54 @@ export default function MaximumMatchingPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "Against a list of 810 common English words, the method answers our sentence in 24 pieces where a space would have given seven. What is responsible?",
+              [
+                "Greed, since a shorter reading was available and an early take passed it by",
+                "The list, since 24 is also the fewest pieces any reading against that list could use",
+                "The direction of the scan, since the mirror image would have found seven",
+                "The bound on candidate length, since no entry longer than ten characters was ever offered",
+              ],
+              1,
+              "Searching every reading whose pieces are either entries or lone characters, exactly one reaches 24 and it is the one the method found. The sentence carries a surname, an abbreviation and four punctuation marks, none of which an ordinary word list holds, so seven letters of Alvarez come back as seven pieces. What the method could find it found, and expect, the, low, cost and analysis all came back whole.",
+            ),
+            choice(
+              "Why is a rule as crude as take the longest entry worth anything at all?",
+              [
+                "Chinese words are mostly one or two characters, so when a longer entry is available it is usually the word really written",
+                "The longest match is the one a word list can confirm most cheaply",
+                "Taking the longest entry is guaranteed to produce the fewest pieces",
+                "A longer entry is held by the list only when it is more frequent than its parts",
+              ],
+              0,
+              "Preferring length stands in for preferring the reading that uses whole words rather than fragments. That is a statement about frequencies and the method holds no frequencies, so it works exactly to the extent that the longest match and the likeliest reading coincide. On the wildlife park sentence the fewest pieces available is five and the left-hand scan answers six, so taking the longest entry carries no guarantee of the fewest pieces.",
+            ),
+            trueFalse(
+              "Handed the two words the cat with a space between them, a list holding thecat as an entry will produce it.",
+              false,
+              "Whitespace ends a run before any matching begins, so the space closed the first run before the first lookup and the two runs are matched on their own, answering the and then cat. Holding thecat changes nothing, since no candidate ever spans the space. That is what keeps the method usable on a page of Chinese that quotes an English name, or on anything with a line break in it.",
+            ),
+            several(
+              "Which of these hold of the word list this method is given?",
+              [
+                "Its longest entry bounds every question the method asks at a position",
+                "Whatever is not on the list does not exist as far as the method is concerned",
+                "It holds counts, so it can prefer a common word to a rare one",
+                "A match may reach across a space when the joined characters form an entry",
+              ],
+              [0, 1],
+              "There is no point offering a candidate longer than anything the list holds, which is also what bounds the cost at the length of the text times the length of the longest entry. A word list says which readings are possible and cannot say which are likely, since it holds no counts, and everything awkward on the page comes back to that one limitation.",
+            ),
+            trueFalse(
+              "On our sentence with its spaces gone, 45 characters against a list whose longest entry is ten characters, the left-to-right scan asked 191 questions of the list, inside a bound of 450.",
+              true,
+              "At each position the method offers at most as many candidates as the longest entry is long, and each candidate is one membership test, so a run of n characters against a list whose longest entry is L characters costs at most n times L lookups, which is 45 times 10 here. Measured, the left-to-right scan cost 191 and the right-to-left scan 156. Those few questions stand against the 17,592,186,044,416 ways the 45 characters could be cut, which is why a rule with this many faults is still what every learned segmenter is measured against.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. Which End You Start From",
           content: (
             <>
@@ -488,20 +497,14 @@ export default function MaximumMatchingPage() {
                   answers.
                 </p>
                 <ScanComparison scenarioKeys={["park"]} />
-                <p>
-                  Moving from the right, the first thing the scan meets is 动物园,
-                  the word for zoo, whole. Having taken it, everything in front
-                  falls into place, and the two words that led the other scan
-                  astray never come up because the positions they begin at are
-                  never visited. The usual argument for why that happens more
-                  often than chance is about the language rather than about this
-                  sentence. Chinese compounds tend to carry their head at the
-                  end, so a scan coming from the right meets the whole compound
-                  before it meets a fragment that begins inside it, where a scan
-                  coming from the left meets the fragment first. That is an
-                  argument about Chinese and it is not something nine characters
-                  can confirm.
+                <>
+<p>
+                  Moving from the right, the first thing the scan meets is 动物园, the word for zoo, whole. Having taken it, everything in front falls into place, and the two words that led the other scan astray never come up because the positions they begin at are never visited. The usual argument for why that happens more often than chance is about the language rather than about this sentence.
                 </p>
+                <p>
+                  Chinese compounds tend to carry their head at the end, so a scan coming from the right meets the whole compound before it meets a fragment that begins inside it, where a scan coming from the left meets the fragment first. That is an argument about Chinese and it is not something nine characters can confirm.
+                </p>
+</>
                 <p>
                   Which puts the usual default in an awkward position. Scanning
                   from the left is what maximum matching ordinarily means, and on
@@ -687,18 +690,14 @@ export default function MaximumMatchingPage() {
                   them are entries.
                 </p>
                 <AMissingWord />
-                <p>
-                  The English case shows the two halves of it. Take table out of
-                  the 810 words and the scan from the left answers exactly what
-                  it answered before, theta, bled, own, there, four pieces and
-                  four entries, so losing the word changed nothing about the
-                  answer or about how finished it looks. The scan from the right
-                  falls apart visibly instead, to six pieces of which three are
-                  lone characters, so on that side there is at least something to
-                  see. Which of those two happens is settled by where the missing
-                  word sat relative to the direction of the scan, and there is
-                  nothing in either answer that says a word went missing.
+                <>
+<p>
+                  The English case shows the two halves of it. Take table out of the 810 words and the scan from the left answers exactly what it answered before, theta, bled, own, there, four pieces and four entries, so losing the word changed nothing about the answer or about how finished it looks. The scan from the right falls apart visibly instead, to six pieces of which three are lone characters, so on that side there is at least something to see.
                 </p>
+                <p>
+                  Which of those two happens is settled by where the missing word sat relative to the direction of the scan, and there is nothing in either answer that says a word went missing.
+                </p>
+</>
                 <KeepInMind>
                   There is no signal here to read. An answer built out of entries
                   looks the same whether the list was complete or not, so a
@@ -769,17 +768,14 @@ export default function MaximumMatchingPage() {
                   one of which is an entry, which is exactly what a correct answer
                   looks like.
                 </p>
-                <p>
-                  There is a genuine decision attached here, and it is the one the
-                  rest of this section is made of. If every piece must be an
-                  entry, this is the only way the method can fail. If readings are
-                  scored instead, a small amount of probability can be held back
-                  for a word nobody has seen, and the method gains the ability to
-                  answer with a degree of doubt rather than with a wrong answer
-                  stated flatly. The price is that the score has to be estimated
-                  from counts, and counts have to come from a corpus somebody
-                  segmented.
+                <>
+<p>
+                  There is a genuine decision attached here, and it is the one the rest of this section is made of. If every piece must be an entry, this is the only way the method can fail. If readings are scored instead, a small amount of probability can be held back for a word nobody has seen, and the method gains the ability to answer with a degree of doubt rather than with a wrong answer stated flatly.
                 </p>
+                <p>
+                  The price is that the score has to be estimated from counts, and counts have to come from a corpus somebody segmented.
+                </p>
+</>
                 <KeepInMind>
                   The word list is the boundary of what this method can say rather
                   than a setting inside it. Every question about coverage is
@@ -796,19 +792,14 @@ export default function MaximumMatchingPage() {
                   at right now, and the two are related only by the rough
                   observation that long matches tend to be intended matches.
                 </p>
-                <p>
-                  Where they come apart the method has no defence, and it has no
-                  defence in a specific way that is worth stating. Both readings
-                  of 研究生命起源 use three pieces and both are built of real
-                  words, so length has nothing to say about them, and the
-                  arithmetic that would say something is a comparison of how often
-                  those words occur. Both readings of the four English words use
-                  four pieces of four real words, and the same is true there.
-                  Neither tie is a coincidence. Length is a coarse quantity that
-                  takes few values, so on a short text several readings land on
-                  the same value of it and the method has run out of things to
-                  compare.
+                <>
+<p>
+                  Where they come apart the method has no defence, and it has no defence in a specific way that is worth stating. Both readings of 研究生命起源 use three pieces and both are built of real words, so length has nothing to say about them, and the arithmetic that would say something is a comparison of how often those words occur.
                 </p>
+                <p>
+                  Both readings of the four English words use four pieces of four real words, and the same is true there. Neither tie is a coincidence. Length is a coarse quantity that takes few values, so on a short text several readings land on the same value of it and the method has run out of things to compare.
+                </p>
+</>
                 <p>
                   That is where the next method starts. Give every entry a
                   frequency, lay out every reading the list permits rather than
@@ -894,6 +885,178 @@ export default function MaximumMatchingPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 to 5",
+          quiz: [
+            choice(
+              "Scanning the wildlife park sentence from the left gives six pieces. What went wrong?",
+              [
+                "Two of the nine characters are covered by no entry, so they came back alone",
+                "The second take was the longer of two entries, which moved the cursor one character too far and let a later fragment line up as an entry",
+                "The scan ran out of candidates because the list holds only nine words",
+                "Nothing went wrong, since six is the fewest pieces any reading of those characters reaches",
+              ],
+              1,
+              "Both 在 and 在野 are entries and the rule takes the longer, after which 生动 lines up as an entry although it is the end of one word and the start of another. Searching every reading, the fewest pieces any of them uses is five and two readings reach it, so the answer is worse by the crudest measure available. No amount of care at the later positions could undo a cut already made.",
+            ),
+            trueFalse(
+              "With the surname written in front of the sentence about the origin of life, both scans answer eight pieces, and eight is also the fewest pieces any reading against the five-word list could use.",
+              true,
+              "A character the list has never seen becomes a word of its own, since a method whose whole vocabulary is a list has nothing else it can say about it, so the five characters of the surname come back as five lone pieces in front of three entries. Nothing greedy went wrong in the sense of the wildlife park sentence, where a five-piece reading was available and the left-hand scan passed it by. Here the method did everything it could and the answer is still five characters of noise in front of three words, which is why the methods later in this section hand a run that nothing covered to a model that guesses at its shape.",
+            ),
+            choice(
+              "Across the five texts the page works through, how do the three rules of the bidirectional heuristic divide the cases?",
+              [
+                "The first settles all five, since the two scans rarely tie on piece count",
+                "The first settles one, the second two and the third two",
+                "The first settles two, the second two and the third one",
+                "The three rules disagree on two of the five, so the heuristic has no answer there",
+              ],
+              1,
+              "The wildlife park sentence is the one the first rule settles, since five pieces beat six. The sentence about the origin of life and the same sentence behind the surname both tie on pieces, and in each the left-hand reading strands 命 on its own, so the second rule keeps the right-hand answer. The four English words and our sentence with its spaces gone are level on both counts, which leaves the standing preference for the right-to-left scan to decide them. None of the three rules is derived from anything, so a convention with no argument behind it outside Chinese decides two cases in five.",
+            ),
+            several(
+              "Which of these hold when a word is taken out of the list?",
+              [
+                "With the word for zoo removed, the right-hand scan produces six pieces every one of which is an entry",
+                "With table removed, the left-hand scan answers exactly what it answered before",
+                "With table removed, the right-hand scan falls apart to six pieces of which three are lone characters",
+                "The answer carries some mark that a word went missing",
+              ],
+              [0, 1, 2],
+              "Which of the two happens is settled by where the missing word sat relative to the direction of the scan. An answer built out of entries looks the same whether the list was complete or not, so a missing word is not a failure the method can report, and the only way to find one is to already know the answer.",
+            ),
+            trueFalse(
+              "A segmentation containing a word the list does not hold is a poor answer under this method.",
+              false,
+              "It is not an answer at all. The readings available are exactly those spellable out of the list plus lone characters, so such a segmentation is not in the space of answers rather than being badly scored within it. Being unable to represent something and being unable to detect its absence are the same fact, which is why nothing comes back as a residual or as a probability that came out low.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Scanning the Two Sentences With the Library",
+          practice: [
+            exercise(
+              "Scan the wildlife park sentence from both ends",
+              ["Build the nine-word list from Part 2 and run the greedy rule over 我们在野生动物园玩 from the left and then from the right. Print each answer with its piece count and how many of its pieces are lone characters.", "Part 2 found six pieces scanning from the left and Part 3 found five from the right, and the five are what a reader answers. The library’s segmenter is a pre-tokenizer, so it answers with words that carry their text and their span in the sentence."],
+              `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
+
+sentence = "我们在野生动物园玩"
+words = ["我们", "在", "在野", "野生", "生动", "动物园", "物", "园", "玩"]
+dictionary = WordDictionary.from_words(words)
+
+for direction in (MatchingDirection.FORWARD, MatchingDirection.BACKWARD):
+    # Build a segmenter over the dictionary scanning in this direction, split the
+    # sentence, and print the pieces, the piece count and the lone-character count.
+    pass`,
+              `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
+
+sentence = "我们在野生动物园玩"
+words = ["我们", "在", "在野", "野生", "生动", "动物园", "物", "园", "玩"]
+dictionary = WordDictionary.from_words(words)
+
+for direction in (MatchingDirection.FORWARD, MatchingDirection.BACKWARD):
+    segmenter = MaximumMatchingSegmenter(dictionary=dictionary, direction=direction)
+    pieces = segmenter.split(sentence)
+    lone = sum(1 for piece in pieces if len(piece.text) == 1)
+    print(f"{direction.value}: {' | '.join(pieces.texts)}")
+    print(f"  {pieces.n_words} pieces, {lone} lone characters")`,
+              `forward: 我们 | 在野 | 生动 | 物 | 园 | 玩
+  6 pieces, 3 lone characters
+backward: 我们 | 在 | 野生 | 动物园 | 玩
+  5 pieces, 2 lone characters`,
+              { hints: ["A word list becomes a dictionary through WordDictionary.from_words, which gives every entry a frequency of one, the honest statement that nothing beyond the list is known.", "MaximumMatchingSegmenter takes the dictionary and a direction at construction. MatchingDirection.FORWARD scans from the left and MatchingDirection.BACKWARD from the right.", "split answers a Words object. Its texts property is the pieces as strings, n_words is the count, and iterating it gives each piece with a text attribute, which is how to count the one-character ones."], check: numberCheck("How many pieces does the right-to-left scan answer?", 5, 0.5, "Moving from the right, the first thing the scan meets is the word for zoo, whole, and everything in front of it falls into place. From the left the second take is 在野 rather than 在, which moves the cursor one character too far, lets 生动 line up as an entry, and leaves three lone characters behind, six pieces in all.") },
+            ),
+            exercise(
+              "Let the heuristic choose on the surname sentence",
+              ["Part 4 put the surname in front of the sentence about the origin of life. Run the five-word list over 阿尔瓦雷斯研究生命起源 three ways, from the left, from the right and both ways with the heuristic keeping one, and print each answer with its piece count, its lone-character count and how many of its pieces the list holds.", "Both scans answer eight pieces, so the heuristic’s first rule cannot decide. The lesson says five characters of the surname come back alone; count the lone characters on each side and you will see which rule does."],
+              `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
+
+sentence = "阿尔瓦雷斯研究生命起源"
+dictionary = WordDictionary.from_words(["研究", "研究生", "生命", "命", "起源"])
+
+for direction in MatchingDirection:
+    pieces = MaximumMatchingSegmenter(dictionary=dictionary, direction=direction).split(sentence)
+    # Count the lone characters and the pieces the dictionary holds, then print
+    # the pieces and the three counts for this direction.
+    pass`,
+              `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
+
+sentence = "阿尔瓦雷斯研究生命起源"
+dictionary = WordDictionary.from_words(["研究", "研究生", "生命", "命", "起源"])
+
+for direction in MatchingDirection:
+    pieces = MaximumMatchingSegmenter(dictionary=dictionary, direction=direction).split(sentence)
+    lone = sum(1 for piece in pieces if len(piece.text) == 1)
+    entries = sum(1 for piece in pieces if piece.text in dictionary)
+    print(f"{direction.value}: {' | '.join(pieces.texts)}")
+    print(f"  {pieces.n_words} pieces, {lone} lone characters, {entries} entries")`,
+              `forward: 阿 | 尔 | 瓦 | 雷 | 斯 | 研究生 | 命 | 起源
+  8 pieces, 6 lone characters, 3 entries
+backward: 阿 | 尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源
+  8 pieces, 5 lone characters, 3 entries
+bidirectional: 阿 | 尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源
+  8 pieces, 5 lone characters, 3 entries`,
+              { hints: ["MatchingDirection has three members, and iterating the enum visits FORWARD, BACKWARD and BIDIRECTIONAL in that order, so one loop runs all three.", "The dictionary supports the in operator, so piece.text in dictionary says whether the list holds a piece.", "A character the list lacks comes back as a word of its own, which is a one-character piece that in dictionary answers false for."], check: numberCheck("How many lone characters does the left-to-right scan leave on the surname sentence?", 6, 0.5, "The five characters of the surname come back alone whichever way the scan runs, since no entry covers them. Scanning from the left then takes 研究生, the graduate student reading, which strands 命 as a sixth. From the right the scan takes 生命 whole and leaves five, so the two answers tie at eight pieces and the heuristic’s second rule, fewer lone characters, keeps the right-to-left answer.") },
+            ),
+            exercise(
+              "Take the word for zoo out of the list",
+              ["Part 4 removes 动物园 from the nine-word list and runs both scans on the wildlife park sentence again. Do the same, and for each scan print the pieces and how many of them are entries of the shortened list.", "The right-to-left scan was the one that got the sentence right. Without the word for zoo it has nothing whole to meet at the end, and what it answers instead carries no mark that anything is missing."],
+              `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
+
+sentence = "我们在野生动物园玩"
+words = ["我们", "在", "在野", "野生", "生动", "动物园", "物", "园", "玩"]
+shortened = WordDictionary.from_words([word for word in words if word != "动物园"])
+
+# For the forward and the backward direction, split the sentence against the
+# shortened list and print the pieces, the piece count and how many pieces are entries.`,
+              `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
+
+sentence = "我们在野生动物园玩"
+words = ["我们", "在", "在野", "野生", "生动", "动物园", "物", "园", "玩"]
+shortened = WordDictionary.from_words([word for word in words if word != "动物园"])
+
+for direction in (MatchingDirection.FORWARD, MatchingDirection.BACKWARD):
+    pieces = MaximumMatchingSegmenter(dictionary=shortened, direction=direction).split(sentence)
+    entries = sum(1 for piece in pieces if piece.text in shortened)
+    print(f"{direction.value}: {' | '.join(pieces.texts)}")
+    print(f"  {pieces.n_words} pieces, {entries} of them entries")`,
+              `forward: 我们 | 在野 | 生动 | 物 | 园 | 玩
+  6 pieces, 6 of them entries
+backward: 我们 | 在野 | 生动 | 物 | 园 | 玩
+  6 pieces, 6 of them entries`,
+              { hints: ["The shortened list is an ordinary dictionary built from eight words, so the segmenter is constructed exactly as before.", "Counting entries is piece.text in shortened over the pieces, and a count equal to the piece count means every piece is an entry."], check: numberCheck("How many of the right-to-left scan’s pieces are entries once the word for zoo is gone?", 6, 0.5, "Without 动物园 the scan from the right has nothing whole to take at the end, so it takes 园, then 物, and from there the same two false words the left-hand scan fell for, ending in the identical six pieces. Every one of them is an entry, which is exactly what a correct answer looks like, and that is why a missing word is not a failure the method can report.") },
+            ),
+            exercise(
+              "Try to match across a space",
+              ["Part 1 says whitespace ends a run before any matching begins, so a list holding thecat as an entry will not produce it from the two words the cat. Build that list, split the cat and then thecat, and print every piece with the span it was cut from.", "Each word the segmenter answers carries a start and an end offset into the text it came from, so the second piece of the cat should begin after the space rather than at the fourth character."],
+              `from oop_ml import MaximumMatchingSegmenter, WordDictionary
+
+dictionary = WordDictionary.from_words(["thecat", "the", "cat"])
+segmenter = MaximumMatchingSegmenter(dictionary=dictionary)
+
+for text in ("the cat", "thecat"):
+    # Split the text and print each piece with its start and end offsets.
+    pass`,
+              `from oop_ml import MaximumMatchingSegmenter, WordDictionary
+
+dictionary = WordDictionary.from_words(["thecat", "the", "cat"])
+segmenter = MaximumMatchingSegmenter(dictionary=dictionary)
+
+for text in ("the cat", "thecat"):
+    pieces = segmenter.split(text)
+    print(f"{text!r} -> {pieces.n_words} piece(s)")
+    for piece in pieces:
+        print(f"  {piece.text!r} at [{piece.start}, {piece.end})")`,
+              `'the cat' -> 2 piece(s)
+  'the' at [0, 3)
+  'cat' at [4, 7)
+'thecat' -> 1 piece(s)
+  'thecat' at [0, 6)`,
+              { hints: ["The direction defaults to scanning from the left, so a segmenter built from the dictionary alone is the forward one.", "Iterating the Words object gives Word objects, each with text, start and end attributes. The span is half open, so text[start:end] is the slice the piece came from."], check: numberCheck("At what offset does the piece cat start in the text the cat?", 4, 0.5, "The space at offset 3 closed the first run before any lookup happened, so the longest entry beginning at offset 0 could only be sought inside the, and cat is found in a second run that starts at offset 4. Handed thecat with no space, the same list produces the six-letter entry whole, since now nothing closes the run.") },
+            ),
+          ],
         },
       ]}
     />

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -20,7 +23,7 @@ import { WidthTradeChart } from "@/components/widgets/WidthTradeChart";
 export const metadata: Metadata = {
   title: "Hashing Characters · oop_ml",
   description:
-    "Turn a character straight into a position with arithmetic, so the table has the height we chose and nothing has to be stored, learned or looked up.",
+    "Map characters to a fixed number of buckets and examine collisions.",
 };
 
 const link =
@@ -31,8 +34,12 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function HashingCharactersPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["hashing-characters"]}
+      technicalStart="Part 2. One Character, Eight Numbers"
+      openingTitle="Choose the Table Size Before Seeing the Alphabet"
+      playgroundIntro="Inspect which characters share buckets. Compare one hash with several and keep the number of stored entries in view."
       title="Hashing Characters"
-      tagline="Turn a character straight into a position with arithmetic, so the table has the height we chose and nothing has to be stored, learned or looked up."
+      tagline="Map characters to a fixed number of buckets and examine collisions."
       prerequisites={
         <>
           One page from earlier in this section. The page on{" "}
@@ -52,98 +59,31 @@ export default function HashingCharactersPage() {
           sets out the table that everything here is refusing to build.
         </>
       }
-      history={
-        <>
-          <p>
-            Kilian Weinberger, Anirban Dasgupta, John Langford, Alex Smola and
-            Josh Attenberg had a storage problem at Yahoo! Research in 2009, and
-            it was not the one people expected. They were building spam filters
-            personalised to individual users, which meant one set of weights per
-            user over a shared vocabulary of words, and the weights were
-            affordable. What was not affordable was the dictionary that turned a
-            word into a position in those weights, since it had to be built, kept
-            in memory, shipped alongside every model and rebuilt whenever the
-            vocabulary changed. In &ldquo;Feature Hashing for Large Scale
-            Multitask Learning&rdquo; they replaced it with a hash function, so
-            the position of a word became something a machine computes in a few
-            instructions from the word itself, and they showed that with a second
-            hash deciding a sign the inner products a linear model reads are
-            preserved on average despite the collisions.
-          </p>
-          <p>
-            Po-Sen Huang, Xiaodong He, Jianfeng Gao, Li Deng, Alex Acero and
-            Larry Heck applied the same move to a piece of a word at Microsoft
-            Research in 2013. Their problem was web search, where a query
-            regularly contains a word no vocabulary of any size holds, and their
-            answer in &ldquo;Learning Deep Structured Semantic Models for Web
-            Search using Clickthrough Data&rdquo; was to wrap each word in a
-            boundary mark, cut it into overlapping runs of three letters, and
-            hash those. A vocabulary of half a million words became a table of
-            letter triples an order of magnitude smaller, misspellings landed
-            near their intended words because most of their triples survived the
-            error, and the whole thing needed no list of known words at all. Part
-            5 here is that idea, and it came back for generative models in 2024
-            in the work of Björn Deiseroth and colleagues at Aleph Alpha.
-          </p>
-          <p>
-            The version this page is mostly about is Jonathan Clark, Dan
-            Garrette, Iulia Turc and John Wieting&rsquo;s, at Google Research in
-            2021. Multilingual models of that period shared one learned subword
-            vocabulary across the hundred or so languages they were trained on,
-            and a shared vocabulary spends its entries where the training text
-            is, so a language with little of it is spelled out in fragments while
-            a language with a great deal of it gets whole words. Their model
-            CANINE dropped the learned vocabulary and read characters, which
-            immediately raised the 855,638,016 the previous page ends on, and
-            they answered that by hashing a character into a fixed number of
-            buckets and giving the model a row per bucket rather than a row per
-            character. They used 16,384 buckets and eight hashes at once, and the
-            argument for the eight is what Part 4 here measures.
-          </p>
-          <p>
-            The page answers six questions in order. What does a table with a row
-            for every character actually cost, and why can a corpus not rescue
-            it? What does it mean to compute a position instead of storing one,
-            and what does the arithmetic look like on our own sentence? What is a
-            collision, and what does one cost a model that has no way of noticing
-            it? Does hashing several times into the same space defend against
-            that, and by how much when it is counted rather than argued? What is
-            the whole arrangement worth against the obvious alternative of
-            reading bytes? And where does the method stop being defined at all?
-          </p>
-        </>
-      }
+
       playground={<CharacterHashExplorer />}
       sections={[
         {
           title: "Part 1. The Table That Cannot Be Built",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Where this picks up, and the number that rules the complete table out">
-                <p>
-                  The previous page ends on a table nobody builds. Reading a text
-                  as its characters means giving every character an entry, and a
-                  table with an entry for every character Unicode has room for is
-                  complete in the way the byte table is complete, so nothing can
-                  ever be unfamiliar to it. The arithmetic is what stops it. A
-                  model gives every entry a row of numbers to learn, and at an
-                  ordinary width of 768 those 1,114,112 entries come to
-                  855,638,016 numbers, which is more than many whole models, for
-                  a table almost every row of which no text will ever reach.
+                <>
+<p>
+                  The previous page ends on a table nobody builds. Reading a text as its characters means giving every character an entry, and a table with an entry for every character Unicode has room for is complete in the way the byte table is complete, so nothing can ever be unfamiliar to it. The arithmetic is what stops it.
                 </p>
                 <p>
-                  Fitting the table to a corpus instead is what the previous page
-                  measured, and it is the failure this page starts from. Every
-                  character of our eighteen English sentences gives a table of 37
-                  entries, which is cheap and covers English. Put one short
-                  sentence of Greek to it and 17 of the 21 characters come back as
-                  the stand-in, so the sentence arrives at the model as the fact
-                  that something unreadable was there, seventeen times over. That
-                  gap does not close with a bigger corpus, since Han alone has
-                  tens of thousands of characters and whatever text we gather is
-                  finite.
+                  A model gives every entry a row of numbers to learn, and at an ordinary width of 768 those 1,114,112 entries come to 855,638,016 numbers, which is more than many whole models, for a table almost every row of which no text will ever reach.
                 </p>
+</>
+                <>
+<p>
+                  Fitting the table to a corpus instead is what the previous page measured, and it is the failure this page starts from. Every character of our eighteen English sentences gives a table of 37 entries, which is cheap and covers English. Put one short sentence of Greek to it and 17 of the 21 characters come back as the stand-in, so the sentence arrives at the model as the fact that something unreadable was there, seventeen times over.
+                </p>
+                <p>
+                  That gap does not close with a bigger corpus, since Han alone has tens of thousands of characters and whatever text we gather is finite.
+                </p>
+</>
                 <NumberTable
                   headings={["one row per", "rows", "numbers at a width of 768"]}
                   rows={[
@@ -173,17 +113,14 @@ export default function HashingCharactersPage() {
                   shipped and kept in step with the model, and it is the part that
                   can be unfamiliar with something.
                 </p>
-                <p>
-                  Hashing removes the second job entirely. A character already has
-                  a number, the one Unicode gave it, and there is a piece of
-                  arithmetic that turns any whole number into a position inside a
-                  range we chose. Multiply it by a fixed odd number and take the
-                  remainder on dividing by the height of the table. That is the
-                  whole mapping. It is a handful of instructions, it stores
-                  nothing, it was fitted to nothing, and it answers for a
-                  character from a script nobody has ever put to it in exactly the
-                  same time it answers for the letter e.
+                <>
+<p>
+                  Hashing removes the second job entirely. A character already has a number, the one Unicode gave it, and there is a piece of arithmetic that turns any whole number into a position inside a range we chose. Multiply it by a fixed odd number and take the remainder on dividing by the height of the table.
                 </p>
+                <p>
+                  That is the whole mapping. It is a handful of instructions, it stores nothing, it was fitted to nothing, and it answers for a character from a script nobody has ever put to it in exactly the same time it answers for the letter e.
+                </p>
+</>
                 <Equation>
                   {"bucket  =  ((character number + 1) × multiplier)  mod  buckets"}
                 </Equation>
@@ -229,7 +166,7 @@ export default function HashingCharactersPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. One Character, Eight Numbers",
@@ -315,11 +252,15 @@ export default function HashingCharactersPage() {
                   buckets, so at this width nothing in it was lost.
                 </p>
                 <KeepInMind>
-                  The eight tables each hold 16,384 rows of 96 numbers, so the
-                  8 × 16,384 × 96 they come to is exactly the 16,384 × 768 a
-                  single table would have cost. Asking for more hashes does not
-                  make the model bigger, which is why the count looks free and why
-                  Part 4 has to ask what it is worth.
+                  <p>
+                    Each of the eight hash tables has 16,384 rows and 96 values per row.
+                    Compare that storage with one table whose rows contain 768 values.
+                  </p>
+                  <Equation>{"eight tables = 8 × 16,384 × 96 = 12,582,912 values\none table    = 16,384 × 768 = 12,582,912 values"}</Equation>
+                  <p>
+                    The parameter count stays fixed because each extra hash receives a
+                    narrower table. Part 4 asks what the different arrangement buys.
+                  </p>
                 </KeepInMind>
               </SubSection>
 
@@ -427,6 +368,29 @@ export default function HashingCharactersPage() {
                   {"A       2046  2838  3894  4026  4818  6402  6798  7458\n" +
                     "䁁      2046  2838  3894  4026  4818  6402  6798  7458"}
                 </Equation>
+                <WorkedExample title="The remainder step, where the two become one">
+                  <p>
+                    Section 4 never had to take a remainder, since every
+                    product there was under the height. This pair is where the
+                    step does its work. Take the first multiplier, 31, add one
+                    to each character number as the rule says, and multiply.
+                  </p>
+                  <Equation>
+                    {"A        66 × 31  =  2046\n" +
+                      "䁁   16,450 × 31  =  509,950\n" +
+                      "509,950 − (31 × 16,384)  =  509,950 − 507,904  =  2046"}
+                  </Equation>
+                  <p>
+                    The first product is under 16,384 and is its own bucket.
+                    The second holds thirty-one whole heights with 2046 left
+                    over, and the remainder step keeps only what is left over.
+                    The two numbers going in were one height apart, so the two
+                    products were thirty-one heights apart, and whole heights
+                    are exactly what the step throws away. The other seven
+                    multipliers do the same with their own products, which is
+                    why the two rows above agree in every column.
+                  </p>
+                </WorkedExample>
                 <p>
                   What a model can no longer do is worth spelling out. It cannot
                   learn that one of these begins an English sentence and the other
@@ -467,16 +431,20 @@ export default function HashingCharactersPage() {
                     way.
                   </p>
                 </WhyThisWorks>
-                <p>
-                  The count follows immediately and it is exact. Unicode has room
-                  for 1,114,112 characters and 1,114,112 divided by 16,384 is 68,
-                  so every set of buckets stands for exactly 68 characters and
-                  every character shares its whole set with exactly 67 others. The
-                  letter A shares with 67, of which 10 are characters Unicode has
-                  actually assigned, the ideograph above among them. The letter z
-                  shares with 67 as well, and so does the Greek eta and the full
-                  stop.
-                </p>
+                <>
+                  <p>
+                    This hash construction repeats its complete bucket pattern after
+                    16,384 code points. Count how many repetitions fit in the Unicode
+                    code-point range.
+                  </p>
+                  <Equation>{"repetitions = 1,114,112 / 16,384 = 68\nother code points sharing a pattern = 68 − 1 = 67"}</Equation>
+                  <p>
+                    These are code points, including unassigned values. Each example
+                    character therefore shares its complete hash pattern with
+                    sixty-seven others; for A, ten of those others are assigned
+                    characters in the data used here.
+                  </p>
+                </>
                 <NumberTable
                   headings={[
                     "buckets",
@@ -511,18 +479,14 @@ export default function HashingCharactersPage() {
                   reading the numbers back gave 17 stand-ins where letters had
                   been.
                 </p>
-                <p>
-                  A hash produces no such signal. Bucket 2046 looks the same
-                  whether one character sends something there or a hundred do, and
-                  nothing in the eight numbers a model reads says how crowded they
-                  are. The text still comes back exactly, because the character
-                  numbers travelled alongside; it is the model&rsquo;s view that
-                  lost the distinction, and the model has no way of asking. So a
-                  collision is not detected, not reported and not repaired at
-                  training time, and the ceiling it puts on what the model can
-                  learn was fixed by an arithmetic accident before the first text
-                  arrived.
+                <>
+<p>
+                  A hash produces no such signal. Bucket 2046 looks the same whether one character sends something there or a hundred do, and nothing in the eight numbers a model reads says how crowded they are. The text still comes back exactly, because the character numbers travelled alongside; it is the model&rsquo;s view that lost the distinction, and the model has no way of asking.
                 </p>
+                <p>
+                  So a collision is not detected, not reported and not repaired at training time, and the ceiling it puts on what the model can learn was fixed by an arithmetic accident before the first text arrived.
+                </p>
+</>
                 <InAModel>
                   <p>
                     The practical version of this is that a model trained on
@@ -585,6 +549,60 @@ export default function HashingCharactersPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            choice(
+              "Which of a table’s two jobs does hashing remove?",
+              [
+                "The mapping from a piece of writing to a row, since a character already carries a number",
+                "The rows of numbers the model learns",
+                "Both of them, since nothing at all is stored",
+                "Neither, because the mapping still has to be fitted to a corpus",
+              ],
+              0,
+              "The model still learns a row per bucket. What has gone is the list saying which character owns which row, which was the part that had to be built from a corpus, saved, shipped and kept in step with the model, and the part that could be unfamiliar with something.",
+            ),
+            trueFalse(
+              "The hash gives buckets to all 21 characters of the Greek sentence, which settles that the sentence can be represented and leaves open whether a model trained on English knows anything about the rows those letters lit.",
+              true,
+              "Representable and learnable are separate questions, and only the first of them has an answer here. The table fitted to eighteen English sentences handed back the stand-in for 17 of those 21 characters, and the hash never fails to produce a reading. A model reads the buckets and nothing else, though, so the failure has moved from before the model to inside it, where more training text can still change the answer.",
+            ),
+            choice(
+              "A character is given eight buckets from eight hashes. What does that cost in parameters?",
+              [
+                "Nothing, since the model gets eight tables of 96 numbers rather than one of 768",
+                "Eight times as much, one full table per hash",
+                "Eight times as many positions in the sequence",
+                "A sixty-eighth of the complete character table, once per hash",
+              ],
+              0,
+              "Both arrangements come to 12,582,912 values at 16,384 buckets, because each extra hash is handed a narrower table. A character is still one place in the sequence with eight rows fetched, and the expensive part of a model counts places rather than lookups.",
+            ),
+            choice(
+              "The capital A at 65 and the Han ideograph at 16,449 produce the identical eight buckets. What is special about that pair?",
+              [
+                "Nothing except that their difference is exactly 16,384, which is the height of the table",
+                "Both are the first character of their script",
+                "Their character numbers share a factor with the multipliers",
+                "Both were missing from the corpus the table was fitted to",
+              ],
+              0,
+              "Multiplying a difference by an odd number cannot make it a multiple of a power of two unless it already was one, so the multiplier changes which bucket a character lands in and changes nothing about which characters land together. Every one of the eight hashes partitions the characters in the identical way, and two of them agree everywhere or nowhere.",
+            ),
+            several(
+              "Which of these hold for the crowd of 68 characters sharing a pattern?",
+              [
+                "It is a count fixed by the height before any text arrives, rather than a probability or an average",
+                "It is the same for a character in daily use and for one nobody has ever typed",
+                "A model trained on English never notices the collision above, since the shared row is entirely A’s",
+                "Nothing in the eight numbers a model reads says how crowded a bucket is, so the collision is never reported",
+              ],
+              [0, 1, 2, 3],
+              "All four hold. The crowd is 1,114,112 divided by 16,384, which is a fact about the height and not about any text, and bucket 2046 looks the same whether one character sends something there or a hundred do. A learned table’s failure is loud, local and fixable with more text. This one is quiet, global and fixable only by choosing a different height and starting again, and the trouble appears later, when the same model is given Chinese and the two characters are already tied together in weights fitted without either of them being separable.",
+            ),
+        ],
         },
         {
           title: "Part 4. Eight Hashes, and What They Buy",
@@ -694,15 +712,19 @@ export default function HashingCharactersPage() {
               </SubSection>
 
               <SubSection title="15. The height where a second hash does buy something">
-                <p>
-                  The condition is now precise enough to construct a case where
-                  the defence works, which is the honest way to show what it
-                  actually depends on. Take 93 buckets, which is 3 times 31, and
-                  the first multiplier 31 shares that factor. Multiplying the
-                  remainders by 31 and reducing by 93 collapses them onto just
-                  three values, so one hash at that height distinguishes 3 kinds
-                  of character out of a possible 93.
-                </p>
+                <>
+                  <p>
+                    Choose ninety-three buckets and multiplier thirty-one. These numbers
+                    share a factor, so multiplication followed by the remainder
+                    operation cannot reach every bucket.
+                  </p>
+                  <Equation>{"93 = 3 × 31\npossible residues of 31x modulo 93: 0, 31, 62"}</Equation>
+                  <p>
+                    One such hash distinguishes only three classes of code points. This
+                    gives a concrete case for testing whether another hash adds
+                    information.
+                  </p>
+                </>
                 <p>
                   Now bring in the second multiplier, 43, which shares nothing
                   with 93. It shuffles the remainders rather than collapsing them,
@@ -771,6 +793,60 @@ export default function HashingCharactersPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Part 4",
+          quiz: [
+            choice(
+              "Run all 1,114,112 characters through the arrangement at 16,384 buckets and count the distinct sets of buckets. What comes out?",
+              [
+                "16,384 under one hash, and 16,384 again under two, four and eight",
+                "16,384 under one hash and 131,072 under eight",
+                "1,114,112 under eight hashes, so nothing collides",
+                "A number with thirty-three zeros after the point",
+              ],
+              0,
+              "The seven extra hashes leave the arrangement exactly where the first one left it. The usual argument, that the chance of agreeing in all eight is the chance of agreeing in one raised to the eighth power, is correct for hashes whose collisions are independent, and these are not.",
+            ),
+            choice(
+              "Why can no number of these hashes tell apart more kinds of character than there are buckets?",
+              [
+                "Every hash reduces by the same height, so the product depends on the character only through its own remainder",
+                "Each multiplier is a different prime, and primes cannot be combined",
+                "The eight tables are narrower, so between them they hold less",
+                "Unicode assigns only 16,384 characters in practice",
+              ],
+              0,
+              "That gives a ceiling rather than a probability, since each character is read only through a value in that range. A multiplier sharing no factor with the height merely shuffles the remainders, and at a power of two every odd multiplier does that, so the first hash already separates every remainder from every other.",
+            ),
+            choice(
+              "At 93 buckets with the multiplier 31, one hash distinguishes only three classes. What do the other seven buy?",
+              [
+                "The second takes it to 93, which is the ceiling, and the third through eighth take it no further",
+                "Each one doubles the count, so eight hashes are needed to reach 93",
+                "Nothing, because 93 and 31 share a factor",
+                "They take it past 93, which is what extra hashes are for",
+              ],
+              0,
+              "93 is 3 times 31, so the products can only land on 0, 31 and 62, and the second multiplier, 43, shares nothing with 93 and shuffles the remainders rather than collapsing them. The extra hashes are worth something exactly when the first was badly matched to the height, and what they buy back is ground it lost rather than any new ground.",
+            ),
+            several(
+              "Every height from 2 to 2,000 was swept. Which of these does the count show?",
+              [
+                "A single hash falls short of its ceiling at 64 of the 1,999 heights, and all 64 are multiples of 31",
+                "Two hashes fall short at none of the 1,999 heights",
+                "The published height of 16,384 is one of the heights where the second hash recovers ground",
+                "A third hash recovers ground at the heights that are multiples of 43, the second multiplier",
+              ],
+              [0, 1],
+              "A second hash is worth something only where the first multiplier divides the height, which is a little over three per cent of the widths, and 16,384 is a power of two that no odd multiplier divides, so it sits in the other ninety-seven per cent. Two hashes already reach the ceiling at every one of the heights, so there is none left where a third could help, the multiples of 43 included. The eight still give the model eight narrow tables rather than one wide one, which is a real difference in how a row is assembled and is not the collision protection they were there for.",
+            ),
+            trueFalse(
+              "Hashing a character several times with hashes whose collisions are independent really would multiply the protection, and what the count corrects is only the claim that these eight are independent.",
+              true,
+              "The claim being corrected is narrow. The chance of agreeing in all eight being the chance of agreeing in one raised to the eighth power is correct for independent hashes, and it is the argument the published eight rest on. These eight share the remainder step, and it is that step rather than the multiplier that decides which characters collide, so drawing the multipliers from eight different primes does not make the hashes independent.",
+            ),
+        ],
         },
         {
           title: "Part 5. The Same Idea on a Piece of a Word",
@@ -967,17 +1043,14 @@ export default function HashingCharactersPage() {
                   derivation arrives at.
                 </p>
                 <WidthTradeChart />
-                <p>
-                  What can be said is what each end costs. At 256 buckets the rows
-                  cost the same 196,608 as the byte table and every set of buckets
-                  stands for 4,352 characters, which is a model that cannot tell
-                  most letters apart. At 262,144 the crowd is down to 4.25
-                  characters to a set and the rows have reached 201,326,592, which
-                  is nearly a quarter of the complete table this page set out to
-                  avoid. Somewhere in between is a choice, and it is a choice about
-                  which scripts the model is expected to read rather than a fact
-                  about hashing.
+                <>
+<p>
+                  What can be said is what each end costs. At 256 buckets the rows cost the same 196,608 as the byte table and every set of buckets stands for 4,352 characters, which is a model that cannot tell most letters apart. At 262,144 the crowd is down to 4.25 characters to a set and the rows have reached 201,326,592, which is nearly a quarter of the complete table this page set out to avoid.
                 </p>
+                <p>
+                  Somewhere in between is a choice, and it is a choice about which scripts the model is expected to read rather than a fact about hashing.
+                </p>
+</>
                 <KeepInMind>
                   A number chosen by measurement on the writing at hand is a
                   perfectly good answer. A number quoted from a published
@@ -1098,6 +1171,231 @@ export default function HashingCharactersPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            trueFalse(
+              "Cat and cats share rows because something in the arrangement records that cats is a form of cat.",
+              false,
+              "Nothing was learned to produce the overlap and no list anywhere records it. At 8,192 buckets and one hash cat lights three buckets and cats lights four, and the two shared ones are the pieces the two words share, _ca and cat, while cat beside dog overlaps on nothing at all.",
+            ),
+            choice(
+              "Why do aaa, aaaa and aaaaa carry exactly the same fingerprint at any width?",
+              [
+                "A set records which pieces occurred and never how many times, and all three are made of _aa, aaa and aa_",
+                "The three runs collide under the hash at every height",
+                "The boundary mark is an underscore, which those words contain",
+                "A word of n characters gives n runs, and all three happen to have the same n",
+              ],
+              0,
+              "Nothing about that loss is a collision, and calling it one would hide the cause. The boundary is precise rather than general, since baa and baaa do differ, because the extra letter there produced the run aaa that the shorter word did not have.",
+            ),
+            several(
+              "Which of these were measured for the word-piece reading?",
+              [
+                "The sentence becomes 7 positions, against 25 under a merged vocabulary and 51 under either character reading",
+                "Those 7 positions light 45 buckets between them, each one a row fetched and added",
+                "Across all 17,576 three-letter words at a deliberately narrow 512 buckets there are 17,570 distinct fingerprints",
+                "A set of buckets can be read back to the word that produced it",
+              ],
+              [0, 1, 2],
+              "It is the cheapest reading on either page in positions and the most expensive in lookups. Nothing reads a fingerprint back, since many words produce a given one and the method holds no list of which, so recovering a word means keeping candidates and fingerprinting each of them.",
+            ),
+            choice(
+              "What does the hash do to the relationships between characters that a learned table could have held?",
+              [
+                "It destroys them, so A and a land in positions with no more in common than any other pair",
+                "It preserves them, since consecutive characters land exactly one multiplier apart",
+                "It preserves them within a script and destroys them across scripts",
+                "It leaves them to be recovered from the character numbers travelling alongside",
+              ],
+              0,
+              "The arithmetic is orderly even so, and that turns out not to help, because rows of a table have no order among themselves, so a model reading row 3038 has no way of noticing that b sits 31 rows further on. This is the one place the method is worse than the fitted character table it replaced, on a corpus that table covers.",
+            ),
+            choice(
+              "What do the two ends of the height sweep cost?",
+              [
+                "At 256 buckets the rows cost the same 196,608 as the byte table and a set stands for 4,352 characters; at 262,144 the crowd is 4.25 and the rows reach 201,326,592",
+                "At 256 buckets the crowd is 4.25 characters and at 262,144 it is 4,352",
+                "Both ends cost the same, since the rows and the crowd cancel",
+                "Neither end is reachable, since the height has to be a power of two",
+              ],
+              0,
+              "Raising the height multiplies the rows and divides the crowd in exact proportion, with no corner anywhere, so there is no height at which something changes character and none a derivation arrives at. Somewhere in between is a choice about which scripts the model is expected to read rather than a fact about hashing.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Counting Collisions With the Library",
+          practice: [
+            exercise(
+              "Hash the running sentence, then narrow the table",
+              ["Build a HashedCharacterTokenizer at its defaults, which are the published 16,384 buckets and eight hashes, and encode the running sentence. Print how many positions and how many numbers it became, the eight buckets of the letter a, and whether the text comes back exactly. Then encode the same sentence at 16,384, 64, 32 and 16 buckets, and print for each how many distinct sets of buckets its characters produce and which characters share one.", "The first three lines should be the figures of sections 4 and 5, and the rows for 64 and 32 buckets should be section 11, with the full stop and n merging first and then D with d and A with a. The page stops at 32, so the row for 16 buckets is yours to read."],
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
+    HashedCharacterTokenizer,
+)
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+# Build the tokenizer at its defaults and encode the sentence. Print the
+# positions, the numbers (positions times hashes), the buckets of the
+# letter a, and whether the encoding's text equals the sentence.
+
+# For each of 16384, 64, 32 and 16 buckets, build a tokenizer of that
+# height, encode the sentence, and group its characters by their bucket
+# sets. Print how many groups there are and the groups holding more than
+# one character.`,
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
+    HashedCharacterTokenizer,
+)
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+hasher = HashedCharacterTokenizer()
+hashed = hasher.encode(sentence)
+print(f"positions {hashed.n_characters}, numbers {hashed.n_characters * hasher.n_hash_functions}")
+print(f"a lands in {hasher.bucket_ids_of(ord('a'))}")
+print(f"text comes back exactly: {hashed.text == sentence}")
+
+for n_buckets in (16384, 64, 32, 16):
+    narrow = HashedCharacterTokenizer(n_buckets=n_buckets)
+    sharing = {}
+    for character in narrow.encode(sentence):
+        sharing.setdefault(character.bucket_ids, set()).add(character.character)
+    merged = sorted("".join(sorted(group)) for group in sharing.values() if len(group) > 1)
+    print(f"{n_buckets:5d} buckets: {len(sharing)} distinct sets, merged {merged}")`,
+              `positions 51, numbers 408
+a lands in (3038, 4214, 5782, 5978, 7154, 9506, 10094, 11074)
+text comes back exactly: True
+16384 buckets: 24 distinct sets, merged []
+   64 buckets: 23 distinct sets, merged ['.n']
+   32 buckets: 21 distinct sets, merged ['.n', 'Aa', 'Dd']
+   16 buckets: 15 distinct sets, merged [' p', "'w", '.n', 'Aa', 'Ddt', 'cs', 'hx', 'iy']`,
+              { hints: ["HashedCharacterTokenizer() with no arguments is the published arrangement, and n_buckets is the keyword that narrows it. encode answers an object with n_characters and text, and bucket_ids_of takes a character number, which ord gives you.", "Iterating over what encode answers gives one hashed character per position, each carrying its character and its bucket_ids, which is a tuple and so can be the key of a dictionary.", "Group with a dictionary from bucket_ids to the set of characters that produced them. The number of keys is the number of distinct sets, and a value holding two or more characters is a merge."], check: numberCheck("How many distinct sets of buckets do the sentence’s 24 characters produce at 16 buckets?", 15, 0.0, "At a height that is a power of two no odd multiplier changes which characters land together, so two characters merge exactly when their numbers differ by a multiple of 16. D, d and t are 68, 100 and 116 and become one kind, and seven pairs go with them, the space and p among them, so nine of the 24 distinctions are lost and 15 are left. Section 11 found 23 at 64 buckets and 21 at 32 by the same rule.") },
+            ),
+            exercise(
+              "Count the characters A cannot be told apart from",
+              ["Section 9 arrives at sixty-seven others by dividing. Count them instead. Take the eight buckets of the capital A at the published settings, run every one of the 1,114,112 character numbers through bucket_ids_of, and keep the ones that produce the same eight. Print how many there are, the nearest four, and every distinct gap between one of them and the next.", "The count should be the 67 of section 9 and the first of them should be 16,449, the ideograph of section 8. Look at the gaps. There should be one value only, and it is the condition the whole of Part 3 turns on."],
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
+    HashedCharacterTokenizer,
+)
+
+hasher = HashedCharacterTokenizer()
+target = hasher.bucket_ids_of(ord("A"))
+print(f"A is character {ord('A')} and lands in {target}")
+
+# Collect every character number from 0 up to 0x110000, other than A's
+# own, whose bucket_ids_of equals target. Print how many there are, the
+# first four, and the set of differences between neighbours.`,
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
+    HashedCharacterTokenizer,
+)
+
+hasher = HashedCharacterTokenizer()
+target = hasher.bucket_ids_of(ord("A"))
+print(f"A is character {ord('A')} and lands in {target}")
+
+sharers = [
+    number
+    for number in range(0x110000)
+    if number != ord("A") and hasher.bucket_ids_of(number) == target
+]
+gaps = sorted({later - earlier for earlier, later in zip(sharers, sharers[1:])})
+print(f"others with the same eight buckets: {len(sharers)}")
+print(f"the nearest four: {sharers[:4]}")
+print(f"gaps between neighbours: {gaps}")`,
+              `A is character 65 and lands in (2046, 2838, 3894, 4026, 4818, 6402, 6798, 7458)
+others with the same eight buckets: 67
+the nearest four: [16449, 32833, 49217, 65601]
+gaps between neighbours: [16384]`,
+              { hints: ["0x110000 is 1,114,112, the number of character numbers Unicode has room for, so range(0x110000) visits every one of them. bucket_ids_of answers a tuple, and two tuples compare equal when every entry agrees.", "A list comprehension with a condition does the collecting. Leave A itself out, or the count comes to 68, which is the size of the crowd rather than the number of others in it.", "zip(sharers, sharers[1:]) pairs each sharer with the next one, and a set of the differences shows at a glance whether they are all the same."], check: numberCheck("How many other character numbers share all eight of A’s buckets?", 67, 0.0, "The pattern of buckets repeats every 16,384 character numbers, and 1,114,112 divided by 16,384 is 68, so each set of buckets stands for 68 characters and A shares its set with the other 67. The only gap the script prints is 16,384, which is the whole condition. It is a count fixed by the height, the same for a letter in daily use and for a number Unicode has assigned nothing to.") },
+            ),
+            exercise(
+              "Count what a second hash buys",
+              ["Part 4 counts how many kinds of character an arrangement can tell apart by running every character number through it and counting the distinct sets of buckets. Do that at 93 buckets, at 62 buckets and at the published 16,384, with one hash, two and eight each time. The keyword for the number of hashes is n_hash_functions. Nine sweeps of the whole space make this the slowest script of the four, so give it a moment.", "The rows for 93 should be section 15, where one hash sees 3 kinds and two see all 93, and the rows for 16,384 should be section 13, the same figure three times. 62 is not a height the page tries. Before running it, work out from 62 being 2 times 31 what one hash will see there."],
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
+    HashedCharacterTokenizer,
+)
+
+for n_buckets in (93, 62, 16384):
+    for n_hash_functions in (1, 2, 8):
+        # Build the tokenizer with this many buckets and hashes, collect
+        # bucket_ids_of for every number in range(0x110000) into a set,
+        # and print the height, the hashes and the size of the set.
+        ...`,
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
+    HashedCharacterTokenizer,
+)
+
+for n_buckets in (93, 62, 16384):
+    for n_hash_functions in (1, 2, 8):
+        hasher = HashedCharacterTokenizer(n_buckets=n_buckets, n_hash_functions=n_hash_functions)
+        kinds = len({hasher.bucket_ids_of(number) for number in range(0x110000)})
+        print(f"{n_buckets:5d} buckets, hashes {n_hash_functions}: {kinds} kinds of character")`,
+              `   93 buckets, hashes 1: 3 kinds of character
+   93 buckets, hashes 2: 93 kinds of character
+   93 buckets, hashes 8: 93 kinds of character
+   62 buckets, hashes 1: 2 kinds of character
+   62 buckets, hashes 2: 62 kinds of character
+   62 buckets, hashes 8: 62 kinds of character
+16384 buckets, hashes 1: 16384 kinds of character
+16384 buckets, hashes 2: 16384 kinds of character
+16384 buckets, hashes 8: 16384 kinds of character`,
+              { hints: ["HashedCharacterTokenizer takes n_buckets and n_hash_functions as keywords, and the hashes it uses are the first so many of the eight multipliers, so one hash means the multiplier 31 alone.", "A set comprehension over range(0x110000) keeps one copy of each distinct tuple of buckets, and its len is the number of kinds the arrangement can tell apart."], check: numberCheck("How many kinds of character does one hash tell apart at 62 buckets?", 2, 0.0, "62 is 2 times 31 and the first multiplier is 31, so every product is a multiple of 31 and its remainder on dividing by 62 can only be 0 or 31. The second multiplier, 43, shares nothing with 62 and shuffles the remainders, so two hashes see all 62 and the other six add nothing. It is section 15 over again at one of the 64 heights section 16 counted, the ones that are multiples of 31.") },
+            ),
+            exercise(
+              "Fingerprint words by their runs of three",
+              ["Build a TrigramHashTokenizer at 8,192 buckets, which is the width Part 5 uses, with its one hash. For each pair of words below, take the activations of both and print how many buckets each lights, how many they share, which the overlap function counts, and whether the two sets of buckets are identical. Finish by printing the runs of three that expected is cut into.", "cat with cats, cat with dog and analysis with reanalysis should be section 18, and the two pairs of repeated letters should be section 20, one identical and one not. The running sentence says expect where the eighteen sentences say expected, and the page never compares the two."],
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.trigram_hashing import (
+    TrigramHashTokenizer,
+    overlap,
+)
+
+pairs = [
+    ("cat", "cats"),
+    ("cat", "dog"),
+    ("analysis", "reanalysis"),
+    ("expect", "expected"),
+    ("aaa", "aaaa"),
+    ("baa", "baaa"),
+]
+
+# Build the tokenizer at 8192 buckets. For each pair, take activations_of
+# both words and print each word's n_active, the overlap of the two, and
+# whether their bucket_ids are equal. Then print trigrams_of("expected").`,
+              `from oop_ml.core.natural_language_processing.tokenization.hashing.trigram_hashing import (
+    TrigramHashTokenizer,
+    overlap,
+)
+
+pairs = [
+    ("cat", "cats"),
+    ("cat", "dog"),
+    ("analysis", "reanalysis"),
+    ("expect", "expected"),
+    ("aaa", "aaaa"),
+    ("baa", "baaa"),
+]
+
+tokenizer = TrigramHashTokenizer(n_buckets=8192)
+for first, second in pairs:
+    one = tokenizer.activations_of(first)
+    two = tokenizer.activations_of(second)
+    same = one.bucket_ids == two.bucket_ids
+    print(f"{first:8s} {second:10s} light {one.n_active} and {two.n_active}, share {overlap(one, two)}, identical {same}")
+
+print(tokenizer.trigrams_of("expected"))`,
+              `cat      cats       light 3 and 4, share 2, identical False
+cat      dog        light 3 and 3, share 0, identical False
+analysis reanalysis light 8 and 10, share 7, identical False
+expect   expected   light 6 and 8, share 5, identical False
+aaa      aaaa       light 3 and 3, share 3, identical True
+baa      baaa       light 3 and 4, share 3, identical False
+('_ex', 'exp', 'xpe', 'pec', 'ect', 'cte', 'ted', 'ed_')`,
+              { hints: ["TrigramHashTokenizer has no default width, so n_buckets has to be given. activations_of takes one word and answers the set of buckets its runs of three light, with n_active for how many and bucket_ids for which.", "overlap is a function rather than a method. It takes two activations and answers how many buckets they have in common.", "Compare the bucket_ids of the two activations rather than the activations themselves, since an activation also remembers which word it came from."], check: numberCheck("How many buckets do expect and expected share?", 5, 0.0, "Wrapped in the boundary mark, expect is cut into _ex, exp, xpe, pec, ect and ct_, and expected keeps the first five of those and then continues with cte, ted and ed_ where the shorter word ended. So five of the six buckets expect lights are among the eight expected lights, and a model meeting one of the two words already holds most of the rows it built for the other, with nothing anywhere recording that they are related.") },
+            ),
+          ],
         },
       ]}
     />

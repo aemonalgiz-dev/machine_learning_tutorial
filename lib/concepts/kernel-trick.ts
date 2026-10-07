@@ -14,7 +14,7 @@ export type KernelChoice =
   | { name: "sigmoid"; gamma?: number; constant?: number };
 
 // What one fit of the classifier reports about itself. The decision values
-// are signed distances in the implied space's units; the squashed values
+// are unnormalized decision scores; the squashed values
 // are those through a logistic, and the page says why that is not a
 // probability.
 export interface FitSummary {

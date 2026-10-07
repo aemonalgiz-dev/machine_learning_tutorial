@@ -66,7 +66,7 @@ export function CurvedPattern() {
         <Stat label="one-component reconstruction error" value={analysis.reconstruction_error_one.toFixed(0)} />
       </div>
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The dashed curve is the pattern, one number per person, and the indigo line is the best straight axis through it. The two groups at the ends of the bend are folded onto the same stretch of the line.
+        The dashed curve is the pattern, one number per person, and the indigo line is the best straight axis through it. The two groups at the ends of the curve are folded onto the same stretch of the line.
       </p>
     </div>
   );

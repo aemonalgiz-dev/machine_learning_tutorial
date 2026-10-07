@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // Where the cuts land, plotted against how many blocks they make.
 //
@@ -233,21 +235,9 @@ export function CutLandingChart() {
         </span>
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The orange line wanders between{" "}
-        {(Math.min(...view.fixed.map((row) => row.share_inside_a_word)) * 100).toFixed(1)}
-        % and{" "}
-        {(Math.max(...view.fixed.map((row) => row.share_inside_a_word)) * 100).toFixed(1)}
-        % with the dashed line running through it, because the rule that draws it
-        has not read the text. At {atTheThreshold?.n_patches} blocks the blue
-        line puts{" "}
-        {atTheThreshold
-          ? (atTheThreshold.share_inside_a_word * 100).toFixed(1)
-          : "…"}
-        % of its cuts inside a word, against{" "}
-        {(nearest.share_inside_a_word * 100).toFixed(1)}% for the nearest orange
-        point at {nearest.n_patches} blocks.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The orange rule places boundaries without reading the text. Its inside-word cut rate varies as the fixed patch size changes. The blue rule uses the learned text model, so compare the two at similar patch counts.</p><Equation>{"Fixed-patch inside-word rates: " + (Math.min(...view.fixed.map((row) => row.share_inside_a_word)) * 100).toFixed(1) + "% to " + (Math.max(...view.fixed.map((row) => row.share_inside_a_word)) * 100).toFixed(1) + "%\nModel boundary rate at " + atTheThreshold?.n_patches + " patches: " + (atTheThreshold ? (atTheThreshold.share_inside_a_word * 100).toFixed(1) : "…") + "%\nNearest fixed-size comparison at " + nearest.n_patches + " patches: " + (nearest.share_inside_a_word * 100).toFixed(1) + "%"}</Equation>
+</>
     </div>
   );
 }

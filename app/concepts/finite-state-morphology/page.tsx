@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { WrittenAgainstLearned } from "@/components/widgets/WrittenAgainstLearne
 export const metadata: Metadata = {
   title: "Finite-State Morphology · oop_ml",
   description:
-    "Write a language’s stems and endings down as a machine, and a word walked through it comes back with its parts named. What that buys over a vocabulary learned by counting, and what it costs to write.",
+    "Use explicit stems, endings, and spelling rules to analyse a word's structure.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -29,8 +32,12 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function FiniteStateMorphologyPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["finite-state-morphology"]}
+      technicalStart="Part 2. A Grammar Is a Machine"
+      openingTitle="Write Down How the Word Is Built"
+      playgroundIntro="Trace a word through the allowed stems and endings. Compare a recognised form, an unfamiliar form, and a form with more than one possible analysis."
       title="Finite-State Morphology"
-      tagline="Write a language’s stems and endings down as a machine, and a word walked through it comes back with its parts named. What that buys over a vocabulary learned by counting, and what it costs to write."
+      tagline="Use explicit stems, endings, and spelling rules to analyse a word's structure."
       prerequisites={
         <>
           It helps to have met one method that learns its pieces from a corpus,
@@ -41,78 +48,23 @@ export default function FiniteStateMorphologyPage() {
           grammar accepts once somebody has written it.
         </>
       }
-      history={
-        <>
-          <p>
-            Kimmo Koskenniemi was working on Finnish at the University of
-            Helsinki at the start of the 1980s, and Finnish is the language that
-            makes the problem impossible to avoid. A Finnish noun has thousands
-            of written forms, so nobody can list them, and a system that reads
-            Finnish has to take a word apart instead of looking it up. The
-            machinery available for taking words apart at the time came from
-            generative phonology, where a form is derived by applying rewrite
-            rules one after another in a fixed order, and running that backwards
-            to recover the parts from the spelling meant undoing an ordered
-            derivation, which is slow and awkward. Koskenniemi&rsquo;s 1983
-            doctoral thesis, Two-Level Morphology, replaced the ordered
-            derivation with a set of constraints that all hold at once between
-            two levels of representation, the spelling a reader sees and the
-            analysis underneath it, and each constraint is a finite-state
-            machine.
-          </p>
-          <p>
-            What made that practical was a result from Xerox PARC. Ronald Kaplan
-            and Martin Kay had shown that phonological rewrite rules of the
-            ordered kind are themselves finite-state relations and can be
-            compiled into transducers, work they had been presenting since the
-            early 1980s and published in full in Computational Linguistics in
-            1994. If the rules are transducers and the lexicon is a transducer,
-            then composing them gives one machine that reads a word and writes
-            its analysis, and it runs in time proportional to the length of the
-            word rather than to the size of the vocabulary. Xerox built the
-            toolchain around that, a lexicon compiler and a rule compiler, and
-            Kenneth Beesley and Lauri Karttunen wrote it up in Finite State
-            Morphology in 2003. Helsinki later produced an open reimplementation
-            of the same tools, and Tim Buckwalter&rsquo;s Arabic analyser,
-            released through the Linguistic Data Consortium in 2002, is the same
-            object in a plainer form, three tables of prefixes, stems and
-            suffixes with a fourth saying which of them may join.
-          </p>
-          <p>
-            This page asks six questions in order. What do all the methods
-            earlier in this section have in common, and what does that commit
-            them to? What does it mean to write a language down as a machine,
-            and what is the machine? What comes back when a word is walked
-            through it, and how is that more than a place to cut? What do the
-            written lines buy, measured against a vocabulary of the same size
-            learned by counting? What happens to a word the grammar has never
-            been told about? And what happens to a word it can read in more than
-            one way? The sentence this section carries is where the last two
-            questions land hardest, since a grammar written by hand reads almost
-            none of it, and the one word it does read it reads correctly and
-            with the parts named.
-          </p>
-        </>
-      }
+
       playground={<MorphologyPlayground />}
       sections={[
         {
           title: "Part 1. Where the Pieces Have Come From Until Now",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Every piece so far was found by counting">
-                <p>
-                  Byte pair encoding merges the pair of symbols that occurs most
-                  often. The unigram model starts from a large set of pieces and
-                  drops whichever is least missed. The method that searches for
-                  the set of pieces describing a corpus in the fewest bits is
-                  measuring the corpus too, and so is the one that picks the
-                  pieces covering the most text. Every one of them arrives at a
-                  vocabulary by asking a body of text a question and reading the
-                  answer off, which means every one of them inherits whatever
-                  that body of text happened to contain.
+                <>
+<p>
+                  Byte pair encoding merges the pair of symbols that occurs most often. The unigram model starts from a large set of pieces and drops whichever is least missed. The method that searches for the set of pieces describing a corpus in the fewest bits is measuring the corpus too, and so is the one that picks the pieces covering the most text.
                 </p>
+                <p>
+                  Every one of them arrives at a vocabulary by asking a body of text a question and reading the answer off, which means every one of them inherits whatever that body of text happened to contain.
+                </p>
+</>
                 <p>
                   That is not a criticism, and it is the reason those methods
                   work on languages nobody on the team speaks. It is a
@@ -228,7 +180,7 @@ export default function FiniteStateMorphologyPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Grammar Is a Machine",
@@ -264,17 +216,14 @@ export default function FiniteStateMorphologyPage() {
                   }
                 </Equation>
                 <WhyThisWorks>
-                  <p>
-                    The requirement that every step reads at least one character
-                    is the reason the search finishes. Each step moves strictly
-                    to the right in the word, so no run of steps can be longer
-                    than the word is, and a state that leads back to itself
-                    cannot be visited forever. Machines of this kind normally
-                    allow a step that reads nothing, and then a loop of such
-                    steps has to be detected and removed before anything can be
-                    walked. Forbidding them costs one thing, which section 8 is
-                    about, and buys termination with no check at all.
+                  <>
+<p>
+                    The requirement that every step reads at least one character is the reason the search finishes. Each step moves strictly to the right in the word, so no run of steps can be longer than the word is, and a state that leads back to itself cannot be visited forever. Machines of this kind normally allow a step that reads nothing, and then a loop of such steps has to be detected and removed before anything can be walked.
                   </p>
+                  <p>
+                    Forbidding them costs one thing, which section 8 is about, and buys termination with no check at all.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   The states are the grammar&rsquo;s claim about what may follow
@@ -651,6 +600,60 @@ export default function FiniteStateMorphologyPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            choice(
+              "A vocabulary of 178 pieces was fitted on a corpus holding every one of the grammar’s 1,074 words exactly once. How did it cut recovers and bakes?",
+              [
+                "As recov and ers, and bak and es, both a character to the left of where the word is jointed",
+                "As recover and s, and bake and s, which is what the grammar says",
+                "It held both whole, since nothing in that corpus was rare",
+                "It refused both, since neither occurs often enough to earn a piece",
+              ],
+              0,
+              "The endings ers and es are frequent in written words, and the counts have no opinion about which characters belong to the stem. The word measured misses in the other direction, coming back as measure and d where the grammar says measur and ed, because the stem drops its final e.",
+            ),
+            trueFalse(
+              "A learned boundary moves when the budget moves, where a written grammar answers the same thing at every size.",
+              true,
+              "At 178 pieces measured is cut as measure and d, and at 356 it is one piece and is not cut at all, while unnamed goes from three pieces to two by absorbing the prefix into the stem. Nothing in a written grammar was chosen by counting, so nothing in it moves when a size does.",
+            ),
+            choice(
+              "Why does every step of this machine have to read at least one character?",
+              [
+                "So that each label can be read off the spelling it sits beside",
+                "So the search finishes, since every step moves strictly to the right and no run of steps can be longer than the word",
+                "So that a word can be read in a single pass rather than by searching",
+                "So that no state can be reached from itself",
+              ],
+              1,
+              "Machines of this kind normally allow a step that reads nothing, and a loop of such steps then has to be detected and removed before anything can be walked. Forbidding them buys termination with no check at all, and the price is that nothing absent can be labelled, so a bare walk comes back as the verb walk rather than as the verb walk in the present tense.",
+            ),
+            choice(
+              "bake plus ed is bakeed, and English writes baked. How does the grammar on this page handle that?",
+              [
+                "By compiling a rule saying a stem-final e disappears before a vowel-initial ending and composing it onto the lexicon",
+                "By a second spelling of the stem, bak, labelled as the verb bake, leading to a state holding only the vowel-initial endings",
+                "By respelling the ending as d after a stem that ends in e",
+                "By handing the word on whole, since no path spells it",
+              ],
+              1,
+              "That repair is four lines, and it takes the smaller grammar from 3 states and 12 lines to 5 states and 16. Koskenniemi’s two-level rules and the compilers after them produce the same bak step without anybody typing it, and there is no rule compiler here, so the alternation is written out one extra spelling at a time.",
+            ),
+            choice(
+              "The word walks has two readings and both have two pieces. Which is handed on to a tokenizer, and why?",
+              [
+                "walk+V +3SG, since the verb reading is the commoner one",
+                "walk+N +PL, because the two tie on piece count and the label string beginning with N sorts first",
+                "Whichever line of the grammar happened to be tried first",
+                "Both, since an analyser reports every reading it finds",
+              ],
+              1,
+              "Nothing in the grammar chooses, so the rule is imported from outside. It is arbitrary, since there is no sense in which the plural noun is the better reading of walks in isolation, and it is written down because the alternative depends on line order, where reordering two lines that say the same thing would change what a word is cut into.",
+            ),
+        ],
+        },
+        {
           title: "Part 4. What a Hundred and Seventy-Eight Lines Buy",
           content: (
             <>
@@ -882,7 +885,7 @@ export default function FiniteStateMorphologyPage() {
                   needs a line, or a spelling rule, or both.
                 </p>
                 <KeepInMind>
-                  Coverage is bought line by line and the curve does not bend on
+                  Coverage is bought line by line and the coverage curve does not improve on
                   its own. A learned vocabulary reaches complete coverage the
                   moment it is fitted, because it can spell anything out of
                   characters, and that difference is the reason this method is
@@ -929,6 +932,54 @@ export default function FiniteStateMorphologyPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 and 5",
+          quiz: [
+            trueFalse(
+              "178 lines accept 1,074 words because every verb reaches every ending and every prefix reaches every stem, so the count of words is roughly a product where the count of lines is a sum.",
+              true,
+              "That is what composition does, and it is not a property of the particular numbers chosen for this grammar. The same 178 lines give 1,184 distinct readings, and the saving grows with the number of endings rather than staying fixed, so a word list of a thousand forms is a thousand lines to write and maintain where the grammar is 178. The machine itself holds 342 steps, because the stem list is copied into a second state for the prefixes to lead to.",
+            ),
+            choice(
+              "At 178 pieces each, the grammar reads the 1,074 words in a mean of 2.648 pieces and the learned vocabulary in 2.943. What happens at 356 learned pieces?",
+              [
+                "The learned mean falls to 2.071, which is shorter than the grammar’s 2.648",
+                "The learned mean barely moves, since the words are already short",
+                "The grammar’s mean falls too, since it has more pieces available",
+                "The learned vocabulary begins holding every one of the words whole",
+              ],
+              0,
+              "37 of the 1,074 words are held whole at that size. A learned vocabulary shortens its sequences by spending memory, and a grammar has no equivalent setting, since its pieces are the morphemes and there are as many of them as the words have, so any case for the grammar has to rest on what the pieces are called.",
+            ),
+            choice(
+              "The larger grammar is handed busiest. What comes back?",
+              [
+                "A cut with one piece marked unknown",
+                "The nearest word the grammar does hold",
+                "Nothing, since no path through the grammar spells those seven characters",
+                "The seven characters one at a time",
+              ],
+              2,
+              "The word is then handed on whole because there is nothing else to do with it. A learned vocabulary always answers, since it can fall back on characters, so its failures are quiet and look like successes, where an empty answer is loud and trivially detectable and lets a system count exactly how often it is failing.",
+            ),
+            several(
+              "On a paragraph of seventy-six words, fifty of the commonest English words were added as lines. What did that buy?",
+              [
+                "Coverage by occurrence went from 9.2% to 60.5%",
+                "Coverage by distinct word went from 12.3% to 47.4%",
+                "Those fifty lines bought more on this text than the 178 lines that say something did",
+                "They added structure as well, since the commonest words carry the most morphology",
+              ],
+              [0, 1, 2],
+              "The commonest words in English carry no morphology at all, so a grammar of stems and endings can say nothing about them except by listing them one at a time, which is fifty more lines and no more structure. Thirty different words are still left over, among them busiest, thinned, gone and stallholder, and each needs a line, or a spelling rule, or both.",
+            ),
+            trueFalse(
+              "The three readings of recovers are a defect that more lines would fix.",
+              false,
+              "All three are real English and nothing in the six characters chooses between them, so more lines produce more readings rather than fewer. Across the whole language the larger grammar accepts, 108 of the 1,074 words are read more than one way, which is 10.1%, and that is a grammar with three prefixes and no derivational depth to speak of.",
+            ),
+        ],
         },
         {
           title: "Part 6. Where the Method Stops Being Defined",
@@ -1015,17 +1066,14 @@ export default function FiniteStateMorphologyPage() {
                   which reading is a fact about the sentence and the grammar
                   never sees a sentence.
                 </p>
-                <p>
-                  Two things follow, and only the second is usually noticed. The
-                  first is that a system needing one answer has to import a rule
-                  from outside, and the tie rule in section 12 is such a rule and
-                  has no argument behind it. The second is that the number of
-                  readings is not bounded by anything in the method. It is bounded
-                  by the grammar, and a grammar with a stem that is also a prefix
-                  plus another stem multiplies rather than adds; the four-line
-                  grammar reaching 233 readings on twelve characters is the
-                  extreme case of exactly that shape.
+                <>
+<p>
+                  Two things follow, and only the second is usually noticed. The first is that a system needing one answer has to import a rule from outside, and the tie rule in section 12 is such a rule and has no argument behind it. The second is that the number of readings is not bounded by anything in the method.
                 </p>
+                <p>
+                  It is bounded by the grammar, and a grammar with a stem that is also a prefix plus another stem multiplies rather than adds; the four-line grammar reaching 233 readings on twelve characters is the extreme case of exactly that shape.
+                </p>
+</>
                 <p>
                   Where the choice matters, the answer is not more lines. It is a
                   model of what words are likely in context, which is a probability
@@ -1148,6 +1196,292 @@ export default function FiniteStateMorphologyPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Part 6",
+          quiz: [
+            trueFalse(
+              "Two competent people writing a grammar for English converge on the same one, as two people running byte pair encoding on one corpus do.",
+              false,
+              "This method has no objective at all, where the earlier ones maximise a merge count or a likelihood or minimise a number of bits. A grammar is a claim about a language, so two people’s disagreements are real disagreements about English rather than differences of tuning, and whether recover is one morpheme or two is defensible either way.",
+            ),
+            choice(
+              "Why is there nothing to score on busiest?",
+              [
+                "Because every reading is scored and this word scores zero",
+                "Because the method is undefined there, in the way a function is undefined outside its domain",
+                "Because the word is too rare for a score to mean anything",
+                "Because the pipeline stops before the grammar is reached",
+              ],
+              1,
+              "The set of words the method answers for is exactly the set its lines spell, which is a definition rather than a limitation found by testing. Every other method here is total, returning pieces for anything because character pieces are always available underneath, and that totality is what lets those methods be scored at all.",
+            ),
+            choice(
+              "Where a word has several readings, what does the page say the answer is?",
+              [
+                "More lines, until the grammar can tell them apart",
+                "A better tie rule, derived from the grammar itself",
+                "A model of what words are likely in context, which is learned from a corpus",
+                "Reporting whichever reading is found first",
+              ],
+              2,
+              "Which reading is meant is a fact about the sentence, and a grammar of stems and endings never sees one. So the grammar and the counting turn out to be complements rather than rivals, which is what the systems in this tradition do, producing every reading and ranking them with something trained.",
+            ),
+            several(
+              "Which costs follow from a grammar being written once, by a person, for one language?",
+              [
+                "It does not transfer, since the 178 lines describe English and say nothing about any other language",
+                "It does not fill itself in, since coverage is bought a line at a time",
+                "It goes stale where nothing has been edited, returning nothing for new words while reporting no error",
+                "It can only be evaluated by asking somebody who knows the language, since no procedure substitutes for that",
+              ],
+              [0, 1, 2, 3],
+              "All four follow. A learned method is retrained by pointing it at a different corpus, which is an afternoon, and is evaluated by rerunning the procedure, where this one is repaired and judged by finding the person again. Fifty lines took coverage on one paragraph from 9.2% to 60.5% and the 30 words still left over need 30 more decisions about English, and a grammar written five years ago returns nothing for every new word while looking exactly as correct as it did. What does not follow is any gradual degradation, since a word outside the set the lines spell produces an empty answer rather than a rough one.",
+            ),
+            trueFalse(
+              "A grammar can gain coverage on a text by listing words while getting worse at describing how the language works.",
+              true,
+              "Coverage measures the grammar against a text rather than against the language, and it is the only thing here that can be measured at all, since the method has no objective and nothing to converge to. The fifty structureless words are the instance, fifty more lines and no more structure that took coverage by occurrence from 9.2% to 60.5%. Whether a grammar describes the language well is a question in linguistics rather than in arithmetic, and only somebody who knows the language can answer it.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Writing a Grammar and Reading Words With the Library",
+          practice: [
+            exercise(
+              "Write the dropped e into the grammar",
+              ["Part 3 built the small grammar both ways. Before the repair it has 3 states and 12 lines, reads bakeed as the past tense of bake and returns nothing at all for baked, and after the repair it has 5 states and 16 lines and does exactly the reverse. The starter builds the grammar before the repair. Write the repair, which is a second spelling of the stem, bak, still labelled as the verb bake, leading to a new state that holds only ed and ing, with the full stem bake redirected to another new state that holds only s.", "Then print, for each grammar, its states and lines and what it makes of baked, bakeed, bakes and walked. What should come out is the lesson’s table, the first two words swapping places and the other two exactly as they were. A word with no reading is handed on whole, so its cut is the word itself."],
+              `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
+from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
+
+verb_endings = Lexicon("verb ending", [
+    LexiconEntry("s", "+3SG", END),
+    LexiconEntry("ed", "+PAST", END),
+    LexiconEntry("ing", "+PROG", END),
+])
+noun_endings = Lexicon("noun ending", [LexiconEntry("s", "+PL", END)])
+regular = [
+    LexiconEntry("walk", "walk+V", "verb ending"),
+    LexiconEntry("walk", "walk+V", END),
+    LexiconEntry("talk", "talk+V", "verb ending"),
+    LexiconEntry("talk", "talk+V", END),
+    LexiconEntry("walk", "walk+N", "noun ending"),
+    LexiconEntry("walk", "walk+N", END),
+]
+bake_before = [
+    LexiconEntry("bake", "bake+V", "verb ending"),
+    LexiconEntry("bake", "bake+V", END),
+]
+before = FiniteStateAnalyzer(
+    root="word",
+    lexicons=(Lexicon("word", regular + bake_before), verb_endings, noun_endings),
+)
+
+# Build a second grammar, after, from the same regular lines. Give bake three
+# lines of its own, the full stem leading to a state that holds only s, the
+# full stem ending the word, and the spelling bak leading to a state that
+# holds only ed and ing. Both spellings carry the label bake+V.
+
+# For before and for after, print the number of states and of lines, then
+# for baked, bakeed, bakes and walked the labels of every reading, or
+# "no reading", and the pieces the word is cut into.`,
+              `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
+from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
+
+verb_endings = Lexicon("verb ending", [
+    LexiconEntry("s", "+3SG", END),
+    LexiconEntry("ed", "+PAST", END),
+    LexiconEntry("ing", "+PROG", END),
+])
+noun_endings = Lexicon("noun ending", [LexiconEntry("s", "+PL", END)])
+regular = [
+    LexiconEntry("walk", "walk+V", "verb ending"),
+    LexiconEntry("walk", "walk+V", END),
+    LexiconEntry("talk", "talk+V", "verb ending"),
+    LexiconEntry("talk", "talk+V", END),
+    LexiconEntry("walk", "walk+N", "noun ending"),
+    LexiconEntry("walk", "walk+N", END),
+]
+bake_before = [
+    LexiconEntry("bake", "bake+V", "verb ending"),
+    LexiconEntry("bake", "bake+V", END),
+]
+before = FiniteStateAnalyzer(
+    root="word",
+    lexicons=(Lexicon("word", regular + bake_before), verb_endings, noun_endings),
+)
+
+bake_after = [
+    LexiconEntry("bake", "bake+V", "ending that starts with a consonant"),
+    LexiconEntry("bake", "bake+V", END),
+    LexiconEntry("bak", "bake+V", "ending that starts with a vowel"),
+]
+consonant = Lexicon("ending that starts with a consonant", [LexiconEntry("s", "+3SG", END)])
+vowel = Lexicon("ending that starts with a vowel", [
+    LexiconEntry("ed", "+PAST", END),
+    LexiconEntry("ing", "+PROG", END),
+])
+after = FiniteStateAnalyzer(
+    root="word",
+    lexicons=(Lexicon("word", regular + bake_after), verb_endings, noun_endings, consonant, vowel),
+)
+
+for label, grammar in [("before", before), ("after", after)]:
+    lines = sum(lexicon.n_entries for lexicon in grammar.lexicons)
+    print(f"{label}: {grammar.n_lexicons} states, {lines} lines")
+    for word in ["baked", "bakeed", "bakes", "walked"]:
+        labels = [reading.tags for reading in grammar.analyse(word)]
+        cut = " ".join(grammar.segment(word).texts)
+        print(f"  {word}: {', '.join(labels) or 'no reading'} | cut {cut}")`,
+              `before: 3 states, 12 lines
+  baked: no reading | cut baked
+  bakeed: bake+V +PAST | cut bake ed
+  bakes: bake+V +3SG | cut bake s
+  walked: walk+V +PAST | cut walk ed
+after: 5 states, 16 lines
+  baked: bake+V +PAST | cut bak ed
+  bakeed: no reading | cut bakeed
+  bakes: bake+V +3SG | cut bake s
+  walked: walk+V +PAST | cut walk ed`,
+              { hints: ["A line is LexiconEntry(spelling, label, next state), and a state is a Lexicon with a name and its lines. A line whose next state is END says the word may finish there.", "Every state a line names has to be among the lexicons handed to the analyser, or construction is refused, so the two new states go into the tuple beside the old ones.", "analyse answers every reading of a word, each with its tags, and is empty when no path spells the word. segment answers the pieces of the reading handed on, with their texts, or the whole word when there is no reading."] },
+            ),
+            exercise(
+              "Count the readings, then make talk a noun",
+              ["Part 2 counted every path through the small grammar and found fourteen paths for twelve words, with walk and walks spelled by two paths each because walk is listed as a verb and as a noun. The starter holds that grammar, 16 lines, and the twelve words it accepts. Read every one of the twelve and add up the readings, and name the words that have more than one.", "Talk is a noun in English as well. Add the two lines that say so, one leading to the noun ending and one ending the word, and count again. Then print which reading of talks is handed on. The lesson does not write these two lines, so the second count is not on the page."],
+              `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
+from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
+
+endings = (
+    Lexicon("verb ending", [
+        LexiconEntry("s", "+3SG", END),
+        LexiconEntry("ed", "+PAST", END),
+        LexiconEntry("ing", "+PROG", END),
+    ]),
+    Lexicon("noun ending", [LexiconEntry("s", "+PL", END)]),
+    Lexicon("ending that starts with a consonant", [LexiconEntry("s", "+3SG", END)]),
+    Lexicon("ending that starts with a vowel", [
+        LexiconEntry("ed", "+PAST", END),
+        LexiconEntry("ing", "+PROG", END),
+    ]),
+)
+stems = [
+    LexiconEntry("walk", "walk+V", "verb ending"),
+    LexiconEntry("walk", "walk+V", END),
+    LexiconEntry("talk", "talk+V", "verb ending"),
+    LexiconEntry("talk", "talk+V", END),
+    LexiconEntry("bake", "bake+V", "ending that starts with a consonant"),
+    LexiconEntry("bake", "bake+V", END),
+    LexiconEntry("bak", "bake+V", "ending that starts with a vowel"),
+    LexiconEntry("walk", "walk+N", "noun ending"),
+    LexiconEntry("walk", "walk+N", END),
+]
+accepted = [
+    "walk", "walks", "walked", "walking",
+    "talk", "talks", "talked", "talking",
+    "bake", "bakes", "baked", "baking",
+]
+
+grammar = FiniteStateAnalyzer(root="word", lexicons=(Lexicon("word", stems), *endings))
+# Print the total number of readings over the twelve accepted words and the
+# words that have more than one.
+
+# Write the two lines that make talk a noun, labelled talk+N, build a second
+# grammar from stems plus those two, and print the same two things for it.
+# Then print the labels of the reading of talks that is handed on.`,
+              `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
+from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
+
+endings = (
+    Lexicon("verb ending", [
+        LexiconEntry("s", "+3SG", END),
+        LexiconEntry("ed", "+PAST", END),
+        LexiconEntry("ing", "+PROG", END),
+    ]),
+    Lexicon("noun ending", [LexiconEntry("s", "+PL", END)]),
+    Lexicon("ending that starts with a consonant", [LexiconEntry("s", "+3SG", END)]),
+    Lexicon("ending that starts with a vowel", [
+        LexiconEntry("ed", "+PAST", END),
+        LexiconEntry("ing", "+PROG", END),
+    ]),
+)
+stems = [
+    LexiconEntry("walk", "walk+V", "verb ending"),
+    LexiconEntry("walk", "walk+V", END),
+    LexiconEntry("talk", "talk+V", "verb ending"),
+    LexiconEntry("talk", "talk+V", END),
+    LexiconEntry("bake", "bake+V", "ending that starts with a consonant"),
+    LexiconEntry("bake", "bake+V", END),
+    LexiconEntry("bak", "bake+V", "ending that starts with a vowel"),
+    LexiconEntry("walk", "walk+N", "noun ending"),
+    LexiconEntry("walk", "walk+N", END),
+]
+accepted = [
+    "walk", "walks", "walked", "walking",
+    "talk", "talks", "talked", "talking",
+    "bake", "bakes", "baked", "baking",
+]
+
+talk_as_a_noun = [
+    LexiconEntry("talk", "talk+N", "noun ending"),
+    LexiconEntry("talk", "talk+N", END),
+]
+
+for label, lines in [("as printed", stems), ("with talk a noun", stems + talk_as_a_noun)]:
+    grammar = FiniteStateAnalyzer(root="word", lexicons=(Lexicon("word", lines), *endings))
+    counts = {word: grammar.analyse(word).n_analyses for word in accepted}
+    twice = [word for word, count in counts.items() if count > 1]
+    print(f"{label}: {sum(counts.values())} readings of {len(accepted)} words")
+    print(f"  more than one reading: {' '.join(twice)}")
+
+print(f"talks is handed on as {grammar.analyse('talks').shortest.tags}")`,
+              `as printed: 14 readings of 12 words
+  more than one reading: walk walks
+with talk a noun: 16 readings of 12 words
+  more than one reading: walk walks talk talks
+talks is handed on as talk+N +PL`,
+              { hints: ["analyse answers an object with an n_analyses, so the total is a sum over the twelve words.", "The two new lines are the two walk already has as a noun, with talk in place of walk in the spelling and in the label.", "The reading handed on is the shortest of an analysis, and its tags are the labels joined by spaces."], check: numberCheck("How many readings do the twelve words have once talk is a noun as well?", 16, 0, "Talk and talks were already accepted as a verb and each now has a noun reading too, so the twelve words go from 14 readings to 16 and not one new word is accepted. Two lines bought two readings and no coverage, which is Part 5’s point that more lines produce more readings, not fewer, once a stem can be two things. The reading handed on for talks is the plural noun for the same reason as for walks. Both readings have two pieces, and a label beginning with N sorts before one beginning with V.") },
+            ),
+            exercise(
+              "Grow the readings on a grammar of four lines",
+              ["Part 5 wrote a grammar of four lines, a piece of one character and a piece of two, each of which may be followed by another or may end the word, and found 13 readings of a word of six characters, 89 of ten and 233 of twelve. Build it, with one state that leads back to itself, and read words of 5, 6, 10, 12 and 15 of the letter a.", "For each print the number of readings and the cut that is handed on. The lesson stops at twelve characters, and it never says which of the readings a tokenizer downstream would receive."],
+              `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
+from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
+
+# Build an analyser whose one state, word, holds four lines. The spelling a,
+# labelled one, leads back to word, and also ends the word. The spelling aa,
+# labelled two, does the same.
+
+for length in [5, 6, 10, 12, 15]:
+    # Read a word of this many a's. Print its length, how many readings it
+    # has, and the pieces of the reading that is handed on.
+    ...`,
+              `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
+from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
+
+grammar = FiniteStateAnalyzer(
+    root="word",
+    lexicons=(
+        Lexicon("word", [
+            LexiconEntry("a", "one", "word"),
+            LexiconEntry("a", "one", END),
+            LexiconEntry("aa", "two", "word"),
+            LexiconEntry("aa", "two", END),
+        ]),
+    ),
+)
+
+for length in [5, 6, 10, 12, 15]:
+    readings = grammar.analyse("a" * length)
+    handed_on = " ".join(readings.shortest.morphs)
+    print(f"{length} characters: {readings.n_analyses} readings, handed on as {handed_on}")`,
+              `5 characters: 8 readings, handed on as a aa aa
+6 characters: 13 readings, handed on as aa aa aa
+10 characters: 89 readings, handed on as aa aa aa aa aa
+12 characters: 233 readings, handed on as aa aa aa aa aa aa
+15 characters: 987 readings, handed on as a aa aa aa aa aa aa aa`,
+              { hints: ["A line may name its own state as the next one. Every step still reads at least one character, so a walk cannot go round for ever, which is the rule Part 2 gave for why the search finishes.", "lexicons is a tuple, so a grammar of one state is written with a trailing comma after the one Lexicon.", "The reading handed on is the shortest of an analysis, and its morphs are the pieces as spelled."], check: numberCheck("How many readings does a word of fifteen characters have?", 987, 0, "A reading of n characters starts with the one-character piece followed by a reading of n − 1, or with the two-character piece followed by a reading of n − 2, so the counts add, and from the lesson’s 233 at twelve they run 377, 610 and 987. The cut handed on is the one with the fewest pieces, eight of them at fifteen characters, seven of two and one of one. Eight readings tie on that, one for each place the single a can stand, and the label string that sorts first puts it at the front. Nothing in the grammar chose that reading. The tie rule did.") },
+            ),
+          ],
         },
       ]}
     />

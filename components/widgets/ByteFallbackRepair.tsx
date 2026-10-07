@@ -113,14 +113,9 @@ export function ByteFallbackRepair() {
         ))}
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Both readings come from the same 85 merges over the same{" "}
-        {view.alphabet_size} symbols, so the only difference is what happens when
-        a symbol has no row. On the left it becomes one stand-in; on the right it
-        becomes its bytes, written in blue, and where a word ended there the
-        marker gets a piece of its own. Those two things are {view.floor_rows}{" "}
-        extra rows in the table, once, whatever the text.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The two readings share the same 85 learned merges and the same {view.alphabet_size}-symbol starting alphabet. What differs is the treatment of an unfamiliar symbol.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The left reading substitutes an unknown entry. The right represents the symbol with bytes, shown in blue, and handles the word-end marker separately. This fallback requires {view.floor_rows} additional vocabulary entries. Compare the decoded text to see what that extra representation preserves.</p>
+</>
     </div>
   );
 }

@@ -174,8 +174,9 @@ export function KernelSimilarityChart() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        The radial curves are the only ones that fade to zero with distance, so
-        under that kernel a far-away point simply stops mattering.
+        The radial curves approach zero as distance increases. A distant
+        observation therefore has a smaller kernel value; its contribution to
+        a prediction also depends on its learned coefficient.
       </p>
 
       <div className="mt-3 grid grid-cols-3 gap-3">

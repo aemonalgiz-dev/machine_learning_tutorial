@@ -45,7 +45,8 @@ export function PassDown() {
         <text x={560} y={134} textAnchor="middle" className="fill-slate-500 text-[10px] dark:fill-slate-400">z = Σ wᵢ hᵢ</text>
       </svg>
       <div className="mt-3 rounded-lg bg-slate-100 px-4 py-3 font-mono text-sm text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-        <p>∂z_out/∂{HIDDEN_NAMES[which]} = w{which + 1} = {show(weights[which])}, because the score is a sum and {HIDDEN_NAMES[which]} appears in it once, multiplied by w{which + 1}</p>
+        <p className="font-sans">The score derivative with respect to a hidden output is its connection weight.</p>
+        <p>∂z_out/∂{HIDDEN_NAMES[which]} = w{which + 1} = {show(weights[which])}</p>
         <p className="mt-1 font-semibold" style={{ color: AMBER }}>∂L/∂{HIDDEN_NAMES[which]} = δ_out × w{which + 1} = {show(delta)} × {show(weights[which])} = {show(output.passed_down[which])}</p>
         <p className="mt-2">passed down to the hidden layer, all three at once ({output.passed_down.map(show).join(", ")})</p>
       </div>

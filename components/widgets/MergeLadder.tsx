@@ -94,32 +94,9 @@ export function MergeLadder({ initialStep = 0 }: { initialStep?: number }) {
         <Stat label="seen" value={here.count === null ? "none" : here.count} />
       </div>
 
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        {here.left === null ? (
-          <>
-            Nothing adjacent occurs twice any more, so there is no merge left to
-            make. The word {learning.unseen_word}, which this corpus never
-            contained, now reads as {here.unseen_pieces.length} pieces.
-          </>
-        ) : (
-          <>
-            {here.tied.length > 1 ? (
-              <>
-                {here.tied.length} pairs reach {here.count} here,{" "}
-                {here.tied.join(", ")}, so the count does not decide on its own
-                and the one whose first symbol sorts earliest is taken.
-              </>
-            ) : (
-              <>
-                One pair reaches {here.count} here, {here.tied[0]}, so nothing
-                needs breaking.
-              </>
-            )}{" "}
-            The word {learning.unseen_word} currently reads as{" "}
-            {here.unseen_pieces.length} pieces.
-          </>
-        )}
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{here.left === null ? "No adjacent pair is eligible for another merge under this implementation's frequency rule." : here.tied.length > 1 ? "The highest count is tied. The implementation uses its stated symbol-order rule to select among the tied candidates." : "One pair has the highest count, so this round needs no tie break."}</p>{here.left !== null && <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Highest count: {here.count}. Candidates: {here.tied.join(", ")}.</p>}<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">The unseen word {learning.unseen_word} currently uses {here.unseen_pieces.length} pieces. Follow it across rounds to see how merges learned from other words affect its encoding.</p>
+</>
     </div>
   );
 }

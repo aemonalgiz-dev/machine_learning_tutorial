@@ -164,13 +164,9 @@ export function PatternPlayground() {
             <EarlierRule reading={view.on_translation_rules} />
           </div>
 
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            A raised dot stands for a space, an arrow for a tab and a return
-            mark for a line break. A piece shaded blue is one that carries its
-            own leading space, so the same word after a space and at the start
-            of a line are two different pieces. Hovering a piece names the
-            branch that produced it and the characters of the text it covers.
-          </p>
+          <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">First identify the characters that are normally invisible: a raised dot denotes a space, an arrow a tab, and a return mark a line break.</p><p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Blue pieces include their own leading space. A word at the start of a line can therefore produce a different piece from the same word after a space. Hover over a piece to inspect the pattern branch that matched it and its span in the original text.</p>
+</>
         </div>
       )}
     </div>

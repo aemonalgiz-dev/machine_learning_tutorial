@@ -178,15 +178,9 @@ export function BlockOverlapMap({
         </div>
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        A block is two cells by two and steps{" "}
-        {view.block_stride_in_cells === 1 ? "one cell" : "two cells"} at a time,
-        so a cell in the middle belongs to{" "}
-        {view.block_stride_in_cells === 1 ? "four blocks" : "one block"} and
-        reaches the answer that many times, each time divided by a different
-        denominator. That is why {view.n_cells} cells come back as{" "}
-        {view.cells_in_the_answer} cells&rsquo; worth of numbers.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Block normalization can reuse a cell in several neighborhoods. Each block contains two cells by two cells. The block stride here is {view.block_stride_in_cells === 1 ? "one cell" : "two cells"}, so an interior cell contributes to {view.block_stride_in_cells === 1 ? "four overlapping blocks" : "one block"}.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Each occurrence is normalized with its own block. The descriptor therefore contains {view.cells_in_the_answer} cells&apos; worth of values from {view.n_cells} original cells. Follow a cell&apos;s highlights to see where its repeated contributions go.</p>
+</>
     </div>
   );
 }

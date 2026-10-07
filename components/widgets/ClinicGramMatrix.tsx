@@ -182,7 +182,8 @@ export function ClinicGramMatrix() {
         Rows and columns are the patients in the order they arrived, the ten
         healthy first, and the dashed lines mark where they end. Indigo is a
         positive kernel value and amber a negative one. Eigenvalues drawn in
-        amber are negative, which no kernel can produce.
+        amber are negative beyond the rounding tolerance. A valid inner-product
+        kernel cannot produce a Gram matrix with negative eigenvalues in exact arithmetic.
       </p>
 
       {message && (

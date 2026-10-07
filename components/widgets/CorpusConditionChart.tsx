@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // What has to be true of the corpus before the uncertainties say anything.
 //
@@ -232,19 +234,9 @@ export function CorpusConditionChart() {
       </div>
 
       {earliest && justBefore && (
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          On the left panel the two lines stay within{" "}
-          {Math.max(
-            ...view.rows
-              .filter((row) => row.smoothing >= 1)
-              .map((row) => row.gap),
-          ).toFixed(3)}{" "}
-          bits of each other all the way to twenty copies, and every marker under
-          it stays grey. On the right the words come out at{" "}
-          {earliest.n_copies} copies and not at {justBefore.n_copies}, where the
-          text still comes to {justBefore.n_patches} blocks rather than{" "}
-          {earliest.n_patches}.
-        </p>
+        <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">This comparison asks whether repeating training text changes the boundary decisions under each smoothing setting. On the left, the displayed lines remain close and the boundary markers stay gray.</p><Equation>{"Largest displayed gap with smoothing at least one: " + Math.max(...view.rows.filter((row) => row.smoothing >= 1).map((row) => row.gap)).toFixed(3) + " bits"}</Equation><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">On the right, word-aligned patches first appear at {earliest.n_copies} copies. At {justBefore.n_copies} copies the model still produces {justBefore.n_patches} patches, compared with {earliest.n_patches} after that change. The corpus count and smoothing rule work together.</p>
+</>
       )}
     </div>
   );

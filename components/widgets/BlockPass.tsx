@@ -205,7 +205,7 @@ export function BlockPass() {
                   textAnchor="middle"
                   className="fill-slate-500 stroke-none text-[10px] dark:fill-slate-400"
                 >
-                  {stageIndex === 0 ? "W₁, bend" : "W₂"}
+                  {stageIndex === 0 ? "W₁, activation function" : "W₂"}
                 </text>
               </g>
             )}

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -22,7 +25,7 @@ import { WindowPositions } from "@/components/widgets/WindowPositions";
 export const metadata: Metadata = {
   title: "The Shape Guarantee · oop_ml",
   description:
-    "A network that cannot work is refused before it reads a single row, in integer comparisons, and the refusal names both arrangements. Flattening is the bridge from a picture to a row, and leaving it out is the case the whole check exists to catch.",
+    "Track how each layer arranges its inputs and outputs, and make reshaping explicit.",
 };
 
 const link =
@@ -31,8 +34,12 @@ const link =
 export default function ShapesAndFlatteningPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["shapes-and-flattening"]}
+      technicalStart="Part 3. One Seam, Settled in Integers"
+      openingTitle="The Right Number of Values Can Still Be the Wrong Shape"
+      playgroundIntro="Compare each layer's output shape with the next layer's expected input. Look for cases with equal value counts but different arrangements."
       title="The Shape Guarantee"
-      tagline="Every seam in a network settled in integer arithmetic, before any data arrives."
+      tagline="Track how each layer arranges its inputs and outputs, and make reshaping explicit."
       prerequisites={
         <>
           The layers joined here are the{" "}
@@ -52,66 +59,14 @@ export default function ShapesAndFlatteningPage() {
           thrown away.
         </>
       }
-      history={
-        <>
-          <p>
-            The running example here is a handwritten digit, twenty-eight rows
-            of twenty-eight grey values, and that picture has a specific
-            provenance. Kunihiko Fukushima published the neocognitron in
-            Biological Cybernetics in 1980, a model that alternated layers
-            picking out small features anywhere in a picture with layers that
-            shrank what those layers found, so that a stroke recognised
-            slightly to the left was still the same stroke. In 1989 Yann LeCun
-            and colleagues at AT&amp;T Bell Laboratories in Holmdel trained
-            that arrangement by backpropagation on handwritten postal codes
-            supplied by the United States Postal Service, published as
-            &ldquo;Backpropagation Applied to Handwritten Zip Code
-            Recognition&rdquo;, and the 1998 paper that grew out of that line
-            of work, &ldquo;Gradient-Based Learning Applied to Document
-            Recognition&rdquo;, is where the shape every convolutional network
-            has borrowed since was written down. A picture goes in,
-            convolutions and pooling layers shrink it while deepening it, and
-            somewhere in the middle the picture is laid out flat into a single
-            row so that ordinary dense layers can finish.
-          </p>
-          <p>
-            That seam, where the picture becomes a row, is where the same
-            mistake has been made ever since, and the two families of framework
-            answer it in opposite ways. Theano, built at the Universit&eacute;
-            de Montr&eacute;al from 2007, described a whole network as a
-            symbolic graph and compiled it before running any of it, so a
-            disagreement between two layers was something the build complained
-            about. PyTorch, released publicly in 2017, took the other bargain
-            and runs each layer at the moment it is called, which buys a great
-            deal of flexibility and means a shape disagreement surfaces only
-            when data reaches the offending layer, often some minutes into a
-            training run and always with the message written in terms of an
-            array rather than in terms of the join. The epistemic problem
-            underneath is small and stubborn. Everything needed to settle
-            whether two layers fit together is known when they are written
-            down, and a framework that waits for data to tell it has thrown
-            that knowledge away.
-          </p>
-          <p>
-            This page asks six questions in order. What can a network refuse to
-            be built out of, and why should the refusal come before any data is
-            read? What is a shape here, given that it is a tuple of extents
-            rather than a count of numbers? How is one seam between two layers
-            checked? What is flattening, and where in a chain does it belong?
-            Why does the check belong to an object that cannot exist unless
-            every seam holds, rather than to a function a caller may forget to
-            call? And what must a complete implementation state, including
-            where this one is known to be weak?
-          </p>
-        </>
-      }
+
       playground={<ShapeStackBuilder />}
       sections={[
         {
           title: "Part 1. What a Network Refuses to Be",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. A chain that cannot work">
                 <p>
                   Build a network for the digit picture and you write down a
@@ -206,7 +161,7 @@ export default function ShapesAndFlatteningPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Shape Is an Arrangement, Not a Count",
@@ -362,6 +317,54 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "Deciding whether the seven-layer digit chain is well formed costs six comparisons of tuples that are at most three numbers long.",
+              true,
+              "Seven layers make six seams, and each seam is settled by comparing two short tuples of whole numbers. Nothing is trained, no picture is sent, and no memory is reserved for a batch, which is why checking first costs nothing worth measuring.",
+            ),
+            choice(
+              "The digit chain reports that it reads (1, 28, 28) and answers (10,). Which figures in the chain does a reader have to reconcile against the world?",
+              [
+                "Only those two, since the first layer has to read what the pictures are and the last has to answer what the task wants",
+                "The 784 numbers in the picture and the 5408 the first convolution produces",
+                "The 5408 handed up by the first convolution and the 400 that arrive at the bridge",
+                "The window size and the stride of each convolution",
+              ],
+              0,
+              "Only the two ends of a chain have anything to do with the data. Everything between them is internal, chosen by whoever wrote the network and settled among the layers themselves, so the 5408, the 1352 and the 400 are facts about the chain and about nothing else.",
+            ),
+            choice(
+              "Why is each side of a shape written as a tuple of extents rather than as a single count of how many numbers it holds?",
+              [
+                "A count works perfectly for a dense layer and destroys the only thing a convolution cares about",
+                "A count is more expensive to compare than a tuple",
+                "A dense layer cannot be described by a count at all",
+                "The count cannot be worked out from the extents",
+              ],
+              0,
+              "A dense layer’s neurons hold one weight per arriving number and have no notion of a row or a column, so a count tells them everything. A convolution’s whole subject is neighbourhood, so collapsing (8, 26, 26) to 5408 throws away what it exists to exploit. The count is the extents multiplied together, so it is derived from the arrangement and never the other way round.",
+            ),
+            several(
+              "An extent is a whole number of at least one. Which of these are refused at the point the shape is written?",
+              [
+                "A picture of height zero",
+                "A negative width",
+                "A side with no extents at all",
+                "An extent larger than the one in the layer beneath",
+              ],
+              [0, 1, 2],
+              "The zero, the negative and the empty side are all refused when the shape is made, so no layer downstream has to carry a branch for meeting one. Zero looks like the harmless edge and is the dangerous one, since a layer of height zero is an absent layer whose shape would agree with whatever sat above it. An extent being larger than the one beneath it is not a fault in the shape. It is a seam question, and a seam is settled by comparing the two shapes.",
+            ),
+            trueFalse(
+              "A chain built only out of dense layers cannot tell an implementation that compares arrangements from one that only ever counts.",
+              true,
+              "For a row the arrangement and the count are written with the same number, so a report that quietly collapsed (36,) into 36 would look identical to one that did not. The fixture has to hold numbers arranged as something that is not a row. A chain that starts by reading (2, 2, 2) says it reads (2, 2, 2), where a collapsed report would say (8,) and be refused by the chain’s own first layer.",
+            ),
+        ],
         },
         {
           title: "Part 3. One Seam, Settled in Integers",
@@ -659,6 +662,26 @@ export default function ShapesAndFlatteningPage() {
                   shapes would still all agree, and the blame would arrive at
                   the wrong pixels.
                 </p>
+                <WorkedExample title="Where one number lands">
+                  <>
+                    <p>
+                      Take section 5&rsquo;s eight numbers arranged as (2, 2, 2). With
+                      the last extent varying fastest, the row is filled by walking
+                      along one row of the picture, then down to the next row, and
+                      only then on to the next channel. A number at channel c, row i
+                      and column j of a picture with h rows and w columns therefore
+                      lands at one known position of the flat row, counting from
+                      zero.
+                    </p>
+                    <Equation>{"position = c × (h × w) + i × w + j\n\nchannel 1, row 0, column 1 of (2, 2, 2)\nposition = 1 × (2 × 2) + 0 × 2 + 1 = 5"}</Equation>
+                    <p>
+                      I put a single nonzero number at that place and it came out at
+                      position 5 of the row. Sending blame back down at position 5
+                      alone returned it to channel 1, row 0, column 1 and to nowhere
+                      else, and the layer reported no gradient.
+                    </p>
+                  </>
+                </WorkedExample>
                 <p>
                   The bridge also has no parameters, so it produces no gradient
                   at all rather than a gradient full of zeros. A block of zeros
@@ -676,6 +699,60 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "A seam check that compared counts would fail loudly on a dense layer written to read (5408,) placed straight above a convolution answering (8, 26, 26).",
+              false,
+              "It passes, which is the whole reason arrangements are compared instead. Nothing crashes and the network trains, on a picture whose rows have been run end to end into one long strip, so the result is a model that works, converges and is worse than it should be for a reason nothing anywhere reported.",
+            ),
+            several(
+              "A convolution answers (8, 26, 26). Which of these readings, placed straight above it, are refused?",
+              [
+                "(5408,)",
+                "(26, 8, 26)",
+                "(4, 52, 26)",
+                "(784,)",
+              ],
+              [0, 1, 2, 3],
+              "All four are refused, because a seam holds only when the two tuples are equal and the one reading that holds is (8, 26, 26) itself. The flat row of 5408, the swap that turns rows into channels and the halving of one extent against the doubling of another all hold 5408 numbers, so a count comparison would have let those three through. (784,) is the count of the picture that went in rather than of what came out, so there the counts disagree as well and the refusal says less.",
+            ),
+            choice(
+              "When does the refusal add the clause saying it is the arrangement that disagrees and not the width?",
+              [
+                "Only when the two sides really do hold the same count",
+                "On every refused seam, so the reader always knows what to look at",
+                "Only when one of the two sides is a flat row",
+                "Only on the seam nearest the picture",
+              ],
+              0,
+              "With 5408 on one side and 784 on the other, a reader already knows the two do not match and the clause would be noise, so the sentence stops after the two arrangements. The clause appears only where a reader would otherwise think the refusal was itself a mistake. An earlier message reported the two counts instead, and on the case the check exists for its own text said that 5408 met 5408.",
+            ),
+            choice(
+              "Along the digit chain the count of numbers runs 784, 5408, 1352, 1936, 400, 400, 32 and 10. Which step leaves the count where it was, and why?",
+              [
+                "The flatten, since it relabels the numbers it was handed and cannot change how many there are",
+                "The second pooling layer, since a window of two at a stride of two only rearranges what it reads",
+                "The first convolution, since its sides shrink by only two",
+                "The last dense layer, since ten answers are what the task wants",
+              ],
+              0,
+              "The bridge reads (16, 5, 5) and answers (400,), which is 400 numbers on both sides. The count peaks at 5408 straight after the first convolution, because eight kernels each produce a whole picture of their own, and it is the pooling layers that bring it down, to 1352 and then to 400. Where the picture becomes a row is not where the data gets smaller.",
+            ),
+            several(
+              "Which of these hold for the bridge, the flattening layer?",
+              [
+                "It produces no gradient at all rather than a block of zeros",
+                "Its backward reshape uses the same ordering as its forward one, with the last extent varying fastest",
+                "It reshapes rather than copies wherever the numbers are already laid out contiguously",
+                "Handing it a row rather than a picture is refused, since there is nothing to flatten",
+              ],
+              [0, 1, 2],
+              "A block of zeros would be a small false claim about having something to learn, and the two reshapes have to agree about which position is which or the blame arrives at the wrong pixels while every shape still agrees. Under that ordering the number at channel 1, row 0, column 1 of a (2, 2, 2) picture sits at position 5 of the row in both directions. Flattening a row is allowed and is the identity, reading (36,) and answering (36,), and it is still worth having because it states a join a reader would otherwise carry in their head.",
+            ),
+        ],
         },
         {
           title: "Part 5. The Arithmetic Behind Every Extent",
@@ -742,15 +819,47 @@ export default function ShapesAndFlatteningPage() {
                   always does.
                 </p>
                 <WorkedExample>
-                  <p>
-                    Take the third row by hand. n is 8, k is 3, p is 0 and s is
-                    2, so 8 minus 3 is 5, divided by 2 with the remainder
-                    dropped is 2, plus one is 3. The layer answers (4, 3, 3),
-                    which holds 36 numbers, and the odd side length is the
-                    remainder being thrown away rather than anything going
-                    wrong.
-                  </p>
+                  <>
+                    <p>
+                      The third row has input side eight, kernel side three, no padding
+                      and stride two. Count the complete window positions using the
+                      floor operation. The convolution in the box above sweeps four
+                      kernels, so it answers with four channels of that side.
+                    </p>
+                    <Equation>{"output side = floor((8 + 2 × 0 − 3) / 2) + 1\n            = floor(5/2) + 1\n            = 2 + 1 = 3\noutput values = 4 channels × 3 × 3 = 36"}</Equation>
+                    <p>
+                      The output shape is (4, 3, 3). The leftover input position does
+                      not fit another complete stride.
+                    </p>
+                  </>
                 </WorkedExample>
+                <InAModel title="Along the digit chain">
+                  <>
+                    <p>
+                      The same sum produces every picture-shaped extent in section
+                      14&rsquo;s table. None of the four windowed layers of the digit
+                      chain has padding, so each side is the incoming side less the
+                      window, divided by the stride with the remainder dropped, plus
+                      one.
+                    </p>
+                    <Equation>{"convolution, window 3, stride 1    (28 − 3) // 1 + 1 = 26\npooling, window 2, stride 2        (26 − 2) // 2 + 1 = 13\nconvolution, window 3, stride 1    (13 − 3) // 1 + 1 = 11\npooling, window 2, stride 2        (11 − 2) // 2 + 1 = 5      remainder 1"}</Equation>
+                    <p>
+                      Only the last of the four divisions leaves a remainder, and it
+                      is the dropped remainder happening in a real chain. Five windows
+                      of two at a stride of two cover ten of the eleven rows and ten
+                      of the eleven columns, so the last row and the last column of
+                      every channel are never inside a window.
+                    </p>
+                    <Equation>{"numbers arriving    16 × 11 × 11 = 1936\nnumbers covered     16 × 10 × 10 = 1600\nnever read          1936 − 1600  = 336"}</Equation>
+                    <p>
+                      I moved those 336 numbers by a hundred each and the pooling
+                      layer&rsquo;s answer did not change at any position. Moving one
+                      covered number changed it. Nothing was refused and nothing was
+                      reported, which is the sense in which the layer says nothing
+                      about the positions it never reaches.
+                    </p>
+                  </>
+                </InAModel>
                 <KeepInMind>
                   The division drops its remainder, so a window that does not
                   quite reach the far edge simply never covers those last few
@@ -1149,8 +1258,11 @@ export default function ShapesAndFlatteningPage() {
                   ]}
                 />
                 <p>
-                  Two of those twelve rows are the ones to carry away, since
-                  the other ten are refusals and these two are not. A step
+                  Two of those twelve rows are the ones to carry away. Eight
+                  of the twelve are refusals, and two are ordinary acceptances,
+                  a chain of one layer and a bridge over a row, which do
+                  exactly what was asked. The last two are accepted and then
+                  do something the caller did not ask for. A step
                   unties tied weights and a layer cannot be handed a position,
                   and in both cases the implementation says so instead of
                   pretending otherwise or quietly substituting something
@@ -1159,6 +1271,238 @@ export default function ShapesAndFlatteningPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            choice(
+              "A three-wide window walks an eight-wide side two steps at a time, with one row of padding at each edge. How many sides does the layer answer with?",
+              ["Three", "Four", "Six", "Eight"],
+              1,
+              "Padding widens the side the window walks along by two, so the sum is (8 − 3 + 2) // 2 + 1, which is 7 // 2 + 1 = 4 with the remainder dropped. Three is the same window and stride with no padding, six is the same window one step at a time with no padding, and eight is what one row of padding gives at a stride of one, the setting that leaves the picture the size it was.",
+            ),
+            trueFalse(
+              "A window exactly as wide as the side it reads is allowed, and the layer answers with a side of one.",
+              true,
+              "A window of eight over a side of eight starts in exactly one place. It is one wider that is refused, since the sum would then go to zero and a layer of extent zero is not a layer. The convolution writes that sum out in full, (8 − 9 + 2 * 0) // 1 + 1 = 0, because padding and stride are both in it and a reader needs to see which term they got wrong.",
+            ),
+            choice(
+              "Why is the whole question decidable when the network is written rather than merely convenient to check there?",
+              [
+                "Every term in the extent rules is a choice already made or an extent already derived, and the recursion bottoms out at the picture the network was told it would read",
+                "The first batch of pictures is inspected cheaply before any epoch begins",
+                "Counts are compared rather than arrangements, and a count needs no data",
+                "A dense layer works out its own width from whatever arrives beneath it",
+              ],
+              0,
+              "The window, the stride, the padding and the neuron count were all chosen by whoever wrote the network, and the incoming extents come from the layer beneath by the same argument. A batch of data has nothing to add, so waiting for one tells you no more than counting does. Nothing infers a dense layer’s width for the person filling it in, which is exactly why the chain above it has to be the thing that objects.",
+            ),
+            trueFalse(
+              "The chain that cheerfully reported it read (784,) while beginning with a convolution over (1, 28, 28) was also checking its interior seams wrongly.",
+              false,
+              "Every seam inside it was still checked correctly, because the seam comparison never consulted the collapsed figure. Only the chain’s description of itself was wrong, which is the quiet half, since a caller sizing a block from that report builds a row of 784 numbers and is refused by the chain’s own first layer. Every test that existed was built out of dense layers, where the arrangement and the count are written with the same number, which is precisely why nothing caught it.",
+            ),
+            several(
+              "Of the twelve edges Part 7 probes, two are accepted and then do something the caller did not ask for. Which two?",
+              [
+                "A step unties tied weights, so one layer object at two positions comes back as two different layers",
+                "Whole numbers meant as positions are turned into floating point and never checked for being whole or in range",
+                "Two pooling layers carrying the identical shape are told apart, so blame is never routed to positions that never won a window",
+                "A window wider than the side it reads is accepted and answers with an extent of zero",
+              ],
+              [0, 1],
+              "In both of those the implementation says so rather than pretending otherwise. One step at a rate of 0.1 leaves two tied positions 1.54375 apart at their furthest and a rate a hundred times smaller leaves them 0.0154375 apart, so shrinking the step never closes the gap. The pooling ambiguity is documented rather than guarded against, and no chain can reach it, since a chain pairs each layer with its own response by construction. A window wider than its side is one of the eight refusals.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Checking a Chain With the Library",
+          practice: [
+            exercise(
+              "Build the digit chain and read every extent",
+              ["Build Part 4’s digit chain with the library, a convolution of 8 kernels of 3 by 3, a pooling layer of window 2 at stride 2, a convolution of 16 kernels, a second pooling layer, the bridge, a dense layer of 32 neurons and a dense layer of 10. Each layer above the first reads what the one beneath it answers, and the dense layers can hold zero weights, since nothing here reads a weight. Print what every layer reads and answers and how many numbers it hands on, then the chain’s own two ends.", "Section 14’s table should come back line for line, ending at 400 numbers arriving at the bridge. The loop then runs the same settings over a colour picture of (3, 32, 32), which the lesson never builds, so nothing on the page tells you what arrives at the bridge there."],
+              `import numpy as np
+from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear
+
+for picture in [(1, 28, 28), (3, 32, 32)]:
+    first = Conv2d(reads=picture, n_filters=8, kernel_size=3, activation=RectifiedLinear())
+    # Build the rest of the chain, each layer reading what the one beneath
+    # answers: a MaxPool2d of window 2 and stride 2, a Conv2d of 16 kernels of
+    # 3 by 3, another MaxPool2d, and a Flatten as the bridge.
+
+    # Build a dense layer of 32 neurons reading the count the bridge answers
+    # with, and a dense layer of 10 neurons reading 32, all with zero weights.
+
+    # Stack the seven layers. Print each layer's name, reads, answers and the
+    # count it hands on, then the chain's two ends, then the count arriving at
+    # the bridge on a line of its own.`,
+              `import numpy as np
+from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear
+
+for picture in [(1, 28, 28), (3, 32, 32)]:
+    first = Conv2d(reads=picture, n_filters=8, kernel_size=3, activation=RectifiedLinear())
+    shrink = MaxPool2d(reads=first.shape.answers, window=2, stride=2)
+    second = Conv2d(reads=shrink.shape.answers, n_filters=16, kernel_size=3, activation=RectifiedLinear())
+    shrink_again = MaxPool2d(reads=second.shape.answers, window=2, stride=2)
+    bridge = Flatten(reads=shrink_again.shape.answers)
+    hidden = DenseLayer([Neuron(np.zeros(bridge.shape.n_outputs), bias=0, activation=Identity()) for _ in range(32)])
+    digits = DenseLayer([Neuron(np.zeros(32), bias=0, activation=Identity()) for _ in range(10)])
+
+    chain = LayerStack([first, shrink, second, shrink_again, bridge, hidden, digits])
+    for layer in chain:
+        shape = layer.shape
+        print(f"{type(layer).__name__:10} reads {str(shape.reads):12} answers {str(shape.answers):12} hands on {shape.n_outputs}")
+    print(f"the chain reads {chain.shape.reads} and answers {chain.shape.answers}")
+    print(f"numbers arriving at the bridge {bridge.shape.n_inputs}")`,
+              `Conv2d     reads (1, 28, 28)  answers (8, 26, 26)  hands on 5408
+MaxPool2d  reads (8, 26, 26)  answers (8, 13, 13)  hands on 1352
+Conv2d     reads (8, 13, 13)  answers (16, 11, 11) hands on 1936
+MaxPool2d  reads (16, 11, 11) answers (16, 5, 5)   hands on 400
+Flatten    reads (16, 5, 5)   answers (400,)       hands on 400
+DenseLayer reads (400,)       answers (32,)        hands on 32
+DenseLayer reads (32,)        answers (10,)        hands on 10
+the chain reads (1, 28, 28) and answers (10,)
+numbers arriving at the bridge 400
+Conv2d     reads (3, 32, 32)  answers (8, 30, 30)  hands on 7200
+MaxPool2d  reads (8, 30, 30)  answers (8, 15, 15)  hands on 1800
+Conv2d     reads (8, 15, 15)  answers (16, 13, 13) hands on 2704
+MaxPool2d  reads (16, 13, 13) answers (16, 6, 6)   hands on 576
+Flatten    reads (16, 6, 6)   answers (576,)       hands on 576
+DenseLayer reads (576,)       answers (32,)        hands on 32
+DenseLayer reads (32,)        answers (10,)        hands on 10
+the chain reads (3, 32, 32) and answers (10,)
+numbers arriving at the bridge 576`,
+              { hints: ["Every layer carries a shape with reads and answers, each a tuple of extents. Passing the layer beneath’s shape.answers as the next layer’s reads is the whole of how a chain is written.", "A dense layer is built from neurons, and a neuron holds a width and not a picture, so it wants the count the bridge answers with. That count is bridge.shape.n_outputs, and np.zeros of that length is one neuron’s weights.", "A shape also reports n_inputs and n_outputs, the extents of each side multiplied together. LayerStack can be looped over layer by layer, and type(layer).__name__ gives a name to print."], check: numberCheck("With the same seven layers over a picture of (3, 32, 32), how many numbers arrive at the bridge?", 576, 0.5, "The sides run 32, 30, 15, 13 and 6. Each convolution takes two off, the first pooling layer halves 30 exactly, and the second drops a remainder, since (13 − 2) // 2 + 1 is 6 and one row and one column are never covered. Sixteen channels of 6 by 6 hold 576 numbers. The three colour channels change the first layer’s reads and nothing after it, because the first convolution answers with its eight kernels whatever it read.") },
+            ),
+            exercise(
+              "Leave the bridge out, then ask each seam yourself",
+              ["A dense layer of ten neurons holding 5408 weights each is built without complaint. Put it straight above the first convolution and print what the stack says. Then put a Flatten between them and print the two ends of the chain that now exists.", "Section 10’s table asks five readings to sit above the same convolution. A Flatten accepts any arrangement as what it reads, so use one as a stand-in for a layer reading each of the five, and print for each how many numbers it holds, whether the counts agree, and whether the seam holds. The seam question is the shape’s own follows."],
+              `import numpy as np
+from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, Neuron, RectifiedLinear, ShapeMismatchError
+
+first = Conv2d(reads=(1, 28, 28), n_filters=8, kernel_size=3, activation=RectifiedLinear())
+dense = DenseLayer([Neuron(np.zeros(5408), bias=0, activation=Identity()) for _ in range(10)])
+readings = [(8, 26, 26), (5408,), (26, 8, 26), (4, 52, 26), (784,)]
+
+# Try to stack the dense layer straight above the convolution and print the
+# refusal. Then stack them with a Flatten between and print the chain's ends.
+
+# For each reading, build a Flatten that reads it, and print the count it
+# holds, whether that equals the count the convolution answers with, and
+# whether its shape follows the convolution's shape.`,
+              `import numpy as np
+from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, Neuron, RectifiedLinear, ShapeMismatchError
+
+first = Conv2d(reads=(1, 28, 28), n_filters=8, kernel_size=3, activation=RectifiedLinear())
+dense = DenseLayer([Neuron(np.zeros(5408), bias=0, activation=Identity()) for _ in range(10)])
+readings = [(8, 26, 26), (5408,), (26, 8, 26), (4, 52, 26), (784,)]
+
+try:
+    LayerStack([first, dense])
+except ShapeMismatchError as refusal:
+    print(f"refused, {refusal}")
+
+chain = LayerStack([first, Flatten(reads=first.shape.answers), dense])
+print(f"with the bridge the chain reads {chain.shape.reads} and answers {chain.shape.answers}")
+
+for reading in readings:
+    above = Flatten(reads=reading)
+    counts_agree = above.shape.n_inputs == first.shape.n_outputs
+    seam_holds = above.shape.follows(first.shape)
+    print(f"{str(reading):12} holds {above.shape.n_inputs:4}, counts agree {counts_agree}, seam holds {seam_holds}")`,
+              `refused, layer 0 answers with (8, 26, 26) and layer 1 reads (5408,); both hold 5408 numbers, so it is the arrangement that disagrees and not the width
+with the bridge the chain reads (1, 28, 28) and answers (10,)
+(8, 26, 26)  holds 5408, counts agree True, seam holds True
+(5408,)      holds 5408, counts agree True, seam holds False
+(26, 8, 26)  holds 5408, counts agree True, seam holds False
+(4, 52, 26)  holds 5408, counts agree True, seam holds False
+(784,)       holds  784, counts agree False, seam holds False`,
+              { hints: ["LayerStack raises ShapeMismatchError from its constructor at the first seam that fails, and the exception printed as it is carries the whole sentence, position, both arrangements and the clause about the counts.", "The bridge is Flatten(reads=first.shape.answers). It reads (8, 26, 26) and answers (5408,), so both of its seams hold by exact equality.", "A shape has a method follows that takes the shape beneath and answers whether this one may sit above it, and n_inputs and n_outputs are the counts on its two sides."] },
+            ),
+            exercise(
+              "Count the window positions before the layer does",
+              ["Each setting below is a side, a window, a stride and a padding. The first six are rows of Part 5’s tables over a side of eight, including the window of nine that does not fit. For each one, count the positions with section 19’s sum, then build a convolution of four kernels over a square picture of that side and print what it answers with beside your count, or its refusal.", "The last setting is the digit picture’s side of 28 under a window of 5 at a stride of 2 with 2 of padding, which the lesson never works. Count it by hand before running the script."],
+              `from oop_ml import Conv2d, Identity, MLLibError
+
+settings = [(8, 3, 1, 0), (8, 3, 2, 0), (8, 3, 2, 1), (8, 5, 1, 2), (8, 8, 1, 0), (8, 9, 1, 0), (28, 5, 2, 2)]
+
+# For each side, window, stride and padding in settings, count the positions
+# with (n - k + 2p) // s + 1.
+
+# Then build a Conv2d of 4 kernels reading (1, side, side) with those settings
+# and Identity() as its activation. Print your count beside what the layer
+# answers with, or beside its refusal if it will not be built.`,
+              `from oop_ml import Conv2d, Identity, MLLibError
+
+settings = [(8, 3, 1, 0), (8, 3, 2, 0), (8, 3, 2, 1), (8, 5, 1, 2), (8, 8, 1, 0), (8, 9, 1, 0), (28, 5, 2, 2)]
+
+for side, window, stride, padding in settings:
+    counted = (side - window + 2 * padding) // stride + 1
+    label = f"side {side:2} window {window} stride {stride} padding {padding}, counted {counted:2}"
+    try:
+        layer = Conv2d(
+            reads=(1, side, side), n_filters=4, kernel_size=window,
+            activation=Identity(), stride=stride, padding=padding,
+        )
+    except MLLibError as refusal:
+        print(f"{label}, refused, {refusal}")
+        continue
+    print(f"{label}, the layer answers {layer.shape.answers}")`,
+              `side  8 window 3 stride 1 padding 0, counted  6, the layer answers (4, 6, 6)
+side  8 window 3 stride 2 padding 0, counted  3, the layer answers (4, 3, 3)
+side  8 window 3 stride 2 padding 1, counted  4, the layer answers (4, 4, 4)
+side  8 window 5 stride 1 padding 2, counted  8, the layer answers (4, 8, 8)
+side  8 window 8 stride 1 padding 0, counted  1, the layer answers (4, 1, 1)
+side  8 window 9 stride 1 padding 0, counted  0, refused, this convolution's answer would have height (8 - 9 + 2 * 0) // 1 + 1 = 0, so the window does not fit over what it reads
+side 28 window 5 stride 2 padding 2, counted 14, the layer answers (4, 14, 14)`,
+              { hints: ["Python’s // is the division that drops its remainder, which is the floor the lesson’s sum needs for these whole numbers.", "Conv2d takes reads, n_filters, kernel_size and activation, with stride and padding as keywords, and it works out its own answering side from them. Its shape.answers is (kernels, height, width).", "A window that does not fit is refused by the constructor with one of the library’s own errors, all of which derive from MLLibError, so wrap the construction in try and except and print the exception."], check: numberCheck("What side does a window of 5 at a stride of 2 with 2 of padding leave from a side of 28?", 14, 0.5, "Two of padding at each edge widen the side the window walks along to 32, so the sum is (28 − 5 + 4) // 2 + 1, which is 27 // 2 + 1 = 14 with a remainder of one dropped. A window of width 2m + 1 with m of padding leaves the side alone at a stride of one, so at a stride of two it halves it, and the layer answers (4, 14, 14).") },
+            ),
+            exercise(
+              "Step one layer standing at two positions",
+              ["The layer below is the small square layer of section 28, with the two rows and two targets its box uses. Put the same object at both positions of one stack, confirm that the stack really does hold one object twice, and run one backward pass under SquaredError. Print the loss, which the lesson does not quote.", "Then step the stack from that one backward pass at rates of 0.1, 0.01 and 0.001. For each, print whether the two positions are still one object and the largest gap between their weight matrices to seven places. Section 28 gives 1.54375 at a rate of 0.1 and 0.0154375 at a rate a hundred times smaller. The rate between them is yours to measure."],
+              `import numpy as np
+from oop_ml import DenseLayer, Identity, LayerStack, Neuron, SquaredError
+
+shared = DenseLayer([
+    Neuron([1.0, 0.5], bias=0.0, activation=Identity()),
+    Neuron([-0.5, 2.0], bias=0.0, activation=Identity()),
+])
+rows = np.array([[1.0, 2.0], [3.0, -1.0]])
+targets = np.array([[0.0, 0.0], [1.0, 1.0]])
+
+# Stack the shared layer twice, check that position 0 is position 1 with \`is\`,
+# run one backward pass on the rows and targets, and print the loss.
+
+# For each rate, step the stack by the backward pass, and print whether the
+# two positions are still one object and the largest absolute difference
+# between their weight matrices.`,
+              `import numpy as np
+from oop_ml import DenseLayer, Identity, LayerStack, Neuron, SquaredError
+
+shared = DenseLayer([
+    Neuron([1.0, 0.5], bias=0.0, activation=Identity()),
+    Neuron([-0.5, 2.0], bias=0.0, activation=Identity()),
+])
+rows = np.array([[1.0, 2.0], [3.0, -1.0]])
+targets = np.array([[0.0, 0.0], [1.0, 1.0]])
+
+chain = LayerStack([shared, shared])
+backward = chain.backward_pass(rows, targets, SquaredError())
+print(f"one object at both positions before the step, {chain[0] is chain[1]}")
+print(f"loss {backward.loss:.4f}")
+
+for rate in (0.1, 0.01, 0.001):
+    stepped = chain.stepped_by(backward, rate)
+    gap = np.max(np.abs(stepped[0].weight_matrix - stepped[1].weight_matrix))
+    print(f"rate {rate}, one object after {stepped[0] is stepped[1]}, largest gap {gap:.7f}")`,
+              `one object at both positions before the step, True
+loss 33.9219
+rate 0.1, one object after False, largest gap 1.5437500
+rate 0.01, one object after False, largest gap 0.1543750
+rate 0.001, one object after False, largest gap 0.0154375`,
+              { hints: ["A square layer reads exactly what it answers with, so LayerStack([shared, shared]) has one seam and it holds. A stack is indexed by position, and `is` asks whether two positions hold the same object rather than equal ones.", "backward_pass takes the rows, the targets and the loss and answers one gradient per position, with the loss on it. stepped_by takes that and a learning rate and answers a new stack, leaving the old one untouched, so one backward pass serves all three rates.", "Each position of the stepped stack is a dense layer with a weight_matrix. Subtract one from the other, take np.abs and then np.max."], check: numberCheck("How far apart, at their furthest, are the two positions’ weights after one step at a rate of 0.01?", 0.154375, 1e-06, "A step moves each position by the rate times that position’s own gradient, and the two positions were handed different gradients, so the gap is the rate times the largest difference between those two gradients. That makes it exactly proportional to the rate, 1.54375 at 0.1, 0.154375 at 0.01 and 0.0154375 at 0.001. No rate closes it, and at every rate the two positions come back as two objects where one went in.") },
+            ),
+          ],
         },
       ]}
     />

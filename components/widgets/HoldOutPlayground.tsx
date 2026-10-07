@@ -69,7 +69,7 @@ function statusText(fit: SplitFit | null, degree: number): string {
   if (fit.held_out_r_squared > 0.9 && degree <= 5) {
     return "Both shares agree. The curve is learning the throw, not the measurements.";
   }
-  return "The shares are parting. The extra bends are starting to chase measurement noise.";
+  return "The shares are parting. The extra polynomial terms are fitting details that do not transfer to held-out data.";
 }
 
 // With ``concealable`` the held-out points start hidden, so a reader can

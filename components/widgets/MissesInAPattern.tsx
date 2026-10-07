@@ -180,7 +180,7 @@ export function MissesInAPattern() {
 
       <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
         Indigo is a person heavier than the fit expects and rose a person
-        lighter. Scatter puts the colours in no order; a bend leaves the young
+        lighter. Scatter puts the colours in no order; a curve leaves the young
         end on one side and a long stretch of the middle on the other.
       </p>
     </div>

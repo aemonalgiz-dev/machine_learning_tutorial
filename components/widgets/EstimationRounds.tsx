@@ -153,14 +153,9 @@ export function EstimationRounds() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-          The corpus is four words repeated, so every occurrence is spelled best
-          as one piece, and the pieces no occurrence needs lose their
-          probability round by round. The word lowest is spelled the same way
-          throughout and its score roughly doubles in the negative direction
-          each round, which is the model becoming certain about a corpus that
-          does not contain it.
-        </p>
+        <>
+<p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">The training corpus repeats four words. In this example, representing each observed word as one piece is favored, while alternative pieces lose probability during estimation.</p><p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">The held-out word lowest keeps the same segmentation, but its log score becomes more negative across rounds. Improving the model&apos;s preference for the observed corpus therefore does not imply improving its probability for an unobserved word.</p>
+</>
       </div>
     </div>
   );

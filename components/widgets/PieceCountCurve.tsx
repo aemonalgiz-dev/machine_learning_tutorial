@@ -191,14 +191,9 @@ export function PieceCountCurve() {
         />
         <Stat label="sentence, in pieces" value={shown.sentence_pieces} />
       </div>
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Indigo is the whole corpus, {sizes.baselines.n_word_occurrences} words
-        in eighteen sentences; green is the one sentence none of them contained.
-        Both are counted in pieces, and both are drawn against their own scale
-        so the shapes can be compared rather than the heights. Hover a point to
-        read it. The rows in the table run {sizes.floor_rows} ahead of the
-        tokens learned at every point, and that gap never moves.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The indigo curve counts pieces across the training corpus: {sizes.baselines.n_word_occurrences} word occurrences in eighteen sentences. The green curve counts pieces in a sentence absent from that corpus.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Each curve uses its own scale, so compare their trends rather than their vertical heights. Hover for exact counts. The total vocabulary also includes {sizes.floor_rows} fixed entries beyond the learned pieces, which explains the persistent difference between those two table-size measures.</p>
+</>
     </div>
   );
 }

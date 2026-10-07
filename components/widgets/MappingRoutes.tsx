@@ -123,11 +123,9 @@ export function MappingRoutes() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        {growing
-          ? `Fourteen tokens are copied because the smaller vocabulary holds their spellings already, and seven are read again. One of the seven is the piece made of an e and a w, whose reading comes back carrying an end-of-word marker the piece never had.`
-          : `Nothing has to be read again in this direction, because every token of the three-merge vocabulary is a token of the ten-merge one as well.`}
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{growing ? "First match tokens whose spellings exist in both vocabularies. Fourteen vectors can be copied directly; seven new pieces need another construction. Inspect the e-w piece: its re-tokenization introduces an end-of-word marker that was not part of the original piece." : "Every piece in the three-merge vocabulary also exists in the ten-merge vocabulary. In this direction, all rows can therefore be matched directly by piece identity."}</p>
+</>
     </div>
   );
 }

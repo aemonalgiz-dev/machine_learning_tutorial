@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // The book's words as directions, turning, described two ways.
 //
@@ -223,17 +225,9 @@ export function Word2vecBookSpace() {
         />
       </div>
 
-      <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-        {space.corpus}, at a minimum count of {space.minimum_count} and the same
-        reach of {space.window} the small corpus uses. The{" "}
-        {projection.words.length} commonest words are drawn and all{" "}
-        {space.n_words} are used to work out the directions, so the picture is a
-        subset and the space is not. Three directions hold{" "}
-        {(space.counted.kept_share * 100).toFixed(1)}% of the spread of the
-        counted rows and {(space.learned.kept_share * 100).toFixed(1)}% of the
-        learned vectors, which is the difference between a description that
-        happens to be wide and one that is genuinely small.
-      </p>
+      <>
+<p className="mt-3 text-sm text-slate-500 dark:text-slate-400">The larger example uses {space.corpus} with a minimum count of {space.minimum_count} and context window {space.window}. The plot shows the {projection.words.length} most common words, but its projection is fitted using all {space.n_words} represented words.</p><Equation>{"Variance retained by the three displayed directions:\nCount representation: " + (space.counted.kept_share * 100).toFixed(1) + "%\nLearned vectors: " + (space.learned.kept_share * 100).toFixed(1) + "%"}</Equation><p className="mt-3 text-sm text-slate-500 dark:text-slate-400">The three-dimensional plot is an approximation to each representation. Use the retained shares to judge how much of its variation is visible, rather than treating the projection as the complete vector space.</p>
+</>
     </div>
   );
 }

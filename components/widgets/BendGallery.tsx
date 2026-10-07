@@ -227,7 +227,7 @@ export function BendGallery() {
         {ACTIVATION_NAMES.map(panel)}
       </div>
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Each bend in indigo with its slope dashed in amber, over scores from
+        Each activation function in indigo with its slope dashed in amber, over scores from
         −6 to 6, marked at the two worked people. The readouts are the output
         and the slope at each.
       </p>

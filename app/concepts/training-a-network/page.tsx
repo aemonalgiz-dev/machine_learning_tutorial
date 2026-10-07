@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -22,7 +25,7 @@ import { TwoLossCurves } from "@/components/widgets/TwoLossCurves";
 export const metadata: Metadata = {
   title: "Training a Network · oop_ml",
   description:
-    "The loop that uses everything on the pages before this. One step and how far it moves, what a batch is, what an epoch is, how a step size is chosen, and why a falling training loss and a held-out score that has stopped improving are different facts.",
+    "Repeat prediction, gradient calculation, and updates while checking what the model learns.",
 };
 
 const link =
@@ -31,15 +34,19 @@ const link =
 export default function TrainingANetworkPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["training-a-network"]}
+      technicalStart="Part 2. The Size of the Step"
+      openingTitle="One Better Guess Is Only the Beginning"
+      playgroundIntro="Compare training and validation curves as the run progresses. Change one training setting at a time and distinguish the number of updates from the number of epochs."
       title="Training a Network"
-      tagline="Measure, move, repeat. The whole of learning is that, and every hard question on this page is about how far to move and when to stop."
+      tagline="Repeat prediction, gradient calculation, and updates while checking what the model learns."
       prerequisites={
         <>
           The chain being trained here is built from the{" "}
           <Link href="/concepts/neurons-and-activations" className={link}>
             neuron
           </Link>{" "}
-          and its bend, joined into{" "}
+          and its activation function, joined into{" "}
           <Link href="/concepts/dense-layers" className={link}>
             dense layers
           </Link>
@@ -68,73 +75,14 @@ export default function TrainingANetworkPage() {
           single move.
         </>
       }
-      history={
-        <>
-          <p>
-            The move this page repeats was published in 1847 by
-            Augustin-Louis Cauchy, in a four-page note to the Comptes Rendus of
-            the French Academy of Sciences titled &ldquo;M&eacute;thode
-            g&eacute;n&eacute;rale pour la r&eacute;solution des
-            syst&egrave;mes d&rsquo;&eacute;quations simultan&eacute;es&rdquo;.
-            The problem in front of him was astronomical, a system of
-            equations relating observations of a body to the orbit that would
-            explain them, and the standard treatment was to eliminate the
-            unknowns one at a time, which for a system of any size was
-            unmanageable by hand. His proposal was to write the whole system
-            as one quantity to be made small, compute the partial derivative
-            of that quantity with respect to each unknown, and change every
-            unknown a little in the direction that lowers it. He noted that
-            the method does not need the equations to be linear and that it
-            can be stopped whenever the remaining error is small enough.
-          </p>
-          <p>
-            The other half of the loop, the part where a step is taken from a
-            handful of rows rather than from all of them, came from a problem
-            that had nothing to do with fitting anything. In 1951 Herbert
-            Robbins and Sutton Monro published &ldquo;A Stochastic
-            Approximation Method&rdquo; in the Annals of Mathematical
-            Statistics, asking how to find the level at which some response
-            reaches a target when the response can only be observed with
-            noise, as in a dosage trial where each subject gives one uncertain
-            reading. Their answer was to keep stepping on the noisy readings
-            and to shrink the step as you go, and their theorem gives the
-            conditions under which that converges even though no single
-            reading is trustworthy. That result is why taking a step from one
-            person at a time is a method rather than a mistake, and the
-            shrinking step is where every learning-rate schedule since comes
-            from.
-          </p>
-          <p>
-            Putting Cauchy&rsquo;s step, Robbins and Monro&rsquo;s noisy
-            reading and a network with a hidden layer into one loop is what
-            David Rumelhart, Geoffrey Hinton and Ronald Williams demonstrated
-            in their 1986 Nature paper &ldquo;Learning representations by
-            back-propagating errors&rdquo;. What was left after that was
-            practice rather than theory, and two collections wrote it down.
-            Yann LeCun, L&eacute;on Bottou, Genevieve Orr and Klaus-Robert
-            M&uuml;ller&rsquo;s &ldquo;Efficient BackProp&rdquo; of 1998 is
-            the advice on step sizes, shuffling and small batches, and Lutz
-            Prechelt&rsquo;s &ldquo;Early Stopping, But When?&rdquo; in the
-            same volume is the argument that the epoch to stop at cannot be
-            read off the curve the loop can see. This page asks six questions
-            in that order. What does one step actually change, and how far
-            should it move? What is a batch, and what changes when it is
-            small? What is an epoch, and what does it mean for the loss to
-            stop falling? How is a step size chosen, and what do too large and
-            too small look like when they are measured rather than described?
-            What does the loss curve tell you, and what does it hide? And what
-            must a complete loop state that this one leaves to whoever writes
-            it?
-          </p>
-        </>
-      }
+
       playground={<TrainingRunPlayground />}
       sections={[
         {
           title: "Part 1. What One Step Changes",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The crowd, the chain, and what is left to do">
                 <p>
                   Sixty people have each been measured twice, and thirty of
@@ -150,7 +98,7 @@ export default function TrainingANetworkPage() {
                 </p>
                 <p>
                   Everything the chain is made of has already been built. Two
-                  measurements feed six units that bend, those six feed a
+                  measurements feed six units with hyperbolic tangent activations, those six feed a
                   single unit that does not, a loss scores the answer against
                   the truth, and a backward walk hands every one of the
                   twenty-five numbers in the chain a slope. What is left is the
@@ -238,7 +186,7 @@ export default function TrainingANetworkPage() {
                     "largest bias slope",
                   ]}
                   rows={[
-                    ["the six bent units", "12", "6", "0.028119", "0.038580"],
+                    ["the six hidden tangent units", "12", "6", "0.028119", "0.038580"],
                     ["the output unit", "6", "1", "0.084723", "0.004452"],
                   ]}
                   caption="One backward walk on the untrained chain, over all sixty people."
@@ -247,7 +195,7 @@ export default function TrainingANetworkPage() {
                   That the output layer&rsquo;s slopes are the larger ones at
                   the start is what the backpropagation page would predict. A
                   slope deep in the chain is the slope above it multiplied by
-                  the weights it passed through and by the bend&rsquo;s own
+                  the weights it passed through and by the activation function&rsquo;s own
                   slope, and every one of those factors is smaller than one
                   here, so a slope shrinks the further down the chain it is
                   carried.
@@ -310,17 +258,14 @@ export default function TrainingANetworkPage() {
                     good for a small enough step.
                   </p>
                 </WhyThisWorks>
-                <p>
-                  The bars in the widget in section 2 are that comparison at
-                  eight step sizes, all taken from the same slope at the same
-                  untrained chain. At a rate of 0.001 the step delivers 0.9999
-                  of what the slope promised, at 0.05 it delivers 0.9936, at
-                  0.5 it delivers 0.9366, at 1.0 it delivers 0.8735 and at 5.0
-                  it delivers 0.3940. That is the usual caution about small
-                  steps arriving as a measurement, and the useful part of it is
-                  that the falling off is gradual, so there is no particular
-                  rate at which the slope stops being informative.
+                <>
+<p>
+                  The bars in the widget in section 2 are that comparison at eight step sizes, all taken from the same slope at the same untrained chain. At a rate of 0.001 the step delivers 0.9999 of what the slope promised, at 0.05 it delivers 0.9936, at 0.5 it delivers 0.9366, at 1.0 it delivers 0.8735 and at 5.0 it delivers 0.3940.
                 </p>
+                <p>
+                  That is the usual caution about small steps arriving as a measurement, and the useful part of it is that the falling off is gradual, so there is no particular rate at which the slope stops being informative.
+                </p>
+</>
                 <p>
                   What that argument does not say is that a small step is
                   better. At a rate of 5.0 the step keeps only 39 percent of
@@ -338,7 +283,7 @@ export default function TrainingANetworkPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Size of the Step",
@@ -553,6 +498,54 @@ export default function TrainingANetworkPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "One step at a rate of 0.5 from the untrained chain. What did the slope promise and what arrived?",
+              [
+                "A predicted drop of 0.009775 and an actual drop of 0.009155",
+                "A predicted drop of 0.009155 and an actual drop of 0.009775",
+                "A predicted drop of 0.069910 and an actual drop of 0.009155",
+                "Both the same, since the slope is exact at the point it was read",
+              ],
+              0,
+              "The predicted drop is the rate times the squared length of the whole slope, and the slope describes the loss only in the immediate neighbourhood of the point it was taken at, which a step carries the chain out of. The 0.069910 is a different quantity, the distance the chain actually covered, which is the rate times the length of the slope rather than its square.",
+            ),
+            trueFalse(
+              "A step whose actual drop is a poor fraction of its predicted one can still be the step that reached the lowest loss.",
+              true,
+              "At a rate of 5.0 the step keeps only 39 percent of its promise and still reaches a loss of 0.688570, lower than the 0.717923 the well-behaved rate of 0.5 reached, because 39 percent of a promise ten times as large is still more. The ratio says how far the slope can be trusted and says nothing about how much ground was covered, and it approaches one only as the step shrinks.",
+            ),
+            choice(
+              "Why are the output layer’s slopes the larger ones at the start?",
+              [
+                "A slope deep in the chain is the slope above it multiplied by the weights it passed through and by the activation’s own slope, and every one of those factors is smaller than one here",
+                "The output layer holds more of the twenty-five numbers than the hidden layer does",
+                "The step size is applied to the output layer alone",
+                "The loss is measured at the output, so only that layer is handed a slope",
+              ],
+              0,
+              "A slope therefore shrinks the further down the chain it is carried, which is what the backpropagation page predicts. Eighteen of the twenty-five numbers belong to the hidden layer and seven to the output unit, so the output layer is the smaller of the two, and the largest single slope anywhere in the chain, 0.084723, still sits there.",
+            ),
+            trueFalse(
+              "A step size that is too large always sends the loss off to infinity.",
+              false,
+              "That is one of two things that can happen. Under log-loss here the walk kept producing perfectly ordinary numbers and simply stopped making progress, touching 0.591843 at epoch 127 and finishing at 13.216754, and it could have gone on that way for as long as it was asked to. Switch the objective to squared error and the same chain at the same rates does run away, because squared error compares the raw output with the target and its slope grows without limit.",
+            ),
+            several(
+              "Which of these are signatures of a step size that is too large, as measured on this chain under log-loss?",
+              [
+                "The loss rises about as often as it falls, on 100 of the 199 consecutive readings at a rate of 20",
+                "The best loss the walk ever reached, 0.591843 at epoch 127, is far below the 13.216754 it finished at",
+                "The loss falls on every epoch, by a tiny amount each time",
+                "Every number in the chain stops being a number within a few epochs",
+              ],
+              [0, 1],
+              "Both numbers have to be watched, since the final loss alone hides the second fact. A loss that falls on every epoch by a tiny amount is the signature of a rate that is too small, which looks like a working loop that simply needs more time, and sometimes is one. Every number ceasing to be a number is what squared error does on this chain, not what a large rate does under log-loss. The recipe the measurements suggest is to start too large deliberately and divide by three or ten until the loss falls on nearly every epoch, then take one more division as a margin.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. Batches, and What a Small One Buys",
           content: (
             <>
@@ -595,18 +588,14 @@ export default function TrainingANetworkPage() {
                   for the angle between the two directions.
                 </p>
                 <BatchSizeComparison showAgreement={true} />
-                <p>
-                  The bars are the cosine of that angle at the untrained chain,
-                  averaged over two hundred draws. A batch of every row agrees
-                  with the whole crowd exactly, at 1.000, since it is the same
-                  calculation. A batch of thirty averages 0.780, a batch of
-                  fifteen 0.546, a batch of five 0.332 and a batch of one only
-                  0.073, which is very nearly a right angle. And the worst
-                  single draw of one person points at &minus;0.785, which is about
-                  a hundred and forty-two degrees away from where the crowd
-                  wanted to go, so the step taken from that one person made the
-                  loss worse on the fifty-nine it did not read.
+                <>
+<p>
+                  The bars are the cosine of that angle at the untrained chain, averaged over two hundred draws. A batch of every row agrees with the whole crowd exactly, at 1.000, since it is the same calculation. A batch of thirty averages 0.780, a batch of fifteen 0.546, a batch of five 0.332 and a batch of one only 0.073, which is very nearly a right angle.
                 </p>
+                <p>
+                  And the worst single draw of one person points at &minus;0.785, which is about a hundred and forty-two degrees away from where the crowd wanted to go, so the step taken from that one person made the loss worse on the fifty-nine it did not read.
+                </p>
+</>
                 <p>
                   Even a batch of thirty, half the crowd, produced one draw at
                   &minus;0.0009. Half the data pointing at right angles to what
@@ -820,19 +809,14 @@ export default function TrainingANetworkPage() {
                   fall together.
                 </p>
                 <EpochReadout />
-                <p>
-                  The loss falls smoothly across the whole run. The accuracy
-                  does not, sitting flat for long stretches and then stepping
-                  up, because it only counts which side of a half each answer
-                  landed on while the loss cares how far from the truth each
-                  answer is. A chain can spend fifty epochs becoming more
-                  confident about people it was already calling correctly,
-                  which lowers the loss and moves the accuracy not at all. And
-                  the largest slope rises before it falls, peaking at 0.084723
-                  in the very first epoch, dropping to 0.024 by epoch 25, rising
-                  again to 0.052 by epoch 75 as the chain finds the bend it
-                  needs, and settling to 0.028 by the end.
+                <>
+<p>
+                  The loss falls smoothly across the whole run. The accuracy does not, sitting flat for long stretches and then stepping up, because it only counts which side of a half each answer landed on while the loss cares how far from the truth each answer is. A chain can spend fifty epochs becoming more confident about people it was already calling correctly, which lowers the loss and moves the accuracy not at all.
                 </p>
+                <p>
+                  And the largest slope rises before it falls, peaking at 0.084723 in the very first epoch, dropping to 0.024 by epoch 25, rising again to 0.052 by epoch 75 as the chain learns the nonlinear relationship it needs, and settling to 0.028 by the end.
+                </p>
+</>
                 <KeepInMind>
                   The largest slope is the honest convergence reading, because
                   when nothing anywhere wants to move by more than a whisker,
@@ -875,6 +859,54 @@ export default function TrainingANetworkPage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Averaged over two hundred draws at the untrained chain, how well does a batch of one point where all sixty point?",
+              [
+                "A cosine of 0.073, which is very nearly a right angle",
+                "A cosine of 0.332",
+                "A cosine of 0.546",
+                "A cosine of 0.780",
+              ],
+              0,
+              "A batch of five averages 0.332, fifteen averages 0.546 and thirty averages 0.780, while every row agrees exactly at 1.000 because it is the same calculation. The worst single draw of one person pointed at minus 0.785, about a hundred and forty-two degrees away, so the step taken from that person made the loss worse on the fifty-nine it did not read.",
+            ),
+            trueFalse(
+              "The run reading one person at a time finished at a loss a hundred and seventy times lower than the run reading all sixty, which shows a small batch is better.",
+              false,
+              "It got there by taking sixty times as many steps, so what the table shows is that an epoch is a much bigger unit of work once it is cut into pieces. Comparing batch sizes at a fixed number of epochs compares runs that took very different numbers of steps, which is a legitimate comparison and not the only one, and a chart that does not say which axis it fixed cannot be read.",
+            ),
+            several(
+              "Which of these hold about what a small batch costs here?",
+              [
+                "Sixty times the steps cost thirty-seven times the time rather than sixty",
+                "The work around a step, building the blocks and walking the chain, is the same whatever the batch holds",
+                "The same measurement on a large network on a graphics card comes out very differently",
+                "A step on one row costs a sixtieth of a step on sixty rows",
+              ],
+              [0, 1, 2],
+              "The arithmetic inside a step is proportional to the rows and the surrounding work is not, and at this size the surrounding work is most of the cost. If a step on one row cost a sixtieth of a step on sixty rows, the batch size would be nearly free and the smallest would always win. How much a batch size costs is a fact about the machine it runs on, so it has to be measured there.",
+            ),
+            trueFalse(
+              "The loss a run reports after an epoch belongs to the chain as it stood before that epoch’s step.",
+              true,
+              "The backward walk measures on its way forward, so the first reading of a run is the untrained loss and a run of two hundred epochs reports 0.135431 as its last reading while the chain it finishes with stands at 0.134309. A loss curve is offset by one step from the chain that produced it, and it matters exactly when someone compares the last point of a curve with a separately measured final loss.",
+            ),
+            choice(
+              "Why is the largest single slope the honest convergence reading?",
+              [
+                "When nothing anywhere wants to move by more than a whisker, further epochs are buying nothing",
+                "It falls steadily from the first epoch to the last",
+                "It reaches zero exactly when the accuracy reaches one",
+                "It is the only one of the three readings that needs no extra data",
+              ],
+              0,
+              "A loss that has stopped changing to four decimal places can still have a large slope underneath it. On this run the largest slope rises before it falls, peaking at 0.084723 in the very first epoch, dropping to 0.024 by epoch 25, rising again to 0.052 by epoch 75 as the chain learns the relationship it needs, and settling to 0.028. All three of the readings a loop can watch need no extra data.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. What the Loss Curve Hides",
           content: (
             <>
@@ -889,7 +921,7 @@ export default function TrainingANetworkPage() {
                   first says almost nothing about the second.
                 </p>
                 <p>
-                  The chain here is given eight bent units rather than six,
+                  The chain here is given eight hidden tangent units rather than six,
                   thirty-three numbers over fourteen people, which is more than
                   enough capacity to describe those fourteen exactly. Three of
                   their labels are then flipped, so that there is something in
@@ -1094,18 +1126,14 @@ export default function TrainingANetworkPage() {
                   one drew.
                 </p>
                 <SeedLedger show="draws" />
-                <p>
-                  On the left, one layer is carried across four passes, and no
-                  two passes keep the same units. On the right the same layer is
-                  rebuilt from the same seed before each pass, and all four
-                  passes are identical, which over a whole run would silence the
-                  same units every time and leave a permanently narrower layer
-                  instead of one that breaks a different partnership on every
-                  pass. So a layer holding a generator has to be carried
-                  through the step rather than rebuilt from its settings, which
-                  is the one place in a walk where a step cannot hand back
-                  something newly made.
+                <>
+<p>
+                  On the left, one layer is carried across four passes, and no two passes keep the same units. On the right the same layer is rebuilt from the same seed before each pass, and all four passes are identical, which over a whole run would silence the same units every time and leave a permanently narrower layer instead of one that breaks a different partnership on every pass.
                 </p>
+                <p>
+                  So a layer holding a generator has to be carried through the step rather than rebuilt from its settings, which is the one place in a walk where a step cannot hand back something newly made.
+                </p>
+</>
                 <KeepInMind>
                   A draw cannot be recomputed, so anything holding one has to
                   survive the step. This is the one exception to the rule that
@@ -1374,18 +1402,14 @@ export default function TrainingANetworkPage() {
               </SubSection>
 
               <SubSection title="31. Where this goes next">
-                <p>
-                  The plain step of section 2 is the beginning of a long list.
-                  Momentum carries part of the previous step into the next one,
-                  which helps where the slope points across a narrow valley
-                  rather than along it. Per-number step sizes give every one of
-                  the twenty-five its own rate, adapted from how large its
-                  slopes have been, which is what makes the single global rate
-                  of Part 2 less critical. Neither is on this page, and both
-                  need the step to widen from taking a rate to taking something
-                  carrying state of its own, which is the same problem the
-                  layer holding a draw already posed in section 26.
+                <>
+<p>
+                  The plain step of section 2 is the beginning of a long list. Momentum carries part of the previous step into the next one, which helps where the slope points across a narrow valley rather than along it. Per-number step sizes give every one of the twenty-five its own rate, adapted from how large its slopes have been, which is what makes the single global rate of Part 2 less critical.
                 </p>
+                <p>
+                  Neither is on this page, and both need the step to widen from taking a rate to taking something carrying state of its own, which is the same problem the layer holding a draw already posed in section 26.
+                </p>
+</>
                 <p>
                   What does not change is the shape of the loop. It measures,
                   it moves, it does that again on some rows, and some rule
@@ -1402,6 +1426,332 @@ export default function TrainingANetworkPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            choice(
+              "Fourteen people, eight hidden units, three labels flipped. Where should the walk have stopped, and what was the training loss doing there?",
+              [
+                "Epoch 73, where the training loss stood at 0.3070 and was still falling",
+                "Epoch 73, where the training loss had flattened out",
+                "Epoch 51, where the training loss reached its lowest point",
+                "Epoch 600, since the training loss fell on every one of the six hundred",
+              ],
+              0,
+              "The held-out loss reaches its lowest point of 0.5354 at epoch 73 and then rises on every epoch after it, all the way to 1.6472, while the training loss falls on all six hundred without exception. Epoch 73 is invisible from inside, since nothing about the training loss announces anything there. Epoch 51 is where the held-out accuracy is highest, which is a different stopping point on the same run.",
+            ),
+            trueFalse(
+              "With the labels as they were drawn rather than flipped, the held-out curve flattens instead of turning.",
+              true,
+              "The held-out loss reaches 0.2469 at epoch 256 and rises over the three hundred and forty-four epochs after it by 0.0113 in total, and the held-out accuracy reaches 0.9130 at epoch 131 and is still exactly 0.9130 at epoch 600. The training loss cannot tell the two cases apart, finishing under 0.1 in both, so waiting for a visible turn will run a clean-label fit far longer than it needed.",
+            ),
+            several(
+              "Which of these hold of what a seed fixes on this chain?",
+              [
+                "Two identical requests, in batches of ten, land on 0.05945412 and 0.05945412, the same to the last bit",
+                "Changing only the order the rows are visited in changes nothing whatever when the run takes the whole crowd in one batch",
+                "Four draws of the starting numbers under the identical loop end up somewhere different each time",
+                "A seed that makes a run reproducible also makes it representative",
+              ],
+              [0, 1, 2],
+              "Shuffling a set you are about to average over in full is a no-op, so both whole-batch runs land on 0.53659416, while in batches of ten the same change moves the final loss to 0.05903582 and the order is doing real work. What a seed does not fix is which resting place the walk finds, and of the four starts three call every person correctly while the fourth reaches 0.9667 at a loss about half as much again as the best. Reproducible and representative are separate properties that the word deterministic runs together.",
+            ),
+            choice(
+              "Why must a layer that silences a random share of its units be carried through the step rather than rebuilt from its settings?",
+              [
+                "Rebuilding it rebuilds its generator at the same position, so the next pass draws exactly what the last one drew",
+                "Its numbers cannot be read off without a forward pass",
+                "Its slopes are larger than any other layer’s",
+                "It holds no numbers to move, so a step would delete it",
+              ],
+              0,
+              "Carried across four passes, no two passes keep the same units. Rebuilt from the same seed before each pass, all four are identical, which over a whole run would silence the same units every time and leave a permanently narrower layer. A draw cannot be recomputed, so this is the one exception to the rule that a step produces a new chain and leaves the old one alone.",
+            ),
+            choice(
+              "Of the ways a training loop can fail, which one can be settled by looking at the chain alone, before a single row is read?",
+              [
+                "Two layers whose widths disagree, since a layer reading eight numbers cannot follow one answering with five and no data changes that",
+                "A step size that is too large, since the loss then rises about as often as it falls",
+                "A walk whose numbers stop being numbers partway through, since the loss goes first",
+                "A batch larger than the training set, which the loop hands back whole",
+              ],
+              0,
+              "That is the only failure here that can be known while the chain is being put together rather than hours into a run, which is the argument the shapes page makes at length. A loop that has started at all is already past it, and what it can still meet at epoch 157 is a chain whose numbers have stopped being numbers, with the loss having gone first two epochs earlier, which was the only warning there was. Asking for more rows than the set holds is not a failure at all, since it simply hands back the whole set.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Running the Loop With the Library",
+          practice: [
+            exercise(
+              "Take one step from the untrained chain",
+              ["Draw the sixty people and the untrained chain exactly as the page does, both from fixed seeds, then take exactly one step at a rate of 0.5 and measure the loss again.", "Part 1 follows the first hidden unit’s weight on the first measurement from 0.345584, with a slope of 0.028119, to 0.331525, and says the loss on all sixty people fell from 0.727078 to 0.717923 while the largest slope anywhere was 0.084723. Read every one of those off the library."],
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(6)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 6) ** 0.5, 6), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+# Run one backward pass, step the chain by 0.5, and print the loss before and
+# after, the first hidden unit's first weight before, its slope, and its value
+# after, and the largest slope anywhere in the chain.`,
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(6)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 6) ** 0.5, 6), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+backward = network.backward_pass(rows, targets, loss)
+stepped = network.stepped_by(backward, 0.5)
+after = stepped.backward_pass(rows, targets, loss)
+
+print(f"loss before {backward.loss:.6f}")
+print(f"loss after one step {after.loss:.6f}")
+print(f"first hidden weight before {network[0].weight_matrix[0, 0]:.6f}")
+print(f"its slope {backward[0].weights[0, 0]:.6f}")
+print(f"first hidden weight after {stepped[0].weight_matrix[0, 0]:.6f}")
+print(f"largest slope anywhere {backward.largest_movement:.6f}")`,
+              `loss before 0.727078
+loss after one step 0.717923
+first hidden weight before 0.345584
+its slope 0.028119
+first hidden weight after 0.331525
+largest slope anywhere 0.084723`,
+              { hints: ["The starting weights are drawn with a spread of the square root of two over the fan-in, which is 1 for the two measurements and the root of a third for the six hidden units, in the order the neurons are built. The seed of 1 is what makes the page’s numbers quotable.", "backward_pass measures the loss on its way forward and answers one gradient per layer, so the loss before the step is on the backward pass itself and the hidden layer’s slopes are at position 0.", "stepped_by hands back a new chain. Measuring the loss after the step means running a second backward pass on that chain, or a forward pass and the loss, and reading its loss."], check: numberCheck("What is the loss on all sixty people after one step at 0.5?", 0.717923, 1e-05, "The loss fell from 0.727078 to 0.717923, a drop of 0.009155 against the 0.009775 the slope promised. One step of a loop that will run two hundred times moved the loss by nine thousandths, by changing every one of the twenty-five numbers by a few hundredths at most.") },
+            ),
+            exercise(
+              "Run two hundred epochs and read the curve",
+              ["Write the loop of Part 7 around the step, two hundred epochs at a rate of 0.5 with every epoch reading all sixty people, and record the loss the backward pass measured at each epoch.", "Part 4 quotes the readings at epochs 1, 50, 100 and 200 as 0.7271, 0.5893, 0.3604 and 0.1354, and says the chain the run finishes with stands at 0.134309, one step past its last reading. Confirm those, then report the first epoch at which the reading falls below 0.2, which the lesson does not quote."],
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(6)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 6) ** 0.5, 6), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+readings = []
+# Loop for two hundred epochs: run the backward pass, step by 0.5, and append
+# the loss the backward pass measured. Then print the readings at epochs 1, 50,
+# 100 and 200, the loss of the finished chain, and the first epoch whose
+# reading is below 0.2.`,
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(6)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 6) ** 0.5, 6), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+readings = []
+for epoch in range(1, 201):
+    backward = network.backward_pass(rows, targets, loss)
+    network = network.stepped_by(backward, 0.5)
+    readings.append(backward.loss)
+
+for epoch in (1, 50, 100, 200):
+    print(f"loss reported at epoch {epoch} {readings[epoch - 1]:.4f}")
+print(f"loss of the finished chain {network.backward_pass(rows, targets, loss).loss:.6f}")
+first_below = next(epoch for epoch, value in enumerate(readings, start=1) if value < 0.2)
+print(f"first reading below 0.2 at epoch {first_below}")`,
+              `loss reported at epoch 1 0.7271
+loss reported at epoch 50 0.5893
+loss reported at epoch 100 0.3604
+loss reported at epoch 200 0.1354
+loss of the finished chain 0.134309
+first reading below 0.2 at epoch 159`,
+              { hints: ["The loop is two lines inside a counter, a backward pass and a step, and the stepped chain replaces the old one each time round.", "The loss on a backward pass belongs to the chain as it stood before that step, so the last reading of two hundred is not the loss of the chain you finish with. One more backward pass on the finished chain gives that.", "enumerate with start=1 numbers the readings by epoch, and next with a generator finds the first one that satisfies the condition."], check: numberCheck("At which epoch does the reported loss first fall below 0.2?", 159, 0.5, "The reading is 0.217060 at epoch 150 and the run only reaches 0.1354 at epoch 200, so the crossing comes late in the run, at epoch 159. Every person is called correctly from epoch 180, so the loss is still falling at a healthy rate well after the accuracy has nothing left to gain, which is Part 4’s point.") },
+            ),
+            exercise(
+              "Watch a rate of twenty thrash",
+              ["Run the same chain from the same starting numbers for two hundred epochs at a rate of 20, and count how many of the 199 consecutive readings went up rather than down.", "Part 2 says the loss rises on 100 of the 199 readings, touches 0.591843 at epoch 127 and finishes at 13.216754, and that nothing ever stops being a number. Confirm that, then print the loss of the chain the run actually finishes with, which the lesson leaves out."],
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(6)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 6) ** 0.5, 6), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+readings = []
+# Loop for two hundred epochs at a rate of 20, recording each backward pass's
+# loss. Then print how many consecutive readings rose, the lowest reading and
+# its epoch, the last reading, and the loss of the finished chain.`,
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(6)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 6) ** 0.5, 6), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+readings = []
+for epoch in range(1, 201):
+    backward = network.backward_pass(rows, targets, loss)
+    network = network.stepped_by(backward, 20.0)
+    readings.append(backward.loss)
+
+rises = sum(1 for earlier, later in zip(readings, readings[1:]) if later > earlier)
+lowest = min(readings)
+print(f"readings that rose {rises} of {len(readings) - 1}")
+print(f"lowest reading {lowest:.6f} at epoch {readings.index(lowest) + 1}")
+print(f"last reading {readings[-1]:.6f}")
+print(f"loss of the finished chain {network.backward_pass(rows, targets, loss).loss:.6f}")`,
+              `readings that rose 100 of 199
+lowest reading 0.591843 at epoch 127
+last reading 13.216754
+loss of the finished chain 4.683362`,
+              { hints: ["Only the rate changes from the previous problem. The chain, the people and the loop are the same.", "zip the readings against themselves shifted by one to compare each reading with the next, and count the pairs where the later one is larger.", "The last reading belongs to the chain before its final step, so the finished chain’s loss is a separate measurement and here it is a very different number."], check: numberCheck("On how many of the 199 consecutive readings did the loss rise?", 100, 0.5, "About as often as it fell, which is the signature of a step too large under log-loss. The best reading of 0.591843 at epoch 127 is real progress from 0.727078 and the run finishes at 13.216754, eighteen times worse than the untrained chain, and the final step then lands the chain somewhere else again, which is why the finished chain’s loss differs from the last reading.") },
+            ),
+            exercise(
+              "Hold forty-six people back and watch two curves",
+              ["Train on fourteen of the sixty people, seven from each group, with three of their labels flipped, using a chain of eight hidden units at a rate of 1.0 for six hundred epochs, and measure the loss on the other forty-six after every epoch without ever stepping on them.", "Part 5 says the training loss falls from 0.7210 to 0.0757, that the held-out loss is lowest at epoch 73, where it reads 0.5354 and the training loss stands at 0.3070, and that it then climbs to 1.6472. Find the epoch the walk should have stopped at."],
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+splitter = np.random.default_rng(5)
+groups = [splitter.permutation(np.flatnonzero(labels == label)) for label in (0.0, 1.0)]
+training_index = np.concatenate([group[:7] for group in groups])
+held_index = np.concatenate([group[7:] for group in groups])
+training_labels = labels[training_index].copy()
+flipped = np.random.default_rng(6).choice(14, size=3, replace=False)
+training_labels[flipped] = 1.0 - training_labels[flipped]
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(8)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 8) ** 0.5, 8), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+# For epochs 0 to 600, run a backward pass on the fourteen training people and
+# another on the forty-six held out, record both losses, and step on the first
+# only. Then print the first and last training loss, the lowest held-out loss
+# with its epoch and the training loss at that epoch, and the last held-out loss.`,
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
+
+people = np.random.default_rng(7)
+rows, labels = [], []
+for radius, label in ((0.55, 0), (1.5, 1)):
+    angles = people.uniform(0.0, 2.0 * np.pi, 30)
+    spread = radius + people.normal(0.0, 0.09, 30)
+    rows.append(np.column_stack([spread * np.cos(angles), spread * np.sin(angles)]))
+    labels.append(np.full(30, float(label)))
+rows, labels = np.vstack(rows), np.concatenate(labels)
+targets = labels.reshape(-1, 1)
+loss = BinaryCrossEntropy()
+
+splitter = np.random.default_rng(5)
+groups = [splitter.permutation(np.flatnonzero(labels == label)) for label in (0.0, 1.0)]
+training_index = np.concatenate([group[:7] for group in groups])
+held_index = np.concatenate([group[7:] for group in groups])
+training_labels = labels[training_index].copy()
+flipped = np.random.default_rng(6).choice(14, size=3, replace=False)
+training_labels[flipped] = 1.0 - training_labels[flipped]
+
+weights = np.random.default_rng(1)
+hidden = DenseLayer([Neuron(weights.normal(0.0, 1.0, 2), bias=0.0, activation=HyperbolicTangent()) for _ in range(8)])
+output = DenseLayer([Neuron(weights.normal(0.0, (2.0 / 8) ** 0.5, 8), bias=0.0, activation=Identity())])
+network = LayerStack([hidden, output])
+
+history = []
+for epoch in range(601):
+    backward = network.backward_pass(rows[training_index], training_labels.reshape(-1, 1), loss)
+    held = network.backward_pass(rows[held_index], targets[held_index], loss)
+    history.append((epoch, backward.loss, held.loss))
+    network = network.stepped_by(backward, 1.0)
+
+best = min(history, key=lambda reading: reading[2])
+print(f"training loss from {history[0][1]:.4f} to {history[-1][1]:.4f}")
+print(f"held-out loss lowest {best[2]:.4f} at epoch {best[0]}, training loss there {best[1]:.4f}")
+print(f"held-out loss at the end {history[-1][2]:.4f}")`,
+              `training loss from 0.7210 to 0.0757
+held-out loss lowest 0.5354 at epoch 73, training loss there 0.3070
+held-out loss at the end 1.6472`,
+              { hints: ["The split draws half the training rows from each group so that a fourteen-person set cannot miss a group entirely, and the flipped labels are drawn from a second seed. Both are already in the starter.", "A backward pass on the held-out rows measures their loss without anything being stepped on them, as long as you never hand its result to stepped_by.", "min with a key picks the record with the lowest held-out loss, and that record carries the epoch and the training loss alongside it."], check: numberCheck("At which epoch is the held-out loss lowest?", 73, 0.5, "The held-out loss reaches 0.5354 at epoch 73 and rises on every one of the 527 epochs after it, while the training loss stands at 0.3070 there and keeps falling on every epoch to 0.0757. Nothing about the training loss announces epoch 73, which is why early stopping needs a second set of people rather than a cleverer reading of the first.") },
+            ),
+          ],
         },
       ]}
     />

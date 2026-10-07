@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -20,7 +23,7 @@ import { WalkTrace } from "@/components/widgets/WalkTrace";
 export const metadata: Metadata = {
   title: "Hebbian Principal Components · oop_ml",
   description:
-    "Reach the principal components without a matrix or a solver, by a single unit that reads one person at a time and obeys fire together, wire together, with one correction to keep its weights from growing without bound.",
+    "Use Oja's learning rule to approach the leading principal component through repeated local updates.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -28,8 +31,12 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function HebbianPcaPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["hebbian-pca"]}
+      technicalStart="Part 2. Oja’s Subtraction"
+      openingTitle="Find a Principal Direction One Observation at a Time"
+      playgroundIntro="Watch both the weight direction and its length. Compare the learned direction with the PCA reference rather than judging progress by the output alone."
       title="Hebbian Principal Components"
-      tagline="A unit obeying a local rule, one person at a time, turns toward the very direction an eigensolver finds."
+      tagline="Use Oja's learning rule to approach the leading principal component through repeated local updates."
       prerequisites={
         <>
           The answer being reached is the{" "}
@@ -50,63 +57,14 @@ export default function HebbianPcaPage() {
           descends a loss.
         </>
       }
-      history={
-        <>
-          <p>
-            Donald Hebb, at McGill in 1949, was trying to explain in{" "}
-            <em>The Organization of Behavior</em> how a brain with no teacher could
-            come to hold anything it had learned, and his proposal was physiological
-            rather than arithmetical. When one cell repeatedly takes part in firing
-            another, he suggested, some growth process makes it more effective at
-            doing so, and that was the whole of it. The slogan that cells which fire
-            together wire together came decades later and is not his wording. The
-            difficulty appears the moment the proposal is written as a number. A
-            connection that strengthens whenever both ends are active only ever
-            strengthens, a stronger connection makes the second cell fire harder,
-            and nothing in the sentence pushes the other way, so a Hebbian weight on
-            any data at all grows without bound. A physiologist can suppose that
-            real synapses saturate. Anyone who wanted the rule to compute something
-            needed a version that stayed bounded, and needed to know what the
-            bounded version computed.
-          </p>
-          <p>
-            Erkki Oja answered both questions in Helsinki in 1982, in a paper
-            called &ldquo;A simplified neuron model as a principal component
-            analyzer&rdquo;. He asked what the smallest change to Hebb&rsquo;s rule
-            would be that held the weight vector at unit length, found that it was a
-            single subtracted term, and then proved what a neuron obeying the
-            corrected rule converges to, which is the first principal component of
-            its inputs, the direction Karl Pearson and Harold Hotelling had reached
-            through the covariance matrix and that the PCA page turns a bar through
-            the crowd to find. The convergence proof uses the stochastic approximation theory
-            Herbert Robbins and Sutton Monro had begun in 1951, and that is where
-            the condition that the rate must fall comes from, a condition this page
-            measures holding on one cloud and failing on another. Terence Sanger
-            at MIT extended the rule in 1989 to a row of such neurons, each handed
-            only what the ones before it had left unexplained, so that they learn
-            every component in order of variance, and he coded images with the
-            arrangement to show it worked. His name for it, the generalised Hebbian
-            algorithm, is the one the method still carries.
-          </p>
-          <p>
-            The page asks six questions in order. What does one neuron obeying
-            Hebb&rsquo;s rule learn from one person? Why does the plain rule run
-            away, and what does Oja&rsquo;s one subtraction do to the length of the
-            weights? How does the weight vector turn toward the direction of
-            greatest spread when it only ever sees one person at a time? How large
-            a rate and how many presentations does that take? How is a second
-            direction found, and how closely does the whole thing agree with the
-            eigensolver&rsquo;s answer? And where does it fail?
-          </p>
-        </>
-      }
+
       playground={<HebbianPlayground />}
       sections={[
         {
           title: "Part 1. One Neuron Reading One Person",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. A neuron with two weights">
                 <p>
                   Everything on the PCA page came out of a matrix. The covariance
@@ -118,17 +76,18 @@ export default function HebbianPcaPage() {
                   weight, reads a person, and fires by the dot product of the two.
                 </p>
                 <Equation>{"y = w · x = w_height × (height − mean height) + w_weight × (weight − mean weight)"}</Equation>
-                <p>
-                  The person is read as a deviation from the mean, for the reason
-                  the PCA page gave when it centred its cloud and for a second reason
-                  this page measures in section 25. On the measured four the mean is
-                  (170, 68), so the first person, at (180, 78), is read as (10, 10),
-                  and a unit whose weights are (1, 0), pointing along height alone,
-                  fires y = 10 on them. The output is one number, and it is exactly
-                  the score the PCA page computed along a direction, except that here
-                  the direction is not chosen by anyone. It is whatever the weights
-                  happen to be.
+                <>
+<p>
+                  We measure the person relative to the average person, so the
+                  unit responds to variation around the mean. The measured four
+                  have a mean of (170, 68). Start with the person at (180, 78)
+                  and a unit whose weight vector points along height alone.
                 </p>
+                <Equation>{"Centered input = (180 − 170, 78 − 68) = (10, 10)\nWeight vector = (1, 0)\nOutput = (1 × 10) + (0 × 10) = 10"}</Equation>
+                <p>
+                  The output is one number, and it is exactly the score the PCA page computed along a direction, except that here the direction is not chosen by anyone. It is whatever the weights happen to be.
+                </p>
+</>
                 <KeepInMind>
                   A unit&rsquo;s weight vector is a direction through the cloud, and
                   its output on a person is that person&rsquo;s coordinate along it.
@@ -151,15 +110,20 @@ export default function HebbianPcaPage() {
                 </p>
                 <Equation>{"w ← w + rate · y · x"}</Equation>
                 <WorkedExample title="One step on the measured four">
-                  <p>
-                    Start the weights at (1, 0) and take the rate the endpoint sets
-                    from the cloud, 0.0025, which section 12 explains. The seeded walk
-                    happens to present person 4 first, whose deviation is (−5, 5).
-                    The unit fires y = 1 × (−5) + 0 × 5 = −5, and the update is
-                    0.0025 × (−5) × (−5, 5) = (0.0625, −0.0625), so the weights land
-                    at (1.0625, −0.0625), of length 1.064, three degrees further from
-                    the diagonal than they started.
-                  </p>
+                  <>
+                    <p>
+                      Start with weights (1, 0) and learning rate 0.0025. Section 12
+                      explains this choice of rate. The seeded walk presents person 4
+                      first, with centred measurements (−5, 5). Compute the response,
+                      the Hebbian update and the new weights in that order.
+                    </p>
+                    <Equation>{"response y = 1 × (−5) + 0 × 5 = −5\nupdate = 0.0025 × (−5) × (−5, 5) = (0.0625, −0.0625)\nnew weights = (1, 0) + (0.0625, −0.0625)\n            = (1.0625, −0.0625)"}</Equation>
+                    <p>
+                      The new vector has length about 1.064 and points three degrees
+                      farther from the diagonal. A single update need not move toward
+                      the final direction.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   Two things in that step deserve a look. The update lies along the
@@ -202,17 +166,14 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="4. What the plain rule does to the weights, measured">
-                <p>
-                  Let the plain rule run and watch the length of the weight vector
-                  rather than its direction. On the measured four, presented in the
-                  seeded order at the rate from section 12, one epoch takes the
-                  length from 1 to 1.064, then 1.326, then 1.779, then 1.825, and
-                  every step lengthened it. Hold the rate constant and the length
-                  after each of twenty epochs runs 1.83, 3.75, 8.18, 18.2, 40.8,
-                  91.8, 206, 464, 1045, 2351 and on to 7.8 million by the twentieth.
-                  Let the rate fall a hundredfold across the twenty epochs as the fit
-                  does and the growth slows to 42.0, though it never once reverses.
+                <>
+<p>
+                  Let the plain rule run and watch the length of the weight vector rather than its direction. On the measured four, presented in the seeded order at the rate from section 12, one epoch takes the length from 1 to 1.064, then 1.326, then 1.779, then 1.825, and every step lengthened it. Hold the rate constant and the length after each of twenty epochs runs 1.83, 3.75, 8.18, 18.2, 40.8, 91.8, 206, 464, 1045, 2351 and on to 7.8 million by the twentieth.
                 </p>
+                <p>
+                  Let the rate fall a hundredfold across the twenty epochs as the fit does and the growth slows to 42.0, though it never once reverses.
+                </p>
+</>
                 <WalkTrace
                   people="four"
                   measure="length"
@@ -242,7 +203,7 @@ export default function HebbianPcaPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Oja’s Subtraction",
@@ -259,15 +220,19 @@ export default function HebbianPcaPage() {
                 </p>
                 <Equation>{"w ← w + rate · y · (x − y · w)"}</Equation>
                 <WorkedExample title="The same first step under the corrected rule">
-                  <p>
-                    Weights (1, 0), person 4 at (−5, 5), output y = −5 as before. The
-                    bracket is (−5, 5) − (−5) × (1, 0) = (0, 5), which is the person
-                    with the part along height removed, since the unit already
-                    explained that part exactly. The update is 0.0025 × (−5) × (0, 5)
-                    = (0, −0.0625), and the weights land at (1, −0.0625), of length
-                    1.002 rather than 1.064. The turn is the same size as before and
-                    the lengthening is almost gone.
-                  </p>
+                  <>
+                    <p>
+                      Use the same weights, person and output with Oja’s rule. First
+                      remove the part of the input already represented by the current
+                      weight direction.
+                    </p>
+                    <Equation>{"adjusted input = (−5, 5) − (−5) × (1, 0) = (0, 5)\nupdate = 0.0025 × (−5) × (0, 5) = (0, −0.0625)\nnew weights = (1, 0) + (0, −0.0625) = (1, −0.0625)"}</Equation>
+                    <p>
+                      The direction changes by a similar amount, but the length is now
+                      about 1.002 instead of 1.064. The correction largely removes the
+                      unwanted growth.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   The subtraction has removed exactly the part of the update that
@@ -290,26 +255,29 @@ export default function HebbianPcaPage() {
                   it. Write r for the bracket, the residual the update is built from.
                 </p>
                 <Equation>{"|w′|² = |w|² + 2 · rate · y² · (1 − |w|²) + rate² · y² · |r|²"}</Equation>
-                <p>
-                  The first term is the subtraction at work. It is positive while
-                  the weights are shorter than one, negative while they are longer,
-                  and zero at length one exactly, so a vector that has grown is pulled
-                  back and one that has shrunk is pushed out, harder the further from
-                  one it is and harder the more strongly the unit fired. The second
-                  term is the square of the step and is always positive, which is why
-                  a single step can still leave the length a little over one. It is
-                  smaller by a factor of the rate, so it loses as the rate falls.
+                <>
+<p>
+                  The first term is the subtraction at work. It is positive while the weights are shorter than one, negative while they are longer, and zero at length one exactly, so a vector that has grown is pulled back and one that has shrunk is pushed out, harder the further from one it is and harder the more strongly the unit fired.
                 </p>
+                <p>
+                  The second term is the square of the step and is always positive, which is why a single step can still leave the length a little over one. It is smaller by a factor of the rate, so it loses as the rate falls.
+                </p>
+</>
                 <InAModel title="The third step of the walk from (1, 0)">
-                  <p>
-                    Before person 1 is presented the squared length is 1.0640 and the
-                    output on them is 12.003. The first term is 2 × 0.0025 × 144.06 ×
-                    (1 − 1.0640) = −0.0461, a pull back toward one. The second term is
-                    0.0025² × 144.06 × 65.15 = 0.0587, a push out, and it wins this
-                    step because the rate times the person&rsquo;s squared length is
-                    a half rather than something small. The squared length lands at
-                    1.0766, a length of 1.0376, and the endpoint reports exactly that.
-                  </p>
+                  <>
+                    <p>
+                      Before person 1 is presented, the squared weight length is about
+                      1.0640 and the output is about 12.003. The first term in the
+                      change of squared length pulls toward one; the second can push
+                      outward.
+                    </p>
+                    <Equation>{"first term ≈ 2 × 0.0025 × 144.06 × (1 − 1.0640) ≈ −0.0461\nsecond term ≈ 0.0025² × 144.06 × 65.15 ≈ 0.0587\nnew squared length ≈ 1.0640 − 0.0461 + 0.0587 ≈ 1.0766\nnew length ≈ √1.0766 ≈ 1.0376"}</Equation>
+                    <p>
+                      The outward term wins on this update. The rate is not small
+                      relative to this person’s squared input length, so the term
+                      quadratic in the rate cannot be ignored.
+                    </p>
+                  </>
                 </InAModel>
                 <p>
                   Over epochs the pull wins. At a constant rate the length at the end
@@ -392,17 +360,21 @@ export default function HebbianPcaPage() {
                   one, and the argument is short enough to fold away.
                 </p>
                 <WhyThisWorks title="Why only the largest direction is stable">
-                  <p>
-                    Suppose the unit rests on an eigenvector u with eigenvalue λ and
-                    lean it a little toward another eigenvector v with eigenvalue μ,
-                    so w = u + εv. The averaged update on the lean is rate times
-                    (μ − λ) times εv to first order, since Cv = μv and the
-                    subtraction removes λ times the whole vector. If μ is larger than
-                    λ the lean grows and the unit leaves u; if μ is smaller the lean
-                    shrinks and the unit returns. So a resting point is stable only
-                    when no other eigenvalue exceeds its own, which is the first
-                    principal component.
-                  </p>
+                  <>
+                    <p>
+                      Suppose the weights lie on eigenvector u, whose eigenvalue is λ.
+                      Add a small component in another eigenvector direction v, whose
+                      eigenvalue is μ.
+                    </p>
+                    <Equation>{"perturbed weights: w = u + εv\nfirst-order change in the perturbation ≈ rate × (μ − λ) × εv"}</Equation>
+                    <p>
+                      If the other eigenvalue is larger, the perturbation grows. If it
+                      is smaller, the perturbation shrinks. Under this local averaged
+                      analysis, a stable direction therefore belongs to the
+                      largest-eigenvalue eigenspace. Tied largest eigenvalues need not
+                      select one unique direction.
+                    </p>
+                  </>
                 </WhyThisWorks>
                 <Equation>{"C w = λ w,        λ = wᵀ C w"}</Equation>
                 <p>
@@ -421,6 +393,60 @@ export default function HebbianPcaPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "At a constant rate the plain Hebbian rule finds the eigen direction and then runs along it, seven million long after twenty epochs.",
+              true,
+              "It finds the direction and then runs along it forever. At the constant rate the weights after twenty epochs point 0.0006 degrees from the eigen direction while being 7.8 million long, because every update has a part along the current weights of the rate times the output squared, and that cannot be negative. The direction it grows along being the right one is the clue to the repair, since only the lengthening has to be removed.",
+            ),
+            choice(
+              "What does Oja’s subtraction take out of the update?",
+              [
+                "The part lying along the weights themselves, which was doing the lengthening, leaving the part across them, which turns",
+                "The part across the weights, which was making the direction wander",
+                "The dependence of the rate on the scale the people are measured in",
+                "The need to centre the rows before reading them",
+              ],
+              0,
+              "The unit’s output times its own weights is the part of the person the unit already explains, and subtracting it removes exactly the part of the update that lay along the weights, which was the part doing the lengthening. The part across them, which turns, is left as it was. On the first step from (1, 0) the plain rule left a length of about 1.064 and the corrected rule about 1.002, with the direction changing by a similar amount under both.",
+            ),
+            choice(
+              "Does the rule normalise the weights?",
+              [
+                "No, nothing ever divides by the norm, and the length arriving at one is the evidence the rule worked",
+                "Yes, every step divides by the new length",
+                "Yes, but only once at the end of each epoch",
+                "No, and the length never comes near one",
+              ],
+              0,
+              "The subtracted term is the first-order expansion of exactly what dividing would have removed, so the approximation is in the rate and is better the smaller the rate is. At a constant rate the length at the end of each of the first five epochs on the measured four is 1.0372, 1.0084, 1.0009, 1.0001 and 1.0000.",
+            ),
+            several(
+              "The change in squared length after one step has two terms. Which of these hold?",
+              [
+                "The first term is positive while the weights are shorter than one and negative while they are longer",
+                "The second term is always positive, so a single step can still leave the length a little over one",
+                "On the step from a squared length of 1.0640 the pull toward one is the larger of the two, so the length falls",
+                "The whole expression is an approximation, good only for a small rate",
+              ],
+              [0, 1],
+              "It is an identity with no approximation in it, which is what lets the two terms be weighed against each other exactly. On that step the pull toward one is about −0.0461 and the outward term about 0.0587, so the outward term wins and the length rises to about 1.0376, because the rate is not small relative to that person’s squared input length. The second term is smaller by a factor of the rate, so it loses as the rate falls, and over epochs the pull toward one wins.",
+            ),
+            choice(
+              "Averaged over the people, where is the corrected update zero?",
+              [
+                "Exactly on an eigenvector of the covariance matrix, and stable only on the one with the largest eigenvalue",
+                "Only on the eigenvector with the largest eigenvalue",
+                "Anywhere the weights have length one",
+                "Only where every person’s residual is zero",
+              ],
+              0,
+              "The average of the output times the person is the covariance matrix applied to the weights, and the average of the output squared is the variance along them, so resting says the matrix only stretches that direction. Every eigenvector is a resting point, and a perturbation toward another one grows whenever its eigenvalue is larger, which leaves the largest as the only stable one.",
+            ),
+        ],
         },
         {
           title: "Part 3. Turning Toward the Direction of Greatest Spread",
@@ -463,16 +489,14 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="10. Why one person can turn the weights the wrong way">
-                <p>
-                  The first step in that table went the wrong way. Person 4 turned
-                  the weights from 45 degrees off the answer to 48.6 degrees off, and
-                  it was the next two people who turned them back. That is not a
-                  mistake in the rule. A single person pulls the weights toward their
-                  own axis, whichever sign they lie on, and person 4 lies on the
-                  second eigen direction, so they pull toward it. What decides the
-                  outcome is how hard each person pulls, which is the output times
-                  the part of the person that lies across the weights.
+                <>
+<p>
+                  The first step in that table went the wrong way. Person 4 turned the weights from 45 degrees off the answer to 48.6 degrees off, and it was the next two people who turned them back. That is not a mistake in the rule. A single person pulls the weights toward their own axis, whichever sign they lie on, and person 4 lies on the second eigen direction, so they pull toward it.
                 </p>
+                <p>
+                  What decides the outcome is how hard each person pulls, which is the output times the part of the person that lies across the weights.
+                </p>
+</>
                 <Equation>{"turn from one person  =  rate · y · (the part of x across w)"}</Equation>
                 <p>
                   Both factors grow with the person&rsquo;s distance from the mean,
@@ -538,18 +562,14 @@ export default function HebbianPcaPage() {
                   sets the rate from the cloud rather than fixing it.
                 </p>
                 <Equation>{"starting rate = 0.5 / (longest deviation)²        = 0.5 / 200 = 0.0025 on the measured four"}</Equation>
-                <p>
-                  The half comes from section 6. The subtraction moves the squared
-                  length toward one by twice the rate times the output squared, and
-                  the output squared is at most the squared length of the longest
-                  person, so at a half the largest single kick lands on length one
-                  rather than carrying past it. Scaling every rate alike moves no
-                  direction and no share, which is what lets the eigensolver be run
-                  on the raw people and still be the right comparison. Write the
-                  heights in millimetres and the starting rate becomes 0.0000495, the
-                  first direction still lands within a hundredth of a degree, and
-                  nothing else about the answer moves.
+                <>
+<p>
+                  The half comes from section 6. The subtraction moves the squared length toward one by twice the rate times the output squared, and the output squared is at most the squared length of the longest person, so at a half the largest single kick lands on length one rather than carrying past it. Scaling every rate alike moves no direction and no share, which is what lets the eigensolver be run on the raw people and still be the right comparison.
                 </p>
+                <p>
+                  Write the heights in millimetres and the starting rate becomes 0.0000495, the first direction still lands within a hundredth of a degree, and nothing else about the answer moves.
+                </p>
+</>
                 <KeepInMind>
                   The rate is not a scale-free number. It has to be set from the
                   data&rsquo;s own spread, or the data standardised first, and a rate
@@ -581,16 +601,14 @@ export default function HebbianPcaPage() {
                     { label: "eight times the rate", rule: "oja", decay: false, start: "along_height", rateMultiplier: 8 },
                   ]}
                 />
-                <p>
-                  The mechanism is the second term of section 6. Past a certain rate
-                  the square of the step outgrows the pull back toward one, so a kick
-                  meant to shrink the weights grows them instead, and the next kick
-                  is larger. The fit refuses a walk like that by name rather than
-                  completing it, and where the line falls depends on the cloud. On the
-                  measured four the fit at four times the rate is refused on the
-                  fourth epoch; on the crowd four times the rate runs the full two
-                  hundred epochs and it is eight times that is refused, on the first.
+                <>
+<p>
+                  The mechanism is the second term of section 6. Past a certain rate the square of the step outgrows the pull back toward one, so a kick meant to shrink the weights grows them instead, and the next kick is larger. The fit refuses a walk like that by name rather than completing it, and where the line falls depends on the cloud.
                 </p>
+                <p>
+                  On the measured four the fit at four times the rate is refused on the fourth epoch; on the crowd four times the rate runs the full two hundred epochs and it is eight times that is refused, on the first.
+                </p>
+</>
                 <SweepTable people="four" section="rates" />
                 <KeepInMind>
                   Below the line a larger rate settles sooner. Above it the length
@@ -629,17 +647,14 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="15. Whether the rate has to fall">
-                <p>
-                  The textbook argument, from Robbins and Monro, is that a constant
-                  rate can never settle. Each person moves the weights by a fixed
-                  amount, so the weights keep chasing whichever person arrived last,
-                  and the fit becomes a fact about presentation order. I measured
-                  it, and on the measured four the claim does not hold. Every one of
-                  those four lies exactly on an eigen direction, so at the answer the
-                  bracket is exactly zero for each of them, and a constant rate
-                  settles at epoch 46 where the falling one takes 91, and lands on
-                  the diagonal just as exactly.
+                <>
+<p>
+                  The textbook argument, from Robbins and Monro, is that a constant rate can never settle. Each person moves the weights by a fixed amount, so the weights keep chasing whichever person arrived last, and the fit becomes a fact about presentation order. I measured it, and on the measured four the claim does not hold.
                 </p>
+                <p>
+                  Every one of those four lies exactly on an eigen direction, so at the answer the bracket is exactly zero for each of them, and a constant rate settles at epoch 46 where the falling one takes 91, and lands on the diagonal just as exactly.
+                </p>
+</>
                 <p>
                   On the crowd the claim holds. Nobody there lies on an axis, so at
                   the answer each person&rsquo;s update is small but not zero, and
@@ -667,6 +682,60 @@ export default function HebbianPcaPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "Each presentation turns the weights toward the answer.",
+              false,
+              "Person 4 turned them from 45 degrees off to 48.6 degrees off, because a single person pulls the weights toward their own axis and that person lies on the second eigen direction. On the measured four the two people on the first axis are ten root two from the mean against five root two, so that axis pulls four times as hard per person and the average wins over an epoch.",
+            ),
+            choice(
+              "Why is the rate set from the cloud rather than fixed at a default?",
+              [
+                "The update carries the square of whatever unit the people are measured in, so a default of 0.05 overflows on the measured four in centimetres",
+                "A smaller cloud needs more epochs, and the rate stands in for the epoch count",
+                "The rate has to be matched to the number of units",
+                "Centring changes the scale of the rows, so the rate has to follow it",
+              ],
+              0,
+              "The starting rate is a half over the squared longest deviation, which is 0.0025 here, and the half is there because the subtraction moves the squared length toward one by twice the rate times the output squared, so the largest single kick lands on length one rather than carrying past it. In millimetres the rate becomes 0.0000495 and the direction still lands within a hundredth of a degree.",
+            ),
+            several(
+              "Raising the rate on the measured four, which of these were measured?",
+              [
+                "At twice the rate, held constant, the walk settles in three epochs at a length of 0.9994",
+                "At three times it never settles, and the length bounces between 0.24 and 1.25 for all twenty epochs",
+                "At four times the fit is refused, on the fourth epoch",
+                "Where that line falls is a property of the rule rather than of the cloud",
+              ],
+              [0, 1, 2],
+              "Past a certain rate the square of the step outgrows the pull back toward one, so a kick meant to shrink the weights grows them instead. The line is a fact about the data’s spread, which is why the crowd runs the full two hundred epochs at four times the rate and is refused only at eight.",
+            ),
+            choice(
+              "The textbook argument says a constant rate can never settle. What did measuring it show?",
+              [
+                "It holds on the crowd and not on the measured four, where every person lies exactly on an eigen direction",
+                "It holds on both, exactly as stated",
+                "It fails on both, since the bracket always reaches zero",
+                "It holds only when the rate is set from the longest deviation",
+              ],
+              0,
+              "At the answer the bracket is exactly zero for each of those four people, so a constant rate settles at epoch 46 where the falling one takes 91 and lands on the diagonal just as exactly. On the crowd nobody lies on an axis, and within the twentieth epoch the direction wobbles between 0.12 and 0.77 degrees off where the falling rate holds it within a hundredth.",
+            ),
+            choice(
+              "Why does the fit reshuffle the order of the people at every epoch?",
+              [
+                "Because one person can turn the weights the wrong way, and a fixed order would let the last person of every epoch have the final say",
+                "Because the covariance matrix changes between epochs",
+                "Because a repeated order would make the fit irreproducible",
+                "Because the rate falls, and the order has to fall with it",
+              ],
+              0,
+              "The same seeded generator draws the starting weights and the order, which is what makes a fit reproducible and why the numbers in the prose are the numbers on the screen. On the measured four five seeds all land within a ten thousandth of a degree of the diagonal, in between fourteen and twenty-two epochs, differing only in sign.",
+            ),
+        ],
         },
         {
           title: "Part 5. A Second Direction by Subtracting What the First Explains",
@@ -728,16 +797,14 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="18. The second direction learns at a pace set by its variance">
-                <p>
-                  The cost of deflation is that a unit chasing a small variance is
-                  pushed by small outputs, and its updates are small in proportion.
-                  On the crowd the second direction holds one percent of the spread,
-                  and after two hundred epochs of the falling rate it is 8.2 degrees
-                  off its twin at a length of 0.43, nowhere near one. On the ideal
-                  case, where it holds seven hundredths of a percent, it is 20.5
-                  degrees off at a length of 0.18. The first direction on both is
-                  within a few thousandths of a degree.
+                <>
+<p>
+                  The cost of deflation is that a unit chasing a small variance is pushed by small outputs, and its updates are small in proportion. On the crowd the second direction holds one percent of the spread, and after two hundred epochs of the falling rate it is 8.2 degrees off its twin at a length of 0.43, nowhere near one.
                 </p>
+                <p>
+                  On the ideal case, where it holds seven hundredths of a percent, it is 20.5 degrees off at a length of 0.18. The first direction on both is within a few thousandths of a degree.
+                </p>
+</>
                 <SweepTable people="crowd" section="epochs" />
                 <p>
                   What starves the second unit is the falling rate, and I measured
@@ -759,18 +826,14 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="19. Orthogonality and the shares are measurements">
-                <p>
-                  An eigensolver&rsquo;s directions are perpendicular to the last bit
-                  and its variances add to the total exactly. The rule&rsquo;s are
-                  neither, and the fit reports rather than pretends. The worst
-                  orthogonality is the largest dot product between two learned unit
-                  directions, 0.000043 on the measured four after the full walk and
-                  0.14 on the crowd, where the second direction was left short. The
-                  variances along the two directions add to 166.66666685 against a
-                  total of 166.66666667, a little over, because two directions that
-                  overlap slightly count the overlap twice. After one epoch, with the
-                  directions 0.12 from perpendicular, they add to 176.3.
+                <>
+<p>
+                  An eigensolver&rsquo;s directions are perpendicular to the last bit and its variances add to the total exactly. The rule&rsquo;s are neither, and the fit reports rather than pretends. The worst orthogonality is the largest dot product between two learned unit directions, 0.000043 on the measured four after the full walk and 0.14 on the crowd, where the second direction was left short.
                 </p>
+                <p>
+                  The variances along the two directions add to 166.66666685 against a total of 166.66666667, a little over, because two directions that overlap slightly count the overlap twice. After one epoch, with the directions 0.12 from perpendicular, they add to 176.3.
+                </p>
+</>
                 <Equation>{"kept variance = variance along w₁ + variance along w₂  ≥  total, when w₁ · w₂ ≠ 0"}</Equation>
                 <KeepInMind>
                   A share above one is a report on the fit rather than an error in
@@ -788,17 +851,14 @@ export default function HebbianPcaPage() {
           content: (
             <>
               <SubSection title="20. The angle between the two directions">
-                <p>
-                  The claim of the page is one number, the angle between the
-                  direction a unit learned and the direction an eigensolver computed,
-                  taken modulo a half turn because the rule lands on either sign. On
-                  the measured four after the full walk it is 0.0000012 degrees for
-                  the first direction and 0.0024 for the second. On the crowd it is
-                  0.0031 for the first and 8.2 for the second, for the reason section
-                  18 gave, and on the ideal case 0.001 for the first. The playground
-                  at the top of the page draws both directions over any cloud you
-                  build, and its angle readouts are these numbers.
+                <>
+<p>
+                  The claim of the page is one number, the angle between the direction a unit learned and the direction an eigensolver computed, taken modulo a half turn because the rule lands on either sign. On the measured four after the full walk it is 0.0000012 degrees for the first direction and 0.0024 for the second.
                 </p>
+                <p>
+                  On the crowd it is 0.0031 for the first and 8.2 for the second, for the reason section 18 gave, and on the ideal case 0.001 for the first. The playground at the top of the page draws both directions over any cloud you build, and its angle readouts are these numbers.
+                </p>
+</>
                 <KeepInMind>
                   Where the walk settles, it settles on the eigensolver&rsquo;s
                   direction to within millionths of a degree. Where a walk is left
@@ -922,17 +982,14 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="25. Uncentred data learns where the cloud is">
-                <p>
-                  Run the rule on the raw positions rather than the deviations and
-                  it still settles at length one, on a direction that is wrong. On
-                  the measured four the weights come to rest 0.08 degrees from the
-                  line joining the origin to the mean at (170, 68) and 23.1 degrees
-                  from the eigen direction, which is the angle between those two
-                  lines. On the crowd it is 0.74 and 22.1 degrees. The rate for this
-                  walk is set from the longest position rather than the longest
-                  deviation, 0.000013 rather than 0.0025, or it would overflow on the
-                  first person.
+                <>
+<p>
+                  Run the rule on the raw positions rather than the deviations and it still settles at length one, on a direction that is wrong. On the measured four the weights come to rest 0.08 degrees from the line joining the origin to the mean at (170, 68) and 23.1 degrees from the eigen direction, which is the angle between those two lines.
                 </p>
+                <p>
+                  On the crowd it is 0.74 and 22.1 degrees. The rate for this walk is set from the longest position rather than the longest deviation, 0.000013 rather than 0.0025, or it would overflow on the first person.
+                </p>
+</>
                 <HebbianStepper people="four" rule="sanger" nComponents={1} maxEpochs={20} centre={false} />
                 <p>
                   The average update on raw rows is the second-moment matrix rather
@@ -950,18 +1007,14 @@ export default function HebbianPcaPage() {
               </SubSection>
 
               <SubSection title="26. Equal eigenvalues, where no direction is the answer">
-                <p>
-                  Put eight people evenly round a circle about the mean and the two
-                  eigenvalues tie, at half the variance each. The eigensolver still
-                  answers, with the height axis and the weight axis, and that answer
-                  is an arbitrary choice, since every direction through a circle
-                  carries the same spread. The rule answers too. It settles at length
-                  1.0005 on a direction 80 degrees from the eigensolver&rsquo;s, with
-                  a share of exactly a half, and five seeds send it 21, 9, 57 and 39
-                  degrees from where the page&rsquo;s own seed sent it. None of those
-                  is wrong, and the walk never stops itself, because a flat objective
-                  gives it no reason to.
+                <>
+<p>
+                  Put eight people evenly round a circle about the mean and the two eigenvalues tie, at half the variance each. The eigensolver still answers, with the height axis and the weight axis, and that answer is an arbitrary choice, since every direction through a circle carries the same spread. The rule answers too. It settles at length 1.0005 on a direction 80 degrees from the eigensolver&rsquo;s, with a share of exactly a half, and five seeds send it 21, 9, 57 and 39 degrees from where the page&rsquo;s own seed sent it.
                 </p>
+                <p>
+                  None of those is wrong, and the walk never stops itself, because a flat objective gives it no reason to.
+                </p>
+</>
                 <SeedDirections left="four" right="circle" />
                 <KeepInMind>
                   A tie between eigenvalues means the components inside the tied
@@ -991,6 +1044,60 @@ export default function HebbianPcaPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            choice(
+              "Two independent units under the corrected rule, on the crowd, do what?",
+              [
+                "They coincide to a thousandth of a degree, since nothing tells a unit what another unit has already found",
+                "They settle perpendicular to one another",
+                "The second decays to no length at all",
+                "They split the largest eigenvalue between them",
+              ],
+              0,
+              "Every unit finds the direction of greatest spread and no other. Sanger’s extension hands the second unit the person with the first unit’s reconstruction removed, and the sum running up to and including the unit’s own term is the whole of it, since dropping the own term loses the normalisation and dropping the earlier ones loses the reason to differ.",
+            ),
+            trueFalse(
+              "Two learned directions that overlap slightly count the overlap twice, so their variances can add to a little more than the total.",
+              true,
+              "On the measured four they come to 166.66666685 against a total of 166.66666667, and after one epoch, with a dot product of 0.12 between the two directions where perpendicular would be zero, they come to 176.3. A share above one is a report on the fit rather than an error in it, which is why the rule’s answer lives in its own vocabulary instead of the one that refuses a pair of directions a hundred-millionth from perpendicular.",
+            ),
+            several(
+              "On the measured four after the full walk, which of these does the page report?",
+              [
+                "The first learned direction is 0.0000012 degrees from the eigensolver’s and the second 0.0024",
+                "The variances along the two learned directions come back 133.3333333 and 33.3333335 against eigenvalues of 133.3333 and 33.3333",
+                "Person 1 scores 14.1421 on the first direction whether the rule or the eigensolver produced it",
+                "A person can be rebuilt from their two coordinates by a transpose, as on the PCA page",
+              ],
+              [0, 1, 2],
+              "Where the walk settles it settles on the eigensolver’s direction to within millionths of a degree, and the variance is measured from the people along the unit direction, which is the same quantity an eigenvalue reports, so the shares 0.8 and 0.2 agree to six decimals. There is no inverse transform, because rebuilding a person by a transpose needs exactly orthonormal directions and these are only nearly so. On the crowd the second direction is left 8.2 degrees off at a length of 0.43, starved by the falling rate, and the length is what reports it.",
+            ),
+            choice(
+              "Run the rule on the raw positions rather than the deviations, with the rate set from the longest position. What does it learn on the measured four?",
+              [
+                "A direction 0.08 degrees from the line joining the origin to the mean, and 23.1 degrees from the eigen direction",
+                "Nothing, since the weights overflow before the first epoch ends",
+                "The eigen direction, a little more slowly than on the deviations",
+                "A direction whose length stays well under one, which reports the failure",
+              ],
+              0,
+              "The average update on raw rows is the second-moment matrix rather than the covariance matrix, and its leading eigenvector is dominated by where the mean is when the mean is far from the origin. It still settles at length one, so nothing about the length announces that the answer is a fact about the units and the origin rather than about the people.",
+            ),
+            several(
+              "Eight people evenly round a circle about the mean. Which of these were measured?",
+              [
+                "The rule settles at length 1.0005 with a share of exactly a half, on a direction 80 degrees from the eigensolver’s",
+                "Five seeds send it 21, 9, 57 and 39 degrees from where the page’s own seed sent it",
+                "The walk never stops itself, because a flat objective gives it no reason to",
+                "The eigensolver still answers, with the height axis and the weight axis, and that answer is an arbitrary choice",
+              ],
+              [0, 1, 2, 3],
+              "Every direction through a circle carries the same spread, so the tie leaves the components inside the plane undetermined by either route. The eigensolver answers with the two axes and the rule answers too, reporting a direction and a length of one as though it had found something, and only the shares and the disagreement between seeds say that it could not have.",
+            ),
+        ],
         },
         {
           title: "Part 8. Implementation and Failure Contracts",
@@ -1041,6 +1148,234 @@ export default function HebbianPcaPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Practice. Learning the Directions With the Library",
+          practice: [
+            exercise(
+              "Learn the four and hold them against the eigensolver",
+              ["Fit the rule on the measured four at the rate Part 4 sets, 0.0025 falling a hundredfold, with the seed the page uses, and fit the eigensolver on the same four people. Print each learned direction beside its eigen twin, with the angle between them.", "Part 6 puts the first direction 0.0000012 degrees from the eigensolver’s and the second 0.0024, with variances of 133.3333333 and 33.3333335. Look for those, for a length of one on both directions that nothing divided to get, and for the epoch on which the walk stopped itself."],
+              `import math
+
+from oop_ml import (
+    ExponentialDecaySchedule,
+    Feature,
+    HebbianPrincipalComponents,
+    PrincipalComponentAnalysis,
+)
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+rate = ExponentialDecaySchedule(start=0.0025, end=0.000025)
+
+# Fit a HebbianPrincipalComponents with two components, this rate, a budget
+# of 200 epochs and a seed of 11, and fit a PrincipalComponentAnalysis on the
+# same people. Print how many epochs the walk ran and whether it converged.
+# Then, for each learned direction beside its eigen twin, print the unit
+# direction, the length the walk left, the variance along it beside the
+# eigenvalue, and the angle between the two in degrees. Finish with the
+# worst orthogonality.`,
+              `import math
+
+from oop_ml import (
+    ExponentialDecaySchedule,
+    Feature,
+    HebbianPrincipalComponents,
+    PrincipalComponentAnalysis,
+)
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+rate = ExponentialDecaySchedule(start=0.0025, end=0.000025)
+
+learned = HebbianPrincipalComponents(
+    n_components=2, learning_rate=rate, max_epochs=200, random_seed=11
+).fit(people)
+solved = PrincipalComponentAnalysis().fit(people)
+
+print(f"epochs run {learned.epochs_run}, converged {learned.converged}")
+for direction, component in zip(learned.directions, solved.components):
+    alignment = abs(float(direction.direction @ component.direction))
+    angle = math.degrees(math.acos(min(1.0, alignment)))
+    height, weight = direction.direction
+    print(direction.name)
+    print(f"  unit direction ({height:.4f}, {weight:.4f}), length {direction.length:.4f}")
+    print(f"  variance along it {direction.variance:.4f}, eigenvalue {component.variance:.4f}")
+    print(f"  angle to the eigen direction {angle:.4f} degrees")
+print(f"worst orthogonality {learned.directions.worst_orthogonality:.6f}")`,
+              `epochs run 91, converged True
+component_1
+  unit direction (0.7071, 0.7071), length 1.0000
+  variance along it 133.3333, eigenvalue 133.3333
+  angle to the eigen direction 0.0000 degrees
+component_2
+  unit direction (0.7071, -0.7071), length 1.0000
+  variance along it 33.3333, eigenvalue 33.3333
+  angle to the eigen direction 0.0024 degrees
+worst orthogonality 0.000043`,
+              { hints: ["The rate is a schedule object handed to learning_rate at construction, beside n_components, max_epochs and random_seed. The people go to fit.", "The fitted model has epochs_run and converged, and its directions can be looped over. Each one carries name, direction, length and variance, where direction is the unit vector and length is what the walk left the weights at.", "The eigensolver’s answer is solved.components, whose entries carry direction and variance in the same order, so zip pairs each learned direction with its twin.", "The rule may land on either sign of a direction, so take the absolute value of the dot product before the arccosine, and cap it at one, since rounding can leave it a last bit over."], check: numberCheck("On which epoch did the walk stop itself?", 91, 0, "The budget was two hundred and the walk stopped at epoch 91, because no weight moved more than a millionth in a whole pass, which is 364 presentations of one of four people. By then both lengths are one to four decimals without anything having divided by a norm, and the directions sit 0.0000 and 0.0024 degrees from the eigensolver’s.") },
+            ),
+            exercise(
+              "Score a fifth person by both routes",
+              ["Part 6 scores the four people the rule was fitted on. Hand both fitted models somebody neither has seen, 185 cm and 60 kg, with the weight column given before the height column, and print the coordinates each model answers.", "The mean is (170, 68), so this person’s deviation is (15, −8). Work out what the score along (0.7071, 0.7071) ought to be before running anything, and then compare the two routes on the second direction, where the lesson says the signs are free to differ."],
+              `from oop_ml import (
+    ExponentialDecaySchedule,
+    Feature,
+    HebbianPrincipalComponents,
+    PrincipalComponentAnalysis,
+)
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+rate = ExponentialDecaySchedule(start=0.0025, end=0.000025)
+learned = HebbianPrincipalComponents(
+    n_components=2, learning_rate=rate, max_epochs=200, random_seed=11
+).fit(people)
+solved = PrincipalComponentAnalysis().fit(people)
+
+newcomer = [Feature("weight", [60]), Feature("height", [185])]
+# Transform the newcomer with each fitted model and print the name and the
+# value of every column that comes back, to four places.`,
+              `from oop_ml import (
+    ExponentialDecaySchedule,
+    Feature,
+    HebbianPrincipalComponents,
+    PrincipalComponentAnalysis,
+)
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+rate = ExponentialDecaySchedule(start=0.0025, end=0.000025)
+learned = HebbianPrincipalComponents(
+    n_components=2, learning_rate=rate, max_epochs=200, random_seed=11
+).fit(people)
+solved = PrincipalComponentAnalysis().fit(people)
+
+newcomer = [Feature("weight", [60]), Feature("height", [185])]
+for route, model in (("by the rule", learned), ("by the eigensolver", solved)):
+    print(route)
+    for column in model.transform(newcomer):
+        print(f"  {column.name} {float(column.values[0]):.4f}")`,
+              `by the rule
+  component_1 4.9497
+  component_2 16.2637
+by the eigensolver
+  component_1 4.9497
+  component_2 -16.2635`,
+              { hints: ["transform takes features the way fit did and answers a list of features, one per direction, named component_1 and component_2 by both models.", "Each returned column holds one value per person handed in, so a single newcomer is the value at position 0.", "The columns are matched to the fitted ones by name, which is why handing weight before height changes nothing. Both models centre with the means they stored at the fit."], check: numberCheck("What does the newcomer score on the first direction?", 4.9497, 0.0005, "The deviation is (15, −8) and the first direction is (0.7071, 0.7071), so the score is 7 over root two, 4.9497, by both routes. On the second direction the eigensolver answers −16.2635 and the rule 16.2637. The sign is conventional, and the two ten-thousandths are the 0.0024 degrees the learned second direction sits from its twin, read on a person seventeen units from the mean.") },
+            ),
+            exercise(
+              "Take the default rate to centimetres, then standardise",
+              ["Part 4 says the default rate of 0.05 suits data spread about one and overflows on the measured four in centimetres. Fit the four without naming a rate and print what the library does about it. Then make the repair the refusal itself suggests, standardising the two columns first, and fit again at the same default rate.", "numpy prints overflow warnings of its own while the first walk runs away, and the library’s refusal follows them. After the repair, read the two lengths. One of them is the report Part 5 describes."],
+              `from oop_ml import Feature, HebbianPrincipalComponents, MLLibError, Standardizer
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+
+# Try to fit two components with a seed of 11 and no learning rate given.
+# Catch the library's own error and print the name of its class and its
+# message.
+
+# Then standardise the people with a Standardizer, fit the same model on the
+# standardised features, and print the epochs run, whether it converged, and
+# each direction's unit vector, length and share of the variance.`,
+              `from oop_ml import Feature, HebbianPrincipalComponents, MLLibError, Standardizer
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+
+try:
+    HebbianPrincipalComponents(n_components=2, random_seed=11).fit(people)
+except MLLibError as refusal:
+    print(type(refusal).__name__)
+    print(refusal)
+
+standardised = Standardizer().fit(people).transform(people)
+learned = HebbianPrincipalComponents(n_components=2, random_seed=11).fit(standardised)
+
+print(f"epochs run {learned.epochs_run}, converged {learned.converged}")
+shares = learned.directions.variance_shares
+for direction, share in zip(learned.directions, shares):
+    height, weight = direction.direction
+    print(direction.name)
+    print(f"  unit direction ({height:.4f}, {weight:.4f})")
+    print(f"  length {direction.length:.4f}")
+    print(f"  share {share:.4f}")`,
+              `DivergenceError
+the weights overflowed on epoch 3; the learning rate is too large for this data's scale, so lower it or standardize the features first
+epochs run 200, converged False
+component_1
+  unit direction (0.7071, 0.7071)
+  length 1.0000
+  share 0.8000
+component_2
+  unit direction (0.7244, -0.6894)
+  length 0.9936
+  share 0.2004`,
+              { hints: ["Leaving learning_rate out of the constructor is what selects the default. Every refusal the library makes derives from MLLibError, so catching that one catches this.", "Standardizer is fitted and then asked to transform, like any other transformer here, and what it answers is a list of features that can go straight to fit.", "learned.directions.variance_shares holds one share per direction, in the order the directions come out, so zip pairs them."], check: numberCheck("After standardising, what length does the second direction come back with?", 0.9936, 0.0005, "Standardised, the people are spread about one, so the default rate no longer overflows, and the first direction lands on the diagonal at length one with a share of 0.8, as it did in centimetres, since both columns had the same spread to begin with. The second comes back 0.9936 long after the full two hundred epochs without converging. It is chasing a fifth of the variance while the rate falls, so it is still a little short, and its share of 0.2004 is a little over for the reason Part 5 gives.") },
+            ),
+            exercise(
+              "Hold the rate constant on the four and on the crowd",
+              ["Part 4 tests the textbook claim that a constant rate can never settle, and finds it false on the measured four and true on the crowd. Set the starting rate from each cloud the way the lesson does, half over the squared longest deviation, and fit each cloud twice, once with the rate falling a hundredfold and once with it held where it starts.", "Read the epochs first, then the lengths. On the crowd neither walk stops itself, and the two schedules fail in different places, which Part 5 measured."],
+              `from oop_ml import ConstantSchedule, ExponentialDecaySchedule, Feature, HebbianPrincipalComponents
+
+CLOUDS = {
+    "the measured four": ([180, 160, 175, 165], [78, 58, 63, 73]),
+    "the crowd": (
+        [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178],
+        [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78],
+    ),
+}
+for name, (heights, weights) in CLOUDS.items():
+    people = [Feature("height", heights), Feature("weight", weights)]
+    mean_height = sum(heights) / len(heights)
+    mean_weight = sum(weights) / len(weights)
+    longest_squared = max(
+        (height - mean_height) ** 2 + (weight - mean_weight) ** 2
+        for height, weight in zip(heights, weights)
+    )
+    start = 0.5 / longest_squared
+    # Build two schedules from start, one falling a hundredfold and one held
+    # constant. Fit two components under each for 200 epochs with a seed of
+    # 11, and print the epochs run, whether the walk converged, and the two
+    # lengths.`,
+              `from oop_ml import ConstantSchedule, ExponentialDecaySchedule, Feature, HebbianPrincipalComponents
+
+CLOUDS = {
+    "the measured four": ([180, 160, 175, 165], [78, 58, 63, 73]),
+    "the crowd": (
+        [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178],
+        [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78],
+    ),
+}
+for name, (heights, weights) in CLOUDS.items():
+    people = [Feature("height", heights), Feature("weight", weights)]
+    mean_height = sum(heights) / len(heights)
+    mean_weight = sum(weights) / len(weights)
+    longest_squared = max(
+        (height - mean_height) ** 2 + (weight - mean_weight) ** 2
+        for height, weight in zip(heights, weights)
+    )
+    start = 0.5 / longest_squared
+    schedules = {
+        "falling": ExponentialDecaySchedule(start=start, end=start / 100),
+        "constant": ConstantSchedule(value=start),
+    }
+    print(f"{name}, starting rate {start:.6f}")
+    for label, schedule in schedules.items():
+        learned = HebbianPrincipalComponents(
+            n_components=2, learning_rate=schedule, max_epochs=200, random_seed=11
+        ).fit(people)
+        lengths = ", ".join(f"{length:.4f}" for length in learned.directions.lengths)
+        print(f"  {label} rate, {learned.epochs_run} epochs, converged {learned.converged}")
+        print(f"    lengths {lengths}")`,
+              `the measured four, starting rate 0.002500
+  falling rate, 91 epochs, converged True
+    lengths 1.0000, 1.0000
+  constant rate, 46 epochs, converged True
+    lengths 1.0000, 1.0000
+the crowd, starting rate 0.000249
+  falling rate, 200 epochs, converged False
+    lengths 1.0000, 0.4256
+  constant rate, 200 epochs, converged False
+    lengths 1.0000, 1.0026`,
+              { hints: ["ExponentialDecaySchedule takes the rate it starts at and the rate it ends at, and ConstantSchedule takes the one value it holds.", "The schedule goes to learning_rate, exactly where a single number would have gone.", "learned.directions.lengths holds the length the walk left each weight vector at, first direction first."], check: numberCheck("On the measured four, at which epoch does the constant rate stop the walk?", 46, 0, "Every one of the four lies exactly on an eigen direction, so at the answer each person’s update is exactly zero and a constant rate has nothing to keep chasing. It stops at epoch 46 where the falling rate takes 91. Nobody in the crowd lies on an axis, so neither walk stops in two hundred epochs there. The falling rate leaves the second direction 0.4256 long, starved, and the constant rate brings it to 1.0026 while the first direction wobbles.") },
+            ),
+          ],
         },
       ]}
     />

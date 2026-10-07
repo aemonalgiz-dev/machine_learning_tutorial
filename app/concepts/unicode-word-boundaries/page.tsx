@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -20,7 +23,7 @@ import { WordBreakPlayground } from "@/components/widgets/WordBreakPlayground";
 export const metadata: Metadata = {
   title: "Unicode Word Boundaries · oop_ml",
   description:
-    "The Unicode word boundary rules put every character into one of eighteen classes and then say, for each pair of neighbouring classes, whether a word may break between them. What that buys over a space, and what it still leaves undecided.",
+    "Use character classes and boundary rules to segment a wider range of writing.",
 };
 
 const link =
@@ -29,8 +32,12 @@ const link =
 export default function UnicodeWordBoundariesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["unicode-word-boundaries"]}
+      technicalStart="Part 2. The Classes"
+      openingTitle="Spaces Are Only One Clue to a Word Boundary"
+      playgroundIntro="Inspect the character classes on either side of a proposed break. Compare the resulting segments with a whitespace split of the same text."
       title="Unicode Word Boundaries"
-      tagline="Every character gets a class, and a short list of numbered rules says which pairs of classes a word may break between."
+      tagline="Use character classes and boundary rules to segment a wider range of writing."
       prerequisites={
         <>
           The{" "}
@@ -43,71 +50,14 @@ export default function UnicodeWordBoundariesPage() {
           appears anywhere on this page.
         </>
       }
-      history={
-        <>
-          <p>
-            The problem was small, concrete and everywhere. A text editor has to
-            decide what a double-click selects, what happens when the cursor is
-            moved one word to the left, and what the whole-word option in a find
-            box means, and before there was a standard every program decided
-            those for itself. The same document behaved differently in two
-            programs on one machine, and a rule written by somebody who read
-            English selected the wrong thing the moment the document was in
-            Hebrew, in Thai or in Japanese. The Unicode Consortium, incorporated
-            in 1991 after Joe Becker&rsquo;s 1988 proposal for one character set
-            wide enough to hold every script, had by then settled what the
-            characters were. It had not settled which runs of them a person would
-            call a word.
-          </p>
-          <p>
-            The answer was published as a Unicode Technical Report numbered 29,
-            titled <em>Text Boundaries</em>, and later became a Unicode Standard
-            Annex under the title <em>Unicode Text Segmentation</em>, edited by
-            Mark Davis, one of the consortium&rsquo;s founders. It answers three
-            questions in one document, where one user-perceived character ends,
-            where one word ends, and where one sentence ends, and it names the
-            applications it has in mind, which are exactly the editor&rsquo;s
-            three. That is worth carrying into the rest of this page, because it
-            explains the shape of what the annex chose. Rules that have to run on
-            every keystroke cannot consult a dictionary, so they read a fixed
-            window of characters around one position and decide there, and every
-            property of the method described below follows from that constraint
-            rather than from a theory of what a word is.
-          </p>
-          <p>
-            The annex is unusually candid about what it does not do. It calls its
-            own rules a default, states that they are meant to be tailored, and
-            names the scripts it declines. Thai, Lao, Khmer, Myanmar and the Tai
-            scripts write no spaces, and the annex deliberately leaves their
-            letters out of the class that holds letters together, so its rules
-            cut them at every character rather than pretending; Chinese and
-            Japanese are the same case. For all of those it says a dictionary or
-            a model is required and that its own rules are not a substitute, and
-            the reference implementation the consortium sponsors ships that
-            second mechanism alongside these rules. The one place the rules have
-            visibly had to grow is emoji, where a clause counting regional
-            indicators in pairs was added so that a flag would not be cut in
-            half.
-          </p>
-          <p>
-            The page answers five questions in order. What does splitting on
-            spaces assume, and what writing does that assumption fail on? What
-            does it mean for a standards body to define where a word breaks, and
-            what does such a definition consist of? What are the character
-            classes, and what does putting a character in one of them decide?
-            What does the rule buy over a space, and what does it cost per piece
-            and per character? And where does it stop being defined, so that its
-            answer is an agreement rather than a fact?
-          </p>
-        </>
-      }
+
       playground={<WordBreakPlayground />}
       sections={[
         {
           title: "Part 1. The Assumption Behind a Space",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. What a space assumes, and the writing it fails on">
                 <p>
                   We carry one sentence through this page, the same one the rest
@@ -163,17 +113,14 @@ export default function UnicodeWordBoundariesPage() {
                   position, and the rules say, for that position, whether a word
                   is allowed to end there. Nothing more.
                 </p>
-                <p>
-                  The definition therefore has two halves and no third. The first
-                  half is a table that puts every character in the world into one
-                  of a small number of classes, so that a rule never has to talk
-                  about a character and can talk about a kind of character. The
-                  second half is a numbered list of rules, each of which looks at
-                  the classes on either side of one position and says break or do
-                  not break. The rules are tried in their published order, the
-                  first that applies decides, and the last one applies to
-                  everything.
+                <>
+<p>
+                  The definition therefore has two halves and no third. The first half is a table that puts every character in the world into one of a small number of classes, so that a rule never has to talk about a character and can talk about a kind of character. The second half is a numbered list of rules, each of which looks at the classes on either side of one position and says break or do not break.
                 </p>
+                <p>
+                  The rules are tried in their published order, the first that applies decides, and the last one applies to everything.
+                </p>
+</>
                 <Equation>
                   {"a text of n characters  has  n − 1  positions between characters\n" +
                     "each position  is  the pair of classes on either side of it\n" +
@@ -307,19 +254,14 @@ export default function UnicodeWordBoundariesPage() {
                   Section 12 is about that step.
                 </p>
                 <WhyThisWorks title="Why the catch-all breaks rather than joins">
-                  <p>
-                    The last rule in the list applies to every pair of classes
-                    that reached it, and it says break. That choice is what makes
-                    the list short. If the catch-all joined, then every pair of
-                    classes that should be separated would need a rule of its own,
-                    and the number of pairs grows with the square of the number of
-                    classes; because it breaks, only the pairs that must be held
-                    together need naming, and there are around a dozen of those.
-                    It also means an unfamiliar character, or one from a script
-                    added to the standard later, gets separated from its
-                    neighbours rather than silently glued to them, which is the
-                    less damaging of the two errors when nothing is known.
+                  <>
+<p>
+                    The last rule in the list applies to every pair of classes that reached it, and it says break. That choice is what makes the list short. If the catch-all joined, then every pair of classes that should be separated would need a rule of its own, and the number of pairs grows with the square of the number of classes; because it breaks, only the pairs that must be held together need naming, and there are around a dozen of those.
                   </p>
+                  <p>
+                    It also means an unfamiliar character, or one from a script added to the standard later, gets separated from its neighbours rather than silently glued to them, which is the less damaging of the two errors when nothing is known.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   One pass, one question per position, first matching rule wins,
@@ -330,24 +272,69 @@ export default function UnicodeWordBoundariesPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
+        },
+        {
+          title: "Questions on Part 1",
+          quiz: [
+            choice(
+              "What do the Unicode word boundary rules define?",
+              [
+                "Whether a word is allowed to end at a position between two neighbouring characters",
+                "What a word is in each language the standard covers",
+                "Which of the resulting stretches count as words",
+                "A score for each candidate boundary, with ties broken by rule order",
+              ],
+              0,
+              "The narrow question is the one that turns out to be answerable, and the standard answers nothing beyond it. Deciding which segments are words is a separate step outside the standard, which is where two implementations of it can part company.",
+            ),
+            trueFalse(
+              "Two rules can both apply at one position, so the rules need a way to break the tie.",
+              false,
+              "The rules are tried in their published order and the first that applies decides, so the order settles every conflict by construction. There is no tie to break and no scoring, and the whole calculation is one pass along the text asking a fixed question at each position.",
+            ),
+            choice(
+              "Why does the last rule in the list break rather than join?",
+              [
+                "Because then only the pairs that must be held together need naming, and there are around a dozen of those",
+                "Because breaking is the more common answer on ordinary English",
+                "Because a joining catch-all would conflict with the rules above it",
+                "Because the standard has no class for an unfamiliar character",
+              ],
+              0,
+              "If the catch-all joined, every pair of classes that should be separated would need a rule of its own, and the number of pairs grows with the square of the number of classes. Breaking also means a character from a script added later is separated from its neighbours rather than silently glued to them, which is the less damaging error when nothing is known.",
+            ),
+            several(
+              "The running sentence gives nine words to the boundary rules and seven pieces to the space rule. Which of these are true of the difference?",
+              [
+                "The hyphens in low-cost and in re-analysis both ended a word",
+                "The apostrophe in didn’t did not end a word",
+                "The nine words hold more of the sentence’s 51 characters than the seven pieces did",
+                "The disagreement is about the six spaces",
+              ],
+              [0, 1],
+              "The disagreement is entirely about four characters, the two hyphens and the two full stops, and the spaces are not among them, since both rules leave every space outside every word. An apostrophe and a hyphen are both a mark standing between two letters, and only one of them ended a word, which is a fact about the class each was put in. The nine words hold 41 of the 51 characters where the seven pieces held 45, because a mark that is not part of a word is not returned as one, so the longer answer holds less of the writing.",
+            ),
+            trueFalse(
+              "Put can’t stop to the rules and three segments come out, and the space between the two words is one of them.",
+              true,
+              "The rules cut the text into stretches and every character lands in exactly one of them, so the space has to be a segment of its own. Positions 5 and 6 are both decided by the catch-all, which breaks on either side of it, where the apostrophe at position 3 is kept inside can’t by the rule for a letter reaching across one mark to another letter. That the segments tile the text is why joining them always reproduces it, and why deciding which of them are words is a separate step.",
+            ),
+        ],
         },
         {
           title: "Part 2. The Classes",
           content: (
             <>
               <SubSection title="5. Eighteen classes, and the seven that six sentences reach">
-                <p>
-                  Naming the classes is what turns the rules from a table of
-                  characters into something a person can read and argue with.
-                  There are eighteen of them. Most describe what a character is,
-                  so there is one for letters, one for digits, one for the spaces
-                  that separate words, one for the ends of lines. The interesting
-                  ones describe what a character is allowed to do, so there is a
-                  class for marks that may stand between two letters, another for
-                  marks that may stand between two digits, and another for marks
-                  that may do either.
+                <>
+<p>
+                  Naming the classes is what turns the rules from a table of characters into something a person can read and argue with. There are eighteen of them. Most describe what a character is, so there is one for letters, one for digits, one for the spaces that separate words, one for the ends of lines.
                 </p>
+                <p>
+                  The interesting ones describe what a character is allowed to do, so there is a class for marks that may stand between two letters, another for marks that may stand between two digits, and another for marks that may do either.
+                </p>
+</>
                 <p>
                   Eighteen sounds like a lot for something this small, and on
                   ordinary English it is. I counted the class of every character
@@ -371,17 +358,14 @@ export default function UnicodeWordBoundariesPage() {
                   ]}
                   caption="Every character of the six sentences, by class. Seven classes of the eighteen, and the other eleven exist for writing this corpus does not contain."
                 />
-                <p>
-                  The eleven that never turn up are the point of the exercise
-                  rather than an inefficiency. They are there for Hebrew and
-                  katakana, for the marks that combine with the letter before
-                  them and the invisible formatting characters, for the halves of
-                  a flag and the ends of lines, and for three joining marks these
-                  six sentences happen never to use, a quotation mark, a colon
-                  and a low line. A rule written for the seven classes that do
-                  turn up would look complete on this corpus and would be wrong
-                  on the first document that was not in English.
+                <>
+<p>
+                  The eleven that never turn up are the point of the exercise rather than an inefficiency. They are there for Hebrew and katakana, for the marks that combine with the letter before them and the invisible formatting characters, for the halves of a flag and the ends of lines, and for three joining marks these six sentences happen never to use, a quotation mark, a colon and a low line.
                 </p>
+                <p>
+                  A rule written for the seven classes that do turn up would look complete on this corpus and would be wrong on the first document that was not in English.
+                </p>
+</>
                 <KeepInMind>
                   The class of a character is decided once, before any rule runs,
                   and every rule is then written about classes. That is what
@@ -503,32 +487,23 @@ export default function UnicodeWordBoundariesPage() {
                   was asked anything.
                 </p>
                 <WhyThisWorks title="Why hiding beats listing">
-                  <p>
-                    The alternative is to write every rule twice, once for the
-                    plain case and once allowing a run of marks in the middle,
-                    and then a third time for two runs, and the list stops being
-                    readable. Hiding the marks once, at the start, means the
-                    dozen rules underneath can be stated about the characters a
-                    reader sees. The cost is that each decision has to look back
-                    over any run of hidden characters to find its real
-                    neighbour, so a very long run of marks costs more than a
-                    short one, and that is a price nobody pays because a run of
-                    marks long enough to matter is not a word anybody has
-                    written.
+                  <>
+<p>
+                    The alternative is to write every rule twice, once for the plain case and once allowing a run of marks in the middle, and then a third time for two runs, and the list stops being readable. Hiding the marks once, at the start, means the dozen rules underneath can be stated about the characters a reader sees.
                   </p>
+                  <p>
+                    The cost is that each decision has to look back over any run of hidden characters to find its real neighbour, so a very long run of marks costs more than a short one, and that is a price nobody pays because a run of marks long enough to matter is not a word anybody has written.
+                  </p>
+</>
                 </WhyThisWorks>
-                <p>
-                  There is a case where the hiding is too eager, and it is worth
-                  reporting rather than smoothing over. The character that joins
-                  two emoji into one picture is an invisible formatting character
-                  by category, and the standard gives it a class of its own
-                  precisely so that a joined sequence stays together. Treated as
-                  ordinary invisible formatting, as it is here, it is absorbed
-                  into the emoji before it and the sequence breaks after it, so
-                  two joined emoji come back as two segments rather than one.
-                  That is a real difference from a complete implementation and it
-                  is on the classes rather than on the rules.
+                <>
+<p>
+                  There is a case where the hiding is too eager, and it is worth reporting rather than smoothing over. The character that joins two emoji into one picture is an invisible formatting character by category, and the standard gives it a class of its own precisely so that a joined sequence stays together. Treated as ordinary invisible formatting, as it is here, it is absorbed into the emoji before it and the sequence breaks after it, so two joined emoji come back as two segments rather than one.
                 </p>
+                <p>
+                  That is a real difference from a complete implementation and it is on the classes rather than on the rules.
+                </p>
+</>
                 <KeepInMind>
                   Two spellings of one word, six characters and eight, and one
                   answer from the rules. The mechanism that gets that right is
@@ -538,6 +513,66 @@ export default function UnicodeWordBoundariesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Part 2",
+          quiz: [
+            choice(
+              "A colon holds a:b together and separates 12:30, while a comma separates a,b and holds 1,000 together. What does that show?",
+              [
+                "Each answer is one general rule about a class, applied to a character somebody put in that class",
+                "The rules carry a special case for times and another for thousands groups",
+                "A colon joins letters and a comma joins digits because of what the two marks mean",
+                "The rules look at the characters on either side individually rather than at their classes",
+              ],
+              0,
+              "There is a class for marks that may stand between two letters and another for marks that may stand between two digits, and a mark is in one, both or neither. Neither answer is a rule about the colon or about the comma, which is the whole argument for having classes at all.",
+            ),
+            choice(
+              "Why does snake_case_name come back as one word while low-cost comes back as two?",
+              [
+                "The low line is in the class that joins whatever it finds on both sides, and the hyphen is in none of the joining classes",
+                "A low line is not punctuation and a hyphen is",
+                "The rules carry a clause for identifiers written in code",
+                "A low line has no white space around it",
+              ],
+              0,
+              "Both are a mark standing between two letters, so nothing about their appearance separates them, and what each does is decided entirely by the class it was put in. The same pair is why re-analysis_2019.csv comes apart into three words while analysis_2019 survives whole in the middle of it.",
+            ),
+            choice(
+              "Seven classes account for every character in the six sentences. What does the page say about the eleven that never turn up?",
+              [
+                "They are the point of the exercise, since a rule written for the seven would look complete here and be wrong on the first document that was not in English",
+                "They are an inefficiency the standard could drop",
+                "They are reserved for scripts the standard has not yet added",
+                "They matter only once the marks are kept rather than dropped",
+              ],
+              0,
+              "The eleven are there for Hebrew and katakana, for combining marks and invisible formatting characters, for the halves of a flag and the ends of lines, and for three joining marks these sentences happen never to use. Covering what a corpus does not contain is what lets the same dozen rules run on writing nobody tested them on.",
+            ),
+            choice(
+              "In the first eighteen characters of the running sentence every boundary the rules found sits where the class changes, and the apostrophe at position 16 is a change of class where no word ended. Why did no word end there?",
+              [
+                "A letter stands on each side of it, so the rule for a letter reaching across one mark to another letter applies before the catch-all is reached",
+                "An apostrophe is placed in the letter class, so the class does not change there",
+                "The apostrophe is hidden before any other rule runs, as a combining mark is",
+                "No space stands next to it, and the rules break only at spaces",
+              ],
+              0,
+              "A change of class is where a boundary can be, since two letters are always kept together, but it is the rules that decide whether one is. The apostrophe has a class of its own, so the class does change at position 16, and the rule for a letter reaching across a mark to a letter is tried before the catch-all and keeps the two sides together. Hiding is done for combining marks and invisible formatting characters only, which is section 8, and the rules break at a great deal more than spaces, since both hyphens of the sentence ended a word.",
+            ),
+            several(
+              "Which of these follow from hiding combining marks and invisible formatting characters before any other rule runs?",
+              [
+                "Both spellings of résumé, six characters and eight, come back as one word",
+                "Each decision has to look back over a run of hidden characters to find its real neighbour",
+                "The dozen rules underneath can be stated about the characters a reader sees",
+                "Two emoji joined by the character that joins them come back as one segment",
+              ],
+              [0, 1, 2],
+              "Hiding the marks once, at the start, is the alternative to writing every rule again for a run of marks in the middle and a third time for two runs. The joining character between two emoji is treated as ordinary invisible formatting here, so it is absorbed and the sequence breaks after it, which is a real difference from a complete implementation and sits on the classes rather than on the rules.",
+            ),
+        ],
         },
         {
           title: "Part 3. What the Rules Buy Over a Space",
@@ -600,18 +635,14 @@ export default function UnicodeWordBoundariesPage() {
                   success.
                 </p>
                 <ScriptCoveragePanel />
-                <p>
-                  Read the Japanese sentence first, because it is the informative
-                  one. Eleven characters, mixing three scripts, and the rules
-                  give seven words where the space rule gives one. The five
-                  katakana characters at the front are held together into one
-                  word, correctly, because katakana has a class of its own and a
-                  rule that joins it to itself. Everything after them is one word
-                  per character, because the standard deliberately leaves the
-                  kanji and the hiragana out of the letter class. Some of that
-                  answer is right and some of it is a placeholder, and the rules
-                  make no distinction between the two.
+                <>
+<p>
+                  Read the Japanese sentence first, because it is the informative one. Eleven characters, mixing three scripts, and the rules give seven words where the space rule gives one. The five katakana characters at the front are held together into one word, correctly, because katakana has a class of its own and a rule that joins it to itself.
                 </p>
+                <p>
+                  Everything after them is one word per character, because the standard deliberately leaves the kanji and the hiragana out of the letter class. Some of that answer is right and some of it is a placeholder, and the rules make no distinction between the two.
+                </p>
+</>
                 <p>
                   Chinese and Thai are the placeholder alone. Nine Chinese
                   characters become nine words where a reader sees four, and
@@ -622,21 +653,14 @@ export default function UnicodeWordBoundariesPage() {
                   the space rule finds.
                 </p>
                 <WhyThisWorks title="Why cutting everywhere is the better failure">
-                  <p>
-                    Faced with a script it cannot segment, a rule has two ways to
-                    fail. It can return the whole run as one word, which is what
-                    the space rule does, or it can cut at every character, which
-                    is what these rules do. The second is worse as a segmentation
-                    and better as a signal, since a caller who sees nine words of
-                    one character each has been told something about the writing,
-                    while a caller who sees one word of nine characters has been
-                    told nothing and has a piece that no vocabulary will ever
-                    hold. It is also the answer that composes, because a
-                    character is at least a unit something downstream can work
-                    with. Neither is the answer, and the answer needs a
-                    dictionary or a model, which is what the next section of this
-                    site is about.
+                  <>
+<p>
+                    Faced with a script it cannot segment, a rule has two ways to fail. It can return the whole run as one word, which is what the space rule does, or it can cut at every character, which is what these rules do. The second is worse as a segmentation and better as a signal, since a caller who sees nine words of one character each has been told something about the writing, while a caller who sees one word of nine characters has been told nothing and has a piece that no vocabulary will ever hold.
                   </p>
+                  <p>
+                    It is also the answer that composes, because a character is at least a unit something downstream can work with. Neither is the answer, and the answer needs a dictionary or a model, which is what the next section of this site is about.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   The rules do not solve the script without spaces and were never
@@ -658,18 +682,14 @@ export default function UnicodeWordBoundariesPage() {
                   that character in the class that joins what it finds on both
                   sides, so the number stays whole and the answer is two words.
                 </p>
-                <p>
-                  The flags run the other way and are stranger. A flag is two
-                  characters, neither of them a letter, and there is a rule that
-                  counts them in pairs so that a flag is never cut in half. Two
-                  flags in a row therefore give two segments, correctly, where
-                  the space rule gives one piece holding both. Neither segment is
-                  a word by the ordinary test, since a word has to hold a letter
-                  or a digit and a flag holds neither, so the count of words for
-                  that text is zero. The rules found the right boundary and then
-                  the word test threw both pieces away, which is the two halves
-                  of the method disagreeing rather than either being wrong.
+                <>
+<p>
+                  The flags run the other way and are stranger. A flag is two characters, neither of them a letter, and there is a rule that counts them in pairs so that a flag is never cut in half. Two flags in a row therefore give two segments, correctly, where the space rule gives one piece holding both.
                 </p>
+                <p>
+                  Neither segment is a word by the ordinary test, since a word has to hold a letter or a digit and a flag holds neither, so the count of words for that text is zero. The rules found the right boundary and then the word test threw both pieces away, which is the two halves of the method disagreeing rather than either being wrong.
+                </p>
+</>
                 <KeepInMind>
                   A character called a space that does not end a word, and a
                   boundary found correctly around something that is then not
@@ -805,17 +825,14 @@ export default function UnicodeWordBoundariesPage() {
               </SubSection>
 
               <SubSection title="15. Where splitting on spaces is the better rule">
-                <p>
-                  There are texts where the simpler rule wins outright, and they
-                  are not exotic. Three of them are in the panel in section 10.
-                  An address comes back as two words with the character that
-                  makes it an address gone, so 18 of its 19 characters survive
-                  and the thing itself does not. A file name comes back as three.
-                  A text holding a single approving hand and nothing else comes
-                  back as no words at all, because the rules found the segment
-                  correctly and then the word test refused it for holding no
-                  letter and no digit.
+                <>
+<p>
+                  There are texts where the simpler rule wins outright, and they are not exotic. Three of them are in the panel in section 10. An address comes back as two words with the character that makes it an address gone, so 18 of its 19 characters survive and the thing itself does not. A file name comes back as three.
                 </p>
+                <p>
+                  A text holding a single approving hand and nothing else comes back as no words at all, because the rules found the segment correctly and then the word test refused it for holding no letter and no digit.
+                </p>
+</>
                 <p>
                   What those three have in common is that they were not written
                   as prose. The rules were designed for what a person reading a
@@ -935,18 +952,14 @@ export default function UnicodeWordBoundariesPage() {
                   words in those scripts requires a dictionary or a model and
                   that these rules are not a substitute.
                 </p>
-                <p>
-                  What follows is a statement about the method rather than about
-                  any text. Where the writing separates its words with characters
-                  the rules can see, whether that is a space in English or a
-                  change of class in a Japanese sentence, the answer is
-                  determined by the writing. Where it does not, the answer is
-                  determined by nothing, and cutting at every character is a
-                  refusal written as an answer. The nine words the Chinese line
-                  came back as are nine correct applications of a rule that says
-                  break when nothing else applies, and there were four words
-                  there.
+                <>
+<p>
+                  What follows is a statement about the method rather than about any text. Where the writing separates its words with characters the rules can see, whether that is a space in English or a change of class in a Japanese sentence, the answer is determined by the writing. Where it does not, the answer is determined by nothing, and cutting at every character is a refusal written as an answer.
                 </p>
+                <p>
+                  The nine words the Chinese line came back as are nine correct applications of a rule that says break when nothing else applies, and there were four words there.
+                </p>
+</>
                 <KeepInMind>
                   Naming the decline in the document is worth more than a silent
                   failure would be, since it tells a reader that seven pieces
@@ -965,18 +978,14 @@ export default function UnicodeWordBoundariesPage() {
                   they are the actual reason to use this rule rather than to
                   invent one.
                 </p>
-                <p>
-                  Two independent programs following the annex select the same
-                  thing when a reader double-clicks, so a document behaves the
-                  same way in both. The rules are published with a version, so an
-                  answer can be reproduced years later by saying which version
-                  produced it. They cover every script the standard covers rather
-                  than the one their author reads, so a program does not fail
-                  when it meets a language nobody tested it on. And because the
-                  rules are stated on classes rather than on characters, a script
-                  added to the standard later gets sensible behaviour without any
-                  program being rewritten.
+                <>
+<p>
+                  Two independent programs following the annex select the same thing when a reader double-clicks, so a document behaves the same way in both. The rules are published with a version, so an answer can be reproduced years later by saying which version produced it. They cover every script the standard covers rather than the one their author reads, so a program does not fail when it meets a language nobody tested it on.
                 </p>
+                <p>
+                  And because the rules are stated on classes rather than on characters, a script added to the standard later gets sensible behaviour without any program being rewritten.
+                </p>
+</>
                 <p>
                   None of those is a claim that a word ends where the annex says
                   it ends. They are claims about agreement, and agreement is what
@@ -1064,6 +1073,306 @@ export default function UnicodeWordBoundariesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 to 5",
+          quiz: [
+            choice(
+              "Nine Chinese characters come back as nine words where a reader sees four. How does the page read that answer?",
+              [
+                "As a refusal written as an answer, since nothing in the characters said otherwise",
+                "As a defect the annex does not acknowledge",
+                "As an answer that is wrong while reporting perfect coverage",
+                "As a tie between two rules that the published order settled badly",
+              ],
+              0,
+              "The letters of those scripts are deliberately left out of the class that holds letters together, so the catch-all applies on both sides of every one of them, and the annex states that finding words there needs a dictionary or a model. The third answer describes the space rule, which returns the whole run as one word and reports no difficulty at all.",
+            ),
+            several(
+              "Which of these are true of what the boundary rules cost over the six sentences?",
+              [
+                "They produce 69 words where cutting at spaces produces 63, about a tenth more",
+                "They keep 80.8 per cent of the writing inside a word, against 84.8",
+                "Keeping every mark as a piece of its own would cost 15 more pieces again, 84 against 69",
+                "They leave more distinct entries than the space rule does",
+                "The nine words of the running sentence glue back to it exactly, as the seven pieces do",
+              ],
+              [0, 1, 2],
+              "Both rules come to 47 entries on this corpus, so the table is no larger, and that equality is worth naming so it is not misread as a result. Separating the marks shrinks a table only where the same word turns up both inside a clause and at the end of one, which happens exactly once here. The glue fails too, since the nine words come back as a line with the abbreviation’s stop gone, both compounds pulled apart and the sentence’s own stop missing. The length and the lost characters are real bills, and the lost characters are recoverable only while the source is still in hand, since every word carries the offsets it came from.",
+            ),
+            choice(
+              "In a sentence carrying U.S., why does the stop inside the abbreviation survive into a word while the stop closing it does not?",
+              [
+                "The one inside has a letter on each side, so the rule for a letter reaching across a mark applies, and the closing one has a space after it",
+                "The rules hold a list of abbreviations and recognise U.S. among them",
+                "The closing stop is also the sentence’s own stop, which the rules treat separately",
+                "A stop is in none of the joining classes, so neither of them survives",
+              ],
+              0,
+              "The stop that closes the abbreviation and the stop that ends a sentence are indistinguishable to the rules because they are indistinguishable in the characters. A list of abbreviations would make this a rule for one language, and even with the list a sentence ending in an abbreviation writes one stop doing both jobs and no division of the characters assigns it to both.",
+            ),
+            trueFalse(
+              "Two flags in a row give two correct segments and a word count of zero.",
+              true,
+              "A rule counts the flag characters in pairs so a flag is never cut in half, and both boundaries come out right. Then the word test asks for a letter or a digit, a flag holds neither, and both pieces are thrown away, which is the two halves of the method disagreeing rather than either being wrong.",
+            ),
+            choice(
+              "What does the page name as the actual reason to use these rules?",
+              [
+                "Agreement, since two programs following the annex select the same characters and a version number makes an answer reproducible",
+                "That a word ends where the annex says it ends",
+                "That they segment every script the standard covers",
+                "That they are quicker than a dictionary or a model",
+              ],
+              0,
+              "None of the properties claimed is a claim that the annex is correct about where a word ends, because there is nothing here for it to be correct about. The cost of two parts of one pipeline reading the text differently is far larger than the cost of either being slightly wrong, and on these six sentences the two readings would disagree about 12 of 47 entries.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Reading the Running Sentence by Both Rules",
+          practice: [
+            exercise(
+              "Read the running sentence by both rules, then the six sentences",
+              ["Put the running sentence to the boundary rules and to the space rule, and for each print how many words came back, how many of the 51 characters they hold between them, and whether gluing them back with single spaces returns the sentence. Then do the same count over the six sentences the page measures.", "Section 3 arrived at nine words holding 41 characters against seven pieces holding 45, and section 14 at 303 of 375 characters against 318. The share kept, to one decimal place, should be the 80.8 and 84.8 per cent the page quotes."],
+              `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+notebook = [
+    sentence,
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rules = {
+    "at every boundary": UnicodeWordPreTokenizer(),
+    "at every run of spaces": WhitespacePreTokenizer(),
+}
+
+# For each rule, split the sentence and print the number of words, how many
+# characters the words hold, and whether the words glued with single spaces
+# equal the sentence. Then, over the notebook, print the total pieces, the
+# total characters held, and that total as a percentage of all characters.`,
+              `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+notebook = [
+    sentence,
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rules = {
+    "at every boundary": UnicodeWordPreTokenizer(),
+    "at every run of spaces": WhitespacePreTokenizer(),
+}
+
+for name, rule in rules.items():
+    words = rule.split(sentence)
+    held = sum(word.end - word.start for word in words)
+    print(f"{name}: {words.n_words} words holding {held} of {len(sentence)} characters")
+    print(f"  glued with single spaces, exact: {' '.join(words.texts) == sentence}")
+    pieces = sum(rule.split(text).n_words for text in notebook)
+    covered = sum(word.end - word.start for text in notebook for word in rule.split(text))
+    characters = sum(len(text) for text in notebook)
+    print(f"  six sentences: {pieces} pieces holding {covered} of {characters} characters")
+    print(f"  share kept {100 * covered / characters:.1f} per cent")`,
+              `at every boundary: 9 words holding 41 of 51 characters
+  glued with single spaces, exact: False
+  six sentences: 69 pieces holding 303 of 375 characters
+  share kept 80.8 per cent
+at every run of spaces: 7 words holding 45 of 51 characters
+  glued with single spaces, exact: True
+  six sentences: 63 pieces holding 318 of 375 characters
+  share kept 84.8 per cent`,
+              { hints: ["Both rules take no settings and answer the same kind of collection from split, so one loop over the two serves, and each word carries text, start and end.", "The characters a rule keeps are the sum of end minus start over its words, for the sentence, and over the words of every sentence for the notebook.", "The collection has a texts property, so the glue is a single join with one space, compared with the sentence it came from."], check: numberCheck("What share of the six sentences’ characters do the boundary rules keep inside a word, in per cent to one place?", 80.8, 0.05, "The words hold 303 of the 375 characters, and 303 over 375 is 80.8 per cent, against 318 and 84.8 for the space rule. The rule that keeps more of the writing is the one that cannot separate a comma from a word, so neither number says anything about whether the words are good words.") },
+            ),
+            exercise(
+              "Put one mark between two letters, then between two digits",
+              ["Section 7 took twelve marks, put each between the letters a and b and then between the digits 1 and 2, and read both by the rules. Repeat the experiment, building each mark from its code point, and report for each whether the two letters were held together and whether the two digits were.", "Three rows should answer differently on the two sides, the colon, the middle dot and the comma. Count how many of the twelve hold two letters together, which the page does not state in words."],
+              `from oop_ml import UnicodeWordPreTokenizer
+
+marks = {
+    "apostrophe": 0x0027,
+    "right single quotation mark": 0x2019,
+    "full stop": 0x002E,
+    "colon": 0x003A,
+    "middle dot": 0x00B7,
+    "comma": 0x002C,
+    "low line": 0x005F,
+    "narrow no-break space": 0x202F,
+    "hyphen-minus": 0x002D,
+    "quotation mark": 0x0022,
+    "solidus": 0x002F,
+    "space": 0x0020,
+}
+rule = UnicodeWordPreTokenizer()
+
+# For each mark, split the letter a, the mark and the letter b, then the
+# digit 1, the mark and the digit 2. A side is held together when one word
+# comes back. Print a row per mark, then how many marks hold two letters
+# together, how many hold two digits together, and how many differ.`,
+              `from oop_ml import UnicodeWordPreTokenizer
+
+marks = {
+    "apostrophe": 0x0027,
+    "right single quotation mark": 0x2019,
+    "full stop": 0x002E,
+    "colon": 0x003A,
+    "middle dot": 0x00B7,
+    "comma": 0x002C,
+    "low line": 0x005F,
+    "narrow no-break space": 0x202F,
+    "hyphen-minus": 0x002D,
+    "quotation mark": 0x0022,
+    "solidus": 0x002F,
+    "space": 0x0020,
+}
+rule = UnicodeWordPreTokenizer()
+
+joins_letters = joins_digits = differ = 0
+for name, code in marks.items():
+    letters = rule.split(f"a{chr(code)}b").n_words == 1
+    digits = rule.split(f"1{chr(code)}2").n_words == 1
+    joins_letters += letters
+    joins_digits += digits
+    differ += letters != digits
+    print(f"U+{code:04X}  {name:28s}  letters {str(letters):5s}  digits {digits}")
+print(f"{joins_letters} of {len(marks)} hold two letters together")
+print(f"{joins_digits} of {len(marks)} hold two digits together")
+print(f"{differ} marks answer differently on the two sides")`,
+              `U+0027  apostrophe                    letters True   digits True
+U+2019  right single quotation mark   letters True   digits True
+U+002E  full stop                     letters True   digits True
+U+003A  colon                         letters True   digits False
+U+00B7  middle dot                    letters True   digits False
+U+002C  comma                         letters False  digits True
+U+005F  low line                      letters True   digits True
+U+202F  narrow no-break space         letters True   digits True
+U+002D  hyphen-minus                  letters False  digits False
+U+0022  quotation mark                letters False  digits False
+U+002F  solidus                       letters False  digits False
+U+0020  space                         letters False  digits False
+7 of 12 hold two letters together
+6 of 12 hold two digits together
+3 marks answer differently on the two sides`,
+              { hints: ["chr turns a code point into the character, so the two probe texts are the letter a, chr of the code, the letter b, and the digit 1, chr of the code, the digit 2.", "A mark holds a pair together exactly when split answers one word, so each side is a test of n_words against one.", "A boolean adds as one or zero, so the three totals are running sums of the two tests and of whether they differ."], check: numberCheck("How many of the twelve marks hold two letters together?", 7, 0.0, "Seven hold two letters together and six hold two digits together, and the two columns differ in three rows. The colon and the middle dot are in the class that may stand between two letters and not the one for digits, the comma is the reverse, and the low line and the narrow no-break space are in the class that joins whatever it finds on both sides. The hyphen, the quotation mark, the solidus and the space are in none of the joining classes, so they separate on both sides.") },
+            ),
+            exercise(
+              "Count the segments, then the words, then the marks kept",
+              ["Section 12 says the rules cut a text into segments that tile it, and a separate decision says which segments are words. Ask the rules for the segments of the running sentence, confirm that joining them gives the sentence back, and then read the sentence three ways, as every segment, as everything that is not spacing, and as words alone. Repeat the three counts over the six sentences.", "The page gives 19, 13 and 9 for the sentence and 141, 84 and 69 for the corpus. It does not say how many distinct entries the six sentences produce once every mark is kept as a piece of its own, so print that beside the 47 the words alone give."],
+              `from oop_ml import Corpus, UnicodeWordPreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+notebook = [
+    sentence,
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+words_only = UnicodeWordPreTokenizer()
+keeping_marks = UnicodeWordPreTokenizer(keep_punctuation=True)
+
+# Print how many segments the sentence has and whether joining their texts
+# returns the sentence, then the piece count keeping every mark and the word
+# count keeping words alone. Over the notebook, print the total segments, and
+# for each of the two readings the total pieces and the number of distinct
+# entries.`,
+              `from oop_ml import Corpus, UnicodeWordPreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+notebook = [
+    sentence,
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+words_only = UnicodeWordPreTokenizer()
+keeping_marks = UnicodeWordPreTokenizer(keep_punctuation=True)
+
+segments = words_only.segments_of(sentence)
+print(f"segments of the running sentence: {segments.n_words}")
+print(f"joined, the segments give the sentence back: {''.join(segments.texts) == sentence}")
+print(f"keeping every mark: {keeping_marks.split(sentence).n_words} pieces")
+print(f"keeping words alone: {words_only.split(sentence).n_words} words")
+
+corpus = Corpus.of(notebook)
+print(f"six sentences, segments: {sum(words_only.segments_of(text).n_words for text in notebook)}")
+for name, rule in [("keeping every mark", keeping_marks), ("keeping words alone", words_only)]:
+    counts = list(corpus.word_counts(rule))
+    print(f"six sentences, {name}: {sum(count.count for count in counts)} pieces, {len(counts)} entries")`,
+              `segments of the running sentence: 19
+joined, the segments give the sentence back: True
+keeping every mark: 13 pieces
+keeping words alone: 9 words
+six sentences, segments: 141
+six sentences, keeping every mark: 84 pieces, 50 entries
+six sentences, keeping words alone: 69 pieces, 47 entries`,
+              { hints: ["segments_of answers the same kind of collection as split, so it has n_words and texts, and the texts joined with nothing between them are the whole text.", "The second reading is the same rules constructed with keep_punctuation set, which keeps every segment that does not begin with white space.", "Corpus.of takes the list and word_counts takes a rule. The sum of the counts is the pieces and the number of counts is the entries, under whichever rule was handed in."], check: numberCheck("How many distinct entries do the six sentences produce when every mark is kept as a piece of its own?", 50, 0.0, "The 47 entries of the words alone, plus three. The full stop, the hyphen and the comma are the only marks the six sentences use, and each becomes an entry of its own, counted 7, 6 and 2 times, which are the 15 extra pieces that take 69 to 84. The choice of reading sits outside the rules, which is why two implementations of one standard can hand back different tables without either having got the standard wrong.") },
+            ),
+            exercise(
+              "Writing that separates the two rules, in both directions",
+              ["Section 10 put nine texts to both rules, three scripts written without spaces, Korean as the control, a French thousands group, two flags, an address, a file name and a single emoji. Read each by both rules and by segments, and print the three counts side by side.", "The Japanese sentence should give seven words to the rules against one piece on spaces, the Chinese and Thai lines one word per character, and the flags and the emoji no words at all while still being found as segments. The thousands group is written with the narrow no-break space, so write that character by its code point."],
+              `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+texts = {
+    "eleven characters of Japanese": "アルバレス博士は驚いた",
+    "nine characters of Chinese": "我来到北京清华大学",
+    "seven characters of Thai": "ภาษาไทย",
+    "Korean, written with spaces": "한국어 단어",
+    "a French thousands group": "1\\u202f000 sensors",
+    "two flags": "\\U0001f1eb\\U0001f1f7\\U0001f1e9\\U0001f1ea",
+    "an address": "alvarez@example.com",
+    "a file name": "re-analysis_2019.csv",
+    "a single approving hand": "\\U0001f44d",
+}
+boundaries = UnicodeWordPreTokenizer()
+spaces = WhitespacePreTokenizer()
+
+# For each text, print its label, the number of words the boundary rules
+# find, the number of pieces the space rule finds, and the number of
+# segments the boundary rules cut it into.`,
+              `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+texts = {
+    "eleven characters of Japanese": "アルバレス博士は驚いた",
+    "nine characters of Chinese": "我来到北京清华大学",
+    "seven characters of Thai": "ภาษาไทย",
+    "Korean, written with spaces": "한국어 단어",
+    "a French thousands group": "1\\u202f000 sensors",
+    "two flags": "\\U0001f1eb\\U0001f1f7\\U0001f1e9\\U0001f1ea",
+    "an address": "alvarez@example.com",
+    "a file name": "re-analysis_2019.csv",
+    "a single approving hand": "\\U0001f44d",
+}
+boundaries = UnicodeWordPreTokenizer()
+spaces = WhitespacePreTokenizer()
+
+for label, text in texts.items():
+    n_words = boundaries.split(text).n_words
+    n_pieces = spaces.split(text).n_words
+    n_segments = boundaries.segments_of(text).n_words
+    print(f"{label:30s} words {n_words}  pieces on spaces {n_pieces}  segments {n_segments}")`,
+              `eleven characters of Japanese  words 7  pieces on spaces 1  segments 7
+nine characters of Chinese     words 9  pieces on spaces 1  segments 9
+seven characters of Thai       words 7  pieces on spaces 1  segments 7
+Korean, written with spaces    words 2  pieces on spaces 2  segments 3
+a French thousands group       words 2  pieces on spaces 3  segments 3
+two flags                      words 0  pieces on spaces 1  segments 2
+an address                     words 2  pieces on spaces 1  segments 3
+a file name                    words 3  pieces on spaces 1  segments 5
+a single approving hand        words 0  pieces on spaces 1  segments 1`,
+              { hints: ["Both rules answer a collection with n_words from split, and the boundary rules also answer one from segments_of, so each row is three calls on one text.", "A text can come back with zero words and still have segments, since the word test asks for a letter or a digit after the segments are cut."], check: numberCheck("How many words do the boundary rules find in the eleven characters of Japanese?", 7, 0.0, "The five katakana characters at the front are held together into one word, because katakana has a class of its own and a rule that joins it to itself, and everything after them is one word per character, because the standard leaves the kanji and the hiragana out of the letter class. The space rule gives one piece, since there is no white space anywhere in the eleven characters.") },
+            ),
+          ],
         },
       ]}
     />

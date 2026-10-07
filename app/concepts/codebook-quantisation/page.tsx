@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { UnusedEntriesTable } from "@/components/widgets/UnusedEntriesTable";
 export const metadata: Metadata = {
   title: "Codebook Quantisation · oop_ml",
   description:
-    "Keep a table of representative vectors and give a picture the number of whichever is nearest. The round trip is lossy, and this page measures by how much.",
+    "Assign each vector to a nearby codebook entry and measure the reconstruction error.",
 };
 
 const link =
@@ -30,8 +33,12 @@ const link =
 export default function CodebookQuantisationPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["codebook-quantisation"]}
+      technicalStart="Part 2. A Table of Positions, and the Nearest One Wins"
+      openingTitle="Replace Many Possible Vectors with a Small Set of Representatives"
+      playgroundIntro="Compare an input vector with its selected codebook entry and reconstruction. Increase the codebook size and inspect both the error and the number of entries used."
       title="Codebook Quantisation"
-      tagline="Vector quantisation, which keeps a table of representative vectors, answers with whichever is nearest, and pays a rounding error you can measure."
+      tagline="Assign each vector to a nearby codebook entry and measure the reconstruction error."
       prerequisites={
         <>
           The contract a vocabulary has to keep is set out on the{" "}
@@ -52,69 +59,14 @@ export default function CodebookQuantisationPage() {
           page.
         </>
       }
-      history={
-        <>
-          <p>
-            The question was forced on Bell Labs by the telephone. Pulse-code
-            modulation carries speech as whole numbers, so somebody has to
-            decide which numbers, and in 1957 Stuart Lloyd wrote an internal
-            report called &ldquo;Least squares quantization in PCM&rdquo; that
-            answered it for a single voltage. Choose the levels, put every
-            sample on the nearest one, then move each level to the mean of the
-            samples that chose it, and repeat. Lloyd&rsquo;s report was not
-            published until 1982, in the IEEE Transactions on Information
-            Theory, and in the meantime Joel Max published the same rule
-            independently in 1960 as &ldquo;Quantizing for minimum
-            distortion&rdquo;. Shannon had already said what such a rule
-            was aiming at, in his 1959 paper on coding with a fidelity
-            criterion, which is that a source can be described at a given rate
-            only to within a given error and the two cannot both be improved.
-          </p>
-          <p>
-            Lloyd&rsquo;s rule quantises one number at a time, and the step this
-            page is about is quantising several at once. Yoseph Linde, Andrés
-            Buzo and Robert Gray published that step in 1980, in &ldquo;An
-            Algorithm for Vector Quantizer Design&rdquo; in the IEEE
-            Transactions on Communications, working on speech coders where a
-            frame of speech is a vector and rounding each of its numbers
-            separately throws away the fact that they move together. Their
-            algorithm is Lloyd&rsquo;s with vectors in place of voltages, and
-            the table of representative vectors it produces is what gave the
-            method its name, since a table you look a number up in is a
-            codebook. That is also, exactly, the update rule of k-means, and
-            the two literatures had been writing down the same procedure for
-            twenty years under two names.
-          </p>
-          <p>
-            The idea came back for a different reason. Aäron van den Oord,
-            Oriol Vinyals and Koray Kavukcuoglu&rsquo;s 2017 paper
-            &ldquo;Neural Discrete Representation Learning&rdquo; put a
-            codebook in the middle of an image model so that a picture became a
-            grid of whole numbers a second model could then be trained to
-            predict, and Wei-Ning Hsu and colleagues did the same to speech in
-            2021 with HuBERT, where the units a speech model reads are the
-            numbers a k-means over speech features hands back. Both wanted the
-            same thing this page wants, which is whole numbers out of something
-            continuous, and both got it from a table and a nearest match.
-          </p>
-          <p>
-            The page answers six questions in order. A picture is already
-            numbers, so what is left for a vocabulary to do? Why can the
-            brightnesses not simply be handed over as they are? What is the
-            method, and where has this table been met before under another
-            name? What does the round trip cost, given that unlike text it does
-            not come back exactly? What does a larger table buy, and what does
-            it cost? And where does the method stop being defined?
-          </p>
-        </>
-      }
+
       playground={<CodebookExplorer />}
       sections={[
         {
           title: "Part 1. A Picture Is Already Numbers",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Why this page changes the example">
                 <p>
                   Every other page in this section carries one sentence,{" "}
@@ -149,16 +101,10 @@ export default function CodebookQuantisationPage() {
 
               <SubSection title="2. The four pictures, and what each is for">
                 <p>
-                  Four pictures run through the whole page, and they are not
-                  four illustrations of one thing. Each one makes the same
-                  measurement come out differently, and the differences are
-                  where most of the argument lives. The photograph is smooth, so
-                  a pixel and the pixel beside it are nearly equal almost
-                  everywhere. The poster is four flat bands of tone. The
-                  printed chart is hard-edged stripes. The speckled square has
-                  every pixel drawn independently of every other, which is the
-                  case with no structure in it at all and is the control the
-                  other three are measured against.
+                  Four pictures run through the whole page, and they are not four illustrations of one thing. Each one makes the same measurement come out differently, and the differences are where most of the argument lives. The photograph is smooth, so a pixel and the pixel beside it are nearly equal almost everywhere. The poster is four flat bands of tone.
+                </p>
+                <p>
+                  The printed chart is hard-edged stripes. The speckled square has every pixel drawn independently of every other, which is the case with no structure in it at all and is the control the other three are measured against.
                 </p>
                 <NumberTable
                   headings={[
@@ -228,28 +174,30 @@ export default function CodebookQuantisationPage() {
                   claiming there is a finite list of pieces to name. A
                   brightness is a real number, so there is no such list.
                 </p>
-                <p>
-                  Rounding does not rescue it, it only hides the problem behind
-                  a large number. Our brightnesses are given to two decimal
-                  places, so a single pixel has 101 possible values and a piece
-                  of two pixels has 101 times 101, which is 10,201 possible
-                  pieces. The photograph uses 53 of them. A table of 10,201
-                  entries to hold 53 that ever occur is not a description of the
-                  picture, and a real sensor records far more than 101 levels,
-                  so the count grows with the equipment and never with the
-                  content.
-                </p>
-                <WhyThisWorks title="Why the count grows with the coordinates too">
+                <>
                   <p>
-                    The trouble compounds with the size of a piece. A piece of
-                    two pixels at 101 levels each has 101 squared possibilities;
-                    a piece of sixteen pixels, which is a modest patch, has 101
-                    to the sixteenth, which is a number with thirty-three digits
-                    in it. Listing the possibilities is not merely wasteful at
-                    that size, it is not a thing that can be done, so any scheme
-                    that gives a picture whole numbers has to be a scheme that
-                    lists something other than the possibilities.
+                    Rounding brightness to two decimal places still leaves 101 possible
+                    values per pixel. A two-pixel piece can combine any of them.
                   </p>
+                  <Equation>{"possible two-pixel pieces = 101 × 101 = 10,201"}</Equation>
+                  <p>
+                    The photograph uses only fifty-three of those possibilities.
+                    Enumerating every possible piece spends most of the table on
+                    combinations absent from this picture.
+                  </p>
+                </>
+                <WhyThisWorks title="Why the count grows with the coordinates too">
+                  <>
+                    <p>
+                      The number of possible pieces grows exponentially with the number
+                      of pixels per piece.
+                    </p>
+                    <Equation>{"two pixels:     101² = 10,201 possibilities\nsixteen pixels: 101¹⁶ ≈ 1.17 × 10³² possibilities"}</Equation>
+                    <p>
+                      A useful codebook therefore records representative pieces from the
+                      data instead of trying to list every possible combination.
+                    </p>
+                  </>
                 </WhyThisWorks>
                 <KeepInMind>
                   There is no finite list of brightness pairs to write down, and
@@ -260,7 +208,7 @@ export default function CodebookQuantisationPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Table of Positions, and the Nearest One Wins",
@@ -306,15 +254,17 @@ export default function CodebookQuantisationPage() {
                 </p>
                 <NearestEntryTable showTie={false} />
                 <WorkedExample title="One row, by hand">
-                  <p>
-                    Take the second vector, (3, 1). Its gap from entry 0 is
-                    (3, 1), whose squared length is 9 plus 1, which is 10. Its
-                    gap from entry 1 is (&minus;1, 1), whose squared length is 1
-                    plus 1, which is 2. Its gap from entry 2 is (3, &minus;2),
-                    whose squared length is 9 plus 4, which is 13. The smallest
-                    is 2, so the vector becomes the number 1, and what that
-                    number means is the vector (4, 0).
-                  </p>
+                  <>
+                    <p>
+                      Compare the vector (3, 1) with each of the three codebook entries.
+                      Squared Euclidean distance is enough to rank them.
+                    </p>
+                    <Equation>{"entry 0 at (0, 0): 3² + 1² = 10\nentry 1 at (4, 0): (−1)² + 1² = 2\nentry 2 at (0, 3): 3² + (−2)² = 13"}</Equation>
+                    <p>
+                      Entry 1 is nearest. Encoding stores the ID one; decoding returns
+                      its representative vector, (4, 0).
+                    </p>
+                  </>
                 </WorkedExample>
                 <KeepInMind>
                   The four vectors become 0, 1, 2 and 0. Two different vectors
@@ -470,16 +420,10 @@ export default function CodebookQuantisationPage() {
                 </p>
                 <WhyThisWorks title="Why this is the quantity, rather than some other measure of miss">
                   <p>
-                    The choice of squares is not neutral, and it is the same
-                    choice the update rule makes. The point minimising the total
-                    squared distance to a set of points is their mean, which is
-                    why the step that moves an entry to the mean of the pieces
-                    that chose it is the step that lowers this number. Measure
-                    the miss some other way, by the sum of the coordinate gaps
-                    for instance, and the minimising point is no longer the mean
-                    and the procedure that chooses the table is no longer
-                    guaranteed to improve. The measure of loss and the way the
-                    table is chosen are one decision taken twice.
+                    The choice of squares is not neutral, and it is the same choice the update rule makes. The point minimising the total squared distance to a set of points is their mean, which is why the step that moves an entry to the mean of the pieces that chose it is the step that lowers this number.
+                  </p>
+                  <p>
+                    Measure the miss some other way, by the sum of the coordinate gaps for instance, and the minimising point is no longer the mean and the procedure that chooses the table is no longer guaranteed to improve. The measure of loss and the way the table is chosen are one decision taken twice.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
@@ -527,18 +471,19 @@ export default function CodebookQuantisationPage() {
                   a brightness was costing, and at any ordinary precision it is a
                   large one.
                 </p>
-                <p>
-                  There is a second cost that is easy to forget and, at this
-                  scale, is the larger of the two. The table has to travel with
-                  the numbers or they mean nothing, and sixteen entries of two
-                  coordinates is 32 numbers. So the whole message is 128 small
-                  numbers plus 32 brightnesses, against 256 brightnesses sent
-                  plainly, and a fifth of what is sent is then the table. On a
-                  picture of a few hundred pieces that overhead is real; on a
-                  collection of millions of pieces sharing one table it
-                  disappears, which is the scale the method was designed at and
-                  not the scale of this page.
-                </p>
+                <>
+                  <p>
+                    The codebook must travel with the IDs, or the receiver cannot
+                    reconstruct their meaning. This example uses sixteen entries with
+                    two coordinates each.
+                  </p>
+                  <Equation>{"codebook = 16 × 2 = 32 brightness values\nencoded picture = 128 IDs + 32 codebook values\noriginal picture = 256 brightness values"}</Equation>
+                  <p>
+                    These are counts of stored values, not equal-sized bytes: an ID and
+                    a brightness value may use different representations. Sharing the
+                    same table across many pictures amortizes the codebook cost.
+                  </p>
+                </>
                 <NumberTable
                   headings={[
                     "entries",
@@ -566,6 +511,49 @@ export default function CodebookQuantisationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            trueFalse(
+              "Rounding every brightness to two decimal places does make the list of possible pieces finite, and the objection to enumerating it is that it is the wrong list rather than an endless one.",
+              true,
+              "Two decimal places leave 101 values per pixel and so 10,201 possible two-pixel pieces, which is finite. The photograph uses fifty-three of them, so enumerating the grid spends almost the whole table on combinations this picture never produces, and the size of that grid is set by the sensor rather than by the picture. At sixteen pixels a piece the same grid runs to about 1.17 × 10³² possibilities.",
+            ),
+            choice(
+              "The vector (2, 0) sits 4 away in squared distance from entry 0 at (0, 0) and 4 away from entry 1 at (4, 0). What settles the number it gets?",
+              [
+                "The entry that is smaller as a vector",
+                "The entry that comes first in the table",
+                "Whichever entry has won fewer vectors so far",
+                "Nothing, and the lookup refuses a tie",
+              ],
+              1,
+              "The rule says nearest and there are two of those, so a convention has to decide, and the one taken here is the earlier position in the table. Writing the same three entries down with (4, 0) first sends the tied vector to the other entry while every other answer and the total cost stay where they were. Two implementations should be expected to disagree on ties unless both have written the rule down.",
+            ),
+            choice(
+              "The photograph’s 128 pieces against a table of sixteen entries give 0.000418. What is that number?",
+              [
+                "The largest squared gap any single piece had to travel",
+                "The mean squared distance from a piece to the entry it became",
+                "The share of pieces that came back unchanged",
+                "The squared gaps summed over all 128 pieces",
+              ],
+              1,
+              "The rounding error takes each piece, subtracts the entry it became, squares coordinate by coordinate, and averages over the pieces. The furthest any piece travelled is a separate figure, a squared gap of 0.00243, and the typical miss read back in brightness is 0.0145.",
+            ),
+            several(
+              "Which of these hold of the relationship between a codebook and the centres k-means finds?",
+              [
+                "Cluster k becomes entry k, and a lookup is the assign step run on one row",
+                "Inertia is the rounding error before it is divided by the number of pieces",
+                "The two are an analogy, since a codebook is fitted by a different procedure",
+                "The warning that a grouping belongs to the rows it was fitted on transfers unchanged",
+              ],
+              [0, 1, 3],
+              "They are the same object rather than two things that resemble each other, which is why the speech units a model like HuBERT reads need no separate machinery. The warning transfers and lands harder here, because a grouping is usually inspected by somebody before it is used while a table of codes is read straight into a model with no way of reporting a poor match.",
+            ),
+        ],
         },
         {
           title: "Part 4. What a Bigger Table Buys",
@@ -598,36 +586,15 @@ export default function CodebookQuantisationPage() {
 
               <SubSection title="15. What the textbook predicts, and what was measured">
                 <p>
-                  There is a standard result for how this trade should behave
-                  when the table is large. For a collection filling d
-                  coordinates, the best achievable error falls roughly as the
-                  table size raised to the power of minus two over d, so with
-                  two coordinates a doubling should buy a factor of two, and
-                  with one coordinate it should buy a factor of four. The
-                  speckled square is the case that result describes, since every
-                  pixel there was drawn independently and the pieces genuinely
-                  fill the square, and its measured factors of 1.74 to 2.63 sit
-                  around the predicted two.
+                  There is a standard result for how this trade should behave when the table is large. For a collection filling d coordinates, the best achievable error falls roughly as the table size raised to the power of minus two over d, so with two coordinates a doubling should buy a factor of two, and with one coordinate it should buy a factor of four.
                 </p>
                 <p>
-                  The photograph does better than that, and the reason is
-                  measurable rather than a matter of opinion. Its pieces do not
-                  fill the plane; they lie close to the line where the two
-                  brightnesses are equal, because a pixel and the pixel beside it
-                  agree almost everywhere in a smooth picture. Measuring the
-                  spread along that line and at right angles to it gives 163.6
-                  times as much of the first as of the second, so the collection
-                  is very nearly one-dimensional, and the factor predicted for
-                  one dimension is four. The measured factors run 4.57, 3.24,
-                  4.10, 4.49 and 7.96, four of them within a quarter of the
-                  predicted four and the last one larger because by 32 entries
-                  the table is close to holding every different piece the
-                  photograph has, which is where any such rate law stops
-                  applying. The prediction did not fail. It is stated in terms
-                  of the dimensions the pieces occupy, and this
-                  photograph&rsquo;s pieces occupy fewer of those than the two
-                  coordinates they are written in.
+                  The speckled square is the case that result describes, since every pixel there was drawn independently and the pieces genuinely fill the square, and its measured factors of 1.74 to 2.63 sit around the predicted two.
                 </p>
+                <p>The two coordinates in these photograph patches are strongly related: neighboring pixels usually have similar brightness. The patches therefore cluster near the line where the coordinates are equal.</p>
+<p>The measured spread along that line is 163.6 times the perpendicular spread. Although each patch is written with two coordinates, most observed variation lies close to one direction. This helps explain why its error reduction differs from a uniformly occupied two-dimensional example.</p>
+<p>The measured reduction factors are 4.57, 3.24, 4.10, 4.49, and 7.96. Several are close to the idealized one-dimensional factor of four. The last occurs when the codebook is approaching the number of distinct patches in this small photograph, where a large-sample scaling argument is no longer a reliable description.</p>
+<p>The comparison supports a useful distinction: the number of coordinates and the effective dimension occupied by the data need not be the same. It does not turn the idealized rate into an exact prediction for every finite codebook.</p>
                 <NumberTable
                   headings={[
                     "picture",
@@ -673,7 +640,7 @@ export default function CodebookQuantisationPage() {
                   distinguished.
                 </p>
                 <KeepInMind>
-                  A sharp bend in the curve marks the number of parts the
+                  A sharp change in the curve’s slope marks the number of parts the
                   collection has. A smooth curve means there is no natural
                   answer there, and the table size is then a budget rather than
                   a discovery.
@@ -682,15 +649,10 @@ export default function CodebookQuantisationPage() {
 
               <SubSection title="17. Where the curve stops">
                 <p>
-                  The curve cannot go on forever, and where it stops is decided
-                  by the collection rather than by the method. The photograph has
-                  53 different pieces, so a table of 53 entries can hold one of
-                  each and reproduce it exactly, and the rounding error at that
-                  size comes out at 4.6 × 10⁻³³, which is zero
-                  to every bit the arithmetic keeps. Asking for 54
-                  is asking for an entry that has nothing of its own to be, and
-                  the result is two entries at one point, which is two numbers
-                  meaning one thing.
+                  The curve cannot go on forever, and where it stops is decided by the collection rather than by the method. The photograph has 53 different pieces, so a table of 53 entries can hold one of each and reproduce it exactly, and the rounding error at that size comes out at 4.6 × 10⁻³³, which is zero to every bit the arithmetic keeps.
+                </p>
+                <p>
+                  Asking for 54 is asking for an entry that has nothing of its own to be, and the result is two entries at one point, which is two numbers meaning one thing.
                 </p>
                 <p>
                   The printed chart reaches that wall much sooner, because it has
@@ -760,19 +722,10 @@ export default function CodebookQuantisationPage() {
                 </p>
                 <InAModel>
                   <p>
-                    This is where the method is worse than the obvious
-                    alternative, and it is worth saying rather than burying. A
-                    fixed grid of levels, where each coordinate is rounded to one
-                    of a few evenly spaced values, covers the whole square
-                    whatever arrives and needs nothing fitted; it would round
-                    (0.90, 0.05) to something near (0.90, 0.05). It pays for that
-                    by spending entries on regions no picture ever visits, which
-                    is why the fitted table wins by 249.5 times on the picture it
-                    was fitted for. A fixed grid would have kept that edge and
-                    would have spent some of its levels on brightness pairs this
-                    photograph never produces, where the fitted table put all
-                    sixteen of its entries inside the band its own pieces
-                    occupy.
+                    This is where the method is worse than the obvious alternative, and it is worth saying rather than burying. A fixed grid of levels, where each coordinate is rounded to one of a few evenly spaced values, covers the whole square whatever arrives and needs nothing fitted; it would round (0.90, 0.05) to something near (0.90, 0.05).
+                  </p>
+                  <p>
+                    It pays for that by spending entries on regions no picture ever visits, which is why the fitted table wins by 249.5 times on the picture it was fitted for. A fixed grid would have kept that edge and would have spent some of its levels on brightness pairs this photograph never produces, where the fitted table put all sixteen of its entries inside the band its own pieces occupy.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -794,15 +747,10 @@ export default function CodebookQuantisationPage() {
                   number 13, and nothing else.
                 </p>
                 <p>
-                  A model reading those numbers has no way to tell the excellent
-                  match from the hopeless one, because the output alphabet is
-                  whole numbers and a whole number is all it gets. That is the
-                  same fact the vocabulary page ends on, that a token number says
-                  which entry and nothing more, and it is sharper here, since the
-                  entries do have positions in a space and it is tempting to
-                  believe some of that survives. It does not. Carrying the gap
-                  alongside the number is possible and is a different scheme, one
-                  that is no longer sending whole numbers.
+                  A model reading those numbers has no way to tell the excellent match from the hopeless one, because the output alphabet is whole numbers and a whole number is all it gets. That is the same fact the vocabulary page ends on, that a token number says which entry and nothing more, and it is sharper here, since the entries do have positions in a space and it is tempting to believe some of that survives.
+                </p>
+                <p>
+                  It does not. Carrying the gap alongside the number is possible and is a different scheme, one that is no longer sending whole numbers.
                 </p>
                 <KeepInMind>
                   The answer is a number on its own, with no distance attached
@@ -814,6 +762,48 @@ export default function CodebookQuantisationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 and 5",
+          quiz: [
+            choice(
+              "The speckled square’s error falls by factors of 1.74 to 2.63 per doubling and the photograph’s by 4.57 to 7.96. What accounts for the gap?",
+              [
+                "The speckled square is quantised in fewer pieces, so each doubling has less to work with",
+                "The photograph's pieces lie close to one line, so they occupy fewer coordinates than they are written with",
+                "The photograph's tables were fitted from more starting draws",
+                "The speckled square is noisier, so its error cannot be measured as precisely",
+              ],
+              1,
+              "The standard result has the best achievable error falling as the table size to the power minus two over the number of coordinates filled, so two coordinates predict a factor of two per doubling and one coordinate predicts four. The speckled square genuinely fills its square and measures around two. The photograph’s spread along the diagonal is 163.6 times its perpendicular spread, and several of its measured factors sit near four. Both pictures are the same 128 pieces at the same table sizes, so the count of pieces cannot be the cause.",
+            ),
+            trueFalse(
+              "A sharp corner in the error curve marks the number of parts the collection has, and is a fact about the picture rather than about the method.",
+              true,
+              "The poster’s error falls by 69.81 from two entries to four and then by only 1.76 from four to eight, because the poster has four tones and the fourth entry is the one that finishes the job. Nothing about the method changed between the poster and the photograph, and the photograph and the speckled square give smooth curves, where no table size is distinguished and the size is a budget rather than a discovery.",
+            ),
+            trueFalse(
+              "Asking for more entries than the collection has different pieces gives a table that degrades gracefully.",
+              false,
+              "The photograph has 53 different pieces, and at 53 entries the error comes out at 4.6 × 10⁻³³, which is zero to every bit the arithmetic keeps. Asking for 54 is asking for an entry with nothing of its own to be, and the result is two entries at one point, which is two numbers meaning one thing. The printed chart hits the same wall at eight entries, where three of them already win nothing.",
+            ),
+            choice(
+              "The photograph’s table of sixteen entries is put to the printed chart instead. What happens?",
+              [
+                "The error rises to 0.104290 and 11 of the 16 entries are never asked for",
+                "The lookup refuses, because the chart's pieces fall outside the table",
+                "The error rises a little, since both are pictures of the same size",
+                "The chart's hard edges survive, because an unmatched piece keeps its own value",
+              ],
+              0,
+              "That is 249.5 times worse than the 0.000418 the table manages on the picture it was chosen from. Every entry sits in the narrow band near the diagonal where the photograph's pieces were, so the chart’s piece (0.90, 0.05) is given number 13, and 13 means (0.4286, 0.4771), which is mid grey twice over. A hard edge comes back as a flat patch.",
+            ),
+            trueFalse(
+              "A model reading the numbers can tell an excellent match from a hopeless one.",
+              false,
+              "The chart’s piece (0.05, 0.05) lands on entry 11 at a squared gap of 0.001 and its piece (0.90, 0.05) lands on entry 13 at 0.404696, four hundred times as large, and what goes downstream is the number 11 and the number 13 and nothing else. Carrying the gap alongside the number is possible and is a different scheme, one that is no longer sending whole numbers. So the rounding error has to be measured by whoever chose the table and cannot be noticed later.",
+            ),
+        ],
         },
         {
           title: "Part 6. Choosing the Table, and Entries That Never Win",
@@ -1057,17 +1047,10 @@ export default function CodebookQuantisationPage() {
                 </p>
                 <NearDisagreementTable />
                 <p>
-                  Of the photograph&rsquo;s 128 pieces against a table of eight
-                  entries, exactly one changes hands. The piece (0.13, 0.30) is
-                  0.1078 from entry 5 and 0.1303 from entry 1 by the straight
-                  line, so it goes to entry 5, and it is 0.1480 from entry 5 and
-                  0.1437 from entry 1 by the sum of the gaps, so it goes to
-                  entry 1. One piece in 128 is a small effect, and it is not
-                  zero. The choice is constrained in a second way as well, since
-                  the straight line is the measure the fitting step lowers, so
-                  changing the rule used at lookup time without changing the one
-                  used at fitting time leaves the two halves of the method
-                  aiming at different quantities.
+                  Of the photograph&rsquo;s 128 pieces against a table of eight entries, exactly one changes hands. The piece (0.13, 0.30) is 0.1078 from entry 5 and 0.1303 from entry 1 by the straight line, so it goes to entry 5, and it is 0.1480 from entry 5 and 0.1437 from entry 1 by the sum of the gaps, so it goes to entry 1.
+                </p>
+                <p>
+                  One piece in 128 is a small effect, and it is not zero. The choice is constrained in a second way as well, since the straight line is the measure the fitting step lowers, so changing the rule used at lookup time without changing the one used at fitting time leaves the two halves of the method aiming at different quantities.
                 </p>
                 <KeepInMind>
                   The straight line is a choice with a reason behind it rather
@@ -1078,6 +1061,241 @@ export default function CodebookQuantisationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 6 and 7",
+          quiz: [
+            trueFalse(
+              "On the photograph, every table up to 32 entries chosen from all 128 pieces has every entry in use, and entries nobody asks for appear only when the pieces being quantised are not the pieces the table was chosen from.",
+              true,
+              "Fitted on the collection it will quantise, the procedure leaves none of them. Fitting on the top 64 pieces leaves the unseen half asking for only ten of sixteen, and a table fitted on the whole photograph and put to the printed chart has 27 of 32 never asked for. A table larger than the collection needs is the other thing a reader might blame, and on this photograph it is not the cause.",
+            ),
+            trueFalse(
+              "Six starting draws at eight entries reached 0.0018756 and 0.0018772, which shows the fitting procedure finds the best table.",
+              false,
+              "Lloyd’s procedure finds a local answer, and which one it finds depends on where it started. Agreement to the sixth decimal place is a fact about this collection, whose pieces lie along a line, rather than a guarantee. On a collection with several genuinely different good tables the spread would be real.",
+            ),
+            trueFalse(
+              "A table of one entry leaves the rounding error at the whole spread of the collection, which on the photograph is 0.113862.",
+              true,
+              "The single entry is the mean of the pieces, so the error is precisely the mean squared distance from the pieces to their own mean. The number costs zero bits, because it could not have been anything else, and the numbers therefore carry none of the collection. That end of the trade and the 53-entry end bracket the entire method.",
+            ),
+            choice(
+              "Measuring nearest by the sum of the coordinate gaps rather than by the straight line, on the photograph’s 128 pieces against eight entries, changes how many assignments?",
+              ["None", "One", "About a third", "All of them, since the table was fitted under the straight line"],
+              1,
+              "The piece (0.13, 0.30) is nearer entry 5 by the straight line and nearer entry 1 by the sum of the gaps, and it is the only one that changes hands. One in 128 is a small effect and it is not zero. The sharper constraint is that the straight line is the measure the fitting step lowers, so changing the rule at lookup time alone leaves the two halves of the method aiming at different quantities.",
+            ),
+            several(
+              "Which of these inputs leave the nearest-entry rule with no answer at all, rather than with an answer that has to be read with care?",
+              [
+                "A table with no entries",
+                "A coordinate that is not a number",
+                "A piece nowhere near any entry",
+                "An entry that no piece is nearest to",
+              ],
+              [0, 1],
+              "Nearest is the smallest of a set of distances, and an empty table has no distances to take the smallest of, while a coordinate that is not a number makes every distance involving it not a number either, so no comparison between two of them holds. A piece far from every entry is the opposite problem, since some entry is nearest however far away it is and the rule answers silently. An entry no piece chooses is well defined and quietly wasteful, which is why the distinct numbers a table produces have to be counted.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Quantising the Photograph With the Library",
+          practice: [
+            exercise(
+              "Four vectors against three entries",
+              ["Build the table of section 6, with entries at (0, 0), (4, 0) and (0, 3), and quantise the four vectors (1, 0), (3, 1), (1, 2) and (2, 0) against it. Print the number each vector gets, the vector each one comes back as, and the rounding error. Then write the same three entries down with (4, 0) first and print the numbers again.", "Section 6 arrived at the numbers 0, 1, 2 and 0, and section 11 at a rounding error of 2.25. Reordering the entries should move exactly one of the four numbers, the tied one, and leave the error where it was."],
+              `from oop_ml import Codebook, CodebookQuantizer
+
+entries = [[0.0, 0.0], [4.0, 0.0], [0.0, 3.0]]
+vectors = [[1.0, 0.0], [3.0, 1.0], [1.0, 2.0], [2.0, 0.0]]
+
+quantizer = CodebookQuantizer(codebook=Codebook(entries))
+# Quantise the four vectors, then print their ids, the vector each comes
+# back as, and the rounding error to two places.
+
+# Build a second quantizer whose table lists (4, 0) first, quantise the
+# same four vectors, and print its ids and its rounding error.`,
+              `from oop_ml import Codebook, CodebookQuantizer
+
+entries = [[0.0, 0.0], [4.0, 0.0], [0.0, 3.0]]
+vectors = [[1.0, 0.0], [3.0, 1.0], [1.0, 2.0], [2.0, 0.0]]
+
+quantizer = CodebookQuantizer(codebook=Codebook(entries))
+assignment = quantizer.quantize(vectors)
+print(f"ids {assignment.ids}")
+for vector, back in zip(vectors, assignment.reconstruction):
+    print(f"{vector} comes back as {back.tolist()}")
+print(f"rounding error {assignment.distortion:.2f}")
+
+reordered = CodebookQuantizer(codebook=Codebook([[4.0, 0.0], [0.0, 0.0], [0.0, 3.0]]))
+again = reordered.quantize(vectors)
+print(f"ids with (4, 0) first {again.ids}")
+print(f"rounding error again {again.distortion:.2f}")`,
+              `ids (0, 1, 2, 0)
+[1.0, 0.0] comes back as [0.0, 0.0]
+[3.0, 1.0] comes back as [4.0, 0.0]
+[1.0, 2.0] comes back as [0.0, 3.0]
+[2.0, 0.0] comes back as [0.0, 0.0]
+rounding error 2.25
+ids with (4, 0) first (1, 0, 2, 0)
+rounding error again 2.25`,
+              { hints: ["Codebook takes the list of entries, and the entry at position i owns the number i. CodebookQuantizer takes that codebook as its one field, passed by keyword.", "quantize takes the vectors as rows and answers one object carrying three things: ids, reconstruction and distortion. Those are the three names to read.", "The tie rule is the lower position, so the second table sends (2, 0) to whichever position (0, 0) now occupies, and nothing else moves."], check: numberCheck("What rounding error do the four vectors report?", 2.25, 0.005, "The squared gaps are 1, 2, 2 and 4, as section 11 works them, and the rounding error is their mean. Reordering the entries changes which number the tied vector (2, 0) is given and not how far it travelled, so the error stays at 2.25 while one id changes.") },
+            ),
+            exercise(
+              "Choose the photograph’s table of sixteen",
+              ["Build the photograph of Part 1 and cut it into its 128 pieces of two side-by-side pixels. Choose a table of sixteen entries from those pieces the way Part 6 says, as the centres a grouping settles on, quantise the pieces against it, and print the rounding error, how many of the sixteen entries are ever used, the largest squared gap any piece travelled, and how many pieces the busiest entry holds.", "Section 12 arrived at a rounding error of 0.000418, every entry in use, and a worst squared gap of 0.00243. The busiest entry’s count is not on the page, so it is the number to run for."],
+              `from collections import Counter
+
+import numpy as np
+from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans
+
+rows = np.arange(16)[:, None]
+columns = np.arange(16)[None, :]
+background = 0.20 + 0.60 * (columns / 15)
+reach = np.sqrt((rows - 5.0) ** 2 + (columns - 6.0) ** 2)
+photograph = np.round(np.clip(background - 0.55 * np.exp(-(reach ** 2) / 12.0), 0.0, 1.0), 2)
+pieces = photograph.reshape(-1, 2)
+
+features = [Feature("left", pieces[:, 0]), Feature("right", pieces[:, 1])]
+# Fit a grouping of sixteen clusters with random_seed=7, turn its centroids
+# into a codebook, and quantise the pieces. Print how many different pieces
+# there are, the rounding error to six places, how many entries are in use,
+# the largest squared gap to five places, and the busiest entry's count.`,
+              `from collections import Counter
+
+import numpy as np
+from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans
+
+rows = np.arange(16)[:, None]
+columns = np.arange(16)[None, :]
+background = 0.20 + 0.60 * (columns / 15)
+reach = np.sqrt((rows - 5.0) ** 2 + (columns - 6.0) ** 2)
+photograph = np.round(np.clip(background - 0.55 * np.exp(-(reach ** 2) / 12.0), 0.0, 1.0), 2)
+pieces = photograph.reshape(-1, 2)
+
+features = [Feature("left", pieces[:, 0]), Feature("right", pieces[:, 1])]
+grouping = KMeans(n_clusters=16, random_seed=7).fit(features)
+quantizer = CodebookQuantizer(codebook=Codebook.from_centroids(grouping.centroids))
+assignment = quantizer.quantize(pieces)
+
+gaps = np.sum((pieces - assignment.reconstruction) ** 2, axis=1)
+usage = Counter(assignment.ids)
+print(f"different pieces {len(np.unique(pieces, axis=0))}")
+print(f"rounding error {assignment.distortion:.6f}")
+print(f"entries in use {len(usage)} of 16")
+print(f"largest squared gap {gaps.max():.5f}")
+print(f"busiest entry holds {usage.most_common(1)[0][1]} pieces")`,
+              `different pieces 53
+rounding error 0.000418
+entries in use 16 of 16
+largest squared gap 0.00243
+busiest entry holds 17 pieces`,
+              { hints: ["Feature takes a name and a column of values, and the grouping is fitted on a list of two of them, one per coordinate, exactly as the k-means page fits its own rows.", "Codebook.from_centroids takes the fitted grouping’s centroids and makes cluster k into entry k, which is section 8 as a single call.", "A piece’s squared gap is the squared difference between the piece and its reconstruction, summed over its two coordinates. Subtracting the two blocks, squaring and summing along each row gives one number per piece.", "A Counter over the ids answers both questions at once: its length is how many entries were used, and most_common(1) is the busiest entry with its count."], check: numberCheck("How many pieces does the busiest of the sixteen entries hold?", 17, 0.5, "Sixteen entries sharing 128 pieces evenly would hold eight each, and the busiest holds seventeen, because the pieces lie in a narrow band along the diagonal and the entries are placed where the pieces fell rather than at equal spacing. The same count read from the other end is section 22’s check, since an entry holding zero pieces is capacity paid for and never received.") },
+            ),
+            exercise(
+              "Put the photograph’s table to the printed chart",
+              ["Build the printed chart of Part 1 beside the photograph, choose the photograph’s table of sixteen entries as before, and quantise the chart’s pieces against it. Print the chart’s rounding error, how many times worse it is than the photograph’s own under the same table, and how many of the sixteen entries the chart never asks for.", "Section 19 arrived at 0.104290, 249.5 times worse, with 11 entries never used. Section 20 reads the worst-matched piece together with its number, so print that piece, the number it was given and its squared gap as well."],
+              `import numpy as np
+from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans
+
+rows = np.arange(16)[:, None]
+columns = np.arange(16)[None, :]
+background = 0.20 + 0.60 * (columns / 15)
+reach = np.sqrt((rows - 5.0) ** 2 + (columns - 6.0) ** 2)
+photograph = np.round(np.clip(background - 0.55 * np.exp(-(reach ** 2) / 12.0), 0.0, 1.0), 2)
+pieces = photograph.reshape(-1, 2)
+stripes = ((columns // 3) % 2 == 0).astype(float)
+level = np.where(rows < 8, 0.9, 0.5)
+chart_pieces = np.round(np.where(stripes > 0, level, 0.05), 2).reshape(-1, 2)
+
+features = [Feature("left", pieces[:, 0]), Feature("right", pieces[:, 1])]
+grouping = KMeans(n_clusters=16, random_seed=7).fit(features)
+quantizer = CodebookQuantizer(codebook=Codebook.from_centroids(grouping.centroids))
+at_home = quantizer.quantize(pieces)
+# Quantise the chart's pieces with the same quantizer. Print the chart's
+# rounding error to six places, how many times worse it is than at_home to
+# one place, how many entries the chart never asks for, and the worst-matched
+# chart piece with the number it was given and its squared gap.`,
+              `import numpy as np
+from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans
+
+rows = np.arange(16)[:, None]
+columns = np.arange(16)[None, :]
+background = 0.20 + 0.60 * (columns / 15)
+reach = np.sqrt((rows - 5.0) ** 2 + (columns - 6.0) ** 2)
+photograph = np.round(np.clip(background - 0.55 * np.exp(-(reach ** 2) / 12.0), 0.0, 1.0), 2)
+pieces = photograph.reshape(-1, 2)
+stripes = ((columns // 3) % 2 == 0).astype(float)
+level = np.where(rows < 8, 0.9, 0.5)
+chart_pieces = np.round(np.where(stripes > 0, level, 0.05), 2).reshape(-1, 2)
+
+features = [Feature("left", pieces[:, 0]), Feature("right", pieces[:, 1])]
+grouping = KMeans(n_clusters=16, random_seed=7).fit(features)
+quantizer = CodebookQuantizer(codebook=Codebook.from_centroids(grouping.centroids))
+at_home = quantizer.quantize(pieces)
+away = quantizer.quantize(chart_pieces)
+
+gaps = np.sum((chart_pieces - away.reconstruction) ** 2, axis=1)
+worst = int(np.argmax(gaps))
+print(f"chart rounding error {away.distortion:.6f}")
+print(f"times worse than at home {away.distortion / at_home.distortion:.1f}")
+print(f"entries never asked for {16 - len(set(away.ids))} of 16")
+print(f"worst piece {chart_pieces[worst].tolist()} became number {away.ids[worst]}")
+print(f"its squared gap {gaps[worst]:.6f}")`,
+              `chart rounding error 0.104290
+times worse than at home 249.5
+entries never asked for 11 of 16
+worst piece [0.9, 0.05] became number 13
+its squared gap 0.404696`,
+              { hints: ["The quantizer is already built, so the chart needs no fit of its own. One more call to quantize, with the chart’s pieces, is the whole of the lookup.", "The ids are a tuple with one entry per piece, so the distinct numbers produced are a set of it, and the entries never asked for are the sixteen less that set’s size.", "The worst piece is the row where the squared gap is largest, which argmax over the per-piece gaps finds, and the same position indexes the ids."], check: numberCheck("How many times worse is the chart’s rounding error than the photograph’s own under the same table?", 249.5, 0.1, "The sixteen entries all sit in the narrow band near the diagonal where the photograph’s pieces were, and the chart’s pieces include (0.90, 0.05), a bright pixel beside a dark one, which no entry has any reason to be near. That piece is given number 13 at a squared gap of 0.404696, and 11 of the 16 entries are never asked for, so the table is paying four bits a piece for numbers that could have been said in three.") },
+            ),
+            exercise(
+              "Ask for a table the photograph cannot supply",
+              ["Section 17 says the photograph admits a table of 53 entries and not one of 54. Fit the grouping at 53 entries, build the codebook and print its rounding error, then do the same at 54 and see which step refuses.", "The grouping itself may settle on 54 centres without complaint. Catch the library’s own error wherever it is raised, print the name of its class and its message, and notice which of the two steps raised it."],
+              `import numpy as np
+from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans, MLLibError
+
+rows = np.arange(16)[:, None]
+columns = np.arange(16)[None, :]
+background = 0.20 + 0.60 * (columns / 15)
+reach = np.sqrt((rows - 5.0) ** 2 + (columns - 6.0) ** 2)
+photograph = np.round(np.clip(background - 0.55 * np.exp(-(reach ** 2) / 12.0), 0.0, 1.0), 2)
+pieces = photograph.reshape(-1, 2)
+features = [Feature("left", pieces[:, 0]), Feature("right", pieces[:, 1])]
+
+# For 53 entries and then 54: fit the grouping, build the codebook from its
+# centroids, quantise the pieces and print the rounding error in scientific
+# notation. Catch the library's own error when a step refuses, and print
+# its class name and its message.`,
+              `import numpy as np
+from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans, MLLibError
+
+rows = np.arange(16)[:, None]
+columns = np.arange(16)[None, :]
+background = 0.20 + 0.60 * (columns / 15)
+reach = np.sqrt((rows - 5.0) ** 2 + (columns - 6.0) ** 2)
+photograph = np.round(np.clip(background - 0.55 * np.exp(-(reach ** 2) / 12.0), 0.0, 1.0), 2)
+pieces = photograph.reshape(-1, 2)
+features = [Feature("left", pieces[:, 0]), Feature("right", pieces[:, 1])]
+
+for n_entries in (53, 54):
+    grouping = KMeans(n_clusters=n_entries, random_seed=7).fit(features)
+    print(f"{n_entries} entries: the grouping fitted")
+    try:
+        codebook = Codebook.from_centroids(grouping.centroids)
+    except MLLibError as refusal:
+        print(f"  {type(refusal).__name__}: {refusal}")
+        continue
+    assignment = CodebookQuantizer(codebook=codebook).quantize(pieces)
+    print(f"  rounding error {assignment.distortion:.1e}")`,
+              `53 entries: the grouping fitted
+  rounding error 4.6e-33
+54 entries: the grouping fitted
+  NonUniqueTokensError: codes 37 and 53 are the same vector, which would be two ids for one point`,
+              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal this turns out to be.", "Put the try around the codebook step on its own. If the grouping fits and the codebook refuses, that tells you which half of the method has the rule that 54 breaks.", "Two entries at the same point is the case section 25 calls undefined as a vocabulary, since one vector at two positions would be two numbers meaning one thing, and that is what the refusal says in its own words."] },
+            ),
+          ],
         },
       ]}
     />

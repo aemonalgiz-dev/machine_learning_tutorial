@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -22,7 +25,7 @@ import { NGramWindows } from "@/components/widgets/NGramWindows";
 export const metadata: Metadata = {
   title: "N-Grams · oop_ml",
   description:
-    "Counting runs of adjacent words gives a model of what comes next. Most of the method is repairing what it says about a run it never counted, which on a new text is two fifths of the triples.",
+    "Predict the next token by counting short sequences and reserving probability for unseen ones.",
 };
 
 const link =
@@ -31,8 +34,12 @@ const link =
 export default function NGramsPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["n-grams"]}
+      technicalStart="Part 2. From Counts to a Prediction"
+      openingTitle="One Previous Word May Not Be Enough"
+      playgroundIntro="Compare predictions with shorter and longer contexts. Inspect an unseen continuation and observe how smoothing changes its probability."
       title="N-Grams"
-      tagline="Count how often runs of words occur, turn the counts into a guess at the next word, and repair the answer of zero that a new text always produces."
+      tagline="Predict the next token by counting short sequences and reserving probability for unseen ones."
       prerequisites={
         <>
           The words counted here are whatever a splitting rule handed over, so{" "}
@@ -53,77 +60,14 @@ export default function NGramsPage() {
           .
         </>
       }
-      history={
-        <>
-          <p>
-            Andrei Markov was arguing about free will. Pavel Nekrasov had
-            claimed that the law of large numbers holds only for independent
-            trials, and drew from that the conclusion that human choices, since
-            they obey statistical regularities, must be independent and
-            therefore free. Markov set out to show that dependent trials obey
-            the same law, and in 1913, in St Petersburg, he needed a real
-            sequence of dependent events to count. He took the first 20,000
-            letters of Pushkin&rsquo;s Eugene Onegin, classified each as a vowel
-            or a consonant, and counted how often each of the four pairs
-            occurred. He was counting a text to settle an argument in
-            probability rather than to model Russian, and the chain of
-            dependence he described is the one every page like this one assumes.
-          </p>
-          <p>
-            Shannon made the same counting a model of language rather than a
-            counterexample in probability. &ldquo;A Mathematical Theory of
-            Communication&rdquo;, published at Bell Labs in 1948, has a section
-            of approximations to English in which he builds text from counts of
-            increasing width, first letters at random, then letters with their
-            frequencies, then pairs, then triples, then whole words and pairs of
-            words, and prints what each produces. He generated the word-level
-            ones by opening a book at a random page, reading until he found the
-            word he needed, and taking whatever followed it. His 1951 paper,
-            &ldquo;Prediction and Entropy of Printed English&rdquo;, turned the
-            same idea into a measurement, asking people to guess the next letter
-            of a text and estimating from their guesses how many bits a letter
-            of English costs. That measurement is the ancestor of the score in
-            Part 5.
-          </p>
-          <p>
-            The method became the working part of a technology at IBM. Frederick
-            Jelinek&rsquo;s group at the Thomas J. Watson Research Center spent
-            the 1970s and 1980s on continuous speech recognition, where the
-            acoustic evidence for a word is often hopeless on its own and the
-            only thing that can settle it is what tends to follow what. A
-            trigram model counted over a large corpus was the piece that made
-            those systems work, and the group needed a way of saying which of
-            two such models was better without rebuilding the recogniser around
-            each, which is what perplexity was introduced for, by Jelinek,
-            Robert Mercer, Lalit Bahl and James Baker in 1977. Jelinek and
-            Mercer&rsquo;s 1980 paper on interpolated estimation from sparse
-            data is one of the first serious answers to the hole this page is
-            mostly about, and the line of work it opened runs through Good and
-            Turing&rsquo;s estimate of unseen species, Kneser and Ney&rsquo;s
-            1995 backing-off rule, and Chen and Goodman&rsquo;s 1998 study
-            comparing them all.
-          </p>
-          <p>
-            The page asks six questions in order. What is a run of words, and
-            what is counting them for? How does a count become a probability,
-            and what has to be added to a sentence before its first word has
-            anything to be predicted from? What happens the first time the model
-            meets a run that never occurred, and how much of a new text is made
-            of those? How much probability should be taken from what was seen
-            and given to what was not, and can that amount be measured rather
-            than assumed? How is a model judged on text it was not fitted to,
-            and why is a lower score better? And what does the same model
-            produce when it is asked to write rather than to read?
-          </p>
-        </>
-      }
+
       playground={<NGramPlayground />}
       sections={[
         {
           title: "Part 1. Counting Runs, Not Cutting Text",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. What this method is for">
                 <p>
                   The pages on either side of this one decide where the pieces
@@ -136,14 +80,16 @@ export default function NGramsPage() {
                   you have not read yet.
                 </p>
                 <p>
-                  That question is the oldest one in the subject, and it is what
-                  a speech recogniser is doing when the sound of a word is
-                  ambiguous and the only thing that can settle it is what tends
-                  to follow the word before. It is also the question a modern
-                  language model is trained on, unchanged in form and answered by
-                  a machine with no counts in it anywhere, so the counting
-                  version is a way in to what the newer ones are being asked to
-                  do.
+                  Context can help a speech recogniser choose between words
+                  that sound similar. A count-based language model supplies
+                  one source of that contextual evidence.
+                </p>
+                <p>
+                  Predicting the next token is also a training task for
+                  autoregressive neural language models. Those models learn
+                  prediction parameters instead of relying on an explicit
+                  table of n-gram counts. The counting version gives us a
+                  transparent starting point for the shared prediction problem.
                 </p>
                 <p>
                   A run of n adjacent pieces is called an n-gram. One word is a
@@ -301,7 +247,7 @@ export default function NGramsPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. From Counts to a Prediction",
@@ -320,18 +266,14 @@ export default function NGramsPage() {
                 <Equation>
                   {"P(w₁ … wₘ)  =  Π over i of  P(wᵢ | w₁ … wᵢ₋₁)"}
                 </Equation>
-                <p>
-                  The n-gram model throws away all of that history except the
-                  last few words. A model of width three believes that the
-                  probability of a word given everything before it equals the
-                  probability of that word given the two words immediately
-                  before, and nothing else about the sentence matters. This is
-                  the Markov assumption, and it is false about language, since
-                  what a sentence is about survives across any number of words.
-                  It is useful anyway, because it turns an unanswerable question
-                  into a table of counts, and a table of counts can be built from
-                  any text at all and read in constant time.
+                <>
+<p>
+                  The n-gram model throws away all of that history except the last few words. A model of width three believes that the probability of a word given everything before it equals the probability of that word given the two words immediately before, and nothing else about the sentence matters. This is the Markov assumption, and it is false about language, since what a sentence is about survives across any number of words.
                 </p>
+                <p>
+                  It is useful anyway, because it turns an unanswerable question into a table of counts, and a table of counts can be built from any text at all and read in constant time.
+                </p>
+</>
                 <Equation>
                   {"P(wᵢ | w₁ … wᵢ₋₁)  ≈  P(wᵢ | wᵢ₋ₙ₊₁ … wᵢ₋₁)"}
                 </Equation>
@@ -459,18 +401,14 @@ export default function NGramsPage() {
                   {"bits  =  −Σ over words of  P(word) log₂ P(word)"}
                 </Equation>
                 <NGramNextWord />
-                <p>
-                  Four contexts are worth comparing there. At the start of a
-                  sentence the model has 44 observations and only five words ever
-                  began one, so the answer is the narrowest of the four at 4.9775
-                  bits. After the it has 46 observations spread over eighteen
-                  different words and reads 5.6283. After Dr. it has seven
-                  observations all agreeing, which ought to be the narrowest
-                  answer of all and is instead the widest at 5.8117, for a reason
-                  Part 4 is about. And after a word it never saw it has nothing,
-                  so every word of the vocabulary gets the same number and the
-                  answer is exactly 6 bits, which is 64 equally likely words.
+                <>
+<p>
+                  Four contexts are worth comparing there. At the start of a sentence the model has 44 observations and only five words ever began one, so the answer is the narrowest of the four at 4.9775 bits. After the it has 46 observations spread over eighteen different words and reads 5.6283. After Dr. it has seven observations all agreeing, which ought to be the narrowest answer of all and is instead the widest at 5.8117, for a reason Part 4 is about.
                 </p>
+                <p>
+                  And after a word it never saw it has nothing, so every word of the vocabulary gets the same number and the answer is exactly 6 bits, which is 64 equally likely words.
+                </p>
+</>
                 <KeepInMind>
                   Six bits over 64 words is what having no information looks
                   like, and it is the ceiling for this model. Any context the
@@ -479,6 +417,60 @@ export default function NGramsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "A seven-word sentence gives eight predicted positions whether the model reads one word back or two.",
+              true,
+              "A model of width n frames each sentence with n − 1 start markers and one end marker. Framed for a window of two the sentence becomes nine positions and eight windows, and framed for a window of three it becomes ten positions and still eight windows, because every framing is built so that each of the seven words and the end has a full context to be predicted from.",
+            ),
+            choice(
+              "Why is the end marker predicted while the start markers are not?",
+              [
+                "The beginning of a sentence is where the model starts rather than somewhere it can arrive, so a run ending in a start marker is not counted at all",
+                "The start markers are too common for their counts to be useful",
+                "The end marker is the only marker the splitting rule produces",
+                "Start markers are predicted as well, but always with probability one",
+              ],
+              0,
+              "Predicting the end marker is what teaches the model which words tend to end a sentence, which is what it means for a model to know when to stop. Without it the probabilities of all the sentences of a given length would sum to one separately for each length, and the model would have no way of preferring a short sentence to a long one.",
+            ),
+            several(
+              "Sixty-four words allow 4,096 pairs and 262,144 triples, and the forty-four sentences produced 141 and 202. Which of these does Part 1 go on to measure about that table of counts?",
+              [
+                "By three words per run, more than half of the distinct runs were seen exactly once",
+                "Going from eleven sentences to all forty-four, the distinct pairs and triples grew roughly as fast as the text did",
+                "A wider window finds more predicted positions in the same corpus",
+                "The share of runs seen exactly once falls as the window widens",
+              ],
+              [0, 1],
+              "At three words 109 of the 202 runs were seen once, and that share rises with the width, to 164 of 236 at four words and 185 of 248 at five. Every width sees the same 370 predicted positions, the 326 words and the 44 end markers, so a wider window spreads the same evidence over more possible runs. More text does not fill the table either, since a little over four times the words took the pairs from 54 to 141 and the triples from 62 to 202, which is what a table nowhere near full looks like.",
+            ),
+            choice(
+              "In the three sentences the step from was to late is worth 2 ⁄ 3, where the step from the to report is worth 1. Where does the 3 come from?",
+              [
+                "Was stood before a next word three times, and late was that word in two of them",
+                "Late is one of three words that end a sentence in the corpus",
+                "One of the three sentences does not contain was",
+                "The end marker takes a third of every context’s probability",
+              ],
+              0,
+              "The estimate is the count of the run over how often its context stood before anything at all. Was is followed by late twice and by short once, so the step is 2 ⁄ 3, while the was followed by report both times it stood before a word. Those two steps and three steps of 1 give the sentence (2 ⁄ 3)(1)(1)(2 ⁄ 3)(1), which is 4 ⁄ 9 or 0.4444.",
+            ),
+            choice(
+              "After a word it never saw, the model’s whole answer costs exactly 6 bits. What is that number saying?",
+              [
+                "Every one of the 64 words gets the same probability, which is what having no information looks like",
+                "The six likeliest words share the probability between them",
+                "The model needs six words of context before it can answer",
+                "The context was seen six times in the forty-four sentences",
+              ],
+              0,
+              "Two to the power of the bits is the number of equally likely words the answer is worth, and two to the sixth is 64, the whole vocabulary. That is the ceiling for this model, so any context it has seen comes in below it, 4.9775 bits at the start of a sentence and 5.6283 after the. The 0.0156 in two rows of the running sentence is the same fact as one probability, one divided by 64.",
+            ),
+        ],
         },
         {
           title: "Part 3. The Zero",
@@ -769,19 +761,14 @@ export default function NGramsPage() {
                   more probability than they deserve. Everything measured above is
                   a demonstration of their point on a small scale.
                 </p>
-                <p>
-                  The rules that replaced it are named here without being drawn,
-                  because this page measures only what it can show. The
-                  Good-Turing estimate uses how many runs were seen exactly once
-                  to estimate how much probability the unseen runs should share.
-                  Interpolation mixes the estimate from a wide window with the
-                  estimate from a narrower one, so a triple nobody has seen falls
-                  back on the pair inside it. Kneser and Ney&rsquo;s rule refines
-                  the fallback by asking, of the lower-order estimate, not how
-                  often a word occurred but in how many different contexts it
-                  occurred, which is what stops a word like Francisco from looking
-                  common when it only ever appears after one other word.
+                <>
+<p>
+                  The rules that replaced it are named here without being drawn, because this page measures only what it can show. The Good-Turing estimate uses how many runs were seen exactly once to estimate how much probability the unseen runs should share. Interpolation mixes the estimate from a wide window with the estimate from a narrower one, so a triple nobody has seen falls back on the pair inside it.
                 </p>
+                <p>
+                  Kneser and Ney&rsquo;s rule refines the fallback by asking, of the lower-order estimate, not how often a word occurred but in how many different contexts it occurred, which is what stops a word like Francisco from looking common when it only ever appears after one other word.
+                </p>
+</>
                 <KeepInMind>
                   Everything on this page below the first Part is true of the
                   better rules as well. They change how much is taken and where it
@@ -791,6 +778,54 @@ export default function NGramsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "A pair with a count of zero makes the model say the sentence containing it is unlikely.",
+              false,
+              "A product with a zero in it is zero, so the model says the sentence cannot happen, which is a claim of a different kind and a false one about a sentence a reader has just read. A single unseen pair ruins a document of any length.",
+            ),
+            choice(
+              "Part 5 finds a best width rather than a score that keeps improving. What in Part 3 is the reason?",
+              [
+                "A wider window knows more about the runs it has seen and has seen a smaller share of what it will meet",
+                "A wider window has fewer predicted positions to average over",
+                "The Markov assumption stops holding above two words",
+                "A wider window cannot be framed, since there are not enough start markers",
+              ],
+              0,
+              "On the six sentences the model was never fitted to there are 53 predicted positions at every width. The runs the training text never produced are 3 of them at one word, 10 at two, 21 at three and 33 at five, so by three words two fifths of a new text is made of runs that would each be a zero. The two effects pull against each other, which is why the score on new text turns at two words instead of improving all the way to five.",
+            ),
+            choice(
+              "Why is giving an unseen run a probability of zero not a careless choice that a more careful one would improve on?",
+              [
+                "It is the estimate that makes the training text as probable as it can be, and any probability given to an unseen run has to be taken from a seen one",
+                "The zeroes are a rounding artefact that a longer corpus removes",
+                "No other estimate can be read in constant time",
+                "A zero is what the Markov assumption requires",
+              ],
+              0,
+              "By that standard it is the best possible estimate, which is why the failure is exactly the success viewed from outside. On the forty-four sentences it was fitted to, a two-word model scores 2.9970 and a five-word model 1.6025, and on six sentences it was not fitted to the same models have no score at all at every width from one to five.",
+            ),
+            trueFalse(
+              "Adding one to every count leaves Dr. followed by Alvarez, seven times out of seven, at a probability of 0.1127.",
+              true,
+              "The constant is added once for every word the model is allowed to answer with, so the denominator went from 7 to 71 while the numerator went from 7 to 8. The answer as a whole then costs 5.8117 bits against the 6 bits of knowing nothing at all, and rare contexts are exactly what a wider window is full of.",
+            ),
+            several(
+              "Which of these hold for the constant added to every count?",
+              [
+                "Sending it towards zero brings the zeroes back",
+                "At two words it was chosen on six sentences held back for the choosing, and the score was then reported on six more",
+                "Sending it upwards makes the model memorise the training text",
+                "The right amount can be read off the counts without a further choice",
+              ],
+              [0, 1],
+              "The constant is a dial between two models that already exist. Towards zero the answer approaches one count over another, the model that memorises, and upwards every word gets the same number whatever stands before it, which scores 64 over 64 words. The amount is not in the counts, so it is found by scoring candidates on further text. That sweep took 0.005 at two words, two hundred times smaller than adding one, and it scores 8.9626 on the reporting text where adding one scores 23.6179.",
+            ),
+        ],
         },
         {
           title: "Part 5. Judging a Model on Text It Was Not Fitted To",
@@ -885,7 +920,7 @@ export default function NGramsPage() {
                 </p>
                 <NumberTable
                   headings={[
-                    "words the model reads back",
+                    "words per run",
                     "the sentences as written",
                     "the same words reversed",
                   ]}
@@ -912,9 +947,10 @@ export default function NGramsPage() {
                   was never very confident about the original either.
                 </p>
                 <KeepInMind>
-                  A model that reads one word back knows which words are common
-                  and has no way of knowing which follows which, so every claim on
-                  this page about word order needs a window of at least two. The
+                  A model that counts one word at a time knows which words are
+                  common and has no way of knowing which follows which, so every
+                  claim on this page about word order needs a window of at least
+                  two. The
                   first row above, 57.5683 in both columns, is what that limit
                   looks like from the outside.
                 </KeepInMind>
@@ -1263,6 +1299,318 @@ export default function NGramsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            choice(
+              "A model with one chance in a hundred at every word has a perplexity of 100. What is the number saying?",
+              [
+                "Over how many equally likely words the model would have to be guessing to do this well",
+                "How many words long the text is",
+                "What share of the words the model would have got right",
+                "How many bits per word the model spends",
+              ],
+              0,
+              "It is the geometric mean of the inverse probabilities, so a model certain of every word scores 1 and lower is better. The same quantity in bits per word is the cross-entropy and perplexity is two to that power, and neither of the two is more fundamental.",
+            ),
+            trueFalse(
+              "On the six reporting sentences the score keeps improving as the window widens from one word to five.",
+              false,
+              "The score on new text turns immediately, 46.73 at one word and 8.9626 at two, then rising through 13.00, 20.09 and 23.40. Two words is the best this corpus supports and every wider window is worse despite having strictly more information available to it. The score on the text the counts came from falls all the way, from 35.06 to 1.6025, which is exactly why it cannot be used to choose the width. That falling score is memorisation, and the drawn sentences show it from the other side, since 45 of 50 draws at five words and all fifty at six are training sentences word for word.",
+            ),
+            several(
+              "Which of these have to be stated before one perplexity can be compared with another?",
+              [
+                "The vocabulary it was computed over",
+                "The positions it was averaged across",
+                "The text it was read on",
+                "The temperature the model was sampled at",
+              ],
+              [0, 1, 2],
+              "A temperature is a knob on the sampling and not on the model, so the probabilities reported are unchanged and a perplexity computed at one temperature is the perplexity at every temperature. The vocabulary is the one that catches people, since fitted to eleven sentences the model has 36 words and knowing nothing there scores 35.9998, where at 64 words knowing nothing scores 63.9975.",
+            ),
+            trueFalse(
+              "A model that counts words one at a time gives the six reporting sentences and the same sentences with their words reversed exactly the same score.",
+              true,
+              "It scores 57.5683 both ways, because a product does not depend on the order of its factors and the factors are the same words either way. A two-word model scores 8.9626 as written and 1715.1308 reversed, 191 times more surprised, so every claim about word order needs a run of at least two. The three-word model’s smaller gap, 14.0173 against 111.8429, is the smoothing and not a weaker grasp of order.",
+            ),
+            trueFalse(
+              "Where a dependency reaches further back than the window, the model becomes approximate about it.",
+              false,
+              "A fixed window is a claim that nothing outside it matters, and where that claim is false the model cannot represent the distinction at all. What it answers is the average over the cases it cannot tell apart. Widening the window is no general answer either, since every extra word multiplies the number of possible contexts by the size of the vocabulary.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Counting, Smoothing and Scoring With the Library",
+          practice: [
+            exercise(
+              "Work the three sentences with the library",
+              ["Part 2 worked the report was late through the three sentences by hand and arrived at 4 ⁄ 9, and Part 3 found that the summary was late and a report was short both come out at exactly zero. Fit a two-word model to the three sentences with the counts as they stand, print the five steps of the report was late, and score each test sentence. Then score them again with one added to every count.", "The lesson gives 1.1761 for the sentence the corpus holds, no finite score for the other two, and 3.7965, 5.0321 and 5.8064 once one is added. The fourth test sentence, a summary was short, is in neither Part. The corpus never wrote it down, but every pair in it occurred, so it should score without any repair."],
+              `from oop_ml.core.natural_language_processing.n_grams.language_model import (
+    NGramLanguageModel,
+)
+from oop_ml.core.natural_language_processing.n_grams.smoothing.base import (
+    AdditiveSmoothing,
+    MaximumLikelihood,
+)
+
+corpus = ["the report was late", "the report was short", "a summary was late"]
+tests = [
+    "the report was late",
+    "the summary was late",
+    "a report was short",
+    "a summary was short",
+]
+steps = [
+    ([], "the"),
+    (["the"], "report"),
+    (["report"], "was"),
+    (["was"], "late"),
+    (["late"], "</s>"),
+]
+
+# Fit one two-word model with the counts as they stand and one with a
+# pretended count of 1.0 added to every count.
+# For each step print the probability of the word after its context under
+# the first model, to four places. An empty context is the start of a sentence
+# and "</s>" is the end marker.
+# For each test sentence print the perplexity under both models, to four places.`,
+              `from oop_ml.core.natural_language_processing.n_grams.language_model import (
+    NGramLanguageModel,
+)
+from oop_ml.core.natural_language_processing.n_grams.smoothing.base import (
+    AdditiveSmoothing,
+    MaximumLikelihood,
+)
+
+corpus = ["the report was late", "the report was short", "a summary was late"]
+tests = [
+    "the report was late",
+    "the summary was late",
+    "a report was short",
+    "a summary was short",
+]
+steps = [
+    ([], "the"),
+    (["the"], "report"),
+    (["report"], "was"),
+    (["was"], "late"),
+    (["late"], "</s>"),
+]
+
+counted = NGramLanguageModel(order=2, smoothing=MaximumLikelihood()).fit(corpus)
+added = NGramLanguageModel(
+    order=2, smoothing=AdditiveSmoothing(pretended_count=1.0)
+).fit(corpus)
+
+for context, word in steps:
+    probability = counted.probability_of(word, context)
+    print(f"{' '.join(context) or 'start'} -> {word}: {probability:.4f}")
+
+for text in tests:
+    alone = counted.evaluate([text]).perplexity
+    repaired = added.evaluate([text]).perplexity
+    print(f"{text}: counts alone {alone:.4f}, one added {repaired:.4f}")`,
+              `start -> the: 0.6667
+the -> report: 1.0000
+report -> was: 1.0000
+was -> late: 0.6667
+late -> </s>: 1.0000
+the report was late: counts alone 1.1761, one added 3.7965
+the summary was late: counts alone inf, one added 5.0321
+a report was short: counts alone inf, one added 5.8064
+a summary was short: counts alone 1.5518, one added 5.3783`,
+              { hints: ["Construction configures and fit learns. The width goes to the constructor as order, the rule as smoothing, and the list of sentences goes to fit, which answers the fitted model.", "The rule that divides one count by another is MaximumLikelihood(), and the rule that adds a constant first is AdditiveSmoothing(pretended_count=1.0).", "probability_of takes the word and then a list of the words before it, and pads a short context with start markers itself. evaluate takes a list of texts and answers an object with a perplexity, which is inf where a step was zero."], check: numberCheck("What does a summary was short score with the counts as they stand, to four places?", 1.5518, 0.0001, "A began one of the three sentences, so the first step is 1 ⁄ 3. Summary always followed a, was always followed summary, short followed was once in three, and short always ended its sentence. The product is 1 ⁄ 9 over five steps and the fifth root of 9 is 1.5518. A two-word model can score a sentence nobody wrote as long as every pair in it was written, which is all the generalising the counts do, and one unseen pair, as in a report was short, puts the score at infinity.") },
+            ),
+            exercise(
+              "Reach a subject five words back, then smooth it",
+              ["Part 7 fitted six sentences in which the verb agrees with a subject standing five words before it, and read the probability of were and of was after the samples that Dr. Alvarez read at every width. Fit the same six sentences with the counts as they stand at widths two to six and print both probabilities at each.", "The lesson has the answer split exactly in half until the model reads five words back, where it becomes 1.0 and 0.0. Then fit the widest model twice more with a constant added to every count, 1.0 and 0.005, and print the same two probabilities. The lesson never smooths this corpus, and Part 4 says what adding one does to a context that is rare."],
+              `from oop_ml.core.natural_language_processing.n_grams.language_model import (
+    NGramLanguageModel,
+)
+from oop_ml.core.natural_language_processing.n_grams.smoothing.base import (
+    AdditiveSmoothing,
+    MaximumLikelihood,
+)
+
+corpus = [
+    "The samples that Dr. Alvarez read were late.",
+    "The sample that Dr. Alvarez read was late.",
+    "The samples that the team read were late.",
+    "The sample that the team read was late.",
+    "The samples that we read were late.",
+    "The sample that we read was late.",
+]
+context = ["The", "samples", "that", "Dr.", "Alvarez", "read"]
+
+for order in [2, 3, 4, 5, 6]:
+    # Fit a model of this width with the counts as they stand and print
+    # how many words it reads back and the probabilities of "were" and of
+    # "was" after the context, to four places.
+    ...
+
+for pretended in [1.0, 0.005]:
+    # Fit a model of width six with this constant added to every count and
+    # print the same two probabilities, to four places.
+    ...`,
+              `from oop_ml.core.natural_language_processing.n_grams.language_model import (
+    NGramLanguageModel,
+)
+from oop_ml.core.natural_language_processing.n_grams.smoothing.base import (
+    AdditiveSmoothing,
+    MaximumLikelihood,
+)
+
+corpus = [
+    "The samples that Dr. Alvarez read were late.",
+    "The sample that Dr. Alvarez read was late.",
+    "The samples that the team read were late.",
+    "The sample that the team read was late.",
+    "The samples that we read were late.",
+    "The sample that we read was late.",
+]
+context = ["The", "samples", "that", "Dr.", "Alvarez", "read"]
+
+for order in [2, 3, 4, 5, 6]:
+    model = NGramLanguageModel(order=order, smoothing=MaximumLikelihood()).fit(corpus)
+    were = model.probability_of("were", context)
+    was = model.probability_of("was", context)
+    print(f"reading {order - 1} back: were {were:.4f}, was {was:.4f}")
+
+for pretended in [1.0, 0.005]:
+    rule = AdditiveSmoothing(pretended_count=pretended)
+    model = NGramLanguageModel(order=6, smoothing=rule).fit(corpus)
+    were = model.probability_of("were", context)
+    was = model.probability_of("was", context)
+    print(f"reading 5 back with {pretended} added: were {were:.4f}, was {was:.4f}")`,
+              `reading 1 back: were 0.5000, was 0.5000
+reading 2 back: were 0.5000, was 0.5000
+reading 3 back: were 0.5000, was 0.5000
+reading 4 back: were 0.5000, was 0.5000
+reading 5 back: were 1.0000, was 0.0000
+reading 5 back with 1.0 added: were 0.1250, was 0.0625
+reading 5 back with 0.005 added: were 0.9349, was 0.0047`,
+              { hints: ["A model of width n reads n − 1 words back, so the widths two to six are the lesson’s rows one to five.", "probability_of can be handed the whole six-word context at every width. The model keeps only as many of the last words as its width reads.", "The smoothing rule is an object given to the constructor, so the second loop builds AdditiveSmoothing(pretended_count=pretended) and fits a new model with order=6 each time."], check: numberCheck("With 1.0 added to every count, what probability does the model reading five words back give were, to four places?", 0.125, 0.0001, "The five words samples that Dr. Alvarez read stood before a next word once in the six sentences, and that word was were. The vocabulary is 15 words, so adding one turns 1 ⁄ 1 into 2 ⁄ 16, which is 0.125, and gives was 1 ⁄ 16. The window wide enough to reach the subject is exactly the kind of rare context Part 4 warned about, and the textbook constant throws most of the certainty away the moment it is reached. At 0.005 the same model keeps 0.9349.") },
+            ),
+            exercise(
+              "Choose the constant for eleven sentences",
+              ["Part 5 fitted a two-word model to the first eleven of the forty-four sentences at 0.005, the constant chosen for the full corpus, and found it scoring 52.03 on the reporting text where knowing nothing over its 36 words scores 36.00. Below are those eleven sentences, the six the lesson chooses on and the six it reports on. Run Part 4’s sweep for this smaller model. Fit at each constant, score both texts to two places, and report the score of the constant the choosing text prefers.", "Then fit once more at 100,000, which is the lesson’s model that knows nothing, and print its score on the reporting text with the size of the vocabulary and how many of the predicted positions hold a word the eleven sentences never contained. The lesson’s row for eleven sentences says 36 words and 15 of 53."],
+              `from oop_ml.core.natural_language_processing.n_grams.language_model import (
+    NGramLanguageModel,
+)
+from oop_ml.core.natural_language_processing.n_grams.smoothing.base import (
+    AdditiveSmoothing,
+)
+
+training = [
+    "The report was expected on Monday.",
+    "The report was expected to cost less.",
+    "The first report was late.",
+    "The second report was late as well.",
+    "Dr. Alvarez wrote the report on Monday.",
+    "Dr. Alvarez wrote the report on Tuesday.",
+    "Dr. Alvarez read the report and asked for a re-analysis.",
+    "The team asked for a re-analysis of the samples.",
+    "The team asked for a low-cost re-analysis.",
+    "A low-cost re-analysis was expected.",
+    "A low-cost re-analysis of the samples was expected.",
+]
+choosing = [
+    "The cost of the samples was the reason for the delay.",
+    "The team asked for the analysis of the second batch.",
+    "We reviewed the summary and rewrote the analysis.",
+    "The revised report was expected on Monday.",
+    "Nobody expected the analysis to arrive early.",
+    "The estimate of the re-analysis was short.",
+]
+reporting = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The cost of the re-analysis was lower than the estimate.",
+    "The team expected the samples on Tuesday.",
+    "We reviewed the tests and rewrote the analysis.",
+    "Nobody expected the second batch to be late.",
+    "The summary of the re-analysis was short.",
+]
+
+rows = []
+for pretended in [0.005, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]:
+    # Fit a two-word model with this constant, print its perplexity on the
+    # choosing text and on the reporting text to two places, and append
+    # (choosing score, reporting score, constant) to rows.
+    ...
+
+# Print the constant with the lowest choosing score and what it reports.
+# Then fit at 100000.0 and print the vocabulary size, the reporting score,
+# and how many predicted positions were unfamiliar out of how many.`,
+              `from oop_ml.core.natural_language_processing.n_grams.language_model import (
+    NGramLanguageModel,
+)
+from oop_ml.core.natural_language_processing.n_grams.smoothing.base import (
+    AdditiveSmoothing,
+)
+
+training = [
+    "The report was expected on Monday.",
+    "The report was expected to cost less.",
+    "The first report was late.",
+    "The second report was late as well.",
+    "Dr. Alvarez wrote the report on Monday.",
+    "Dr. Alvarez wrote the report on Tuesday.",
+    "Dr. Alvarez read the report and asked for a re-analysis.",
+    "The team asked for a re-analysis of the samples.",
+    "The team asked for a low-cost re-analysis.",
+    "A low-cost re-analysis was expected.",
+    "A low-cost re-analysis of the samples was expected.",
+]
+choosing = [
+    "The cost of the samples was the reason for the delay.",
+    "The team asked for the analysis of the second batch.",
+    "We reviewed the summary and rewrote the analysis.",
+    "The revised report was expected on Monday.",
+    "Nobody expected the analysis to arrive early.",
+    "The estimate of the re-analysis was short.",
+]
+reporting = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The cost of the re-analysis was lower than the estimate.",
+    "The team expected the samples on Tuesday.",
+    "We reviewed the tests and rewrote the analysis.",
+    "Nobody expected the second batch to be late.",
+    "The summary of the re-analysis was short.",
+]
+
+rows = []
+for pretended in [0.005, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]:
+    rule = AdditiveSmoothing(pretended_count=pretended)
+    model = NGramLanguageModel(order=2, smoothing=rule).fit(training)
+    chosen_on = model.perplexity(choosing)
+    reported = model.perplexity(reporting)
+    rows.append((chosen_on, reported, pretended))
+    print(f"{pretended}: choosing {chosen_on:.2f}, reporting {reported:.2f}")
+
+chosen_on, reported, pretended = min(rows)
+print(f"chosen {pretended}, which reports {reported:.2f}")
+
+rule = AdditiveSmoothing(pretended_count=100000.0)
+flat = NGramLanguageModel(order=2, smoothing=rule).fit(training)
+read = flat.evaluate(reporting)
+print(f"knowing nothing over {flat.vocabulary.n_tokens} words: {read.perplexity:.2f}")
+print(f"{read.n_unknown} of {read.n_words} positions unfamiliar")`,
+              `0.005: choosing 46.27, reporting 52.03
+0.02: choosing 29.83, reporting 32.93
+0.05: choosing 24.46, reporting 26.83
+0.1: choosing 22.63, reporting 24.74
+0.2: choosing 22.40, reporting 24.36
+0.5: choosing 24.10, reporting 25.87
+1.0: choosing 26.39, reporting 27.93
+chosen 0.2, which reports 24.36
+knowing nothing over 36 words: 36.00
+15 of 53 positions unfamiliar`,
+              { hints: ["perplexity takes a list of texts and answers one number for all of them together, the end marker of every sentence counted among the predicted positions.", "Tuples compare by their first entry, so min(rows) is the row with the lowest choosing score, and its other two entries are the reporting score and the constant.", "evaluate answers an object that also carries n_words, the predicted positions, and n_unknown, how many of them held a word outside the vocabulary. The vocabulary of a fitted model has an n_tokens."], check: numberCheck("What does the constant chosen on the choosing text score on the reporting text, to two places?", 24.36, 0.005, "With eleven sentences the counts are thin, so the choosing text prefers 0.2, forty times the 0.005 chosen for the full corpus, which is the lesson’s chosen constant drifting up as the counts thin out. At that setting the model scores 24.36 where knowing nothing over its 36 words scores 36.00, so the counting does pay at eleven sentences. The 52.03 in Part 5 is the price of a constant chosen for the full forty-four sentences, and the choice here was made without looking at the reporting text at all.") },
+            ),
+          ],
         },
       ]}
     />

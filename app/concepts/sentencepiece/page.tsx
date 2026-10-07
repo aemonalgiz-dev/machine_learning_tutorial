@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -24,7 +27,7 @@ import { WithoutSpaces } from "@/components/widgets/WithoutSpaces";
 export const metadata: Metadata = {
   title: "SentencePiece · oop_ml",
   description:
-    "Treat the space as an ordinary character and learn the pieces from raw text with no splitting at all. What that buys is a scheme that needs to know nothing about the language, and a round trip that is exact.",
+    "Treat whitespace as part of the text representation and learn subword pieces from that stream.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -33,8 +36,12 @@ const MARK = "▁";
 export default function SentencePiecePage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["sentencepiece"]}
+      technicalStart="Part 2. The Space as a Symbol"
+      openingTitle="Learn the Pieces Before Deciding Where the Words Are"
+      playgroundIntro="Follow the space markers through encoding and decoding. Compare the reconstructed text with the input and check which normalisation rules were applied."
       title="SentencePiece"
-      tagline="Treat the space as an ordinary character and learn the pieces from raw text with no splitting at all. What that buys is a scheme that needs to know nothing about the language, and a round trip that is exact."
+      tagline="Treat whitespace as part of the text representation and learn subword pieces from that stream."
       prerequisites={
         <>
           One thing from earlier in this section is assumed, which is a scheme
@@ -46,64 +53,14 @@ export default function SentencePiecePage() {
           arithmetic is counting and a rule for breaking a tie.
         </>
       }
-      history={
-        <>
-          <p>
-            Taku Kudo and John Richardson, working at Google, published
-            SentencePiece in 2018 as a system paper rather than as a new
-            algorithm, and the problem they named was one of plumbing that had
-            hardened into a limitation. A translation system of that period was
-            a chain, and the first link was always a program that cut the text
-            into words. For English and the other European languages that was
-            usually the Moses tokenizer, a long accumulation of rules about
-            abbreviations, contractions, hyphens and quotation marks. For
-            Japanese it could not be used at all, because there are no spaces to
-            work from, so a separate segmenter had to be trained and run
-            instead. Two languages meant two front ends, and comparing results
-            across languages meant comparing across two different front ends as
-            well.
-          </p>
-          <p>
-            The second half of the problem was that the chain could not be run
-            backwards. A tokenizer that splits on rules throws the exact
-            whitespace away, so putting a translated sentence back together
-            needs a detokenizer, which is another pile of language-specific
-            rules and which does not always agree with the tokenizer that ran
-            first. Kudo and Richardson wanted a component that could be trained
-            from raw sentences, that carried no rule about any language, and
-            whose output could be turned back into the input exactly. Their
-            answer was to stop treating whitespace as a separator at all. Replace
-            every run of it with a visible character, feed the resulting stream
-            to the same subword learner Rico Sennrich, Barry Haddow and
-            Alexandra Birch had used two years earlier, and decode by joining
-            the pieces and putting the spaces back. Kudo had published the
-            second of the two learners it wraps earlier that same year, a
-            probabilistic one that starts large and drops pieces rather than
-            joining them.
-          </p>
-          <p>
-            This page asks five questions in order. What exactly does a scheme
-            lose by being told where the words are first? What does the text
-            look like once the space is a character like any other? What does a
-            vocabulary learned from that stream contain, and why is a third of
-            it strange to look at? What is the round trip exact about, and what
-            is it not exact about? And what does the whole arrangement cost,
-            measured against a scheme that splits on spaces first, on the same
-            corpus at the same size? The sentence carried through every page in
-            this section is a good test of the first question, because a
-            rule-based front end has to decide separately what to do with the
-            full stop in Dr., the apostrophe in didn&rsquo;t and the hyphens in
-            low-cost and re-analysis.
-          </p>
-        </>
-      }
+
       playground={<SentencePiecePlayground />}
       sections={[
         {
           title: "Part 1. Text That Nothing Has Cut Into Words Yet",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. One sentence, one corpus, and the step before everything">
                 <p>
                   We carry the same sentence as the other pages in this section,
@@ -115,17 +72,20 @@ export default function SentencePiecePage() {
                   built from.
                 </p>
                 <Equation>{SENTENCE}</Equation>
-                <p>
-                  Every subword scheme so far has begun by cutting that into
-                  words on its spaces, and then asked what the pieces inside a
-                  word should be. The cutting has been quietly doing a great
-                  deal of work. It decides that the full stop in Dr. belongs to
-                  the abbreviation and the full stop in analysis. does not, that
-                  didn&rsquo;t is one word or two, that low-cost is one word or
-                  three. Every one of those decisions is a fact about English
-                  written down by somebody, and none of them is learned from the
-                  corpus.
-                </p>
+                <>
+                  <p>
+                    The earlier examples first split on whitespace, then learned pieces
+                    inside each resulting chunk. A whitespace split leaves Dr., didn’t
+                    and low-cost intact. It does not decide whether a full stop ends a
+                    sentence or belongs to an abbreviation.
+                  </p>
+                  <p>
+                    A richer pre-tokenizer may split punctuation, contractions or
+                    hyphenated expressions as well. Those are additional decisions.
+                    SentencePiece lets us train from the text stream without first
+                    supplying a linguistic word segmentation.
+                  </p>
+                </>
                 <KeepInMind>
                   There are two questions here and they are usually asked
                   together. Where do the words end, and what pieces should a
@@ -135,31 +95,43 @@ export default function SentencePiecePage() {
               </SubSection>
 
               <SubSection title="2. What the cutting rule is a fact about">
-                <p>
-                  The rule we have been using is that a word is a run of
-                  characters with whitespace on either side. It is the simplest
-                  rule there is and it works for English, and it is still a rule
-                  about a language rather than about text. Hand it five short
-                  sentences of Chinese, written the way Chinese is written, and
-                  it finds five words, because each line contains no whitespace
-                  at all and so is one unbroken run.
-                </p>
-                <p>
-                  That is not a small inconvenience to be patched. The whole
-                  vocabulary is learned from counts over words, so a corpus with
-                  five words in it teaches almost nothing, and the pieces that
-                  come out are the pieces of five very long strings. Getting
-                  anything useful requires a Chinese segmenter, which is a
-                  separate model trained on separately annotated data, and the
-                  scheme has stopped being one thing that works on text and
-                  become one thing per writing system.
-                </p>
+                <>
+                  <p>
+                    A whitespace split treats each uninterrupted run as one chunk. This
+                    is often a convenient starting point for English, although a chunk
+                    need not be a linguistic word. A Chinese sentence with no spaces
+                    becomes one long chunk. Calling that chunk a word would confuse a
+                    formatting boundary with a language boundary.
+                  </p>
+                  <p>
+                    To make that concrete, this page carries five short sentences of
+                    Chinese beside the English corpus, written the way Chinese is
+                    written, with nothing between the words. Between them they use
+                    seven words, the words for research, life, origin, student,
+                    very, many and good, and several of those words turn up in more
+                    than one sentence. A whitespace split finds five chunks in them,
+                    one per line, and reports nothing unusual. The repetition a
+                    learner needs is there, and it is inside the chunks, where a
+                    rule about spaces cannot see it. Part 5 fits both schemes on
+                    these five lines and measures what each finds.
+                  </p>
+                </>
+                <>
+                  <p>
+                    Character-based subword learning can still find repeated pieces
+                    inside those long chunks. It does not inherently require an
+                    annotated Chinese segmenter. The distinction is whether a separate
+                    word segmentation is required by the training pipeline.
+                    SentencePiece provides a framework that can learn directly from
+                    unsegmented text.
+                  </p>
+                </>
                 <KeepInMind>
-                  A whitespace rule is not language-neutral because it makes no
-                  reference to a language. On the five Chinese sentences it
-                  reports five words, which is a wrong answer given confidently
-                  and with nothing raised, and the vocabulary learned from that
-                  answer is a vocabulary of five strings.
+                  <p>
+                    A whitespace split finds whitespace boundaries. It does not discover
+                    words in a writing system that does not mark them that way. Keep
+                    those two jobs separate when judging what the tokenizer has learned.
+                  </p>
                 </KeepInMind>
               </SubSection>
 
@@ -233,7 +205,7 @@ export default function SentencePiecePage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Space as a Symbol",
@@ -342,18 +314,14 @@ export default function SentencePiecePage() {
                   followed by one word, and a piece is never allowed to reach out
                   of its unit.
                 </p>
-                <p>
-                  That second step is a genuine decision rather than a
-                  consequence of the first, and it is worth flagging now because
-                  the closing part measures what happens without it. Taken
-                  together the two steps amount to splitting on whitespace and
-                  putting a mark at the front of each piece, which sounds like it
-                  has quietly restored the thing the method set out to remove. It
-                  has not, and the difference is precise. The mark is inside the
-                  unit, so it is a symbol the learner counts, merges and stores,
-                  and it comes back out at the other end. A separator is none of
-                  those things.
+                <>
+<p>
+                  That second step is a genuine decision rather than a consequence of the first, and it is worth flagging now because the closing part measures what happens without it. Taken together the two steps amount to splitting on whitespace and putting a mark at the front of each piece, which sounds like it has quietly restored the thing the method set out to remove.
                 </p>
+                <p>
+                  It has not, and the difference is precise. The mark is inside the unit, so it is a symbol the learner counts, merges and stores, and it comes back out at the other end. A separator is none of those things.
+                </p>
+</>
                 <WhyThisWorks title="Why cutting at the marks is not the same as cutting on spaces">
                   <p>
                     A separator is deleted and remembered elsewhere. A mark is
@@ -376,6 +344,49 @@ export default function SentencePiecePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "The eighteen sentences use 36 distinct characters, the space among them. Marking the end of every word turns the 35 that are not the space into how many symbols?",
+              ["36", "51", "72", "137"],
+              1,
+              "Sixteen letters appear both inside a word and at the end of one and have to be held apart, and the full stop only ever ends one. So sixteen rows are spent before a single merge is learned, and the smallest vocabulary that can exist at all under that scheme is 52.",
+            ),
+            trueFalse(
+              "The holes that marking the end of a word leaves in the alphabet sit exactly where the unusual text is.",
+              true,
+              "A letter the corpus uses only inside words has no end-of-word symbol, so a word ending in it cannot be spelled at all. These eighteen sentences contain z, in the word size, and no word in them ends in z. Alvarez does.",
+            ),
+            choice(
+              "Why does the mark go in front of a word rather than behind it?",
+              [
+                "A mark in front means no letter is ever doubled, since a letter is a letter wherever it sits and the mark is a symbol of its own",
+                "A mark in front reads more naturally when a marked text is printed",
+                "A mark in front is what lets a piece reach across a word boundary",
+                "A mark in front is what the merging learner requires",
+              ],
+              0,
+              "A mark in front says a space preceded this, and a space preceded the first word too, so one is prepended to the whole text. Recording the boundary in front costs one symbol whatever the corpus is. Recording it behind costs one extra symbol for every character that can end a word, which is a number the corpus decides and nobody chose.",
+            ),
+            several(
+              "Marking every whitespace run and then cutting at every mark amounts to splitting on whitespace and marking each piece. Which of these are the differences the page draws?",
+              [
+                "The mark is inside the unit, so the learner counts it, merges it and stores it, and it comes back out at the other end",
+                "A separator is deleted and remembered elsewhere, so it takes no part in the arithmetic and appears in no finished row",
+                "Cutting at the marks is the step that makes the method reversible",
+                "Cutting at the marks follows from marking, so it is not a separate decision",
+              ],
+              [0, 1],
+              "There are two steps and they are not the same kind of thing. Marking is what makes the method language-independent and reversible, since nothing is thrown away on the way in. Cutting at the marks is a convention added afterwards, with a measurable cost that the closing part measures. Keeping the mark as a symbol is also cheap, since on this corpus it makes the alphabet one symbol larger where annotating the letters made it sixteen larger.",
+            ),
+            trueFalse(
+              "SentencePiece is a third way of choosing pieces, alongside merging and shrinking.",
+              false,
+              "It is a treatment of the text that either of those can be run on, and the page runs both on the same four words. The contribution is the step before the learner, which is why neither learner has to know what a mark is; both take units already spelled in symbols with counts.",
+            ),
+        ],
         },
         {
           title: "Part 3. What Gets Learned Once the Space Is a Symbol",
@@ -672,6 +683,55 @@ export default function SentencePiecePage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "On the four words the mark joins nothing until the fifth merge. Why not sooner?",
+              [
+                "Its pairs keep tying with pairs of letters, and the tie rule takes the earlier-sorting pair, where the mark at codepoint 9601 sorts after every letter",
+                "Its pairs are genuinely rarer than the pairs of letters at that stage",
+                "The loop is told to leave pairs containing the mark until the end",
+                "A merge may not include the mark until the word it belongs to is complete",
+              ],
+              0,
+              "At merge 2 the pair of l then o, the pair of o then w, and the pair of the mark then l all occur exactly 7 times, so the objective is indifferent and something outside it has to choose. A pair beginning with the mark was among the tied candidates eleven times and was taken three times, each of those being a step where it was the only candidate left at that count, which is why the table ends up holding the marked low and newest rather than the marked l and n.",
+            ),
+            trueFalse(
+              "A finished table that holds low and also holds the marked low is duplication a better scheme would avoid.",
+              false,
+              "The two really are different things and the model reading them should know which it has. The low in low-cost has no space before it and the low in the low readings does, and a scheme that gave them one row could not put the space back afterwards. What looks like duplication is the boundary information, stored in the only place it can be stored once the space is a character.",
+            ),
+            choice(
+              "Of the 99 merges the eighteen sentences support, how many extend a piece that already begins with the mark?",
+              ["3", "17", "42", "99"],
+              2,
+              "Nearly half the learned table is therefore about where words start. A separate count is that 17 of the 136 finished rows are a row the table already holds with a space in front of it, cost beside cost and re beside re among them. On this larger corpus the mark also stops waiting, since the second merge of all joins it to t at a count of 25.",
+            ),
+            several(
+              "Both schemes were fitted on the eighteen sentences, handed the sentence they had never seen, and had their pieces glued back together. Which of these happened?",
+              [
+                "The marked-behind fit never learned a symbol for a z at the end of a word, so a stand-in row came back in place of the z in Alvarez",
+                "That stand-in carries no boundary, so the space after Alvarez was gone and the next word ran into it",
+                "Inside re-analysis the front-marked fit fell back to an, aly and sis, because its row for analysis carries a leading space",
+                "The front-marked fit returned the sentence exactly, all 51 characters of it",
+              ],
+              [0, 1, 2, 3],
+              "One missing symbol cost the marked-behind fit a letter and a word boundary at once, and what came back reads Alvare, a stand-in, and didn’t run together. The front-marked fit is exact because nothing about the input was discarded when the marks went in, so gluing back is concatenate, replace every mark with a space, drop the one at the front. Its fallback inside re-analysis costs pieces and not characters, which is the price the next Part measures.",
+            ),
+            several(
+              "The round trip is exact up to a normalisation the defaults chose. Which of these does that normalisation do?",
+              [
+                "A run of whitespace of any length and any kind becomes one mark, so two spaces come back as one and so does a tab",
+                "Whitespace at the two ends of the text is dropped entirely",
+                "A text containing the mark character itself is treated as though it held a space there",
+                "A full stop ending an abbreviation is separated from the word in front of it",
+              ],
+              [0, 1, 2],
+              "No rule looked at either full stop on the running sentence, which is why the question of whether an abbreviation keeps its stop never came up. The normalisation costs nothing there, where the only whitespace is six single spaces between words, and it would cost every level of indentation in a page of code.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. What It Costs",
           content: (
             <>
@@ -821,17 +881,14 @@ export default function SentencePiecePage() {
                   to the space that follows it, at a count of 39.
                 </p>
                 <CrossingMerges />
-                <p>
-                  Thirteen of the first forty merges produce a piece holding a
-                  space somewhere other than at its front. By rank 3 the piece is
-                  the whole of the word the with a space behind it, by rank 17 it
-                  is a space, the, and another space, and by rank 20 it is the
-                  ending of one word joined to the whole of the next. The loop is
-                  answering exactly the question it was asked, which is which
-                  pair is commonest, and early on the commonest pairs are letters
-                  sitting either side of a gap. Forty merges in, thirteen of them
-                  have gone on pieces that straddle a boundary.
+                <>
+<p>
+                  Thirteen of the first forty merges produce a piece holding a space somewhere other than at its front. By rank 3 the piece is the whole of the word the with a space behind it, by rank 17 it is a space, the, and another space, and by rank 20 it is the ending of one word joined to the whole of the next.
                 </p>
+                <p>
+                  The loop is answering exactly the question it was asked, which is which pair is commonest, and early on the commonest pairs are letters sitting either side of a gap. Forty merges in, thirteen of them have gone on pieces that straddle a boundary.
+                </p>
+</>
                 <KeepInMind>
                   Both answers are defensible and they buy different things.
                   Cutting at the marks guarantees every row is a piece of one
@@ -853,17 +910,14 @@ export default function SentencePiecePage() {
                   before the lowercase letters.
                 </p>
                 <WhichMark />
-                <p>
-                  Both tables hold 27 rows and 18 of them agree once the mark is
-                  written the same way, so nine rows on each side exist under one
-                  mark and not the other. The merges tell the story. Under the
-                  late-sorting mark the third, fourth and fifth merges are l with
-                  o, lo with w, and then the mark with the finished low. Under the
-                  early-sorting one they are the mark with l, that with o, and
-                  that with w, so the word is built outward from the space one
-                  letter at a time and the table fills with the mark followed by
-                  l, then by lo, then by low, rather than with lo and low.
+                <>
+<p>
+                  Both tables hold 27 rows and 18 of them agree once the mark is written the same way, so nine rows on each side exist under one mark and not the other. The merges tell the story. Under the late-sorting mark the third, fourth and fifth merges are l with o, lo with w, and then the mark with the finished low.
                 </p>
+                <p>
+                  Under the early-sorting one they are the mark with l, that with o, and that with w, so the word is built outward from the space one letter at a time and the table fills with the mark followed by l, then by lo, then by low, rather than with lo and low.
+                </p>
+</>
                 <p>
                   What did not change is the unseen word, which both fits cut as
                   the marked low followed by est. So the effect is real and it is
@@ -995,6 +1049,252 @@ export default function SentencePiecePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "The stem expect is the cleanest case of the front-marked fit losing. How do the two fits read it?",
+              [
+                "The marked-behind fit reads it in three pieces built from interior merges, where the front-marked fit reads it in five",
+                "The front-marked fit reads it in three and the marked-behind fit in five",
+                "Both read it as one piece, since the corpus holds expected",
+                "Neither can spell it at all, since the corpus holds expected and not expect",
+              ],
+              0,
+              "Interior merges apply anywhere inside a word, where the front-marked fit’s early merges went into building the marked expected and there is nothing in its table for the middle of a word beginning with ex. 42 of its 99 rows only apply where a word starts, and a word the corpus never contained is usually met somewhere other than at its start.",
+            ),
+            several(
+              "Both schemes were fitted at fourteen sizes on the same corpus. Which of these did that comparison report?",
+              [
+                "On the corpus the front-marked fit is shorter at every size from 52 rows up, 553 pieces against 648 at the bottom",
+                "On the held-out sentence it is shorter at 52 rows and at 60, and longer at every size above that",
+                "At the largest fit it reads the held-out sentence in three pieces fewer",
+                "Below 52 rows neither scheme can be fitted at all",
+              ],
+              [0, 1],
+              "Those two outcomes come from one cause, which is that 42 of its rows only apply where a word starts and the corpus is made of words it has seen start. At the largest fit the sentence costs 28 pieces against 25, three more and not three fewer, about twelve per cent, and that is what the exact round trip has to be weighed against. Below 52 rows only the marked-behind scheme is impossible. The front-marked one runs from 37 rows, where the corpus costs 781 pieces.",
+            ),
+            choice(
+              "The five short Chinese sentences, both schemes asked for 40 rows. What did the marked-behind scheme do?",
+              [
+                "It learned three merges and stopped at 17 rows, three of which are a character it already holds, kept apart because that character once fell at the end of a line",
+                "It refused, since there are no word boundaries in that writing for a marker to record",
+                "It learned six merges, reached 18 rows and read the new sentence in three pieces",
+                "It reached all 40 rows and read the five lines in 15 pieces",
+              ],
+              0,
+              "Finding one word per line leaves it five very long words to merge inside and almost no repetition across them, so it reads the five lines in 18 pieces and the new sentence in five where the front-marked scheme reads it in three. A piece carrying one of those three line-end rows puts a space into the decoded text at a place no space belongs, and nothing refused and nothing warned.",
+            ),
+            trueFalse(
+              "Run with nothing cut, the very first merge on the eighteen sentences joins the letter e to the space that follows it, at a count of 39.",
+              true,
+              "The counting rule says take the commonest adjacent pair, and a pair straddling a space is adjacent like any other, so early on the commonest pairs are letters sitting either side of a gap. Thirteen of the first forty merges produce a piece holding a space somewhere other than at its front, and by rank 3 the piece is the whole of the word the with a space behind it.",
+            ),
+            several(
+              "The closing part separates decisions from limits. Which of these does it name as decisions?",
+              [
+                "Which character marks a space",
+                "How a tie between equally common pairs is broken",
+                "Whether a piece may cross a space",
+                "What a run of whitespace collapses to",
+              ],
+              [0, 1, 2, 3],
+              "All four have defensible answers on both sides and each changes what the finished vocabulary holds. The mark’s identity alone is worth nine of the 27 rows on the four words, for a reason that is arithmetic about codepoints and has nothing to do with language. What the page does not count as a decision is the alphabet, which is whatever the corpus happened to use. That is why the English fit answers a mark and eight stand-in rows for an eight-character Chinese sentence, and why the repair is to start from the 256 byte values and not any setting here.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Marking, Merging and Coming Back With the Library",
+          practice: [
+            exercise(
+              "Fit the four words under two marks",
+              ["Part 3 ran fifteen merges on the four words and watched the mark join last, and Part 6 fitted the same words again with an underscore for the mark and found 18 of the 27 rows in common. Fit both with the merging learner, asking for 30 rows. For each, print how many rows the table holds and how many of them begin with the mark, the merges in the order they were learned, and the cut of lowest. Then print how many rows the two tables share.", "The usual mark is the character numbered 9601, which many consoles cannot print, so the script writes every mark as an underscore before printing, which is also what lets the two tables be compared row for row. The count of rows beginning with the mark is not in the lesson for either fit."],
+              `from oop_ml import SentencePiece, SubwordAlgorithm
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+
+tables = {}
+for mark in ["\\u2581", "_"]:
+    # Fit a SentencePiece with the merging learner, 30 rows and this mark.
+    # Write its rows and its merges with the mark replaced by an underscore.
+    # Print the mark's codepoint, the number of rows, how many begin with
+    # the mark, the merges as left+right, and the pieces of lowest.
+    # Keep the set of rows in tables[mark].
+    ...
+
+# Print how many rows the two tables have in common.`,
+              `from oop_ml import SentencePiece, SubwordAlgorithm
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+
+tables = {}
+for mark in ["\\u2581", "_"]:
+    model = SentencePiece(
+        vocabulary_size=30, algorithm=SubwordAlgorithm.BYTE_PAIR, whitespace_marker=mark
+    ).fit(corpus)
+    rows = [row.replace(mark, "_") for row in model.vocabulary]
+    merges = " ".join(f"{merge.left}+{merge.right}" for merge in model.merges)
+    cut = " ".join(model.encode("lowest").texts)
+    marked = sum(1 for row in rows if row.startswith("_"))
+    print(f"codepoint {ord(mark)}: {len(rows)} rows, {marked} begin with the mark")
+    print("  merges:", merges.replace(mark, "_"))
+    print("  lowest:", cut.replace(mark, "_"))
+    tables[mark] = set(rows)
+
+shared = tables["\\u2581"] & tables["_"]
+print(f"{len(shared)} rows in common")`,
+              `codepoint 9601: 27 rows, 5 begin with the mark
+  merges: e+s es+t l+o lo+w _+low e+w ew+est n+ewest _+newest d+est i+dest w+idest _+widest e+r _low+er
+  lowest: _low est
+codepoint 95: 27 rows, 14 begin with the mark
+  merges: e+s es+t _+l _l+o _lo+w _+n _n+e _ne+w _new+est _+w _w+i _wi+d _wid+est _low+e _lowe+r
+  lowest: _low est
+18 rows in common`,
+              { hints: ["The learner is chosen at construction with algorithm=SubwordAlgorithm.BYTE_PAIR, and the mark with whitespace_marker. Asking for 30 rows is not refused when the corpus runs out of pairs at 27.", "merges is iterable in the order the merges were learned, and each merge has a left and a right. The vocabulary is iterable too, one row at a time.", "Two sets of rows are compared with the & operator, and that only means something once both are written with the same mark."], check: numberCheck("How many of the 27 rows begin with the mark when the mark is an underscore?", 14, 0, "An underscore is codepoint 95 and sorts before every lowercase letter, so a pair beginning with it wins each tie it enters and every word is grown outward from its space, the mark with l, then with lo, then with low. That leaves the mark itself and thirteen pieces that start a word. Under the usual mark at 9601 the same ties go the other way and only five rows begin with it, the mark, low, newest, widest and lower. Both cut lowest identically, so nine rows of 27 turned on a codepoint without changing this answer.") },
+            ),
+            exercise(
+              "Find where the two schemes cross on the sentence",
+              ["Part 5 fitted both ways of recording a boundary on the eighteen sentences at fourteen sizes. Its table has the front-marked fit ahead on the held-out sentence at 60 rows, 38 pieces against 39, and behind at 80, and says the curves cross in between. Fit both at 60, 70 and 137 rows, the front-marked one with the merging learner and the other with its byte rows switched off, and at each size print what the corpus costs, what the sentence costs, and whether the sentence comes back exactly.", "The rows at 60 and 137 are in the lesson’s table. The row at 70 is not."],
+              `from oop_ml import BytePairEncoding, SentencePiece, SubwordAlgorithm
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for size in [60, 70, 137]:
+    fits = [
+        ("in front", SentencePiece(vocabulary_size=size, algorithm=SubwordAlgorithm.BYTE_PAIR)),
+        ("behind", BytePairEncoding(vocabulary_size=size, byte_fallback=False)),
+    ]
+    # Fit each on the sentences. Print the size, the label, the rows the fit
+    # reached, the pieces the eighteen sentences cost, the pieces the
+    # sentence costs, and whether decoding its ids gives the sentence back.`,
+              `from oop_ml import BytePairEncoding, SentencePiece, SubwordAlgorithm
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for size in [60, 70, 137]:
+    fits = [
+        ("in front", SentencePiece(vocabulary_size=size, algorithm=SubwordAlgorithm.BYTE_PAIR)),
+        ("behind", BytePairEncoding(vocabulary_size=size, byte_fallback=False)),
+    ]
+    for label, model in fits:
+        model.fit(sentences)
+        encoding = model.encode(sentence)
+        corpus_pieces = sum(model.encode(text).n_tokens for text in sentences)
+        exact = model.decode(encoding.ids) == sentence
+        print(f"{size} {label}: {model.vocabulary.n_tokens} rows, corpus {corpus_pieces}, "
+              f"sentence {encoding.n_tokens}, exact {exact}")`,
+              `60 in front: 60 rows, corpus 496, sentence 38, exact True
+60 behind: 60 rows, corpus 531, sentence 39, exact False
+70 in front: 70 rows, corpus 444, sentence 36, exact True
+70 behind: 70 rows, corpus 460, sentence 32, exact False
+137 in front: 136 rows, corpus 261, sentence 28, exact True
+137 behind: 137 rows, corpus 263, sentence 25, exact False`,
+              { hints: ["fit learns in place and also answers the fitted model, so calling it inside the loop is enough.", "A corpus costs the sum of what each of its texts encodes to. encode answers an object with an n_tokens and the ids that decode takes back.", "The front-marked fit stops at 136 rows when asked for 137, since no pair is left that occurs twice, and vocabulary.n_tokens says so."], check: numberCheck("How many pieces does the front-marked fit read the held-out sentence in at 70 rows?", 36, 0, "At 60 rows the front-marked fit is still one piece ahead on the sentence, 38 against 39, and at 70 it is four behind, 36 against 32, so the crossing falls between those two sizes. On the corpus it stays ahead, 444 pieces against 460. Both come from the same place. The fifteen alphabet rows it saved are spent as extra merges, and many of its merges build pieces that begin with a space, which pay on words the corpus has seen start and not on a sentence made of words it never held. Only the front-marked fit gives the sentence back at any size.") },
+            ),
+            exercise(
+              "Measure what the round trip does not keep",
+              ["Part 4 said the round trip is exact up to a normalisation, and listed what the defaults discard. A run of whitespace of any length and kind comes back as one space, and whitespace at the two ends is dropped. Fit the four words with the merging learner and send five texts out and back, printing each text, its length, how many pieces it became, what came back and its length.", "The last text is three words laid out over three indented lines. The lesson says this normalisation would cost every level of indentation in a page of code without measuring a case, so count the characters that go in and the characters that come back."],
+              `from oop_ml import SentencePiece, SubwordAlgorithm
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+texts = [
+    "low lower",
+    "low  lower",
+    " low lower ",
+    "low\\tlower",
+    "low\\n    lower\\n        lowest",
+]
+
+model = SentencePiece(vocabulary_size=30, algorithm=SubwordAlgorithm.BYTE_PAIR).fit(corpus)
+# For each text, encode it, decode the ids, and print the text with repr so
+# the whitespace shows, its length, the number of pieces, what came back,
+# its length, and whether it equals the text.`,
+              `from oop_ml import SentencePiece, SubwordAlgorithm
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+texts = [
+    "low lower",
+    "low  lower",
+    " low lower ",
+    "low\\tlower",
+    "low\\n    lower\\n        lowest",
+]
+
+model = SentencePiece(vocabulary_size=30, algorithm=SubwordAlgorithm.BYTE_PAIR).fit(corpus)
+for text in texts:
+    encoding = model.encode(text)
+    back = model.decode(encoding.ids)
+    print(f"{text!r} ({len(text)}) -> {encoding.n_tokens} pieces -> {back!r} ({len(back)}), "
+          f"exact {back == text}")`,
+              `'low lower' (9) -> 2 pieces -> 'low lower' (9), exact True
+'low  lower' (10) -> 2 pieces -> 'low lower' (9), exact False
+' low lower ' (11) -> 2 pieces -> 'low lower' (9), exact False
+'low\\tlower' (9) -> 2 pieces -> 'low lower' (9), exact False
+'low\\n    lower\\n        lowest' (28) -> 4 pieces -> 'low lower lowest' (16), exact False`,
+              { hints: ["encode answers an object with the ids and an n_tokens, and decode takes the ids and answers a string.", "Writing {text!r} in an f-string prints the text the way Python would write it in source, so a tab shows as a backslash and a t and a line break as a backslash and an n."], check: numberCheck("How many characters come back from the indented text of 28?", 16, 0, "Each line break together with the indentation after it is one run of whitespace, five characters the first time and nine the second, and each run becomes one mark and comes back as one space. So 14 characters of whitespace come back as 2 and the 28 characters come back as 16, with every word intact and the layout gone. Nothing was refused and nothing warned, and the pieces are the same four whether the words were indented or not, which is why the text cannot be recovered from them.") },
+            ),
+          ],
         },
       ]}
     />

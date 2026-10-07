@@ -394,7 +394,7 @@ export function BackpropagationPlayground() {
           Take one step
         </button>
         <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-          hidden bend
+          hidden activation function
           <select
             value={activation}
             onChange={(event) => {
@@ -587,7 +587,7 @@ export function BackpropagationPlayground() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         Inside each neuron, z is its score and a its output. Above it, the
-        slope that arrived and the bend&rsquo;s slope g′ at the score; beneath
+        slope that arrived and the activation function&rsquo;s slope g′ at the score; beneath
         it, their product δ. On each edge, w is the weight and ∂ the slope of
         the loss with respect to it. Click an edge to check that slope by
         nudging.

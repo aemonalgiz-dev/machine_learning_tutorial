@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -16,19 +19,22 @@ import { LatticePlayground } from "@/components/widgets/LatticePlayground";
 import { PathLadder } from "@/components/widgets/PathLadder";
 import { ReadingsAgainstSteps } from "@/components/widgets/ReadingsAgainstSteps";
 
-const TAGLINE =
-  "Rather than committing at each step, lay out every reading the word list permits and take the best whole path. What a path is scored by, why the best one can be found without looking at the others, and why adding one word changes the cut of a text that does not contain it.";
+
 
 export const metadata: Metadata = {
   title: "The Word Lattice · oop_ml",
-  description: TAGLINE,
+  description: "Keep alternative word segmentations and score complete paths through the sentence.",
 };
 
 export default function TheWordLatticePage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["the-word-lattice"]}
+      technicalStart="Part 2. What a Whole Reading Is Worth"
+      openingTitle="A Good First Word Can Leave a Bad Ending"
+      playgroundIntro="Trace two complete paths through the same text. Compare their total scores, rather than judging a path only by the length of its first word."
       title="The Word Lattice"
-      tagline={TAGLINE}
+      tagline="Keep alternative word segmentations and score complete paths through the sentence."
       prerequisites={
         <>
           The greedy scan of the previous page, since this one is the repair for
@@ -38,67 +44,14 @@ export default function TheWordLatticePage() {
           logarithms so that the multiplication becomes addition.
         </>
       }
-      history={
-        <>
-          <p>
-            By the early 1990s every system that indexed or searched Chinese
-            began by guessing where the words were, and the guess was almost
-            always the greedy dictionary scan. What its users kept running into
-            was not that it was crude but that it had nothing to be crude with.
-            A word list can say that a reading is possible and it cannot say
-            that one possible reading is more plausible than another, so when two
-            readings of a sentence were both built out of real words there was
-            no quantity anywhere in the method to compare them by. The
-            dictionaries themselves had the missing quantity all along, since a
-            lexicographer counts occurrences, and what nobody had written down
-            was how to spend a count on a whole sentence rather than on a word.
-          </p>
-          <p>
-            The paper that wrote it down is Richard Sproat, Chilin Shih, William
-            Gale and Nancy Chang&rsquo;s 1996 article in Computational
-            Linguistics on a stochastic finite-state word segmentation algorithm
-            for Chinese, written at AT&amp;T Bell Laboratories. They built the
-            dictionary as a weighted machine in which every entry carried a cost
-            equal to minus the logarithm of its estimated probability, laid that
-            machine over the sentence, and asked for the cheapest way through.
-            Finding the words stopped being a scan with a rule attached and
-            became a shortest-path problem, which is a question with one answer
-            rather than a procedure with a convention bolted to it.
-          </p>
-          <p>
-            The search that answers it was already old. Richard
-            Bellman&rsquo;s work on dynamic programming at RAND in the 1950s is
-            where the argument comes from, that if the whole of a route is best
-            then the tail of that route is best for the tail of the problem, so a
-            best route can be assembled backwards from its end. Andrew
-            Viterbi&rsquo;s 1967 paper in the IEEE Transactions on Information
-            Theory applied exactly that recurrence to decoding convolutional
-            codes coming off a noisy channel, and it is the same recurrence used
-            here with words in place of code states. The segmenter most people
-            reach for in Python today, Jieba, is this method almost line for
-            line, building the graph of dictionary matches over each run of
-            characters and taking the most probable path through it, with a
-            separate character model kept for the stretches its dictionary
-            missed.
-          </p>
-          <p>
-            This page asks six questions in order. What exactly is laid out when
-            every reading is laid out at once? What is a whole reading worth, and
-            why is that a sum rather than a product? What does scoring the whole
-            path fix that scoring each step could not? Why is finding the best of
-            an enormous number of readings affordable at all? What does a stretch
-            no entry covers cost, and what does that cost decide? And where does
-            the scoring stop deciding, so that something outside it has to?
-          </p>
-        </>
-      }
+
       playground={<LatticePlayground />}
       sections={[
         {
           title: "Part 1. What Committing at Each Step Costs",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Where the greedy scan left off">
                 <p>
                   The previous page took the longest entry of a word list that
@@ -126,17 +79,14 @@ export default function TheWordLatticePage() {
                   ]}
                   caption="Both texts against the word lists the previous page used, which are nine Chinese words and 810 common English words. In each case a long entry that happened to begin where the scan was standing was taken, and what came after it had nothing good left to do."
                 />
-                <p>
-                  The English case is the one to look at closely, since anybody
-                  can check it. Standing after under, the longest entry in a list
-                  of 810 ordinary English words that begins there is theta, the
-                  Greek letter, which the list holds like any other word. Taking
-                  it leaves b, l and e behind, three characters no entry covers,
-                  and the answer comes back in seven pieces where five would have
-                  done. The scan had no way of knowing that theta was going to
-                  cost three pieces later, because at the moment it chose, later
-                  did not exist.
+                <>
+<p>
+                  The English case is the one to look at closely, since anybody can check it. Standing after under, the longest entry in a list of 810 ordinary English words that begins there is theta, the Greek letter, which the list holds like any other word. Taking it leaves b, l and e behind, three characters no entry covers, and the answer comes back in seven pieces where five would have done.
                 </p>
+                <p>
+                  The scan had no way of knowing that theta was going to cost three pieces later, because at the moment it chose, later did not exist.
+                </p>
+</>
                 <p>
                   The second failure is not repaired here and it would be
                   dishonest to imply it is. A word the list does not hold cannot
@@ -171,17 +121,14 @@ export default function TheWordLatticePage() {
                   readings use three real words.
                 </p>
                 <LatticeBoard scenarioKeys={["research"]} />
-                <p>
-                  Ten candidates in all, which are the five entries at the
-                  positions where they fit and the five single characters that no
-                  entry covers. Each one knows where it starts and where it ends,
-                  so the arc for the first entry runs from position 0 to position
-                  2 and the arc for the three-character entry runs from 0 to 3.
-                  An arrangement like this one is what the method is named after,
-                  and this sense of the word, a set of positions with arcs
-                  between them, has nothing to do with the lattice of order
-                  theory that the same word names in algebra.
+                <>
+<p>
+                  Ten candidates in all, which are the five entries at the positions where they fit and the five single characters that no entry covers. Each one knows where it starts and where it ends, so the arc for the first entry runs from position 0 to position 2 and the arc for the three-character entry runs from 0 to 3.
                 </p>
+                <p>
+                  An arrangement like this one is what the method is named after, and this sense of the word, a set of positions with arcs between them, has nothing to do with the lattice of order theory that the same word names in algebra.
+                </p>
+</>
                 <KeepInMind>
                   Nothing has been decided yet. The lattice is a statement of
                   what the list permits and it contains the greedy answer, the
@@ -288,7 +235,7 @@ export default function TheWordLatticePage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. What a Whole Reading Is Worth",
@@ -385,18 +332,14 @@ export default function TheWordLatticePage() {
                   very small numbers.
                 </p>
                 <WhyThisWorks>
-                  <p>
-                    There is a second reason to prefer the sum, and it is
-                    structural rather than numerical. A sum over the words of a
-                    reading is a sum over the arcs of a path, so the score of a
-                    path is the total of the weights on the arcs it walks. That
-                    is the shape every shortest-path argument needs, and it is
-                    what lets the fourteenth section split a path into a head and
-                    a tail and reason about the two separately. A product would
-                    work for the same reason, since it factors the same way, but
-                    the additive form is the one every result about paths is
-                    written in.
+                  <>
+<p>
+                    There is a second reason to prefer the sum, and it is structural rather than numerical. A sum over the words of a reading is a sum over the arcs of a path, so the score of a path is the total of the weights on the arcs it walks. That is the shape every shortest-path argument needs, and it is what lets the fourteenth section split a path into a head and a tail and reason about the two separately.
                   </p>
+                  <p>
+                    A product would work for the same reason, since it factors the same way, but the additive form is the one every result about paths is written in.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   Logarithms here are bookkeeping and not modelling. The model is
@@ -416,22 +359,25 @@ export default function TheWordLatticePage() {
                 </p>
                 <PathLadder scenarioKeys={["research"]} />
                 <WorkedExample>
-                  <p>
-                    The research reading multiplies 10 by 8 by 5 and divides by
-                    33 three times, which in logarithms is −1.1939 and −1.4171
-                    and −1.8871 added up to −4.4981. The graduate student reading
-                    multiplies 6 by 4 by 5 over the same three divisions, which
-                    is −1.7047 and −2.1102 and −1.8871 added up to −5.7020. The
-                    gap is 1.2040.
-                  </p>
-                  <p>
-                    That gap is the logarithm of 400 over 120, since the
-                    divisions by 33 are the same three divisions on both sides
-                    and cancel, and 400 over 120 is 10 over 3. So the winning
-                    reading is three and a third times as likely as the other one
-                    under these counts, and the widget prints the same thing as a
-                    share of 30 per cent.
-                  </p>
+                  <>
+                    <p>
+                      Each three-piece reading multiplies its three word probabilities.
+                      In log space, add the log probabilities instead.
+                    </p>
+                    <Equation>{"research reading = ln(10/33) + ln(8/33) + ln(5/33) ≈ −4.4981\ngraduate-student reading = ln(6/33) + ln(4/33) + ln(5/33) ≈ −5.7020\nlog-score difference ≈ 1.2040"}</Equation>
+                  </>
+                  <>
+                    <p>
+                      Both readings contain three pieces, so their common denominator
+                      cancels when we compare probabilities.
+                    </p>
+                    <Equation>{"probability ratio = (10 × 8 × 5) / (6 × 4 × 5)\n                  = 400 / 120 = 10/3\nlog ratio = ln(10/3) ≈ 1.2040\nlosing probability / winning probability = 120/400 = 0.30"}</Equation>
+                    <p>
+                      The thirty percent shown by the widget is relative to the winning
+                      path. It is not the losing path’s normalized share of all possible
+                      readings.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   It is worth being exact about what has been settled here. The
@@ -459,15 +405,18 @@ export default function TheWordLatticePage() {
                   reverses.
                 </p>
                 <PathLadder scenarioKeys={["research-student"]} />
-                <p>
-                  The graduate student reading now scores −4.9319 and the
-                  research reading −6.0305, a gap of 1.0986, which is the
-                  logarithm of 1200 over 400 and so exactly three. Meanwhile the
-                  greedy rule answers the same thing it answered before, from the
-                  left the graduate student and from the right the research,
-                  because it reads no counts and there was nothing in it for the
-                  change to reach.
-                </p>
+                <>
+                  <p>
+                    After the count changes, the graduate-student reading wins. Compare
+                    the two path products again.
+                  </p>
+                  <Equation>{"probability ratio = (20 × 12 × 5) / (10 × 8 × 5)\n                  = 1,200 / 400 = 3\nlog-score difference = ln 3 ≈ 1.0986"}</Equation>
+                  <p>
+                    The log-score difference is about 1.0986; the probability ratio is
+                    three. Greedy longest matching is unchanged because it does not
+                    consult these counts.
+                  </p>
+                </>
                 <InAModel>
                   <p>
                     That is the difference worth carrying away from this part.
@@ -489,6 +438,54 @@ export default function TheWordLatticePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "Building the lattice decides nothing.",
+              true,
+              "It is a statement of what the list permits, and it holds the greedy answer, the answer a reader would give, and every wrong answer as well, all on the same footing. On the six characters that is ten candidates, the five entries at the positions where they fit and the five single characters no entry covers.",
+            ),
+            choice(
+              "A text of n characters admits two to the power of n minus one cuts. What does the word list buy?",
+              [
+                "Almost none of those cuts are paths, since a cut whose pieces are not entries has no arcs to walk along",
+                "It brings the count of readings down to something small",
+                "It rules out every reading that uses a bare single character",
+                "It fixes the number of readings at ten whatever the text",
+              ],
+              0,
+              "Ten of thirty-two on six characters, and 240 of seventeen and a half trillion on forty-five, so the filter tightens as the text lengthens without ever bringing the count down to something small. Enumerating the readings is therefore not on the table, which is what the search in Part 4 is for.",
+            ),
+            choice(
+              "Why is the model computed as a sum of logarithms rather than as the product of shares it actually is?",
+              [
+                "A product of many shares falls below the smallest number a computer can tell from zero, and a sum over arcs is the shape every result about paths is written in",
+                "The logarithm changes which reading wins, in favour of the shorter one",
+                "It makes every score positive and so easier to compare",
+                "It turns the shares into probabilities that add to one",
+              ],
+              0,
+              "The logarithm is increasing, so whichever product was larger has the larger logarithm and nothing about which reading wins changes. Every score is negative, since every share is below one, and a score nearer zero is the likelier reading. Logarithms here are bookkeeping and not modelling.",
+            ),
+            trueFalse(
+              "Counting the graduate-student entry 20 times rather than 6 and the single character 12 rather than 4 reverses the answer, and changes the lattice with it.",
+              false,
+              "The lattice is character for character the same, the same ten candidates at the same ten spans, and only the answer moves. Greedy longest matching is unchanged as well, because it never consults these counts. That is the difference worth carrying away, since the greedy rule’s answer is a property of the direction it was run in and this one’s is a property of the counts it was given.",
+            ),
+            several(
+              "Both of the model’s assumptions are wrong. Which of these hold?",
+              [
+                "Words are not independent, since research is far likelier before origin than after it",
+                "The counts come from whatever text somebody happened to count",
+                "The independence is what makes the search possible at all",
+                "The counts are the only evidence about the language the method has",
+              ],
+              [0, 1, 2, 3],
+              "All four hold, and neither failing is fatal. Treating the words as independent is false about language and is exactly what lets the search in Part 4 keep one number per position, so the cost and the crudeness are the same fact. The counts are evidence about whatever text was counted rather than about the language, and one lattice under two sets of counts gives two opposite answers, so where the counts came from is the whole question and not one this method contains an answer to.",
+            ),
+        ],
         },
         {
           title: "Part 3. What Scoring the Whole Path Fixes",
@@ -643,39 +640,37 @@ export default function TheWordLatticePage() {
                   nowhere in the sentence at all.
                 </p>
                 <GrowingWordList />
-                <p>
-                  The condition above is 3 times the total against 10 times 10,
-                  so the two readings are exactly level when the total reaches
-                  33.3333, and any total above that reads the compound whole. At
-                  32 the split wins by 0.0408. Counting one unrelated word twice
-                  takes the total to 34, and the compound wins by 0.0198. Nothing
-                  about the sentence, its candidates or their counts changed
-                  between those two answers.
-                </p>
-                <p>
-                  My first reading of this was that it made the answer depend on
-                  how much text had been counted, and the control at the bottom
-                  of the widget says otherwise. Multiply all six counts by a
-                  hundred, so that the total runs from 32 to 3,200, and the
-                  winning score stays at −6.7729 to the last bit, because every
-                  share is a count over a total and multiplying both leaves it
-                  alone. Counting the same text over again moves nothing. What
-                  moved the answer above was one count belonging to a word this
-                  sentence never uses.
-                </p>
-                <InAModel>
+                <>
                   <p>
-                    The condition itself is a quantity this site has a page on
-                    already. Dividing both sides by the total twice turns it into
-                    a comparison between the share of the compound and the product
-                    of the shares of its two characters, which is exactly the
-                    pointwise mutual information between them being above zero,
-                    and reading a compound whole is worth it precisely when its
-                    two halves attract. Mass belonging to other words lowers the
-                    share of each half and so lowers their product twice as fast
-                    as it lowers the share of the compound, which is why a wide
-                    vocabulary makes long words easier to keep.
+                    The compound’s count is three and its two separate words each have
+                    count ten. The preference changes when the corpus total crosses the
+                    following threshold.
                   </p>
+                  <Equation>{"tie condition: 3 × total = 10 × 10\ntie total = 100/3 ≈ 33.3333"}</Equation>
+                  <p>
+                    At total thirty-two, splitting wins by about 0.0408 in log score.
+                    Adding two occurrences of an unrelated word raises the total to
+                    thirty-four, making the compound win by about 0.0198. The sentence
+                    and its candidate counts did not change.
+                  </p>
+                </>
+                <>
+<p>
+                  My first reading of this was that it made the answer depend on how much text had been counted, and the control at the bottom of the widget says otherwise. Multiply all six counts by a hundred, so that the total runs from 32 to 3,200, and the winning score stays at −6.7729 to the last bit, because every share is a count over a total and multiplying both leaves it alone.
+                </p>
+                <p>
+                  Counting the same text over again moves nothing. What moved the answer above was one count belonging to a word this sentence never uses.
+                </p>
+</>
+                <InAModel>
+                  <>
+<p>
+                    The condition itself is a quantity this site has a page on already. Dividing both sides by the total twice turns it into a comparison between the share of the compound and the product of the shares of its two characters, which is exactly the pointwise mutual information between them being above zero, and reading a compound whole is worth it precisely when its two halves attract.
+                  </p>
+                  <p>
+                    Mass belonging to other words lowers the share of each half and so lowers their product twice as fast as it lowers the share of the compound, which is why a wide vocabulary makes long words easier to keep.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   The best path is a property of the whole string and of the whole
@@ -787,19 +782,14 @@ export default function TheWordLatticePage() {
                     be. The swap is legal because both tails start at exactly the
                     position where the head ends, so either fits on as it stands.
                   </p>
-                  <p>
-                    The step doing the work is that the score is a sum whose terms
-                    depend on nothing but the arcs, so a tail is worth the same
-                    whatever head it was reached by. That is exactly the
-                    independence assumption of the fifth section, cashed in. If a
-                    word&rsquo;s score depended on the word before it, a tail
-                    would be worth different amounts after different heads, the
-                    swap would change what the tail scored, and a single number
-                    per position would no longer be enough. The repair is to keep
-                    one number per
-                    position and per preceding word, which multiplies the table by
-                    the size of the list, and is where the cheapness stops.
+                  <>
+<p>
+                    The step doing the work is that the score is a sum whose terms depend on nothing but the arcs, so a tail is worth the same whatever head it was reached by. That is exactly the independence assumption of the fifth section, cashed in. If a word&rsquo;s score depended on the word before it, a tail would be worth different amounts after different heads, the swap would change what the tail scored, and a single number per position would no longer be enough.
                   </p>
+                  <p>
+                    The repair is to keep one number per position and per preceding word, which multiplies the table by the size of the list, and is where the cheapness stops.
+                  </p>
+</>
                 </WhyThisWorks>
                 <p>
                   This is the argument Bellman called the principle of optimality
@@ -845,16 +835,14 @@ export default function TheWordLatticePage() {
                   ]}
                   caption="Substrings the word list was asked about, on the three texts. The best path costs between two and seven times what the greedy scan costs on these, and both are linear in the length of the text against a number of readings that is not."
                 />
-                <p>
-                  There is one cost that is not a count of questions and it
-                  matters more in practice. The greedy scan can hand back its
-                  first word after reading a few characters; this one cannot say
-                  anything until it has reached the end of the run and come back,
-                  because best(0) is the last number the table fills in. On a
-                  sentence that is nothing, and on a stream of text that has to be
-                  cut into runs first, it is the reason whitespace ending a run
-                  matters as much here as it did on the previous page.
+                <>
+<p>
+                  There is one cost that is not a count of questions and it matters more in practice. The greedy scan can hand back its first word after reading a few characters; this one cannot say anything until it has reached the end of the run and come back, because best(0) is the last number the table fills in.
                 </p>
+                <p>
+                  On a sentence that is nothing, and on a stream of text that has to be cut into runs first, it is the reason whitespace ending a run matters as much here as it did on the previous page.
+                </p>
+</>
                 <KeepInMind>
                   Between two and seven times the questions, and the same order of
                   growth, in exchange for a comparison between whole readings
@@ -865,6 +853,54 @@ export default function TheWordLatticePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Standing after under, the greedy scan took the five-letter Greek letter. What does scoring the whole path change about that choice?",
+              [
+                "A path through it still has to reach the end of the text with single characters, so the purchase and the bill are terms in the same sum",
+                "The candidate is removed from the lattice",
+                "The scan backtracks out of the bad choice once the stranded characters appear",
+                "The scan looks three characters ahead before committing",
+              ],
+              0,
+              "Nothing looked ahead and nothing backtracked, because no choice was made at that position at all. The reading a person gives uses five words and scores −33.4852, and the greedy one uses seven and scores −46.8792, which makes it one part in 656,100 as likely. Every candidate is built exactly as before, and only the comparison moved.",
+            ),
+            trueFalse(
+              "With a word list and no counts, maximising the score means using as few words as possible.",
+              true,
+              "Every entry has been counted once, so every word is worth the same and the score is that one value added up once per word. On the wildlife park sentence the best paths use five words for −10.9861 where the greedy scan from the left used six for −13.1833. What is not repaired is the reading, since two different paths use five words and score identically to the last bit.",
+            ),
+            trueFalse(
+              "Counting the same text over again can change which reading wins.",
+              false,
+              "Multiply all six counts by a hundred, so the total runs from 32 to 3,200, and the winning score stays at −6.7729 to the last bit, because every share is a count over a total and multiplying both leaves it alone. What moved the answer was one count belonging to a word the sentence never uses, taking the total from thirty-two to thirty-four.",
+            ),
+            choice(
+              "Reading a compound whole is worth more than reading it as its two separate words exactly when what holds?",
+              [
+                "Its two halves attract, which is their pointwise mutual information being above zero",
+                "Its count is larger than the sum of its two halves’ counts",
+                "The compound is longer than two characters",
+                "The total of all counts is below one hundred",
+              ],
+              0,
+              "Dividing both sides of the tie condition by the total twice turns it into a comparison between the share of the compound and the product of the shares of its halves. Mass belonging to other words lowers the share of each half and so lowers their product twice as fast as it lowers the share of the compound, which is why a wide vocabulary makes long words easier to keep.",
+            ),
+            choice(
+              "The search keeps one number per position. What makes that enough?",
+              [
+                "A tail is worth the same whatever head reached it, because the score is a sum whose terms depend on nothing but the arcs",
+                "Every position offers exactly one candidate that can lie on the best path",
+                "The candidates at a position are tried longest first",
+                "The table is filled from the left, so a head is settled before its tail",
+              ],
+              0,
+              "That is the independence assumption cashed in. If a word’s score depended on the word before it, a tail would be worth different amounts after different heads, the swap argument would fail, and the repair would be one number per position and per preceding word, which multiplies the table by the size of the list. The table is filled from the right-hand end, since the score at the end of the text is zero.",
+            ),
+        ],
         },
         {
           title: "Part 5. A Stretch the Word List Never Saw",
@@ -919,18 +955,14 @@ export default function TheWordLatticePage() {
                   counts lets it.
                 </p>
                 <WhyThisWorks>
-                  <p>
-                    An entry covering k characters scores the logarithm of its
-                    count over the total. The k unknown characters underneath it
-                    score the logarithm of one over the total, k times over, which
-                    is the logarithm of one over the total raised to the k. Since
-                    an entry is counted at least once, its numerator is at least
-                    one; since the total is above one, dividing by it k times is
-                    worse than dividing by it once. So for any k of two or more
-                    the entry wins, and at k equal to one the question does not
-                    arise, because a character the list holds gets no fallback
-                    candidate.
+                  <>
+<p>
+                    An entry covering k characters scores the logarithm of its count over the total. The k unknown characters underneath it score the logarithm of one over the total, k times over, which is the logarithm of one over the total raised to the k. Since an entry is counted at least once, its numerator is at least one; since the total is above one, dividing by it k times is worse than dividing by it once.
                   </p>
+                  <p>
+                    So for any k of two or more the entry wins, and at k equal to one the question does not arise, because a character the list holds gets no fallback candidate.
+                  </p>
+</>
                 </WhyThisWorks>
                 <p>
                   It also says something about the shape of the failure. The
@@ -1005,18 +1037,14 @@ export default function TheWordLatticePage() {
                   the previous page was made of.
                 </p>
                 <PathLadder scenarioKeys={["table"]} />
-                <p>
-                  Seventeen characters of ordinary English against 810 words
-                  counted once each. Two readings use four words, they score
-                  −26.7881 apiece and the two numbers are equal in every bit, so
-                  the gap is zero and neither is likelier. One of them is the
-                  sentence and the other is four real English words nobody would
-                  write, and what decides is a rule about which candidate to keep
-                  when a comparison comes out level. Prefer the longer candidate,
-                  which is the usual choice, and the five-letter Greek letter is
-                  taken and the wrong reading comes back. The greedy scan run from
-                  the right end had answered correctly.
+                <>
+<p>
+                  Seventeen characters of ordinary English against 810 words counted once each. Two readings use four words, they score −26.7881 apiece and the two numbers are equal in every bit, so the gap is zero and neither is likelier. One of them is the sentence and the other is four real English words nobody would write, and what decides is a rule about which candidate to keep when a comparison comes out level.
                 </p>
+                <p>
+                  Prefer the longer candidate, which is the usual choice, and the five-letter Greek letter is taken and the wrong reading comes back. The greedy scan run from the right end had answered correctly.
+                </p>
+</>
                 <p>
                   Ties are not an accident of a small example either. With every
                   count equal the score is a count of words times a constant, so
@@ -1083,28 +1111,22 @@ export default function TheWordLatticePage() {
                   good the scoring becomes, the word list is the boundary of what
                   can be said.
                 </p>
-                <p>
-                  The second is that the scores are not probabilities of anything,
-                  and it is worth seeing why rather than taking it as a caution.
-                  Every entry&rsquo;s share is its count over the total of every
-                  count, so the shares of the entries add to exactly one already.
-                  Each single character the list does not hold is then handed
-                  another share of one over the total on top of that. The numbers
-                  being multiplied together therefore add to more than one over
-                  the things they describe, so a score ranks readings correctly
-                  and is no probability.
+                <>
+<p>
+                  The second is that the scores are not probabilities of anything, and it is worth seeing why rather than taking it as a caution. Every entry&rsquo;s share is its count over the total of every count, so the shares of the entries add to exactly one already. Each single character the list does not hold is then handed another share of one over the total on top of that.
                 </p>
                 <p>
-                  That is why the widgets on this page print a gap and a ratio
-                  rather than a confidence. The difference between two scores is
-                  readable, since the extra mass sits in both of them and cancels
-                  in the comparison, and a single score standing on its own cannot
-                  be read as how sure anything is. Building a segmenter that
-                  answers with a genuine probability means reserving mass for
-                  words nobody has written down and taking it away from the ones
-                  the list holds, which is a different model rather than a
-                  correction to this one.
+                  The numbers being multiplied together therefore add to more than one over the things they describe, so a score ranks readings correctly and is no probability.
                 </p>
+</>
+                <>
+<p>
+                  That is why the widgets on this page print a gap and a ratio rather than a confidence. The difference between two scores is readable, since the extra mass sits in both of them and cancels in the comparison, and a single score standing on its own cannot be read as how sure anything is.
+                </p>
+                <p>
+                  Building a segmenter that answers with a genuine probability means reserving mass for words nobody has written down and taking it away from the ones the list holds, which is a different model rather than a correction to this one.
+                </p>
+</>
                 <KeepInMind>
                   Neither of these shows up in an answer. A reading built entirely
                   out of entries looks the same whether the list was complete or
@@ -1186,6 +1208,221 @@ export default function TheWordLatticePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "A character no entry covers has to be scored somehow. What score does it get?",
+              [
+                "The score of a word counted exactly once, which against a list counted 33 times is −3.4965",
+                "Zero, since nothing whatever is known about it",
+                "The score of the rarest entry in the list, −2.1102",
+                "The score of the commonest entry in the list, −1.1939",
+              ],
+              0,
+              "It is the smallest score a real entry could have had, and it is a convention rather than a measurement. Setting it lower makes a stretch of unknown characters so expensive that the path contorts to avoid it, and setting it higher lets single characters start winning against real words.",
+            ),
+            trueFalse(
+              "Some arrangement of the counts would let a stretch of unknown characters outscore a single entry covering the same stretch.",
+              false,
+              "An entry is counted at least once, so its numerator is at least one, and dividing by the total k times over is worse than dividing by it once. For any stretch of two or more the entry wins, and at one the question does not arise, since a character the list holds gets no fallback candidate. The fallback is a floor rather than a competitor, so every error of this kind falls on the same side.",
+            ),
+            trueFalse(
+              "Where the top two readings score the same, reporting a single answer is reporting a convention as though it were a result.",
+              true,
+              "On seventeen characters against 810 words counted once each, two readings use four words and score −26.7881 apiece, equal in every bit. One is the sentence and the other is four real English words nobody would write, and preferring the longer candidate takes the Greek letter and returns the wrong one. The number worth carrying beside any segmentation is the gap to the next reading, since a gap of zero says the method chose nothing.",
+            ),
+            choice(
+              "Why are the scores not probabilities of anything?",
+              [
+                "The entries’ shares already add to one, and each uncovered single character is handed a further share on top of that",
+                "The logarithm destroys the normalisation",
+                "The counts came from a corpus rather than from the language itself",
+                "A product of many shares falls below the smallest number a computer holds",
+              ],
+              0,
+              "The numbers being multiplied together therefore add to more than one over the things they describe, so a score ranks readings correctly and is no probability. A difference between two scores is still readable, since the extra mass sits in both and cancels in the comparison, which is why the widgets print a gap and a ratio rather than a confidence.",
+            ),
+            several(
+              "Which of these are decisions rather than limits of the method?",
+              [
+                "How a tie is settled",
+                "What an uncovered character is worth",
+                "What text the counts were taken from",
+                "That a reading using a word the list lacks was never a candidate",
+              ],
+              [0, 1, 2],
+              "Each of the three has a defensible answer on more than one side and each changes the cut, so each belongs in whatever describes a segmenter. The fourth is the ceiling rather than a choice, since however good the scoring becomes the word list is the boundary of what can be said. The fourth decision the page names is which words the list carries besides the ones a sentence uses.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Scoring Whole Readings With the Library",
+          practice: [
+            exercise(
+              "Score both readings under both sets of counts",
+              ["Part 2 scored the research reading of 研究生命起源 at −4.4981 and the graduate-student reading at −5.7020 under the first table of counts, then moved two counts and reversed the answer. Build each table as a dictionary with counts, ask the segmenter for its best path and total, and score both readings yourself from the definition, as the sum of the logarithms of the shares.", "The best path’s total should match the definition’s score for whichever reading won. The lesson quotes the gap of 1.0986 after the counts move but never prints either total under the second table."],
+              `import math
+from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
+
+sentence = "研究生命起源"
+tables = {
+    "research favoured": {"研究": 10, "生命": 8, "起源": 5, "研究生": 6, "命": 4},
+    "student favoured": {"研究": 10, "生命": 8, "起源": 5, "研究生": 20, "命": 12},
+}
+readings = {"research": ("研究", "生命", "起源"), "student": ("研究生", "命", "起源")}
+
+for label, counts in tables.items():
+    dictionary = WordDictionary([DictionaryEntry(word, count) for word, count in counts.items()])
+    # Ask a lattice segmenter over this dictionary for the best path of the sentence,
+    # print its words and total, then print each reading's score from the definition.
+    pass`,
+              `import math
+from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
+
+sentence = "研究生命起源"
+tables = {
+    "research favoured": {"研究": 10, "生命": 8, "起源": 5, "研究生": 6, "命": 4},
+    "student favoured": {"研究": 10, "生命": 8, "起源": 5, "研究生": 20, "命": 12},
+}
+readings = {"research": ("研究", "生命", "起源"), "student": ("研究生", "命", "起源")}
+
+for label, counts in tables.items():
+    dictionary = WordDictionary([DictionaryEntry(word, count) for word, count in counts.items()])
+    path = DictionaryLatticeSegmenter(dictionary=dictionary).best_path(sentence)
+    print(f"{label}, total {dictionary.total_frequency}: {' | '.join(path.words)} scores {path.total_log_score:.4f}")
+    for name, words in readings.items():
+        total = dictionary.total_frequency
+        score = sum(math.log(dictionary.frequency_of(word) / total) for word in words)
+        print(f"  {name} reading from the definition {score:.4f}")`,
+              `research favoured, total 33: 研究 | 生命 | 起源 scores -4.4981
+  research reading from the definition -4.4981
+  student reading from the definition -5.7020
+student favoured, total 55: 研究生 | 命 | 起源 scores -4.9319
+  research reading from the definition -6.0305
+  student reading from the definition -4.9319`,
+              { hints: ["A dictionary with counts is WordDictionary built from DictionaryEntry(word, count) objects, one per word. from_words would give every word a count of one, which is the other page.", "DictionaryLatticeSegmenter takes the dictionary at construction, and best_path answers an object whose words and total_log_score are the reading and its score.", "The dictionary answers frequency_of(word) and total_frequency, so a reading’s score from the definition is the sum over its words of math.log(frequency_of(word) / total_frequency)."], check: numberCheck("What does the best path score under the counts that favour the graduate student?", -4.9319, 0.0005, "With the graduate-student entry at 20 and the lone character at 12 the total is 55, and the winning reading is ln(20/55) + ln(12/55) + ln(5/55). The research reading scores −6.0305 under the same counts, 1.0986 behind, which is ln 3 and is the gap Part 2 quotes. The lattice is the same ten candidates either way, and only the counts moved.") },
+            ),
+            exercise(
+              "Lay out the lattice and read every candidate",
+              ["Part 1 drew ten candidates for the six characters, five entries and five single characters no entry covers. Build the lattice with the research-favouring counts, print every candidate with its span and its score, and then ask the lattice itself for its best path.", "Part 5 says a character no entry covers scores the logarithm of one over the total, which is −3.4965 at a total of 33. The fallbacks should all show that score and the entries should show their own shares."],
+              `from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
+
+sentence = "研究生命起源"
+counts = {"研究": 10, "生命": 8, "起源": 5, "研究生": 6, "命": 4}
+dictionary = WordDictionary([DictionaryEntry(word, count) for word, count in counts.items()])
+
+# Build the lattice of the sentence, print how many candidates it holds, then print
+# each candidate's word, span and log score, marking whether the list holds it, and
+# finally the words and total of the lattice's own best path.`,
+              `from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
+
+sentence = "研究生命起源"
+counts = {"研究": 10, "生命": 8, "起源": 5, "研究生": 6, "命": 4}
+dictionary = WordDictionary([DictionaryEntry(word, count) for word, count in counts.items()])
+
+lattice = DictionaryLatticeSegmenter(dictionary=dictionary).lattice_of(sentence)
+print(f"{lattice.n_edges} candidates over {lattice.n_positions} characters")
+for edge in lattice:
+    kind = "entry" if edge.word in dictionary else "fallback"
+    print(f"  {edge.word} [{edge.start}, {edge.end}) scores {edge.log_score:.4f} ({kind})")
+
+best = lattice.best_path()
+print(f"best path {' | '.join(best.words)} scores {best.total_log_score:.4f}")`,
+              `10 candidates over 6 characters
+  研 [0, 1) scores -3.4965 (fallback)
+  研究 [0, 2) scores -1.1939 (entry)
+  研究生 [0, 3) scores -1.7047 (entry)
+  究 [1, 2) scores -3.4965 (fallback)
+  生 [2, 3) scores -3.4965 (fallback)
+  生命 [2, 4) scores -1.4171 (entry)
+  命 [3, 4) scores -2.1102 (entry)
+  起 [4, 5) scores -3.4965 (fallback)
+  起源 [4, 6) scores -1.8871 (entry)
+  源 [5, 6) scores -3.4965 (fallback)
+best path 研究 | 生命 | 起源 scores -4.4981`,
+              { hints: ["lattice_of on the segmenter answers a Lattice, which knows its n_edges and n_positions and iterates its candidates by start position.", "Each candidate is a LatticeEdge with word, start, end and log_score. The dictionary supports the in operator, which is what separates an entry from a fallback.", "The lattice has its own best_path, which runs the recurrence of Part 4 over the candidates it holds and answers the same words the segmenter does."], check: numberCheck("How many candidates does the lattice hold for the six characters?", 10, 0.5, "Five entries fit somewhere in the sentence, and every one of the six characters that no entry covers on its own gets a fallback candidate, except 命, which is an entry already. That makes five entries and five fallbacks, and the search in Part 4 does one addition per candidate, ten in all, to settle a choice among the ten readings they spell out.") },
+            ),
+            exercise(
+              "Repair the greedy scan on five English words",
+              ["Part 3 runs thewaterunderthetable past the greedy scan, which takes the Greek letter and strands three characters, and then past the lattice, which does not. The page uses the list of 810 words, which is too long to type, so use a list of five words counted once each that holds the four the sentence uses and theta. Run both methods and score both answers.", "With every count one the score of a reading is its number of words times the logarithm of one over the total, so the greedy reading can be scored from the definition without a lattice. The totals differ from the page’s, since the list is smaller, and the shape of the repair should not."],
+              `import math
+from oop_ml import DictionaryLatticeSegmenter, MaximumMatchingSegmenter, WordDictionary
+
+text = "thewaterunderthetable"
+dictionary = WordDictionary.from_words(["the", "water", "under", "table", "theta"])
+one_word = math.log(1 / dictionary.total_frequency)
+
+# Split the text with the greedy scan from the left and print its pieces, their count
+# and the reading's score from the definition. Then find the lattice's best path and
+# print its words, its count and its total, and the gap between the two scores.`,
+              `import math
+from oop_ml import DictionaryLatticeSegmenter, MaximumMatchingSegmenter, WordDictionary
+
+text = "thewaterunderthetable"
+dictionary = WordDictionary.from_words(["the", "water", "under", "table", "theta"])
+one_word = math.log(1 / dictionary.total_frequency)
+
+greedy = MaximumMatchingSegmenter(dictionary=dictionary).split(text)
+print(f"greedy: {' | '.join(greedy.texts)} in {greedy.n_words} pieces")
+print(f"  scored from the definition {greedy.n_words * one_word:.4f}")
+
+path = DictionaryLatticeSegmenter(dictionary=dictionary).best_path(text)
+print(f"best path: {' | '.join(path.words)} in {path.n_edges} words")
+print(f"  scores {path.total_log_score:.4f}")
+
+gap = path.total_log_score - greedy.n_words * one_word
+print(f"gap {gap:.4f}, two words at {one_word:.4f} each, so one part in {math.exp(gap):.0f}")`,
+              `greedy: the | water | under | theta | b | l | e in 7 pieces
+  scored from the definition -11.2661
+best path: the | water | under | the | table in 5 words
+  scores -8.0472
+gap 3.2189, two words at -1.6094 each, so one part in 25`,
+              { hints: ["MaximumMatchingSegmenter scans from the left by default and answers Words, with texts and n_words. It will take theta at the fourth word exactly as the page describes.", "DictionaryLatticeSegmenter over the same dictionary answers its best_path, whose n_edges is the number of words it used and whose total_log_score is the sum of their scores.", "A stranded character is scored like a word counted once, so with every count one every piece of the greedy reading costs the same one_word, and its score is the count of pieces times that."], check: numberCheck("What does the lattice’s best path score on the five-word list?", -8.0472, 0.0005, "Every word is worth ln(1/5), which is −1.6094, and the reading a person gives uses five of them. The greedy reading spends seven pieces at the same price, four words and three stranded characters, so it scores two words less and is one part in 25 as likely. On the page the list held 810 words, so the same two extra pieces cost 810 twice over and made the greedy reading one part in 656,100 as likely.") },
+            ),
+            exercise(
+              "Count a word the sentence never uses",
+              ["Part 3 took six words in which the compound meaning life is counted 3 times and each of its characters 10, with the whole list counted 32 times, and then counted one more word that occurs nowhere in the sentence. Build the table, count 很 zero, one, two and three times, and print the best path and its score at each total.", "The page says splitting wins at 32 and the compound wins once the total reaches 34. Then multiply every count by a hundred as the control, and confirm the score does not move at all."],
+              `from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
+
+sentence = "研究生命起源"
+counts = {"研究": 6, "研究生": 1, "生命": 3, "生": 10, "命": 10, "起源": 2}
+
+for added in (0, 1, 2, 3):
+    table = dict(counts)
+    if added:
+        table["很"] = added
+    # Build the dictionary from the table, find the best path of the sentence, and
+    # print the count added, the total, the words and the score.
+    pass
+
+# Then build a dictionary with every count multiplied by 100 and print its best path
+# and score the same way.`,
+              `from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
+
+sentence = "研究生命起源"
+counts = {"研究": 6, "研究生": 1, "生命": 3, "生": 10, "命": 10, "起源": 2}
+
+for added in (0, 1, 2, 3):
+    table = dict(counts)
+    if added:
+        table["很"] = added
+    dictionary = WordDictionary([DictionaryEntry(word, count) for word, count in table.items()])
+    path = DictionaryLatticeSegmenter(dictionary=dictionary).best_path(sentence)
+    print(f"很 counted {added}, total {dictionary.total_frequency}: {' | '.join(path.words)} scores {path.total_log_score:.4f}")
+
+scaled = WordDictionary([DictionaryEntry(word, count * 100) for word, count in counts.items()])
+path = DictionaryLatticeSegmenter(dictionary=scaled).best_path(sentence)
+print(f"every count times 100, total {scaled.total_frequency}: {' | '.join(path.words)} scores {path.total_log_score:.4f}")`,
+              `很 counted 0, total 32: 研究 | 生 | 命 | 起源 scores -6.7729
+很 counted 1, total 33: 研究 | 生 | 命 | 起源 scores -6.8960
+很 counted 2, total 34: 研究 | 生命 | 起源 scores -6.9956
+很 counted 3, total 35: 研究 | 生命 | 起源 scores -7.0825
+every count times 100, total 3200: 研究 | 生 | 命 | 起源 scores -6.7729`,
+              { hints: ["The added word shares no character with the sentence, so it adds no candidate to the lattice. All it changes is total_frequency, which every score is divided by.", "A dictionary is built fresh for each table, since its total is fixed at construction.", "The control multiplies every count, so every share is a count over a total that both grew by the same factor, and the path and its score should come back identical."], check: numberCheck("What does the best path score once 很 is counted twice, at a total of 34?", -6.9956, 0.0005, "At a total of 34 the compound reading scores −6.9956 and the split reading −7.0154, so the compound wins by the 0.0198 Part 3 quotes, where at 32 the split reading won by 0.0408. The tie total is 100 over 3, about 33.3333, and it was crossed without a single count belonging to the sentence moving. Multiplying every count by a hundred leaves the split reading winning at −6.7729, to the last bit, because every share is a count over a total and both grew alike.") },
+            ),
+          ],
         },
       ]}
     />

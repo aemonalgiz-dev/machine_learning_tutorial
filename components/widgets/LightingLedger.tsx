@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // What a change of lighting does, stage by stage.
 //
@@ -164,13 +166,9 @@ export function LightingLedger() {
         ))}
       </div>
 
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        The bars run on a logarithmic scale from ten to the minus eighteenth to
-        ten thousand, so a green bar is a distance small enough to be nothing at
-        all. Watch the top row, where nothing is rescaled. Its shift bar stays
-        green whatever the shift is, and its multiply bar grows with the
-        multiplier; every row below it is green in all three places.
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">The comparison measures how far a descriptor moves when lighting changes. The bars use a logarithmic scale, so green indicates a very small numerical distance rather than a proof of exact equality.</p><Equation>{"Displayed distance range:\n10⁻¹⁸ to 10⁴"}</Equation><p className="mt-3 text-xs text-slate-500 dark:text-slate-400">In the unnormalized top row, the additive-shift comparison stays small while the brightness-multiplier comparison grows. The normalized rows remain small in the displayed experiment. That shows what the normalization removes under these specific lighting transformations.</p>
+</>
     </div>
   );
 }

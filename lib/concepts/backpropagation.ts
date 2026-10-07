@@ -23,7 +23,7 @@ export const HIDDEN_ACTIVATION_LABELS: Record<HiddenActivation, string> = {
   rectified_linear: "rectifier, max(0, z)",
   sigmoid: "sigmoid",
   hyperbolic_tangent: "hyperbolic tangent",
-  identity: "identity, no bend",
+  identity: "identity, output equals score",
 };
 
 // One neuron as the request carries it, a weight per input in the order the

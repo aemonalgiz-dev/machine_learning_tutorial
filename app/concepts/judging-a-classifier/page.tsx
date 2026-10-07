@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -24,7 +27,7 @@ import { TwoReadings } from "@/components/widgets/TwoReadings";
 export const metadata: Metadata = {
   title: "Judging a Classifier · oop_ml",
   description:
-    "Accuracy is one number and it hides two different mistakes. The confusion matrix keeps them apart, precision and recall ask two different questions of it, the threshold trades one mistake for the other, and a chance has to be measured before it is believed.",
+    "Count different kinds of classification mistakes and connect them to the decision you need to make.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -32,8 +35,12 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function JudgingAClassifierPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["judging-a-classifier"]}
+      technicalStart="Part 2. Two Questions Asked of One Table"
+      openingTitle="Two Models Can Be Equally Accurate and Fail Differently"
+      playgroundIntro="Look at the false positives and false negatives separately. Move the threshold and watch which kind of mistake becomes more common."
       title="Judging a Classifier"
-      tagline="Four cells, two questions, a dial that trades one mistake for the other, and a chance that has to earn its meaning."
+      tagline="Count different kinds of classification mistakes and connect them to the decision you need to make."
       prerequisites={
         <>
           The model being judged is the{" "}
@@ -54,92 +61,37 @@ export default function JudgingAClassifierPage() {
           repair it, and does not teach that again.
         </>
       }
-      history={
-        <>
-          <p>
-            The four cells came from medicine before they had a name. Jacob
-            Yerushalmy, a statistician at the United States Public Health
-            Service, was asked in 1947 how to compare the chest X-ray
-            techniques then used to screen for tuberculosis, and his paper in
-            Public Health Reports pointed out that a technique has two
-            separate failure rates, the share of the diseased it misses and
-            the share of the healthy it flags, which he called sensitivity
-            and specificity. The problem underneath was that the two could
-            not be compared as one number, since a reader who called more
-            films positive improved the first and worsened the second, so
-            any single score quietly chose how to weigh a missed case against
-            a false alarm. That is the same problem this page meets with a
-            child called an adult and an adult called a child, and the same
-            two rates appear in Part 2 as recall and specificity.
-          </p>
-          <p>
-            The curve came from radar. At the University of Michigan in
-            1954, Peterson, Birdsall and Fox published &ldquo;The theory of
-            signal detectability&rdquo;, which treated a receiver deciding whether a blip was a target as
-            a decision under uncertainty, and showed that the receiver&rsquo;s
-            whole behaviour, at every setting of its threshold, was one
-            curve of detections against false alarms. Wilson Tanner and John
-            Swets carried it into psychology the same year, and Lee Lusted
-            argued in Science in 1971 that a diagnostic test should be
-            reported the same way. James Hanley and Barbara McNeil showed in
-            1982, in Radiology, that the area under that curve is the
-            probability that a randomly chosen positive case is ranked above
-            a randomly chosen negative one, which is the number Part 3
-            counts directly on the crowd rather than integrating.
-          </p>
-          <p>
-            Precision and recall came from libraries. Allen Kent and his
-            colleagues at Western Reserve University proposed in 1955 that a
-            literature search be judged by two factors, the share of the
-            relevant documents it recovered and the share of what it
-            recovered that was relevant, and Cyril Cleverdon&rsquo;s Cranfield
-            experiments on indexing languages through the late 1950s and
-            1960s measured both across thousands of queries and found that
-            every indexing system traded one against the other. Keith van
-            Rijsbergen&rsquo;s 1979 textbook folded the two into the one
-            effectiveness measure whose complement is the F-score of Part 4.
-            Glenn Brier, a weather forecaster, had already asked in 1950 how
-            to score a forecast that says &ldquo;seventy percent chance of
-            rain&rdquo;, and his answer is the score Part 6 puts on a
-            classifier&rsquo;s chances. The page asks six questions in order.
-            Why is one number not a judgement? What two questions does the
-            table answer? What does the threshold trade, and what do the two
-            pictures of that trade show? How are two rates folded into one
-            when one is needed? What changes with three classes? And is a
-            chance of 0.7 seven in ten?
-          </p>
-        </>
-      }
+
       playground={<ThresholdMatrix />}
       sections={[
         {
           title: "Part 1. One Number Is Not a Judgement",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Twelve people, and two the boundary cannot place">
                 <p>
                   Twelve people are in the box above, six children and six
                   adults measured by height and weight, and each is labelled
                   with the chance the fitted model gives them of being an
                   adult. Ten of them are easy. Two are not, since there is a
-                  child at 168 centimetres and 66 kilograms who is built like
-                  an adult, and an adult at 150 centimetres and 50 kilograms
-                  who is built like a child, and no boundary drawn from height
-                  and weight can put those two on the right side at once.
+                  child at 168 centimetres and 66 kilograms, and an adult at
+                  150 centimetres and 50 kilograms. Their measurements overlap
+                  the other class, and this fitted model gives the child a
+                  higher adult score than the adult. A single threshold on
+                  those scores cannot classify both correctly.
+                </p>
+                <>
+<p>
+                  The model gives the tall child a chance of 0.8669 and the short adult a chance of 0.4911, and with the dial at the halfway mark it calls the first an adult and the second a child. Accuracy reports 0.8333 and stops. The colours in the box say more, that one child was called an adult and one adult was called a child, and those are different mistakes that a reader may care about very differently.
                 </p>
                 <p>
-                  The model gives the tall child a chance of 0.8669 and the
-                  short adult a chance of 0.4911, and with the dial at the
-                  halfway mark it calls the first an adult and the second a
-                  child. Accuracy reports 0.8333 and stops. The colours in the
-                  box say more, that one child was called an adult and one
-                  adult was called a child, and those are different mistakes
-                  that a reader may care about very differently. If the
-                  question were whether to admit somebody to an adult ward,
-                  one of them is paperwork and the other is a safeguarding
-                  failure.
+                  Different applications can attach different costs to these
+                  two mistakes. This height-and-weight exercise illustrates
+                  that distinction; it does not establish a reliable way to
+                  determine somebody&rsquo;s age.
                 </p>
+</>
                 <KeepInMind>
                   Accuracy adds the two kinds of mistake together and reports
                   the total, and on the twelve that total is two people out
@@ -157,18 +109,14 @@ export default function JudgingAClassifierPage() {
                   it is right about twenty-six people in thirty.
                 </p>
                 <AccuracyBaseline />
-                <p>
-                  The lazy classifier scores 0.8667, which is one minus the
-                  share of adults, and it would score 0.99 on a crowd where
-                  one person in a hundred was an adult. The fitted boundary
-                  at the halfway threshold scores 0.9333, finds three of the
-                  four adults and wrongly calls one child. The same boundary
-                  at a threshold of 0.7 also scores 0.9333, finds two of the
-                  four and wrongly calls nobody. Two classifiers with the
-                  identical accuracy, one of which finds half again as many
-                  adults as the other, and a third that finds none and is
-                  right about two people fewer.
+                <>
+<p>
+                  The lazy classifier scores 0.8667, which is one minus the share of adults, and it would score 0.99 on a crowd where one person in a hundred was an adult. The fitted boundary at the halfway threshold scores 0.9333, finds three of the four adults and wrongly calls one child. The same boundary at a threshold of 0.7 also scores 0.9333, finds two of the four and wrongly calls nobody.
                 </p>
+                <p>
+                  Two classifiers with the identical accuracy, one of which finds half again as many adults as the other, and a third that finds none and is right about two people fewer.
+                </p>
+</>
                 <Equation>{"everybody a child        26 right of 30   =  0.8667     adults found  0 of 4\nthe boundary at 0.5     28 right of 30   =  0.9333     adults found  3 of 4, one child wrongly called\nthe boundary at 0.7     28 right of 30   =  0.9333     adults found  2 of 4, no child wrongly called"}</Equation>
                 <KeepInMind>
                   Read accuracy beside the share of the majority class, since
@@ -216,7 +164,7 @@ export default function JudgingAClassifierPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Two Questions Asked of One Table",
@@ -357,6 +305,49 @@ export default function JudgingAClassifierPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "On the rare crowd of thirty the classifier that calls everybody a child scores 0.8667, which is one minus the share of adults.",
+              true,
+              "It finds no adult at all and is still right about twenty-six people in thirty, and on a crowd where one person in a hundred was an adult it would score 0.99. That share is what a classifier which learned nothing would score, so accuracy is worth reading beside it rather than on its own.",
+            ),
+            choice(
+              "On the rare crowd the fitted boundary at 0.5 and the same boundary at 0.7 both score 0.9333. What separates them?",
+              [
+                "The first finds three of the four adults and wrongly calls one child, the second finds two and wrongly calls nobody",
+                "The first was fitted on the thirty and the second was not",
+                "They differ only in how many children they correctly left alone",
+                "The second is better once the majority share is subtracted from both",
+              ],
+              0,
+              "Accuracy adds the two kinds of mistake together and reports the total, with no record of which two people it was. That is how one classifier can find half again as many adults as another and read identically, and it is the reason the four cells of the table are kept beside any rate quoted from them.",
+            ),
+            choice(
+              "What is a false positive here?",
+              [
+                "A child called an adult",
+                "An adult called a child",
+                "An adult the model found",
+                "A child the model left alone",
+              ],
+              0,
+              "Positive means the class the question is about, adult here, and has nothing to do with good news. The first word says whether the call was right and the second says what the call was, so an adult called a child is the false negative.",
+            ),
+            trueFalse(
+              "Turning the dial to 0.99, above every chance in the crowd, gives the model a precision of zero.",
+              false,
+              "Nobody is called an adult, so precision is zero over zero and comes back undefined. A model that made no positive claims has not made a wrong one, and the difference is kept by refusing to return a number rather than by returning 0. An undefined rate says the question could not be asked of this data, which is not the same as the answer being bad.",
+            ),
+            several(
+              "Which of these rates depend only on the ranking of the people and not on how many of each class there are?",
+              ["Recall", "Specificity", "Precision", "Accuracy"],
+              [0, 1],
+              "Recall is a share of the adults and specificity a share of the children, so each reads one column of the table and neither knows the make-up of the crowd. Precision is a share of the people called adult, who are drawn from both classes, which is why the curve built from recall and the false positive rate has a coin’s diagonal on any crowd and the precision-recall curve does not.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. The Threshold Trades One Mistake for the Other",
           content: (
             <>
@@ -372,18 +363,14 @@ export default function JudgingAClassifierPage() {
                   cells change only because people cross the line.
                 </p>
                 <SweepChart series={["precision", "recall"]} />
-                <p>
-                  Drag the marker down to 0.3. The short adult&rsquo;s 0.4911
-                  now clears the bar, so all six adults are found and recall
-                  is 1.0, while the tall child&rsquo;s 0.8669 still clears it
-                  too, so seven people are called adult and six of them are,
-                  for a precision of 0.8571. Drag it up to 0.9 and only the
-                  three adults above 0.9 are called, so precision is a
-                  perfect 1.0 and recall halves to 0.5, with the adults at
-                  0.7376, 0.7684 and 0.4911 now called children. The model
-                  did not change between the two readings, and neither did
-                  any chance; the line the calls are read against did.
+                <>
+<p>
+                  Drag the marker down to 0.3. The short adult&rsquo;s 0.4911 now clears the bar, so all six adults are found and recall is 1.0, while the tall child&rsquo;s 0.8669 still clears it too, so seven people are called adult and six of them are, for a precision of 0.8571. Drag it up to 0.9 and only the three adults above 0.9 are called, so precision is a perfect 1.0 and recall halves to 0.5, with the adults at 0.7376, 0.7684 and 0.4911 now called children.
                 </p>
+                <p>
+                  The model did not change between the two readings, and neither did any chance; the line the calls are read against did.
+                </p>
+</>
                 <KeepInMind>
                   Where to set the threshold is a decision about costs and not
                   a property of the model, and the same fitted chances serve
@@ -403,18 +390,14 @@ export default function JudgingAClassifierPage() {
                   why the indigo curve above only ever steps downward.
                 </p>
                 <Equation>{"threshold up   ⇒   TP can only fall,  FN can only rise\nrecall  =  TP / (TP + FN)     where TP + FN is the number of adults, fixed\n\nso recall never rises as the threshold rises"}</Equation>
-                <p>
-                  Precision has no such guarantee, because both its numerator
-                  and its denominator move. Reading the amber curve at five
-                  thresholds on the twelve gives 0.75 at 0.1, 0.8571 at 0.2,
-                  0.8333 at 0.5, 0.75 at 0.8 and 1.0 at 0.9. It rose, fell,
-                  fell and rose, and each move is one person crossing the
-                  line. Between 0.2 and 0.49 the seven people above the line
-                  include the tall child and every adult; at 0.5 the short
-                  adult drops out, taking one true positive from a numerator
-                  of six and one person from a denominator of seven, and the
-                  ratio falls from six sevenths to five sixths.
+                <>
+<p>
+                  Precision has no such guarantee, because both its numerator and its denominator move. Reading the amber curve at five thresholds on the twelve gives 0.75 at 0.1, 0.8571 at 0.2, 0.8333 at 0.5, 0.75 at 0.8 and 1.0 at 0.9. It rose, fell, fell and rose, and each move is one person crossing the line.
                 </p>
+                <p>
+                  Between 0.2 and 0.49 the seven people above the line include the tall child and every adult; at 0.5 the short adult drops out, taking one true positive from a numerator of six and one person from a denominator of seven, and the ratio falls from six sevenths to five sixths.
+                </p>
+</>
                 <NumberTable
                   headings={["threshold", "called adult", "of whom adults", "precision", "recall"]}
                   rows={[
@@ -448,21 +431,14 @@ export default function JudgingAClassifierPage() {
                   curve is a staircase, and it is drawn as one.
                 </p>
                 <PrecisionRecallCurve />
-                <p>
-                  On the twelve there are twelve distinct chances and so
-                  twelve corners. The first three steps add the three most
-                  confident adults and precision holds at 1.0 while recall
-                  climbs to 0.5; the fourth adds the tall child and precision
-                  drops to 0.75 with recall unmoved; three more adults take
-                  recall to 1.0 with precision recovering to 0.8571; and the
-                  last five steps add the remaining children, lowering
-                  precision to 0.5 while recall has nowhere left to go. The
-                  area under the steps is the average precision, 0.9151 here,
-                  and the rightmost precision is always the share of the crowd
-                  that is adult, since calling everybody adult finds every
-                  adult and is right about a prevalence&rsquo;s worth of
-                  them.
+                <>
+<p>
+                  On the twelve there are twelve distinct chances and so twelve corners. The first three steps add the three most confident adults and precision holds at 1.0 while recall climbs to 0.5; the fourth adds the tall child and precision drops to 0.75 with recall unmoved; three more adults take recall to 1.0 with precision recovering to 0.8571; and the last five steps add the remaining children, lowering precision to 0.5 while recall has nowhere left to go.
                 </p>
+                <p>
+                  The area under the steps is the average precision, 0.9151 here, and the rightmost precision is always the share of the crowd that is adult, since calling everybody adult finds every adult and is right about a prevalence&rsquo;s worth of them.
+                </p>
+</>
                 <Equation>{"average precision  =  Σ  (recall gained at the corner) × (precision at the corner)\n                   =  (1/6)·1 + (1/6)·1 + (1/6)·1 + 0·0.75 + (1/6)·0.8 + (1/6)·0.8333 + (1/6)·0.8571 + 0 + …\n                   =  0.9151"}</Equation>
                 <KeepInMind>
                   The area is a sum of steps and deliberately not a trapezoid,
@@ -506,18 +482,14 @@ export default function JudgingAClassifierPage() {
               </SubSection>
 
               <SubSection title="12. What the two pictures answer differently">
-                <p>
-                  The two curves are built from the same sweep and disagree
-                  about what a good model looks like when one class is rare,
-                  because one of them reads a column of the table and the
-                  other reads a row. Recall and the false positive rate are
-                  each a share of one class, so the ROC does not know how many
-                  of each class there are, and its diagonal is a coin&rsquo;s
-                  curve on any crowd. Precision is a share of the people
-                  called adult, who are drawn from both classes, so the
-                  precision-recall curve knows the prevalence intimately and
-                  ends at it.
+                <>
+<p>
+                  The two curves are built from the same sweep and disagree about what a good model looks like when one class is rare, because one of them reads a column of the table and the other reads a row. Recall and the false positive rate are each a share of one class, so the ROC does not know how many of each class there are, and its diagonal is a coin&rsquo;s curve on any crowd.
                 </p>
+                <p>
+                  Precision is a share of the people called adult, who are drawn from both classes, so the precision-recall curve knows the prevalence intimately and ends at it.
+                </p>
+</>
                 <NumberTable
                   headings={["crowd", "share adult", "area under the ROC", "a coin’s ROC area", "average precision", "a coin’s average precision"]}
                   rows={[
@@ -526,21 +498,14 @@ export default function JudgingAClassifierPage() {
                   ]}
                   caption="Both crowds through the same sweep. A coin’s area under the ROC is 0.5 on any crowd; a coin’s average precision is the share of the crowd that is adult."
                 />
-                <p>
-                  On the rare crowd the model&rsquo;s average precision is
-                  0.9167 against a floor of 0.1333, where on the twelve it is
-                  0.9151 against a floor of 0.5, so the rare crowd&rsquo;s figure
-                  is the larger achievement though the two numbers are within
-                  0.002 of each other.
-                  The ROC area reads 0.9808 and 0.9167 against the same floor
-                  of 0.5 on both. When the positive class is rare and the
-                  false alarms are what will be looked at, the
-                  precision-recall picture is the one that shows what it will
-                  cost, since a false positive rate of 0.04 on the rare crowd
-                  is one child, and on a crowd of ten thousand children it
-                  would be four hundred people to be examined for every few
-                  adults found.
+                <>
+<p>
+                  On the rare crowd the model&rsquo;s average precision is 0.9167 against a floor of 0.1333, where on the twelve it is 0.9151 against a floor of 0.5, so the rare crowd&rsquo;s figure is the larger achievement though the two numbers are within 0.002 of each other. The ROC area reads 0.9808 and 0.9167 against the same floor of 0.5 on both.
                 </p>
+                <p>
+                  When the positive class is rare and the false alarms are what will be looked at, the precision-recall picture is the one that shows what it will cost, since a false positive rate of 0.04 on the rare crowd is one child, and on a crowd of ten thousand children it would be four hundred people to be examined for every few adults found.
+                </p>
+</>
                 <KeepInMind>
                   Neither picture is the right one. The ROC compares rankings
                   across crowds of different make-up; the precision-recall
@@ -572,19 +537,14 @@ export default function JudgingAClassifierPage() {
                 </p>
                 <Equation>{"F1  =  2 · precision · recall / (precision + recall)\n\nat 0.9 on the twelve:   2 · 1.0 · 0.5 / (1.0 + 0.5)  =  0.6667     the arithmetic mean would say 0.75\nat 0.5 on the twelve:   2 · 0.8333 · 0.8333 / 1.6667  =  0.8333    the two agree, so any mean of them is 0.8333"}</Equation>
                 <WhyThisWorks title="Why the harmonic mean cannot be gamed">
-                  <p>
-                    Send recall to zero while keeping precision at 1.0, which
-                    a model does by calling one obvious adult and nobody
-                    else. The arithmetic mean reports 0.5, half marks for
-                    finding almost nothing. The harmonic mean reports 0, since
-                    the numerator carries the product of the two rates and a
-                    zero in either makes it zero. The same holds the other way
-                    round, calling everybody adult for a recall of 1.0 and a
-                    precision equal to the prevalence, and the harmonic mean
-                    of 1.0 and 0.5 on the twelve is 0.6667 again. A model
-                    cannot buy a good F1 by abandoning one of the two rates
-                    entirely.
+                  <>
+<p>
+                    Send recall to zero while keeping precision at 1.0, which a model does by calling one obvious adult and nobody else. The arithmetic mean reports 0.5, half marks for finding almost nothing. The harmonic mean reports 0, since the numerator carries the product of the two rates and a zero in either makes it zero.
                   </p>
+                  <p>
+                    The same holds the other way round, calling everybody adult for a recall of 1.0 and a precision equal to the prevalence, and the harmonic mean of 1.0 and 0.5 on the twelve is 0.6667 again. A model cannot buy a good F1 by abandoning one of the two rates entirely.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   F1 ignores the true negatives completely, so it does not
@@ -678,6 +638,49 @@ export default function JudgingAClassifierPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "Raising the threshold can lower recall but never raise it.",
+              true,
+              "Raising it can only turn a call of adult into a call of child, so the true positives can only fall and the false negatives can only rise. The denominator, which is the number of adults, does not depend on the threshold at all, so recall is a falling count over a constant and the indigo curve only ever steps downward.",
+            ),
+            trueFalse(
+              "Precision falls as the threshold rises, for the same reason recall does.",
+              false,
+              "Precision has no such guarantee, because both its numerator and its denominator move. Read at five thresholds on the twelve it gives 0.75, 0.8571, 0.8333, 0.75 and 1.0, so it rose, fell, fell and rose, and each move is one person crossing the line. A curve with several local peaks is also why a coarse sweep can miss the best point.",
+            ),
+            choice(
+              "The area under the ROC on the twelve is 0.9167. What is that counting?",
+              [
+                "The share of the thirty-six adult and child pairs in which the adult has the higher chance, which is thirty-three of them",
+                "The share of the twelve the model placed correctly at its best threshold",
+                "The share of the crowd that is adult",
+                "The area under the precision-recall staircase",
+              ],
+              0,
+              "The area is a count over pairs, with a tie counting a half, and a coin would draw the diagonal and score 0.5. It judges the ranking and not the threshold, so a model can have a high area and still be useless at the one threshold it is deployed at. The share of the crowd that is adult is where the other curve ends.",
+            ),
+            choice(
+              "At a threshold of 0.9 on the twelve, precision is 1.0 and recall is 0.5. Which score reports 0.75?",
+              ["The arithmetic mean", "F1", "F½", "F2"],
+              0,
+              "F1 is the harmonic mean and reports 0.6667, because the harmonic mean is pulled towards whichever rate is worse. The precision-leaning F½ says 0.8333 and the recall-leaning F2 says 0.5556. The arithmetic mean’s 0.75 is a respectable-looking figure for a model that missed half the adults.",
+            ),
+            several(
+              "Which of these hold for F1 on this page?",
+              [
+                "It ignores the true negatives, so it never rewards the children correctly left alone",
+                "Swapping which class is called positive changes it",
+                "A model can buy a good F1 by abandoning recall while keeping precision at 1.0",
+                "A threshold chosen by maximising it over the sweep is a hyperparameter fitted to the rows it was scored on",
+              ],
+              [0, 1, 3],
+              "On the rare crowd the twenty-six correct rejections are exactly what let accuracy flatter, and F1 not counting them is the point rather than an oversight. Abandoning a rate does not work either way, since the numerator carries the product of the two and a zero in either makes the whole thing zero. The peak of a curve read off the fitting rows is optimistic in the same way any training score is.",
+            ),
+        ],
         },
         {
           title: "Part 5. More Than Two Classes",
@@ -781,17 +784,14 @@ export default function JudgingAClassifierPage() {
               </SubSection>
 
               <SubSection title="19. The width has to be stated">
-                <p>
-                  A three-class table needs to know it has three classes, and
-                  there are two ways it can find out. It can be told, or it
-                  can read the true classes of the rows it was handed and
-                  count. The second sounds harmless and is where a held-out
-                  fold goes wrong, because a fold of a small crowd can easily
-                  hold no adults, and a table that counts its classes from the
-                  rows then has no column for adults at all. Switch the widget
-                  in section 16 to judge the crowd without its adults and
-                  untick the stated width.
+                <>
+<p>
+                  A three-class table needs to know it has three classes, and there are two ways it can find out. It can be told, or it can read the true classes of the rows it was handed and count. The second sounds harmless and is where a held-out fold goes wrong, because a fold of a small crowd can easily hold no adults, and a table that counts its classes from the rows then has no column for adults at all.
                 </p>
+                <p>
+                  Switch the widget in section 16 to judge the crowd without its adults and untick the stated width.
+                </p>
+</>
                 <DerivationTable
                   expressionHeading="the judged rows, and whether the width is stated"
                   reasonHeading="what happens"
@@ -804,19 +804,14 @@ export default function JudgingAClassifierPage() {
                     { expression: "everybody, width stated as four", reason: "accepted, with an empty fourth class whose recall is undefined." },
                   ]}
                 />
-                <p>
-                  The quiet case is the one the refusal above narrowly avoids.
-                  I measured a version of this crowd without the short adult,
-                  where the model places the tall teenager correctly, so that
-                  no judged row was called adult, and the inferred table came
-                  back two by two with no adult column and every figure
-                  defined, a table that is silently the wrong shape. Stating
-                  the width turns that into a three-by-three table with an
-                  empty row, whose recall is undefined and says so. So the
-                  width is stated up front and the rows are held to it,
-                  which is the rule the fold endpoint of
-                  Part 7 uses on every fold.
+                <>
+<p>
+                  The quiet case is the one the refusal above narrowly avoids. I measured a version of this crowd without the short adult, where the model places the tall teenager correctly, so that no judged row was called adult, and the inferred table came back two by two with no adult column and every figure defined, a table that is silently the wrong shape.
                 </p>
+                <p>
+                  Stating the width turns that into a three-by-three table with an empty row, whose recall is undefined and says so. So the width is stated up front and the rows are held to it, which is the rule the fold endpoint of Part 7 uses on every fold.
+                </p>
+</>
                 <KeepInMind>
                   The width of a table is a fact about the problem and not
                   about the rows in front of you. State it, and let an absent
@@ -843,17 +838,14 @@ export default function JudgingAClassifierPage() {
                   chances and counting.
                 </p>
                 <ReliabilityDiagram />
-                <p>
-                  On the twelve the bin from 0.8 to 1.0 holds four people at
-                  a mean chance of 0.9230, and three of the four are adults,
-                  a share of 0.75 against a promise of 0.92, since the tall
-                  child is one of the four. The bin from 0.6 to 0.8 holds two people
-                  at a mean of 0.7530 and both are adults. The bin from 0.4 to
-                  0.6 holds one person, the short adult, and the bin from 0.2
-                  to 0.4 holds nobody. Twelve people cannot fill five bins,
-                  so most of what the diagram says here is that twelve is too
-                  few, which is a fair thing for it to say.
+                <>
+<p>
+                  On the twelve the bin from 0.8 to 1.0 holds four people at a mean chance of 0.9230, and three of the four are adults, a share of 0.75 against a promise of 0.92, since the tall child is one of the four. The bin from 0.6 to 0.8 holds two people at a mean of 0.7530 and both are adults.
                 </p>
+                <p>
+                  The bin from 0.4 to 0.6 holds one person, the short adult, and the bin from 0.2 to 0.4 holds nobody. Twelve people cannot fill five bins, so most of what the diagram says here is that twelve is too few, which is a fair thing for it to say.
+                </p>
+</>
                 <p>
                   Over everybody the model balances, with a mean chance of
                   0.5000 against an observed adult rate of 0.5, which a
@@ -1007,32 +999,22 @@ export default function JudgingAClassifierPage() {
                   widget deals the same twelve four ways and reports both.
                 </p>
                 <PooledFoldsTable />
-                <p>
-                  The pooled column reads 0.8333 on every row, because every
-                  person is held out in exactly one fold whatever the deal,
-                  so adding the folds&rsquo; tables always rebuilds one table
-                  of the same twelve people. The averaged column does not.
-                  Dealt seven ways it says 0.8571, because twelve people do
-                  not divide into seven equal folds and averaging gives a
-                  fold of one the same vote as a fold of two, and dealt five
-                  ways with the classes balanced it says 0.8. On the plain
-                  five-fold deal the two happen to agree to the last digit,
-                  which is arithmetic luck and not a rule.
+                <>
+<p>
+                  The pooled column reads 0.8333 on every row, because every person is held out in exactly one fold whatever the deal, so adding the folds&rsquo; tables always rebuilds one table of the same twelve people. The averaged column does not. Dealt seven ways it says 0.8571, because twelve people do not divide into seven equal folds and averaging gives a fold of one the same vote as a fold of two, and dealt five ways with the classes balanced it says 0.8.
                 </p>
                 <p>
-                  What settles the question is the fold with no adults, which
-                  the plain five-fold deal produces. It holds two people, the
-                  refitted boundary wrongly calls one of them an adult, and
-                  its recall is zero found over zero present. Averaged, that
-                  fold has to contribute something and whatever is chosen is a
-                  convention. Pooled, it adds nothing to either side of the
-                  ratio, which is right, because a fold with no adults in it
-                  has no evidence about finding adults. So a
-                  classifier&rsquo;s folds are pooled, and a spread across
-                  folds is reported only for accuracy, which is defined on
-                  any fold with anybody in it and reads 0.5 here on every
-                  deal.
+                  On the plain five-fold deal the two happen to agree to the last digit, which is arithmetic luck and not a rule.
                 </p>
+</>
+                <>
+<p>
+                  What settles the question is the fold with no adults, which the plain five-fold deal produces. It holds two people, the refitted boundary wrongly calls one of them an adult, and its recall is zero found over zero present. Averaged, that fold has to contribute something and whatever is chosen is a convention. Pooled, it adds nothing to either side of the ratio, which is right, because a fold with no adults in it has no evidence about finding adults.
+                </p>
+                <p>
+                  So a classifier&rsquo;s folds are pooled, and a spread across folds is reported only for accuracy, which is defined on any fold with anybody in it and reads 0.5 here on every deal.
+                </p>
+</>
                 <Equation>{"pooled     ( Σ TPₖ ) / ( Σ (TPₖ + FNₖ) )      a fold with no adults adds 0 to both\naveraged   (1/k) Σ  TPₖ / (TPₖ + FNₖ)        a fold with no adults has no term to add"}</Equation>
                 <KeepInMind>
                   Balancing the deal so each fold keeps the class proportions
@@ -1125,6 +1107,226 @@ export default function JudgingAClassifierPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            trueFalse(
+              "On the sixteen, micro precision, micro recall and accuracy are the same number, 0.875.",
+              true,
+              "Every person gets exactly one call, so the pooled numerator is the diagonal and the pooled denominator is everybody, and the three figures are one number reported under three names. The macro average is a different question, 0.8778 here, because it gives every class an equal vote however many people it holds.",
+            ),
+            trueFalse(
+              "Macro F1 is the harmonic mean of macro precision and macro recall.",
+              false,
+              "It is the mean of the per-class F1 scores. The harmonic mean of the two macro figures is a different number and not a standard one, however reasonable it looks. A macro average is also undefined whenever any class’s rate is, since averaging over the classes that happen to be defined would quietly change the question.",
+            ),
+            choice(
+              "A table that counts its classes from the rows it was handed, rather than being told the width, is given a crowd with no adults in it. What was measured?",
+              [
+                "It came back two by two with no adult column and every figure defined",
+                "It raised, because a class was missing",
+                "It reported an undefined recall for the adult class",
+                "It reported an accuracy of zero on the adults",
+              ],
+              0,
+              "On the version of this crowd without the short adult, where the model places the tall teenager correctly, no judged row was called adult and the inferred table was silently the wrong shape. Stating the width instead gives a three-by-three table with an empty row whose recall is undefined and says so, since the width is a fact about the problem and not about the rows in front of you.",
+            ),
+            trueFalse(
+              "Stretching every chance towards 0 and 1 without changing anybody’s order leaves the area under the ROC at 0.9167 while moving every dot of the reliability diagram.",
+              true,
+              "The area counts pairs and asks only which of two chances is the higher, so any rising function applied to every chance leaves a pair that was in order in order and the count unchanged. The diagram reads the values rather than the order, so the same change moves every bin’s mean and can move people between bins. A high area and a low calibration error are two claims, and one does not imply the other.",
+            ),
+            several(
+              "Which of these hold for combining a classifier’s folds?",
+              [
+                "The pooled column reads 0.8333 on every deal, because each person is held out in exactly one fold",
+                "Dealt seven ways the averaged column reads 0.8571, since a fold of one gets the same vote as a fold of two",
+                "Stratifying the deal removes every fold that is missing a class",
+                "A fold with no adults adds nothing to either side of the pooled recall",
+              ],
+              [0, 1, 3],
+              "Adding the folds’ tables always rebuilds one table of the same twelve people, which is why pooling is stable across deals and averaging is not. Stratifying cuts the folds missing a class from one to none at five and from four to two at seven, and cannot reach zero there, because twelve people in seven folds leaves folds of a single person. Pooling is what lets the fold that still happens add nothing rather than a convention.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Judging the Crowds With the Library",
+          practice: [
+            exercise(
+              "Fill the four cells",
+              ["Fit the page’s boundary to the twelve, standardising the two columns first as the page does and giving the climb the page’s 2000 passes, and read the chance it gives the tall child and the short adult, the two people whose measurements overlap the other class.", "Part 1 quotes 0.8669 and 0.4911, and a table of five, one, one and five with accuracy, precision and recall all at 0.8333. Part 6 says this fit ran its full 2000 passes without converging, so print that as well."],
+              `from oop_ml import Feature, LogisticRegression, Standardizer
+
+heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
+weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
+is_adult = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("is_adult", is_adult)
+model = LogisticRegression(learning_rate=1.0, max_epochs=2000, tolerance=1e-6)
+# Fit the boundary on the standardised columns and print the chance it gives
+# the tall child (position 5) and the short adult (position 6). Then evaluate
+# it and print the four cells of the table, the accuracy, the precision and
+# the recall, and how the climb ended.`,
+              `from oop_ml import Feature, LogisticRegression, Standardizer
+
+heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
+weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
+is_adult = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("is_adult", is_adult)
+model = LogisticRegression(learning_rate=1.0, max_epochs=2000, tolerance=1e-6)
+model.fit(scaled, labels)
+chances = [float(chance) for chance in model.predict_probability(scaled)]
+print(f"tall child {chances[5]:.4f}, short adult {chances[6]:.4f}")
+
+evaluation = model.evaluate(scaled, labels)
+cells = evaluation.confusion_matrix
+print(f"true positives {cells.true_positives}, false negatives {cells.false_negatives}")
+print(f"false positives {cells.false_positives}, true negatives {cells.true_negatives}")
+print(f"accuracy {evaluation.accuracy:.4f}, precision {evaluation.precision:.4f}, recall {evaluation.recall:.4f}")
+print(f"passes run {model.epochs_run}, converged {model.converged}")`,
+              `tall child 0.8669, short adult 0.4911
+true positives 5, false negatives 1
+false positives 1, true negatives 5
+accuracy 0.8333, precision 0.8333, recall 0.8333
+passes run 2000, converged False`,
+              { hints: ["fit takes the standardised features and the label Feature, and predict_probability answers one chance per person in the order the rows were given, so positions 5 and 6 are the 168 cm child and the 150 cm adult.", "evaluate pairs the calls at the model’s threshold of one half with the truth and answers an evaluation whose confusion_matrix carries true_positives, false_negatives, false_positives and true_negatives.", "accuracy, precision and recall are properties of the evaluation, and epochs_run and converged are the climb’s own record."], check: numberCheck("What chance does the boundary give the tall child?", 0.8669, 0.0005, "The child at 168 centimetres and 66 kilograms sits among the adults on both measurements, so the boundary gives them a higher adult chance than it gives the short adult at 0.4911, and no single threshold can classify both correctly. At one half the child is called an adult and the adult a child, which is the one false positive and the one false negative in the table.") },
+            ),
+            exercise(
+              "Score the rare crowd beside its baseline",
+              ["Part 1 says accuracy is misleading where one class is rare. Fit the same boundary to the thirty people of whom four are adults, score the laziest classifier there is, which calls everybody a child, and then score the boundary at thresholds of 0.5 and 0.7.", "Part 1 quotes 0.8667 for the lazy classifier and 0.9333 for the boundary at both thresholds, one of which finds three of the four adults and the other two. Print the accuracy beside the precision and the recall each time, so the two 0.9333s can be told apart."],
+              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, Standardizer
+
+heights = [110, 113, 115, 118, 120, 121, 122, 124, 125, 127, 128, 130, 131, 133, 134,
+           136, 137, 139, 140, 142, 144, 145, 147, 149, 152, 155, 150, 156, 178, 183]
+weights = [20, 21, 22, 24, 25, 27, 28, 29, 31, 32, 34, 35, 37, 38, 40,
+           41, 42, 44, 45, 46, 47, 48, 49, 51, 52, 54, 50, 53, 78, 83]
+is_adult = [0] * 26 + [1] * 4
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("is_adult", is_adult)
+model = LogisticRegression(learning_rate=1.0, max_epochs=2000, tolerance=1e-6).fit(scaled, labels)
+chances = [float(chance) for chance in model.predict_probability(scaled)]
+
+# Evaluate a call of child for everybody and print its accuracy and recall.
+# Then for thresholds 0.5 and 0.7, call an adult wherever the chance reaches
+# the threshold and print the accuracy, the precision and the recall.`,
+              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, Standardizer
+
+heights = [110, 113, 115, 118, 120, 121, 122, 124, 125, 127, 128, 130, 131, 133, 134,
+           136, 137, 139, 140, 142, 144, 145, 147, 149, 152, 155, 150, 156, 178, 183]
+weights = [20, 21, 22, 24, 25, 27, 28, 29, 31, 32, 34, 35, 37, 38, 40,
+           41, 42, 44, 45, 46, 47, 48, 49, 51, 52, 54, 50, 53, 78, 83]
+is_adult = [0] * 26 + [1] * 4
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("is_adult", is_adult)
+model = LogisticRegression(learning_rate=1.0, max_epochs=2000, tolerance=1e-6).fit(scaled, labels)
+chances = [float(chance) for chance in model.predict_probability(scaled)]
+
+lazy = ClassificationEvaluation(is_adult, [0] * 30)
+print(f"everybody a child: accuracy {lazy.accuracy:.4f}, recall {lazy.recall:.4f}")
+for threshold in (0.5, 0.7):
+    calls = [1 if chance >= threshold else 0 for chance in chances]
+    judged = ClassificationEvaluation(is_adult, calls)
+    print(f"threshold {threshold}: accuracy {judged.accuracy:.4f}, precision {judged.precision:.4f}, recall {judged.recall:.4f}")`,
+              `everybody a child: accuracy 0.8667, recall 0.0000
+threshold 0.5: accuracy 0.9333, precision 0.7500, recall 0.7500
+threshold 0.7: accuracy 0.9333, precision 1.0000, recall 0.5000`,
+              { hints: ["ClassificationEvaluation takes the true labels and the calls, in that order, and the lazy classifier’s calls are thirty zeros.", "A call at a threshold is 1 wherever the chance is at or above it, one comparison per person, which is what the dial in Part 3 does without refitting.", "Recall is a property of the evaluation, the share of the four adults found, and precision the share of the people called adult who were."], check: numberCheck("What recall does the boundary have at a threshold of 0.7?", 0.5, 0.0005, "Raising the threshold from 0.5 to 0.7 drops the adult the boundary gave a chance of 0.6292, so two of the four adults are found rather than three, and the one child wrongly called at 0.5, whose chance is 0.5072, is left alone. The two kinds of mistake traded one for one, which is why accuracy reads 0.9333 both times and says nothing about which classifier found more adults.") },
+            ),
+            exercise(
+              "Turn the dial to 0.9, then past everybody",
+              ["Part 4 says the arithmetic mean of a precision of 1.0 and a recall of 0.5 flatters a model that missed half the adults. Call an adult wherever the twelve’s chances reach 0.9 and read the precision, the recall and the F1 score the library reports.", "Then turn the dial to 0.99, above every chance in the crowd, and ask for the precision. Part 2 says it is zero over zero and comes back undefined rather than as zero. Print the accuracy and the recall there, which do exist, and catch what the library raises when you ask for the precision, printing its name and its message."],
+              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, MLLibError, Standardizer
+
+heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
+weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
+is_adult = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("is_adult", is_adult)
+model = LogisticRegression(learning_rate=1.0, max_epochs=2000, tolerance=1e-6).fit(scaled, labels)
+chances = [float(chance) for chance in model.predict_probability(scaled)]
+
+# At a threshold of 0.9 print the precision, the recall and the F1 score of
+# the calls. Then at 0.99 print the accuracy and the recall, ask for the
+# precision, and print the name and the message of what the library raises.`,
+              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, MLLibError, Standardizer
+
+heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
+weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
+is_adult = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("is_adult", is_adult)
+model = LogisticRegression(learning_rate=1.0, max_epochs=2000, tolerance=1e-6).fit(scaled, labels)
+chances = [float(chance) for chance in model.predict_probability(scaled)]
+
+at_nine = ClassificationEvaluation(is_adult, [1 if chance >= 0.9 else 0 for chance in chances])
+print(f"at 0.9: precision {at_nine.precision:.4f}, recall {at_nine.recall:.4f}, F1 {at_nine.f1_score:.4f}")
+
+nobody = ClassificationEvaluation(is_adult, [1 if chance >= 0.99 else 0 for chance in chances])
+print(f"at 0.99: accuracy {nobody.accuracy:.4f}, recall {nobody.recall:.4f}")
+try:
+    print(nobody.precision)
+except MLLibError as refusal:
+    print(f"{type(refusal).__name__}: {refusal}")`,
+              `at 0.9: precision 1.0000, recall 0.5000, F1 0.6667
+at 0.99: accuracy 0.5000, recall 0.0000
+UndefinedMetricError: precision is undefined when nothing was predicted positive`,
+              { hints: ["f1_score is a property of the evaluation beside precision and recall, and it is the harmonic mean of the two.", "Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal this turns out to be.", "The accuracy and the recall at 0.99 are ordinary numbers, since there are twelve people to be right about and six adults to find; only the precision has nobody underneath it."], check: numberCheck("What F1 score do the calls at 0.9 earn?", 0.6667, 0.0005, "Only the three adults above 0.9 are called, so precision is a perfect 1.0 and recall is 0.5. The harmonic mean is pulled towards whichever rate is worse, and 2 times 1.0 times 0.5 over 1.5 is 0.6667 where the arithmetic mean would say 0.75. At 0.99 nobody is called, the precision is zero over zero, and the library refuses it by name rather than reporting a precision of zero for a model that made no wrong claim.") },
+            ),
+            exercise(
+              "Judge three classes with the width stated",
+              ["Part 5 grows the table to three rows by three columns and gives each class its own precision and recall. Fit the three-class model to the sixteen, standardised first and with the page’s 500 passes, and read the per-class rates, the macro precision and the accuracy.", "Part 5 quotes five sixths each way for teenagers, 0.8 each way for adults, five of five for children, a macro precision of 0.8778 and an accuracy of 0.875. Then judge only the rows that are not adults, with the width stated as three, and ask for the adult class’s recall. Part 5 says an absent class should show up as an empty row with an undefined recall, so catch what the library raises and print it."],
+              `from oop_ml import Feature, MLLibError, MultiClassEvaluation, MultinomialLogisticRegression, Standardizer
+
+heights = [118, 120, 122, 125, 145, 147, 156, 159, 162, 178, 180, 183, 186, 172, 160, 141]
+weights = [24, 25, 28, 31, 57, 41, 53, 57, 61, 78, 80, 83, 77, 70, 58, 40]
+age_group = [0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 2, 0]
+names = ("child", "teenager", "adult")
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("age_group", age_group)
+model = MultinomialLogisticRegression(learning_rate=1.0, max_epochs=500, tolerance=1e-6).fit(scaled, labels)
+# Evaluate the model on the sixteen and print each class's precision and
+# recall, then the macro precision and the accuracy. Then build a
+# MultiClassEvaluation from only the rows that are not adults, with
+# n_classes=3, ask for the adult class's recall, and print what is raised.`,
+              `from oop_ml import Feature, MLLibError, MultiClassEvaluation, MultinomialLogisticRegression, Standardizer
+
+heights = [118, 120, 122, 125, 145, 147, 156, 159, 162, 178, 180, 183, 186, 172, 160, 141]
+weights = [24, 25, 28, 31, 57, 41, 53, 57, 61, 78, 80, 83, 77, 70, 58, 40]
+age_group = [0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 1, 2, 0]
+names = ("child", "teenager", "adult")
+
+scaled = Standardizer().fit_transform([Feature("height", heights), Feature("weight", weights)])
+labels = Feature("age_group", age_group)
+model = MultinomialLogisticRegression(learning_rate=1.0, max_epochs=500, tolerance=1e-6).fit(scaled, labels)
+judged = model.evaluate(scaled, labels)
+for index, name in enumerate(names):
+    print(f"{name}: precision {judged.precision_for(index):.4f}, recall {judged.recall_for(index):.4f}")
+print(f"macro precision {judged.macro_precision:.4f}, accuracy {judged.accuracy:.4f}")
+
+calls = [int(call) for call in model.predict(scaled)]
+kept = [position for position, group in enumerate(age_group) if group != 2]
+without_adults = MultiClassEvaluation([age_group[position] for position in kept], [calls[position] for position in kept], n_classes=3)
+try:
+    print(without_adults.recall_for(2))
+except MLLibError as refusal:
+    print(f"{type(refusal).__name__}: {refusal}")`,
+              `child: precision 1.0000, recall 1.0000
+teenager: precision 0.8333, recall 0.8333
+adult: precision 0.8000, recall 0.8000
+macro precision 0.8778, accuracy 0.8750
+UndefinedMetricError: recall for class 2 is undefined because no row belongs to it`,
+              { hints: ["evaluate on a three-class model answers a MultiClassEvaluation whose precision_for and recall_for take a class index, 0 for child, 1 for teenager and 2 for adult, and whose macro_precision and accuracy are properties.", "predict answers one class per row as a float, so int turns each into the class index, and the rows to keep are those whose true class is not 2.", "MultiClassEvaluation takes the true classes, the calls and n_classes, and stating the width is what gives the table an empty adult row rather than a table that quietly shrank."], check: numberCheck("What macro precision does the model earn on the sixteen?", 0.8778, 0.0005, "The three per-class precisions are one for children, five sixths for teenagers and four fifths for adults, and the macro average gives each class an equal vote however many people it holds, so it is their plain mean. Pooling the counts first and dividing once gives the micro figure instead, 14 of 16 or 0.875, which is also the accuracy, since every person gets exactly one call.") },
+            ),
+          ],
         },
       ]}
     />

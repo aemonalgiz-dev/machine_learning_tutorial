@@ -185,14 +185,9 @@ export function UnigramPlayground() {
             </div>
           </div>
 
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            The corpus is spelled in {fit.alphabet.length} symbols, so the
-            smallest vocabulary that can exist here is {fit.smallest_size}. Ask
-            for fewer and the answer is a refusal rather than a smaller
-            vocabulary, since a single symbol is never dropped and a corpus that
-            cannot be spelled has no likelihood at all. Ask for more than{" "}
-            {fit.n_candidates} and there is nothing left to keep.
-          </p>
+          <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The initial alphabet has {fit.alphabet.length} symbols. Keeping those symbols and the required entries establishes the minimum vocabulary size of {fit.smallest_size}; removing them would leave some training text without a complete spelling.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The candidate set has {fit.n_candidates} entries, which also limits how many pieces can remain after pruning. Choose a vocabulary size within those bounds, then inspect which larger pieces the fitted objective retains.</p>
+</>
         </>
       )}
     </div>

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -29,7 +32,7 @@ import { UnitToggle } from "@/components/widgets/UnitToggle";
 export const metadata: Metadata = {
   title: "Principal Component Analysis · oop_ml",
   description:
-    "Find the few directions a cloud of data actually varies along, and describe each point by where it sits along them.",
+    "Find directions that preserve as much variation as possible when you use fewer coordinates.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -37,8 +40,12 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function PcaPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["pca"]}
+      technicalStart="Part 3. Viewing the Cloud Along One Direction"
+      openingTitle="Two Measurements, Much of the Same Information"
+      playgroundIntro="Rotate the projection direction and compare the spread of the projected points. Then inspect the gap between each original point and its reconstruction."
       title="Principal Component Analysis"
-      tagline="Find the directions the data actually varies along, and keep only the ones that matter."
+      tagline="Find directions that preserve as much variation as possible when you use fewer coordinates."
       prerequisites={
         <>
           This page is where two primers cash their promises, the{" "}
@@ -55,64 +62,14 @@ export default function PcaPage() {
           cloud and watch the spread along it change.
         </>
       }
-      history={
-        <>
-          <p>
-            Height and weight carry a lot of the same information. Tell me one
-            and I can guess the other tolerably well, which the statistics
-            primer measured as their correlation, and the pattern only deepens
-            with more measurements, since arm span, shoe size and sitting
-            height all largely follow how big a person is. Karl Pearson, at
-            University College London, asked in 1901 what to do with such
-            data when no one column is the answer. Regression as Galton and
-            Yule had left it treats one measurement as the outcome and the
-            others as exact, and Pearson&rsquo;s paper &ldquo;On lines and
-            planes of closest fit to systems of points in space&rdquo; started
-            from the fact that every measurement of a body carries error, so
-            the line wanted is the one closest to the points in every
-            direction at once rather than the one whose vertical misses are
-            smallest. He found it, and it is the direction of greatest spread
-            that this page turns a bar through the crowd to look for.
-          </p>
-          <p>
-            Harold Hotelling rebuilt the method in 1933 at Columbia, in
-            &ldquo;Analysis of a complex of statistical variables into
-            principal components&rdquo;, and his data were scores on batteries
-            of mental tests, where Charles Spearman had argued in 1904 that
-            the correlations among a child&rsquo;s test scores were explained
-            by one underlying factor of general intelligence. Hotelling&rsquo;s
-            question was how many directions such a table actually varied
-            along and how much of the total variance each carried, and he
-            gave the components their name and a way of computing them one at
-            a time, by repeated multiplication, that was feasible by hand.
-            Carl Eckart and Gale Young showed in 1936 that keeping the first
-            few components gives the reconstruction of the original table
-            closest in squared error that any fixed number of directions can
-            give, which is the guarantee this page leans on when it rebuilds
-            height and weight from one number. The difficulty underneath all
-            three papers is the one this page has to be plain about. A
-            component is a direction the data spreads along and nothing more;
-            it is not a cause, it need not correspond to anything we would
-            name, and how much variance a direction carries depends entirely
-            on the units the columns were measured in.
-          </p>
-          <p>
-            The page asks six questions in order. Why can several measured
-            features overlap? What does it mean to look at data from a
-            different direction? Which direction keeps the most variation?
-            How does the covariance matrix find that direction? How are
-            observations turned into fewer numbers and rebuilt? And what does
-            the method discard or distort along the way?
-          </p>
-        </>
-      }
+
       playground={<PcaPlayground />}
       sections={[
         {
           title: "Part 1. Redundant Measurements",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Several measurements, shared information">
                 <p>
                   Start with two features and eleven people. Shorter people
@@ -170,7 +127,7 @@ export default function PcaPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Centre the Data",
@@ -346,14 +303,21 @@ export default function PcaPage() {
                 </p>
                 <ProjectionExplorer panels={["contribution"]} initialAngle={45} people="worked" />
                 <WorkedExample title="Person 1 on the measured four">
-                  <p>
-                    Their deviation is (10, 10), so the height part is
-                    0.71 × 10 = 7.07, the weight part is also 7.07, and the
-                    score is 14.14. Person 3, at (5, −5), has parts of 3.54
-                    and −3.54, and a score of exactly zero. They sit on the
-                    mean along this direction, however far from it they sit
-                    along the other.
-                  </p>
+                  <>
+                    <p>
+                      The first person’s centred measurements are (10, 10). At
+                      forty-five degrees, both direction coordinates equal the
+                      reciprocal square root of two. Multiply each measurement by its
+                      direction coordinate and add.
+                    </p>
+                    <Equation>{"height contribution = 10 / √2 ≈ 7.071\nweight contribution = 10 / √2 ≈ 7.071\nperson 1 score = 20 / √2 ≈ 14.142\n\nperson 3 score = 5 / √2 − 5 / √2 = 0"}</Equation>
+                    <p>
+                      Person 3 lies at (5, −5), so the two contributions cancel. They
+                      have the same coordinate as the mean along this direction,
+                      although they are separated from it along the perpendicular
+                      direction.
+                    </p>
+                  </>
                 </WorkedExample>
                 <KeepInMind>
                   A component is a direction in feature space; a component
@@ -444,6 +408,54 @@ export default function PcaPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 to 5",
+          quiz: [
+            trueFalse(
+              "Centring moves the cloud onto the origin without changing the distance between any two observations.",
+              true,
+              "Subtracting one fixed point from every observation slides the whole cloud and leaves its shape and orientation alone. On the four people the centred scores have mean 0 and mean square 100, while uncentred the mean square is 28,422; the variance about their own mean is 100 either way, so what centring removed was location rather than spread.",
+            ),
+            choice(
+              "Why must the direction u be restricted to unit length?",
+              [
+                "Otherwise stretching the arrow raises every score, so a direction could look wide merely by being long",
+                "Otherwise the dot product is undefined for vectors of different lengths",
+                "Because the covariance matrix only acts on vectors of length one",
+                "Because the scores would no longer be centred",
+              ],
+              0,
+              "Every score is the dot product of a deviation with u, so doubling u doubles every score and quadruples the variance along it without any change of direction. Fixing u · u = 1 makes a comparison between directions a comparison between directions rather than between vector scales.",
+            ),
+            choice(
+              "Person 1’s centred measurements are (10, 10) and the first direction at 45 degrees is (0.71, 0.71). What is their score along it?",
+              [
+                "14.14, the sum of a height contribution of 7.07 and a weight contribution of 7.07",
+                "7.07, since each feature contributes 7.07",
+                "20, the sum of the two deviations",
+                "0, since the two contributions cancel as they do for person 3",
+              ],
+              0,
+              "A score is a dot product, each centred measurement multiplied by its direction coordinate and the products added, and at 45 degrees both coordinates are 1/√2, so 10/√2 + 10/√2 ≈ 14.142. The two contributions of 7.07 are the parts of one score, not two scores. Person 3, at (5, −5), is the case where the parts cancel to 0, which puts them at the mean’s coordinate along this direction while they sit away from it along the perpendicular one.",
+            ),
+            trueFalse(
+              "Replacing the first component (0.71, 0.71) with (−0.71, −0.71) changes the distances between the projected people.",
+              false,
+              "The two describe the same axis and the method has no reason to prefer either. Flipping the sign reverses every score numerically and changes nothing else, not the distances between projected people, not the variance, not the reconstructions.",
+            ),
+            several(
+              "Which of these are required of the second principal component?",
+              [
+                "It is perpendicular to the first",
+                "Among the perpendicular directions it carries as much of the remaining variance as possible",
+                "Its variance is strictly smaller than the first component’s",
+                "It is uniquely determined in two dimensions, apart from its sign",
+              ],
+              [0, 1, 3],
+              "The second component is chosen the same way as the first with one extra rule, perpendicularity, and among those directions it takes the most remaining variance. In two dimensions only one perpendicular axis is left, so it is forced. The ordering is λ₁ ≥ λ₂, not a strict inequality; ties are possible, and when two eigenvalues are equal the directions inside the plane they span are not uniquely determined.",
+            ),
+        ],
+        },
+        {
           title: "Part 6. The Covariance Matrix",
           content: (
             <>
@@ -480,14 +492,19 @@ export default function PcaPage() {
                 <Equation>{"C u = λ u"}</Equation>
                 <ProjectionExplorer panels={["transform"]} initialAngle={0} people="worked" />
                 <InAModel title="On the measured four">
-                  <p>
-                    At 0 degrees, u = (1, 0) and Cu = (62.5, 37.5), which
-                    is 31 degrees off the input. At 45 degrees, u = (0.71,
-                    0.71) and Cu = (70.7, 70.7), exactly u scaled by 100.
-                    Turn the slider and watch the amber arrow swing toward
-                    the indigo one as the angle approaches 45, and again at
-                    135, where the scaling factor is 25.
-                  </p>
+                  <>
+                    <p>
+                      At zero degrees, the covariance transformation changes the
+                      direction of the input arrow. At forty-five degrees, it only
+                      scales the arrow.
+                    </p>
+                    <Equation>{"at 0°:  u = (1, 0)\n        Cu = (62.5, 37.5)\n\nat 45°: u = (1/√2, 1/√2)\n        Cu = 100u ≈ (70.7, 70.7)"}</Equation>
+                    <p>
+                      Turn the slider and watch the transformed arrow line up with the
+                      original at forty-five degrees. They also share an axis at 135
+                      degrees, where the scaling factor is twenty-five.
+                    </p>
+                  </>
                 </InAModel>
                 <KeepInMind>
                   The covariance matrix&rsquo;s eigenvectors are the
@@ -559,13 +576,18 @@ export default function PcaPage() {
                   and 100 is the number the sweep in section 7 peaked at.
                 </p>
                 <InAModel title="Which convention the readouts use">
-                  <p>
-                    The playground reports each component&rsquo;s variance
-                    with the sample divisor, so on the measured four it says
-                    133.3 and 33.3 rather than 100 and 25. Same directions,
-                    same shares, one common factor of 4 / 3 on the
-                    variances.
-                  </p>
+                  <>
+                    <p>
+                      The playground reports sample variances, while the calculation
+                      above describes population variances. With four people, changing
+                      the divisor from four to three multiplies both variances by the
+                      same factor.
+                    </p>
+                    <Equation>{"first sample variance = 100 × 4/3 ≈ 133.3\nsecond sample variance = 25 × 4/3 ≈ 33.3"}</Equation>
+                    <p>
+                      The directions and explained-variance shares stay the same.
+                    </p>
+                  </>
                 </InAModel>
                 <KeepInMind>
                   The direction is the same whether the scatter or the
@@ -676,20 +698,14 @@ export default function PcaPage() {
                   natural measure of it.
                 </p>
                 <Equation>{"errorᵢ = ‖xᵢ − x̂ᵢ‖²           total = Σᵢ ‖xᵢ − x̂ᵢ‖²"}</Equation>
-                <p>
-                  Now rotate the retained direction instead of accepting the
-                  first component, and watch the total. The widget in
-                  section 11 is the same instrument, and its discarded
-                  readout is this total. It is smallest at the first
-                  component, because for centred data the direction that
-                  keeps the most variance and the direction that leaves the
-                  smallest squared stubs are the same direction. Pythagoras
-                  is why. Each person&rsquo;s squared distance from the mean
-                  splits into a squared score plus a squared stub, and the
-                  distances do not depend on the direction, so making the
-                  scores as large as possible makes the stubs as small as
-                  possible.
+                <>
+<p>
+                  Now rotate the retained direction instead of accepting the first component, and watch the total. The widget in section 11 is the same instrument, and its discarded readout is this total. It is smallest at the first component, because for centred data the direction that keeps the most variance and the direction that leaves the smallest squared stubs are the same direction.
                 </p>
+                <p>
+                  Pythagoras is why. Each person&rsquo;s squared distance from the mean splits into a squared score plus a squared stub, and the distances do not depend on the direction, so making the scores as large as possible makes the stubs as small as possible.
+                </p>
+</>
                 <Equation>{"‖dᵢ‖² = (dᵢ · u)² + stubᵢ²"}</Equation>
                 <InAModel title="On the measured four">
                   <p>
@@ -804,6 +820,48 @@ export default function PcaPage() {
           ),
         },
         {
+          title: "Questions on Parts 6 to 11",
+          quiz: [
+            choice(
+              "What distinguishes the eigenvectors of the covariance matrix from other directions?",
+              [
+                "The matrix leaves them on the same axis and only scales them",
+                "The matrix sends them to zero",
+                "They are the original feature axes",
+                "They are the directions along which the covariance is zero",
+              ],
+              0,
+              "For most directions Cu points somewhere else, turned away from u. For a few the result stays on the same axis, longer or shorter, and the scaling factor is the eigenvalue. On the four people that happens at 45 degrees with factor 100 and at 135 degrees with factor twenty-five, which are the two component directions and the two variances.",
+            ),
+            trueFalse(
+              "Dividing the scatter matrix by 4 rather than by 3 scales both eigenvalues by the same factor and leaves the first component’s direction and its share of 0.8 unchanged.",
+              true,
+              "The choice of divisor is a common factor on every eigenvalue, so it changes neither the eigenvectors nor the shares. The scatter eigenvalues 400 and 100 become variances 100 and 25 under the population divisor and 133.3 and 33.3 under the sample one, which is what the playground reports, and the share of the first component is 400 over 500, 100 over 125 or 133.3 over 166.7, which is 0.8 every time. Name the matrix you are using, because the variances are comparable only under one divisor.",
+            ),
+            trueFalse(
+              "Keeping the most variance and leaving the smallest squared stubs pull in different directions, so one has to be traded against the other.",
+              false,
+              "They are the same direction for centred data, and Pythagoras is the reason. Each squared distance from the mean splits into a squared score plus a squared stub, and the distances do not depend on the direction chosen, so the largest squared scores leave the smallest squared stubs. On the four people the two totals are 400 and 100 at 45 degrees and sum to 500 at every angle.",
+            ),
+            trueFalse(
+              "Writing the crowd’s heights in millimetres rather than metres changes which feature the first component is almost entirely made of.",
+              true,
+              "In millimetres the height variance is 52,178 against weight’s 431, and the first component is (−0.996, −0.089), almost pure height, claiming 99.97 percent. In metres the height variance is 0.05 and the first component is (0.011, 1.000), almost pure weight. Same people, different units, and the covariance matrix is built from the numbers.",
+            ),
+            several(
+              "Which of these does the page say about choosing how many components to keep?",
+              [
+                "Keeping 95 percent of the variance is a rule of thumb rather than a law",
+                "The right count depends on what the reduced representation is for",
+                "On the five-measurement dataset the first component alone carries 95 percent of the standardised variance",
+                "Reconstruction quality and predictive performance are the same question measured two ways",
+              ],
+              [0, 1],
+              "On the five-measurement dataset the first component carries 78.2 percent of the standardised variance, two carry 87.2, three 94.4 and four 99.0, so a 95 percent rule would keep four, and the page is explicit that the rule is a convention and not a law. A low-variance direction may carry the information a downstream task needs, which is why reconstruction quality and predictive performance answer different questions rather than one question measured two ways.",
+            ),
+        ],
+        },
+        {
           title: "Part 12. What PCA Does Not Know",
           content: (
             <>
@@ -862,10 +920,10 @@ export default function PcaPage() {
 
               <SubSection title="27. Linear versus curved structure">
                 <p>
-                  PCA finds linear structure. Twelve people along a bend
+                  PCA finds linear structure. Twelve people along a curve
                   have a one-dimensional pattern, their position along the
                   curve, and no straight axis follows it. The first component
-                  does what it can, which is to lay a line across the bend
+                  does what it can, which is to lay a line across the curve
                   and fold the two ends onto the same stretch of it.
                 </p>
                 <CurvedPattern />
@@ -1075,6 +1133,23 @@ export default function PcaPage() {
                   scores, components, reconstructions and explained variances
                   it returns.
                 </p>
+                <p>
+                  Most of those choices change a number without changing the
+                  fit, which is what makes them worth stating. The divisor
+                  scales every variance by one factor and leaves the
+                  directions and the shares alone, as Part 7 measured, so two
+                  implementations can disagree about every variance they
+                  report and agree about every component. The sign is the same
+                  kind of difference. The fit on this page keeps whichever
+                  sign the solver returned, which is why the millimetre
+                  component of Part 11 came back as (−0.996, −0.089) with both
+                  loadings negative while the metre one came back as
+                  (0.011, 1.000), and Part 4 is the reason neither sign means
+                  anything. A reader comparing two implementations has to know
+                  which of their disagreements are about the data and which
+                  are about these conventions, and only a stated contract
+                  tells them.
+                </p>
                 <DerivationTable
                   expressionHeading="the edge"
                   reasonHeading="the behaviour"
@@ -1091,6 +1166,26 @@ export default function PcaPage() {
                     { expression: "reordered or non-orthogonal components handed to the model", reason: "refused at construction, because both failures are silent otherwise." },
                   ]}
                 />
+                <InAModel title="The contracts on the crowd">
+                  <p>
+                    Every refusal in the table is a sentence rather than a
+                    crash. Asked for three components of the crowd&rsquo;s two
+                    features, the fit answers that it cannot keep three
+                    components from two features; handed one person, that a
+                    decomposition needs at least two rows to have any spread;
+                    handed height alone after being fitted on height and
+                    weight, that it expected exactly the fitted features and
+                    names them.
+                  </p>
+                  <p>
+                    The accepted edges are quieter. Height fitted beside an
+                    exact copy of itself comes back with the first component
+                    carrying every share and the second a variance of exactly
+                    0.0, and a constant shoe size beside height does the same.
+                    Both are correct, and both are exactly what a reader who
+                    did not look at the shares would miss.
+                  </p>
+                </InAModel>
                 <p>
                   Constant features are the case that deserves particular
                   care, because the two preprocessing choices treat them
@@ -1099,9 +1194,219 @@ export default function PcaPage() {
                   and the refusal is the right answer rather than a quiet
                   substitution.
                 </p>
+                <KeepInMind>
+                  In every one of these the alternative is a number that looks
+                  fine. A sign chosen by the solver, a variance under the
+                  other divisor, a zero-variance component quietly dropped, a
+                  solver&rsquo;s −3e−17 reported as a fact about the data, all
+                  fit and all transform. The rows that refuse are the ones
+                  where no number would be honest, and the rows that accept
+                  are the ones where the honest number is zero.
+                </KeepInMind>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 12 to 16",
+          quiz: [
+            trueFalse(
+              "On the two-group cloud, the first component carries 98.5 percent of the variance and is therefore the direction that separates the groups.",
+              false,
+              "It is the opposite. The two groups differ across the short axis, which is the 1.5 percent direction, so keeping one component places the fourteen people on the first line where the groups interleave and discards the line that separates them cleanly. The direction with the most variation is not necessarily the one most useful for prediction, and PCA cannot know because it was never told.",
+            ),
+            choice(
+              "What did adding one tall, light stranger to the crowd do?",
+              [
+                "Nothing measurable, since one person in twelve is a twelfth of the data",
+                "It moved the mean, turned the first component by 4.6 degrees and cut its share from 0.990 to 0.841",
+                "It left the components alone and changed only the explained-variance shares",
+                "It raised the covariance of height and weight from 349 to 464",
+              ],
+              1,
+              "A squared deviation grows with the square of the distance, so a distant observation contributes far more than its share of the rows. The mean moved from (151.8, 53.4) to (155.4, 51.4) and the covariance of height and weight fell from 464 to 349, which is the reverse of the claim that it rose from 349 to 464.",
+            ),
+            choice(
+              "Predicting weight from height gives a slope of 0.890 and predicting height from weight gives 0.928. Why do the two differ?",
+              [
+                "Because each minimises a different set of misses, the vertical ones for its own chosen outcome",
+                "Because the two fits were run on different people",
+                "Because one of the two fits has not converged",
+                "Because regression requires the features to be standardised and PCA does not",
+              ],
+              0,
+              "Regression picks an outcome and minimises the vertical misses in predicting it, so reversing which feature is the outcome changes which misses are being minimised and therefore the line. PCA minimises the perpendicular misses instead and sits between the two at 0.907, which is why it is a different geometric problem rather than regression without a target.",
+            ),
+            several(
+              "A fitted PCA is applied to a new observation. Which of these travel with the fit?",
+              [
+                "The training mean",
+                "The training standard deviations, when scaling was fitted",
+                "The retained training component directions",
+                "A fresh covariance matrix computed from the new observation",
+              ],
+              [0, 1, 2],
+              "The new observation goes through the same transformation the training data went through, so the mean, the scales when standardisation was fitted, and the retained directions all travel with the scores. Refitting per observation would make the coordinates mean something different every time.",
+            ),
+            trueFalse(
+              "A constant column is harmless to raw covariance PCA and a division by zero once the features are standardised.",
+              true,
+              "The two preprocessing choices treat it oppositely. Raw, the column simply carries nothing; standardised, its deviations are divided by a standard deviation of zero, and refusing is the right answer rather than quietly substituting some other number.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Turning the Crowd Onto Its Own Axes With the Library",
+          practice: [
+            exercise(
+              "Work the four people with the library",
+              ["Part 7 works the four people by hand to directions of (0.707, 0.707) and (0.707, −0.707), variances of 100 and 25 under the population divisor, and shares of 0.8 and 0.2, and says the playground reports sample variances of 133.3 and 33.3 instead. Fit PrincipalComponentAnalysis on the four and read all of that off the fitted components.", "Then transform the four people and print each one's two scores. Part 8 has person 1 at 14.14 and 0 and person 3 at 0 and 7.07. Expect the sign of the second component, and so of person 3's second score, to come back as the solver chose it, which Part 4 says is a convention and not a fact."],
+              `from oop_ml import Feature, PrincipalComponentAnalysis
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+
+fitted = PrincipalComponentAnalysis().fit(people)
+# For each component print its name, its direction rounded to three places,
+# its variance and its share of the total. Then transform the four people and
+# print each person's score along the first and the second component.`,
+              `from oop_ml import Feature, PrincipalComponentAnalysis
+
+people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
+
+fitted = PrincipalComponentAnalysis().fit(people)
+for component, share in zip(fitted.components, fitted.components.variance_shares):
+    direction = [round(float(value), 3) for value in component.direction]
+    print(f"{component.name}: direction {direction}, variance {component.variance:.2f}, share {share:.2f}")
+
+first, second = fitted.transform(people)
+for person in range(4):
+    print(f"person {person + 1}: scores {first.values[person]:.2f} and {second.values[person]:.2f}")`,
+              `component_1: direction [0.707, 0.707], variance 133.33, share 0.80
+component_2: direction [-0.707, 0.707], variance 33.33, share 0.20
+person 1: scores 14.14 and 0.00
+person 2: scores -14.14 and 0.00
+person 3: scores 0.00 and -7.07
+person 4: scores 0.00 and 7.07`,
+              { hints: ["The fitted components can be iterated, and variance_shares on the same object answers one share per component in the same order, so zip pairs them.", "A component carries name, direction and variance as properties. The direction is an array, one entry per feature in the order they were fitted.", "transform answers one Feature per component, named component_1 and component_2, whose values are the scores of the four people in the order they went in."], check: numberCheck("What variance does the library report for the first component?", 133.33, 0.01, "The library divides by one fewer than the number of people, the sample divisor, so the first component's variance is 100 times 4/3, which is 133.33, and the second is 33.33, exactly as Part 7 says the playground reports. The directions and the shares of 0.8 and 0.2 are the same under either divisor, because a common factor on both eigenvalues cancels in the ratio and moves no direction.") },
+            ),
+            exercise(
+              "Flatten the crowd and the arc onto one axis",
+              ["Part 5 says the crowd's first component carries 98.97 percent of the variance and Part 3 puts it at 42.2 degrees; Part 12 says the arc's carries 68 percent and that keeping one component leaves a reconstruction error of 3,316 on the arc against 108 on the crowd. Fit each cloud whole for its directions and shares, then fit it again with n_components=1, transform and inverse_transform, and total the squared gaps between the people and their rebuilt copies.", "Report the first component's angle modulo a half turn, since its sign is conventional, and both components' variances, which the lesson does not quote."],
+              `import math
+from oop_ml import Feature, PrincipalComponentAnalysis
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+crowd = [Feature("height", heights), Feature("weight", weights)]
+arc = [Feature("height", [120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 156]), Feature("weight", [80, 62, 49, 40, 35, 33, 35, 40, 49, 62, 80, 33])]
+
+for label, people in (("the crowd", crowd), ("the arc", arc)):
+    whole = PrincipalComponentAnalysis().fit(people)
+    # Print the first component's angle in degrees modulo 180, the two
+    # variances, and the first share. Then fit with n_components=1, rebuild
+    # the people from their one score, and print the total squared error.`,
+              `import math
+from oop_ml import Feature, PrincipalComponentAnalysis
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+crowd = [Feature("height", heights), Feature("weight", weights)]
+arc = [Feature("height", [120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 156]), Feature("weight", [80, 62, 49, 40, 35, 33, 35, 40, 49, 62, 80, 33])]
+
+for label, people in (("the crowd", crowd), ("the arc", arc)):
+    whole = PrincipalComponentAnalysis().fit(people)
+    first, second = whole.components
+    angle = math.degrees(math.atan2(first.direction[1], first.direction[0])) % 180
+    print(f"{label}: first component at {angle:.1f} degrees, variances {first.variance:.2f} and {second.variance:.2f}, "
+          f"first share {whole.components.variance_shares[0]:.4f}")
+    flattened = PrincipalComponentAnalysis(n_components=1).fit(people)
+    rebuilt = flattened.inverse_transform(flattened.transform(people))
+    error = sum(
+        (float(before) - float(after)) ** 2
+        for original, copy in zip(people, rebuilt)
+        for before, after in zip(original.values, copy.values)
+    )
+    print(f"  one-component reconstruction error {error:.2f}")`,
+              `the crowd: first component at 42.2 degrees, variances 1037.41 and 10.81, first share 0.9897
+  one-component reconstruction error 108.10
+the arc: first component at 1.0 degrees, variances 641.44 and 301.50, first share 0.6803
+  one-component reconstruction error 3316.45`,
+              { hints: ["Unpacking the fitted components into two names works because a two-feature fit has exactly two of them, in order of variance.", "atan2 of the direction's second entry over its first is the angle; taking it modulo 180 removes the sign the solver chose, since (−0.74, −0.67) and (0.74, 0.67) are one axis.", "inverse_transform takes what transform answered and hands back one Feature per original column, so the error is a double loop, over the two columns and over the people in each."], check: numberCheck("What variance does the crowd's second component carry?", 10.81, 0.01, "The crowd's two components carry 1037.41 and 10.81, which is why the first claims 98.97 percent and the stubs left by flattening total only 108.10. The arc's two carry 641.44 and 301.50, a first share of 68 percent, and the stubs total 3316.45, because twelve people along a curve have no straight axis to follow and the first component lays a line across the bend. The numbers say the straight axis is a poor summary of the arc; the picture says why.") },
+            ),
+            exercise(
+              "Add one stranger to the crowd",
+              ["Part 12 adds one tall, light person, 195 cm and 30 kg, to the eleven and reports that the first component turns by 4.6 degrees and its share falls from 0.990 to 0.841. Fit the crowd with and without the stranger and print the first component's angle and share for each.", "Print the second component's variance as well, before and after, which the lesson does not quote and which is where the stranger's say shows most plainly."],
+              `import math
+from oop_ml import Feature, PrincipalComponentAnalysis
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+
+for label, extra_height, extra_weight in (("the crowd", [], []), ("with the stranger", [195], [30])):
+    people = [Feature("height", heights + extra_height), Feature("weight", weights + extra_weight)]
+    # Fit the cloud, then print the label, the first component's angle in
+    # degrees modulo 180, its share, and the second component's variance.`,
+              `import math
+from oop_ml import Feature, PrincipalComponentAnalysis
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+
+for label, extra_height, extra_weight in (("the crowd", [], []), ("with the stranger", [195], [30])):
+    people = [Feature("height", heights + extra_height), Feature("weight", weights + extra_weight)]
+    fitted = PrincipalComponentAnalysis().fit(people)
+    first, second = fitted.components
+    angle = math.degrees(math.atan2(first.direction[1], first.direction[0])) % 180
+    share = fitted.components.variance_shares[0]
+    print(f"{label}: first component at {angle:.2f} degrees with share {share:.4f}, second component variance {second.variance:.2f}")`,
+              `the crowd: first component at 42.21 degrees with share 0.9897, second component variance 10.81
+with the stranger: first component at 37.62 degrees with share 0.8409, second component variance 183.55`,
+              { hints: ["The stranger is appended to both lists before the Features are built, so the second fit sees twelve people and the first sees eleven.", "The angle and the share are read exactly as in the previous problem. The turn is the difference between the two printed angles."], check: numberCheck("What share of the variance does the first component carry once the stranger is in?", 0.8409, 0.0005, "One person in twelve turns the first component from 42.21 to 37.62 degrees, the 4.6 degrees Part 12 reports, and cuts its share from 0.9897 to 0.8409, because a squared deviation grows with the square of the distance and a distant person contributes far more than a twelfth. The second component's variance goes from 10.81 to 183.55, which is the stranger's whole say, since they sit far off the crowd's long axis and the short axis has to grow to reach them.") },
+            ),
+            exercise(
+              "Write the heights in three units, then standardize",
+              ["Part 11 writes the crowd's heights in millimetres, where the first component is (−0.996, −0.089) and claims 99.97 percent, and in metres, where it is (0.011, 1.000) and claims all of it. Fit the crowd with the heights in millimetres, centimetres and metres, raw and with standardize=True, and print the first component's direction and share for each of the six fits.", "Then ask the fit for three components of two features and print what the library raises, which the table in Part 16 says is a refusal at the fit."],
+              `from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+
+for unit, factor in (("millimetres", 10), ("centimetres", 1), ("metres", 0.01)):
+    people = [Feature("height", [h * factor for h in heights]), Feature("weight", weights)]
+    # Fit the cloud raw and with standardize=True, and for each print the
+    # unit, which of the two it was, the first component's direction rounded
+    # to three places, and its share to four.
+
+# Try to fit a PrincipalComponentAnalysis with n_components=3 on the last
+# cloud, catching the library's own error and printing its name and message.`,
+              `from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+
+for unit, factor in (("millimetres", 10), ("centimetres", 1), ("metres", 0.01)):
+    people = [Feature("height", [h * factor for h in heights]), Feature("weight", weights)]
+    for standardize in (False, True):
+        fitted = PrincipalComponentAnalysis(standardize=standardize).fit(people)
+        first = fitted.components["component_1"]
+        direction = [round(float(value), 3) for value in first.direction]
+        reading = "standardized" if standardize else "raw"
+        print(f"{unit}, {reading}: direction {direction}, share {fitted.components.variance_shares[0]:.4f}")
+
+try:
+    PrincipalComponentAnalysis(n_components=3).fit(people)
+except MLLibError as refusal:
+    print(f"{type(refusal).__name__}: {refusal}")`,
+              `millimetres, raw: direction [-0.996, -0.089], share 0.9997
+millimetres, standardized: direction [0.707, 0.707], share 0.9896
+centimetres, raw: direction [-0.741, -0.672], share 0.9897
+centimetres, standardized: direction [0.707, 0.707], share 0.9896
+metres, raw: direction [0.011, 1.0], share 1.0000
+metres, standardized: direction [0.707, 0.707], share 0.9896
+InvalidValuesError: cannot keep 3 components from 2 features`,
+              { hints: ["standardize is a field of the constructor, so each unit needs two fits, one with it off and one with it on.", "A component can be read by name from components, and the first is component_1.", "The refusal happens at fit, when the number of features is first known, so the try has to wrap the fit rather than the construction."], check: numberCheck("What share does the first component carry once the heights are standardized, in any of the three units?", 0.9896, 0.0005, "Standardized, all three units give the same fit, a direction of (0.707, 0.707) and a share of 0.9896, because dividing each feature by its own spread removes the unit before the covariance is built, and the question changes from how the features vary together in their units to how they vary relative to their own scales. Raw, the share runs from 0.9897 in centimetres to 0.9997 in millimetres and 1.0000 in metres while the direction swings from almost pure height to almost pure weight. Same people, and the covariance matrix is built from the numbers.") },
+            ),
+          ],
         },
       ]}
     />

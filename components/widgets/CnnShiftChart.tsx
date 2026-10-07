@@ -102,12 +102,9 @@ export function CnnShiftChart({ variants }: { variants: Variant[] }) {
           </button>
         </span>
       </div>
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        {reading === "calls_changed"
-          ? "The share of moved pictures whose highest-scoring kind is not the one it was before the move, right or wrong either time."
-          : "Half the summed change in the four probabilities, averaged over the moved pictures, so 0 is an answer that did not move and 1 is one that moved all its weight elsewhere."}{" "}
-        {reports[0].shifts.map((shift) => `${shift.n_pictures} moved pictures at ${shift.distance}`).join(", ")}.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Choose the measurement that answers the comparison you need. {reading === "calls_changed" ? "Changed calls counts pictures whose predicted class changes after the move. It does not say whether either prediction was correct." : "Probability change measures how much the full class distribution changes. Zero means unchanged; one is the largest possible total-variation distance."}</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The comparison uses {reports[0].shifts.map((shift) => shift.n_pictures + " moved pictures at distance " + shift.distance).join(", ")}.</p>
+</>
     </div>
   );
 }

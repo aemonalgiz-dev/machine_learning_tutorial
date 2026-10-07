@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // The scene, the same scene under a different lamp, and what each reading of
 // it says about the difference.
@@ -89,19 +91,9 @@ export function SceneUnderTwoLamps() {
         />
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Every one of the {lighting.n_pixels} brightnesses is different, and the
-        two lists are{" "}
-        {(lighting.pixel_share_moved * 100).toFixed(0)} per cent of their own
-        length apart. Not one edge direction turned by more than{" "}
-        {lighting.largest_direction_difference_degrees.toExponential(1)} of a
-        degree, and every edge grew sharper by the same factor of{" "}
-        {lighting.smallest_magnitude_ratio.toFixed(2)}. The finished
-        descriptions of the two pictures are{" "}
-        {tiny(there.distance_from_the_scene ?? 0)} apart, where leaving the
-        rescaling out puts them{" "}
-        {(unrescaled?.moved_by_both ?? 0).toFixed(2)} apart.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Compare the original scene with the lighting-transformed version. The measurement distinguishes changes to raw brightness, edge direction, edge magnitude, and the final normalized descriptor.</p><Equation>{"Pixels compared: " + lighting.n_pixels + "\nChanged-pixel share: " + (lighting.pixel_share_moved * 100).toFixed(0) + "%\nLargest edge-direction change: " + lighting.largest_direction_difference_degrees.toExponential(1) + " degrees\nEdge-magnitude multiplier: " + lighting.smallest_magnitude_ratio.toFixed(2) + "\nNormalized descriptor distance: " + tiny(there.distance_from_the_scene ?? 0) + "\nUnnormalized descriptor distance: " + (unrescaled?.moved_by_both ?? 0).toFixed(2)}</Equation><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">These results show which stages change under this particular lighting transformation. Near-zero numerical differences should not be interpreted as a guarantee under arbitrary lighting.</p>
+</>
     </div>
   );
 }

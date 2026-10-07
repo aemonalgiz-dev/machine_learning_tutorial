@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -20,7 +23,7 @@ import { UNetTrainingCurves } from "@/components/widgets/UNetTrainingCurves";
 export const metadata: Metadata = {
   title: "U-Net · oop_ml",
   description:
-    "A network that shrinks a picture to work out what is in it and grows it back to say where, carrying the fine detail across on connections that skip the middle, measured with and without those connections.",
+    "Learn from images paired with labeled masks to predict a label for every pixel.",
 };
 
 const link =
@@ -29,8 +32,12 @@ const link =
 export default function UNetPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["u-net"]}
+      technicalStart="Part 2. The Shape of the U"
+      openingTitle="Knowing What Is There Does Not Tell Us Where"
+      playgroundIntro="Compare the predicted mask with the target pixel by pixel. Pay particular attention to boundaries and thin shapes when the skip connections are removed."
       title="U-Net"
-      tagline="A U-Net answers for every pixel of a picture by shrinking it to find what is there and growing it back to say where, and its skip connections carry the fine detail across the middle. Here it is built small enough to train in seconds and measured with and without them."
+      tagline="Learn from images paired with labeled masks to predict a label for every pixel."
       prerequisites={
         <>
           The way down is the network on the{" "}
@@ -45,95 +52,32 @@ export default function UNetPage() {
           <Link href="/concepts/pooling" className={link}>
             pooling
           </Link>{" "}
-          on the same sixteen by sixteen pictures, and none of that is explained
-          again. The loop that trains it is the one on{" "}
+          on the same sixteen by sixteen pictures. Those lessons explain the
+          individual operations. The loop that trains them together is on{" "}
           <Link href="/concepts/training-a-network" className={link}>
             training a network
           </Link>
-          , and Part 3 leans on the idea there that each layer works out its
-          own share of the blame and hands the rest down.
+          . Part 3 follows how the loss depends on each layer and how those
+          derivatives pass back through the network.
         </>
       }
-      history={
-        <>
-          <p>
-            The problem this architecture was built for is labelling every
-            pixel of a picture, and before 2015 the way to do it with a neural
-            network was to ask a classifier the question once per pixel. Dan
-            Cireşan, Alessandro Giusti, Luca Gambardella and J&uuml;rgen
-            Schmidhuber at IDSIA in Lugano won the 2012 ISBI challenge on
-            segmenting neuronal membranes in electron microscope stacks that
-            way, in &ldquo;Deep Neural Networks Segment Neuronal Membranes in
-            Electron Microscopy Images&rdquo; at NIPS 2012. A network read a
-            window of pixels around one position and said whether that
-            position was membrane, and then the window moved on by one pixel
-            and the whole network ran again. It was slow, since neighbouring
-            windows share almost all their pixels and every one was read
-            afresh, and the size of the window set a trade that could not be
-            escaped, since a wider window gave the network more context and
-            also more pooling to throw away where exactly the membrane was.
-          </p>
-          <p>
-            Jonathan Long, Evan Shelhamer and Trevor Darrell at Berkeley removed
-            the repetition in &ldquo;Fully Convolutional Networks for Semantic
-            Segmentation&rdquo; at CVPR 2015. They read a trained
-            classifier&rsquo;s dense layers as convolutions, so a single pass
-            over a whole picture answered a coarse grid of scores, grew that
-            grid back to full size with a learned upsampling, and, finding the
-            coarse answer blurred at every edge, added in scores computed from
-            earlier layers that still had finer grids. Olaf Ronneberger,
-            Philipp Fischer and Thomas Brox at Freiburg took that further in
-            &ldquo;U-Net: Convolutional Networks for Biomedical Image
-            Segmentation&rdquo; at MICCAI the same year. They made the way back
-            up as deep as the way down, with as many channels, and at every
-            depth they laid the encoder&rsquo;s maps alongside the decoder&rsquo;s
-            rather than adding scores, so the decoder could use the detail
-            however it liked. Their convolutions used no padding, so each map
-            shrank a little and the encoder&rsquo;s maps had to be cropped to
-            fit. They trained on the thirty annotated slices of that same ISBI
-            electron microscope challenge, stretched by random elastic
-            deformations, and won the ISBI cell tracking challenge of 2015. The
-            drawing of the network in their paper is shaped like a U, and that
-            is the whole of where the name came from.
-          </p>
-          <p>
-            This page builds the smallest U that still shows the idea, on the
-            pictures the convolutional networks page names, and asks six
-            questions of it in order. Why a network that names a picture has
-            nothing left to say where its shape is; what the U is made of and
-            where its parameters go; how the blame is carried back through a
-            join, since the layers used here are a chain and the joins have to
-            be made outside them; what the skip connections buy, measured on
-            held-out pictures with and without them and separately at the edge
-            of each shape; how the U compares with simply cutting the
-            brightness at a threshold, which on these pictures turns out to be
-            better; and what it does with a kind of shape and a size of picture
-            it never trained on, before the last Part asks where the method
-            stops being defined.
-          </p>
-        </>
-      }
+
       playground={<UNetExplorer />}
       sections={[
         {
           title: "Part 1. An Answer for Every Pixel",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The same pictures, a different question">
-                <p>
-                  Every picture here is one of the sixteen by sixteen pictures
-                  from the convolutional networks page, a cross, a square
-                  outline, a filled disc or a diagonal bar drawn at a random
-                  place and size, brightness and background, with a little noise
-                  on every pixel. That page asked which of the four kinds each
-                  picture held. This one asks, for every one of its 256 pixels,
-                  whether the pixel belongs to the shape. The answer is a
-                  picture of its own, one yes or no per pixel, and every picture
-                  in the collection is drawn with that answer attached, which is
-                  called its mask. The box at the top of the page shows the
-                  first held-out picture of each kind with its mask.
+                <>
+<p>
+                  Every picture here is one of the sixteen by sixteen pictures from the convolutional networks page, a cross, a square outline, a filled disc or a diagonal bar drawn at a random place and size, brightness and background, with a little noise on every pixel. That page asked which of the four kinds each picture held.
                 </p>
+                <p>
+                  This one asks, for every one of its 256 pixels, whether the pixel belongs to the shape. The answer is a picture of its own, one yes or no per pixel, and every picture in the collection is drawn with that answer attached, which is called its mask. The box at the top of the page shows the first held-out picture of each kind with its mask.
+                </p>
+</>
                 <NumberTable
                   headings={["the held-out half", "count"]}
                   rows={[
@@ -227,15 +171,19 @@ export default function UNetPage() {
                 </p>
                 <Equation>{"overlap  =  pixels called shape and truly shape  ÷  pixels called shape or truly shape"}</Equation>
                 <WorkedExample title="The held-out cross, answered by the U without its skip connections">
-                  <p>
-                    The cross has 28 shape pixels. The network without skip
-                    connections, at weight seed 0, calls 23 pixels shape, and 19
-                    of those are truly shape. So the pixels in either set number
-                    28 + 23 − 19 = 32, and the overlap is 19 ÷ 32 = 0.594. It
-                    gets 243 of the 256 pixels right, which is 0.949, and the
-                    thirteen it gets wrong are the nine shape pixels it missed
-                    and the four ground pixels it called shape.
-                  </p>
+                  <>
+                    <p>
+                      The cross contains twenty-eight shape pixels. The network without
+                      skip connections predicts twenty-three shape pixels, nineteen of
+                      them correctly. Intersection over union compares those nineteen
+                      shared pixels with every pixel in either set.
+                    </p>
+                    <Equation>{"union = actual shape + predicted shape − intersection\n      = 28 + 23 − 19 = 32\nIoU = 19 / 32 ≈ 0.594\n\ncorrect pixels = 256 − 9 missed shape − 4 false shape = 243\npixel accuracy = 243 / 256 ≈ 0.949"}</Equation>
+                    <p>
+                      The high pixel accuracy includes the many background pixels. IoU
+                      makes the missed and extra shape pixels more visible.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   The third score is the claim this whole architecture is built
@@ -255,7 +203,7 @@ export default function UNetPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Shape of the U",
@@ -288,18 +236,14 @@ export default function UNetPage() {
               </SubSection>
 
               <SubSection title="5. The middle, where the picture is smallest">
-                <p>
-                  At the bottom of the U one more convolution, eight filters of
-                  three by three, reads the eight maps of four by four and
-                  answers eight more of the same size. Each of its sixteen
-                  positions stands for a block of four by four pixels of the
-                  picture, and by the geometry the convolutional networks page
-                  worked out, a number here can depend on a patch eighteen pixels
-                  wide, wider than the picture itself. So the middle is the one
-                  place where every number can take in a whole shape, and it is
-                  also the place with the least idea where, to finer than four
-                  pixels, anything is.
+                <>
+<p>
+                  At the bottom of the U one more convolution, eight filters of three by three, reads the eight maps of four by four and answers eight more of the same size. Each of its sixteen positions stands for a block of four by four pixels of the picture, and by the geometry the convolutional networks page worked out, a number here can depend on a patch eighteen pixels wide, wider than the picture itself.
                 </p>
+                <p>
+                  So the middle is the one place where every number can take in a whole shape, and it is also the place with the least idea where, to finer than four pixels, anything is.
+                </p>
+</>
                 <KeepInMind>
                   The middle knows the most about what is in the picture and the
                   least about where, and the two come together because every
@@ -344,18 +288,14 @@ export default function UNetPage() {
               </SubSection>
 
               <SubSection title="7. The skip connections, laid alongside">
-                <p>
-                  At each depth on the way up, the decoder takes the maps that
-                  came up from below and the maps the encoder kept at the same
-                  size, and lays them side by side as one block with more
-                  channels. At half size eight repeated maps and the
-                  encoder&rsquo;s eight make a block of sixteen, and at full size
-                  eight and four make twelve. The convolution that follows reads
-                  every channel through its three by three windows, so at every
-                  position it sees both what the middle concluded and what the
-                  encoder saw there at full resolution, and its weights decide
-                  how to combine them.
+                <>
+<p>
+                  At each depth on the way up, the decoder takes the maps that came up from below and the maps the encoder kept at the same size, and lays them side by side as one block with more channels. At half size eight repeated maps and the encoder&rsquo;s eight make a block of sixteen, and at full size eight and four make twelve.
                 </p>
+                <p>
+                  The convolution that follows reads every channel through its three by three windows, so at every position it sees both what the middle concluded and what the encoder saw there at full resolution, and its weights decide how to combine them.
+                </p>
+</>
                 <UNetArchitecture />
                 <p>
                   The layers on this page are a chain, each reading only what the
@@ -441,13 +381,18 @@ export default function UNetPage() {
                       ["without them", "0.0832", "0.5208", "0.6524"],
                     ]}
                   />
-                  <p>
-                    The pixel is shape, so its loss is the negative logarithm of
-                    the probability of shape, and −log 0.5208 = 0.6524. The
-                    network without skips called it shape by a margin of 0.02,
-                    about as unsure as a coin, while the network with them is
-                    sure.
-                  </p>
+                  <>
+                    <p>
+                      This pixel belongs to the shape. Cross-entropy therefore uses the
+                      negative logarithm of the probability assigned to shape.
+                    </p>
+                    <Equation>{"pixel loss = −ln(0.5208) ≈ 0.6524"}</Equation>
+                    <p>
+                      The network without skips predicts shape with only slightly more
+                      than fifty percent probability. The network with skips is much
+                      more confident on this pixel.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   Because the loss adds up 256 pixels for every picture, the
@@ -465,6 +410,50 @@ export default function UNetPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "A network that never calls any pixel shape still gets 0.889 of pixels right.",
+              true,
+              "Only about one pixel in nine of these pictures belongs to a shape, so answering ground everywhere is right almost nine times in ten. That is why the share of pixels right is never reported on its own here, and always has a score beside it that answering nothing cannot win.",
+            ),
+            choice(
+              "What does the overlap score give a network that calls every pixel shape?",
+              [
+                "Zero",
+                "The shape’s share of the picture",
+                "One half",
+                "One",
+              ],
+              1,
+              "The overlap divides the pixels in both sets by the pixels in either, so calling everything shape leaves the numerator at the shape’s own size and the denominator at the whole picture. Calling nothing scores zero, and only an exact mask scores one.",
+            ),
+            choice(
+              "The classifier gets 0.971 of held-out kinds right. Turning each picture’s true kind into a mask, by averaging the training masks of that kind, is worth what overlap?",
+              ["0.080", "0.556", "0.889", "0.971"],
+              0,
+              "A cross can be drawn anywhere, so the average of crosses drawn everywhere is a faint blur in the middle and names no position. Using the kind the classifier calls instead of the true one gives 0.081, so its few mistakes were not what held the score down. What the classifier learned to throw away, the position, is the whole of what this task asks for.",
+            ),
+            several(
+              "Which of these hold for the two skip connections in this U?",
+              [
+                "They add no layer, and only widen what one decoder convolution reads",
+                "They cost 720 parameters, all of them in the two decoder convolutions",
+                "They have weights of their own, trained alongside the convolutions",
+                "They leave the two arrangements compared in Part 4 the same size",
+              ],
+              [0, 1],
+              "Nothing in a join has weights. A join lays one block beside another, and the whole cost is the extra channels the following convolution has to read, which is why the U with skips holds 2,521 parameters against 1,801 without them.",
+            ),
+            choice(
+              "Growing a map by repetition copies each value over a two by two block. Blames of 0.1, 0.2, 0.3 and 0.4 arrive at the four copies of one value. What is owed to the value itself?",
+              ["0.1", "0.25", "0.4", "1.0"],
+              3,
+              "Moving the value a little moves all four copies by that amount together, so its slope is the total of the four slopes that arrive, 1.0 here. The same reason makes the blame at an encoder answer a sum rather than a choice, since that answer too is read more than once.",
+            ),
+        ],
         },
         {
           title: "Part 3. Carrying the Blame Back Through a Join",
@@ -743,22 +732,66 @@ export default function UNetPage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "A backward pass that forgets the skip’s share of the blame fails loudly, so the mistake shows up without a check.",
+              false,
+              "It still runs and still trains, because the encoder goes on receiving the blame that comes down through the middle. Only a finite difference check said the slopes were wrong, by 6.838 and 4.054 at the two encoder convolutions on slopes no larger than 9.505. The middle and the decoder sit above the joins, so their slopes came out right either way, and the error is confined to the layers whose answers were read twice and credited once.",
+            ),
+            choice(
+              "At seed 0 the U without skips gets 3,130 held-out pixels wrong. Where are they?",
+              [
+                "Nearly all on an edge, 3,007 of them, about as many shape pixels missed as invented",
+                "Spread over edge pixels and other pixels in proportion to how many of each there are",
+                "Mostly inside the shapes, since the middle cannot tell what kind a shape is",
+                "Mostly in the ground far from any shape, which the coarse maps fill in",
+              ],
+              0,
+              "It misses 1,760 shape pixels and invents 1,370, so its shapes come out about the right size and are off by a pixel or so along most of their outline. Away from the edges it gets 0.998 of pixels right, nearly as many as the U with skips, since the middle can place a shape to within about four pixels and no closer. The skips raised the share of edge pixels right from between 0.62 and 0.76 to about 0.997.",
+            ),
+            trueFalse(
+              "After twenty passes, about as much blame reaches the first convolution across the full-size skip as through the middle.",
+              true,
+              "The two routes measured 0.573 and 0.587 after training, where before training the middle carried 6.551 against the skip’s 1.861. The short route passes through two convolutions where the route through the middle passes through five, which is the second thing a skip does beside carrying detail forward.",
+            ),
+            several(
+              "Which of these did the training comparison find?",
+              [
+                "At seed 0 the U with skips finishes at an overlap of 0.992",
+                "The U without skips does not get past 0.64 at any pass",
+                "The worst seed without skips still gets 0.906 of pixels right",
+                "The three seeds without skips agree with each other within 0.004",
+              ],
+              [0, 1, 2],
+              "It is the U with skips whose three seeds agree within 0.004; without them they spread from 0.163 to 0.623. And 0.906 of pixels right is only 0.016 above what answering ground everywhere gets, which is how little that score separates the two arrangements.",
+            ),
+            choice(
+              "Which kind does the U without skips do worst on?",
+              [
+                "The square outline",
+                "The filled disc",
+                "The diagonal bar",
+                "The cross",
+              ],
+              0,
+              "A square outline here is one pixel thick, so every pixel of it is on an edge and nothing is left for the coarse route to get right. The filled disc has an inside and is its best kind; the diagonal bar is the weakest kind for the U with skips, at 0.977, which is a different question.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. A Threshold Does Better Here",
           content: (
             <>
               <SubSection title="18. The obvious alternative, measured">
-                <p>
-                  Every picture in this collection is a dim background with a
-                  brighter shape drawn on it, so the obvious way to find the
-                  shape is to call every pixel brighter than some level shape.
-                  I tried two versions. The first uses one level for every
-                  picture, the one of 41 levels from 0.20 to 0.60 that got most
-                  training pixels right, which was 0.41. The second chooses a
-                  level for each picture from that picture alone, by Otsu&rsquo;s
-                  rule of 1979, which tries every cut between two brightnesses
-                  and keeps the one that splits the picture into two groups
-                  whose means are furthest apart for their sizes.
+                <>
+<p>
+                  Every picture in this collection is a dim background with a brighter shape drawn on it, so the obvious way to find the shape is to call every pixel brighter than some level shape. I tried two versions. The first uses one level for every picture, the one of 41 levels from 0.20 to 0.60 that got most training pixels right, which was 0.41.
                 </p>
+                <p>
+                  The second chooses a level for each picture from that picture alone, by Otsu&rsquo;s rule of 1979, which tries every cut between two brightnesses and keeps the one that splits the picture into two groups whose means are furthest apart for their sizes.
+                </p>
+</>
                 <UNetBaselineBoard />
                 <NumberTable
                   headings={["held-out", "overlap", "edge pixels right", "pixels wrong"]}
@@ -786,19 +819,14 @@ export default function UNetPage() {
               </SubSection>
 
               <SubSection title="19. Why, and what that says about the task">
-                <p>
-                  The threshold wins because the pictures were drawn so that it
-                  would. A shape pixel is its picture&rsquo;s background plus a
-                  lift of at least 0.4, and the noise on each pixel has a spread
-                  of 0.05, so within one picture the shape and the ground are two
-                  groups of brightness with a gap between them, and splitting the
-                  gap is the whole task. What the U-Net was invented for is the
-                  case where that is not true, where a membrane in an electron
-                  microscope picture is no brighter than the inside of the cell
-                  beside it and the only way to tell them apart is the shape of
-                  the surroundings. That case is not in this collection, and
-                  building it would need pictures drawn some other way.
+                <>
+<p>
+                  The threshold wins because the pictures were drawn so that it would. A shape pixel is its picture&rsquo;s background plus a lift of at least 0.4, and the noise on each pixel has a spread of 0.05, so within one picture the shape and the ground are two groups of brightness with a gap between them, and splitting the gap is the whole task.
                 </p>
+                <p>
+                  What the U-Net was invented for is the case where that is not true, where a membrane in an electron microscope picture is no brighter than the inside of the cell beside it and the only way to tell them apart is the shape of the surroundings. That case is not in this collection, and building it would need pictures drawn some other way.
+                </p>
+</>
                 <p>
                   So what this collection can show about a U-Net is the
                   architecture itself, the gap between having the skips and not,
@@ -837,17 +865,14 @@ export default function UNetPage() {
                     ["without them", "0.487", "0.048", "0.451"],
                   ]}
                 />
-                <p>
-                  With the skips the rings come out almost as well as the kinds
-                  it trained on. Its errors are ring pixels called ground, 20,
-                  70 and 11 of the 2,257 at the three seeds, and it calls at most
-                  2 of the 2,046 pixels inside the rings&rsquo; holes shape, so
-                  it did not fill a ring in as if it were a disc. Without the
-                  skips, at seed 0, it called 245 of those hole pixels shape and
-                  missed 908 ring pixels, which in the box at the top of the page
-                  looks like a smudge where a ring should be. The rings are the
-                  last four pictures there.
+                <>
+<p>
+                  With the skips the rings come out almost as well as the kinds it trained on. Its errors are ring pixels called ground, 20, 70 and 11 of the 2,257 at the three seeds, and it calls at most 2 of the 2,046 pixels inside the rings&rsquo; holes shape, so it did not fill a ring in as if it were a disc.
                 </p>
+                <p>
+                  Without the skips, at seed 0, it called 245 of those hole pixels shape and missed 908 ring pixels, which in the box at the top of the page looks like a smudge where a ring should be. The rings are the last four pictures there.
+                </p>
+</>
                 <KeepInMind>
                   A per-pixel answer built from local detail carries over to a
                   shape the network never saw far better than a classifier&rsquo;s
@@ -911,18 +936,14 @@ export default function UNetPage() {
                   ]}
                   caption="With two poolings the joins are defined exactly when the side is divisible by four, and with d poolings when it is divisible by two to the power d."
                 />
-                <p>
-                  There are three ways out, and each costs something. Pad the
-                  picture up to the next side that halves evenly, which invents
-                  pixels at the border that the network then has to answer for.
-                  Crop the larger block down to the smaller, which is what the
-                  paper did throughout, since its unpadded convolutions shrank
-                  every map anyway, and which throws away the encoder&rsquo;s
-                  outermost rows. Or resize the picture, which changes every
-                  shape in it. Without the joins the question does not arise at
-                  the joins, but it moves to the answer, which for a side of 30
-                  comes out 28 wide and cannot be compared with a mask of 30.
+                <>
+<p>
+                  There are three ways out, and each costs something. Pad the picture up to the next side that halves evenly, which invents pixels at the border that the network then has to answer for. Crop the larger block down to the smaller, which is what the paper did throughout, since its unpadded convolutions shrank every map anyway, and which throws away the encoder&rsquo;s outermost rows.
                 </p>
+                <p>
+                  Or resize the picture, which changes every shape in it. Without the joins the question does not arise at the joins, but it moves to the answer, which for a side of 30 comes out 28 wide and cannot be compared with a mask of 30.
+                </p>
+</>
                 <KeepInMind>
                   A U-Net with d poolings is defined for sides divisible by two
                   to the power d, and every other side needs a decision about
@@ -959,6 +980,339 @@ export default function UNetPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            choice(
+              "Why does a level chosen for each picture do so well on this collection?",
+              [
+                "A shape pixel is its picture’s background plus a lift of at least 0.4 against a noise spread of 0.05, so brightness falls into two separated groups",
+                "Otsu’s rule was fitted on the 240 training masks",
+                "Every picture in the collection shares one background brightness",
+                "The U was trained with a step of 0.003, which is too small to compete",
+              ],
+              0,
+              "The pictures were drawn so that splitting the gap in brightness is the whole task, and a rule that splits it has nothing left to learn. The rule has never seen a mask, which is what makes it beating a trained network worth reporting rather than embarrassing.",
+            ),
+            trueFalse(
+              "The U with skips, with its 2,521 trained parameters, gets fewer held-out pixels wrong than a brightness level chosen for each picture.",
+              false,
+              "The U gets 48 held-out pixels wrong and the level chosen per picture gets one wrong in 61,440, with no parameters and without ever seeing a mask. What the U does beat is one fixed level for every picture, by about 0.01 in overlap and on the edges too, since a fixed level has no way to follow a picture whose background happens to be bright.",
+            ),
+            several(
+              "Which of these hold on the sixty rings, a kind neither arrangement trained on?",
+              [
+                "With the skips, the errors are ring pixels called ground",
+                "With the skips, at most 2 of the 2,046 pixels inside the holes are called shape",
+                "Without the skips, seed 0 called 245 of those hole pixels shape",
+                "Both arrangements had to be retrained on rings before they could answer",
+              ],
+              [0, 1, 2],
+              "A U-Net is asked only which pixels are shape, so a kind it never saw is still a question it can answer without retraining. The handful of hole pixels called shape is what says it did not simply fill a ring in as though it were a disc.",
+            ),
+            choice(
+              "Why can the U read a 32 by 32 picture without retraining, where the classifier cannot?",
+              [
+                "The U has no dense layer, so every layer reads its input window by window",
+                "The U was trained on pictures of several sizes",
+                "The U chooses how many poolings to use from the side it is given",
+                "The seams between the four pictures are padded with zeros during the pass",
+              ],
+              0,
+              "A dense layer has one weight per number of the flattened row, which fixes the classifier at sixteen by sixteen and no other size. At the seams a window reads the neighbouring picture rather than the zeros it saw at the frame during training, and the call at every pixel came out the same as when the four were read apart.",
+            ),
+            several(
+              "A picture whose side does not halve evenly breaks the join. Which of these are true of the ways out?",
+              [
+                "Cropping the larger block down is what the paper did, and it throws away the encoder’s outermost rows",
+                "Padding up to the next side that halves evenly invents pixels at the border the network then has to answer for",
+                "A U with two poolings is defined for sides divisible by four",
+                "Without the joins the trouble moves to the answer, which for a side of 30 comes out 28 wide",
+              ],
+              [0, 1, 2, 3],
+              "All four hold. A U with d poolings needs a side divisible by two to the power d, and every other side forces a decision about which pixels to invent or throw away. Dropping the joins does not remove the difficulty, since halving 30 twice and doubling back gives 28, and an answer 28 wide cannot be compared with a mask of 30. Resizing the picture is the third way out, and it changes every shape in it.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Building and Walking a Small U With the Library",
+          practice: [
+            exercise(
+              "Count the U with its skips, without them, and with one",
+              ["Part 2 counts the U layer by layer and finds that a skip adds no layer, only channels for one decoder convolution to read. The starter builds the two convolutions of the way down and the middle for a sixteen by sixteen picture, three times over, with the number of channels each skip would add.", "Add the half-size decoder convolution, the full-size one and the one by one convolution that scores each pixel, then print every convolution’s parameter count and the total for each of the three arrangements. The page gives 2,521 with both skips and 1,801 with neither. The U with the full-size skip only is not on the page."],
+              `from oop_ml import Conv2d, Identity, RectifiedLinear
+
+bend = RectifiedLinear()
+for name, half_skip, full_skip in (("both skips", 8, 4), ("neither skip", 0, 0), ("the full-size skip only", 0, 4)):
+    convolutions = {
+        "down 1": Conv2d(reads=(1, 16, 16), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=0),
+        "down 2": Conv2d(reads=(4, 8, 8), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=1),
+        "middle": Conv2d(reads=(8, 4, 4), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=2),
+        # Add "decoder half", eight filters reading the middle's eight maps
+        # at eight by eight plus half_skip more channels, "decoder full", four
+        # filters reading eight maps at sixteen by sixteen plus full_skip
+        # more, and "score", one filter of one by one with an Identity
+        # activation reading the four maps.
+    }
+    # Count each convolution's kernels and biases, and print the counts and
+    # their total beside the arrangement's name.`,
+              `from oop_ml import Conv2d, Identity, RectifiedLinear
+
+bend = RectifiedLinear()
+for name, half_skip, full_skip in (("both skips", 8, 4), ("neither skip", 0, 0), ("the full-size skip only", 0, 4)):
+    convolutions = {
+        "down 1": Conv2d(reads=(1, 16, 16), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=0),
+        "down 2": Conv2d(reads=(4, 8, 8), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=1),
+        "middle": Conv2d(reads=(8, 4, 4), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=2),
+        "decoder half": Conv2d(reads=(8 + half_skip, 8, 8), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=3),
+        "decoder full": Conv2d(reads=(8 + full_skip, 16, 16), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=4),
+        "score": Conv2d(reads=(4, 16, 16), n_filters=1, kernel_size=1, activation=Identity(), random_seed=5),
+    }
+    counts = {label: layer.kernels.size + layer.bias_vector.size for label, layer in convolutions.items()}
+    print(f"{name}: {counts}")
+    print(f"{name}: {sum(counts.values())} parameters in all")`,
+              `both skips: {'down 1': 40, 'down 2': 296, 'middle': 584, 'decoder half': 1160, 'decoder full': 436, 'score': 5}
+both skips: 2521 parameters in all
+neither skip: {'down 1': 40, 'down 2': 296, 'middle': 584, 'decoder half': 584, 'decoder full': 292, 'score': 5}
+neither skip: 1801 parameters in all
+the full-size skip only: {'down 1': 40, 'down 2': 296, 'middle': 584, 'decoder half': 584, 'decoder full': 436, 'score': 5}
+the full-size skip only: 1945 parameters in all`,
+              { hints: ["A decoder convolution reads the maps that came up from below with the encoder’s maps laid after them, so its reads is the eight repeated channels plus whatever the skip adds, at the size of that depth.", "A convolution keeps what it learns in kernels and bias_vector, and each has a size. The pooling and the repetition between these layers hold nothing, so the convolutions are the whole count.", "A one by one convolution needs no padding to answer at every pixel, so the score layer leaves the padding out."], check: numberCheck("How many parameters does the U hold with the full-size skip only?", 1945, 0.5, "A skip has no weights of its own. Its whole cost is the extra channels one decoder convolution reads, which takes the full-size decoder from 292 parameters to 436 and the half-size one from 584 to 1,160. With both the U holds the page’s 2,521 and with neither 1,801, so the two skips cost 144 and 576, the 720 of Part 2, and the full-size skip alone leaves the U at 1,945.") },
+            ),
+            exercise(
+              "Grow a two by two map, and send the blame back",
+              ["Part 2 grows a map by copying each value over a two by two block, and works the way back by hand on a map of four values. Build the repetition for one map of two by two, hand it the values 1, 2, 3 and 4, and print what it answers.", "Then send blame back. Put 0.1, 0.2, 0.3 and 0.4 on the top left block of the answer, which is the page’s example, and 1.0 on each of the four cells of the bottom right block, and print what the layer hands down to the four values and the gradient it reports for itself."],
+              `import numpy as np
+from oop_ml import NearestUpsample2d
+
+small = np.array([[1.0, 2.0], [3.0, 4.0]])
+arriving = np.zeros((1, 1, 4, 4))
+arriving[0, 0, :2, :2] = [[0.1, 0.2], [0.3, 0.4]]
+arriving[0, 0, 2:, 2:] = 1.0
+
+# Build the repetition for one channel of two by two, respond to small as a
+# block of one row and one channel, and print the arrangements it reads and
+# answers and the grown map. Then ask for its correction from arriving, and
+# print what it hands down, what the top left value is owed, and its gradient.`,
+              `import numpy as np
+from oop_ml import NearestUpsample2d
+
+small = np.array([[1.0, 2.0], [3.0, 4.0]])
+arriving = np.zeros((1, 1, 4, 4))
+arriving[0, 0, :2, :2] = [[0.1, 0.2], [0.3, 0.4]]
+arriving[0, 0, 2:, 2:] = 1.0
+
+up = NearestUpsample2d(reads=(1, 2, 2))
+response = up.respond_to(small[None, None])
+print(f"reads {up.shape.reads}, answers {up.shape.answers}")
+print(response.outputs[0, 0])
+correction = up.correction_for(response, arriving)
+print(correction.passed_down[0, 0])
+print(f"the top left value is owed {correction.passed_down[0, 0, 0, 0]:.1f}")
+print(f"the layer's own gradient is {correction.gradient}")`,
+              `reads (1, 2, 2), answers (1, 4, 4)
+[[1. 1. 2. 2.]
+ [1. 1. 2. 2.]
+ [3. 3. 4. 4.]
+ [3. 3. 4. 4.]]
+[[1. 0.]
+ [0. 4.]]
+the top left value is owed 1.0
+the layer's own gradient is None`,
+              { hints: ["NearestUpsample2d takes the arrangement it reads as channels, height and width, and repeats by a factor of two unless told otherwise.", "A layer reads a block whose leading axis is rows, so one map goes in as small[None, None], and the response’s outputs come back arranged the same way.", "correction_for takes the response and the blame arriving at the answer. What it hands down is passed_down, arranged like what the layer read, and its gradient is what the layer would learn from."], check: numberCheck("What is the top left value owed?", 1.0, 0.05, "Moving the value moves all four of its copies together, so its slope is the total of the four slopes that arrive at them, the 1.0 Part 2 worked by hand. The bottom right value is owed 4.0 for the same reason, and the two values whose copies were blamed nothing are owed nothing. The gradient is None because a repetition has no weights, which is why Part 2 says it has nothing to get wrong.") },
+            ),
+            exercise(
+              "Walk one join back by hand, and check it with a nudge",
+              ["Part 3 carries the blame back through a join by splitting it in the order the block was built, and adding the skip’s share where the encoder’s answer was read twice. The starter builds the smallest U that has a join. One convolution on the way down whose answer is kept, a pooling, a middle convolution, a repetition, and a last convolution that reads the four repeated maps with the four kept ones laid after them and answers one score per pixel. It runs the forward walk three times, twice with one weight of the first convolution nudged a millionth up and down, and measures that weight’s slope from the two losses.", "Write the walk back from the last forward pass, which is the one with no nudge. Split the blame the last convolution hands down into the part for the repeated maps and the part for the kept ones, carry the first part down through the repetition, the middle and the pooling, and ask the first convolution for its correction twice, once from the two parts added and once from the part that came down alone. Print both slopes for the nudged weight beside the measured one, and the lengths of the two parts and of their sum."],
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, Conv2d, Flatten, Identity, MaxPool2d, NearestUpsample2d, RectifiedLinear
+
+bend, loss = RectifiedLinear(), BinaryCrossEntropy()
+down = Conv2d(reads=(1, 8, 8), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=0)
+pool = MaxPool2d(reads=(4, 8, 8))
+middle = Conv2d(reads=(4, 4, 4), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=1)
+up = NearestUpsample2d(reads=(4, 4, 4))
+join = Conv2d(reads=(8, 8, 8), n_filters=1, kernel_size=3, activation=Identity(), padding=1, random_seed=2)
+flat = Flatten(reads=(1, 8, 8))
+
+mask = np.zeros((8, 8))
+mask[2:6, 2:6] = 1.0
+picture, target = (0.1 + 0.5 * mask)[None, None], mask.reshape(1, 64)
+
+losses = []
+for nudge in (1e-6, -1e-6, 0.0):
+    kernels = down.kernels.copy()
+    kernels[0, 0, 1, 1] += nudge
+    kept = down.with_parameters(kernels, down.bias_vector).respond_to(picture)
+    pooled = pool.respond_to(kept.outputs)
+    deep = middle.respond_to(pooled.outputs)
+    grown = up.respond_to(deep.outputs)
+    joined = join.respond_to(np.concatenate([grown.outputs, kept.outputs], axis=1))
+    flattened = flat.respond_to(joined.outputs)
+    measured = loss.measure(flattened.outputs, target)
+    losses.append(measured.value)
+print(f"slope measured by the nudge {(losses[0] - losses[1]) / 2e-6:.4f}")
+
+# Walk back from measured.gradient through flat and join, split what join
+# hands down into its first four channels and its last four, carry the first
+# four down through up, middle and pool, and take the first convolution's
+# correction from the two parts added and from the deep part alone. The
+# nudged weight is entry [0, 4] of the gradient's weights.`,
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, Conv2d, Flatten, Identity, MaxPool2d, NearestUpsample2d, RectifiedLinear
+
+bend, loss = RectifiedLinear(), BinaryCrossEntropy()
+down = Conv2d(reads=(1, 8, 8), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=0)
+pool = MaxPool2d(reads=(4, 8, 8))
+middle = Conv2d(reads=(4, 4, 4), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=1)
+up = NearestUpsample2d(reads=(4, 4, 4))
+join = Conv2d(reads=(8, 8, 8), n_filters=1, kernel_size=3, activation=Identity(), padding=1, random_seed=2)
+flat = Flatten(reads=(1, 8, 8))
+
+mask = np.zeros((8, 8))
+mask[2:6, 2:6] = 1.0
+picture, target = (0.1 + 0.5 * mask)[None, None], mask.reshape(1, 64)
+
+losses = []
+for nudge in (1e-6, -1e-6, 0.0):
+    kernels = down.kernels.copy()
+    kernels[0, 0, 1, 1] += nudge
+    kept = down.with_parameters(kernels, down.bias_vector).respond_to(picture)
+    pooled = pool.respond_to(kept.outputs)
+    deep = middle.respond_to(pooled.outputs)
+    grown = up.respond_to(deep.outputs)
+    joined = join.respond_to(np.concatenate([grown.outputs, kept.outputs], axis=1))
+    flattened = flat.respond_to(joined.outputs)
+    measured = loss.measure(flattened.outputs, target)
+    losses.append(measured.value)
+print(f"slope measured by the nudge {(losses[0] - losses[1]) / 2e-6:.4f}")
+
+blame = flat.correction_for(flattened, measured.gradient).passed_down
+blame = join.correction_for(joined, blame).passed_down
+below, across = blame[:, :4], blame[:, 4:]
+below = up.correction_for(grown, below).passed_down
+below = middle.correction_for(deep, below).passed_down
+below = pool.correction_for(pooled, below).passed_down
+added = down.correction_for(kept, below + across).gradient.weights[0, 4]
+forgotten = down.correction_for(kept, below).gradient.weights[0, 4]
+print(f"slope from the walk with the skip's share added {added:.4f}")
+print(f"slope from the walk with the skip's share left out {forgotten:.4f}")
+print(f"length across the skip {np.linalg.norm(across):.3f}, down through the pooling {np.linalg.norm(below):.3f}, their sum {np.linalg.norm(below + across):.3f}")`,
+              `slope measured by the nudge 0.0897
+slope from the walk with the skip's share added 0.0897
+slope from the walk with the skip's share left out 0.4354
+length across the skip 3.499, down through the pooling 1.179, their sum 3.752`,
+              { hints: ["Every layer’s correction_for takes that layer’s own response and the blame arriving at its answer, and its passed_down is the blame for what the layer read, which is what the layer beneath is handed next.", "The joined block was built with the repeated maps first and the kept maps after them, so the blame splits the same way, the first four channels for the repetition and the last four across the skip.", "A convolution’s gradient holds its kernel slopes flattened to one row per filter, so the weight at filter 0, channel 0, row 1, column 1 of a three by three kernel is entry 4 of row 0.", "The length of a block of blame is the square root of the sum of its squares, which np.linalg.norm gives for a block of any arrangement."], check: numberCheck("What slope does the walk give the nudged weight when the two parts are added, to four places?", 0.0897, 0.0005, "With the two parts added the walk gives 0.0897, the slope the nudge measured. Leaving the skip’s share out gives 0.4354, nearly five times too large, from a walk that ran without complaint, which is the mistake Part 3 says only a check like this one finds. The first convolution’s answer was read twice, by the pooling and by the last convolution across the join, so it is owed the slope from both uses. The sum of the two parts is shorter than their two lengths added because the two blocks point partly against each other.") },
+            ),
+            exercise(
+              "Train a small U with its skip and without it",
+              ["Part 4 trains the U twice, with the joins and without. This problem does the same on a collection small enough to train in a few seconds. Eighty pictures twelve pixels on a side, each holding a square outline five pixels across and one pixel thick, the kind the page found hardest without skips, lit at 0.6 on a ground of 0.1 with a little noise. The first forty train the network and the last forty are held out. The U has two poolings, a middle, one repetition by a factor of four and one full-size skip, and the starter trains it each way for 100 passes at a step size of 0.005, with the walk of Part 3 written as a loop.", "Write the scoring of Part 1 on the held-out forty. Call a pixel shape where its score is above zero, which is a probability above one half, and print the share of pixels right, the overlap averaged over pictures and how many pixels were called shape. After both arrangements, print what calling every pixel ground would get."],
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, Conv2d, Flatten, Identity, MaxPool2d, NearestUpsample2d, RectifiedLinear
+
+draw = np.random.default_rng(0)
+masks = np.zeros((80, 12, 12))
+for mask, (top, left) in zip(masks, draw.integers(1, 7, size=(80, 2))):
+    mask[top : top + 5, left : left + 5] = 1.0
+    mask[top + 1 : top + 4, left + 1 : left + 4] = 0.0  # a square outline, one pixel thick
+pictures = (0.1 + 0.5 * masks + draw.normal(0.0, 0.05, masks.shape))[:, None]
+targets, bend, loss = masks.reshape(80, 144), RectifiedLinear(), BinaryCrossEntropy()
+
+for skip in (True, False):
+    layers = [
+        Conv2d(reads=(1, 12, 12), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=0),
+        MaxPool2d(reads=(4, 12, 12)),
+        Conv2d(reads=(4, 6, 6), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=1),
+        MaxPool2d(reads=(8, 6, 6)),
+        Conv2d(reads=(8, 3, 3), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=2),
+        NearestUpsample2d(reads=(8, 3, 3), factor=4),
+        Conv2d(reads=(12 if skip else 8, 12, 12), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=3),
+        Conv2d(reads=(4, 12, 12), n_filters=1, kernel_size=1, activation=Identity(), random_seed=4),
+        Flatten(reads=(1, 12, 12)),
+    ]
+
+    def forward(block):
+        responses = []
+        for position, layer in enumerate(layers):
+            if skip and position == 6:  # the join, repeated maps first
+                block = np.concatenate([block, responses[0].outputs], axis=1)
+            responses.append(layer.respond_to(block))
+            block = responses[-1].outputs
+        return responses
+
+    for epoch in range(100):
+        for first in range(0, 40, 8):
+            responses = forward(pictures[first : first + 8])
+            blame = loss.measure(responses[-1].outputs, targets[first : first + 8]).gradient
+            for position in reversed(range(len(layers))):
+                if skip and position == 0:  # the first convolution is owed both parts
+                    blame = blame + across
+                correction = layers[position].correction_for(responses[position], blame)
+                blame = correction.passed_down
+                if skip and position == 6:  # split in the order the join was built
+                    blame, across = blame[:, :8], blame[:, 8:]
+                layers[position] = layers[position].stepped_by(correction.gradient, 0.005)
+
+    # Score pictures[40:] against targets[40:]. Print, for this arrangement,
+    # the share of pixels right, the mean overlap and the pixels called shape.
+# Print the share of held-out pixels right if every pixel is called ground.`,
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, Conv2d, Flatten, Identity, MaxPool2d, NearestUpsample2d, RectifiedLinear
+
+draw = np.random.default_rng(0)
+masks = np.zeros((80, 12, 12))
+for mask, (top, left) in zip(masks, draw.integers(1, 7, size=(80, 2))):
+    mask[top : top + 5, left : left + 5] = 1.0
+    mask[top + 1 : top + 4, left + 1 : left + 4] = 0.0  # a square outline, one pixel thick
+pictures = (0.1 + 0.5 * masks + draw.normal(0.0, 0.05, masks.shape))[:, None]
+targets, bend, loss = masks.reshape(80, 144), RectifiedLinear(), BinaryCrossEntropy()
+
+for skip in (True, False):
+    layers = [
+        Conv2d(reads=(1, 12, 12), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=0),
+        MaxPool2d(reads=(4, 12, 12)),
+        Conv2d(reads=(4, 6, 6), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=1),
+        MaxPool2d(reads=(8, 6, 6)),
+        Conv2d(reads=(8, 3, 3), n_filters=8, kernel_size=3, activation=bend, padding=1, random_seed=2),
+        NearestUpsample2d(reads=(8, 3, 3), factor=4),
+        Conv2d(reads=(12 if skip else 8, 12, 12), n_filters=4, kernel_size=3, activation=bend, padding=1, random_seed=3),
+        Conv2d(reads=(4, 12, 12), n_filters=1, kernel_size=1, activation=Identity(), random_seed=4),
+        Flatten(reads=(1, 12, 12)),
+    ]
+
+    def forward(block):
+        responses = []
+        for position, layer in enumerate(layers):
+            if skip and position == 6:  # the join, repeated maps first
+                block = np.concatenate([block, responses[0].outputs], axis=1)
+            responses.append(layer.respond_to(block))
+            block = responses[-1].outputs
+        return responses
+
+    for epoch in range(100):
+        for first in range(0, 40, 8):
+            responses = forward(pictures[first : first + 8])
+            blame = loss.measure(responses[-1].outputs, targets[first : first + 8]).gradient
+            for position in reversed(range(len(layers))):
+                if skip and position == 0:  # the first convolution is owed both parts
+                    blame = blame + across
+                correction = layers[position].correction_for(responses[position], blame)
+                blame = correction.passed_down
+                if skip and position == 6:  # split in the order the join was built
+                    blame, across = blame[:, :8], blame[:, 8:]
+                layers[position] = layers[position].stepped_by(correction.gradient, 0.005)
+
+    called, truth = forward(pictures[40:])[-1].outputs > 0, targets[40:] > 0
+    overlap = np.mean((called & truth).sum(axis=1) / (called | truth).sum(axis=1))
+    print(f"{'with the skip' if skip else 'without it'}: pixels right {np.mean(called == truth):.3f}, overlap {overlap:.3f}, pixels called shape {called.sum()}")
+print(f"calling every pixel ground gets {np.mean(targets[40:] == 0):.3f} of pixels right")`,
+              `with the skip: pixels right 1.000, overlap 1.000, pixels called shape 640
+without it: pixels right 0.908, overlap 0.379, pixels called shape 554
+calling every pixel ground gets 0.889 of pixels right`,
+              { hints: ["forward answers every layer’s response in order, so the scores are the outputs of the last one, a row of 144 per picture, and a score above zero is a call of shape.", "The overlap for one picture is the count of pixels both called and truly shape over the count of pixels either called or truly shape. With rows of True and False those are & and |, summed along each row, and the mean over the forty rows is the score.", "Every picture here holds sixteen shape pixels, so the pixels in either set are never none and the division is always defined, which Part 7 points out is not so for a picture with no shape in it.", "Calling every pixel ground is right exactly where the target is zero."], check: numberCheck("What share of the held-out pixels does the U without its skip get right, to three places?", 0.908, 0.01, "Without the skip the U gets 0.908 of pixels right, only 0.019 above the 0.889 that calling every pixel ground gets, while its overlap is 0.379 against 1.000 with the skip. A square outline covers sixteen of the 144 pixels, the same one in nine as the page’s collection, so the share of pixels right is dominated by ground here too and makes the two arrangements look far closer than they are. The outline is one pixel thick and the middle works on a grid four pixels wide, which is Part 4’s point that a one-pixel line cannot be drawn from blocks of four.") },
+            ),
+          ],
         },
       ]}
     />

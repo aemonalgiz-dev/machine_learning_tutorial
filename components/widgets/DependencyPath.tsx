@@ -72,11 +72,9 @@ export function DependencyPath() {
           the output weights skip the first three boxes, which is why a single neuron was easy to train
         </text>
       </svg>
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        {hidden.outputs[neuron] === 0
-          ? `${HIDDEN_NAMES[neuron]} scored ${show(hidden.scores[neuron])} and the rectifier turned it to 0, so on this row nothing this weight does reaches the output at all. Hold that thought for section 7.`
-          : `Five stages between this weight and the loss, and the question training needs answered is how much a small change at the left end moves the number at the right end.`}
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">{hidden.outputs[neuron] === 0 ? HIDDEN_NAMES[neuron] + " has score " + show(hidden.scores[neuron]) + " and a zero ReLU output. Under the derivative convention used here, this example sends no gradient through that activation to the selected weight." : "Start with the selected weight and follow the five operations connecting it to the loss. At each operation, ask how a small input change affects its output. The chain rule will connect those local effects."}</p>
+</>
     </div>
   );
 }

@@ -85,19 +85,9 @@ export function WidthTradeChart() {
         <Key colour={CROWD_COLOUR} label="characters sharing one set of buckets" />
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Each bar is scaled against the largest of its own kind, so the two are
-        read for their shape rather than against each other. Every step up in
-        width multiplies the cost by four and divides the crowd by four, and
-        nothing in the two curves marks a place to stop. The published width sits
-        at {published ? published.numbers.toLocaleString() : "…"} numbers and{" "}
-        {published
-          ? published.characters_per_bucket_set.toLocaleString(undefined, {
-              maximumFractionDigits: 2,
-            })
-          : "…"}{" "}
-        characters to a set.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">A wider representation increases the number of stored values while reducing average sharing between characters. Compare those two consequences before choosing a width.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Each bar uses the largest value of its own measure as its scale. Their shapes can be compared, but their heights are not quantities in the same units. The referenced setting stores {published ? published.numbers.toLocaleString() : "…"} numbers and averages {published ? published.characters_per_bucket_set.toLocaleString(undefined, { maximumFractionDigits: 2 }) : "…"} characters per bucket set. Those counts do not identify an optimal width by themselves.</p>
+</>
     </div>
   );
 }

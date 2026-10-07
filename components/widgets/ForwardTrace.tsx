@@ -16,7 +16,7 @@ const STAGES = [
   { title: "hidden scores z", note: "each neuron's weighted sum of the row plus its bias" },
   { title: "hidden activations a", note: "each score after the rectifier, max(0, z)" },
   { title: "output score", note: "the output neuron's weighted sum of the three activations" },
-  { title: "the prediction ŷ", note: "the output bend is the identity, so the score is the answer" },
+  { title: "the prediction ŷ", note: "the output activation function is the identity, so the score is the answer" },
   { title: "the loss", note: "half the squared miss against the target" },
 ];
 
@@ -52,7 +52,7 @@ export function ForwardTrace() {
         <div className="space-y-1">{box("loss", show(step.loss_before), stage >= 5)}{box("target", "1", stage >= 5)}</div>
       </div>
       <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        Six kinds of number, all kept. The scores are kept because a bend&rsquo;s slope has to be evaluated where the forward pass evaluated the bend; the activations are kept because they are what the next layer&rsquo;s weights multiplied. <span style={{ color: INDIGO }}>Nothing here is a derivative yet.</span>
+        Six kinds of number, all kept. The scores are kept because an activation function&rsquo;s slope has to be evaluated where the forward pass evaluated the activation function; the activations are kept because they are what the next layer&rsquo;s weights multiplied. <span style={{ color: INDIGO }}>Nothing here is a derivative yet.</span>
       </p>
     </div>
   );

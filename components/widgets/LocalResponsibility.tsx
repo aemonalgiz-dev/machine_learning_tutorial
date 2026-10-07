@@ -39,7 +39,7 @@ export function LocalResponsibility() {
       <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr]">
         <Factor question="How much does the loss respond to the neuron's output?" symbol="∂L/∂a" value={show(lossToOutput)} why="the loss is ½(ŷ − y)², whose slope is ŷ − y = 5 − 1" />
         <Times />
-        <Factor question="How much does the output respond to the score?" symbol="∂a/∂z" value={show(outputToScore)} why="the output bend is the identity, whose slope is 1 everywhere" />
+        <Factor question="How much does the output respond to the score?" symbol="∂a/∂z" value={show(outputToScore)} why="the output activation function is the identity, whose slope is 1 everywhere" />
         <Times />
         <Factor question={isBias ? "How much does the score respond to the bias?" : "How much does the score respond to this weight?"} symbol={isBias ? "∂z/∂b" : `∂z/∂w${which + 1}`} value={show(scoreToWeight)} why={isBias ? "a bias is a weight on an input that is always 1" : `the score is Σ wᵢhᵢ + b, so its slope in w${which + 1} is what that weight multiplied, ${HIDDEN_NAMES[which]} = ${show(output.inputs[which])}`} />
         <Times equals />

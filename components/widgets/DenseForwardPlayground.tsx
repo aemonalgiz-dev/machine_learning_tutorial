@@ -443,7 +443,7 @@ export function DenseForwardPlayground() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         Each neuron prints z, its weighted sum plus bias, and a, that score
-        after its bend. The next column reads the a values and nothing else.
+        after its activation function. The next column reads the a values and nothing else.
         {answer ? ` The pass ran for ${answer.purpose}.` : ""}
       </p>
 
@@ -524,7 +524,7 @@ export function DenseForwardPlayground() {
           }
         />
         <Stat
-          label="Without the bends"
+          label="With identity activations"
           value={
             answer
               ? `(${answer.without_bends.weights.map(formatNumber).join(", ")})·x + ${formatNumber(answer.without_bends.bias)} = ${formatNumber(answer.without_bends.output)}`
@@ -636,7 +636,7 @@ function WeightTable({
             onActivation(event.target.value as ActivationName)
           }
           className={SELECT_CLASS}
-          aria-label={`${title} bend`}
+          aria-label={`${title} activation function`}
         >
           {ACTIVATION_NAMES.map((name) => (
             <option key={name} value={name}>

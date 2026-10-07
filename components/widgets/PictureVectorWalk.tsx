@@ -11,6 +11,7 @@
 // browser only draws.
 
 import { useEffect, useState } from "react";
+import { Equation } from "@/components/concept/Equation";
 import { ApiError } from "@/lib/api";
 import { WalkAnswer, fetchWalk } from "@/lib/concepts/a-vector-for-a-picture";
 import {
@@ -197,12 +198,11 @@ function Four({ answer }: { answer: WalkAnswer }) {
         />
       </div>
 
-      <p className="mt-4 font-mono text-xs text-slate-600 dark:text-slate-400">
-        {worked.first} · {worked.second} = {worked.dot.toFixed(4)}, lengths{" "}
-        {worked.first_length.toFixed(4)} and {worked.second_length.toFixed(4)}, so
-        the cosine is {worked.dot.toFixed(4)} / ({worked.first_length.toFixed(4)}{" "}
-        × {worked.second_length.toFixed(4)}) = {worked.cosine.toFixed(4)}
+      <p className="mt-4 text-xs text-slate-600 dark:text-slate-400">
+        Compare {worked.first} with {worked.second}. Their vector lengths are{" "}
+        {worked.first_length.toFixed(4)} and {worked.second_length.toFixed(4)}.
       </p>
+      <Equation>{`dot product = ${worked.dot.toFixed(4)}\ncosine = ${worked.dot.toFixed(4)} / (${worked.first_length.toFixed(4)} × ${worked.second_length.toFixed(4)})\n       = ${worked.cosine.toFixed(4)}`}</Equation>
     </div>
   );
 }

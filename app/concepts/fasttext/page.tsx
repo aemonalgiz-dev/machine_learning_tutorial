@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -23,7 +26,7 @@ import { FasttextUnseenWord } from "@/components/widgets/FasttextUnseenWord";
 export const metadata: Metadata = {
   title: "FastText · oop_ml",
   description:
-    "The same training as word2vec, with each word also standing for the short pieces of its spelling, so that a word the corpus never held still has an answer.",
+    "Share information through character substrings so word vectors can use spelling as well as context.",
 };
 
 const link =
@@ -32,8 +35,12 @@ const link =
 export default function FasttextPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["fasttext"]}
+      technicalStart="Part 2. A Word Made of Its Spelling"
+      openingTitle="An Unfamiliar Word May Have Familiar Parts"
+      playgroundIntro="Compare a familiar word's whole-word contribution with its substring contributions. Try an unseen spelling and inspect which learned pieces support its vector."
       title="FastText"
-      tagline="FastText changes one thing about word2vec, that a word also stands for the short pieces of its spelling, and what that buys is an answer for a word the training text never held."
+      tagline="Share information through character substrings so word vectors can use spelling as well as context."
       prerequisites={
         <>
           This page changes one part of{" "}
@@ -53,83 +60,23 @@ export default function FasttextPage() {
           is assumed rather than argued.
         </>
       }
-      history={
-        <>
-          <p>
-            By 2015 word vectors were being trained on languages other than
-            English, and a difficulty that hardly shows in English became hard to
-            ignore. A Czech or a Finnish verb has dozens of written forms, a
-            German noun compounds without limit, and Arabic writes much of its
-            grammar inside the word rather than beside it, so a vocabulary read
-            off a corpus of those languages is mostly forms that occurred a
-            handful of times, with the forms of one word scattered across it as
-            unrelated entries. Each form got its own row, learned from its own few
-            occurrences, and nothing connected two forms of one verb except
-            whatever the corpus happened to show about both.
-          </p>
-          <p>
-            The obvious repair was to build a word out of its parts, and it had
-            been tried. Andrei Alexandrescu and Katrin Kirchhoff described a word
-            in 2006, in &ldquo;Factored neural language models&rdquo;, as a bundle
-            of features rather than a single symbol. Minh-Thang Luong, Richard
-            Socher and Christopher Manning built word vectors from morphemes in
-            2013, in &ldquo;Better word representations with recursive neural
-            networks for morphology&rdquo;, and Jan Botha and Phil Blunsom added
-            morpheme vectors together in 2014 in &ldquo;Compositional morphology
-            for word representations and language modelling&rdquo;. All of them
-            needed something to say where a word&rsquo;s parts are, which is a
-            morphological analyser, which has to be built per language and is
-            wrong some of the time.
-          </p>
-          <p>
-            Piotr Bojanowski, Edouard Grave, Armand Joulin and Tomas Mikolov, at
-            Facebook AI Research in Paris, removed that requirement in
-            &ldquo;Enriching word vectors with subword information&rdquo;, posted
-            in 2016 and published in Transactions of the Association for
-            Computational Linguistics in 2017. Their parts are every run of three
-            to six characters inside the word, which needs no analyser and knows
-            nothing about morphology, and a word&rsquo;s vector is the sum of its
-            own row and the rows of its runs. They reported the largest gains on
-            exactly the languages that had prompted the work, German, Czech,
-            Russian and Arabic among them, and on rare words in all of them. The
-            released program, which also carried the text classifier of Joulin,
-            Grave, Bojanowski and Mikolov, gave the method the name it has now,
-            and the pre-trained vectors published with it covered a great many
-            languages read off Wikipedia. The one piece of machinery they took off
-            a shelf was the hash that decides where a run of characters is kept,
-            designed by Glenn Fowler, Landon Curt Noll and Phong Vo around 1991
-            for purposes with nothing to do with language.
-          </p>
-          <p>
-            This page asks five questions in order. What does a method that learns
-            one position per word do when it meets a word it never saw? What
-            exactly are a word&rsquo;s pieces, and where are they kept? Is an
-            answer built from pieces alone any good, measured against a group the
-            word belongs to and a group it does not? What do the pieces cost, in
-            numbers held and in rows two unrelated pieces have to share? And where
-            does the method stop being defined?
-          </p>
-        </>
-      }
+
       playground={<FasttextPlayground />}
       sections={[
         {
           title: "Part 1. The Word With No Row",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Two lists of words, and the form left out of one">
-                <p>
-                  Everything on this page is fitted to one small corpus, and what
-                  matters about it is not only what it holds but what it
-                  deliberately does not. Two hundred sentences of five to eight
-                  words each, every sentence drawn from one of two word lists and
-                  never from both. One list holds twenty forms of five verbs,
-                  play, stay, say, walk and talk, in their various endings; the
-                  other holds eleven words about money, stock, bond, market, price
-                  and so on. That comes to 1,311 word occurrences across 31
-                  distinct words, and no word appears in both lists.
+                <>
+<p>
+                  Everything on this page is fitted to one small corpus, and what matters about it is not only what it holds but what it deliberately does not. Two hundred sentences of five to eight words each, every sentence drawn from one of two word lists and never from both. One list holds twenty forms of five verbs, play, stay, say, walk and talk, in their various endings; the other holds eleven words about money, stock, bond, market, price and so on.
                 </p>
+                <p>
+                  That comes to 1,311 word occurrences across 31 distinct words, and no word appears in both lists.
+                </p>
+</>
                 <p>
                   The verb list holds play, plays, player and played. It does not
                   hold playing. Every short run of letters that playing is made of
@@ -218,7 +165,7 @@ export default function FasttextPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Word Made of Its Spelling",
@@ -233,31 +180,25 @@ export default function FasttextPage() {
                   so that two words spelled alike are made of some of the same
                   parts.
                 </p>
-                <p>
-                  Before it is cut, the word is wrapped, so play becomes
-                  &lt;play&gt;. The wrapping is not decoration. Without it the
-                  three letters her at the beginning of a word, in the middle of
-                  one and at its end would all be the same piece; with it the piece
-                  at the start of her is &lt;he and the piece at its end is er&gt;,
-                  while the her sitting inside where is the same plain her that her
-                  itself also contains. So a beginning and an ending are told apart
-                  from the same letters somewhere in the middle, which is what
-                  carries a grammatical ending.
+                <>
+<p>
+                  Before it is cut, the word is wrapped, so play becomes &lt;play&gt;. The wrapping is not decoration. Without it the three letters her at the beginning of a word, in the middle of one and at its end would all be the same piece; with it the piece at the start of her is &lt;he and the piece at its end is er&gt;, while the her sitting inside where is the same plain her that her itself also contains.
                 </p>
+                <p>
+                  So a beginning and an ending are told apart from the same letters somewhere in the middle, which is what carries a grammatical ending.
+                </p>
+</>
                 <Equation>{"pieces(w) = every run of m to M characters inside <w>, except <w> itself"}</Equation>
                 <FasttextPieces />
                 <WorkedExample title="Where, cut three characters at a time">
-                  <p>
-                    The wrapped word &lt;where&gt; has seven characters, so at a
-                    length of exactly three it gives five pieces, &lt;wh, whe, her,
-                    ere and re&gt;, which is the example the original paper works.
-                    At the published lengths of three to six the same word gives
-                    fourteen, five of length three, four of four, three of five and
-                    two of six. The shortest useful case is a word like at, whose
-                    wrapped form has four characters and yields exactly &lt;at and
-                    at&gt;, since the wrapped word itself is never one of its own
-                    pieces. It does not need to be; the word already has a row.
+                  <>
+<p>
+                    The wrapped word &lt;where&gt; has seven characters, so at a length of exactly three it gives five pieces, &lt;wh, whe, her, ere and re&gt;, which is the example the original paper works. At the published lengths of three to six the same word gives fourteen, five of length three, four of four, three of five and two of six.
                   </p>
+                  <p>
+                    The shortest useful case is a word like at, whose wrapped form has four characters and yields exactly &lt;at and at&gt;, since the wrapped word itself is never one of its own pieces. It does not need to be; the word already has a row.
+                  </p>
+</>
                 </WorkedExample>
                 <KeepInMind>
                   A piece is a run of characters and not a morpheme. Nothing here
@@ -402,18 +343,14 @@ export default function FasttextPage() {
                   whether or not anything has ever written to their rows.
                 </p>
                 <Equation>{"vector(w) = Σ over the pieces g of <w> of row(g)"}</Equation>
-                <p>
-                  Playing has 22 pieces at the published lengths. Sixteen of them
-                  are owned by some word of the corpus, and those rows have been
-                  written to thousands of times; six of them, layi, playi, layin,
-                  &lt;playi, playin and laying, occur in no word of the corpus and
-                  their rows never moved. Seventeen of the 22 rows it reaches had
-                  been written to, one more than those sixteen pieces account for,
-                  and the extra one is an accident worth remembering. The piece
-                  playin, which no word of this corpus holds, was sent to row 1312,
-                  and so was ayed&gt;, which played, stayed, walked and talked all
-                  own.
+                <>
+<p>
+                  Playing has 22 pieces at the published lengths. Sixteen of them are owned by some word of the corpus, and those rows have been written to thousands of times; six of them, layi, playi, layin, &lt;playi, playin and laying, occur in no word of the corpus and their rows never moved. Seventeen of the 22 rows it reaches had been written to, one more than those sixteen pieces account for, and the extra one is an accident worth remembering.
                 </p>
+                <p>
+                  The piece playin, which no word of this corpus holds, was sent to row 1312, and so was ayed&gt;, which played, stayed, walked and talked all own.
+                </p>
+</>
                 <KeepInMind>
                   There is no unknown word here, only unseen ones, and the
                   difference matters. A method with a fallback entry gives every
@@ -528,6 +465,54 @@ export default function FasttextPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            trueFalse(
+              "With all 30 sentences that contain walking dropped, the method built from pieces still placed walking among the verb forms.",
+              true,
+              "It placed walking at a mean cosine of 0.9953 to the nineteen surviving verb forms and 0.0497 to the eleven money words, with walked nearest, having never seen the word at all. The method with one row per word had nothing to return, exactly as it had nothing for playing, because a table indexed by whole words has no entry for a word it never indexed.",
+            ),
+            choice(
+              "Why is a word wrapped before it is cut into pieces, so that play becomes <play>?",
+              [
+                "So the same letters at the start of a word, inside one and at its end are three different pieces",
+                "So the wrapped word is always one of its own pieces",
+                "So the hash cannot send two pieces to the same row",
+                "So a word shorter than the minimum piece length still yields pieces",
+              ],
+              0,
+              "Without the wrapping the three letters her would be one piece wherever they fell. With it the piece at the start of her is <he and the piece at its end is er>, while the her sitting inside where stays plain her, and telling a beginning from an ending is what carries a grammatical ending. The wrapped word is deliberately never one of its own pieces, because the word already has a row.",
+            ),
+            choice(
+              "Playing is in no sentence, yet it comes back at 0.9970 to the verb forms and 0.1003 to the money words. Why does it land there?",
+              [
+                "Its vector is a sum over rows that only verb forms ever wrote to, since eight verb forms share a piece with it and no money word does",
+                "The fit recognised ing as a verb ending and placed the word by its grammar",
+                "An unseen word is given the average of the verb forms’ vectors as a fallback",
+                "Its own row was filled in from the rows of play, plays, player and played",
+              ],
+              0,
+              "Saying and staying share ten of its pieces, the four play forms share six each, and talking and walking share the three pieces of ing, while none of the eleven money words shares one. So the landing is that arithmetic and no insight into English. There is no fallback entry and no row of its own, which is why two unseen words get different answers worked out from different pieces.",
+            ),
+            trueFalse(
+              "A piece is given a row only once some word of the corpus has been found to contain it.",
+              false,
+              "There is no lookup and no list of pieces anywhere. A piece is hashed and the remainder on division by the number of rows is the row it uses, so a piece nobody has ever written is given a row just as readily as a common one. The piece laying, which no word of this corpus contains, lands in row 827, and that row is still every coordinate zero.",
+            ),
+            several(
+              "Which of these follow from a word’s vector being the sum of its own row and the rows of its pieces?",
+              [
+                "The correction from a training pair is added unchanged to every part’s row",
+                "A word’s composed vector travels further per correction than a plain one would",
+                "A step size chosen for one row per word is still the right step size here",
+                "The first pass costs less per training pair than the same fit without pieces",
+              ],
+              [0, 1, 3],
+              "The derivative of a sum with respect to any one term is the derivative with respect to the whole, so every part receives the same correction, and a word here has 14.6129 parts on average. The cost curve shows the effect, with a first pass at 2.5560 against 3.7370 without pieces. The step size therefore does not transfer, since doubling the published 0.025 takes the plain fit from 0.7033 to 0.8266 while this one goes only from 0.8723 to 0.8814 and its verb forms start coming apart.",
+            ),
+        ],
+        },
+        {
           title: "Part 4. What the Pieces Cost",
           content: (
             <>
@@ -550,18 +535,14 @@ export default function FasttextPage() {
                   same numbers to the last bit.
                 </p>
                 <WhyThisWorks title="Why the rows for the pieces start at zero">
-                  <p>
-                    Word rows start at a small random draw, which breaks the
-                    symmetry between words that would otherwise all begin
-                    identical. The rows for the pieces start at zero instead, for
-                    two reasons. A random offset on a shared row carries nothing
-                    about the corpus, and two pieces that only ever occur together
-                    receive identical corrections forever, so they would differ for
-                    good by nothing but where they happened to start. And starting
-                    at zero, and taking nothing from the sequence of random numbers,
-                    means a word&rsquo;s composed vector begins precisely where a
-                    plain one begins and the two fits walk the same walk.
+                  <>
+<p>
+                    Word rows start at a small random draw, which breaks the symmetry between words that would otherwise all begin identical. The rows for the pieces start at zero instead, for two reasons. A random offset on a shared row carries nothing about the corpus, and two pieces that only ever occur together receive identical corrections forever, so they would differ for good by nothing but where they happened to start.
                   </p>
+                  <p>
+                    And starting at zero, and taking nothing from the sequence of random numbers, means a word&rsquo;s composed vector begins precisely where a plain one begins and the two fits walk the same walk.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   A gap of exactly zero rules out a class of mistake that a gap of
@@ -581,6 +562,31 @@ export default function FasttextPage() {
                   word&rsquo;s length and with the width of the range.
                 </p>
                 <Equation>{"how many pieces =  Σ over k from m to min(M, L + 1) of (L + 3 − k)"}</Equation>
+                <WorkedExample title="The count, checked on three words">
+                  <>
+                    <p>
+                      Where has five letters, so L is 5, and at the published
+                      lengths the sum runs over k from three to six. A wrapped
+                      word of L plus two characters holds L plus three minus k
+                      runs of k characters, one for each place a run of that
+                      length can start. The sum stops at L plus one rather than
+                      L plus two, because the single run of L plus two
+                      characters is the wrapped word itself, which is never one
+                      of its own pieces.
+                    </p>
+                    <Equation>{"where, L = 5:     (5 + 3 − 3) + (5 + 3 − 4) + (5 + 3 − 5) + (5 + 3 − 6) = 5 + 4 + 3 + 2 = 14\nplaying, L = 7:   7 + 6 + 5 + 4 = 22\nat, L = 2:        (2 + 3 − 3) = 2"}</Equation>
+                    <p>
+                      Those are the fourteen pieces Part 2 counted for where,
+                      the 22 that playing is made of, and the two that at
+                      yields. For at the sum has one term, since a piece of
+                      four characters would be the whole of the wrapped word.
+                      Every extra letter adds one piece at each length in the
+                      range, which is why a longer word has more pieces and why
+                      widening the range from three only to three to six takes
+                      this corpus from 5.0000 pieces per word to 13.6129.
+                    </p>
+                  </>
+                </WorkedExample>
                 <p>
                   Where that lands is a choice with nothing inside the fit to settle
                   it, and both ends of it cost something. Cut this corpus at exactly
@@ -732,19 +738,14 @@ export default function FasttextPage() {
                   verb forms.
                 </p>
                 <FasttextSpelling />
-                <p>
-                  Five of them land where a reader would put them. Banking comes
-                  back at 0.9632 to the money words against 0.3718 to the verbs, and
-                  its three nearest are trade, yield and debt; stocking, traded,
-                  sharing and priced do the same, the last at 0.9870 with price,
-                  yield and fund nearest. Walkway lands among the verbs at 0.9970,
-                  nearest walk and walks, and that is the spelling working exactly
-                  as designed while giving the wrong answer, since a walkway is a
-                  thing rather than something anybody does. No sentence here ever
-                  put walkway beside anything, so there was no evidence to weigh
-                  against the letters it shares with walk, walks, walked and
-                  walking.
+                <>
+<p>
+                  Five of them land where a reader would put them. Banking comes back at 0.9632 to the money words against 0.3718 to the verbs, and its three nearest are trade, yield and debt; stocking, traded, sharing and priced do the same, the last at 0.9870 with price, yield and fund nearest. Walkway lands among the verbs at 0.9970, nearest walk and walks, and that is the spelling working exactly as designed while giving the wrong answer, since a walkway is a thing rather than something anybody does.
                 </p>
+                <p>
+                  No sentence here ever put walkway beside anything, so there was no evidence to weigh against the letters it shares with walk, walks, walked and walking.
+                </p>
+</>
                 <KeepInMind>
                   Stocking is the same shape of mistake wearing a better disguise. A
                   stocking has nothing to do with the stock market, and the fit puts
@@ -795,19 +796,14 @@ export default function FasttextPage() {
                   every coordinate exactly zero.
                 </p>
                 <Equation>{"cos(a, b) = (a · b) / (|a| |b|),  which is 0 / 0 when |a| = 0"}</Equation>
-                <p>
-                  A cosine is a ratio whose denominator is the product of the two
-                  lengths, so against a zero vector it is zero divided by zero. It
-                  is not a small similarity and not a large distance; the quantity
-                  does not exist, because the zero vector has no direction for an
-                  angle to be measured from. That is a fact about the arithmetic
-                  rather than about any program, and every implementation faces the
-                  same choice. Refusing says so. Returning zero would report that
-                  the word is unrelated to everything, which is a claim the method
-                  never made. Returning some default direction would place the word
-                  somewhere the corpus never implied, which is the thing having
-                  pieces was supposed to avoid.
+                <>
+<p>
+                  A cosine is a ratio whose denominator is the product of the two lengths, so against a zero vector it is zero divided by zero. It is not a small similarity and not a large distance; the quantity does not exist, because the zero vector has no direction for an angle to be measured from.
                 </p>
+                <p>
+                  That is a fact about the arithmetic rather than about any program, and every implementation faces the same choice. Refusing says so. Returning zero would report that the word is unrelated to everything, which is a claim the method never made. Returning some default direction would place the word somewhere the corpus never implied, which is the thing having pieces was supposed to avoid.
+                </p>
+</>
                 <KeepInMind>
                   This is the honest edge of the promise. A method built from pieces
                   has no unknown words, only unseen ones, and that holds exactly as
@@ -826,17 +822,14 @@ export default function FasttextPage() {
                   from the answer alone there is no procedure that recovers which
                   pieces wrote a row, or how many did.
                 </p>
-                <p>
-                  The collisions this page names were found from outside, by taking
-                  the corpus&rsquo;s own list of pieces and hashing it a second time
-                  looking for two that agree, which works only because that list was
-                  already in hand. It does not extend to the case that matters. The
-                  piece queue&gt; belongs to no word of the corpus, so no list of
-                  the corpus&rsquo;s pieces contains it, and the only way to find
-                  that particular accident is to already suspect the word queue and
-                  go looking. The set of spellings that might one day be asked for
-                  is not a set anybody can enumerate.
+                <>
+<p>
+                  The collisions this page names were found from outside, by taking the corpus&rsquo;s own list of pieces and hashing it a second time looking for two that agree, which works only because that list was already in hand. It does not extend to the case that matters. The piece queue&gt; belongs to no word of the corpus, so no list of the corpus&rsquo;s pieces contains it, and the only way to find that particular accident is to already suspect the word queue and go looking.
                 </p>
+                <p>
+                  The set of spellings that might one day be asked for is not a set anybody can enumerate.
+                </p>
+</>
                 <KeepInMind>
                   There is no repair inside the method either. A different hash, or
                   more rows, is a different table, and a different table has to be
@@ -856,18 +849,14 @@ export default function FasttextPage() {
                   none at all with any of the eleven money words, so the sum over its
                   pieces could hardly land anywhere else.
                 </p>
-                <p>
-                  That overlap is not a property of the method. It is a property of
-                  how a language writes its grammar, and it is fixed before any
-                  fitting begins. Where related forms are built by adding letters to
-                  a stem, as they are for walk and walking, the overlap is large and
-                  the method is buying something real. Where a related form is
-                  written differently, as go and went are, the two share no run of
-                  letters at all and the pieces have nothing to carry. And where two
-                  unrelated words happen to look alike, the pieces carry a
-                  connection that is not there, which stocking and stock show in
-                  miniature.
+                <>
+<p>
+                  That overlap is not a property of the method. It is a property of how a language writes its grammar, and it is fixed before any fitting begins. Where related forms are built by adding letters to a stem, as they are for walk and walking, the overlap is large and the method is buying something real.
                 </p>
+                <p>
+                  Where a related form is written differently, as go and went are, the two share no run of letters at all and the pieces have nothing to carry. And where two unrelated words happen to look alike, the pieces carry a connection that is not there, which stocking and stock show in miniature.
+                </p>
+</>
                 <KeepInMind>
                   Nothing on this page measures a second language, and the claim
                   here is narrower than a comparison would be. The quantity the
@@ -944,6 +933,254 @@ export default function FasttextPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 to 6",
+          quiz: [
+            trueFalse(
+              "With the shortest piece set to fifty characters, the fit agrees with the plain method exactly, with a largest disagreement of 0.0.",
+              true,
+              "The longest wrapped word here is nine characters, so no word has a piece and every row kept for the pieces stays at the zero it started from. Two passes cost 3.8942 and 2.7842 by both routes, the same numbers to the last bit. A gap of exactly zero rules out a class of mistake that four matching decimal places would not, since any difference in how the corpus is walked would show up as a small disagreement.",
+            ),
+            choice(
+              "Stocking is in no sentence and comes back at 0.9694 to the money words with stock nearest. What does that reading show?",
+              [
+                "A word inherits the company of the words it is spelled like, whether or not it means anything similar",
+                "The corpus used stocking beside the money words often enough to place it",
+                "One of its pieces was hashed by accident into a row a money word wrote, as happened to queue",
+                "The fit is right, since a stocking belongs with the stock market",
+              ],
+              0,
+              "A stocking has nothing to do with the stock market, and the five letters it shares with stock are the whole of the evidence, because no sentence ever put the word beside anything. Walkway is the same mistake among the verbs at 0.9970. Queue is a different failure, placed by one colliding row and no shared spelling at all.",
+            ),
+            trueFalse(
+              "Raising the number of rows improves the answer steadily, because fewer pieces collide.",
+              false,
+              "The sweep is not a smooth curve. Fifty rows put the missing form at 0.1133 to the money words and two hundred rows put it at 0.2285, which is worse at the larger table. Which particular pieces happen to collide is a fact about the hash and this vocabulary, although ten rows really does break the method, separating the two lists by 0.4417 against the 0.8723 that two thousand rows give.",
+            ),
+            choice(
+              "Queue comes back at 0.9919 to the eleven money words. What produced that reading?",
+              [
+                "Its spelling resembles that of several of the money words",
+                "Thirteen of its fourteen pieces are shared with money words",
+                "One of its pieces, queue>, was hashed to the row that arket uses, and market owns arket",
+                "An unseen word falls back to a default vector that sits among the money words",
+              ],
+              2,
+              "Thirteen of queue’s rows were never written to and contribute nothing, so the whole of its vector is one row that market and nothing else wrote. It is an arithmetic accident with no connection to spelling, meaning or usage, and it sits within 0.0051 of playing’s reading of its own list, so nothing distinguishes the two answers at the point a reader sees them.",
+            ),
+            several(
+              "Zap has five pieces, and the hash sent every one of them to a row no word of this corpus reaches. Which of these then hold?",
+              [
+                "Its vector is every coordinate exactly zero",
+                "A cosine against it is zero divided by zero, so the quantity does not exist",
+                "Its cosine against another word is zero, which reports that it is unrelated to everything",
+                "More passes over the same corpus would give it a direction",
+              ],
+              [0, 1],
+              "Every term of the sum is a row that never moved, and a cosine divides by the product of the two lengths, so against a zero vector the denominator is zero. Returning zero instead would report that the word is unrelated to everything, which is a claim the method never made. More passes walk the same sentences, and no word in them reaches any of zap’s five rows, so the rows stay where they started.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Asking the Library for Words It Never Saw",
+          practice: [
+            exercise(
+              "Ask both fits for the word no sentence holds",
+              ["The starter builds the corpus of Part 1, whose verb list holds play, plays, player and played and leaves playing out. Fit Word2Vec and FastText to it with the same settings, and give FastText two thousand rows for its pieces, which is what the page uses.", "Ask the plain fit’s embeddings for the words nearest playing and print the refusal. Then ask the FastText model for the four nearest, and print the mean cosine from playing to the twenty verb forms and to the eleven money words, to four places."],
+              `import random
+from statistics import mean
+
+from oop_ml import FastText, UnknownTokenError, Word2Vec
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+settings = dict(dimension=12, window=3, epochs=5, learning_rate=0.025, random_seed=0)
+
+# Fit Word2Vec with the settings, ask its embeddings for the four words
+# nearest playing, and print the UnknownTokenError it raises.
+
+# Fit FastText with the same settings and n_buckets=2000.
+
+# Print its four nearest words to playing with their cosines, then the mean
+# similarity from playing to VERBS and to MONEY.`,
+              `import random
+from statistics import mean
+
+from oop_ml import FastText, UnknownTokenError, Word2Vec
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+settings = dict(dimension=12, window=3, epochs=5, learning_rate=0.025, random_seed=0)
+
+plain = Word2Vec(**settings).fit(corpus)
+try:
+    plain.embeddings.most_similar("playing", 4)
+except UnknownTokenError as refusal:
+    print(f"one row per word: {refusal}")
+
+pieces = FastText(**settings, n_buckets=2000).fit(corpus)
+for neighbour in pieces.most_similar("playing", 4):
+    print(f"{neighbour.word:8s}{neighbour.similarity:.4f}")
+to_verbs = mean(pieces.similarity("playing", word) for word in VERBS)
+to_money = mean(pieces.similarity("playing", word) for word in MONEY)
+print(f"to the verb forms:  {to_verbs:.4f}")
+print(f"to the money words: {to_money:.4f}")`,
+              `one row per word: token 'playing' is not in this vocabulary of 31, which has no unknown token to fall back on
+play    0.9993
+plays   0.9988
+player  0.9987
+played  0.9985
+to the verb forms:  0.9970
+to the money words: 0.1003`,
+              { hints: ["Both constructors take the same settings, so Word2Vec(**settings) and FastText(**settings, n_buckets=2000) differ only in the rows for the pieces.", "A Word2Vec answers through its embeddings, a table with one row per word, so embeddings.most_similar raises for a word it never indexed. Wrap the call in try and except UnknownTokenError.", "The FastText model answers most_similar and similarity itself, composing a vector from the pieces of any spelling. Looping over most_similar gives entries with a word and a similarity."], check: numberCheck("What is the mean cosine from playing to the eleven money words, to four places?", 0.1003, 5e-05, "None of the eleven money words shares a single piece with playing, so its vector is a sum over rows that only verb forms wrote to. That is the 0.1003 of Part 3, against 0.9970 to the verb forms, from a fit that never saw the word.") },
+            ),
+            exercise(
+              "Find the words stocking is spelled like",
+              ["Part 5 says stocking lands among the money words because five letters agree with stock. No fit is needed to see what it shares, since the pieces are decided by the spellings alone. Cut stocking and every word of the two lists at the published lengths.", "Print how many pieces stocking has, how many of them some word of the corpus also owns, and then each corpus word that shares a piece with it beside the number shared, largest first. The lesson quotes none of these counts."],
+              `from oop_ml import FastText
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+cutter = FastText()
+
+# The pieces of stocking, as a set.
+
+# The pieces every corpus word owns between them, as one set.
+
+# Print how many pieces stocking has and how many are in the owned set.
+
+# For each corpus word, count the pieces it shares with stocking, and print
+# the words that share at least one, largest count first.`,
+              `from oop_ml import FastText
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+cutter = FastText()
+
+pieces = set(cutter.n_grams_of("stocking"))
+owned = {piece for word in VERBS + MONEY for piece in cutter.n_grams_of(word)}
+print(f"stocking has {len(pieces)} pieces, {len(pieces & owned)} of them owned by a corpus word")
+
+shared = {word: len(pieces & set(cutter.n_grams_of(word))) for word in VERBS + MONEY}
+for word in sorted(shared, key=lambda word: (-shared[word], word)):
+    if shared[word] > 0:
+        print(f"{word:9s}{shared[word]}")`,
+              `stocking has 26 pieces, 16 of them owned by a corpus word
+stock    10
+talking  6
+walking  6
+staying  4
+saying   3
+stay     1
+stayed   1
+stays    1`,
+              { hints: ["An unfitted FastText() already knows how to cut. n_grams_of(word) answers the pieces of any spelling at lengths three to six.", "Turn each answer into a set, and the pieces two words share are the intersection of their sets.", "Sorting the words by the negative of their count puts the largest first."], check: numberCheck("How many pieces does stocking share with stock?", 10, 0, "Wrapped, the two words begin with the same six characters, and every run of three to six characters inside them is a piece of both, four of length three, three of four, two of five and one of six. The six pieces it shares with talking and with walking come from the ending, and the fit still puts it at 0.9694 to the money words.") },
+            ),
+            exercise(
+              "Read the length a cosine throws away",
+              ["Part 5 ends on the one visible sign that queue was placed by an accident, which is how short its vector is. Fit FastText as in the first problem and look at four words no sentence holds, playing, stocking, queue and zap.", "For each, print how many of the rows its pieces reach were ever written to, and the length of its vector to four places. Then ask for the word nearest zap and print the refusal. The lesson gives the lengths of playing and queue and not of stocking."],
+              `import random
+
+import numpy as np
+from oop_ml import FastText, UndefinedMetricError
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+settings = dict(dimension=12, window=3, epochs=5, learning_rate=0.025, random_seed=0)
+model = FastText(**settings, n_buckets=2000).fit(corpus)
+
+for word in ("playing", "stocking", "queue", "zap"):
+    # rows: the set of rows this word's pieces are hashed to.
+
+    # written: how many of those rows hold anything but zeros.
+
+    # length: the length of the word's vector.
+
+    # Print the word, written, the number of rows, and length to four places.
+    pass
+
+# Ask for the word nearest zap and print the UndefinedMetricError it raises.`,
+              `import random
+
+import numpy as np
+from oop_ml import FastText, UndefinedMetricError
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+settings = dict(dimension=12, window=3, epochs=5, learning_rate=0.025, random_seed=0)
+model = FastText(**settings, n_buckets=2000).fit(corpus)
+
+for word in ("playing", "stocking", "queue", "zap"):
+    rows = set(model.n_gram_ids_of(word))
+    written = sum(1 for row in rows if model.bucket_vectors[row].any())
+    length = float(np.linalg.norm(model.vector_of(word).values))
+    print(f"{word:9s}rows written {written:2d} of {len(rows):2d}   length {length:.4f}")
+
+try:
+    model.most_similar("zap", 1)
+except UndefinedMetricError as refusal:
+    print(f"zap: {refusal}")`,
+              `playing  rows written 17 of 22   length 3.7789
+stocking rows written 16 of 26   length 3.0864
+queue    rows written  1 of 14   length 0.1893
+zap      rows written  0 of  5   length 0.0000
+zap: the zero vector has no direction, so nothing is similar to it`,
+              { hints: ["model.n_gram_ids_of(word) answers the row each piece is hashed to, and model.bucket_vectors is the table of those rows, two thousand by twelve.", "A row that was never written to is still every coordinate zero, so model.bucket_vectors[row].any() is False for it.", "model.vector_of(word).values is the composed vector as an array, and np.linalg.norm gives its length."], check: numberCheck("How long is stocking’s vector, to four places?", 3.0864, 5e-05, "Sixteen written rows went into its sum, nearly as many as playing’s seventeen, so it is nearly as long as playing’s 3.7789. The length marks queue, whose 0.1893 is one row, and says nothing against stocking, whose mistake is in the spelling and not in the arithmetic.") },
+            ),
+          ],
         },
       ]}
     />

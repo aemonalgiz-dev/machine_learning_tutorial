@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // The same corpus, the same number of merges, two alphabets.
 //
@@ -115,16 +117,9 @@ export function AlphabetComparison() {
         })}
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Both fits learned the same number of merges from the same eighteen
-        sentences, so the only difference between them is what they merged over.
-        Those sentences use {variants.corpus_distinct_characters} distinct
-        characters, so a fit merging over bytes is spending its early merges
-        rebuilding the letters a character fit began with, and it carries{" "}
-        {256 - variants.corpus_distinct_characters} byte rows nothing here will
-        ever reach. Both return every text exactly, so what separates them is
-        length, and which of them is shorter depends on the text.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">To compare the starting alphabets, both fits use the same corpus and merge count. The character alphabet begins with the corpus&apos;s {variants.corpus_distinct_characters} distinct characters. The byte alphabet can represent every byte, but may need early merges to rebuild multi-byte characters.</p><Equation>{"Byte entries beyond the corpus character count:\n256 − " + variants.corpus_distinct_characters + " = " + (256 - variants.corpus_distinct_characters)}</Equation><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">This is a difference in table sizes, not a count of unused byte values: one character may use several bytes. Both displayed encodings round-trip exactly. Compare their sequence lengths for each text.</p>
+</>
     </div>
   );
 }

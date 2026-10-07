@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -23,7 +26,7 @@ import { TwoSensesOneRow } from "@/components/widgets/TwoSensesOneRow";
 export const metadata: Metadata = {
   title: "Latent Semantic Analysis · oop_ml",
   description:
-    "Count which word appears in which document, weight the counts so a word used everywhere counts for nothing, and squeeze the table down to a handful of directions.",
+    "Weight a term-document table and compress it into a shared space for words and documents.",
 };
 
 const link =
@@ -32,8 +35,12 @@ const link =
 export default function LatentSemanticAnalysisPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["latent-semantic-analysis"]}
+      technicalStart="Part 3. Squeezing The Table"
+      openingTitle="A Large Word Table May Have a Smaller Pattern Inside It"
+      playgroundIntro="Compare the original table with its weighted and reduced representations. Inspect neighbouring words and documents as you change the number of retained directions."
       title="Latent Semantic Analysis"
-      tagline="Latent semantic analysis counts which word appears in which document, weights the counts so a word used everywhere counts for nothing, and squeezes the table down to a few directions, which gives every word and every document a position in one space."
+      tagline="Weight a term-document table and compress it into a shared space for words and documents."
       prerequisites={
         <>
           Everything here ends as a handful of coordinates, and two of them are
@@ -52,89 +59,23 @@ export default function LatentSemanticAnalysisPage() {
           reader who has will recognise most of Part 3 on sight.
         </>
       }
-      history={
-        <>
-          <p>
-            In the middle 1980s a group at Bell Communications Research in
-            Morristown, New Jersey were trying to make a computer find the
-            document somebody wanted. Every system then in use worked by
-            matching words, so a request reached a document when the two used
-            the same spelling and missed it otherwise. George Furnas, Thomas
-            Landauer, Louis Gomez and Susan Dumais had measured how badly that
-            fails, and published the measurement in the Communications of the
-            ACM in 1987 under the title &ldquo;The vocabulary problem in
-            human-system communication&rdquo;. Asked to give a name to the same
-            thing, two people picked the same word less than a fifth of the
-            time. That is the epistemic problem the method was invented for. A
-            keyword system is being asked to reward an agreement that mostly
-            does not happen.
-          </p>
-          <p>
-            Scott Deerwester, Dumais, Furnas, Landauer and Richard Harshman
-            published &ldquo;Indexing by latent semantic analysis&rdquo; in the
-            Journal of the American Society for Information Science in 1990.
-            Their proposal was to stop reading the table of which word appeared
-            in which document literally and to replace it with the closest
-            table of low rank, using a theorem Carl Eckart and Gale Young had
-            proved in 1936, that truncating a singular value decomposition gives
-            the nearest matrix of that rank in the least-squares sense. Two
-            documents about one subject that share no word are, in the replaced
-            table, both filled in from the same handful of directions, so they
-            come out near each other without ever having met. The weighting the
-            method leans on came from Karen Sp&auml;rck Jones, who argued in the
-            Journal of Documentation in 1972 that a term&rsquo;s value in
-            retrieval falls with the number of documents holding it; the table
-            itself is Gerard Salton&rsquo;s vector space model, set out with
-            Anita Wong and Chung-Shu Yang in 1975.
-          </p>
-          <p>
-            The retrieval application was patented in 1988 and is usually called
-            latent semantic indexing; the name on this page is the one used when
-            the same fit is read as a statement about words rather than about
-            documents. Landauer and Dumais pressed that reading hard in
-            &ldquo;A solution to Plato&rsquo;s problem&rdquo; in the
-            Psychological Review in 1997, where a fit over an encyclopaedia
-            answered a multiple-choice synonym test at a rate comparable to
-            applicants to American universities from abroad, which was offered
-            as evidence that a great deal of what looks like knowledge of word
-            meaning can be recovered from co-occurrence alone. Thomas
-            Hofmann&rsquo;s probabilistic version in 1999 and the latent
-            Dirichlet allocation of David Blei, Andrew Ng and Michael Jordan in
-            2003 replaced the decomposition with a generative model, and the
-            counting-and-squeezing shape is the one those descend from.
-          </p>
-          <p>
-            This page asks six questions in order. Why does one table describe
-            words and documents at the same time? What goes wrong if the counts
-            in it are read as they stand? What does the weighting repair, and
-            what does it fail to repair? What does squeezing the table down
-            actually keep, and what does it invent? Why can the strongest
-            direction the squeeze finds never tell one subject from another?
-            And where does the method stop being defined?
-          </p>
-        </>
-      }
+
       playground={<LatentSpaceExplorer />}
       sections={[
         {
           title: "Part 1. One Table, Two Readings",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Twenty-four documents, and four small enough to print">
-                <p>
-                  Everything on this page is fitted to one of two collections,
-                  and it is worth knowing exactly what is in them before any
-                  method touches them. The larger one is twenty-four documents,
-                  twelve about cooking and twelve about sailing. The cooking
-                  half is written from ten words, flour, sugar, butter, eggs,
-                  oven, bake, stir, whisk, dough and pan; the sailing half from
-                  ten of its own, sail, wind, boat, harbour, anchor, tide, mast,
-                  rope, deck and crew. No content word appears in both halves.
-                  What the two halves do share is three words carrying no
-                  subject at all, and, the and we, and each document uses
-                  exactly one of them.
+                <>
+<p>
+                  Everything on this page is fitted to one of two collections, and it is worth knowing exactly what is in them before any method touches them. The larger one is twenty-four documents, twelve about cooking and twelve about sailing. The cooking half is written from ten words, flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan; the sailing half from ten of its own, sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew.
                 </p>
+                <p>
+                  No content word appears in both halves. What the two halves do share is three words carrying no subject at all, and, the and we, and each document uses exactly one of them.
+                </p>
+</>
                 <p>
                   Each document is six words long, five consecutive words of its
                   own half taken in a cycle and one of the three shared words,
@@ -170,17 +111,14 @@ export default function LatentSemanticAnalysisPage() {
                   cat give the same column, and nothing about which document
                   came first survives it either.
                 </p>
-                <p>
-                  The reason this one table can answer two different questions is
-                  that it can be read along either axis. Read a column and a
-                  document has become a list of numbers over the vocabulary,
-                  which is what it means to say a document is a point. Read a row
-                  and a word has become a list of numbers over the collection,
-                  which is the same claim about a word. Neither reading needs
-                  anything the other does not have, so a method that works on the
-                  table is answering both questions at once whether or not it
-                  meant to.
+                <>
+<p>
+                  The reason this one table can answer two different questions is that it can be read along either axis. Read a column and a document has become a list of numbers over the vocabulary, which is what it means to say a document is a point. Read a row and a word has become a list of numbers over the collection, which is the same claim about a word.
                 </p>
+                <p>
+                  Neither reading needs anything the other does not have, so a method that works on the table is answering both questions at once whether or not it meant to.
+                </p>
+</>
                 <TermDocumentTable corpus="four" />
                 <p>
                   Seven distinct words over four documents gives 28 cells, and
@@ -237,7 +175,7 @@ export default function LatentSemanticAnalysisPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Weighting What A Count Is Worth",
@@ -290,19 +228,18 @@ export default function LatentSemanticAnalysisPage() {
                   counts for less than everything else and still counts.
                 </p>
                 <WorkedExample title="Seven words, four documents">
-                  <p>
-                    The word the is in all four documents, so its weight is the
-                    logarithm of five over five plus one, which is exactly
-                    1.0000. Cat and boat are each in two, so their weight is the
-                    logarithm of five over three plus one, or 1.5108. Sat, ran,
-                    sailed and sank are each in one, and their weight is the
-                    logarithm of five over two plus one, or 1.9163. The entries
-                    that change most are the four words used once, whose cells
-                    go from 1 to 1.9163, while the row of the does not move at
-                    all. What has changed is the ratio between them, and with it
-                    the share of a column that the takes, which falls from 33.3%
-                    to 22.6%.
-                  </p>
+                  <>
+                    <p>
+                      The occurs in every document, cat and boat in two each, and the
+                      remaining four words in one each. Smoothed inverse-document
+                      frequency assigns weights from those document counts.
+                    </p>
+                    <Equation>{"the:              ln(5/5) + 1 = 1\ncat, boat:        ln(5/3) + 1 ≈ 1.5108\nsat, ran, sailed, sank: ln(5/2) + 1 ≈ 1.9163"}</Equation>
+                    <p>
+                      Rare words gain weight relative to the shared word. Its numerical
+                      row stays unchanged, but its share of each document’s total falls.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   Switch the table in step 2 to weighted counts and watch what
@@ -364,6 +301,48 @@ export default function LatentSemanticAnalysisPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "The table of counts rates a cooking document against a sailing one higher than it rates two cooking documents against each other.",
+              true,
+              "By the cycle that built them those two cooking documents happen to share no word at all, so their comparison is exactly zero, while the cross-half pair shares the word and and comes out at 0.1483. Two things are alike in this table only when they overlap, which is why the failure is structural rather than statistical.",
+            ),
+            choice(
+              "The mean over every pair made of a cooking word and a sailing word is exactly zero. Why is that worse than it sounds?",
+              [
+                "Ten of the 90 pairs taken from one half also score exactly zero, so flour against bake and flour against anchor are the same number",
+                "Zero is the lowest the comparison can go, so nothing has been lost",
+                "The mean is dragged down by the three words both halves use",
+                "It shows the two halves were written from one vocabulary",
+              ],
+              0,
+              "The table cannot tell the two situations apart, and no amount of extra text repairs it directly. What anybody wanted the table to say is that two words are alike because they keep the same company, and overlap is the only thing it can see.",
+            ),
+            trueFalse(
+              "The row of the is uninformative, and being uninformative it is at least harmless.",
+              false,
+              "The damage is that the row is loud as well as uninformative. Under plain counts the takes a third of the weight of every column here, so a third of what any comparison of two documents reads is a quantity that is identical in both. A word used once has a row that is mostly zeros and so can be uninformative cheaply.",
+            ),
+            choice(
+              "Why do the additions inside the weighting formula matter?",
+              [
+                "Without them a word in every document gets a weight of exactly zero, which deletes its row, where the smoothed form hands it a weight of one",
+                "They stop the weight going negative on a rare word",
+                "They make the weights sum to one over the vocabulary",
+                "They let a weight write a number into a cell the collection left empty",
+              ],
+              0,
+              "They behave as though one extra document contained every word once, so the widest-spread word counts for less than everything else and still counts. On a small collection a real word can easily turn up everywhere, which is where the difference bites. A weight multiplies a count and cannot create one, so every cell that was empty stays empty.",
+            ),
+            trueFalse(
+              "On the twenty-four documents the weighting makes a large difference to the comparisons.",
+              false,
+              "No word appears in every document there. The three shared words are each in eight documents and the subject words in five to seven, so the weights run only from 2.0217 to 2.4271 and the most common word is barely held back. That makes this a poor demonstration of the weighting, and it also means no later claim is propped up by it, since every one holds under both weightings.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. Squeezing The Table",
           content: (
             <>
@@ -388,19 +367,14 @@ export default function LatentSemanticAnalysisPage() {
                 </p>
                 <Equation>{"sum over every cell of ( X − X(k) )²  =  the sum of the discarded squared numbers"}</Equation>
                 <WhyThisWorks title="Why the error is the discarded weight, exactly">
-                  <p>
-                    The pieces are chosen so that the directions over the words
-                    are at right angles to one another and so are the directions
-                    over the documents. Cells of the table therefore never
-                    interfere between one piece and another, so the total squared
-                    size of the table splits cleanly into a contribution per
-                    piece, each of them the square of that piece&rsquo;s number.
-                    Dropping a piece removes its contribution and nothing else,
-                    which is why the error of the rebuild and the weight thrown
-                    away are one quantity rather than two that happen to agree.
-                    On the twenty-four documents at two directions kept, both are
-                    371.3389.
+                  <>
+<p>
+                    The pieces are chosen so that the directions over the words are at right angles to one another and so are the directions over the documents. Cells of the table therefore never interfere between one piece and another, so the total squared size of the table splits cleanly into a contribution per piece, each of them the square of that piece&rsquo;s number.
                   </p>
+                  <p>
+                    Dropping a piece removes its contribution and nothing else, which is why the error of the rebuild and the weight thrown away are one quantity rather than two that happen to agree. On the twenty-four documents at two directions kept, both are 371.3389.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   The method chooses its directions to make that squared error
@@ -588,22 +562,52 @@ export default function LatentSemanticAnalysisPage() {
                   every sailing word on the other.
                 </p>
                 <WorkedExample title="The four-document collection, by hand">
-                  <p>
-                    The same two facts fall out of the small collection in
-                    numbers anyone can check, and under plain counts they are
-                    whole numbers. Its four numbers are the square roots of 7,
-                    3, 1 and 1, so the shares are seven twelfths,
-                    three twelfths, one twelfth and one twelfth. On the first
-                    direction all four documents sit at the square root of seven
-                    over two, which is 1.3229, the same value for every one of
-                    them, so it does not merely fail to separate the pairs, it
-                    reports them as identical. On the second, the two cat
-                    documents sit at one value and the two boat documents at
-                    minus it. The word the sits at 2 on the first direction and
-                    at exactly 0 on the second, in the same place a word used in
-                    every document has to be.
+                  <>
+<p>
+                    The same two facts fall out of the small collection in numbers anyone can check, and under plain counts they are whole numbers. Its four numbers are the square roots of 7, 3, 1 and 1, so the shares are seven twelfths, three twelfths, one twelfth and one twelfth. On the first direction all four documents sit at the square root of seven over two, which is 1.3229, the same value for every one of them, so it does not merely fail to separate the pairs, it reports them as identical.
                   </p>
+                  <p>
+                    On the second, the two cat documents sit at one value and the two boat documents at minus it. The word the sits at 2 on the first direction and at exactly 0 on the second, in the same place a word used in every document has to be.
+                  </p>
+</>
                 </WorkedExample>
+                <WhyThisWorks title="Where 7, 3, 1 and 1 come from, with a pencil">
+                  <p>
+                    Count, for every pair of the four documents, how many
+                    words the two share. A document shares all three of its
+                    words with itself, the two cat documents share two, the two
+                    boat documents share two, and a cat document and a boat
+                    document share only the word the.
+                  </p>
+                  <Equation>{`                  the cat sat   the cat ran   the boat sailed   the boat sank
+the cat sat            3             2               1                1
+the cat ran            2             3               1                1
+the boat sailed        1             1               3                2
+the boat sank          1             1               2                3`}</Equation>
+                  <p>
+                    A direction over the documents is a pattern of signs, and
+                    the square of its number is what one row of this table
+                    adds up to when the pattern&rsquo;s signs are put on it.
+                    There are four patterns worth trying. Every document alike,
+                    the cat pair against the boat pair, one cat document
+                    against the other, and one boat document against the
+                    other.
+                  </p>
+                  <Equation>{`every document alike              3 + 2 + 1 + 1  =  7
+cat pair against boat pair        3 + 2 − 1 − 1  =  3
+one cat document against the other        3 − 2  =  1
+one boat document against the other       3 − 2  =  1`}</Equation>
+                  <p>
+                    The largest belongs to the pattern with no minus sign in
+                    it, which is Perron&rsquo;s theorem on four documents, and
+                    the next to the pattern that tells the halves apart. The
+                    four add up to 12, the number of filled cells in a table
+                    whose every filled cell holds a 1, and that is where the
+                    twelfths come from. The pattern with every document alike,
+                    scaled to length one, puts a half on each of the four, and
+                    a half of the square root of 7 is the 1.3229 above.
+                  </p>
+                </WhyThisWorks>
                 <KeepInMind>
                   Two directions are needed before this collection says anything
                   about its subject, and the first of them is spent on something
@@ -643,18 +647,14 @@ export default function LatentSemanticAnalysisPage() {
                   ]}
                   caption="The same twenty-four documents under weighted counts, decomposed twice. Shifting moves the split from the second direction to the first and changes nothing else about the fit that this page reports."
                 />
-                <p>
-                  So why not shift? Because the table has an interpretation the
-                  shifted one loses. An entry of the table as counted is a weight
-                  a document actually gave a word, and a rebuilt entry is a
-                  guess at the same quantity, which is what makes the rebuild
-                  readable and what makes a new document foldable into the space
-                  later. Shifting also fills every empty cell with the negative
-                  of a row mean, which on a table that is 73.9% empty means
-                  almost the whole of it stops being sparse, and on a real
-                  collection that is the difference between a computation that
-                  fits in memory and one that does not.
+                <>
+<p>
+                  So why not shift? Because the table has an interpretation the shifted one loses. An entry of the table as counted is a weight a document actually gave a word, and a rebuilt entry is a guess at the same quantity, which is what makes the rebuild readable and what makes a new document foldable into the space later.
                 </p>
+                <p>
+                  Shifting also fills every empty cell with the negative of a row mean, which on a table that is 73.9% empty means almost the whole of it stops being sparse, and on a real collection that is the difference between a computation that fits in memory and one that does not.
+                </p>
+</>
                 <KeepInMind>
                   The two methods are the same arithmetic applied to different
                   tables, and the choice of table is where they part company. A
@@ -666,6 +666,60 @@ export default function LatentSemanticAnalysisPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            trueFalse(
+              "The squared error of a rebuild and the weight that was thrown away are one quantity, not two that happen to agree.",
+              true,
+              "The directions over the words are at right angles to one another and so are the directions over the documents, so the total squared size of the table splits cleanly into a contribution per piece, and dropping a piece removes its contribution and nothing else. On the twenty-four documents at two directions kept, both are 371.3389, which means the size of the error is known before the rebuild is made.",
+            ),
+            choice(
+              "Rebuilt from two directions, the row of flour holds about 1.1 in all twelve cooking documents where the collection used it in six. What should be made of that?",
+              [
+                "It is the point of the method rather than a side effect, and the numbers it writes where the collection was silent are not evidence about the word and the document they sit between",
+                "It shows the fit has learned what cooking is",
+                "It is a rounding artefact of keeping too few directions",
+                "It means flour really was used in all twelve and the counts were lost",
+              ],
+              0,
+              "Across the whole table the empty cells come back at 0.4043 on average and the largest at 1.2970, which is more than half of the 2.2730 that a single observed use of flour carries. The rebuild also writes numbers no count can be, 104 cells below zero at two directions and 208 at eight, because the fit is minimising a squared difference and was never told its entries are counts.",
+            ),
+            several(
+              "Which of these hold for the twenty-four documents once the table has been squeezed?",
+              [
+                "A fit keeping two directions reports 48.0 percent of the table, a share whose denominator was worked out before the cut",
+                "The two cooking documents that share no word come out at 0.9998, above the 0.0819 of the cooking and sailing pair that share one",
+                "Flour against bake and flour against anchor, both exactly zero in the table as counted, come out at 1.0000 and −0.0028",
+                "The running total of the shares reaches the whole table at the fourteenth direction and never moves again",
+              ],
+              [0, 1, 2, 3],
+              "All four hold. After the cut the discarded numbers are gone, so a share worked out then would report that the fit had kept everything. The reversal among the documents, and the two word pairs ending at opposite ends of the range, is the method doing the job it was invented for, and none of it amounts to the fit having learned about cooking, since flour and bake are simply used in documents that use the same other words. Twenty-three words over twenty-four documents arranged in this cycle leave only fourteen directions with any spread in them at all.",
+            ),
+            choice(
+              "Why can the leading direction of a count table not put the two halves on opposite sides?",
+              [
+                "A matrix with no negative entry has a leading direction with no negative entry either, so every document gets a coordinate of the same sign and there are no opposite sides to be on",
+                "That direction carries too small a share of the table to say anything",
+                "The weighting flattens it",
+                "The three shared words cancel along it",
+              ],
+              0,
+              "Measured, every coordinate lies between 2.6501 and 2.8994 and the two halves’ means differ by 4.4 times ten to the minus sixteen, which is the last bit of a double-precision number rather than a difference. That direction carries 26.3 percent of the table and measures how much of the common vocabulary a document uses, which is close to how long it is. The split is complete on the second direction instead.",
+            ),
+            several(
+              "Each row is shifted by its own mean across the documents before decomposing. Which of these follow?",
+              [
+                "The leading direction becomes the separating one, carrying 29.4 percent against the unshifted leading direction’s 26.3",
+                "Perron no longer applies, because the matrix is no longer non-negative",
+                "A rebuilt entry is still a guess at a weight some document gave a word",
+                "Every empty cell is filled with the negative of a row mean, so a table that is 73.9 percent empty stops being sparse",
+              ],
+              [0, 1, 3],
+              "The shift is what makes a sign change possible and what the leading direction gains by. What it costs is the reading, since an entry of the unshifted table is a weight a document actually gave a word, and that is what makes the rebuild readable and a new document foldable later. On a real collection the loss of sparsity is the difference between a computation that fits in memory and one that does not.",
+            ),
+        ],
         },
         {
           title: "Part 5. A Position For Every Word And Every Document",
@@ -782,17 +836,14 @@ export default function LatentSemanticAnalysisPage() {
                   the two routes are held together.
                 </p>
                 <WorkedExample title="Three texts handed to the fitted space">
-                  <p>
-                    We bake the dough and whisk the eggs lands at 3.7471 on the
-                    first direction and −1.9689 on the second, which is the
-                    cooking side. The crew sail the boat past the harbour lands
-                    at 3.3330 and 2.0586, which is the sailing side, and the word
-                    past is simply ignored because the collection never contained
-                    it. A quiet afternoon lands at 0 and 0, since not one of its
-                    words is in the vocabulary, and a position of zero has no
-                    direction, so nothing is near it and asking what it resembles
-                    has no answer.
+                  <>
+<p>
+                    We bake the dough and whisk the eggs lands at 3.7471 on the first direction and −1.9689 on the second, which is the cooking side. The crew sail the boat past the harbour lands at 3.3330 and 2.0586, which is the sailing side, and the word past is simply ignored because the collection never contained it.
                   </p>
+                  <p>
+                    A quiet afternoon lands at 0 and 0, since not one of its words is in the vocabulary, and a position of zero has no direction, so nothing is near it and asking what it resembles has no answer.
+                  </p>
+</>
                 </WorkedExample>
                 <p>
                   Type a text into the box under the playground to try this. A
@@ -830,8 +881,9 @@ export default function LatentSemanticAnalysisPage() {
                     ["4 directions", "192", "68.0%"],
                     ["6 directions", "288", "84.2%"],
                   ]}
-                  caption="The twenty-four documents, 23 words by 24 documents. A fit at width k stores 23k plus 24k plus k numbers, so the saving is real only while k is well below the number of documents."
+                  caption="Twenty-three words across twenty-four documents. The factorized representation saves storage only at sufficiently small widths."
                 />
+                <Equation>{"factorized storage = 23k + 24k + k = 48k values\noriginal table = 23 × 24 = 552 values"}</Equation>
                 <p>
                   The saving looks thin because the collection is tiny, and the
                   shape of the arithmetic says why it is not thin in practice.
@@ -913,19 +965,14 @@ export default function LatentSemanticAnalysisPage() {
                   those to another, and a fit gives no sign that it has found
                   something uninteresting.
                 </p>
-                <p>
-                  A related consequence is that the individual coordinates carry
-                  no meaning even when the fit is good. Two directions of equal
-                  strength are only determined up to a rotation within the plane
-                  they span, so the pair can be turned arbitrarily and the
-                  rebuild is unchanged. The four-document collection has exactly
-                  that, since its third and fourth numbers are both exactly 1, so
-                  its third and fourth directions are settled by the arithmetic
-                  and not by the data. Each direction is also determined only up
-                  to a sign, since flipping a word direction and its matching
-                  document direction together leaves everything the fit says
-                  unchanged.
+                <>
+<p>
+                  A related consequence is that the individual coordinates carry no meaning even when the fit is good. Two directions of equal strength are only determined up to a rotation within the plane they span, so the pair can be turned arbitrarily and the rebuild is unchanged. The four-document collection has exactly that, since its third and fourth numbers are both exactly 1, so its third and fourth directions are settled by the arithmetic and not by the data.
                 </p>
+                <p>
+                  Each direction is also determined only up to a sign, since flipping a word direction and its matching document direction together leaves everything the fit says unchanged.
+                </p>
+</>
                 <KeepInMind>
                   Anything read off these coordinates has to survive a sign flip
                   and, where numbers are tied, a rotation. An angle between two
@@ -1065,6 +1112,421 @@ export default function LatentSemanticAnalysisPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            trueFalse(
+              "Keeping two directions separates the halves and orders the words inside a half at the same time.",
+              false,
+              "The two directions that separated the halves so cleanly also flattened everything inside one. Every pair of cooking words comes out between 0.9999 and 1.0000 and every pair of cooking documents at 1.0000, so the fit cannot tell flour from sugar. The table as counted does better at that one question, its cooking-word angles running from 0.0000 to 0.8571. Six directions is where both things hold at once, and nothing computed during the fit turns over at that width, so it is a judgement made from outside.",
+            ),
+            trueFalse(
+              "The fit treats a cell the collection left empty as an observation of the value zero, and is penalised for placing anything else there.",
+              true,
+              "A cell holding zero means the collection did not observe that word in that document, which is 408 of the 552 cells here, and the table has no way of saying whether the word belongs there. The squeeze minimises the squared difference over every cell, so a word that truly belongs to a document it was never used in and a word that truly does not push the fit the same way with the same force. The 0.4043 the rebuild puts into those cells on average was arrived at while being told the true value in each was zero, and neither fact is evidence that a filled-in number is right.",
+            ),
+            choice(
+              "A new text is folded into a fitted collection. Which weights are used on its counts?",
+              [
+                "The fitted ones, since a word’s weight is a statement about the collection and a single new document would say every word in it was equally rare",
+                "Weights recomputed from the new text, so that it is described on its own terms",
+                "None, since the new text took no part in the fit",
+                "The weights belonging to the nearest fitted document",
+              ],
+              0,
+              "Applied to a document that was in the fit, the same arithmetic returns exactly the position that document already had, which is how the two routes are held together. Folding in is not refitting, so a text about something the collection never covered gets a position saying how much it looks like the subjects that were covered, and a text with no word in the vocabulary lands at 0 and 0, where nothing is near it.",
+            ),
+            several(
+              "Which of these survive the indeterminacies of the decomposition?",
+              [
+                "An angle between two words",
+                "The value of a single coordinate",
+                "A comparison of one fit’s third coordinate with another’s",
+                "The rebuild itself, under a rotation of two directions of equal strength",
+              ],
+              [0, 3],
+              "Each direction is settled only up to a sign, since flipping a word direction and its matching document direction together leaves everything the fit says unchanged. Two directions of equal strength are settled only up to a rotation within the plane they span, and the four-document collection has exactly that, its third and fourth numbers both being exactly 1, so those two directions come from the arithmetic rather than from the data.",
+            ),
+            choice(
+              "One cooking word and one sailing word are respelled roll, and nothing else changes. Where does roll land?",
+              [
+                "At zero on the direction that separates the halves, 0.7219 from flour and 0.7050 from sail",
+                "Among the cooking words, since that half comes first in the table",
+                "At the origin, since the fit cannot place a word with two senses",
+                "At two positions, one for each sense",
+              ],
+              0,
+              "Its nearest neighbours are the three words carrying no subject, at 1.0000, 0.9997 and 0.9997, which is where a word with no position on that direction sits. One row holds the company of both senses at once and there is no second row for the second sense to occupy, so the position fitting both sets of company is the one halfway between them.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Squeezing A Table With The Library",
+          practice: [
+            exercise(
+              "Decompose the four documents under plain counts",
+              ["Fit LatentSemanticAnalysis to the four-document collection, keeping all four directions and weighting by plain counts. Print the square of each direction’s number, the share of the table each carries, the first two coordinates of every document, and the first two coordinates of the word the.", "The squares should be the 7, 3, 1 and 1 of step 12, the shares should be twelfths, every document should sit at 1.3229 on the first direction, and the word the should sit at 2 and 0. Step 12 says the cat documents sit at one value on the second direction and the boat documents at minus it, without giving the value."],
+              `from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+from oop_ml.core.natural_language_processing.embeddings.counts.term_document import (
+    TermWeighting,
+)
+
+four = ["the cat sat", "the cat ran", "the boat sailed", "the boat sank"]
+
+# Build LatentSemanticAnalysis with dimension=4 and
+# weighting=TermWeighting.COUNT, and fit it to the four texts.
+
+# Print each of singular_values squared, and each of variance_shares.
+
+# For each text, print the first two numbers of its document vector.
+
+# Print the first two coordinates of the word "the".`,
+              `from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+from oop_ml.core.natural_language_processing.embeddings.counts.term_document import (
+    TermWeighting,
+)
+
+four = ["the cat sat", "the cat ran", "the boat sailed", "the boat sank"]
+
+model = LatentSemanticAnalysis(dimension=4, weighting=TermWeighting.COUNT).fit(four)
+print("squares", [round(float(value) ** 2, 4) for value in model.singular_values])
+print("shares ", [round(share, 4) for share in model.variance_shares])
+
+for place, text in enumerate(four):
+    first, second = model.document_vectors.vector_of(place)[:2]
+    print(f"{text:15s} {first:.4f} {second:.4f}")
+
+first, second = model.embeddings.vector_of("the").values[:2]
+print(f"{'the':15s} {first:.4f} {second:.4f}")`,
+              `squares [7.0, 3.0, 1.0, 1.0]
+shares  [0.5833, 0.25, 0.0833, 0.0833]
+the cat sat     1.3229 0.8660
+the cat ran     1.3229 0.8660
+the boat sailed 1.3229 -0.8660
+the boat sank   1.3229 -0.8660
+the             2.0000 0.0000`,
+              { hints: ["The weighting is a field of the model and TermWeighting.COUNT is the plain count. Left out, the model weights by the formula of step 5, and the squares stop being whole numbers.", "A fitted model has singular_values, one per direction kept, and variance_shares beside them. Its document_vectors hold one position per document, reached with vector_of and the document’s place in the list.", "Its embeddings are the positions of the words. vector_of takes a word there, and the coordinates are the values of what comes back."], check: numberCheck("At what value do the two cat documents sit on the second direction, to four places?", 0.866, 5e-05, "The second direction is the pattern that sets the cat pair against the boat pair, and its number is the square root of 3. Scaled to length one that pattern puts a half on each document, so the cat documents sit at half the square root of 3, which is 0.8660, and the boat documents at minus it. The first direction does the same with the square root of 7 and no minus signs, which is the 1.3229 every document shares.") },
+            ),
+            exercise(
+              "Squeeze the twenty-four documents at three widths",
+              ["Fit LatentSemanticAnalysis to the twenty-four documents keeping two directions, then four, then six, with the weighting left at its default. At each width print the share of the table the kept directions carry between them and the cosine of flour with bake, of flour with sugar and of flour with anchor, and the cosine of the first document with the sixth and with the thirteenth, which are the two pairs of step 3.", "At two directions you should see the 48.0% of step 9 and the figures of step 10, with flour and bake at 1.0000 and the two cooking documents at 0.9998. At six you should see step 15, with flour and bake down at 0.0727 and flour and sugar at 0.8777. Four directions is a width the page does not report, and the pair of cooking documents that share no word is worth following down all three."],
+              `from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+for dimension in (2, 4, 6):
+    # Fit a model keeping this many directions. Print the sum of its
+    # variance_shares, the similarity of flour with bake, sugar and anchor
+    # from its embeddings, and the similarity of document 0 with documents
+    # 5 and 12 from its document_vectors.
+    ...`,
+              `from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+for dimension in (2, 4, 6):
+    model = LatentSemanticAnalysis(dimension=dimension).fit(documents)
+    words = model.embeddings
+    texts = model.document_vectors
+    print(f"{dimension} directions keep {sum(model.variance_shares):.4f} of the table")
+    print(f"  flour with bake {words.similarity('flour', 'bake'):.4f}, sugar {words.similarity('flour', 'sugar'):.4f}, anchor {words.similarity('flour', 'anchor'):.4f}")
+    print(f"  first document with the sixth {texts.similarity(0, 5):.4f}, with the thirteenth {texts.similarity(0, 12):.4f}")`,
+              `2 directions keep 0.4799 of the table
+  flour with bake 1.0000, sugar 1.0000, anchor -0.0028
+  first document with the sixth 0.9998, with the thirteenth 0.0819
+4 directions keep 0.6801 of the table
+  flour with bake 1.0000, sugar 0.8830, anchor -0.0001
+  first document with the sixth 0.1743, with the thirteenth 0.0554
+6 directions keep 0.8416 of the table
+  flour with bake 0.0727, sugar 0.8777, anchor 0.0030
+  first document with the sixth 0.0859, with the thirteenth 0.0855`,
+              { hints: ["dimension is how many directions the model keeps. fit takes the list of texts and answers the fitted model.", "variance_shares has one share per kept direction, each worked out against the whole table, so their sum is what the cut kept.", "embeddings.similarity takes two words and document_vectors.similarity takes two places in the list of documents, counting from zero, so the sixth document is 5 and the first sailing one is 12."], check: numberCheck("What share of the table do four directions keep, to four places?", 0.6801, 5e-05, "The first two directions carry 26.3% and 21.7%, and the next two about a tenth each, which comes to 0.6801. Those two extra directions have begun to spread the cooking words out, flour with sugar falling from 1.0000 to 0.8830, while flour with bake is still at 1.0000, so four is not yet the width at which the fit can order the words of one half, which step 15 found at six. The widening has a price the last line of each block shows. The two cooking documents that share no word fall from 0.9998 to 0.1743 and then to 0.0859, level with the cooking and sailing pair, so the repair of step 10 belongs to the narrow fit.") },
+            ),
+            exercise(
+              "Check the error against what was thrown away",
+              ["Step 7 says the squared error of a rebuild is exactly the sum of the squares of the numbers that were discarded. Check it at two directions and at four. For each, take the table the fit decomposed and the rebuild of it, and print the summed squared difference between them beside the discarded weight. Then print how many cells the collection left empty, the mean of what the rebuild put in them, and how many cells of the rebuild are below zero.", "At two directions the two figures should both be the 371.3389 of step 7, with 408 empty cells filled to 0.4043 on average and 104 cells below zero, which is step 8. The row for four directions is yours."],
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+for dimension in (2, 4):
+    model = LatentSemanticAnalysis(dimension=dimension).fit(documents)
+    original = np.asarray(model.term_document_matrix.values)
+    # The rebuild is model.decomposition.reconstruction(). The discarded
+    # weight is the decomposition's total_squared_singular_values less the
+    # sum of the kept singular_values squared. Print the squared error,
+    # the discarded weight, the count of cells where original is 0, the
+    # mean of the rebuild over those cells, and the count of rebuilt cells
+    # below zero.
+    ...`,
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+for dimension in (2, 4):
+    model = LatentSemanticAnalysis(dimension=dimension).fit(documents)
+    original = np.asarray(model.term_document_matrix.values)
+    rebuilt = model.decomposition.reconstruction()
+    error = np.sum((original - rebuilt) ** 2)
+    kept = np.sum(np.asarray(model.singular_values) ** 2)
+    discarded = model.decomposition.total_squared_singular_values - kept
+    empty = original == 0
+    print(f"{dimension} directions: error {error:.4f}, discarded {discarded:.4f}")
+    print(f"  {empty.sum()} empty cells filled to {rebuilt[empty].mean():.4f} on average, {(rebuilt < 0).sum()} cells below zero")`,
+              `2 directions: error 371.3389, discarded 371.3389
+  408 empty cells filled to 0.4043 on average, 104 cells below zero
+4 directions: error 228.3946, discarded 228.3946
+  408 empty cells filled to 0.2541 on average, 136 cells below zero`,
+              { hints: ["The decomposition remembers the squared size of the whole table as total_squared_singular_values, which was worked out before the cut, so subtracting the kept squares from it leaves the discarded weight.", "original == 0 is a grid of True and False the same shape as the table, and indexing the rebuild with it picks out exactly the cells the collection never wrote in."], check: numberCheck("What is the squared error of the rebuild from four directions, to four places?", 228.3946, 5e-05, "The whole table’s squared size is the same whatever is kept, and four directions keep 0.6801 of it where two kept 0.4799, so the error falls from 371.3389 to 228.3946 and matches the discarded weight to every digit printed, because dropping a piece removes its contribution and nothing else. The empty cells are filled less heavily, 0.2541 against 0.4043, and more of the rebuild goes below zero, 136 cells against 104, since nothing told the fit its entries are counts.") },
+            ),
+            exercise(
+              "Fold new texts into a fitted collection",
+              ["Fit the twenty-four documents at two directions and fold in the three texts of step 16 with transform, together with a fourth that takes two words from each half. Print the two coordinates of each. Then fold the twenty-four fitted documents themselves back in and print the largest difference from the positions the fit gave them, and print the second coordinate of whisk, eggs, deck and boat.", "The first three should be the figures of step 16, the cooking side, the sailing side and the origin. The fitted documents should come back where they were, to rounding. Read the second coordinates of the four words before deciding where the fourth text ought to land."],
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+texts = [
+    "we bake the dough and whisk the eggs",
+    "the crew sail the boat past the harbour",
+    "a quiet afternoon",
+    "whisk the eggs on the deck of the boat",
+]
+
+model = LatentSemanticAnalysis(dimension=2).fit(documents)
+
+# Fold the texts in with model.transform, and print each one's two
+# coordinates, which vector_of gives by the text's place in the list.
+
+# Fold the fitted documents in the same way and print the largest absolute
+# difference between those vectors and model.document_vectors.vectors.
+
+# Print the second coordinate of whisk, eggs, deck and boat.`,
+              `import numpy as np
+from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
+    LatentSemanticAnalysis,
+)
+
+cooking = [
+    "flour sugar and butter eggs oven",
+    "sugar butter eggs the oven bake",
+    "we butter eggs oven bake stir",
+    "eggs oven and bake stir whisk",
+    "oven bake stir the whisk dough",
+    "we bake stir whisk dough pan",
+    "stir whisk and dough pan flour",
+    "whisk dough pan the flour sugar",
+    "we dough pan flour sugar butter",
+    "pan flour and sugar butter eggs",
+    "flour sugar butter the eggs oven",
+    "we sugar butter eggs oven bake",
+]
+sailing = [
+    "sail wind and boat harbour anchor",
+    "wind boat harbour the anchor tide",
+    "we boat harbour anchor tide mast",
+    "harbour anchor and tide mast rope",
+    "anchor tide mast the rope deck",
+    "we tide mast rope deck crew",
+    "mast rope and deck crew sail",
+    "rope deck crew the sail wind",
+    "we deck crew sail wind boat",
+    "crew sail and wind boat harbour",
+    "sail wind boat the harbour anchor",
+    "we wind boat harbour anchor tide",
+]
+documents = cooking + sailing
+
+texts = [
+    "we bake the dough and whisk the eggs",
+    "the crew sail the boat past the harbour",
+    "a quiet afternoon",
+    "whisk the eggs on the deck of the boat",
+]
+
+model = LatentSemanticAnalysis(dimension=2).fit(documents)
+
+folded = model.transform(texts)
+for place, text in enumerate(texts):
+    first, second = folded.vector_of(place)
+    print(f"{first:.4f} {second:7.4f}  {text}")
+
+again = np.asarray(model.transform(documents).vectors)
+fitted = np.asarray(model.document_vectors.vectors)
+print(f"fitted documents folded back in move by at most {np.abs(again - fitted).max():.1e}")
+
+for word in ("whisk", "eggs", "deck", "boat"):
+    print(f"{word:5s} {model.embeddings.vector_of(word).values[1]:7.4f}")`,
+              `3.7471 -1.9689  we bake the dough and whisk the eggs
+3.3330  2.0586  the crew sail the boat past the harbour
+0.0000  0.0000  a quiet afternoon
+3.2910  0.0000  whisk the eggs on the deck of the boat
+fitted documents folded back in move by at most 3.1e-14
+whisk -2.3562
+eggs  -3.1580
+deck   2.3562
+boat   3.1580`,
+              { hints: ["transform takes a list of texts and answers their positions in the fitted space, without refitting anything. What comes back has vector_of, taking a place in the list, and vectors, the whole grid.", "The weights transform puts on a new text’s counts are the ones the fit worked out, which is why a fitted document folded in lands where the fit put it.", "A word’s coordinates are model.embeddings.vector_of(word).values, and the second of them is at index 1."], check: numberCheck("Where on the first direction does the text with two words of each half land, to four places?", 3.291, 5e-05, "It lands at 3.2910 on the first direction and at 0.0000 on the second. whisk and deck sit at −2.3562 and 2.3562 on the direction that separates the halves and eggs and boat at −3.1580 and 3.1580, so the two cooking words pull the text exactly as far one way as the two sailing words pull it the other, while on and of are ignored because the collection never contained them and the word the adds nothing there because it is used equally on both sides. What is left is the first direction, which measures how much of the common vocabulary a text uses.") },
+            ),
+          ],
         },
       ]}
     />

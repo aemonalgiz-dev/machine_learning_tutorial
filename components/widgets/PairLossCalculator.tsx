@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // Two positions in a plane, and what the contrastive loss makes of them.
 //
@@ -275,14 +277,9 @@ export function PairLossCalculator() {
             <Stat label="if the two were one kind" value={answer.loss_if_same.toFixed(4)} />
             <Stat label="if they were two kinds" value={answer.loss_if_different.toFixed(4)} />
           </div>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Slope at the first point ({answer.slope_on_first.map((value) => value.toFixed(4)).join(", ")}), and at the second its negative.{" "}
-            {!answer.direction_defined
-              ? "The two points coincide, so the push has a size and nothing to point along, and the slope is returned as zero."
-              : !sameKind && answer.beyond_margin
-                ? "The pair is beyond the margin, so it is left alone."
-                : "The arrows show which way a step would move each point."}
-          </p>
+          <>
+<p className="mt-2 text-sm text-slate-500 dark:text-slate-400">The two points contribute opposite position derivatives because changing their separation depends on their relative movement. The arrows show the corresponding update directions.</p><Equation>{"Derivative at the first point:\n[" + answer.slope_on_first.map((value) => value.toFixed(4)).join(", ") + "]\nDerivative at the second point: the negative of that vector"}</Equation><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{!answer.direction_defined ? "The points coincide, so the separation supplies no unique direction. The implementation returns zero under its stated convention." : !sameKind && answer.beyond_margin ? "This different-kind pair is beyond the margin, so its loss supplies no further separating update." : "Inspect how the derivative changes as the points approach one another or the margin."}</p>
+</>
           {message && <p className="mt-1 text-sm text-rose-600">{message}</p>}
         </>
       )}

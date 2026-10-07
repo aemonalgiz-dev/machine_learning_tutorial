@@ -67,7 +67,7 @@ export function FoldLines() {
           <CarvedCrowdMap
             carving={carving}
             folds
-            title={`${carving.hidden_widths[0]} creases, seed ${carving.best_seed}`}
+            title={`${carving.hidden_widths[0]} activation boundaries, seed ${carving.best_seed}`}
           />
           <div>
             <div className="overflow-x-auto">
@@ -132,7 +132,7 @@ export function FoldLines() {
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
         Weights are in standard units, so a weight on height of 5 means one
         deviation of height, 15.6 centimetres, moves the unit&rsquo;s score
-        by five. The boundary can only bend where a crease crosses it.
+        by five. The decision boundary can change direction where a hidden neuron switches between zero output and its score.
       </p>
     </div>
   );

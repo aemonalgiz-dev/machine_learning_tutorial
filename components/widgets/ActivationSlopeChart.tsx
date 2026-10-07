@@ -167,7 +167,7 @@ export function ActivationSlopeChart() {
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         The factor a gradient keeps on its way back through one neuron, for
-        each of the four bends. Where a curve runs along the floor, the neurons
+        each of the four activation functions. Where a curve runs along the floor, the neurons
         below stop learning.
       </p>
 

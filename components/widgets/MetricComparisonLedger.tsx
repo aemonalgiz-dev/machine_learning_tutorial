@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // The same question asked of four spaces: for each kind, how often does a
 // picture's nearest other picture turn out to be its own kind?
@@ -186,19 +188,9 @@ function AllTable({ answer, reading }: { answer: Comparison; reading: Reading })
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-        Searched among all {answer.n_evaluation_pictures} evaluation pictures,
-        60 of each kind. Cells tinted amber are kinds that space&rsquo;s network
-        never saw. {reading === "ratio"
-          ? "The mean distance inside a kind over the mean distance from it to every other picture, so lower is tighter."
-          : reading === "ten"
-            ? "The mean share of each picture’s ten nearest that are its own kind."
-            : "How many pictures of the kind have a nearest picture of their own kind."}{" "}
-        The three-kind classifier names {(answer.classifier_accuracy * 100).toFixed(1)}%
-        of held-out pictures of its own kinds correctly, and the pair loss fell
-        from {answer.pair_loss_first_epoch.toFixed(4)} in the first epoch to{" "}
-        {answer.pair_loss_last_epoch.toFixed(4)} in the last.
-      </p>
+      <>
+<p className="mt-2 text-sm text-slate-500 dark:text-slate-400">To compare representations fairly, each query searches the same {answer.n_evaluation_pictures} evaluation pictures, with 60 pictures per kind. Amber identifies a kind absent from that representation&apos;s training labels.</p><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{reading === "ratio" ? "The ratio compares mean within-kind distance with mean distance to the remaining pictures. Lower values indicate a more concentrated kind under that measurement." : reading === "ten" ? "This score is the mean share of the ten nearest neighbors that have the query's kind." : "This count records queries whose nearest picture has the same kind."}</p><Equation>{"Classifier accuracy on its known held-out kinds: " + (answer.classifier_accuracy * 100).toFixed(1) + "%\nPair loss, first epoch: " + answer.pair_loss_first_epoch.toFixed(4) + "\nPair loss, last epoch: " + answer.pair_loss_last_epoch.toFixed(4)}</Equation><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Training loss and retrieval quality answer different questions. Compare both before judging the representation.</p>
+</>
     </>
   );
 }

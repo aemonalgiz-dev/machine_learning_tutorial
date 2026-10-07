@@ -1,5 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -23,106 +27,48 @@ import { VoteSharingSlide } from "@/components/widgets/VoteSharingSlide";
 export const metadata: Metadata = {
   title: "Histogram of Oriented Gradients · oop_ml",
   description:
-    "Describe a patch by which way its edges point, counted over small cells, so that a change of lighting leaves the description where it was.",
+    "Build an image descriptor from local edge directions and normalise neighbouring regions.",
 };
 
 export default function OrientedGradientsPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["histogram-of-oriented-gradients"]}
+      technicalStart="Part 2. Counting Directions Inside A Cell"
+      openingTitle="Describe Which Way the Edges Point"
+      playgroundIntro="Follow an edge direction into its histogram bins. Compare the counts before and after block normalisation as the picture's contrast changes."
       title="Histogram of Oriented Gradients"
-      tagline="Describe a patch by which way its edges point, counted over small squares of it, so that turning the lamp up leaves the description where it was."
+      tagline="Build an image descriptor from local edge directions and normalise neighbouring regions."
       prerequisites={
         <>
-          One thing from before this page carries most of the weight, which is
-          the rate at which brightness changes across a picture. Sweeping a
-          small grid of weights over a picture twice, once asking how fast the
-          brightness rises to the right and once how fast it rises downward,
-          leaves two numbers at every pixel, and those two are a vector whose
-          length says how sharply the brightness is changing there and whose
-          angle says which way it is rising. That angle is measured from
-          pointing right, turning towards pointing down, and it points straight
-          across the edge rather than along it. This page leans on that fact
-          harder than on anything else, so it is worth being sure of before
-          going on.
+          Start with{" "}
+          <Link href="/concepts/filters-and-edges" className="font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400">
+            filters and edges
+          </Link>
+          . That lesson measures how brightness changes horizontally and
+          vertically. Together those measurements describe a direction and
+          strength of change. Here we collect those directions into a compact
+          description of an image region. A brightness gradient points across
+          an edge, toward increasing brightness, rather than along the edge.
         </>
       }
-      history={
-        <>
-          <p>
-            Finding a person in a photograph was, around the turn of the
-            century, a problem that the methods which worked on faces did not
-            transfer to. Constantinos Papageorgiou and Tomaso Poggio at MIT had
-            built a pedestrian detector in the late 1990s out of Haar wavelet
-            responses fed to a support vector machine, and Paul Viola, Michael
-            Jones and Daniel Snow showed in 2003 that adding the difference
-            between successive video frames made the problem far easier, which
-            is of no help at all when there is one photograph and no motion to
-            read. The difficulty underneath is that a person is not a rigid
-            pattern of brightness. Clothing changes, limbs move, the background
-            behind a walker is whatever happened to be there, and a dark coat
-            against a bright wall and a light coat against a dark one produce
-            brightnesses that are near enough opposites of each other. What
-            does stay put across all of that is the outline, and more precisely
-            the set of directions the outline runs in at each part of the body.
-          </p>
-          <p>
-            Navneet Dalal and Bill Triggs, at INRIA Rh&ocirc;ne-Alpes in
-            Grenoble, published &ldquo;Histograms of Oriented Gradients for
-            Human Detection&rdquo; at the 2005 computer vision conference, and
-            the shape of the investigation matters as much as the answer. They
-            held the classifier fixed, a linear support vector machine, and
-            varied only the description handed to it, so that a difference in
-            detection rate was attributable to the description and to nothing
-            else. They also had to build a new dataset, the INRIA Person set,
-            because the MIT pedestrian images the earlier work used were close
-            enough to solved that they could no longer separate one method from
-            another. The description they settled on takes a window 64 pixels
-            wide and 128 tall, divides it into 8 by 8 pixel cells, counts each
-            cell&rsquo;s edge directions into 9 buckets over half a circle, and
-            then rescales overlapping 2 by 2 groups of cells. Those are the
-            defaults everything on this page uses.
-          </p>
-          <p>
-            The idea of counting edge directions was not new to them. David
-            Lowe, at the University of British Columbia, had built orientation
-            histograms over the neighbourhood of an interesting point in 1999,
-            and that scheme was already widely used for matching one photograph
-            against another. What Dalal and Triggs changed was that they
-            computed the histograms densely, on a fixed grid over a whole
-            detection window rather than around a few chosen points, and that
-            they rescaled overlapping groups of cells rather than each cell
-            once. This page asks six questions in order. Why does a description
-            made of brightnesses move when the lamp does? What does a cell of
-            counted directions keep, and what does it throw away? Why is a vote
-            shared between two buckets rather than dropped whole into one? What
-            exactly does rescaling a block of cells buy, and what was already
-            free before it? Should an edge and its reverse be one direction or
-            two? And what does the finished description cost, in numbers and in
-            the things it can no longer tell apart?
-          </p>
-        </>
-      }
+
       playground={<OrientedGradientPlayground />}
       sections={[
         {
           title: "Part 1. Why A Description Made Of Brightnesses Will Not Do",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The scene we will describe">
-                <p>
-                  Everything on this page is worked on one small scene, 48
-                  pixels on a side, drawn by arithmetic rather than
-                  photographed so that we can always say exactly what is in it.
-                  There is a square near the top left with four straight edges
-                  and four corners, a disc to the right of it whose edge points
-                  in every direction there is, a bar running diagonally across
-                  the bottom left, and three small crosses scattered about.
-                  Laid over all of that is a ramp of brightness that makes the
-                  right-hand side of the scene lighter than the left, so the
-                  crosses on the right are brighter than the ones on the left
-                  although they are the same shape.
+                <>
+<p>
+                  Everything on this page is worked on one small scene, 48 pixels on a side, drawn by arithmetic rather than photographed so that we can always say exactly what is in it. There is a square near the top left with four straight edges and four corners, a disc to the right of it whose edge points in every direction there is, a bar running diagonally across the bottom left, and three small crosses scattered about.
                 </p>
+                <p>
+                  Laid over all of that is a ramp of brightness that makes the right-hand side of the scene lighter than the left, so the crosses on the right are brighter than the ones on the left although they are the same shape.
+                </p>
+</>
                 <p>
                   The question the whole page turns on is what we should write
                   down about a patch of that scene so that we could recognise
@@ -149,12 +95,28 @@ export default function OrientedGradientsPage() {
                 </p>
                 <Equation>{`relit = 1.6 × here + 0.15`}</Equation>
                 <p>
+                  Two lists of the same length can be compared one position at
+                  a time. Take the difference at every pixel, square it, add
+                  the 2304 squares up and take the square root, and the result
+                  is one number saying how far apart the two lists are. The
+                  same arithmetic on one list by itself, squaring each
+                  brightness rather than each difference, gives that
+                  list&rsquo;s own length, which is the yardstick a distance
+                  has to be read against, since a distance means nothing until
+                  it is set beside how long the lists themselves are. Every
+                  distance and every length on this page is measured this way.
+                </p>
+                <Equation>{`apart  = √( Σ over pixels of (relit − here)² )
+
+length = √( Σ over pixels of here² )`}</Equation>
+                <p>
                   Measured, the two lists are 19.52 apart, where the first
                   list&rsquo;s own length is 21.89. That is 89 per cent of the
                   way to being an unrelated picture, for a change that a person
                   looking at the two would describe as the same scene on a
                   brighter day.
                 </p>
+                <Equation>{`19.52 / 21.89 ≈ 0.89`}</Equation>
                 <SceneUnderTwoLamps />
                 <KeepInMind>
                   A description built out of brightnesses is partly a
@@ -237,7 +199,7 @@ export default function OrientedGradientsPage() {
                 </InAModel>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Counting Directions Inside A Cell",
@@ -274,14 +236,17 @@ export default function OrientedGradientsPage() {
               </SubSection>
 
               <SubSection title="6. Nine buckets over half a circle">
-                <p>
-                  To count directions we need somewhere to put them. Divide the
-                  range of possible directions into a fixed number of equal
-                  buckets. The usual choice folds a direction and its reverse
-                  together, so the range to divide is half a circle rather than
-                  the whole one, and 9 buckets over 180 degrees makes each one
-                  20 degrees wide.
-                </p>
+                <>
+                  <p>
+                    A histogram needs a fixed set of direction bins. With unsigned
+                    orientations, a direction and its reverse count as the same
+                    orientation, so the range is half a circle.
+                  </p>
+                  <Equation>{"bin width = 180° / 9 = 20°"}</Equation>
+                  <p>
+                    Each of the nine bins covers a twenty-degree interval.
+                  </p>
+                </>
                 <Equation>{`bucket b covers  [ b × w , (b+1) × w )    and is centred at  (b + 0.5) × w
 
 with  w = 180 / 9 = 20 degrees`}</Equation>
@@ -355,15 +320,18 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
                   outvoting the outline that we actually care about.
                 </p>
                 <Equation>{`H(cell, b) = sum over pixels in the cell of  magnitude(pixel) × share(direction(pixel), b)`}</Equation>
-                <p>
-                  It also means the counts scale with the lighting, exactly as
-                  the rates of change did. Multiplying every brightness in the
-                  scene by 1.6 multiplies every weight by 1.6 and so multiplies
-                  the whole unrescaled description by 1.6, which moves it by 0.6
-                  of its own length. Measured on the scene, the unrescaled
-                  answer has length 221.49 and the relit one is 132.89 away,
-                  and 0.6 times 221.49 is 132.89 to the last place shown.
-                </p>
+                <>
+                  <p>
+                    Multiplying every brightness by 1.6 multiplies every gradient
+                    magnitude, and therefore every unnormalized histogram value, by 1.6.
+                    The change vector has sixty percent of the original magnitude.
+                  </p>
+                  <Equation>{"relative change = 1.6 − 1 = 0.6\nchange in descriptor ≈ 0.6 × 221.49 ≈ 132.89"}</Equation>
+                  <p>
+                    The measured values match this prediction. Normalization is needed
+                    to remove this dependence on overall contrast.
+                  </p>
+                </>
                 <KeepInMind>
                   The counts in a cell are a sum of magnitudes and not a
                   probability, so they do not add to one and they grow with the
@@ -384,17 +352,36 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
                   of where it was.
                 </p>
                 <InsideOneCell />
-                <p>
-                  The move that stays inside the cell leaves the description at
-                  a distance of exactly 0, which is the same vector rather than
-                  a nearby one. The move that crosses the cell edge takes it
-                  1.4142 away, out of an answer whose own length is 1, and
-                  1.4142 is the furthest apart two answers of that length can
-                  be. So the same change in the brightnesses produces no change
-                  at all in one case and the largest change available in the
-                  other, and which of the two happens is decided by where the
-                  cell edges were drawn.
+                <>
+<p>
+                  The move that stays inside the cell leaves the description at a distance of exactly 0, which is the same vector rather than a nearby one. The move that crosses the cell edge takes it 1.4142 away, out of an answer whose own length is 1, and 1.4142 is the furthest apart two answers of that length can be.
                 </p>
+                <p>
+                  So the same change in the brightnesses produces no change at all in one case and the largest change available in the other, and which of the two happens is decided by where the cell edges were drawn.
+                </p>
+</>
+                <WhyThisWorks>
+                  <p>
+                    Why 1.4142 is the ceiling needs one fact about the
+                    description. Every entry in it is a sum of vote weights,
+                    and a weight is how sharply the brightness changes, which
+                    is never below nought. So no entry is ever negative, and
+                    two answers of length 1 are as far apart as they can be
+                    when they have no bucket in common at all, every entry
+                    that is above nought in one being nought in the other.
+                    The squared distance is then the sum of the two squared
+                    lengths.
+                  </p>
+                  <Equation>{`with no entry in common     apart² = 1² + 1² = 2     so     apart = √2 ≈ 1.4142`}</Equation>
+                  <p>
+                    The square that crossed into the next cell is exactly that
+                    case. Its votes left the cell that held them for one that
+                    held nothing, so the two unit blocks have no position
+                    above nought in common, and the distance between them is
+                    the largest the method can report for two answers of that
+                    length.
+                  </p>
+                </WhyThisWorks>
                 <KeepInMind>
                   This is where the method is worse than reading the
                   brightnesses directly. Two patches that a person would call
@@ -409,6 +396,54 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "Relighting the scene leaves the two lists of 2304 brightnesses 19.52 apart, against the first list’s own length of 21.89. What happens to the rates of change?",
+              [
+                "No direction turned by more than 6.2 times ten to the minus thirteenth of a degree, and every rate of change grew by the same factor of 1.60",
+                "Both the directions and the sizes come back unchanged",
+                "The directions all turn by the same angle, and the sizes hold",
+                "The directions hold, and the sizes are untouched by the multiplier",
+              ],
+              0,
+              "The added constant cancels because every sweep’s weights add to nought, so it contributes that constant times nought. The multiplier survives and stretches all the arrows while turning none of them, because a direction is the ratio of two rates of change and a common factor cancels out of a ratio. So the added constant is already free, and the multiplier is a real problem that is still there.",
+            ),
+            trueFalse(
+              "Reading a rate of change at every pixel gives the scene two numbers per pixel, 4608 where there were 2304, and still describes nothing.",
+              true,
+              "Each of those numbers is tied to an exact position, so the same shape drawn one pixel to the left disagrees with the original at almost every position, exactly as the brightnesses did. What is wanted is to keep the directions, which held still under the lamp, and give up some of the precision about where each one was, and that trade is what the three stages make.",
+            ),
+            trueFalse(
+              "At a cell side of 16 pixels the scene divides into 3 cells by 3, the square lies almost wholly inside one of them, and a movement of five pixels can then change the answer by nothing at all.",
+              true,
+              "The cell side is the dial that trades tolerance to position against knowing where anything was, and nothing in the method sets it. At 8 pixels the scene divides into 6 cells by 6 and the 11 pixel square spreads over six of them, so the same movement crosses cell edges and the answer changes. A larger cell buys more tolerance by throwing more away, which is why there is no sense in which 8 pixels is correct.",
+            ),
+            choice(
+              "A bright square 3 pixels across is moved within its cell, and then moved into the next cell along. Both moves change the brightnesses by exactly 4.2426. What happens to the description?",
+              [
+                "The move inside the cell leaves it at a distance of exactly 0 and the move across takes it 1.4142 away, the furthest two answers of length 1 can be",
+                "Both moves change it by the same amount, since both changed the brightnesses by the same amount",
+                "Both leave it unchanged, which is the tolerance the cells buy",
+                "The move inside the cell changes it slightly and the move across not at all",
+              ],
+              0,
+              "Which of the two happens is decided by where the cell edges were drawn, and no amount of care further along recovers the difference, because it was discarded before anything further along ran. The 1.4142 is the square root of two, which is as far apart as two answers of length 1 with no entry in common can be. A smaller cell shrinks the region inside which everything is indistinguishable and adds more cell edges for a shape to fall across, so it works on both problems at once and neither goes away.",
+            ),
+            several(
+              "Which of these hold under the page’s nine unsigned buckets?",
+              [
+                "A direction and its reverse count as one, so the range is half a circle and each bucket covers twenty degrees",
+                "On the 6 by 6 patch with cells 3 pixels on a side, each cell collects 12 of weight and under whole votes all of it lands in bucket 0",
+                "Bucket 4 covers 80 up to 100 degrees and is centred on 100",
+                "A cell’s counts add to one, since a histogram is a distribution",
+              ],
+              [0, 1],
+              "A bucket is centred halfway along its span, so bucket 4, covering 80 up to 100, is centred on 90, and bucket 8 on 170. The sweep answers 4 at every pixel of the two columns beside the patch’s edge, so each cell holds 3 pixels of 4 and the four cells hold 48 between them. The counts are a sum of magnitudes rather than a probability, so they do not add to one and they grow with the contrast of the picture, which is what Part 4 removes.",
+            ),
+        ],
         },
         {
           title: "Part 3. Sharing One Vote Between Two Buckets",
@@ -488,18 +523,19 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
                   looks like a mistake and it is not one.
                 </p>
                 <EdgeToBucket initialSharing="shared" />
-                <p>
-                  Bucket 0 is centred on 10 degrees and bucket 8 is centred on
-                  170. A direction of 0 degrees is 10 degrees below the first
-                  centre and 10 degrees above the last one, since 170 plus 10 is
-                  180 and 180 is the same direction as 0 once the circle has
-                  been folded. It falls exactly between two centres that are
-                  genuinely neighbours, so it is genuinely split in half. The
-                  scene&rsquo;s own square has upright edges and the cells
-                  holding them read 0.5 and 0.5 in the same two buckets, which
-                  the playground at the top of the page shows in the cell it
-                  opens on, at row 1 and column 0.
-                </p>
+                <>
+                  <p>
+                    The first bin centre is ten degrees and the last is 170 degrees.
+                    Unsigned orientations wrap around after 180 degrees, making zero
+                    equally close to those two centres.
+                  </p>
+                  <Equation>{"wraparound distance = 180° − 170° = 10°\nordinary distance = 10° − 0° = 10°\nweight in each bin = 1/2"}</Equation>
+                  <p>
+                    The square’s upright edges split their contributions equally between
+                    these neighbouring bins. The initial playground cell shows that
+                    split.
+                  </p>
+                </>
                 <p>
                   Compare that with an edge running left to right, whose
                   direction is 90 degrees. That is the centre of bucket 4, so
@@ -529,20 +565,14 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
                   in return a turn of two degrees changes the answer by
                   something proportional to two degrees.
                 </p>
-                <p>
-                  Drag the slider above to 30 degrees and both rules put
-                  everything in the second bucket, since 30 is that
-                  bucket&rsquo;s centre. Drag to 20, which is a boundary rather
-                  than a centre, and the shared rule reads a clean half and half
-                  while the whole-vote rule reads 0.4531 and 0.5469, because the
-                  ramp&rsquo;s direction is worked out pixel by pixel and lands
-                  on either side of the boundary by amounts far below anything
-                  the picture could distinguish. That is what a rule with a
-                  jump in it does when handed the jump, and it is why the shared
-                  rule is the one worth building on, at the price that no cell
-                  ever again reports a direction more precisely than the two
-                  buckets it falls between.
+                <>
+<p>
+                  Drag the slider above to 30 degrees and both rules put everything in the second bucket, since 30 is that bucket&rsquo;s centre. Drag to 20, which is a boundary rather than a centre, and the shared rule reads a clean half and half while the whole-vote rule reads 0.4531 and 0.5469, because the ramp&rsquo;s direction is worked out pixel by pixel and lands on either side of the boundary by amounts far below anything the picture could distinguish.
                 </p>
+                <p>
+                  That is what a rule with a jump in it does when handed the jump, and it is why the shared rule is the one worth building on, at the price that no cell ever again reports a direction more precisely than the two buckets it falls between.
+                </p>
+</>
                 <KeepInMind>
                   Only the direction is shared here. The original work also
                   shares each vote between neighbouring cells, which removes the
@@ -570,7 +600,11 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
                   The answer is neither one cell nor the whole patch. Cells are
                   gathered into small groups, 2 by 2 by default, and each group
                   is laid end to end into one vector of 36 numbers and divided
-                  by its own length. A group of cells is called a block, and the
+                  by its own length. The 36 is four cells of nine buckets each,
+                  and the length is the same square root of a sum of squares
+                  that Part 1 used on two lists of brightnesses, so dividing by
+                  it leaves a vector of length exactly 1 whatever the contrast
+                  of the picture was. A group of cells is called a block, and the
                   reason for choosing that size rather than the whole patch is
                   that lighting across a real photograph is not uniform, so a
                   factor that holds over a 16 pixel square often does not hold
@@ -696,14 +730,19 @@ answer = cut / ‖cut‖`}</Equation>
                   different denominator.
                 </p>
                 <BlockOverlapMap initialPreset={2} />
-                <p>
-                  On a grid three cells square that means nine cells are
-                  described in sixteen cells&rsquo; worth of numbers. The corner
-                  cells appear once, the edge cells twice and the middle cell
-                  four times, and four times one plus four times two plus four
-                  is sixteen. On the scene, which is six cells square, thirty-six
-                  cells come back as one hundred.
-                </p>
+                <>
+                  <p>
+                    Overlapping two-by-two blocks reuse cells. In a three-by-three cell
+                    grid, each corner belongs to one block, each non-corner edge cell to
+                    two, and the centre to four.
+                  </p>
+                  <Equation>{"cell appearances = 4 × 1 + 4 × 2 + 1 × 4 = 16"}</Equation>
+                  <p>
+                    The nine cells therefore contribute sixteen sets of histogram
+                    values. On the six-by-six scene, thirty-six cells produce one
+                    hundred such appearances.
+                  </p>
+                </>
                 <WhyThisWorks>
                   <p>
                     The repetition is the point rather than an accident of the
@@ -727,6 +766,60 @@ answer = cut / ‖cut‖`}</Equation>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Turning a ramp from 19 degrees to 21, across the boundary at 20, moves a cell’s histogram by 724.08 under whole votes. What does sharing between the two nearest centres give?",
+              [
+                "72.41, a tenth of the whole-vote move, because two degrees is a tenth of a twenty-degree bucket",
+                "724.08 still, since the direction crossed a boundary either way",
+                "Nothing at all, since the two centres are equally near",
+                "1.4142, the furthest two answers of length 1 can be",
+              ],
+              0,
+              "At 19 degrees the cell reads 0.55 and 0.45 and at 21 it reads 0.45 and 0.55, and the ratio between the two moves is 10 to within 4.4 times ten to the minus fourteenth. Sharing makes the histogram a continuous function of the direction, so a small turn of the picture produces a small change in the answer, which is what a description handed to a classifier needs if nearby inputs are to get nearby scores.",
+            ),
+            trueFalse(
+              "A clean upright edge splitting its weight evenly between the first bucket and the last is a fault in the wrapping.",
+              false,
+              "The first centre is 10 degrees and the last is 170, and once directions wrap at 180 the two are equally near to 0, which makes 0 degrees the furthest a direction can fall from any centre under this arrangement. An edge running left to right, at 90 degrees, sits exactly on the centre of bucket 4 and the two rules agree on it. Reading the split as a bug and moving the bucket edges would only put the halfway points somewhere else.",
+            ),
+            choice(
+              "What does sharing a vote cost?",
+              [
+                "A reader can no longer recover which single bucket a pure direction belonged to, since the fullest bucket holds between 0.5 and 1.0 of the cell",
+                "Nothing, since the two rules agree on every direction",
+                "The histogram stops being a continuous function of the direction",
+                "The wrapping between the last bucket and the first",
+              ],
+              0,
+              "Under whole votes a pure direction lands in one bucket and the cell says with complete confidence which of the nine it was. Handed a direction on a boundary, though, the whole-vote rule reads 0.4531 and 0.5469 where the shared rule reads a clean half and half, because the ramp’s direction is worked out pixel by pixel and falls on either side by amounts nothing in the picture could distinguish. The two rules agree only where a direction sits exactly on a centre, as at 30 degrees.",
+            ),
+            choice(
+              "Rescaling the blocks is usually said to buy the tolerance to lighting. What did splitting the change in two show?",
+              [
+                "Adding 0.15 to every brightness already moved the unrescaled description by 8.4 times ten to the minus fourteenth, so the rescaling buys tolerance to the multiplier and nothing else",
+                "The rescaling buys both halves, exactly as it is usually described",
+                "The rescaling buys tolerance to the added constant and nothing else",
+                "Neither half is bought by the rescaling",
+              ],
+              0,
+              "Multiplying every brightness by 1.6 moves the unrescaled description by 132.89 against an answer whose own length is 221.49, and with the rescaling on the whole change moves it by 2.3 times ten to the minus fifteenth. Every one of the four ways of rescaling removes the multiplier completely, and what separates them is the shape they leave a block in. Keeping the two halves apart is what explains why the step is done over small groups of cells rather than once at the end.",
+            ),
+            several(
+              "Blocks step one cell at a time instead of tiling. Which of these does the page give as the reason or the consequence?",
+              [
+                "A cell away from the border belongs to four blocks and reaches the answer four times, each under a different denominator",
+                "A cell beside a strong edge is dimmed in the block they share and left alone in a block that does not hold the strong edge",
+                "Both readings survive, so the classifier is given the choice rather than having it made by where the boundaries happened to fall",
+                "Tiling the blocks instead gives an answer four times shorter, in which every cell is described once under exactly one denominator",
+              ],
+              [0, 1, 2, 3],
+              "Every one of the four holds. The repetition is the point rather than an accident of the arrangement, and the claim about tiling is what the widget shows when the blocks are switched to tile, since what tiling gives up is the second, third and fourth readings of each middle cell. On a 3 by 3 grid the nine cells make sixteen appearances in the answer, and on the scene’s 6 by 6 grid thirty-six cells make a hundred.",
+            ),
+        ],
         },
         {
           title: "Part 5. Half A Circle Or The Whole One, And How Long The Answer Is",
@@ -763,17 +856,14 @@ answer = cut / ‖cut‖`}</Equation>
               </SubSection>
 
               <SubSection title="20. Why the pedestrian work folded the circle">
-                <p>
-                  A person in a dark coat against a bright wall and the same
-                  person in a light coat against a dark one produce gradients
-                  that point opposite ways along the same silhouette. A
-                  description over the whole circle calls those two people as
-                  different as two descriptions can be, when the thing a
-                  detector has to learn is that they are the same shape, and a
-                  description over half a circle hands it both of them as one
-                  case. That is the argument Dalal and Triggs made, and the
-                  measurement above is that argument in two numbers.
+                <>
+<p>
+                  A person in a dark coat against a bright wall and the same person in a light coat against a dark one produce gradients that point opposite ways along the same silhouette. A description over the whole circle calls those two people as different as two descriptions can be, when the thing a detector has to learn is that they are the same shape, and a description over half a circle hands it both of them as one case.
                 </p>
+                <p>
+                  That is the argument Dalal and Triggs made, and the measurement above is that argument in two numbers.
+                </p>
+</>
                 <p>
                   It is not always the right choice. Where the direction of the
                   contrast is itself information, keeping the whole circle is
@@ -883,18 +973,14 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                   of what the method does.
                 </p>
                 <TurnedAgainstRelit />
-                <p>
-                  It would be comfortable to blame the buckets. At 9 buckets a
-                  quarter turn is four and a half buckets, so the directions do
-                  not land cleanly on new buckets, and one might hope that a
-                  count dividing 90 exactly would fix it. It does not. At 6
-                  buckets, where each covers 30 degrees and a quarter turn is
-                  exactly three of them, the answer still moves 0.95 of its own
-                  length, and no way of rescaling a block brings any of it below
-                  0.98. The directions are only half of the problem, since the
-                  cells have moved as well, and no arithmetic over buckets can
-                  undo that.
+                <>
+<p>
+                  It would be comfortable to blame the buckets. At 9 buckets a quarter turn is four and a half buckets, so the directions do not land cleanly on new buckets, and one might hope that a count dividing 90 exactly would fix it. It does not. At 6 buckets, where each covers 30 degrees and a quarter turn is exactly three of them, the answer still moves 0.95 of its own length, and no way of rescaling a block brings any of it below 0.98.
                 </p>
+                <p>
+                  The directions are only half of the problem, since the cells have moved as well, and no arithmetic over buckets can undo that.
+                </p>
+</>
                 <KeepInMind>
                   This is why the family of methods that followed begins by
                   measuring a patch&rsquo;s own dominant direction and turning
@@ -944,23 +1030,9 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                   with weight nought whichever answer is chosen, so the choice
                   is invisible in the counts.
                 </p>
-                <p>
-                  It stops being invisible one stage later. A block in which
-                  every cell is flat is a vector of nothing but noughts, and
-                  dividing it by its own length is a division by nought. The
-                  choices there are to leave the block as noughts, to add a
-                  small constant to the denominator, or to refuse the picture,
-                  and they differ in what they say about a patch of blank sky.
-                  The first two say the patch has no edges, which is true, and
-                  they differ only in whether the arithmetic ever divides by a
-                  number smaller than that constant, which matters for a block
-                  that is nearly flat rather than exactly flat. Refusing says
-                  that a patch with no edges cannot be described at all, which
-                  is defensible and leaves a caller with nothing to do about a
-                  region of sky. On a scene whose brightness is the same
-                  everywhere the counted weight is 0 and the finished answer has
-                  length 0 under the first choice.
-                </p>
+                <p>A flat image region creates a zero gradient histogram. Normalizing that histogram requires care because its length is zero, and direct division by that length is undefined.</p>
+<p>We therefore need a stated policy. We can leave a zero block unchanged, stabilize the denominator with a small positive constant, or reject the block. The first two preserve a useful interpretation, which is that this region has no measured edge structure.</p>
+<p>The stabilizing constant also affects nearly flat regions, where dividing by a tiny length could amplify numerical noise. In the displayed uniform scene, the accumulated gradient weight is zero and the implementation returns a zero descriptor.</p>
               </SubSection>
 
               <SubSection title="26. A limit that is not a ceiling">
@@ -972,15 +1044,18 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                   arithmetic says so before any picture is involved.
                 </p>
                 <WorkedExample>
-                  <p>
-                    Take the 6 by 6 patch from Part 2, whose one block holds
-                    eight equal entries of 6 and twenty-eight noughts. Its
-                    length is the square root of 288, which is 16.9706, so as a
-                    unit vector every one of the eight reads 0.353553. All eight
-                    are above 0.2, so all eight are cut to 0.2, and the cut
-                    vector&rsquo;s length is the square root of eight times
-                    0.04, which is 0.565685.
-                  </p>
+                  <>
+                    <p>
+                      The example block has eight entries of six and twenty-eight zeros.
+                      Normalize it, clip every value above 0.2, then inspect the clipped
+                      vector’s length.
+                    </p>
+                    <Equation>{"original length = √(8 × 6²) = √288 ≈ 16.9706\nnormalized nonzero entry = 6 / √288 ≈ 0.353553\nclipped nonzero entry = 0.2\nclipped length = √(8 × 0.2²) ≈ 0.565685"}</Equation>
+                    <p>
+                      All eight nonzero entries are clipped. The following normalization
+                      restores unit length.
+                    </p>
+                  </>
                   <Equation>{`0.2 / 0.565685 = 0.353553`}</Equation>
                   <p>
                     Every entry is back exactly where it started. The cut
@@ -988,17 +1063,14 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                     supposed to hold at 0.2 ends at 0.3536.
                   </p>
                 </WorkedExample>
-                <p>
-                  On the scene, where the entries are not all equal, the cut
-                  does change the answer and still does not enforce the limit.
-                  The largest entry falls from 0.9274 to 0.5376, which is nearly
-                  three times the limit it was cut to. And the number of entries
-                  in the whole description above 0.2 rises from 170 to 248,
-                  because making each block a unit vector again lifts everything
-                  that was not cut. What the step does is move weight from the
-                  loud entries of a block to the quiet ones, and the 0.2 governs
-                  how much moves rather than where any entry ends up.
+                <>
+<p>
+                  On the scene, where the entries are not all equal, the cut does change the answer and still does not enforce the limit. The largest entry falls from 0.9274 to 0.5376, which is nearly three times the limit it was cut to. And the number of entries in the whole description above 0.2 rises from 170 to 248, because making each block a unit vector again lifts everything that was not cut.
                 </p>
+                <p>
+                  What the step does is move weight from the loud entries of a block to the quiet ones, and the 0.2 governs how much moves rather than where any entry ends up.
+                </p>
+</>
               </SubSection>
 
               <SubSection title="27. What has to be decided">
@@ -1061,6 +1133,278 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "A bright bar on a dark ground, beside the same bar with its brightness turned inside out. How far apart are the two descriptions?",
+              [
+                "Exactly 0 over half a circle, and 1.41421 over the whole circle",
+                "1.41421 either way",
+                "Exactly 0 either way, since nothing in the shape has moved",
+                "0 over the whole circle and 1.41421 over half of it",
+              ],
+              0,
+              "The bar’s two edges are one edge seen from either side, so their directions are exactly opposite and fold into one bucket over half a circle, while over the whole circle they land in two buckets centred on 10 and 190 degrees with half the weight in each. That is Dalal and Triggs’ argument in two numbers, since a person in a dark coat against a bright wall is the same shape as one in a light coat against a dark wall, and for printed text the 1.41421 is the useful answer and the 0 the useless one.",
+            ),
+            choice(
+              "The pedestrian window is 64 wide and 128 tall with 8 pixel cells. How does its description reach 3780 numbers?",
+              [
+                "8 cells across and 16 down give 7 by 15 block positions, so 105 blocks of 36 numbers each",
+                "8 by 16 block positions, one per cell, of 36 numbers each",
+                "128 cells of 9 buckets, once for each of the scales searched",
+                "7 by 15 block positions of 9 numbers each, one bucket per block",
+              ],
+              0,
+              "A 2 by 2 block stepping one cell at a time has one position fewer than there are cells along each side, and each block holds 4 cells of 9 buckets, which is 36 numbers. That is Dalal and Triggs’ own figure for their descriptor. The window holds 8192 brightnesses, so the description is smaller than the picture though not by much, and it is far larger than the 128 cells it is built from would suggest, because the overlap describes those 128 cells in 420 cells’ worth of numbers.",
+            ),
+            trueFalse(
+              "A bucket count that divides 90 exactly would let the description survive a quarter turn.",
+              false,
+              "A quarter turn moves the description 5.2331 where its own length is 5, and at 6 buckets, where a quarter turn is exactly three of them, it still moves 0.95 of its own length, with no way of rescaling a block bringing any of it below 0.98. The directions are only half the problem, since the cells have moved as well and no arithmetic over buckets can undo that.",
+            ),
+            choice(
+              "Why is the description of an object twice as far away not merely a poorer match?",
+              [
+                "It fills a quarter as many cells, so it is a different length, and two descriptions of different lengths do not correspond position by position",
+                "Its rates of change are weaker, so every entry comes out smaller",
+                "Its directions have turned, so the buckets no longer line up",
+                "The cut at 0.2 bites differently at the smaller size",
+              ],
+              0,
+              "The distance between two descriptions of different lengths has no meaning, so the comparison is undefined rather than poor. The usual repair lives outside the method, resizing the picture several times over and keeping whichever answer scored best, which turns the cost of one description into that cost times the number of sizes tried.",
+            ),
+            several(
+              "The cut at 0.2 is applied to a unit vector, which is then made a unit vector again. Which of these hold?",
+              [
+                "On a block of eight equal entries the cut changes nothing, and the entry it was meant to hold at 0.2 ends at 0.3536",
+                "On the scene the largest entry falls from 0.9274 to 0.5376, which is nearly three times the limit it was cut to",
+                "The number of entries in the whole description above 0.2 rises from 170 to 248",
+                "After the step no entry can be above 0.2, which is what the limit is for",
+              ],
+              [0, 1, 2],
+              "Whenever the cut removed anything at all the entry comes back above 0.2, because it is then divided by a length the cut itself made smaller, and the arithmetic says so before any picture is involved. What the step does is move weight from the loud entries of a block to the quiet ones, and the 0.2 governs how much moves rather than where any entry ends up.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Describing The Scene With The Library",
+          practice: [
+            exercise(
+              "Work the one-edge patch through with the library",
+              ["Part 2 takes a patch 6 pixels square, dark on the left and bright on the right, with cells 3 pixels on a side, and counts 12 of weight into each of its four cells, all of it in bucket 0 under whole votes. Part 3 switches the sharing on and the same 12 comes apart into 6 in bucket 0 and 6 in bucket 8. Build the patch, count its votes under both rules with HistogramOfOrientedGradients, and read the top-left cell.", "Then describe the patch under the default settings. The four cells make one block, so the description is a single unit vector of 36 numbers, and it is the block of eight sixes that Part 6 works on paper. Read how long it is, its largest entry, and how many of its entries sit above the 0.2 limit."],
+              `import numpy as np
+from oop_ml.core.computer_vision.oriented_gradients import (
+    HistogramOfOrientedGradients,
+    VoteSharing,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+patch = Picture([[0.0, 0.0, 0.0, 1.0, 1.0, 1.0] for _ in range(6)])
+whole = HistogramOfOrientedGradients(cell_side=3, vote_sharing=VoteSharing.WHOLE_TO_NEAREST)
+shared = HistogramOfOrientedGradients(cell_side=3)
+
+# Count the votes into cells under each rule. Print the total weight and the
+# grid of cells, then the top-left cell's nine buckets under each rule.
+# Then describe the patch with the shared rule, and print how many numbers
+# the description holds, its length, its largest entry and how many of its
+# entries are above 0.2.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.oriented_gradients import (
+    HistogramOfOrientedGradients,
+    VoteSharing,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+patch = Picture([[0.0, 0.0, 0.0, 1.0, 1.0, 1.0] for _ in range(6)])
+whole = HistogramOfOrientedGradients(cell_side=3, vote_sharing=VoteSharing.WHOLE_TO_NEAREST)
+shared = HistogramOfOrientedGradients(cell_side=3)
+
+counted_whole = whole.cell_histograms(patch)
+counted_shared = shared.cell_histograms(patch)
+print(f"total weight {counted_shared.total_weight:.1f} over {counted_shared.n_cell_rows} by {counted_shared.n_cell_columns} cells")
+print(f"top-left cell under whole votes  {counted_whole.histogram_at(0, 0)}")
+print(f"top-left cell under shared votes {counted_shared.histogram_at(0, 0)}")
+
+described = shared.describe(patch)
+entries = np.asarray(described)
+print(f"description holds {described.n_values} numbers of length {described.length:.4f}")
+print(f"largest entry {entries.max():.4f} with {int((entries > 0.2).sum())} entries above 0.2")`,
+              `total weight 48.0 over 2 by 2 cells
+top-left cell under whole votes  [12.  0.  0.  0.  0.  0.  0.  0.  0.]
+top-left cell under shared votes [6. 0. 0. 0. 0. 0. 0. 0. 6.]
+description holds 36 numbers of length 1.0000
+largest entry 0.3536 with 8 entries above 0.2`,
+              { hints: ["cell_histograms takes a Picture and answers an object holding one histogram per cell. total_weight, n_cell_rows and n_cell_columns are properties of it, and histogram_at(row, column) is one cell’s nine buckets as an array.", "The shared rule is the default, so the second model needs only the cell side. The whole-vote rule is VoteSharing.WHOLE_TO_NEAREST.", "describe takes the same Picture and answers the finished description. n_values and length are properties of it, and np.asarray turns it into a plain array for max and for a comparison with 0.2."], check: numberCheck("What is the largest entry of the finished description?", 0.3536, 0.0005, "The patch is one block of four identical cells, each holding 6 in bucket 0 and 6 in bucket 8, so the block has eight entries of 6 and twenty-eight of nought, which is exactly the block Part 6 works on paper. Its length is the square root of 288, and 6 over that is 0.3536. The cut to 0.2 takes all eight entries down together and the second division puts every one of them back, so the limit holds nothing here and all eight entries end above it.") },
+            ),
+            exercise(
+              "Turn a ramp across a bucket boundary",
+              ["Part 3 draws a picture whose brightness rises along a straight ramp, so that every interior pixel has the same direction, and turns the ramp from 19 degrees to 21, across the boundary between the first two buckets. Draw the two ramps, 24 pixels square, and read the middle cell at row 1 and column 1 under each voting rule.", "The lesson reports the cell moving 724.08 under whole votes and 72.41 under sharing. Print those, the shares in each bucket at both angles, and one number the lesson does not give, which is how much weight the cell holds."],
+              `import numpy as np
+from oop_ml.core.computer_vision.oriented_gradients import (
+    HistogramOfOrientedGradients,
+    VoteSharing,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+rows, columns = np.mgrid[0:24, 0:24]
+at_19 = Picture(np.cos(np.deg2rad(19)) * columns + np.sin(np.deg2rad(19)) * rows)
+at_21 = Picture(np.cos(np.deg2rad(21)) * columns + np.sin(np.deg2rad(21)) * rows)
+
+for sharing in (VoteSharing.WHOLE_TO_NEAREST, VoteSharing.SPLIT_BETWEEN_NEIGHBOURS):
+    model = HistogramOfOrientedGradients(vote_sharing=sharing)
+    # Read the middle cell, at row 1 and column 1, from each ramp's histograms.
+    # Print the rule, the cell's total weight, its shares at each angle
+    # rounded to two places, and how far the cell moved between the two.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.oriented_gradients import (
+    HistogramOfOrientedGradients,
+    VoteSharing,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+rows, columns = np.mgrid[0:24, 0:24]
+at_19 = Picture(np.cos(np.deg2rad(19)) * columns + np.sin(np.deg2rad(19)) * rows)
+at_21 = Picture(np.cos(np.deg2rad(21)) * columns + np.sin(np.deg2rad(21)) * rows)
+
+for sharing in (VoteSharing.WHOLE_TO_NEAREST, VoteSharing.SPLIT_BETWEEN_NEIGHBOURS):
+    model = HistogramOfOrientedGradients(vote_sharing=sharing)
+    before = np.asarray(model.cell_histograms(at_19).histogram_at(1, 1))
+    after = np.asarray(model.cell_histograms(at_21).histogram_at(1, 1))
+    print(sharing.value)
+    print(f"  cell weight {before.sum():.1f}")
+    print(f"  shares at 19 degrees {np.round(before / before.sum(), 2)}")
+    print(f"  shares at 21 degrees {np.round(after / after.sum(), 2)}")
+    print(f"  moved {np.linalg.norm(after - before):.2f}")`,
+              `whole_to_nearest
+  cell weight 512.0
+  shares at 19 degrees [1. 0. 0. 0. 0. 0. 0. 0. 0.]
+  shares at 21 degrees [0. 1. 0. 0. 0. 0. 0. 0. 0.]
+  moved 724.08
+split_between_neighbours
+  cell weight 512.0
+  shares at 19 degrees [0.55 0.45 0.   0.   0.   0.   0.   0.   0.  ]
+  shares at 21 degrees [0.45 0.55 0.   0.   0.   0.   0.   0.   0.  ]
+  moved 72.41`,
+              { hints: ["The default cell side is 8, so a 24 pixel ramp is 3 cells by 3 and the cell at row 1, column 1 is the one that touches no border.", "histogram_at(1, 1) answers that cell’s nine buckets as a frozen array. Wrap it in np.asarray so the arithmetic that follows works on a plain array, and the weight is its sum.", "The move between the two angles is the length of the difference between the two histograms, which is np.linalg.norm of one minus the other, the same yardstick Part 1 uses on two lists of brightnesses."], check: numberCheck("How much weight does the middle cell hold, under either rule?", 512, 0.5, "The ramp rises by one unit of brightness per pixel along its direction, and the sweep reads that rate of change as 8 at every interior pixel, so a cell of 8 by 8 pixels collects 64 votes of 8. Under whole votes all 512 leave bucket 0 for bucket 1, a move of 512 times the square root of two, which is the 724.08 of Part 3, and under sharing a tenth of the cell moves, which is the 72.41. The weight is the same under both rules because sharing decides where a vote goes and never how much it weighs.") },
+            ),
+            exercise(
+              "Relight the scene and turn it, and measure both at each stage",
+              ["Rebuild the 48 pixel scene from Part 1, a square, a disc, a diagonal bar, three crosses and a brightness ramp, and make the three relit copies Part 4 measures, the shift of 0.15 alone, the multiplier of 1.6 alone and the two together, along with the quarter turn of Part 6.", "Describe the scene with the blocks left alone and under the default rule. Part 4 reports the unrescaled description moving 8.4 times ten to the minus fourteenth for the shift and 132.89 for the multiplier against its own length of 221.49, and Part 6 reports the quarter turn moving the finished description 5.2331 against a length of 5. Print all of those to six significant figures, with the two figures Part 6 sets side by side, the turn and the whole relighting under the default rule, in the same block of output."],
+              `import numpy as np
+from oop_ml.core.computer_vision.oriented_gradients import (
+    BlockNormalisation,
+    HistogramOfOrientedGradients,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+canvas = np.full((48, 48), 0.12)
+canvas[6:17, 5:16] = 0.78
+rows, columns = np.ogrid[:48, :48]
+canvas[(rows - 12) ** 2 + (columns - 34) ** 2 <= 36] = 0.78
+for step in range(14):
+    canvas[30 - step, 6 + step : 9 + step] = 0.78
+cross = np.full((7, 7), 0.12)
+cross[2:5, :], cross[:, 2:5] = 0.78, 0.78
+for row, column in ((26, 26), (38, 12), (39, 36)):
+    canvas[row : row + 7, column : column + 7] = np.maximum(canvas[row : row + 7, column : column + 7], cross)
+canvas += np.tile(np.linspace(0.0, 0.30, 48), (48, 1))
+
+here = Picture(canvas)
+changes = {"shift": canvas + 0.15, "scale": canvas * 1.6, "both": canvas * 1.6 + 0.15, "turn": np.rot90(canvas)}
+# For the blocks left alone and for the default rule, describe the scene,
+# print the description's length, and print how far each of the four changes
+# moves it, to six significant figures.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.oriented_gradients import (
+    BlockNormalisation,
+    HistogramOfOrientedGradients,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+canvas = np.full((48, 48), 0.12)
+canvas[6:17, 5:16] = 0.78
+rows, columns = np.ogrid[:48, :48]
+canvas[(rows - 12) ** 2 + (columns - 34) ** 2 <= 36] = 0.78
+for step in range(14):
+    canvas[30 - step, 6 + step : 9 + step] = 0.78
+cross = np.full((7, 7), 0.12)
+cross[2:5, :], cross[:, 2:5] = 0.78, 0.78
+for row, column in ((26, 26), (38, 12), (39, 36)):
+    canvas[row : row + 7, column : column + 7] = np.maximum(canvas[row : row + 7, column : column + 7], cross)
+canvas += np.tile(np.linspace(0.0, 0.30, 48), (48, 1))
+
+here = Picture(canvas)
+changes = {"shift": canvas + 0.15, "scale": canvas * 1.6, "both": canvas * 1.6 + 0.15, "turn": np.rot90(canvas)}
+for rule in (BlockNormalisation.NONE, BlockNormalisation.L2_CLIPPED):
+    model = HistogramOfOrientedGradients(block_normalisation=rule)
+    described = model.describe(here)
+    print(f"{rule.value} length {described.length:.6g}")
+    for name, values in changes.items():
+        print(f"  {name} moves it {described.distance_to(model.describe(Picture(values))):.6g}")`,
+              `none length 221.49
+  shift moves it 8.35981e-14
+  scale moves it 132.894
+  both moves it 132.894
+  turn moves it 265.588
+l2_clipped length 5
+  shift moves it 1.9318e-15
+  scale moves it 1.9759e-15
+  both moves it 2.29922e-15
+  turn moves it 5.23308`,
+              { hints: ["A model is configured at construction and reads a picture with describe. The only setting that changes between the two runs is block_normalisation, which takes BlockNormalisation.NONE or BlockNormalisation.L2_CLIPPED, the default.", "Each changed copy of the canvas is a plain array until Picture wraps it, and describe wants the Picture. The original canvas stays as it was, since the arithmetic made new arrays rather than writing into it.", "distance_to is a method of one description taking another, and length is a property. A format of .6g shows the tiny moves as powers of ten rather than as 0.000000."], check: numberCheck("How far does the quarter turn move the finished description, under the default rule?", 5.23308, 0.0005, "Every stage measures a direction from a fixed axis and assigns a pixel to a cell by its position, so a quarter turn turns every direction and moves every pixel into a different cell, and the description, whose own length is 5, moves further than its whole length. The same relighting that moved the unrescaled description by 132.894 moves the rescaled one by about ten to the minus fifteenth, which is the pair of figures Part 6 says must always be quoted together.") },
+            ),
+            exercise(
+              "Ask for three things the method does not define",
+              ["Part 6 lists the cases the arithmetic has no answer for, and three of them the library refuses by name. Hand it a 20 by 20 picture at the default cell side of 8, which does not divide into whole cells. Ask for the distance between the descriptions of a 48 by 48 picture and a 24 by 24 one, which are different lengths. And construct a model whose 2 by 2 blocks step 3 cells at a time, which would leave cells no block covers.", "Catch each refusal and print the name of its class and its message. The first two derive from the library’s own base error. The third is refused at construction, before any picture exists, by the validation the model’s own constructor runs, so it arrives as a validation error rather than as one of the library’s."],
+              `import numpy as np
+from oop_ml import MLLibError
+from oop_ml.core.computer_vision.oriented_gradients import HistogramOfOrientedGradients
+from oop_ml.core.computer_vision.picture import Picture
+from pydantic import ValidationError
+
+model = HistogramOfOrientedGradients()
+blank = {side: Picture(np.zeros((side, side))) for side in (20, 24, 48)}
+
+# Try each of the three in turn, catching what the library raises, and print
+# the class name and the message. The third refusal comes from the
+# constructor, so the message is the first entry of its errors().`,
+              `import numpy as np
+from oop_ml import MLLibError
+from oop_ml.core.computer_vision.oriented_gradients import HistogramOfOrientedGradients
+from oop_ml.core.computer_vision.picture import Picture
+from pydantic import ValidationError
+
+model = HistogramOfOrientedGradients()
+blank = {side: Picture(np.zeros((side, side))) for side in (20, 24, 48)}
+
+try:
+    model.describe(blank[20])
+except MLLibError as refusal:
+    print(type(refusal).__name__)
+    print(refusal)
+
+try:
+    model.describe(blank[48]).distance_to(model.describe(blank[24]))
+except MLLibError as refusal:
+    print(type(refusal).__name__)
+    print(refusal)
+
+try:
+    HistogramOfOrientedGradients(block_stride_in_cells=3)
+except ValidationError as refusal:
+    print(type(refusal).__name__)
+    print(refusal.errors()[0]["msg"])`,
+              `ShapeMismatchError
+a 20 by 20 patch does not divide into whole 8 by 8 cells, and the leftover strip would either vote in a cell of a different size or not vote at all
+ShapeMismatchError
+two descriptions can only be compared position by position, and these are 900 and 144 long, so they were built under different settings
+ValidationError
+Value error, blocks 2 cells across stepping 3 cells at a time leave cells that no block covers, so those cells would not reach the answer at all; the stride is at most the block's own side`,
+              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal each of the first two turns out to be, and printing the exception prints its message.", "A blank picture describes without complaint, since a block with no weight comes back as noughts, so the second refusal is about the two lengths alone. The 48 by 48 picture describes in 900 numbers and the 24 by 24 one in 144.", "The model is a pydantic model, and a rule that spans two of its fields is checked when it is constructed. pydantic wraps that check in a ValidationError whose errors() lists each failure as a dictionary with the message under msg."] },
+            ),
+          ],
         },
       ]}
     />

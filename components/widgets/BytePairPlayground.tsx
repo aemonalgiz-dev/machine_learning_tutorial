@@ -223,16 +223,9 @@ export function BytePairPlayground() {
             )}
           </div>
 
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            The corpus is spelled in {fit.alphabet.length} symbols, so the
-            smallest vocabulary that can exist here is {fit.smallest_size}. Ask
-            for fewer and the answer is a refusal rather than a smaller
-            vocabulary; ask for many more and the count stops rising, because
-            the corpus runs out of pairs it has seen twice.{" "}
-            {fit.floor_rows > 0
-              ? `The size asked for bounds only what the corpus taught, and ${fit.floor_rows} further rows sit underneath it so that no character is unspellable.`
-              : "As published there are no rows underneath, so a character the corpus never used has nothing to be written with."}
-          </p>
+          <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The initial alphabet contains {fit.alphabet.length} symbols. Those symbols and the required reserved entries establish the minimum vocabulary size of {fit.smallest_size}. A smaller request would remove pieces needed to represent the training text.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Larger requests add learned merges only while the corpus supplies eligible pairs. {fit.floor_rows > 0 ? "A further " + fit.floor_rows + " fixed fallback entries support characters outside the learned alphabet." : "This variant has no byte fallback, so it needs an explicit unknown policy for characters outside the learned alphabet."}</p>
+</>
         </>
       )}
     </div>

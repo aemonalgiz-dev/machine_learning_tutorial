@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { StopProbePanel } from "@/components/widgets/StopProbePanel";
 export const metadata: Metadata = {
   title: "Moses Rules · oop_ml",
   description:
-    "The rule list of the statistical machine translation era, written so the pieces could be put back into readable text, with a named list of the abbreviations it must not cut.",
+    "Combine punctuation rules with language-specific exceptions for translation-oriented tokenisation.",
 };
 
 const link =
@@ -30,8 +33,12 @@ const link =
 export default function MosesRulesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["moses-rules"]}
+      technicalStart="Part 2. The Full Stop, and the List It Cannot Do Without"
+      openingTitle="A Full Stop Does Not Always End a Sentence"
+      playgroundIntro="Compare a sentence-ending period, an abbreviation, and a decimal. Inspect which rule applies and where an exception list changes the cut."
       title="Moses Rules"
-      tagline="A rule list written for machine translation, so every piece stays a stretch of the writing it came from and an abbreviation it must not cut is named on a list."
+      tagline="Combine punctuation rules with language-specific exceptions for translation-oriented tokenisation."
       prerequisites={
         <>
           The{" "}
@@ -52,73 +59,14 @@ export default function MosesRulesPage() {
           is needed to make the rules work, only to count what they do.
         </>
       }
-      history={
-        <>
-          <p>
-            The idea that a translation could be estimated from counts rather
-            than written down as grammar came out of the Candide project at IBM
-            in the late nineteen eighties, and Peter Brown, Stephen Della
-            Pietra, Vincent Della Pietra and Robert Mercer set it out in{" "}
-            <em>
-              The Mathematics of Statistical Machine Translation: Parameter
-              Estimation
-            </em>{" "}
-            in <em>Computational Linguistics</em> in 1993. Their evidence was
-            the Canadian parliamentary proceedings, printed in English and
-            French, and what the method learns about a word is a row of counts
-            over the words it was seen opposite. That is the fact everything on
-            this page follows from. A row is keyed on a run of characters, so{" "}
-            <span className="font-mono">Washington</span>,{" "}
-            <span className="font-mono">Washington.</span> and{" "}
-            <span className="font-mono">Washington,</span> are three separate
-            rows with the evidence for one word divided between them.
-          </p>
-          <p>
-            Philipp Koehn, Franz Josef Och and Daniel Marcu moved the unit from
-            the word to the contiguous phrase in{" "}
-            <em>Statistical Phrase-Based Translation</em> at the 2003 meeting of
-            the North American chapter of the Association for Computational
-            Linguistics, which made the table larger and the vocabulary problem
-            worse. Koehn then assembled <em>Europarl</em>, described at the
-            Machine Translation Summit in 2005, eleven languages of European
-            Parliament proceedings aligned sentence by sentence, and a great
-            deal of the field&rsquo;s work for the next decade was run on it.
-            The toolkit that read it was Moses, presented by Koehn, Hieu Hoang,
-            Alexandra Birch, Chris Callison-Burch, Marcello Federico and their
-            colleagues at the 2007 meeting of the Association for Computational
-            Linguistics. It shipped a short Perl script that cut the text into
-            words, a file of abbreviations per language that the script must not
-            cut, and, unusually, a second script that put the words back
-            together.
-          </p>
-          <p>
-            That second script is the whole difference from the annotation rules
-            of the previous page. A treebank is read by a linguist and a parser,
-            and neither of them ever needs the original paragraph back. A
-            translation system is read by a person who wanted a sentence, so the
-            pipeline runs in both directions, and any rule that makes a piece
-            unlike the writing it came from has to be undoable or it cannot be
-            used. The page answers five questions in order. What does having to
-            put the text back forbid, that annotating it does not? Where do these
-            rules and the annotation rules actually differ, given that on our
-            running sentence they give the same number of pieces? How can a full
-            stop be assigned to an abbreviation or to a sentence, and why does
-            that clause need a list where nothing else here does? What is the
-            general shape of a rule that applies everywhere with a named list of
-            places it must not, and what does a list buy that another rule
-            cannot? And where does the method stop being defined, so that
-            following it is agreement about a data file rather than a fact about
-            English?
-          </p>
-        </>
-      }
+
       playground={<MosesPlayground />}
       sections={[
         {
           title: "Part 1. Rules Written for a Translation System",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The pieces have to go back together again">
                 <p>
                   The three rules on the pages before this one were each
@@ -306,7 +254,7 @@ export default function MosesRulesPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Full Stop, and the List It Cannot Do Without",
@@ -576,6 +524,54 @@ export default function MosesRulesPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "Both rule lists give nine pieces on the running sentence and part on the contraction, one cutting in front of the n and the other at the apostrophe. What decided it here?",
+              [
+                "Only the cut at the apostrophe lets the pieces be joined back into the sentence",
+                "The cut at the apostrophe needs nothing known about English, and the same script had to run over eleven languages",
+                "The cut in front of the n opens a second row for a word the corpus already holds",
+                "The apostrophe is the only mark the rules are allowed to cut at",
+              ],
+              1,
+              "Both cuts give back the sentence when the pieces are joined, so reversibility does not choose between them. The cut in front of the n is a claim about English, that the negation is a morpheme, and would have needed a linguist per language. The cut at the apostrophe is one rule applied wherever an apostrophe stands between two letters, with no list and no exception.",
+            ),
+            trueFalse(
+              "On the ten scored stops the annotation rules place eight where they belong against these rules’ seven, and a set of ten with the proportions reversed would have given the annotation rules two.",
+              true,
+              "The annotation rules answered kept on all ten, because none of the ten stops is the last character of its text. Their eight is exactly the number of cases whose answer happens to be kept, reached without distinguishing anything. These rules answered kept five times and split five times, so their seven is a score a differently balanced set would not move nearly so far, and the honest reading is that one rule distinguishes and the other does not.",
+            ),
+            choice(
+              "The clause that rescues an abbreviation nobody listed reads one character of lookahead. What is it reading, and why?",
+              [
+                "Whether the next character is a capital, since an English sentence begins with one so a lowercase word after a stop means the stop did not end a sentence",
+                "Whether the next character is a letter, since a stop between two letters is never a sentence stop",
+                "Whether the next character is a space, since a sentence stop is always followed by one",
+                "Whether the next character is a figure, since a figure after a stop marks an article number",
+              ],
+              0,
+              "It is a piece of reasoning about writing rather than about language, and it costs one character. It also makes the answer depend on writing that has nothing to do with the abbreviation, which is why approx. keeps its stop before forty and loses it before 40. The figure test is the third clause, which is the condition attached to particular entries such as No.",
+            ),
+            several(
+              "Counted over the eighteen minuted sentences, which of these hold of the list of 55 entries?",
+              [
+                "19 entries answered the question and the other 36 were never consulted at all",
+                "Five real abbreviations turn up that no entry covers",
+                "Every stop that was kept was kept by a list rather than by a clause reading characters",
+                "The clause that catches an interior stop carried most of the kept stops",
+              ],
+              [0, 1, 2],
+              "Twenty stops were kept over those sentences, 18 by the named list and 2 by the figures list, and the two cheap clauses kept none. The interior-stop clause needs a word like U.S., which these sentences happen not to contain, and the lowercase clause needs an abbreviation followed by an ordinary lowercase word, which almost never happens here because the abbreviations are titles and the next word is a surname.",
+            ),
+            trueFalse(
+              "When no clause covers a word, a caller can tell from the output that the list was consulted and found nothing.",
+              false,
+              "The rules never refuse and never report. Gov is a title and is not on the list, and the word after it is a capitalised surname, so no clause saves it and Gov comes back beside every other truncated word with the stop it lost beside every sentence-final stop. Adding Gov leaves Sen, and adding that leaves the next one.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. A Rule Everywhere, and a Named List of Places It Must Not",
           content: (
             <>
@@ -749,6 +745,21 @@ export default function MosesRulesPage() {
                   English, and the French and Italian settings in the playground
                   change only where the apostrophe cut falls.
                 </p>
+                <WorkedExample title="The running sentence under the French setting">
+                  <Equation>
+                    {"English setting   Dr.  Alvarez  didn  't  expect  the  low-cost  re-analysis  .\n" +
+                      "French setting    Dr.  Alvarez  didn'  t  expect  the  low-cost  re-analysis  ."}
+                  </Equation>
+                  <p>
+                    One piece boundary moved, from in front of the apostrophe to
+                    behind it, and nothing else changed. The title kept its stop
+                    under the French setting for the same reason it kept it
+                    under the English one, which is that the list consulted is
+                    still the English list. A French text gets no help from the
+                    setting with its own abbreviations, and an English title
+                    inside it would be recognised.
+                  </p>
+                </WorkedExample>
                 <KeepInMind>
                   The clause is a rule plus a data file, and the file has a
                   language written on it. What that means for correctness is the
@@ -928,6 +939,54 @@ export default function MosesRulesPage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "A rule that ends a word before n’t has its awkward cases held in a table that is checked before the pattern runs. Why can they not be written into a longer pattern?",
+              [
+                "A table is faster than a pattern when the same clause runs over eleven languages",
+                "The exceptions are not describable as characters, since a rule cutting before n’t gives wo from won’t and sha from shan’t",
+                "A pattern cannot read an apostrophe standing between two letters",
+                "The table also records what each half should be spelt as, which a pattern cannot do",
+              ],
+              1,
+              "Any attempt to fix one of those inside the pattern breaks the others, and as a table it is one line each, checked before the pattern runs, with the pattern untouched. A table is the right shape exactly when the exception is a fact about a particular word rather than about a pattern of characters. Reaching for one is a report that the characters have been examined and found silent.",
+            ),
+            trueFalse(
+              "An entry in a table of this shape may say where a word is cut and may not say what the pieces are spelt as, so can’t cannot be listed as can and not.",
+              true,
+              "Three of the six proposals were refused and the three refusals are the same refusal. The pieces an entry lists must join back to exactly the word it names, and can and not join to cannot. Without that a piece stops being a stretch of the source, so the sentence can no longer be reassembled, and it stops being one for whichever words happen to be listed rather than uniformly.",
+            ),
+            choice(
+              "The annotation rules rewrite an opening quotation mark into two backquotes. Why can that not be undone?",
+              [
+                "The rewriting changes the span the piece names, so the original position is lost",
+                "Two backquotes is how a typist of the period produced the mark, so nothing in the output distinguishes a rewritten sentence from one typed that way",
+                "The mapping is not recorded anywhere, unlike the eight-character table",
+                "Backquotes are not characters a phrase table is allowed to hold",
+              ],
+              1,
+              "A rewriting can be undone only when nothing else produces the same characters, and the whole point of choosing two backquotes was that a typist of the period wrote them. A sentence with plain quotation marks and the same sentence typed with backquotes and apostrophes come back as the identical seven pieces under the annotation rules. Under these rules the plain one gives seven pieces and the typed one nine, because a backquote is not a quotation mark and each stands alone.",
+            ),
+            trueFalse(
+              "Joining the pieces with one space between each pair gives back all eighteen minuted sentences.",
+              false,
+              "It gives back two of the eighteen, the ones that happen to end in an abbreviation so that every piece was already separated by a space in the writing. The other sixteen have a comma or a final stop standing alone, and a space in front of a comma is not English. The pieces plus their spans plus the source recover everything exactly, and the pieces alone recover every character in order with the spacing still to be decided.",
+            ),
+            choice(
+              "Under the French setting the contraction of the running sentence is cut behind its apostrophe instead of in front of it. What else in the sentence comes out differently?",
+              [
+                "Nothing, since the setting moves the apostrophe cut and the list of abbreviations stays the English one",
+                "The title loses its stop, since the French list does not hold it",
+                "Both compounds are cut at the hyphen, as French writes them",
+                "The apostrophe is rewritten as a named character",
+              ],
+              0,
+              "The same clause was written once and turned round for French and Italian by moving the cut to the other side of the mark, which is a setting rather than a second table. The list is a data file with a language written on it, and a language is supported exactly when somebody has sat down and listed its abbreviations. Every measurement on the page is English.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. What It Costs",
           content: (
             <>
@@ -944,7 +1003,18 @@ export default function MosesRulesPage() {
                   On the eighteen minuted sentences these rules give 228 pieces
                   where splitting on spaces gives 192, which is 18.75 per cent
                   more from identical writing, and the written-out table gives
-                  243 because it also cuts every compound at its hyphen. On the
+                  243 because it also cuts every compound at its hyphen.
+                </p>
+                <Equation>
+                  {"228 − 192   =  36 more pieces\n" +
+                    "36 / 192    =  18.75 per cent"}
+                </Equation>
+                <p>
+                  The 36 are not spread evenly over the writing. Twenty of them
+                  are full stops standing alone, eight are commas and four are
+                  quotation marks, which is the 32 pieces holding no letter and
+                  no digit, and the rest are the second halves of the
+                  contractions and possessives. On the
                   six-sentence notebook these rules give 72, splitting on spaces
                   gives 63, the annotation rules give 72 as well and the table
                   gives 84.
@@ -984,22 +1054,49 @@ export default function MosesRulesPage() {
                   A saving of five rows is paid for by the rows the marks and the
                   contraction halves open, and the two come out level.
                 </p>
-                <InAModel>
+                <WorkedExample title="Where the 137 and the 136 come from">
                   <p>
-                    The argument only pays at corpus scale, and the reason is
-                    arithmetic rather than linguistics. The rows a mark opens are
-                    bounded, since there are a few dozen marks and each of them
-                    is one row however often it turns up. The rows a mark costs
-                    are not bounded, because every common noun in the language
-                    eventually appears with a comma after it, with a stop after
-                    it, and inside a pair of brackets. Of the 137 entries these
-                    eighteen sentences give the crude rule, only 5 are a word
-                    that reached a second spelling, so the fixed cost of
-                    separating the marks is still the larger of the two here. The
-                    corpus of proceedings these rules were written for holds
-                    millions of sentences, and the fixed cost does not grow with
-                    any of them.
+                    Lay the two lists of entries for the minutes side by side.
+                    They share 106 entries. The crude rule holds 31 that these
+                    rules do not, and these rules hold 30 that the crude rule
+                    does not.
                   </p>
+                  <Equation>
+                    {"entries both rules hold                               106\n" +
+                      "\n" +
+                      "only at spaces\n" +
+                      "  a marked run whose word has no other row            24    small.   Gov.\n" +
+                      "  a marked run whose word already has a row            5    re-analysis.   Okafor,\n" +
+                      "  a contraction                                        2    didn't   It's\n" +
+                      "  at spaces               106 + 24 + 5 + 2   =       137\n" +
+                      "\n" +
+                      "only under these rules\n" +
+                      "  the words those 24 runs become                      24    small   Gov\n" +
+                      "  marks standing alone                                 3    .   ,   \"\n" +
+                      "  pieces of a contraction or possessive                3    didn   't   's\n" +
+                      "  under these rules       106 + 24 + 3 + 3   =       136"}
+                  </Equation>
+                  <p>
+                    The 24 runs in the first row change their spelling and
+                    nothing else, since each gives up a row and the word inside
+                    it takes one. The saving is the next two rows, seven
+                    entries that go without a new word arriving, and against
+                    it stand six new rows that hold no word, three marks and
+                    three pieces of a contraction. Seven against six is the
+                    saving of one. On the notebook the same accounting gives
+                    two entries saved and four opened, which is the loss of
+                    two.
+                  </p>
+                </WorkedExample>
+                <InAModel>
+                  <>
+<p>
+                    The argument only pays at corpus scale, and the reason is arithmetic rather than linguistics. The rows a mark opens are bounded, since there are a few dozen marks and each of them is one row however often it turns up. The rows a mark costs are not bounded, because every common noun in the language eventually appears with a comma after it, with a stop after it, and inside a pair of brackets.
+                  </p>
+                  <p>
+                    Of the 137 entries these eighteen sentences give the crude rule, only 5 are a word that reached a second spelling, so the fixed cost of separating the marks is still the larger of the two here. The corpus of proceedings these rules were written for holds millions of sentences, and the fixed cost does not grow with any of them.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   137 different pieces against 136 on the minutes and 47 against
@@ -1147,19 +1244,14 @@ export default function MosesRulesPage() {
                   has no interior stop and is followed by a capital, and that
                   covers most titles at the head of a sentence.
                 </p>
-                <p>
-                  So the method is a rule and a table, and what the method does
-                  to a text is not determined until somebody has written the
-                  table down. That has three consequences worth separating. The
-                  answer for a given text depends on which file was loaded, so
-                  two callers running the same rules on the same sentence can get
-                  different pieces without either being unfaithful. The table is
-                  per language, so a language nobody has written a file for is
-                  not badly handled, it is outside what the method says. And a
-                  table is finite while the abbreviations of a language are open,
-                  so there is always a next word, and no amount of adding entries
-                  changes that.
+                <>
+<p>
+                  So the method is a rule and a table, and what the method does to a text is not determined until somebody has written the table down. That has three consequences worth separating. The answer for a given text depends on which file was loaded, so two callers running the same rules on the same sentence can get different pieces without either being unfaithful.
                 </p>
+                <p>
+                  The table is per language, so a language nobody has written a file for is not badly handled, it is outside what the method says. And a table is finite while the abbreviations of a language are open, so there is always a next word, and no amount of adding entries changes that.
+                </p>
+</>
                 <p>
                   The practical consequence is about reporting rather than about
                   quality. Two numbers measured on the same corpus by two people
@@ -1335,6 +1427,292 @@ export default function MosesRulesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "The motive was to make the surface vocabulary smaller. What did measuring it find?",
+              [
+                "137 different pieces against 136 on the minutes and 47 against 49 on the notebook, which is a saving of one and a loss of two",
+                "A saving of about a fifth on both corpora, which is what the rules were built for",
+                "No change at all, since the same characters are kept either way",
+                "A saving on the notebook and a loss on the minutes, because the notebook holds more marks",
+              ],
+              0,
+              "The mechanism is real and visible, in the words the crude rule spells more than one way, five of them on the minutes and one on the notebook. What is missing at this size is repetition, so a saving of five rows is paid for by the rows the marks and the contraction halves open. The claim about surface vocabulary is a claim about a large corpus and should not be quoted as though it held at any size.",
+            ),
+            choice(
+              "Why does the argument pay at corpus scale when it does not pay on eighteen sentences?",
+              [
+                "A larger corpus holds fewer marks per sentence, so the fixed cost falls away",
+                "The rows a mark opens are bounded while the rows a mark costs are not, since every common noun eventually appears with a comma after it, with a stop after it, and inside brackets",
+                "A larger corpus lets the list of abbreviations grow until no stop is misplaced",
+                "At scale the pieces holding no letter and no digit stop being counted separately",
+              ],
+              1,
+              "There are a few dozen marks and each of them is one row however often it turns up, so the cost of separating them does not grow. Of the 137 entries the eighteen sentences give the crude rule, only 5 are a word that reached a second spelling, so at this size the fixed cost is still the larger of the two.",
+            ),
+            trueFalse(
+              "A sentence ending in an abbreviation can be divided so that the abbreviation keeps its stop and the sentence keeps its stop as well.",
+              false,
+              "The writing carries one character where the reading carries two marks, and a division of a text gives every character to exactly one piece, so no method that partitions a text can be right here. These rules answer Co. and lose the sentence’s stop, while the annotation rules answer Co and a stop and lose the abbreviation’s. Four of the eighteen minuted sentences end this way, so the choice has to be made rather than deferred.",
+            ),
+            several(
+              "Which of these changes to a piece’s text does the method allow itself?",
+              [
+                "Replacing eight characters a phrase table would otherwise swallow with names",
+                "Spelling the hyphen of a cut compound as a marker three characters long",
+                "Folding the case, so that The and the share one row",
+                "Expanding a contraction into the two words it stands for",
+              ],
+              [0, 1],
+              "Both allowed rewritings arrive with an inverse written down beside them, and both leave the span the piece names untouched, so a piece carries where it came from even when it no longer looks like it. Lowercasing cannot be read backwards, since the does not say whether it began a sentence, and expanding a contraction is the same shape. Anything a pipeline wants that cannot be undone has to happen in a step that is not this one.",
+            ),
+            trueFalse(
+              "Two people running these rules over the same sentence can get different pieces without either of them being unfaithful to the method.",
+              true,
+              "The rules are exact relative to a table of abbreviations, and the table is a document somebody maintains. Every count on the page was taken with one file of 55 entries, and a file with Gov and Sen in it would move the score on the ten stops and the piece counts at the same time. Nothing in the output says which file was loaded, since a word that lost its stop looks the same whether the file was short or the word was not an abbreviation.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Running the Rules and Putting the Pieces Back",
+          practice: [
+            exercise(
+              "Cut the running sentence under both rule lists",
+              ["Put the running sentence to the library’s Moses rules and print each piece beside the half-open span it came from. Then put the same sentence to the Penn Treebank rules, which are the annotation rules of this page, and count the pieces the two answers have in common.", "Part 1 arrived at nine pieces under each and seven shared, with the two that differ being the halves of the contraction. Print the pieces only one of the two rule lists produced, so that the disagreement can be read off."],
+              `from oop_ml import MosesPreTokenizer, PennTreebankPreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+# Split the sentence with a MosesPreTokenizer and print each piece with
+# its start and end. Split it with a PennTreebankPreTokenizer as well, and
+# print how many pieces each gave, how many texts the two share, and the
+# texts that only one of them produced.`,
+              `from oop_ml import MosesPreTokenizer, PennTreebankPreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+here = MosesPreTokenizer().split(sentence)
+for word in here:
+    print(f"{word.text:12s} [{word.start}, {word.end})")
+
+there = PennTreebankPreTokenizer().split(sentence)
+shared = set(here.texts) & set(there.texts)
+print(f"{here.n_words} pieces here, {there.n_words} pieces there, {len(shared)} shared")
+print("only here: ", sorted(set(here.texts) - shared))
+print("only there:", sorted(set(there.texts) - shared))`,
+              `Dr.          [0, 3)
+Alvarez      [4, 11)
+didn         [12, 16)
+'t           [16, 18)
+expect       [19, 25)
+the          [26, 29)
+low-cost     [30, 38)
+re-analysis  [39, 50)
+.            [50, 51)
+9 pieces here, 9 pieces there, 7 shared
+only here:  ["'t", 'didn']
+only there: ['did', "n't"]`,
+              { hints: ["Both rules are constructed with nothing, since the defaults are the English setting with both switches off, and the text goes to split.", "split answers a collection that can be iterated for words carrying text, start and end, and that knows n_words and the texts alone.", "Turning each answer’s texts into a set makes the shared pieces an intersection and the pieces only one side produced a difference."], check: numberCheck("How many pieces do the two rule lists share on the running sentence?", 7, 0.0, "Both give nine pieces and seven are the same. These rules cut the contraction at the apostrophe, into didn and a piece beginning with the mark, and the annotation rules cut it in front of the negation, into did and a piece beginning with n. The first needs nothing known about English to state, which is what decided it for a script that had to run over eleven languages.") },
+            ),
+            exercise(
+              "Give the same abbreviation two different followers",
+              ["Section 7 gave the rules the same abbreviation twice with different writing after it. Put the three pairs below to the Moses rules, and for each text print the pieces and whether the word in question came back with its stop still attached.", "Each pair should split, one kept and one cut, and in every pair the abbreviation itself is identical in both texts. Count how many of the six stops were kept, and notice which clause of section 6 is responsible for each of the six answers."],
+              `from oop_ml import MosesPreTokenizer
+
+cases = [
+    ("No. 5 shows the drift.", "No."),
+    ("No. Nothing shows the drift.", "No."),
+    ("The reading was approx. 40 per cent.", "approx."),
+    ("The reading was approx. forty per cent.", "approx."),
+    ("Alvarez et al. ran the analysis.", "al."),
+    ("Alvarez et al. Ran it again.", "al."),
+]
+rule = MosesPreTokenizer()
+
+# For each case, split the text and print whether the word with its stop
+# is among the pieces, followed by the pieces. Then print how many of the
+# six stops were kept.`,
+              `from oop_ml import MosesPreTokenizer
+
+cases = [
+    ("No. 5 shows the drift.", "No."),
+    ("No. Nothing shows the drift.", "No."),
+    ("The reading was approx. 40 per cent.", "approx."),
+    ("The reading was approx. forty per cent.", "approx."),
+    ("Alvarez et al. ran the analysis.", "al."),
+    ("Alvarez et al. Ran it again.", "al."),
+]
+rule = MosesPreTokenizer()
+
+kept = 0
+for text, word in cases:
+    pieces = rule.split(text).texts
+    stayed = word in pieces
+    kept += stayed
+    print(f"{'kept ' if stayed else 'split'}  {'  '.join(pieces)}")
+print(f"{kept} of {len(cases)} stops kept")`,
+              `kept   No.  5  shows  the  drift  .
+split  No  .  Nothing  shows  the  drift  .
+split  The  reading  was  approx  .  40  per  cent  .
+kept   The  reading  was  approx.  forty  per  cent  .
+kept   Alvarez  et  al.  ran  the  analysis  .
+split  Alvarez  et  al  .  Ran  it  again  .
+3 of 6 stops kept`,
+              { hints: ["The texts of a split are a tuple of strings, so whether the abbreviation kept its stop is whether the word with the stop on it is in that tuple.", "A stop that came off shows up as the bare word followed by a piece that is a full stop and nothing else.", "A true answer counts as one when it is added to a number, so the tally of kept stops can be a running sum of the test."], check: numberCheck("How many of the six stops do the rules keep?", 3, 0.0, "Three are kept and all three by what follows the word. No. keeps its stop because a figure follows an entry of the figures list, and approx. and al. keep theirs because the next word begins with a lowercase letter. The other three are the same abbreviations in front of a capital or a figure, so the answer turned on writing that has nothing to do with the abbreviation, which is section 7’s warning about a clause that reads the next word.") },
+            ),
+            exercise(
+              "Count what the rules cost over the minutes",
+              ["Part 5 counted the eighteen minuted sentences under each rule. Count them under splitting on spaces, under the Moses rules, and under the Moses rules with the switch that cuts a compound at its hyphen. For each, print how many pieces the corpus became and how many different pieces there were.", "The first two rows should be 192 and 137 against 228 and 136, and the third should have the 240 pieces section 17 quotes. The page does not say what the hyphen switch does to the count of different pieces, so read that off and see whether cutting the compounds made the vocabulary smaller here."],
+              `from oop_ml import Corpus, MosesPreTokenizer, WhitespacePreTokenizer
+
+minutes = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "Mr. Okafor asked whether the sensors had been calibrated in Nov. 2019.",
+    "Mrs. Lindqvist replied that Art. 3 of the agreement covers calibration.",
+    "The contract was signed by Alvarez Instruments Ltd. and by Okafor Co.",
+    "Prof. Nakamura said the drift was 5,300 parts per million, not 1,000.",
+    "Gov. Reyes had asked for the same figures in Jan.",
+    "Sen. Duarte objected that Fig. 4 was drawn from the wrong column.",
+    "The delegation met at St. Andrew's, near Mt. Pleasant.",
+    "Ms. Haddad read out the reading, the drift and the residual, etc.",
+    '"We cannot sign this," said Mr. Okafor, "until No. 5 is corrected."',
+    "The reading of 3.14 was checked against the low-cost sensor vs. the reference one.",
+    "J. Alvarez had run the first analysis in 2019.",
+    "The re-analysis cost 1,000 euros and took until Dec.",
+    "It's the store room readings, not the field ones, that drifted.",
+    "The committee's own well-known preference is for a re-analysis.",
+    "Inc. and Corp. are written differently in the two translations.",
+    "Rev. Santos asked whether approx. 40 per cent was the right share.",
+    "The drift was small. It did not go away.",
+]
+rules = {
+    "at spaces": WhitespacePreTokenizer(),
+    "these rules": MosesPreTokenizer(),
+    "with compounds cut": MosesPreTokenizer(aggressive_hyphen_splitting=True),
+}
+corpus = Corpus.of(minutes)
+
+# For each rule, count the corpus's words under it, and print the rule's
+# name, the total number of pieces and the number of different pieces.`,
+              `from oop_ml import Corpus, MosesPreTokenizer, WhitespacePreTokenizer
+
+minutes = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "Mr. Okafor asked whether the sensors had been calibrated in Nov. 2019.",
+    "Mrs. Lindqvist replied that Art. 3 of the agreement covers calibration.",
+    "The contract was signed by Alvarez Instruments Ltd. and by Okafor Co.",
+    "Prof. Nakamura said the drift was 5,300 parts per million, not 1,000.",
+    "Gov. Reyes had asked for the same figures in Jan.",
+    "Sen. Duarte objected that Fig. 4 was drawn from the wrong column.",
+    "The delegation met at St. Andrew's, near Mt. Pleasant.",
+    "Ms. Haddad read out the reading, the drift and the residual, etc.",
+    '"We cannot sign this," said Mr. Okafor, "until No. 5 is corrected."',
+    "The reading of 3.14 was checked against the low-cost sensor vs. the reference one.",
+    "J. Alvarez had run the first analysis in 2019.",
+    "The re-analysis cost 1,000 euros and took until Dec.",
+    "It's the store room readings, not the field ones, that drifted.",
+    "The committee's own well-known preference is for a re-analysis.",
+    "Inc. and Corp. are written differently in the two translations.",
+    "Rev. Santos asked whether approx. 40 per cent was the right share.",
+    "The drift was small. It did not go away.",
+]
+rules = {
+    "at spaces": WhitespacePreTokenizer(),
+    "these rules": MosesPreTokenizer(),
+    "with compounds cut": MosesPreTokenizer(aggressive_hyphen_splitting=True),
+}
+corpus = Corpus.of(minutes)
+
+for name, rule in rules.items():
+    counts = corpus.word_counts(rule)
+    print(f"{name:19s} {counts.total} pieces, {counts.n_words} different")`,
+              `at spaces           192 pieces, 137 different
+these rules         228 pieces, 136 different
+with compounds cut  240 pieces, 138 different`,
+              { hints: ["Corpus.of takes the list of sentences, and its word_counts takes a rule and answers the count of every distinct piece the rule produced over the whole corpus.", "The counts know total, which is every piece counted with its repeats, and n_words, which is how many different pieces there were."], check: numberCheck("How many different pieces do the minutes give with every compound cut at its hyphen?", 138, 0.0, "Cutting the compounds takes three entries away, low-cost, re-analysis and well-known, and opens five, which are low, re, well, known and the marker that stands for the hyphen, since cost and analysis already had rows. So 136 becomes 138 and the switch makes the vocabulary larger on eighteen sentences, for the reason section 20 gives about the rules as a whole. The saving needs the halves to turn up elsewhere often enough, and at this size they do not.") },
+            ),
+            exercise(
+              "Switch the rewriting on and undo it",
+              ["Section 17 says the eight named characters can be put back because nothing else produces those names. Split each of the eighteen minuted sentences with the rewriting switched on, count the pieces whose text is no longer the stretch of the sentence their span names, then join the pieces with nothing between them, put the eight characters back, and compare with the sentence stripped of its spacing.", "Every one of the eighteen should come back. The page counts three rewritten pieces on its quoted sentence and does not count them over the minutes, so read off how many pieces of the whole corpus the switch rewrote.", "The table of names is not exported from the top of the library, so it is imported here from the module that holds the rules."],
+              `import re
+
+from oop_ml import MosesPreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.moses import UNESCAPES
+
+minutes = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "Mr. Okafor asked whether the sensors had been calibrated in Nov. 2019.",
+    "Mrs. Lindqvist replied that Art. 3 of the agreement covers calibration.",
+    "The contract was signed by Alvarez Instruments Ltd. and by Okafor Co.",
+    "Prof. Nakamura said the drift was 5,300 parts per million, not 1,000.",
+    "Gov. Reyes had asked for the same figures in Jan.",
+    "Sen. Duarte objected that Fig. 4 was drawn from the wrong column.",
+    "The delegation met at St. Andrew's, near Mt. Pleasant.",
+    "Ms. Haddad read out the reading, the drift and the residual, etc.",
+    '"We cannot sign this," said Mr. Okafor, "until No. 5 is corrected."',
+    "The reading of 3.14 was checked against the low-cost sensor vs. the reference one.",
+    "J. Alvarez had run the first analysis in 2019.",
+    "The re-analysis cost 1,000 euros and took until Dec.",
+    "It's the store room readings, not the field ones, that drifted.",
+    "The committee's own well-known preference is for a re-analysis.",
+    "Inc. and Corp. are written differently in the two translations.",
+    "Rev. Santos asked whether approx. 40 per cent was the right share.",
+    "The drift was small. It did not go away.",
+]
+rule = MosesPreTokenizer(escape_special_characters=True)
+names = re.compile("|".join(re.escape(name) for name in UNESCAPES))
+
+# For each sentence, split it, add to a count the pieces whose text
+# differs from the slice of the sentence between start and end, join the
+# texts, replace every name with the character UNESCAPES gives for it,
+# and add to a second count when that equals the sentence without its
+# spacing. Print both counts.`,
+              `import re
+
+from oop_ml import MosesPreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.moses import UNESCAPES
+
+minutes = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "Mr. Okafor asked whether the sensors had been calibrated in Nov. 2019.",
+    "Mrs. Lindqvist replied that Art. 3 of the agreement covers calibration.",
+    "The contract was signed by Alvarez Instruments Ltd. and by Okafor Co.",
+    "Prof. Nakamura said the drift was 5,300 parts per million, not 1,000.",
+    "Gov. Reyes had asked for the same figures in Jan.",
+    "Sen. Duarte objected that Fig. 4 was drawn from the wrong column.",
+    "The delegation met at St. Andrew's, near Mt. Pleasant.",
+    "Ms. Haddad read out the reading, the drift and the residual, etc.",
+    '"We cannot sign this," said Mr. Okafor, "until No. 5 is corrected."',
+    "The reading of 3.14 was checked against the low-cost sensor vs. the reference one.",
+    "J. Alvarez had run the first analysis in 2019.",
+    "The re-analysis cost 1,000 euros and took until Dec.",
+    "It's the store room readings, not the field ones, that drifted.",
+    "The committee's own well-known preference is for a re-analysis.",
+    "Inc. and Corp. are written differently in the two translations.",
+    "Rev. Santos asked whether approx. 40 per cent was the right share.",
+    "The drift was small. It did not go away.",
+]
+rule = MosesPreTokenizer(escape_special_characters=True)
+names = re.compile("|".join(re.escape(name) for name in UNESCAPES))
+
+rewritten = 0
+recovered = 0
+for sentence in minutes:
+    words = rule.split(sentence)
+    rewritten += sum(word.text != sentence[word.start:word.end] for word in words)
+    undone = names.sub(lambda found: UNESCAPES[found.group(0)], "".join(words.texts))
+    recovered += undone == "".join(sentence.split())
+
+print(f"pieces rewritten: {rewritten}")
+print(f"sentences recovered: {recovered} of {len(minutes)}")`,
+              `pieces rewritten: 8
+sentences recovered: 18 of 18`,
+              { hints: ["UNESCAPES is a dictionary from each name, such as the one for a quotation mark, to the character it stands for, and the pattern built above matches any one of the eight names.", "A rewritten piece still carries the span of the writing it replaced, so the test for one is whether its text differs from the sentence sliced from start to end.", "The pattern’s sub takes a function that is handed each match, and the matched name is found.group(0), which is the key to look up. Splitting a sentence with no argument and joining with nothing strips its spacing."], check: numberCheck("How many pieces of the eighteen sentences does the switch rewrite?", 8, 0.0, "Eight pieces are rewritten, the four quotation marks of the tenth sentence and the four pieces that begin with an apostrophe, which come from didn’t, Andrew’s, It’s and committee’s. All eighteen sentences come back once the names are replaced, because each name stands for exactly one character and nothing else in the writing produces it. That is the difference from the annotation rules’ quotation marks, whose rewritten spelling a typist could also have typed.") },
+            ),
+          ],
         },
       ]}
     />

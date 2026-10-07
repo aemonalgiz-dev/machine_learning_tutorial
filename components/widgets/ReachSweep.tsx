@@ -110,9 +110,9 @@ export function ReachSweep() {
         <text x={VIEW.width - PAD.right + 4} y={PAD.top + 8} className="fill-slate-500 text-[9px] dark:fill-slate-400">1.0</text>
         <text x={VIEW.width - PAD.right + 4} y={VIEW.height - PAD.bottom + 3} className="fill-slate-500 text-[9px] dark:fill-slate-400">0.0</text>
       </svg>
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        The bars read on the left scale and show {grouped ? "the gap between the two groups along the first kernel direction, green where the groups come apart and rose where they interleave" : "how often the first kernel direction turns back when the people are read by height"}. The lines read on the right scale, the first share in indigo, the second in amber, and the total lifted variance dashed.
-      </p>
+      <>
+<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Read the bars against the left axis. They measure {grouped ? "the separation of the two groups along the first kernel component; green indicates separation and rose indicates overlap" : "how often the first kernel component reverses direction when observations are ordered by height"}.</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Read the lines against the right axis. Indigo and amber show the first and second component shares, and the dashed line shows the total feature-space variance. A visually separated component and a large variance share are different properties.</p>
+</>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {grouped ? (
           <>

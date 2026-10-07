@@ -91,7 +91,7 @@ function clampToWindow(value: number): number {
 export function NeuronPlayground() {
   const [weights, setWeights] = useState<[number, number]>(WORKED_WEIGHTS);
   const [bias, setBias] = useState(WORKED_BIAS);
-  const [activation, setActivation] = useState<ActivationName>("sigmoid");
+  const [activation, setActivation] = useState<ActivationName>("rectified_linear");
   const [probe, setProbe] = useState<PlanePoint>(TALL_HEAVY);
   const [showCrowd, setShowCrowd] = useState(false);
   const [twin, setTwin] = useState<LogisticTwin | null>(null);
@@ -728,7 +728,7 @@ export function NeuronPlayground() {
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
         Left, the neuron&rsquo;s output over the plane of standardised height
         and weight, the dashed line where its score is zero, and the probe you
-        can drag. Right, the chosen bend in indigo and its slope in amber,
+        can drag. Right, the chosen activation function in indigo and its slope in amber,
         marked at the probe&rsquo;s score.
       </p>
 

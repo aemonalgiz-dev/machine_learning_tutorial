@@ -188,10 +188,9 @@ export function UNetArchitecture() {
         ))}
         <Stat label="all parameters" value={thousands(report.n_parameters)} />
       </div>
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        Each block is drawn as tall as its maps are wide and as wide as it has channels. The amber part of a joined block is the encoder&rsquo;s maps copied across; the indigo part beside it is what came up from the middle.{" "}
-        {skip ? "The upper dashed line carries the full-size maps across the top of the U." : "Without the joins, the way up reads only what came through the middle."}
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">First follow spatial resolution and channel count separately. A block&apos;s height represents its feature-map width, while the drawn block width represents its number of channels.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">Amber marks feature maps arriving through an encoder skip connection. Indigo marks the decoder features with which they are combined. {skip ? "The upper dashed route brings the full-resolution encoder maps across to the decoder." : "With skips removed, the decoder has only the representation passed through the network's reduced middle."}</p>
+</>
     </div>
   );
 }

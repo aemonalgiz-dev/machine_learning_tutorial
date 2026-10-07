@@ -11,7 +11,7 @@
 import { useState } from "react";
 import { AMBER, HIDDEN_NAMES, INDIGO, show, useWorkedStep, workedRequest } from "./backpropFixtures";
 
-const STAGES = ["through the bend", "one weight", "all three weights", "the bias"];
+const STAGES = ["through the activation function", "one weight", "all three weights", "the bias"];
 
 export function OutputNeuronBackward() {
   const { step, message } = useWorkedStep(workedRequest());
@@ -37,9 +37,10 @@ export function OutputNeuronBackward() {
         {stage === 0 && (
           <>
             <p>arriving slope, ∂L/∂a = {show(output.arriving[0])}</p>
-            <p>the output bend is the identity, so g′(z) = g′({show(output.scores[0])}) = {show(output.slopes[0])}</p>
+            <p className="font-sans">The output activation is identity, whose derivative is one.</p>
+            <p>g′({show(output.scores[0])}) = {show(output.slopes[0])}</p>
             <p className="mt-1 font-semibold" style={{ color: AMBER }}>δ = ∂L/∂a × g′(z) = {show(output.arriving[0])} × {show(output.slopes[0])} = {show(delta)}</p>
-            <p className="mt-2 font-sans text-xs text-slate-500 dark:text-slate-400">The delta is the arriving slope after it has passed through the activation. Here the bend did nothing, so the number is unchanged, and that is the point of starting with this neuron.</p>
+            <p className="mt-2 font-sans text-xs text-slate-500 dark:text-slate-400">The delta is the arriving slope after it has passed through the activation. Here the activation function did nothing, so the number is unchanged, and that is the point of starting with this neuron.</p>
           </>
         )}
         {stage === 1 && (
@@ -53,7 +54,8 @@ export function OutputNeuronBackward() {
               </span>
             </div>
             <p>z = w₁h₁ + w₂h₂ + w₃h₃ + b</p>
-            <p>∂z/∂w{which + 1} = {HIDDEN_NAMES[which]} = {show(output.inputs[which])}, because that is what w{which + 1} multiplied</p>
+            <p className="font-sans">The score derivative is the input multiplied by this weight.</p>
+            <p>∂z/∂w{which + 1} = {HIDDEN_NAMES[which]} = {show(output.inputs[which])}</p>
             <p className="mt-1 font-semibold" style={{ color: AMBER }}>∂L/∂w{which + 1} = δ × {HIDDEN_NAMES[which]} = {show(delta)} × {show(output.inputs[which])} = {show(output.weight_gradient[0][which])}</p>
           </>
         )}

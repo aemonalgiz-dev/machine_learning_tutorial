@@ -244,7 +244,7 @@ export function DeadUnitCensus() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Each person filled in proportion to the bend&rsquo;s slope at their
+        Each person filled in proportion to the activation function&rsquo;s slope at their
         score, amber for a child and indigo for an adult, with the dead drawn
         as a dotted ring. The dashed line is where the score is zero, and
         scaling does not move it.

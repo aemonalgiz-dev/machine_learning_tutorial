@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { WordPiecePlayground } from "@/components/widgets/WordPiecePlayground";
 export const metadata: Metadata = {
   title: "WordPiece · oop_ml",
   description:
-    "The same merging, scored differently. A pair is judged by how much more often it occurs than its two halves would predict.",
+    "Compare a pair's frequency with the frequencies of its parts, then encode using longest matching pieces.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -29,8 +32,12 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function WordPiecePage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["wordpiece"]}
+      technicalStart="Part 2. The Score That Replaces the Count"
+      openingTitle="A Common Pair May Only Have Common Halves"
+      playgroundIntro="Compare candidate pairs under raw counts and the relative-frequency score. Then inspect how continuation markers affect the longest-match encoding."
       title="WordPiece"
-      tagline="The same merging, scored differently. A pair is judged by how much more often it occurs than its two halves would predict, which prefers a pair of rare symbols over a pair of common ones and changes the vocabulary from the very first merge."
+      tagline="Compare a pair's frequency with the frequencies of its parts, then encode using longest matching pieces."
       prerequisites={
         <>
           You need the merging loop from the previous page, which is the whole
@@ -44,57 +51,14 @@ export default function WordPiecePage() {
           happening independently.
         </>
       }
-      history={
-        <>
-          <p>
-            Mike Schuster and Kaisuke Nakajima, working on voice search at
-            Google, published &ldquo;Japanese and Korean Voice Search&rdquo; at
-            the 2012 signal processing conference, and the problem they had was
-            not the problem the merging idea was invented for. Japanese is
-            written without spaces, so a speech recogniser for it has no word
-            boundaries to start from, and the segmenters available then were
-            hand-built, language-specific and slow to run inside a recogniser.
-            Korean has spaces but glues so many suffixes onto a stem that a word
-            list of any size still misses most of what people say. They wanted
-            one inventory of pieces, learned from data, that would serve both
-            languages and leave nothing unreadable, and they called the pieces
-            wordpieces.
-          </p>
-          <p>
-            The rule they described for choosing a piece is the thing this page
-            is about. Rather than take the commonest pair, they asked which
-            single new piece would most raise the likelihood of the training
-            data under a model that treats the pieces as independent draws, and
-            added that one. Their reported result was that the wordpiece system
-            beat the word system on both languages while keeping the inventory
-            small, and that nothing had to be known about either language for it
-            to work. Four years later Yonghui Wu and colleagues at the same lab
-            used a wordpiece vocabulary for their translation system and made
-            the method visible outside speech, and in 2018 Jacob Devlin, Ming
-            Wei Chang, Kenton Lee and Kristina Toutanova used one for the
-            language model they called BERT, which is where most readers meet
-            it, and which is where the convention of writing two hashes in front
-            of a piece that continues a word comes from.
-          </p>
-          <p>
-            This page asks five questions in order. Why does taking the
-            commonest pair choose badly, and what exactly is wrong with a count?
-            What figure replaces it, and what does that figure measure? Which
-            pairs does it prefer, and which does it now refuse to buy? What does
-            marking a piece that continues a word do to the vocabulary and to
-            the cut? And what does the whole change cost, in the only currency
-            anything downstream cares about, which is how many pieces a sentence
-            becomes?
-          </p>
-        </>
-      }
+
       playground={<WordPiecePlayground />}
       sections={[
         {
           title: "Part 1. What a Pair Count Cannot Tell You",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Where this starts, and the one thing that changes">
                 <p>
                   We start where the previous page ended. A corpus is cut into
@@ -105,18 +69,19 @@ export default function WordPiecePage() {
                   round again. Each turn adds one row to the vocabulary, so the
                   loop stops when the vocabulary is the size that was asked for.
                 </p>
-                <p>
-                  WordPiece is that loop with one word changed. Where the
-                  earlier method reads &ldquo;take the pair that occurs most
-                  often&rdquo;, this one reads &ldquo;take the pair that occurs
-                  most often <em>relative to how often its two halves occur on
-                  their own</em>&rdquo;. Everything else on this page follows
-                  from that, including a second change to how words are spelled
-                  which is not a matter of taste but a consequence of the first.
-                  We carry the same sentence every page in this section carries,
-                  and the same eighteen short sentences of ordinary English to
-                  learn from, none of which is the sentence.
-                </p>
+                <>
+                  <p>
+                    The teaching implementation keeps the same merge loop but changes
+                    the score used to select its next pair. It rewards pairs whose parts
+                    occur together more strongly relative to their individual counts.
+                  </p>
+                  <p>
+                    We use the same held-out sentence and eighteen-sentence training
+                    corpus as the earlier examples. Later we compare a second,
+                    independent choice: longest-match encoding instead of replaying
+                    merges.
+                  </p>
+                </>
                 <Equation>{SENTENCE}</Equation>
                 <KeepInMind>
                   Nothing about the loop changes. The same corpus, the same
@@ -128,17 +93,14 @@ export default function WordPiecePage() {
               </SubSection>
 
               <SubSection title="2. The commonest pair is common because its halves are">
-                <p>
-                  Take the eighteen sentences and count every adjacent pair
-                  once, before any merging. There are 87 pairs that occur at
-                  least twice, and the commonest of them is h followed by e, at
-                  32 occurrences, which comes almost entirely from the word the.
-                  That looks like a discovery until you look at the two halves
-                  on their own. The letter h occurs 36 times in the corpus and
-                  the letter e occurs 98 times, so nearly every h in the corpus
-                  is followed by an e, and the pair is frequent chiefly because
-                  e is everywhere.
+                <>
+<p>
+                  Take the eighteen sentences and count every adjacent pair once, before any merging. There are 87 pairs that occur at least twice, and the commonest of them is h followed by e, at 32 occurrences, which comes almost entirely from the word the. That looks like a discovery until you look at the two halves on their own.
                 </p>
+                <p>
+                  The letter h occurs 36 times in the corpus and the letter e occurs 98 times, so nearly every h in the corpus is followed by an e, and the pair is frequent chiefly because e is everywhere.
+                </p>
+</>
                 <p>
                   Put every candidate on a chart, with how often it occurs
                   across the bottom and, up the side, how often it occurs
@@ -148,14 +110,15 @@ export default function WordPiecePage() {
                 </p>
                 <PairScoreScatter />
                 <p>
-                  They do not. The commonest pair sits low, and the pair highest
+                  They do not. The commonest pair sits low, only the 32nd best
+                  of the 87 candidates by the other figure. The pair highest
                   up the chart is o followed by f, which occurs three times and
                   is the whole of the word of. Every o that starts a word in
                   this corpus is one of six, every f that sits inside a word is
                   one of three, and half of those o&rsquo;s and all of those
                   f&rsquo;s are in the same three places. Counted on its own it
-                  is the 32nd best of the 87 candidates by the other figure,
-                  which is roughly the middle.
+                  has 45 of the 87 candidates ahead of it, which puts it in the
+                  lower half.
                 </p>
                 <KeepInMind>
                   A large count answers the question &ldquo;how often do these
@@ -192,7 +155,7 @@ export default function WordPiecePage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Score That Replaces the Count",
@@ -262,18 +225,18 @@ export default function WordPiecePage() {
                 </p>
                 <PairScoreBoard />
                 <WorkedExample title="Two pairs, worked">
-                  <p>
-                    The pair e followed by s occurs nine times, once inside
-                    newest and once inside widest, weighted by six and three.
-                    Across the whole corpus e occurs 17 times and s occurs nine,
-                    so the score is 9 divided by 17 times 9, which is one
-                    seventeenth, or 0.0588. The pair i followed by d occurs three
-                    times, all of them inside widest. Across the whole corpus i
-                    occurs three times and d occurs three times, so the score is
-                    3 divided by 3 times 3, which is one third, or 0.3333. The
-                    second pair is seen a third as often as the first and scores
-                    nearly six times as well.
-                  </p>
+                  <>
+                    <p>
+                      The pair e followed by s occurs nine times. Its two parts occur
+                      seventeen and nine times. The pair i followed by d occurs three
+                      times, and each part occurs three times.
+                    </p>
+                    <Equation>{"score(e, s) = 9 / (17 × 9) = 1/17 ≈ 0.0588\nscore(i, d) = 3 / (3 × 3) = 1/3 ≈ 0.3333"}</Equation>
+                    <p>
+                      The second pair occurs less often but receives the larger ratio
+                      score because its parts always occur together in this corpus.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   Ordered by the count, e followed by s is at the top and i
@@ -299,17 +262,14 @@ export default function WordPiecePage() {
                   it.
                 </p>
                 <MergeOrderColumns />
-                <p>
-                  On the four words the two part at the very first merge,
-                  counting taking e followed by s and the score taking i followed
-                  by d. On the eighteen sentences they part at the first merge
-                  too, counting taking h followed by e at 32 occurrences and the
-                  score taking o followed by f at three. There is no corpus on
-                  this page where the two agree for even one turn, which is worth
-                  saying because a change of one word in the rule sounds like a
-                  refinement and here it produces a different vocabulary from the
-                  first row onwards.
+                <>
+<p>
+                  On the four words the two part at the very first merge, counting taking e followed by s and the score taking i followed by d. On the eighteen sentences they part at the first merge too, counting taking h followed by e at 32 occurrences and the score taking o followed by f at three.
                 </p>
+                <p>
+                  There is no corpus on this page where the two agree for even one turn, which is worth saying because a change of one word in the rule sounds like a refinement and here it produces a different vocabulary from the first row onwards.
+                </p>
+</>
                 <InAModel>
                   At the scale a real vocabulary is built at, thirty thousand
                   rows over billions of words, the divergence is the same but the
@@ -338,17 +298,14 @@ export default function WordPiecePage() {
                   which occur seventeen and nine times and are adjacent nine of
                   those times.
                 </p>
-                <p>
-                  What it will not buy is the row that a count-driven run buys
-                  first, which is the frequent pairing of two frequent symbols.
-                  On the eighteen sentences the count rule spends its first six
-                  turns assembling he, the, st, re, ed and The, every one of them
-                  a very common fragment of a very common word. The score rule
-                  spends its first six turns on of, ex, exp, ly, Dr and Dr., of
-                  which of and Dr. are whole words of the corpus and ex and exp
-                  are the front of expect and expected. Those are recognisably
-                  different kinds of thing.
+                <>
+<p>
+                  What it will not buy is the row that a count-driven run buys first, which is the frequent pairing of two frequent symbols. On the eighteen sentences the count rule spends its first six turns assembling he, the, st, re, ed and The, every one of them a very common fragment of a very common word.
                 </p>
+                <p>
+                  The score rule spends its first six turns on of, ex, exp, ly, Dr and Dr., of which of and Dr. are whole words of the corpus and ex and exp are the front of expect and expected. Those are recognisably different kinds of thing.
+                </p>
+</>
                 <KeepInMind>
                   Preferring rare-but-bound pairs is the intended behaviour and
                   also the cost, since a row spent on a rare pair shortens the
@@ -358,6 +315,60 @@ export default function WordPiecePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "The commonest adjacent pair in the eighteen sentences is h followed by e, at 32 occurrences. Why is that not a discovery?",
+              [
+                "h occurs 36 times and e occurs 98, so nearly every h is followed by an e and the pair is frequent chiefly because e is everywhere",
+                "32 occurrences is too few to rely on",
+                "The pair spans the gap between two words",
+                "A pair of single letters cannot be a vocabulary row",
+              ],
+              0,
+              "Two very common symbols will turn up next to each other often whether or not they have anything to do with one another. What a vocabulary row is worth is whether its halves belong together, which is a comparison against chance rather than a count.",
+            ),
+            choice(
+              "What does the score divide the pair count by?",
+              [
+                "The product of how often each half occurs anywhere in the corpus",
+                "The number of distinct words the pair occurs in",
+                "The total number of symbols in the corpus",
+                "The count of the commoner of the two halves",
+              ],
+              0,
+              "The denominator is the whole of the idea. Two halves that are each common make it large, so a pair of common symbols has to be extraordinarily frequent together to score well, and a pair whose halves never appear apart from each other scores highest of all.",
+            ),
+            trueFalse(
+              "Dropping the corpus total from the likelihood gain per occurrence leaves exactly the division the rule uses, because the total appears in every candidate alike.",
+              true,
+              "Merging a pair turns two draws into one at every occurrence, and the corpus gains the log of the pair’s share less the logs of the two halves’ shares. Turning shares back into counts puts the corpus total into every candidate, where it cannot change which is largest, so the figure is not an invention with a likelihood story attached afterwards. What it ranks is the gain one occurrence makes, which Part 6 shows is not the gain all of them make together.",
+            ),
+            choice(
+              "On the four words, e followed by s occurs nine times with halves occurring seventeen and nine times, and i followed by d occurs three times with each half occurring three times. Which does the score take?",
+              [
+                "i followed by d",
+                "e followed by s",
+                "Whichever occurs in more distinct words",
+                "Neither, because both halves are too common",
+              ],
+              0,
+              "One third against one seventeenth, because i and d are only ever seen beside each other inside widest. Ordered by the count the two swap ends, which is a different question producing a different answer on the same eleven rows.",
+            ),
+            several(
+              "Which of these describe the first six turns on the eighteen sentences?",
+              [
+                "Counting assembles he, the, st, re, ed and The",
+                "The score assembles of, ex, exp, ly, Dr and Dr.",
+                "Of the score’s six, of and Dr. are whole words of the corpus",
+                "The two rules part at the very first turn, counting taking h followed by e at 32 occurrences and the score taking o followed by f at three",
+              ],
+              [0, 1, 2, 3],
+              "There is no corpus on this page where the two agree for even one turn, and on both of them they part at the very first merge. The count rule buys the frequent pairing of frequent symbols, every one of its six a fragment of a very common word, where the score buys of whole and the front of expect and expected. A change of one word in the rule sounds like a refinement and produces a different vocabulary from the first row onwards.",
+            ),
+        ],
         },
         {
           title: "Part 3. Marking the Piece That Continues a Word",
@@ -423,17 +434,15 @@ export default function WordPiecePage() {
               </SubSection>
 
               <SubSection title="10. Cutting a word by longest match, with the merges forgotten">
-                <p>
-                  Here is the second real difference, and it is a consequence of
-                  the first rather than a separate idea. A count-driven scheme
-                  encodes a new word by replaying its merges in the order they
-                  were learned, so the order is part of the model. WordPiece
-                  throws the order away and keeps only the finished vocabulary.
-                  To cut a word, start at its first character, take the longest
-                  vocabulary piece that spells a prefix of what is left, advance
-                  past it, and repeat, looking up every piece after the first in
-                  its continuation form.
-                </p>
+                <>
+                  <p>
+                    WordPiece also uses a different encoding rule: it searches the final
+                    vocabulary for the longest matching piece at the current position.
+                    BPE replays learned merges in order. This is a separate design
+                    choice from the score used to select pieces during training. A
+                    vocabulary alone does not specify how an input should be segmented.
+                  </p>
+                </>
                 <DerivationTable
                   expressionHeading="the step"
                   reasonHeading="what it does"
@@ -695,6 +704,54 @@ export default function WordPiecePage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Why mark the piece that continues a word rather than give the space a symbol of its own?",
+              [
+                "A space symbol would merge with whatever sits beside it, so a piece could span the gap between two words",
+                "The score cannot be computed for a symbol that sits between two words",
+                "Marking continuations means nothing has to be stripped at a join",
+                "A space cannot be written with two leading hashes",
+              ],
+              0,
+              "Marking a symbol keeps every merge inside one word by construction, since the words are counted separately and no pair ever spans two of them. Marking continuations does cost something at each join, because the mark has to be stripped from the right half or two hashes end up in the middle of a piece.",
+            ),
+            trueFalse(
+              "The two markings are the same fact written on different pieces, so the two vocabularies can spell the same words.",
+              false,
+              "A vocabulary in one form can be rewritten into the other symbol by symbol, and what cannot be rewritten is which words it can spell. Of the 35 characters these sentences use, thirteen never open a word and eighteen never end one, so Alvarez defeats the end-marked spelling, zebra defeats the continuation-marked one, and you defeats both.",
+            ),
+            trueFalse(
+              "Under longest match the vocabulary is the model, and the order the rows were learned in is only the history of how it was built.",
+              true,
+              "The cut takes the longest opening piece that fits and then the longest continuation that fits the rest, and never consults the merges, so lowest becomes low and ##est and widest becomes wid and ##est. The count-scored scheme replays its merges instead and arrives at lo, w and est with its marker for the same word. One consequence is that exactly one piece per word carries no mark, so the count of unmarked pieces in any cut is the number of words.",
+            ),
+            several(
+              "Which of these were measured when the two complete schemes were fitted at a vocabulary of 130?",
+              [
+                "The count-scored scheme reads the corpus in 277 pieces where this one needs 343",
+                "The sentence costs 31 pieces under this scheme against 25",
+                "The score-driven scheme reads the corpus in fewer pieces at every size",
+                "The end-marked fit gives the sentence back exactly and this one does not",
+              ],
+              [0, 1],
+              "The older scheme gives shorter text at every size a reader would actually choose, 24 per cent more on the corpus here, and the two columns cross only at the very end, where the count-scored fit has run out of pairs at 137 rows and this one keeps merging to 157. Coverage runs the other way, since at every size the continuation-marked fit gives the sentence back exactly and the end-marked one leaves one piece unspellable because of the z at the end of Alvarez. A shorter reading that has lost a character is not obviously the better reading, which is why length and coverage are reported together.",
+            ),
+            choice(
+              "Both schemes are asked to read lox, whose x the corpus never contained. What is the difference?",
+              [
+                "The count-scored one answers lo and then a stand-in, where this one answers a single stand-in for the whole word",
+                "The count-scored one refuses to answer and this one does not",
+                "This one answers lo and then a stand-in, where the count-scored one answers a single stand-in",
+                "Both answer a single stand-in, and only the reported length differs",
+              ],
+              0,
+              "When a longest-match cut fails partway through a word there is no sensible way to continue, because the pieces already chosen were chosen on the assumption that the rest would work out. Handing on lo tells a model something and also something false, and handing on one stand-in is less information and no misinformation.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. Two Decisions the Score Does Not Make",
           content: (
             <>
@@ -716,18 +773,14 @@ export default function WordPiecePage() {
                   ]}
                   caption="The two candidates at the top of the first turn on the four words, and the figures that fail to separate them."
                 />
-                <p>
-                  Any tie-break at all is added from outside. The choice made
-                  here is to compare the two candidates as text and take the
-                  smaller, which at least makes the answer independent of the
-                  order the corpus&rsquo;s texts arrived in. Because the
-                  comparison happens in the spelling the merges are learned in,
-                  where a word&rsquo;s first symbol carries a mark of its own,
-                  what actually decides is the position of that mark in the
-                  character table against the position of the letter i. The mark
-                  is at 9601 and i is at 105, so i comes first, and the
-                  vocabulary contains ##id and does not contain wi.
+                <>
+<p>
+                  Any tie-break at all is added from outside. The choice made here is to compare the two candidates as text and take the smaller, which at least makes the answer independent of the order the corpus&rsquo;s texts arrived in. Because the comparison happens in the spelling the merges are learned in, where a word&rsquo;s first symbol carries a mark of its own, what actually decides is the position of that mark in the character table against the position of the letter i.
                 </p>
+                <p>
+                  The mark is at 9601 and i is at 105, so i comes first, and the vocabulary contains ##id and does not contain wi.
+                </p>
+</>
                 <KeepInMind>
                   A codepoint is deciding which of two equally good rows the
                   vocabulary gets, and every later turn is downstream of that.
@@ -1047,6 +1100,323 @@ export default function WordPiecePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "At the first merge on the four words, i followed by d and w followed by i both score one third. How is the tie settled?",
+              [
+                "The two candidates are compared as text and the smaller is taken",
+                "The pair occurring in more words is taken",
+                "The pair whose halves are rarer is taken",
+                "Both are merged and the loop moves on",
+              ],
+              0,
+              "Any tie-break at all is added from outside, and this one at least makes the answer independent of the order the texts arrived in. The comparison happens in the spelling the merges are learned in, where the word-initial mark sits at 9601 and i at 105, so the vocabulary gets ##id and not wi.",
+            ),
+            trueFalse(
+              "Applying the minimum count to the winning pair rather than to the candidates behaves the same way under either scoring rule.",
+              false,
+              "Under counting the two readings coincide, since the winner always has the largest count and a failing winner means every candidate fails. Under this score the winner can be rare while common pairs are still unmerged, so at a minimum of three on the four words the winner test stops after five merges and leaves ##est, ##ew, new, newest and widest unlearned while reporting itself finished.",
+            ),
+            choice(
+              "Two symbols occur only ever beside each other, c times each. What does the rule score that pair?",
+              [
+                "One over c, so the score falls as the pair gets commoner",
+                "c, so the score rises as the pair gets commoner",
+                "One, whatever c is",
+                "Nothing, since the division is undefined when the halves never occur apart",
+              ],
+              0,
+              "The numerator and both parts of the denominator are counting the same occurrences, so the score is c divided by its own square. Among perfectly bound pairs the rule therefore prefers the rarest, and the division is where that comes from rather than any choice an implementation made.",
+            ),
+            several(
+              "Which of these hold for the pair that most raises the corpus likelihood on the four words?",
+              [
+                "It is s followed by t, gaining 19.55",
+                "It is ranked fourth by the score",
+                "It is joint first by the count, and loses that tie on alphabetical order",
+                "It is the pair the score takes at the first turn",
+              ],
+              [0, 1, 2],
+              "The total gain is the per-occurrence figure multiplied by how many occurrences there are, and the rule does not do the multiplication, so neither rule takes it. The score takes i followed by d, gaining 9.81, which is a deliberate lean away from frequency and towards association rather than an approximation somebody failed to finish.",
+            ),
+            trueFalse(
+              "With every symbol of the corpus in the vocabulary in both forms, the greedy left-to-right cut succeeds exactly when some division of the word into vocabulary pieces exists.",
+              true,
+              "Every merged continuation piece is built out of continuation symbols that are themselves in the vocabulary, so after the first character there is always a single-character fallback, and the cut can only fail where a character has no continuation form at all, in which case no division succeeds either. All 1,578 of the later refusals on the four words contain an l or an n after the first character, two letters that open words there without ever appearing inside one. Where a real vocabulary caps its alphabet and drops rare single characters that guarantee is gone, which is an argument for keeping the alphabet complete rather than for searching over divisions.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Scoring, Marking and Cutting With the Library",
+          practice: [
+            exercise(
+              "Cut lowest by longest match on the four words",
+              ["Part 3 fitted the four words to ten merges and cut lowest, which the corpus never contained, as low and ##est. Fit the same corpus with the library, asking for 22 rows, print the rows the fit holds, and encode lowest, widest and lox. Fit the count-scored scheme of the previous lesson at the same size, with its byte rows switched off, and read the same three words with it.", "Part 5 settled the first tie in favour of ##id over wi, and Part 4 said a word that cannot be cut becomes one stand-in whole where the count-scored cut keeps lo. Both should show in what is printed."],
+              `from oop_ml import BytePairEncoding, WordPiece
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+
+marked = WordPiece(vocabulary_size=22).fit(corpus)
+ended = BytePairEncoding(vocabulary_size=22, byte_fallback=False).fit(corpus)
+# Print how many rows and merges the marked fit holds and its rows in order.
+# Then for lowest, widest and lox print the pieces under each fit and how
+# many there are.`,
+              `from oop_ml import BytePairEncoding, WordPiece
+
+corpus = [
+    "low low low low low",
+    "lower lower",
+    "newest newest newest newest newest newest",
+    "widest widest widest",
+]
+
+marked = WordPiece(vocabulary_size=22).fit(corpus)
+ended = BytePairEncoding(vocabulary_size=22, byte_fallback=False).fit(corpus)
+print(f"{marked.vocabulary.n_tokens} rows after {marked.n_merges} merges")
+print(" ".join(marked.vocabulary))
+for word in ["lowest", "widest", "lox"]:
+    first = marked.encode(word).texts
+    second = ended.encode(word).texts
+    print(f"{word}: {' '.join(first)} ({len(first)}) | count-scored: {' '.join(second)} ({len(second)})")`,
+              `22 rows after 10 merges
+[UNK] l n w ##d ##e ##i ##o ##r ##s ##t ##w ##id wid lo ##st low ##er lower ##est ##ew new
+lowest: low ##est (2) | count-scored: lo w est</w> (3)
+widest: wid ##est (2) | count-scored: widest</w> (1)
+lox: [UNK] (1) | count-scored: lo [UNK] (2)`,
+              { hints: ["Both fits take the size at construction and the corpus in fit. The vocabulary is iterable in the order its rows were added, the stand-in first, then the alphabet, then the merges.", "The marked fit exposes n_merges and not the merges themselves, because under longest match the merges are how the vocabulary was learned and not what it is.", "encode answers an object whose texts are the pieces as a reader sees them, with the two hashes on every continuation."], check: numberCheck("How many pieces does lowest come to under the continuation-marked fit?", 2, 0, "Longest match takes the longest opening piece that fits, which is low rather than l or lo, and then the longest continuation that fits the rest, which is ##est, and nothing about the order the rows were learned in is consulted. The count-scored scheme replays its merges instead and arrives at three pieces, lo, w and est with its marker, from the same corpus at the same size.") },
+            ),
+            exercise(
+              "Fit both schemes at one size and compare",
+              ["Part 4 fitted both schemes at the same requested sizes and read the eighteen sentences and the held-out sentence with each. Fit at 100 and at 130, and at each size print, for each scheme, the rows learned, the pieces the corpus costs, the pieces the sentence costs, how many of those are the stand-in, and whether the sentence comes back exactly.", "At 130 the table in Part 4 has the corpus at 343 against 277 and the sentence at 31 against 25, with the continuation-marked fit giving the sentence back exactly and the end-marked one never doing so. The row at 100 is one the lesson does not print."],
+              `from oop_ml import BytePairEncoding, WordPiece
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for size in [100, 130]:
+    fits = [
+        ("marked", WordPiece(vocabulary_size=size).fit(sentences)),
+        ("end-marked", BytePairEncoding(vocabulary_size=size, byte_fallback=False).fit(sentences)),
+    ]
+    # For each fit print the size, its label, the rows in its vocabulary, the
+    # pieces the eighteen sentences cost, the pieces the sentence costs, how
+    # many of those are the stand-in [UNK], and whether decoding gives the
+    # sentence back exactly.`,
+              `from oop_ml import BytePairEncoding, WordPiece
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+for size in [100, 130]:
+    fits = [
+        ("marked", WordPiece(vocabulary_size=size).fit(sentences)),
+        ("end-marked", BytePairEncoding(vocabulary_size=size, byte_fallback=False).fit(sentences)),
+    ]
+    for label, model in fits:
+        encoding = model.encode(sentence)
+        corpus_pieces = sum(model.encode(text).n_tokens for text in sentences)
+        stand_ins = sum(1 for piece in encoding.texts if piece == "[UNK]")
+        exact = model.decode(encoding.ids) == sentence
+        print(f"{size} {label}: {model.vocabulary.n_tokens} rows, corpus {corpus_pieces}, "
+              f"sentence {encoding.n_tokens}, stand-ins {stand_ins}, exact {exact}")`,
+              `100 marked: 100 rows, corpus 446, sentence 34, stand-ins 0, exact True
+100 end-marked: 100 rows, corpus 344, sentence 27, stand-ins 1, exact False
+130 marked: 130 rows, corpus 343, sentence 31, stand-ins 0, exact True
+130 end-marked: 130 rows, corpus 277, sentence 25, stand-ins 1, exact False`,
+              { hints: ["The end-marked scheme is the previous lesson’s class with its byte rows switched off, which is what makes its table comparable row for row and is also why it can leave a piece unspellable.", "A corpus costs the sum of what each of its texts encodes to. The stand-in is spelled [UNK] under both schemes, so counting pieces equal to it counts what could not be spelled.", "Whether the sentence came back is decode compared with the text that went in. The end-marked fit puts its stand-in where the z and its end-of-word mark belong, so the z and the space after Alvarez are both missing from what comes back."], check: numberCheck("How many pieces does the corpus cost under the continuation-marked fit at 100 rows?", 446, 0, "At 100 rows the score-driven fit has spent fifty merges on pairs chosen for association rather than frequency, so the corpus is still 446 pieces where the count-scored fit of the same size reads it in 344. That is the price Part 4 measures, since a row spent on a rare pair shortens the corpus less than a row spent on a common one, and the gap closes only at exhaustion, 254 against 263.") },
+            ),
+            exercise(
+              "Fit to exhaustion and price three texts per word",
+              ["Part 6 fitted the eighteen sentences until nothing was left to merge and priced three texts in pieces per word. Fit with a size the corpus cannot reach, print the rows learned, and for the corpus, the sentence about the dial and the diode, and the running sentence print the pieces, the words and the pieces per word to two places.", "The lesson arrives at 1.91, 2.38 and 4.14. Then count how many of the corpus’s 72 distinct words are single rows of the vocabulary, which the lesson does not say."],
+              `from oop_ml import WordPiece
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+neighbour = "The dial was set and the diode tested."
+
+model = WordPiece(vocabulary_size=600).fit(sentences)
+# Print the rows and merges learned. Then for the corpus joined into one
+# text, the neighbour sentence and the running sentence, print the pieces,
+# the words and the pieces per word to two places. Finally count the
+# distinct words of the corpus that are rows of the vocabulary.`,
+              `from oop_ml import WordPiece
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+neighbour = "The dial was set and the diode tested."
+
+model = WordPiece(vocabulary_size=600).fit(sentences)
+print(f"{model.vocabulary.n_tokens} rows after {model.n_merges} merges")
+
+texts = {"corpus": " ".join(sentences), "neighbour": neighbour, "running": sentence}
+for label, text in texts.items():
+    pieces = model.encode(text).n_tokens
+    words = len(text.split())
+    print(f"{label}: {pieces} pieces over {words} words, {pieces / words:.2f} per word")
+
+distinct = sorted({word for text in sentences for word in text.split()})
+whole = [word for word in distinct if word in model.vocabulary]
+print(f"{len(whole)} of {len(distinct)} distinct words are single rows")`,
+              `157 rows after 107 merges
+corpus: 254 pieces over 133 words, 1.91 per word
+neighbour: 19 pieces over 8 words, 2.38 per word
+running: 29 pieces over 7 words, 4.14 per word
+24 of 72 distinct words are single rows`,
+              { hints: ["Asking for 600 is not refused. The fit stops when no pair is left that occurs twice and vocabulary.n_tokens says what it reached, which Part 4 put at 157.", "Words are found on spaces by the default rule, so joining the sentences with spaces and encoding once costs the same as encoding them one at a time.", "The vocabulary answers the in operator, so a word is a single row exactly when the word itself is in it. A word-initial piece carries no mark, which is what makes that test work."], check: numberCheck("How many of the 72 distinct words of the corpus are single rows of the vocabulary?", 24, 0, "Among them are analysis, expected and costing, and estimate with its full stop attached, which is why the corpus reads at under two pieces per word. The running sentence shares only two of its seven words with that list, Dr. and the, and costs 4.14 per word, which is what carrying one corpus looks like on text the corpus did not contain.") },
+            ),
+            exercise(
+              "Spell the words each marking cannot",
+              ["Part 3 says the two markings fail on different words. Fit the eighteen sentences to exhaustion under both schemes, the end-marked one with its byte rows switched off so that it is the method of the previous lesson exactly, and read Alvarez, zebra, you, old and hour with each.", "Alvarez should defeat the end-marked spelling and not this one, zebra the other way round, and you both. The two words the lesson’s prose never reads, old and hour, say something about which letters the corpus used in both positions."],
+              `from oop_ml import BytePairEncoding, WordPiece
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+marked = WordPiece(vocabulary_size=600).fit(sentences)
+ended = BytePairEncoding(vocabulary_size=600, byte_fallback=False).fit(sentences)
+# For Alvarez, zebra, you, old and hour print the pieces under each fit and
+# how many there are.`,
+              `from oop_ml import BytePairEncoding, WordPiece
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+marked = WordPiece(vocabulary_size=600).fit(sentences)
+ended = BytePairEncoding(vocabulary_size=600, byte_fallback=False).fit(sentences)
+for word in ["Alvarez", "zebra", "you", "old", "hour"]:
+    first = marked.encode(word).texts
+    second = ended.encode(word).texts
+    print(f"{word}: {' '.join(first)} ({len(first)}) | end-marked: {' '.join(second)} ({len(second)})")`,
+              `Alvarez: A ##l ##v ##ar ##e ##z (6) | end-marked: A l v a re [UNK] (6)
+zebra: [UNK] (1) | end-marked: z e b r a</w> (5)
+you: [UNK] (1) | end-marked: y o [UNK] (3)
+old: o ##l ##d (3) | end-marked: o l d</w> (3)
+hour: h ##o ##u ##r (4) | end-marked: h o u r</w> (4)`,
+              { hints: ["A text of one word encodes to that word’s pieces, so no pre-tokenizer has to be called by hand.", "The continuation-marked fit answers one stand-in for a whole word it cannot cut, where the end-marked fit keeps the letters it could spell and puts the stand-in where it failed, so the two refusals do not look alike."], check: numberCheck("How many pieces does Alvarez cost under the continuation-marked vocabulary?", 6, 0, "Every letter of Alvarez has been seen in the position it sits in, A opening a word and the rest inside one, so the word is spelled, at six pieces, which is the honest price of a word the corpus never held. The end-marked vocabulary also answers six pieces and the last of them is a stand-in, because no word of the corpus ends in z. A count of pieces alone cannot tell those two readings apart, which is why length and coverage are read together.") },
+            ),
+          ],
         },
       ]}
     />

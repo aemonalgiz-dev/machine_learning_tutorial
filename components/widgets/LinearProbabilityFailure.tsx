@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // A straight line fitted to zeros and ones, and where it stops being a probability.
 //
@@ -111,11 +113,9 @@ export function LinearProbabilityFailure() {
         ))}
         <text x={PAD.left + PLOT.width / 2} y={VIEW.height - 6} textAnchor="middle" className="fill-slate-500 text-xs font-medium dark:fill-slate-400">hours studied</text>
       </svg>
-      <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-        {line && !showCurve
-          ? `The line is below zero for anyone who studied less than ${belowZeroUntil!.toFixed(1)} hours and above one past ${aboveOneFrom!.toFixed(1)} hours, the red stretches. At one hour it predicts ${lineAt(1).toFixed(2)} and at eight hours ${lineAt(8).toFixed(2)}.`
-          : "The curve stays inside the shaded band at every number of hours, so every value on it can be read as a chance."}
-      </p>
+      <>
+<p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{line && !showCurve ? "A straight-line prediction is unrestricted. The red regions show where its outputs fall outside the interval required for probabilities." : "Sigmoid maps the score into the probability interval. That makes the output eligible for a probability interpretation, but does not by itself establish good calibration."}</p>{line && !showCurve && <Equation>{"Below zero before: " + belowZeroUntil!.toFixed(1) + " hours\nAbove one after: " + aboveOneFrom!.toFixed(1) + " hours\nPrediction at one hour: " + lineAt(1).toFixed(2) + "\nPrediction at eight hours: " + lineAt(8).toFixed(2)}</Equation>}
+</>
       {message && (
         <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">{message}</p>
       )}

@@ -9,6 +9,7 @@
 // visible. Every number is the API's.
 
 import { AMBER, HIDDEN_NAMES, INPUT_NAMES, show, useWorkedStep, workedRequest } from "./backpropFixtures";
+import { Equation } from "@/components/concept/Equation";
 
 export function HiddenGradients() {
   const { step, message } = useWorkedStep(workedRequest());
@@ -37,9 +38,17 @@ export function HiddenGradients() {
           );
         })}
       </div>
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        The largest slope in the network is {show(step.largest_movement)}, on h₃&rsquo;s weight from x₂, a delta of 8 times an input of 2. The output layer&rsquo;s largest was 12. No new rule was needed to find any of them.
-      </p>
+      <>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          The largest weight gradient belongs to h₃’s connection from x₂. Multiply that
+          neuron’s delta by its second input.
+        </p>
+        <Equation>{"weight gradient = 8 × 2 = 16"}</Equation>
+        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+          The output layer’s largest weight gradient was twelve. Both layers use the
+          same calculation.
+        </p>
+      </>
     </div>
   );
 }

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -23,7 +26,7 @@ import { ThresholdSweep } from "@/components/widgets/ThresholdSweep";
 export const metadata: Metadata = {
   title: "Filters and Edges · oop_ml",
   description:
-    "Sweep a small grid of weights across a picture and read where the brightness changes rather than what it is.",
+    "Use small image filters to measure local changes in brightness.",
 };
 
 const link =
@@ -32,8 +35,12 @@ const link =
 export default function FiltersAndEdgesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["filters-and-edges"]}
+      technicalStart="Part 2. Carrying a Grid of Weights Across a Picture"
+      openingTitle="The Brightness Changed; the Edge Stayed Put"
+      playgroundIntro="Compare the original picture with the filter response. Inspect one window's arithmetic, then change the filter and examine which changes in brightness it highlights."
       title="Filters and Edges"
-      tagline="Sweep a small grid of weights across a picture, and read where the brightness changes rather than what it is."
+      tagline="Use small image filters to measure local changes in brightness."
       prerequisites={
         <>
           Nothing beyond arithmetic is needed to follow the sweep, since it is a
@@ -51,80 +58,14 @@ export default function FiltersAndEdgesPage() {
           it is estimated by subtraction throughout and never differentiated.
         </>
       }
-      history={
-        <>
-          <p>
-            Lawrence Roberts wanted a machine to look at a photograph of a few
-            wooden blocks and say what solids were in the picture and where they
-            sat, which was the subject of his 1963 doctoral thesis at MIT,
-            &ldquo;Machine Perception of Three-Dimensional Solids&rdquo;. The
-            difficulty he ran into first is the one this page opens on. He could
-            not work from the brightness of the pixels, because the brightness
-            of a face of a block is a fact about the lamp and the angle it
-            shines from as much as about the block, and a program that learned
-            what a block looks like under one lamp would have learned nothing
-            about the same block under another. What does not move is where one
-            face stops and the next begins, so his first step was to find those
-            boundaries, and the operator he used for it was a pair of two by two
-            grids differencing the two diagonals of a small square.
-          </p>
-          <p>
-            Judith Prewitt was working on a different problem with the same
-            difficulty. She was building automatic descriptions of cells
-            photographed down a microscope, where the illumination is not even
-            across the field and one specimen is stained a little more heavily
-            than the next, and her contribution in &ldquo;Object enhancement and
-            extraction&rdquo;, published in 1970 in <em>Picture Processing and
-            Psychopictorics</em>, was a three by three grid that differences
-            across the boundary and averages along it, so that a single stray
-            pixel counts for a third of what it used to. Irwin Sobel and Gary
-            Feldman had presented a variant at the Stanford Artificial
-            Intelligence Project in 1968 which counts the middle row twice, and
-            it reached print in Duda and Hart&rsquo;s <em>Pattern
-            Classification and Scene Analysis</em> in 1973, which is where most
-            people met it and why it carries Sobel&rsquo;s name. Sobel has since
-            written down how the weights were arrived at, which was by letting
-            each of the eight neighbours contribute in proportion to how close
-            it sits to the pixel being answered for.
-          </p>
-          <p>
-            The last of the four weightings on this page comes from asking a
-            sharper question about what those grids are for. Hanno Scharr, in
-            doctoral work at Heidelberg published in 2000, took the view that
-            what a gradient operator is usually wanted for is the <em>angle</em>
-            {" "}it reports, since that is what a later stage counts and
-            compares, and that the angle is exactly what a three by three grid
-            gets wrong on an edge that is not upright or flat. So he chose the
-            weights to make the reported angle as close to independent of how
-            the edge is turned as three columns allow, and arrived at three and
-            ten where Sobel has one and two. Between those and the modern form
-            sit two papers that changed what the question was. David Marr and
-            Ellen Hildreth argued in 1980 that an edge should be found as a zero
-            crossing of a smoothed second derivative, and John Canny in 1986
-            wrote down what &ldquo;good&rdquo; ought to mean for an edge finder
-            at all, which was to find the edge, to put it in the right place,
-            and to answer once rather than several times, and then derived the
-            filter that does best on those three at once.
-          </p>
-          <p>
-            The page asks six questions in order. Why is the brightness of a
-            pixel nearly useless for recognising anything? What exactly does one
-            step of a sweep do? Should the weights multiply the pixels in the
-            order they are written or in reverse, and what turns on the answer?
-            What is read where the weights hang off the picture, given that there
-            is nothing there? Which weights, and what does each choice buy? And
-            which way does the answer point, given that this is the thing most
-            often got the wrong way round?
-          </p>
-        </>
-      }
+
       playground={<EdgeFieldPlayground />}
       sections={[
         {
           title: "Part 1. What Brightness Cannot Do",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. One number per pixel, and a scene to work on">
                 <p>
                   A greyscale picture is a grid of numbers, one to a pixel,
@@ -136,16 +77,14 @@ export default function FiltersAndEdgesPage() {
                   thousand three hundred and four numbers in all, of which three
                   hundred and seventy five belong to a shape.
                 </p>
-                <p>
-                  There is one more thing in it, and it is deliberate. The whole
-                  scene is a little brighter on the right than on the left, by
-                  0.30 spread evenly across the forty eight columns, which is
-                  0.00638 per column. That is a ramp, and it is what a scene
-                  looks like when the lamp is off to one side. Without it the
-                  page could not tell the difference between a method that reads
-                  the objects and a method that reads the lighting, and the
-                  playground above lets you take the ramp away and put it back.
+                <>
+<p>
+                  There is one more thing in it, and it is deliberate. The whole scene is a little brighter on the right than on the left, by 0.30 spread evenly across the forty eight columns, which is 0.00638 per column. That is a ramp, and it is what a scene looks like when the lamp is off to one side.
                 </p>
+                <p>
+                  Without it the page could not tell the difference between a method that reads the objects and a method that reads the lighting, and the playground above lets you take the ramp away and put it back.
+                </p>
+</>
                 <KeepInMind>
                   A picture is a grid of numbers and nothing more, and the
                   numbers are not a property of the objects in the scene. The
@@ -195,17 +134,14 @@ export default function FiltersAndEdgesPage() {
               </SubSection>
 
               <SubSection title="3. What the change of lamp leaves alone">
-                <p>
-                  Look at the same two pictures a different way. Instead of
-                  asking how bright each pixel is, ask how different it is from
-                  the pixel beside it. Turning the lamp up multiplied every pixel
-                  by 1.6, so it multiplied every difference by 1.6 as well; the
-                  second lamp added a flat 0.15 to every pixel, so it added
-                  nothing at all to any difference, since the same constant sits
-                  on both sides of every subtraction. Whatever that pattern of
-                  differences was, the same lamp change scales the whole of it by
-                  one common number and leaves it otherwise exactly where it was.
+                <>
+<p>
+                  Look at the same two pictures a different way. Instead of asking how bright each pixel is, ask how different it is from the pixel beside it. Turning the lamp up multiplied every pixel by 1.6, so it multiplied every difference by 1.6 as well; the second lamp added a flat 0.15 to every pixel, so it added nothing at all to any difference, since the same constant sits on both sides of every subtraction.
                 </p>
+                <p>
+                  Whatever that pattern of differences was, the same lamp change scales the whole of it by one common number and leaves it otherwise exactly where it was.
+                </p>
+</>
                 <p>
                   Measured on the scene, that is what happens. Every pixel where
                   there is any change at all has its measured sharpness
@@ -269,7 +205,7 @@ export default function FiltersAndEdgesPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Carrying a Grid of Weights Across a Picture",
@@ -324,16 +260,18 @@ export default function FiltersAndEdgesPage() {
                 </p>
                 <Equation>{"−0.5   0   0.5"}</Equation>
                 <WorkedExample>
-                  <p>
-                    At column 2 the window covers columns 1, 2 and 3, reading 0,
-                    0 and 1. The products are &minus;0.5 &times; 0, 0 &times; 0
-                    and 0.5 &times; 1, which sum to 0.5. At column 3 the window
-                    covers 2, 3 and 4, reading 0, 1 and 1, and the products are
-                    &minus;0.5 &times; 0, 0 &times; 1 and 0.5 &times; 1, which
-                    also sum to 0.5. At column 4 the window covers 3, 4 and 5,
-                    all of them 1, and the products are &minus;0.5 and 0.5, which
-                    cancel to 0.
-                  </p>
+                  <>
+                    <p>
+                      At column 2, the three-pixel window reads 0, 0 and 1. At column 3
+                      it reads 0, 1 and 1. At column 4 it reads three ones. Apply the
+                      same three weights in each position.
+                    </p>
+                    <Equation>{"column 2: (−0.5) × 0 + 0 × 0 + 0.5 × 1 = 0.5\ncolumn 3: (−0.5) × 0 + 0 × 1 + 0.5 × 1 = 0.5\ncolumn 4: (−0.5) × 1 + 0 × 1 + 0.5 × 1 = 0"}</Equation>
+                    <p>
+                      The first two windows straddle a change in brightness. The third
+                      contains constant brightness, so its contributions cancel.
+                    </p>
+                  </>
                   <p>
                     Every row of the answer is the same, since every row of the
                     picture is.
@@ -389,17 +327,14 @@ export default function FiltersAndEdgesPage() {
               </SubSection>
 
               <SubSection title="8. In the order written, or reversed">
-                <p>
-                  There is a fork here that looks like pedantry and is not.
-                  Having laid the weights over the picture, we can multiply them
-                  by the pixels in the order they are written, or we can turn the
-                  weights end over end first and then multiply. The first is
-                  called correlation and the second convolution. For a grid that
-                  reads the same forwards as backwards the two agree exactly and
-                  nobody ever notices the question. For the weights on this page
-                  they do not agree, because these weights are negative on one
-                  side and positive on the other, and reversing them swaps which.
+                <>
+<p>
+                  There is a fork here that looks like pedantry and is not. Having laid the weights over the picture, we can multiply them by the pixels in the order they are written, or we can turn the weights end over end first and then multiply. The first is called correlation and the second convolution. For a grid that reads the same forwards as backwards the two agree exactly and nobody ever notices the question.
                 </p>
+                <p>
+                  For the weights on this page they do not agree, because these weights are negative on one side and positive on the other, and reversing them swaps which.
+                </p>
+</>
                 <p>
                   On the six by six picture, sweeping in the order written
                   answers 0.5 at columns two and three, and sweeping the reversed
@@ -442,6 +377,54 @@ export default function FiltersAndEdgesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "A threshold of 0.6 labels every one of the 2304 pixels correctly. The lamp is then turned up so every pixel is multiplied by 1.6, and a second lamp adds a flat 0.15. What happens to that threshold?",
+              [
+                "It still works, since no object moved and none changed shape",
+                "It keeps too few pixels now, so it needs lowering a little",
+                "It relabels 877 pixels, and the window of thresholds that works has moved somewhere that does not overlap the old window",
+                "It fails because the second lamp changed the contrast between the shapes and the ground",
+              ],
+              2,
+              "It keeps 1252 pixels where it should keep 375, disagreeing with itself about 38.06 per cent of the picture. The working window moved from between 0.42 and 0.8119 to between 0.822 and 1.4491, and the two do not overlap anywhere, so nothing was wrong with 0.6 and no single number can serve both pictures.",
+            ),
+            several(
+              "The same lamp change is applied and the differences between neighbouring pixels are read instead. Which of these were measured on the scene?",
+              [
+                "Every measured sharpness is multiplied by a number between 1.5999999999999897 and 1.6000000000000139",
+                "The direction in which the brightness rises does not move, the largest turn over all 2304 pixels being 1.07e-14 radians",
+                "A threshold on sharpness now carries across the change of lamp",
+                "The flat 0.15 adds nothing to any difference, since the same constant sits on both sides of every subtraction",
+              ],
+              [0, 1, 3],
+              "What survives a lamp that multiplies and adds is everything not resting on a common scale, which is the direction and any comparison between two sharpness readings. The size did move, by a factor of 1.6, so a threshold on sharpness is no more portable than a threshold on brightness was, and the loose version of this claim is the false one.",
+            ),
+            trueFalse(
+              "On a scanned page, where the lamp is part of the machine, thresholding the brightness is the better method than reading differences.",
+              true,
+              "Reading differences is a trade rather than an improvement. It costs thirty four multiplications and additions per pixel against one comparison, and what comes back is an answer about the 450 pixels on a boundary rather than a verdict on all 2304. What it buys is independence from the lamp, and a document scanner lights the page itself, so there the threshold answers the stronger question for about a thirtieth of the work. Roberts and Prewitt were not working on those; Roberts had photographs of blocks lit by whatever was in the room.",
+            ),
+            choice(
+              "The six by six picture has one boundary, between columns two and three, and two columns report it at equal strength. Why?",
+              [
+                "Because the weights have not been normalised",
+                "Because the change happens between two pixels, and any three wide window centred on either of them straddles it equally",
+                "Because the border rule invented values outside the frame",
+                "Because correlation and convolution disagree about the sign",
+              ],
+              1,
+              "There is no cleverer choice of three weights that avoids it. An operator of this kind says where the brightness is changing to within a pixel and not to within less, so the smearing is the arithmetic rather than a fault in it.",
+            ),
+            trueFalse(
+              "Correlation and convolution give the same answer for the weights used on this page.",
+              false,
+              "They agree exactly whenever the grid reads the same forwards as backwards, and these weights are negative on one side and positive on the other, so reversing them swaps which. On the six by six picture one convention answers 0.5 at columns two and three and the other answers −0.5 at the same two columns, which is a disagreement about which way the brightness is rising everywhere at once.",
+            ),
+        ],
         },
         {
           title: "Part 3. What Happens at the Border",
@@ -609,8 +592,9 @@ export default function FiltersAndEdgesPage() {
                     ["Sobel", "1, 2, 1", "−1, 0, 1"],
                     ["Scharr", "3, 10, 3", "−1, 0, 1"],
                   ]}
-                  caption="Each three by three grid is the row weighting multiplied by the column weighting, so Sobel’s middle-left entry is 2 × −1, which is −2."
+                  caption="Each grid entry is the row weight multiplied by the column weight."
                 />
+                <Equation>{"Sobel middle-left entry = 2 × (−1) = −2"}</Equation>
                 <p>
                   The grid that asks about the downward direction is this one
                   turned on its side, which is not a coincidence and not worth
@@ -707,55 +691,40 @@ export default function FiltersAndEdgesPage() {
               </SubSection>
 
               <SubSection title="16. Where the weights actually differ">
-                <p>
-                  If the four barely disagree, the question is what Scharr&rsquo;s
-                  three and ten was for. The answer needs an edge the scene does
-                  not contain, because every boundary in it is drawn by arithmetic
-                  and is one pixel wide, and a step one pixel wide is a case where
-                  none of these estimates is any good. So the test is a straight
-                  edge drawn at every angle from zero to eighty five degrees, and
-                  drawn twice, once as a hard one-pixel step and once spread
-                  across a couple of pixels, which is what a lens and a sensor do
-                  to the boundary of a real object.
+                <>
+<p>
+                  If the four barely disagree, the question is what Scharr&rsquo;s three and ten was for. The answer needs an edge the scene does not contain, because every boundary in it is drawn by arithmetic and is one pixel wide, and a step one pixel wide is a case where none of these estimates is any good.
                 </p>
+                <p>
+                  So the test is a straight edge drawn at every angle from zero to eighty five degrees, and drawn twice, once as a hard one-pixel step and once spread across a couple of pixels, which is what a lens and a sensor do to the boundary of a real object.
+                </p>
+</>
                 <OperatorGallery />
-                <p>
-                  On the spread edge the ordering is exactly the published one and
-                  the gaps are large. The worst angle any of them reports across
-                  the eighteen drawn angles is out by 4.13 degrees for the central
-                  difference, 3.10 for Prewitt, 1.16 for Sobel and 0.28 for
-                  Scharr, so Scharr&rsquo;s weights are four times steadier than
-                  Sobel&rsquo;s and nearly fifteen times steadier than the bare
-                  difference. Every one of them is exact at zero and at forty five
-                  degrees, where the arrangement of pixels around the edge is
-                  symmetric, and worst somewhere between fifteen and twenty five
-                  degrees, and again at the mirror of that past forty five, since
-                  the curve is symmetric about the diagonal.
+                <>
+<p>
+                  On the spread edge the ordering is exactly the published one and the gaps are large. The worst angle any of them reports across the eighteen drawn angles is out by 4.13 degrees for the central difference, 3.10 for Prewitt, 1.16 for Sobel and 0.28 for Scharr, so Scharr&rsquo;s weights are four times steadier than Sobel&rsquo;s and nearly fifteen times steadier than the bare difference.
                 </p>
                 <p>
-                  On the hard one-pixel step none of that holds. Every operator is
-                  out by more than nine degrees on average, Prewitt and Sobel come
-                  out identical at 9.2367, and Scharr is the worst of the three at
-                  10.8913, with a worst case of 27.01 against Sobel&rsquo;s 21.57.
-                  That is the honest report and it is not a defect in Scharr. A
-                  one-pixel step has no well-defined rate of change to estimate,
-                  so the weights tuned to estimate one accurately have nothing to
-                  be accurate about, and the fact that the workbench scene is
-                  drawn that way is exactly why the diagonal bar showed so little
-                  between them.
+                  Every one of them is exact at zero and at forty five degrees, where the arrangement of pixels around the edge is symmetric, and worst somewhere between fifteen and twenty five degrees, and again at the mirror of that past forty five, since the curve is symmetric about the diagonal.
                 </p>
+</>
+                <>
+<p>
+                  On the hard one-pixel step none of that holds. Every operator is out by more than nine degrees on average, Prewitt and Sobel come out identical at 9.2367, and Scharr is the worst of the three at 10.8913, with a worst case of 27.01 against Sobel&rsquo;s 21.57. That is the honest report and it is not a defect in Scharr.
+                </p>
+                <p>
+                  A one-pixel step has no well-defined rate of change to estimate, so the weights tuned to estimate one accurately have nothing to be accurate about, and the fact that the workbench scene is drawn that way is exactly why the diagonal bar showed so little between them.
+                </p>
+</>
                 <InAModel>
-                  <p>
-                    The reason this matters more than it sounds is what usually
-                    happens next. A description built from gradients throws the
-                    sizes away and counts the directions, sorting them into bins a
-                    few tens of degrees wide, so an angle out by four degrees will
-                    sometimes fall in the wrong bin and an angle out by a third of
-                    a degree will almost never do so. That is what buys the extra
-                    arithmetic of three and ten over one and two, and it buys
-                    nothing at all on a picture whose boundaries were drawn rather
-                    than photographed.
+                  <>
+<p>
+                    The reason this matters more than it sounds is what usually happens next. A description built from gradients throws the sizes away and counts the directions, sorting them into bins a few tens of degrees wide, so an angle out by four degrees will sometimes fall in the wrong bin and an angle out by a third of a degree will almost never do so.
                   </p>
+                  <p>
+                    That is what buys the extra arithmetic of three and ten over one and two, and it buys nothing at all on a picture whose boundaries were drawn rather than photographed.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   On an edge spread over a couple of pixels, which is what a
@@ -777,19 +746,14 @@ export default function FiltersAndEdgesPage() {
                   square root and an inverse tangent per pixel on top of that.
                 </p>
                 <SweepCost />
-                <p>
-                  The timings underneath are a measurement of whichever machine
-                  answered the request and move a little between runs, which is
-                  why they are read live rather than written into this page. The
-                  figure worth taking from them is the shape rather than any one
-                  number, since the cost per pixel at the scene&rsquo;s size is roughly
-                  double what it is on a picture a thousand pixels on a side,
-                  because on a small picture most of the time goes on arranging
-                  the sweep rather than on doing it. It also scales as the number
-                  of pixels and not worse, so a picture with four times as many
-                  pixels costs about four times as much, which is what made these
-                  operators usable on the hardware they were invented on.
+                <>
+<p>
+                  The timings underneath are a measurement of whichever machine answered the request and move a little between runs, which is why they are read live rather than written into this page. The figure worth taking from them is the shape rather than any one number, since the cost per pixel at the scene&rsquo;s size is roughly double what it is on a picture a thousand pixels on a side, because on a small picture most of the time goes on arranging the sweep rather than on doing it.
                 </p>
+                <p>
+                  It also scales as the number of pixels and not worse, so a picture with four times as many pixels costs about four times as much, which is what made these operators usable on the hardware they were invented on.
+                </p>
+</>
                 <KeepInMind>
                   A sweep costs a fixed amount of arithmetic per pixel, which for
                   a three by three grid in both directions is thirty four
@@ -801,21 +765,66 @@ export default function FiltersAndEdgesPage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Which border rule changes the shape of the answer?",
+              [
+                "Repeating the edge pixel outward",
+                "Treating everything outside the frame as black",
+                "Answering only at positions where the whole grid fits",
+                "None of them, since a sweep always answers one value per pixel",
+              ],
+              2,
+              "A three by three grid that refuses to hang off the picture answers two fewer rows and two fewer columns, so the forty eight by forty eight scene comes back as forty six by forty six. It is the one option that invents nothing, and the price is that two sweeps of different grids can no longer be laid on top of each other and that stacking sweeps shrinks the picture each time.",
+            ),
+            trueFalse(
+              "Repeating the edge pixel and treating the outside as black are the same rule, since both answer 0 at the left border of the six by six picture.",
+              false,
+              "They agree there because that picture happens to be dark on its left, which is a property of the picture rather than of the rules, and the right border is where they part company. Repeating the edge asserts only that the scene continued as it was, where treating the outside as black asserts that the world beyond the frame is dark, which is right at a dark border and wrong at a bright one.",
+            ),
+            choice(
+              "On a clean step the four operators answer 0.5, 3, 4 and 16 at the same boundary. What do all four share?",
+              [
+                "Their weights sum to zero, so a flat region answers nothing whatever its brightness",
+                "They are scaled to a common unit, so a threshold transfers between them",
+                "They report the same size once the picture itself is rescaled",
+                "They average over the same number of rows",
+              ],
+              0,
+              "On a flat region the positive and negative weights meet the same value and cancel, which is also why adding a constant to every pixel changes no answer anywhere. None of the four is normalised, and the factor between Scharr and the central difference is thirty two, so a threshold chosen for one of them is meaningless for another.",
+            ),
+            several(
+              "A straight edge was drawn at every angle from zero to eighty five degrees, twice. What did that test find?",
+              [
+                "On an edge spread across a couple of pixels the worst reported angle is out by 4.13 degrees for the central difference and 0.28 for Scharr",
+                "On a hard one-pixel step the ordering reverses, and Scharr is the worst of the three at 10.8913",
+                "Every operator is exact at zero and at forty five degrees, where the arrangement of pixels around the edge is symmetric",
+                "The workbench scene’s diagonal bar is what demonstrates Scharr’s extra accuracy",
+              ],
+              [0, 1, 2],
+              "A one-pixel step has no well-defined rate of change to estimate, so weights tuned to estimate one accurately have nothing to be accurate about. Every boundary in the workbench scene is drawn by arithmetic and is one pixel wide, which is exactly why the diagonal bar showed so little between the four, their angles falling within 0.2839 degrees of each other.",
+            ),
+            trueFalse(
+              "A gradient from a three by three grid costs thirty four operations per pixel, and the total grows in step with the number of pixels rather than faster.",
+              true,
+              "Nine multiplications and eight additions per sweep, and a gradient needs one sweep across and one down, which is 78,336 operations for the whole forty eight by forty eight scene before the square root and the inverse tangent are added. A picture with four times as many pixels costs about four times as much, which is what made these operators usable on the hardware they were invented on.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. Two Answers Kept Together",
           content: (
             <>
               <SubSection title="18. A rate across and a rate down">
-                <p>
-                  Sweeping once answers how fast the brightness rises to the
-                  right, and that alone is not an edge. A boundary running exactly
-                  up and down is invisible to it in the vertical direction and a
-                  boundary running exactly flat is invisible to it in the
-                  horizontal one, which is why the vertical sweep of the six by
-                  six picture answers zero everywhere while the horizontal sweep
-                  answers 4 at two columns. So the same picture is swept twice,
-                  with the same grid turned on its side for the second, and the
-                  two answers are kept together.
+                <>
+<p>
+                  Sweeping once answers how fast the brightness rises to the right, and that alone is not an edge. A boundary running exactly up and down is invisible to it in the vertical direction and a boundary running exactly flat is invisible to it in the horizontal one, which is why the vertical sweep of the six by six picture answers zero everywhere while the horizontal sweep answers 4 at two columns.
                 </p>
+                <p>
+                  So the same picture is swept twice, with the same grid turned on its side for the second, and the two answers are kept together.
+                </p>
+</>
                 <p>
                   Together they are a pair of numbers at every pixel, and a pair
                   of numbers is an arrow. Handing back two separate pictures and
@@ -850,15 +859,20 @@ export default function FiltersAndEdgesPage() {
                   square&rsquo;s upright sides read 2.6911 and its flat ones
                   2.6405.
                 </p>
-                <p>
-                  Away from the border the flat parts of the scene answer 0.0511
-                  rather than zero, because the scene carries the brightness ramp
-                  from step 1, and that number is worth checking. The window spans
-                  two columns either side of centre, so it sees twice the
-                  ramp&rsquo;s 0.00638, and the positive weights add to 4, giving
-                  2 &times; 0.00638 &times; 4 = 0.0511. Take the ramp away in the
-                  playground and those same 1666 pixels answer 0.
-                </p>
+                <>
+                  <p>
+                    The flat regions still contain the brightness ramp introduced in
+                    step 1. The filter compares positions two columns from its centre,
+                    and its positive weights add to four. That predicts the small
+                    nonzero response.
+                  </p>
+                  <Equation>{"ramp response ≈ 2 × 0.00638 × 4 ≈ 0.0511"}</Equation>
+                  <p>
+                    Remove the ramp in the playground and those same 1666 interior
+                    pixels return zero. The filter was responding to a small brightness
+                    change, even where the larger shapes looked flat.
+                  </p>
+                </>
                 <KeepInMind>
                   The sharpness is a length, so it is never negative and never
                   says which way anything is going. A perfectly gentle slope
@@ -955,18 +969,14 @@ export default function FiltersAndEdgesPage() {
                   been had the scene been sampled finely enough for the question
                   to have an answer.
                 </p>
-                <p>
-                  That is not a quibble, because it says exactly when the estimate
-                  is good. It is good when the scene changes slowly compared with
-                  the spacing of the pixels, so that three neighbouring readings
-                  really do lie near one smooth curve. It has nothing to say when
-                  the scene changes faster than that, and a boundary between two
-                  flat regions one pixel apart is the extreme case. Step 16
-                  measured what that does. On an edge spread over a couple of
-                  pixels the four operators report angles out by between 0.28 and
-                  4.13 degrees, and on a one-pixel step the same four are out by
-                  between 21.57 and 40.00.
+                <>
+<p>
+                  That is not a quibble, because it says exactly when the estimate is good. It is good when the scene changes slowly compared with the spacing of the pixels, so that three neighbouring readings really do lie near one smooth curve. It has nothing to say when the scene changes faster than that, and a boundary between two flat regions one pixel apart is the extreme case.
                 </p>
+                <p>
+                  Step 16 measured what that does. On an edge spread over a couple of pixels the four operators report angles out by between 0.28 and 4.13 degrees, and on a one-pixel step the same four are out by between 21.57 and 40.00.
+                </p>
+</>
                 <DerivationTable
                   expressionHeading="the case"
                   reasonHeading="what the mathematics says"
@@ -1055,17 +1065,14 @@ export default function FiltersAndEdgesPage() {
                   bar, where the change is genuinely gentler because a three wide
                   window straddles it rather than meeting it square.
                 </p>
-                <p>
-                  So the faint half of a real boundary and the loud half of the
-                  noise occupy the same range of sharpness, and no single number
-                  keeps one and drops the other. The escape is to stop asking for
-                  one number, which is what the work after 1980 did, and the two
-                  usual moves are to use two thresholds and keep a weak pixel only
-                  when it joins a strong one, and to smooth first at a chosen
-                  scale so that the noise loses more than the boundary does. Both
-                  are still choices with a cost; neither turns the overlap into a
-                  separation.
+                <>
+<p>
+                  So the faint half of a real boundary and the loud half of the noise occupy the same range of sharpness, and no single number keeps one and drops the other. The escape is to stop asking for one number, which is what the work after 1980 did, and the two usual moves are to use two thresholds and keep a weak pixel only when it joins a strong one, and to smooth first at a chosen scale so that the noise loses more than the boundary does.
                 </p>
+                <p>
+                  Both are still choices with a cost; neither turns the overlap into a separation.
+                </p>
+</>
                 <KeepInMind>
                   A single threshold on sharpness has one number to separate two
                   populations that overlap. Above the overlap it drops the faint
@@ -1082,30 +1089,22 @@ export default function FiltersAndEdgesPage() {
                   answered is about objects, and those two questions have
                   different answers in both directions.
                 </p>
-                <p>
-                  Brightness changes where no object ends. The shadow a hand casts
-                  on a table has a boundary as sharp as the hand does, and so does
-                  the printed edge of a pattern on a shirt, and so does the line
-                  where sunlight stops on a wall; a gradient operator reports all
-                  of them at full strength, because at each of them the brightness
-                  really is changing sharply, which is all it was ever asked. And
-                  objects end where the brightness does not change. A grey cat on
-                  a grey sofa has a real boundary along which the brightness is
-                  the same on both sides, and the operator answers close to
-                  nothing there, correctly and uselessly.
+                <>
+<p>
+                  Brightness changes where no object ends. The shadow a hand casts on a table has a boundary as sharp as the hand does, and so does the printed edge of a pattern on a shirt, and so does the line where sunlight stops on a wall; a gradient operator reports all of them at full strength, because at each of them the brightness really is changing sharply, which is all it was ever asked.
                 </p>
                 <p>
-                  There is nothing in the estimate that could distinguish these,
-                  because the distinction is not present in the numbers being
-                  read. It needs something the operator does not have, which is
-                  either a colour or a texture that does differ across the
-                  boundary, or knowledge of what shape the thing is, or a second
-                  view of the same scene from elsewhere. That is roughly the
-                  history of the subject after this page, since everything else in this
-                  section is a way of building something more informative on top
-                  of these answers, and none of it repairs the gap between where
-                  the brightness changes and where the object is.
+                  And objects end where the brightness does not change. A grey cat on a grey sofa has a real boundary along which the brightness is the same on both sides, and the operator answers close to nothing there, correctly and uselessly.
                 </p>
+</>
+                <>
+<p>
+                  There is nothing in the estimate that could distinguish these, because the distinction is not present in the numbers being read. It needs something the operator does not have, which is either a colour or a texture that does differ across the boundary, or knowledge of what shape the thing is, or a second view of the same scene from elsewhere.
+                </p>
+                <p>
+                  That is roughly the history of the subject after this page, since everything else in this section is a way of building something more informative on top of these answers, and none of it repairs the gap between where the brightness changes and where the object is.
+                </p>
+</>
                 <KeepInMind>
                   An edge operator answers where the brightness changes. Shadows,
                   printed patterns and lighting boundaries change the brightness
@@ -1117,6 +1116,277 @@ export default function FiltersAndEdgesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "A boundary runs straight up and down with the bright side on the right. Which way does the arrow point?",
+              [
+                "Along the boundary, at a quarter circle",
+                "Due right, at zero radians, while the boundary itself runs at a quarter circle",
+                "Due left, since the dark side is on the left",
+                "Nowhere in particular, since the vertical sweep answers zero there",
+              ],
+              1,
+              "The brightness does not change as you walk up or down the boundary and changes as fast as it ever does as you step across it, so the arrow points across, from the dark side to the bright side. The arrow’s angle and the edge’s own direction are the same fact reported two ways and are a quarter turn apart always, and confusing them turns every later description by ninety degrees without anything looking wrong.",
+            ),
+            trueFalse(
+              "Where the picture is flat the reported angle is zero, and that zero is a measurement.",
+              false,
+              "Both rates are zero there, and an arrow of zero length has no angle at all, so the number that comes back was chosen by whoever implemented it. That is why the drawings put a stroke only where the sharpness is above a share of the largest, and why any later stage counting directions has to weight each one by its sharpness rather than counting them equally.",
+            ),
+            choice(
+              "With a normal spread of 0.08 added to every pixel, flat ground answers as high as 1.0157 while the faintest real boundary is still at 0.898. What follows for a single threshold?",
+              [
+                "No number separates the two, because the populations overlap in the quantity being thresholded",
+                "A threshold of 0.9 separates them, which is why it is the best in the sweep",
+                "The threshold simply has to be raised above 1.0157",
+                "The noise has to be subtracted first, after which any threshold works again",
+              ],
+              0,
+              "The sweep says what each end costs. At 0.4 nothing real is lost and 693 of the 1854 flat pixels survive as false edges, and at 1.1 no flat pixel survives but 63 pixels on a real boundary have gone. The best value in the whole sweep is 0.9 and it still keeps 5 flat pixels while losing 35 real ones.",
+            ),
+            several(
+              "Why does an edge operator not answer the question anyone actually wants answered?",
+              [
+                "A shadow cast on a table has a boundary as sharp as the hand does, and the operator reports it at full strength",
+                "A grey cat on a grey sofa has a real boundary along which the operator answers close to nothing",
+                "A better choice of weights, border rule and threshold would close the gap",
+                "Smoothing first at a chosen scale turns the overlap between noise and faint boundaries into a separation",
+              ],
+              [0, 1],
+              "Brightness changes where no object ends and objects end where the brightness does not change, so the two questions have different answers in both directions. The distinction is not present in the numbers being read, so it needs colour, texture, knowledge of the shape or a second view, and no choice of weights, border rule or threshold closes it. Smoothing first and keeping a weak pixel only when it joins a strong one are the two usual moves after 1980, and both are still choices with a cost; neither turns the overlap into a separation.",
+            ),
+            trueFalse(
+              "A grid with an even side is refused here rather than swept, because its answer would belong half a pixel from any pixel it could be written at.",
+              true,
+              "A grid with an odd number of columns has a middle column to report at and a grid with an even number does not, so the answer from a two wide grid belongs half a pixel to the side of anywhere it could be written, and every later comparison against the picture is offset by that half pixel with nothing to reveal it. Roberts’ own operator is two by two and works, with its answers belonging to the corners between pixels, which he knew. Everything on this page is odd on both sides so that every answer sits at a pixel.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Sweeping the Scene With the Library",
+          practice: [
+            exercise(
+              "Sweep the six by six picture under every border rule",
+              ["Part 2 swept the six by six picture with the central difference and found 0.5 at columns two and three and nothing elsewhere, and found that reversing the weights answers −0.5 at the same two columns. Part 3 then ran the four border rules over it with the Sobel operator and found that two of them invent an edge the picture does not hold. Reproduce all of it with the library.", "The picture is the lesson’s own, six rows of 0, 0, 0, 1, 1, 1. The library sweeps by correlation, with the weights in the order written, so the sign of every answer is the sign you wrote down."],
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField, GradientOperator
+from oop_ml.core.computer_vision.filtering import EdgeRule, swept
+from oop_ml.core.computer_vision.picture import Picture
+
+picture = Picture([[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] * 6)
+
+# Sweep the picture with the central difference, minus a half, nought, a half,
+# and print the middle row of the answer. Sweep it again with those weights
+# reversed and print the same row. Then, for each border rule, build the Sobel
+# gradient field under it and print the shape of its answer and the middle
+# row of its sharpness.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField, GradientOperator
+from oop_ml.core.computer_vision.filtering import EdgeRule, swept
+from oop_ml.core.computer_vision.picture import Picture
+
+picture = Picture([[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] * 6)
+
+written = np.asarray(swept(picture, [[-0.5, 0.0, 0.5]]))
+reversed_grid = np.asarray(swept(picture, [[0.5, 0.0, -0.5]]))
+print(f"weights as written, middle row {written[3].tolist()}")
+print(f"weights reversed, middle row  {reversed_grid[3].tolist()}")
+
+for rule in EdgeRule:
+    field = GradientField.of(picture, GradientOperator.SOBEL, rule)
+    magnitude = np.asarray(field.magnitude)
+    middle = magnitude[min(3, field.shape[0] - 1)]
+    print(f"{rule.value:14} answer {field.shape[0]} by {field.shape[1]}, Sobel sharpness along a middle row {middle.tolist()}")`,
+              `weights as written, middle row [0.0, 0.0, 0.5, 0.5, 0.0, 0.0]
+weights reversed, middle row  [0.0, 0.0, -0.5, -0.5, 0.0, 0.0]
+keep_valid     answer 4 by 4, Sobel sharpness along a middle row [0.0, 4.0, 4.0, 0.0]
+extend         answer 6 by 6, Sobel sharpness along a middle row [0.0, 0.0, 4.0, 4.0, 0.0, 0.0]
+wrap           answer 6 by 6, Sobel sharpness along a middle row [4.0, 0.0, 4.0, 4.0, 0.0, 4.0]
+pad_with_zero  answer 6 by 6, Sobel sharpness along a middle row [0.0, 0.0, 4.0, 4.0, 0.0, 4.0]`,
+              { hints: ["swept takes the Picture, the weights as a list of rows, and a border rule that defaults to repeating the edge pixel. It answers a Picture, and np.asarray turns one into a plain array whose row three is the middle row.", "GradientField.of takes the Picture, an operator and a border rule, and its magnitude is a Picture of the sharpness. Under the rule that answers only where the weights fit, the field is four by four, so its middle row is row one rather than row three.", "EdgeRule is an enum, so iterating over it visits all four rules, and each one’s value is its name as a string."], check: numberCheck("What does the Sobel sweep answer at the right border of the middle row when the outside is treated as black?", 4.0, 0.001, "The bright right side meets invented darkness, so the operator reports a change exactly as sharp as the one real boundary, 4, which is the sum of Sobel’s positive weights. Repeating the edge pixel answers 0 there, because a flat border stays flat; reading from the opposite side answers 4 at both ends and reports three boundaries where the picture holds one; and answering only where the weights fit invents nothing and comes back four by four.") },
+            ),
+            exercise(
+              "Relight the scene and watch what survives",
+              ["Part 1 drew the forty eight by forty eight scene, lit it again with the lamp turned up by 1.6 and a second lamp adding 0.15, and found that a threshold of 0.6 which labelled every pixel correctly now relabels 877 of them, while every sharpness was multiplied by 1.6 and no direction moved. The scene is rebuilt here from the numbers behind the page, so every pixel is the page’s own.", "The starter draws the square, the disc, the diagonal bar and the three crosses on ground of 0.12 at a brightness of 0.78, then adds the ramp of 0.30 across the columns. The last line, adding a row of forty eight numbers to a grid of forty eight columns, adds the ramp to every row at once."],
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField
+from oop_ml.core.computer_vision.picture import Picture
+
+scene = np.full((48, 48), 0.12)
+scene[6:17, 5:16] = 0.78
+rows, columns = np.ogrid[:48, :48]
+scene[(rows - 12) ** 2 + (columns - 34) ** 2 <= 36] = 0.78
+for step in range(14):
+    scene[30 - step, 6 + step:9 + step] = 0.78
+cross = np.full((7, 7), 0.12)
+cross[2:5, :] = 0.78
+cross[:, 2:5] = 0.78
+for row, column in ((26, 26), (38, 12), (39, 36)):
+    scene[row:row + 7, column:column + 7] = np.maximum(scene[row:row + 7, column:column + 7], cross)
+scene = scene + np.linspace(0.0, 0.30, 48)
+relit = scene * 1.6 + 0.15
+
+# Label the shape pixels as those at or above 0.7. Print how many there are,
+# the brightest ground pixel and the darkest shape pixel, and the same two
+# numbers for the relit scene. Print how many pixels a threshold of 0.6 keeps
+# in each picture and how many pixels the two labellings disagree about.
+# Then build the Sobel gradient field of both pictures and print the smallest
+# and largest ratio of relit sharpness to original, and the largest turn
+# of any direction between the two.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField
+from oop_ml.core.computer_vision.picture import Picture
+
+scene = np.full((48, 48), 0.12)
+scene[6:17, 5:16] = 0.78
+rows, columns = np.ogrid[:48, :48]
+scene[(rows - 12) ** 2 + (columns - 34) ** 2 <= 36] = 0.78
+for step in range(14):
+    scene[30 - step, 6 + step:9 + step] = 0.78
+cross = np.full((7, 7), 0.12)
+cross[2:5, :] = 0.78
+cross[:, 2:5] = 0.78
+for row, column in ((26, 26), (38, 12), (39, 36)):
+    scene[row:row + 7, column:column + 7] = np.maximum(scene[row:row + 7, column:column + 7], cross)
+scene = scene + np.linspace(0.0, 0.30, 48)
+relit = scene * 1.6 + 0.15
+
+is_shape = scene >= 0.7
+print(f"shape pixels {is_shape.sum()}, brightest ground {scene[~is_shape].max():.4f}, darkest shape {scene[is_shape].min():.4f}")
+print(f"relit, brightest ground {relit[~is_shape].max():.4f}, darkest shape {relit[is_shape].min():.4f}")
+kept, kept_relit = scene >= 0.6, relit >= 0.6
+print(f"threshold 0.6 keeps {kept.sum()} pixels here and {kept_relit.sum()} relit, disagreeing about {(kept != kept_relit).sum()}")
+
+here = GradientField.of(Picture(scene))
+there = GradientField.of(Picture(relit))
+sharpness_here, sharpness_there = np.asarray(here.magnitude), np.asarray(there.magnitude)
+ratio = sharpness_there / sharpness_here
+print(f"sharpness multiplied by between {ratio.min():.6f} and {ratio.max():.6f}")
+turn = np.abs((np.asarray(there.direction) - np.asarray(here.direction) + np.pi) % (2 * np.pi) - np.pi)
+print(f"largest turn of any direction {turn.max():.2e} radians")`,
+              `shape pixels 375, brightest ground 0.4200, darkest shape 0.8119
+relit, brightest ground 0.8220, darkest shape 1.4491
+threshold 0.6 keeps 375 pixels here and 1252 relit, disagreeing about 877
+sharpness multiplied by between 1.600000 and 1.600000
+largest turn of any direction 1.07e-14 radians`,
+              { hints: ["A comparison such as scene >= 0.7 answers a grid of booleans, which can index the scene to pick out the ground or the shapes, and .sum() counts how many are true.", "GradientField.of takes a Picture and defaults to the Sobel operator with the edge pixel repeated, so Picture(scene) is all the construction needed. Its magnitude and direction are Pictures, and np.asarray reads either as an array.", "The ramp makes every pixel of the scene change a little, so no sharpness is zero and the ratio can be taken everywhere without guarding against division by zero.", "Directions are angles, so the gap between two is taken the short way round, adding π, reducing modulo 2π and subtracting π again, which is what the page does before reporting the largest turn."], check: numberCheck("How many of the 2304 pixels does the threshold of 0.6 disagree with itself about between the two lightings?", 877, 0.5, "The threshold keeps 375 pixels on the scene as drawn, which is exactly the shape pixels, and 1252 on the relit scene, so 877 pixels are labelled differently, 38.06 per cent of the picture. The window of thresholds that works moved from between 0.42 and 0.8119 to between 0.822 and 1.4491, and the two windows do not overlap anywhere. The sharpness, meanwhile, was multiplied by 1.6 to fourteen places everywhere, and the largest turn of any direction is a rounding step rather than a movement.") },
+            ),
+            exercise(
+              "Put the four operators on a clean step and on a turned edge",
+              ["Part 4 says that on a clean step every operator answers the sum of its own positive weights, 0.5, 3, 4 and 16, all reporting the brightness rising at exactly zero radians, and that on an edge spread across a pixel the operators part company over the angle, Scharr’s worst miss being 0.28 degrees against the central difference’s 4.13. Measure both with the library.", "The step is five rows of 0, 0, 1, 1. The turned edge is drawn with numpy the way the page’s sweep draws it, a straight boundary at twenty degrees spread across about a pixel by a hyperbolic tangent, and read at its centre pixel. What each operator reports there is a number the page does not print."],
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField, GradientOperator, weights_of
+from oop_ml.core.computer_vision.picture import Picture
+
+step = Picture([[0.0, 0.0, 1.0, 1.0]] * 5)
+# For each operator, print the sum of its positive weights, the sharpness it
+# answers at row 2, column 1 of the step, and the direction it reports there.
+
+angle = np.radians(20)
+rows, columns = np.mgrid[:21, :21]
+across = (columns - 10) * np.cos(angle) + (rows - 10) * np.sin(angle)
+edge = Picture(0.5 + 0.5 * np.tanh(across))
+# For each operator, print the angle in degrees it reports at the centre of
+# this edge, and how far that is from twenty.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField, GradientOperator, weights_of
+from oop_ml.core.computer_vision.picture import Picture
+
+step = Picture([[0.0, 0.0, 1.0, 1.0]] * 5)
+for operator in GradientOperator:
+    grid = np.asarray(weights_of(operator, vertical=False))
+    field = GradientField.of(step, operator)
+    sharpness = np.asarray(field.magnitude)[2, 1]
+    print(f"{operator.value:18} positive weights add to {grid[grid > 0].sum():4}, answer on the step {sharpness:4}, "
+          f"direction {np.asarray(field.direction)[2, 1]:.4f} radians")
+
+angle = np.radians(20)
+rows, columns = np.mgrid[:21, :21]
+across = (columns - 10) * np.cos(angle) + (rows - 10) * np.sin(angle)
+edge = Picture(0.5 + 0.5 * np.tanh(across))
+for operator in GradientOperator:
+    reported = np.degrees(np.asarray(GradientField.of(edge, operator).direction)[10, 10])
+    print(f"{operator.value:18} reports the twenty degree edge at {reported:.2f} degrees, out by {abs(reported - 20):.2f}")`,
+              `central_difference positive weights add to  0.5, answer on the step  0.5, direction 0.0000 radians
+prewitt            positive weights add to  3.0, answer on the step  3.0, direction 0.0000 radians
+sobel              positive weights add to  4.0, answer on the step  4.0, direction 0.0000 radians
+scharr             positive weights add to 16.0, answer on the step 16.0, direction 0.0000 radians
+central_difference reports the twenty degree edge at 24.13 degrees, out by 4.13
+prewitt            reports the twenty degree edge at 17.01 degrees, out by 2.99
+sobel              reports the twenty degree edge at 18.90 degrees, out by 1.10
+scharr             reports the twenty degree edge at 20.27 degrees, out by 0.27`,
+              { hints: ["GradientOperator is an enum of the four, and weights_of(operator, vertical=False) answers the horizontal grid as a list of rows, so np.asarray and a boolean mask pick out the positive weights.", "GradientField.of takes the Picture and the operator, and its magnitude and direction are Pictures, so np.asarray and an index of [2, 1] read the answer at row 2, column 1.", "The direction is in radians, measured from pointing right towards pointing down, and np.degrees converts it. Twenty degrees is the direction the brightness rises in, which is across the drawn edge."], check: numberCheck("What angle does Scharr report at the centre of the twenty degree edge, in degrees?", 20.27, 0.01, "Scharr’s three and ten were chosen so that the reported angle is as close to independent of how the edge is turned as three columns of weights allow, and across every angle the page swept its worst miss was 0.28 degrees, against 1.16 for Sobel, 3.10 for Prewitt and 4.13 for the central difference. At twenty degrees the four misses line up in that order. On the clean step they all agree exactly, since the vertical sweep answers exactly zero on a picture whose rows are identical.") },
+            ),
+            exercise(
+              "Threshold the sharpness and find the overlap",
+              ["Part 6 says that on the scene as drawn every threshold between 0.0511 and 0.898 labels all 2304 pixels correctly, and that with a normal spread of 0.08 added to every pixel flat ground answers as high as 1.0157, so the two populations overlap and no threshold keeps every boundary pixel while dropping every flat one. Measure the overlap and score four thresholds.", "The two populations are read off the ramp-free scene, as the page does, so that the ramp’s own gentle change does not count as a boundary. The page quotes 0.4, 0.9 and 1.1; what 0.7 keeps and loses is a number it does not print."],
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField
+from oop_ml.core.computer_vision.picture import Picture
+
+scene = np.full((48, 48), 0.12)
+scene[6:17, 5:16] = 0.78
+rows, columns = np.ogrid[:48, :48]
+scene[(rows - 12) ** 2 + (columns - 34) ** 2 <= 36] = 0.78
+for step in range(14):
+    scene[30 - step, 6 + step:9 + step] = 0.78
+cross = np.full((7, 7), 0.12)
+cross[2:5, :] = 0.78
+cross[:, 2:5] = 0.78
+for row, column in ((26, 26), (38, 12), (39, 36)):
+    scene[row:row + 7, column:column + 7] = np.maximum(scene[row:row + 7, column:column + 7], cross)
+ramped = scene + np.linspace(0.0, 0.30, 48)
+
+# Build the Sobel sharpness of the scene without its ramp and with it. Call
+# a pixel a boundary pixel where the ramp-free sharpness is above 0.2 and a
+# flat pixel where it is exactly zero. Print the sharpest reading with the
+# ramp, what flat ground answers up to with and without it, the count of
+# boundary and flat pixels, and the faintest boundary reading.
+# Then add normal noise of spread 0.08 from a generator seeded with 0, and
+# for thresholds 0.4, 0.7, 0.9 and 1.1 print how many flat pixels survive
+# and how many boundary pixels are lost.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.edges import GradientField
+from oop_ml.core.computer_vision.picture import Picture
+
+scene = np.full((48, 48), 0.12)
+scene[6:17, 5:16] = 0.78
+rows, columns = np.ogrid[:48, :48]
+scene[(rows - 12) ** 2 + (columns - 34) ** 2 <= 36] = 0.78
+for step in range(14):
+    scene[30 - step, 6 + step:9 + step] = 0.78
+cross = np.full((7, 7), 0.12)
+cross[2:5, :] = 0.78
+cross[:, 2:5] = 0.78
+for row, column in ((26, 26), (38, 12), (39, 36)):
+    scene[row:row + 7, column:column + 7] = np.maximum(scene[row:row + 7, column:column + 7], cross)
+ramped = scene + np.linspace(0.0, 0.30, 48)
+
+plain = np.asarray(GradientField.of(Picture(scene)).magnitude)
+clean = np.asarray(GradientField.of(Picture(ramped)).magnitude)
+on_edge, on_flat = plain > 0.2, plain == 0.0
+print(f"sharpest reading {clean.max():.4f}, flat ground answers up to {clean[on_flat].max():.4f} with the ramp and {plain[on_flat].max()} without")
+print(f"{on_edge.sum()} boundary pixels, the faintest at {clean[on_edge].min():.3f}, and {on_flat.sum()} flat pixels")
+
+noisy = Picture(ramped + np.random.default_rng(0).normal(0.0, 0.08, ramped.shape))
+sharpness = np.asarray(GradientField.of(noisy).magnitude)
+print(f"with noise, flat ground answers up to {sharpness[on_flat].max():.4f}")
+for threshold in (0.4, 0.7, 0.9, 1.1):
+    kept = sharpness >= threshold
+    print(f"threshold {threshold}: {(kept & on_flat).sum()} flat pixels kept, {(~kept & on_edge).sum()} boundary pixels lost")`,
+              `sharpest reading 2.9974, flat ground answers up to 0.0511 with the ramp and 0.0 without
+450 boundary pixels, the faintest at 0.898, and 1854 flat pixels
+with noise, flat ground answers up to 1.0157
+threshold 0.4: 693 flat pixels kept, 0 boundary pixels lost
+threshold 0.7: 80 flat pixels kept, 15 boundary pixels lost
+threshold 0.9: 5 flat pixels kept, 35 boundary pixels lost
+threshold 1.1: 0 flat pixels kept, 63 boundary pixels lost`,
+              { hints: ["GradientField.of(Picture(scene)).magnitude is the Sobel sharpness under the default rule, and np.asarray turns it into a grid that comparisons such as > 0.2 can be made on.", "np.random.default_rng(0).normal(0.0, 0.08, ramped.shape) is the noise the page adds, one draw per pixel, and the same seed draws the same noise.", "Boolean grids combine with & and negate with ~, so (kept & on_flat).sum() counts the flat pixels that survive a threshold and (~kept & on_edge).sum() the boundary pixels that do not."], check: numberCheck("At a threshold of 0.7, how many boundary pixels are lost?", 15, 0.5, "At 0.4 nothing real is lost and 693 of the 1854 flat pixels survive as false edges; at 1.1 no flat pixel survives and 63 boundary pixels have gone. In between both happen at once, and 0.7 sits inside the overlap, keeping 80 flat pixels and losing 15 real ones, because the faint half of a real boundary, the obliquely crossed pixels on the disc’s rim and along the diagonal bar, and the loud half of the noise occupy the same range of sharpness. The best value in the whole sweep is 0.9, keeping 5 flat pixels and losing 35 real ones.") },
+            ),
+          ],
         },
       ]}
     />

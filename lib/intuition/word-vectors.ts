@@ -1,0 +1,88 @@
+import { plot, step, story, strips, type LessonIntuition } from "./types";
+
+export const wordVectors: Record<string, LessonIntuition> = {
+  "a-vector-for-a-word": story([
+    "Suppose we want a search for cat to find a passage about kittens. Comparing exact spellings will miss the connection, and assigning each word an ID does not create it.",
+    "We need a representation that can express relationships. A word vector gives a word several numerical coordinates, with those coordinates chosen or learned for a particular purpose."
+  ], [
+    step("An ID tells us which word we have", "An ID works like a library catalogue number. It identifies an entry, but a neighbouring number need not identify a related entry. Arithmetic on arbitrary IDs will not reliably tell us which words belong together.", strips("These illustrative IDs are addresses, not measurements of meaning.", [["Vocabulary entries", ["cat → 103", "kitten → 814", "invoice → 104"]]])),
+    step("Give words positions we can compare", "Imagine placing words on a map so that related uses occupy nearby positions. A vector records the coordinates of a position. This drawing is a deliberately arranged picture of the idea, not a trained result.", plot("An illustrative arrangement with two coordinates.", [[1, 1], [1.5, 1.4], [4, 3.5]], "First coordinate", "Second coordinate", { labels: ["cat", "kitten", "invoice"] })),
+    step("Let a task determine useful positions", "A learning procedure can adjust vectors so they help predict context, classify text, or solve another task. Words used in similar ways can then acquire related representations. The task and training data determine which relationships are encouraged.", strips("The representation receives its usefulness from a learning objective.", [["Observed text", ["Words used in context"]], ["Learning task", ["Adjust vectors to improve predictions"]], ["Result", ["Positions that support that task"]]], true)),
+    step("Inspect what the map captures", "Once we have vectors, we still need a comparison rule. We can inspect nearby words and test whether those neighbours help our application. A small map can hide distinctions, and a single vector for bank may mix its different uses.", strips("A useful representation still needs an evaluation.", [["Inspect", ["Nearest words", "Different senses", "Performance on the intended task"]]]))
+  ], "Coordinates make relationships available to a model", [
+    "The lesson below first explores positions, lengths, and directions. Later lessons explain several ways to learn the coordinates from text.",
+    "A vector's individual coordinates need not have names such as animal or finance. Useful relationships can be distributed across many coordinates."
+  ]),
+  "distance-and-similarity": story([
+    "If two arrows point in the same direction but one is much longer, should we call them similar? That depends on what their direction and length represent.",
+    "Before comparing word vectors, we need to decide what kind of difference should matter. A comparison rule turns that decision into a number."
+  ], [
+    step("Compare two positions", "On a map, we often care about the direct gap between locations. Euclidean distance follows that idea: moving either endpoint changes the gap, even if both arrows from the origin still point in the same direction.", plot("A and B point along the same direction but end at different positions.", [[1, 1], [3, 3], [3, 1]], "First coordinate", "Second coordinate", { labels: ["A", "B", "C"], paths: [[[0, 0], [1, 1]], [[0, 0], [3, 3]]] })),
+    step("Compare directions instead", "Now imagine that arrow length records how much text we observed, while direction describes its mixture of topics. We may want two differently sized collections with the same mixture to count as similar. Cosine similarity compares direction.", strips("The same pair can agree in direction while differing in magnitude.", [["A and B", ["Same direction", "Different lengths"]], ["Cosine comparison", ["Treat the directions as matching"]]])),
+    step("Decide whether magnitude should contribute", "A dot product responds to both alignment and magnitude. It can give a larger score when an aligned vector grows longer. That can be useful when magnitude carries evidence, but misleading when magnitude is an irrelevant side effect.", strips("Choose the rule to match what the representation means.", [["If length carries useful evidence", ["Consider a magnitude-sensitive score"]], ["If length is irrelevant", ["Consider normalizing or comparing direction"]]])),
+    step("Check the meaning of the returned number", "Some functions return a distance, where smaller means closer. Others return a similarity score, where larger means more alike. Their ranges and special cases differ, so a ranking or threshold must use the right interpretation.", strips("The direction of the ranking is part of the rule.", [["Distance", ["Smaller usually means closer"]], ["Similarity", ["Larger usually means more alike"]]]))
+  ], "There is no comparison rule independent of the representation", [
+    "The worked examples now calculate the available comparisons on the same vectors so their different behaviour is visible.",
+    "We also check special cases, including zero-length vectors, before using a score in a search or classifier."
+  ]),
+  "word2vec": story([
+    "We can often guess something about an unfamiliar word from its neighbours. A word that repeatedly appears near knead, flour, and bake probably has something to do with cooking.",
+    "Word2Vec uses a related idea: learn word vectors while practising a small prediction task involving nearby words."
+  ], [
+    step("Choose a word and its local context", "Take one short stretch of text. The surrounding words supply evidence about how the chosen word is being used. A context window decides how far that evidence extends.", strips("An illustrative window, not a fitted prediction.", [["Text", ["we", "knead", "the", "dough", "before", "baking"], [3]], ["Nearby context", ["knead", "the", "before", "baking"]]])),
+    step("Turn that context into a prediction exercise", "In skip-gram, the chosen word is used to predict nearby words. In CBOW, nearby words are combined to predict the chosen word. Both create many small training examples from ordinary text.", strips("Two directions for the prediction task.", [["Skip-gram", ["dough", "Predict context words"]], ["CBOW", ["Context words", "Predict dough"]]])),
+    step("Adjust vectors when predictions are poor", "The model starts with vectors that have not learned these relationships. Training changes them to improve its context predictions. Words appearing in similar surroundings receive related learning signals, even when their spellings differ.", strips("The training task supplies a reason to move the vectors.", [["Current vectors", ["Make a context prediction"]], ["Prediction error", ["Adjust the vectors"]], ["Further examples", ["Repeat across the corpus"]]], true)),
+    step("Use the learned input vectors as representations", "After training, we can compare word vectors instead of making the original context predictions. Similar contexts can produce useful neighbours, but a tiny or biased corpus can produce misleading ones too.", strips("Inspect what the prediction exercise taught the representation.", [["After training", ["Compare neighbours", "Check corpus coverage", "Evaluate the intended use"]]]))
+  ], "Predicting context provides the learning signal", [
+    "The full example makes the window, training pairs, and update rule explicit. Its small corpus lets us inspect what the model actually saw.",
+    "The technical sections then explain efficient output objectives without requiring us to begin with their equations."
+  ]),
+  "fasttext": story([
+    "A model may have seen walking and walked without ever seeing walker. If it stores only separate whole-word vectors, that unfamiliar spelling has no learned entry of its own.",
+    "fastText shares information through short character sequences. Related spellings can reuse some of the same learned parts."
+  ], [
+    step("Notice what the unfamiliar word shares", "Walking and walker share letters in the same local order. Those shared sequences offer information that a whole-word lookup would ignore. They are spelling patterns, not a guaranteed grammatical analysis.", strips("The shared spelling motivates reuse.", [["Seen word", ["walking"]], ["Unseen word", ["walker"]], ["Shared beginning", ["walk"]]])),
+    step("Break spellings into overlapping character pieces", "A character n-gram is a short run of neighbouring characters. Overlapping pieces let several parts contribute to a word's representation. Boundary markers can distinguish a piece at the edge of a word.", strips("A simplified selection of three-character pieces, with boundary pieces omitted.", [["walking", ["wal", "alk", "lki", "kin", "ing"]], ["walker", ["wal", "alk", "lke", "ker"], [0, 1]]])),
+    step("Train shared pieces through word contexts", "When a word participates in the prediction task, its component vectors contribute to the prediction and receive updates. A useful piece can then contribute to more than one word.", strips("Shared pieces connect the learning from different spellings.", [["Word in context", ["Combine its component vectors"]], ["Prediction error", ["Update contributing components"]], ["Another word", ["Reuse shared components"]]], true)),
+    step("Construct a vector for a new spelling", "The new word can combine available learned subword information. This is useful only to the extent that its pieces or buckets received relevant training. An unusual spelling or accidental overlap can still give a poor representation.", strips("Composition gives a possible representation, not guaranteed understanding.", [["New word", ["Available subword components"]], ["Composed vector", ["Inspect its neighbours and usefulness"]]], true))
+  ], "Spelling creates a route for sharing learned information", [
+    "The detailed example shows the actual character pieces, their storage policy, and how their vectors are combined.",
+    "The held-out word lets us check the difference between composing an unseen spelling and retrieving a word that training already encountered."
+  ]),
+  "glove": story([
+    "Instead of looking at one context prediction at a time, we could first count which words occur near each other throughout a corpus. Those counts give us a larger picture of how words are used.",
+    "GloVe learns compact word vectors from this co-occurrence information. The first thing to understand is what that table records."
+  ], [
+    step("Collect nearby-word observations", "Each time we encounter a word, inspect its context window. Seeing bread near bake contributes evidence about that pair. Repeated observations accumulate rather than replacing earlier ones.", strips("One illustrative observation entering a corpus-wide record.", [["Local context", ["bake", "the", "bread"]], ["Recorded relationship", ["bread occurred near bake"]]], true)),
+    step("Build a table across the corpus", "A row represents a target word and a column represents a context word. Each cell records how often the pair met under the chosen window and weighting conventions.", strips("A schematic view of the table's meaning.", [["Row", ["Target word: bread"]], ["Columns", ["bake", "oven", "planet"]], ["Cells", ["Observed co-occurrence counts"]]])),
+    step("Look for informative differences", "A context shared widely by many words may distinguish them poorly. A context associated much more strongly with one word can reveal a useful difference. Relative co-occurrence patterns motivate how GloVe models the table.", strips("The informative question compares patterns across words.", [["Compare two target words", ["Which contexts occur with both?", "Which contexts distinguish them?"]]])),
+    step("Fit a compact representation of those counts", "GloVe adjusts word vectors, context vectors, and bias terms to approximate transformed co-occurrence counts. Weighting controls how observations contribute, so the fit is not a promise to reproduce every count exactly.", strips("The large observation table is represented through smaller learned components.", [["Observed table", ["Co-occurrence evidence"]], ["Learned components", ["Word vectors", "Context vectors", "Bias terms"]]], true))
+  ], "The observation table comes before the vector fit", [
+    "The technical explanation now introduces log counts, weighting, and the objective, with each calculation in its own block.",
+    "The learned vectors reflect the corpus and fitting choices. We inspect their neighbours rather than assuming a low training loss proves semantic understanding."
+  ]),
+  "latent-semantic-analysis": story([
+    "A collection of documents may discuss only a few recurring subjects, even though its vocabulary contains thousands of words. Can we describe those recurring patterns with fewer numbers?",
+    "Latent semantic analysis starts with a table of words and documents, then finds a smaller set of directions that approximates the table."
+  ], [
+    step("Describe documents with word counts", "Give each word a row and each document a column. A column is then a numerical description of the words in one document. This keeps word usage but discards word order.", strips("The starting representation has one coordinate per vocabulary word.", [["Cooking document", ["Counts for bread, oven, sail, sea, ..."]], ["Sailing document", ["Counts for the same vocabulary"]]])),
+    step("Notice words that vary together", "Across documents, bread and oven may tend to be present together, while sail and sea follow another pattern. Their rows are different, but they contain related information about the collection.", strips("A schematic pattern to look for, not measured corpus counts.", [["Some documents", ["bread", "oven"]], ["Other documents", ["sail", "sea"]]])),
+    step("Replace many coordinates with a few directions", "Singular value decomposition finds orthogonal directions that capture the table's strongest variation. Keeping only some directions gives a lower-rank approximation. These directions can combine many words at once.", strips("Compression retains selected patterns of variation.", [["Original description", ["Many word coordinates"]], ["Reduced description", ["A few retained direction coordinates"]]], true)),
+    step("Compare documents in the reduced space", "Documents can now be compared through their reduced coordinates. Some detail has been discarded, so inspect what the approximation retains and loses. A mathematical direction is not automatically a neatly named human topic.", strips("A smaller representation creates a tradeoff.", [["Retained", ["Broad patterns captured by selected directions"]], ["Discarded", ["Variation outside those directions"]]]))
+  ], "A smaller table representation can reveal shared usage", [
+    "The worked example introduces weighting, decomposition, and reconstruction in that order so each operation has a purpose.",
+    "Choosing the retained rank controls the approximation. The document examples let us inspect whether that compression helps the comparisons we care about."
+  ]),
+  "pointwise-mutual-information": story([
+    "The word the appears near many other words. A large count beside bread may tell us little about a special relationship, because the is common almost everywhere.",
+    "Pointwise mutual information asks whether a pair occurs together more often than we would expect from the individual words' frequencies."
+  ], [
+    step("Begin with an observed pair", "Count occasions when the two words meet under a defined context rule. The rule matters: adjacent words and words anywhere in the same document produce different observations.", strips("Define the observation before interpreting it.", [["Observed pair", ["bread", "oven"]], ["Context rule", ["A specified local window"]]])),
+    step("Build a baseline from separate frequencies", "Imagine pairing words independently while keeping their individual frequencies. Common words would still meet often under this baseline. That gives us something meaningful to compare with the observed pair frequency.", strips("The baseline removes a source of misleading raw counts.", [["Individual frequencies", ["How common is bread?", "How common is oven?"]], ["Independent baseline", ["How often would they meet without association?"]]], true)),
+    step("Compare observation with expectation", "A pair above the baseline has positive PMI. A pair at the baseline has zero PMI. A pair below the baseline has negative PMI. The logarithm expresses this relative comparison on an additive scale.", strips("The sign describes the pair relative to the baseline.", [["Above expectation", ["Positive PMI"]], ["At expectation", ["Zero PMI"]], ["Below expectation", ["Negative PMI"]]])),
+    step("Check whether the evidence is reliable", "A rare pair can receive a large score from very little evidence. Zero counts also require explicit treatment. Positive PMI clips negative values to zero, which changes what information the representation retains.", strips("A striking score may rest on a fragile count.", [["Inspect together", ["Association score", "Supporting count", "Zero-count policy"]]]))
+  ], "Association compares a count with a frequency-aware baseline", [
+    "The detailed calculation now derives the observed and expected probabilities from a small table before taking their ratio and logarithm.",
+    "We then distinguish raw PMI from positive PMI and inspect how sparse observations affect the resulting word representation."
+  ]),
+};

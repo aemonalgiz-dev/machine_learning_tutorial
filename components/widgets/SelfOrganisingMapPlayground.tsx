@@ -385,13 +385,9 @@ export function SelfOrganisingMapPlayground() {
         </text>
       </svg>
 
-      <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Each square is a cell, joined to its neighbours on the grid, and each
-        person wears the colour of the cell that won them. Switch the reach off
-        and the net falls apart into an ordinary grouping. Every change here is
-        a fresh fit from the same seed, not a step of one fit. Hover a square
-        for where it rests.
-      </p>
+      <>
+<p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">Each square represents a prototype vector. The lines show neighborhood relationships on the grid, and each observation takes the color of its closest prototype.</p><p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">Turn neighborhood reach off to remove updates to surrounding cells and inspect the resulting independent competition. Each control change runs a fresh fit from the same seed; it does not continue the previous fit. Hover over a square to read its fitted location.</p>
+</>
 
       <div className="mt-3 grid grid-cols-3 gap-3">
         <Stat

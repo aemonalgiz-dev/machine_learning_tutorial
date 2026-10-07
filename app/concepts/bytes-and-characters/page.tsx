@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { ScriptCostChart } from "@/components/widgets/ScriptCostChart";
 export const metadata: Metadata = {
   title: "Bytes and Characters · oop_ml",
   description:
-    "Read a text as the bytes or the characters it is already made of, so that no piece can ever be unfamiliar, and pay for it in length.",
+    "Compare character and byte representations, including their coverage and sequence lengths.",
 };
 
 const link =
@@ -32,8 +35,12 @@ const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
 export default function BytesAndCharactersPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["bytes-and-characters"]}
+      technicalStart="Part 2. Reading the Units the Text Is Already Made Of"
+      openingTitle="A Tiny Alphabet Can Spell a Very Long Sentence"
+      playgroundIntro="Compare the number of characters with the number of bytes. Inspect a character represented by multiple bytes and check the decoded result."
       title="Bytes and Characters"
-      tagline="Read a text as the units it is already made of, so that no piece can ever be unfamiliar, and pay for it in length."
+      tagline="Compare character and byte representations, including their coverage and sequence lengths."
       prerequisites={
         <>
           Two things from earlier in this section. The page on{" "}
@@ -51,82 +58,14 @@ export default function BytesAndCharactersPage() {
           and these can be read together.
         </>
       }
-      history={
-        <>
-          <p>
-            Ken Thompson and Rob Pike had a concrete problem at Bell Labs in
-            1992. Plan 9 was being rewritten to hold text from every writing
-            system rather than only from Latin ones, and every tool in it read a
-            file as a stream of bytes. A proposal in front of the X/Open group
-            would have let a byte belonging to one character reappear in the
-            middle of another, which meant that searching for a short string
-            could match in the middle of a longer one and that no program could
-            tell, from a byte, whether it was standing at the start of a
-            character. On the second of September, over dinner in a New Jersey
-            diner, Thompson worked out the encoding now called UTF-8 and sketched
-            it on a placemat, and the two of them had Plan 9 converted within the
-            week. Pike and Thompson described it the following January at the
-            USENIX conference in a paper whose title is written in three scripts,
-            &ldquo;Hello World, or Καλημέρα κόσμε, or こんにちは 世界&rdquo;. The
-            property Thompson insisted on that evening, that a byte announces
-            whether it begins a character or continues one, is the reason section
-            15 can say of any stopping point in a run of bytes whether it lands
-            in the middle of a letter.
-          </p>
-          <p>
-            Reading a text one character at a time is older than any of that as a
-            way of building a model, and it kept being returned to for one
-            reason. Ilya Sutskever, James Martens and Geoffrey Hinton, at
-            Toronto in 2011, trained a recurrent network to generate English
-            one character at a time in &ldquo;Generating Text with Recurrent
-            Neural Networks&rdquo;, and Alex Graves did the same in
-            &ldquo;Generating Sequences With Recurrent Neural Networks&rdquo; in
-            2013. What they were escaping was a word vocabulary of a hundred
-            thousand entries that still could not spell a name, and what they
-            paid was that the model had to assemble every word out of letters
-            before it could learn anything about the word. Yoon Kim, Yacine
-            Jernite, David Sontag and Alexander Rush kept both halves in
-            &ldquo;Character-Aware Neural Language Models&rdquo; in 2016 by
-            reading a word through its characters and then predicting whole
-            words.
-          </p>
-          <p>
-            The byte answer arrived with the large models. Alec Radford and
-            colleagues merged over the 256 byte values rather than over
-            characters for the second version of their language model in 2019,
-            and Linting Xue and colleagues went the whole way in 2022 with
-            &ldquo;ByT5: Towards a Token-Free Future with Pre-trained
-            Byte-to-Byte Models&rdquo;, a model with no tokenizer at all. Their
-            argument was that a learned vocabulary is a separate artefact that
-            has to be trained, shipped and kept in step with the model, that it
-            ages as the language it was fitted to changes, and that it handles
-            misspellings and unusual spellings badly. Their measured cost was
-            sequences three to four times longer. A year later Aleksandar
-            Petrov, Emanuele La Malfa, Philip Torr and Adel Bibi turned that cost
-            into a question about who pays it, in &ldquo;Language Model
-            Tokenizers Introduce Unfairness Between Languages&rdquo;, and Part 5
-            here is that question asked of the two readings on this page.
-          </p>
-          <p>
-            The page answers six questions in order. What does a piece it has
-            never seen actually cost a vocabulary that was learned from a corpus?
-            What is left if we refuse to learn one and read the units the writing
-            is already made of? What exactly does a fixed alphabet of 256
-            guarantee, and what does it not? Where do a byte and a character part
-            company, and what does each reading then promise when the numbers are
-            read back? What does all this cost in sequence length, and why is
-            that bill not shared evenly between languages? And where does the
-            method stop being defined at all?
-          </p>
-        </>
-      }
+
       playground={<ByteCharacterExplorer />}
       sections={[
         {
           title: "Part 1. What an Unfamiliar Piece Costs",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. One sentence, and eighteen sentences it is not in">
                 <p>
                   Every page in this section carries the same sentence, and this
@@ -249,7 +188,7 @@ export default function BytesAndCharactersPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Reading the Units the Text Is Already Made Of",
@@ -309,17 +248,10 @@ export default function BytesAndCharactersPage() {
                     "the number    =  the byte value itself"}
                 </Equation>
                 <p>
-                  The number an entry goes in as is the byte value, so there is
-                  nothing to look up in either direction. What does need a
-                  decision is how to write the entries down, since a table is
-                  read by people and 68 of the 256 values have nothing visible to
-                  stand for them, the control characters and the space among
-                  them. The usual answer, and the one used here, lets the other
-                  188 stand for themselves and lends those 68 a shape from a
-                  block of letters no byte value occupies, which is why the space
-                  shows up as Ġ in the playground above. The choice is arbitrary
-                  in every respect except that it is fixed, and it does not
-                  affect a single number.
+                  The number an entry goes in as is the byte value, so there is nothing to look up in either direction. What does need a decision is how to write the entries down, since a table is read by people and 68 of the 256 values have nothing visible to stand for them, the control characters and the space among them.
+                </p>
+                <p>
+                  The usual answer, and the one used here, lets the other 188 stand for themselves and lends those 68 a shape from a block of letters no byte value occupies, which is why the space shows up as Ġ in the playground above. The choice is arbitrary in every respect except that it is fixed, and it does not affect a single number.
                 </p>
                 <KeepInMind>
                   There is no stand-in entry here, deliberately. Nothing can be
@@ -379,15 +311,19 @@ export default function BytesAndCharactersPage() {
                   piece goes in as would simply be its codepoint, no corpus, no
                   stand-in, one number per character rather than one per byte.
                 </p>
-                <p>
-                  The answer is arithmetic rather than principle. Unicode has
-                  room for 1,114,112 codepoints, a model gives every entry of the
-                  table a row of numbers to learn, and at an ordinary width of
-                  768 that comes to 855,638,016 numbers, which is more than the
-                  whole of many complete language models, for a table almost
-                  every row of which no text will ever touch. The byte table at
-                  the same width costs 196,608, which is 4,352 times fewer.
-                </p>
+                <>
+                  <p>
+                    Allocating a learned row for every possible Unicode code point would
+                    make a very large embedding table, including many rows that text
+                    never uses. Compare that with one row per byte value at the same
+                    width.
+                  </p>
+                  <Equation>{"code-point table = 1,114,112 × 768 = 855,638,016 values\nbyte table = 256 × 768 = 196,608 values\nstorage ratio = 1,114,112 / 256 = 4,352"}</Equation>
+                  <p>
+                    The smaller table is the attraction of byte inputs. Later sections
+                    measure their cost in sequence length.
+                  </p>
+                </>
                 <NumberTable
                   headings={["one entry per", "entries", "numbers at a width of 768"]}
                   rows={[
@@ -409,6 +345,54 @@ export default function BytesAndCharactersPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "The merged table reads the sentence as 25 numbers and does not give it back. What went wrong?",
+              [
+                "The corpus never contained the letter z",
+                "The corpus contains z but no word ending in z, and a letter at the end of a word is a different symbol",
+                "The surname is longer than any merged piece",
+                "The table was fitted to too few merges",
+              ],
+              1,
+              "Losing the letter costs one character. Losing the word boundary costs more, because a stand-in carries no boundary, so everything after it reads as part of the word in front and the surname and the contraction come back joined. What a vocabulary holds are the pieces its corpus happened to form, not the letters it happened to contain.",
+            ),
+            trueFalse(
+              "The merged table turns the 21 characters of the Greek sentence into 18 numbers, and nothing in those numbers tells it from any other Greek sentence with the same count of letters.",
+              true,
+              "Seventeen of the 18 are the same stand-in and the last is a full stop. The stand-in destroys the difference between everything it covers, so a model shown this is not shown a degraded sentence. What arrives is the fact that something unreadable was there, seventeen times over, with the spaces gone as well.",
+            ),
+            choice(
+              "The first piece of the sentence is D, which goes in as 68 under the byte reading and as 7 under the character reading. What could a different corpus change?",
+              [
+                "The 7 and not the 68",
+                "The 68 and not the 7",
+                "Both numbers",
+                "Neither number",
+              ],
+              0,
+              "The 68 is the byte value of D and would be 68 whatever anybody had read. The 7 is where D happens to sit once the 36 characters of these eighteen sentences are put in the order Unicode gives them, so a corpus without a capital A in it would have made D a 6. Shuffling the same sentences changes neither, since that order depends on which characters were used and on nothing else.",
+            ),
+            trueFalse(
+              "The byte table has no stand-in entry because no text has yet needed one.",
+              false,
+              "It has none deliberately. Nothing can be unfamiliar to a table that already holds every byte value, so an entry meaning something else could never legitimately be reached, and a table that had one would hide a fault behind a plausible-looking answer rather than showing it.",
+            ),
+            choice(
+              "Why is the complete table on this page the byte one rather than a table with a row per Unicode codepoint?",
+              [
+                "A codepoint table would still leave characters out",
+                "At a width of 768 it would come to 855,638,016 values, more than many whole models",
+                "Codepoints are not fixed, so the table would have to be refitted",
+                "A codepoint table cannot give an exact round trip",
+              ],
+              1,
+              "A codepoint table really would be complete, and that is not the objection. The byte table at the same width is 196,608 values, a ratio of 4,352, and many of the codepoint rows would be for characters no text ever uses. Making the character case affordable means giving up on storing a table at all.",
+            ),
+        ],
         },
         {
           title: "Part 3. What the Fixed Alphabet Guarantees",
@@ -527,8 +511,9 @@ export default function BytesAndCharactersPage() {
                 <p>
                   Everything so far has quietly used one sentence in which the
                   two readings agree, and it is time to stop. The encoding that
-                  turns characters into bytes does not use the same number of
-                  bytes for every character. It uses one byte for the characters
+                  turns characters into bytes, which is UTF-8 everywhere on this
+                  page, does not use the same number of bytes for every
+                  character. It uses one byte for the characters
                   of basic English, two for most accented Latin letters and for
                   Greek, Cyrillic, Hebrew and Arabic, three for the Indic scripts
                   and for Chinese, Japanese and Korean, and four for the rest,
@@ -612,16 +597,10 @@ export default function BytesAndCharactersPage() {
                 </p>
                 <ByteCharacterRoundTrip />
                 <p>
-                  The byte reading is exact three times out of three and would be
-                  exact on any text put to it. The character reading is exact on
-                  the first and loses two characters on the second and seventeen
-                  on the third, and what it gives back in place of them is the
-                  stand-in&rsquo;s own spelling, so the two Scandinavian letters
-                  come back as a word with two square-bracketed markers embedded
-                  in it. The failure is the same shape as the merged
-                  vocabulary&rsquo;s in Part 1, and it is smaller only because a
-                  character table is surprised less often than a table of merged
-                  pieces.
+                  The byte reading is exact three times out of three and would be exact on any text put to it. The character reading is exact on the first and loses two characters on the second and seventeen on the third, and what it gives back in place of them is the stand-in&rsquo;s own spelling, so the two Scandinavian letters come back as a word with two square-bracketed markers embedded in it.
+                </p>
+                <p>
+                  The failure is the same shape as the merged vocabulary&rsquo;s in Part 1, and it is smaller only because a character table is surprised less often than a table of merged pieces.
                 </p>
                 <KeepInMind>
                   Reading a text as its characters gives an exact round trip on
@@ -647,16 +626,13 @@ export default function BytesAndCharactersPage() {
                     "169 alone  =  �"}
                 </Equation>
                 <p>
-                  What comes back in place of a broken position is the mark
-                  above, which means that a character stood here and could not be
-                  read. Of the 256 numbers in the table, exactly 128 stand for a
-                  character on their own and the other 128 do not, since they only
-                  ever continue the number in front of them. That is not an edge
-                  case reached by malformed input. It is what a model generating
-                  numbers one at a time walks into every time it is interrupted,
-                  and the widget below shows how often. The Greek sentence has 38
-                  numbers and 17 of its 38 stopping points land in the middle of a
-                  letter; the English sentence has 24 numbers and none of them do.
+                  What comes back in place of a broken position is the mark above, which means that a character stood here and could not be read. The two halves of the letter fail for different reasons. The 195 opens a two-byte character and means nothing until the number after it arrives, and the 169 finishes a character and means nothing without the number that opened it.
+                </p>
+                <p>
+                  Of the 256 numbers in the table, exactly 128 stand for a character on their own, the values 0 to 127, which are the one-byte characters of basic English. The other 128, the values 128 to 255, are never a character alone. They occur only inside a character of two, three or four bytes, so a run that stops just after one of them may have stopped in the middle of a letter.
+                </p>
+                <p>
+                  That is not an edge case reached by malformed input. It is what a model generating numbers one at a time walks into every time it is interrupted, and the widget below shows how often. The Greek sentence has 38 numbers and 17 of its 38 stopping points land in the middle of a letter; the English sentence has 24 numbers and none of them do.
                 </p>
                 <PartialByteRun />
                 <p>
@@ -678,6 +654,54 @@ export default function BytesAndCharactersPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "One sentence of each of twelve languages is added in turn. What happens to the two table sizes?",
+              [
+                "Both climb, the character count faster",
+                "The character count climbs from 36 to 117 and is still rising, while the byte table is 256 at every point",
+                "The character count settles once Greek and Russian have been added",
+                "The byte table grows to 103, which is what the twelve texts touch",
+              ],
+              1,
+              "Nothing about that curve suggests it is about to flatten, since Han alone has tens of thousands of characters and these texts have met six of them. Only 103 byte values are ever touched by all thirty texts, so 153 entries are carried unused, which is what the guarantee costs when it is paid in entries rather than in coverage.",
+            ),
+            trueFalse(
+              "Because every byte value is in the table, a model that has only ever read English can read a Chinese sentence.",
+              false,
+              "Representable and learnable are separate questions and only the first is settled by the guarantee. What changes is where the failure happens. Under a learned vocabulary an unfamiliar text fails at the tokenizer, before the model is reached, and under a byte reading it arrives intact and fails inside the model, where more training data can still change the answer.",
+            ),
+            choice(
+              "Why did the running sentence come to 51 numbers under both readings?",
+              [
+                "The two tables were fitted to the same corpus",
+                "It is written entirely in characters that take one byte each, so the two readings cut it in the same places",
+                "The character table reserves an entry for anything else, which makes up the difference",
+                "Both readings drop the spaces",
+              ],
+              1,
+              "The encoding uses one byte for basic English, two for most accented Latin letters and for Greek, Cyrillic, Hebrew and Arabic, three for the Indic scripts and for Chinese, Japanese and Korean, and four for the rest. An English sentence cannot show the difference between the two methods, so a measurement taken only on English will report that there is none.",
+            ),
+            trueFalse(
+              "The character reading gives an exact round trip only on text spelled in characters its corpus met, where the byte reading gives one on any text.",
+              true,
+              "The character reading’s promise is conditional and the byte reading’s has no condition attached. On the three texts of Part 4 the character reading is exact on the running sentence, loses two characters on the accented one and seventeen on the Greek, handing back the stand-in’s own spelling in their place. The byte reading is exact on all three.",
+            ),
+            several(
+              "A run of byte numbers can stop part way through a character. Which of these hold of such a run?",
+              [
+                "Exactly 128 of the 256 numbers stand for a character on their own",
+                "17 of the Greek sentence’s 38 stopping points land in the middle of a letter, against none of the English sentence’s 24",
+                "It is an unfamiliar piece, so it comes back as the stand-in",
+                "It arises only when the input was malformed",
+              ],
+              [0, 1],
+              "The other 128 numbers are never a character alone, as with the 195 and 169 that spell é together and each come back as the broken-character mark apart. Such a run is not an unfamiliar piece and not a refusal, since the byte table has no stand-in to give. It is also no edge case, because it is what a model generating one number at a time walks into whenever it is interrupted.",
+            ),
+        ],
         },
         {
           title: "Part 5. The Cost, and Who Pays It",
@@ -703,16 +727,16 @@ export default function BytesAndCharactersPage() {
                 />
                 <InAModel>
                   <p>
-                    A model that lets every position read every other position
-                    does a piece of work for each pair of positions, so its cost
-                    grows with the square of the sequence length. Nearly three
-                    times the numbers is therefore around eight times the work on
-                    the same writing, and any fixed limit on how much a model can
-                    hold at once holds a third as much of it. That is why reading
-                    bytes is expensive rather than merely long, and why it is
-                    usually paired with a step that groups the bytes back into
-                    larger units before the expensive part of the model sees
-                    them.
+                    A model that lets every position read every other position does a piece of work for each pair of positions, so its cost grows with the square of the sequence length. The ratio of the two corpus readings is the ratio of lengths, and squaring it gives the ratio of work.
+                  </p>
+                  <Equation>
+                    {"763 / 263    ≈  2.90\n" + "2.90 × 2.90  ≈  8.4"}
+                  </Equation>
+                  <p>
+                    Nearly three times the numbers is therefore around eight times the work on the same writing, and any fixed limit on how much a model can hold at once holds a third as much of it.
+                  </p>
+                  <p>
+                    That is why reading bytes is expensive rather than merely long, and why it is usually paired with a step that groups the bytes back into larger units before the expensive part of the model sees them.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -768,6 +792,30 @@ export default function BytesAndCharactersPage() {
                   3.00, since every character in both sentences takes three bytes
                   and neither sentence contains a space.
                 </p>
+                <WorkedExample title="Where the Greek sentence’s 1.81 comes from">
+                  <p>
+                    The Greek sentence is 21 characters. Seventeen of them are
+                    Greek letters at two bytes each, and the other four are
+                    three spaces and a full stop at one byte each.
+                  </p>
+                  <Equation>
+                    {"Η έκθεση έφτασε αργά.\n" +
+                      "\n" +
+                      "letters               17 × 2  =  34 bytes\n" +
+                      "spaces and stop        4 × 1  =   4 bytes\n" +
+                      "\n" +
+                      "bytes                 34 + 4  =  38\n" +
+                      "bytes per character  38 / 21  ≈  1.81"}
+                  </Equation>
+                  <p>
+                    A sentence of two-byte letters never reaches 2.00, because
+                    the characters that separate its words are still the
+                    one-byte ones. The more spaces and punctuation a sentence
+                    has for its length, the further below two its ratio falls,
+                    which is all that separates the Greek, Russian and Arabic
+                    figures from one another.
+                  </p>
+                </WorkedExample>
                 <KeepInMind>
                   A reader of English pays nothing for the guarantee and a reader
                   of Chinese pays three times over on this measure, and neither
@@ -805,16 +853,10 @@ export default function BytesAndCharactersPage() {
                   caption="The same sentence twelve ways, ordered by what the byte reading actually charges for it."
                 />
                 <p>
-                  The Chinese sentence is the cheapest of the twelve. It pays the
-                  worst multiplier on the page and still costs 18 numbers against
-                  English&rsquo;s 24, because it says the same thing in six
-                  characters where English takes twenty-four. Hindi is the most
-                  expensive at 48, twice the English figure, and it gets there
-                  with fewer characters than English uses. So the textbook
-                  statement that a byte reading charges non-Latin scripts three
-                  times as much did not hold when I measured the thing a model is
-                  actually charged for, and the language it is worst for on this
-                  list is not one of the three-byte ones.
+                  The Chinese sentence is the cheapest of the twelve. It pays the worst multiplier on the page and still costs 18 numbers against English&rsquo;s 24, because it says the same thing in six characters where English takes twenty-four. Hindi is the most expensive at 48, twice the English figure, and it gets there with fewer characters than English uses.
+                </p>
+                <p>
+                  So the textbook statement that a byte reading charges non-Latin scripts three times as much did not hold when I measured the thing a model is actually charged for, and the language it is worst for on this list is not one of the three-byte ones.
                 </p>
                 <WhyThisWorks title="Why a shorter reading can still be an empty one">
                   <p>
@@ -851,15 +893,10 @@ export default function BytesAndCharactersPage() {
                   reader would point at in several ordinary cases.
                 </p>
                 <p>
-                  The word café can be written two ways that look identical on
-                  the page. One spells the last letter as a single codepoint; the
-                  other spells it as a plain e followed by a codepoint meaning
-                  &ldquo;put an acute accent on the thing before me&rdquo;. Those
-                  are 4 characters and 5 characters, 5 bytes and 6 bytes, and they
-                  are different texts by every comparison a computer makes, so a
-                  model reads them as different words. Emoji make it worse, since
-                  a tinted thumb is two codepoints, a family is five and a Welsh
-                  flag is seven, and a reader would call each of those one mark.
+                  The word café can be written two ways that look identical on the page. One spells the last letter as a single codepoint; the other spells it as a plain e followed by a codepoint meaning &ldquo;put an acute accent on the thing before me&rdquo;. Those are 4 characters and 5 characters, 5 bytes and 6 bytes, and they are different texts by every comparison a computer makes, so a model reads them as different words.
+                </p>
+                <p>
+                  Emoji make it worse, since a tinted thumb is two codepoints, a family is five and a Welsh flag is seven, and a reader would call each of those one mark.
                 </p>
                 <NumberTable
                   headings={["one thing a reader would point at", "characters", "bytes"]}
@@ -874,16 +911,10 @@ export default function BytesAndCharactersPage() {
                   caption="Every one of these comes back exactly under the byte reading, which does not need to have an opinion about any of it."
                 />
                 <p>
-                  There are three defensible answers and each costs something.
-                  Counting codepoints is simple and splits marks a reader
-                  considers single. Counting what Unicode calls grapheme clusters
-                  matches a reader and needs a large body of tables that has to be
-                  shipped and updated. Rewriting every text into one preferred
-                  spelling before reading it makes the two cafés the same word and
-                  makes the round trip inexact, which is a real loss for anything
-                  that has to reproduce its input. The byte reading avoids the
-                  question entirely, and pays for that by having no notion of a
-                  character at all.
+                  There are three defensible answers and each costs something. Counting codepoints is simple and splits marks a reader considers single. Counting what Unicode calls grapheme clusters matches a reader and needs a large body of tables that has to be shipped and updated. Rewriting every text into one preferred spelling before reading it makes the two cafés the same word and makes the round trip inexact, which is a real loss for anything that has to reproduce its input.
+                </p>
+                <p>
+                  The byte reading avoids the question entirely, and pays for that by having no notion of a character at all.
                 </p>
                 <KeepInMind>
                   A character count is only defined once somebody says which of
@@ -912,16 +943,10 @@ export default function BytesAndCharactersPage() {
                   from section 16 read as a distance rather than as a cost.
                 </p>
                 <p>
-                  And there is nothing here that knows a piece is common. The
-                  whole of what a learned vocabulary buys is that frequent things
-                  become cheap, since the merging spends its entries on what
-                  recurs and leaves the rest to be spelled out. Both readings on
-                  this page charge for every character alike, so the three-letter
-                  word the costs three numbers every time it appears and would
-                  still cost three if it were the only word in the language.
-                  Giving that up is what buys the coverage guarantee, and putting
-                  it back is the job of whatever groups the bytes into larger
-                  units afterwards.
+                  And there is nothing here that knows a piece is common. The whole of what a learned vocabulary buys is that frequent things become cheap, since the merging spends its entries on what recurs and leaves the rest to be spelled out. Both readings on this page charge for every character alike, so the three-letter word the costs three numbers every time it appears and would still cost three if it were the only word in the language.
+                </p>
+                <p>
+                  Giving that up is what buys the coverage guarantee, and putting it back is the job of whatever groups the bytes into larger units afterwards.
                 </p>
                 <KeepInMind>
                   These two methods have no model of the writing beyond how it is
@@ -957,7 +982,7 @@ export default function BytesAndCharactersPage() {
                     {
                       expression: "a run of numbers that stops mid-character",
                       reason:
-                        "not text, and the encoding says so rather than leaving it open. Of the 256 numbers, 128 only ever continue the number before them, so 17 of the 38 stopping points in the Greek reading stand for nothing. Refusing such a run and marking each broken position are both defensible; refusing means refusing most of a half-finished generation.",
+                        "not text, and the encoding says so rather than leaving it open. Of the 256 numbers, 128 are never a character on their own, so 17 of the 38 stopping points in the Greek reading stand for nothing. Refusing such a run and marking each broken position are both defensible; refusing means refusing most of a half-finished generation.",
                     },
                     {
                       expression: "a number outside the table",
@@ -1001,6 +1026,319 @@ export default function BytesAndCharactersPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            several(
+              "What does refusing to learn a vocabulary cost, as measured on this page?",
+              [
+                "Two to three times the sequence length on English, 263 pieces against 763 across the corpus",
+                "Around eight times the work in a model whose cost grows with the square of the sequence length",
+                "Three numbers for the word the every time it appears, however common it is",
+                "The exact round trip",
+              ],
+              [0, 1, 2],
+              "The round trip is the one thing the byte reading keeps unconditionally, so giving up the exact round trip is the opposite of the trade. Both readings here charge for every character alike, which is exactly what a learned vocabulary buys back by spending its entries on what recurs.",
+            ),
+            trueFalse(
+              "On English the byte reading is worse than the character reading on both of the two numbers a reading is judged on.",
+              true,
+              "It carries nearly seven times the entries, 256 against 37, for exactly the same sequence length and the same exact round trip. Anybody measuring the two on English alone should conclude the byte reading is strictly worse, and on English alone they would be right, which is the argument for measuring it on something else before choosing.",
+            ),
+            choice(
+              "Measured by the numbers a model is actually charged for, which of the twelve sentences is cheapest?",
+              ["English, at 24", "Chinese, at 18", "Greek, at 38", "Hindi, at 48"],
+              1,
+              "Chinese pays the worst multiplier on the page, exactly 3.00 per character, and is still the cheapest of the twelve, because it says the same thing in six characters where English takes twenty-four. Hindi is the most expensive at 48 and gets there with fewer characters than English uses, so the textbook claim about three-byte scripts did not survive the measurement.",
+            ),
+            trueFalse(
+              "A shorter reading of a text is the better reading of it.",
+              false,
+              "The merged vocabulary reads the English sentence as 8 numbers, every one of them a real piece, and the Chinese sentence as 6 numbers, every one of them the stand-in. The shorter reading is the one that carries nothing. Sequence length is only comparable between two readings that both represent the text.",
+            ),
+            choice(
+              "The word café can be written two ways that look identical on the page. What follows?",
+              [
+                "They are the same text, since nothing visible distinguishes them",
+                "They are 4 characters and 5 characters, and different texts by every comparison a computer makes",
+                "Rewriting both into one preferred spelling costs nothing",
+                "The byte reading can tell them apart and the character reading cannot",
+              ],
+              1,
+              "They are also 5 bytes and 6 bytes, and a model reads them as two different words. Rewriting every text into one preferred spelling does make them the same word, and it makes the round trip inexact, which is a real loss for anything that has to reproduce its input. A character count is only defined once somebody says which of the three readings of character they meant.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Reading Text as Bytes and as Characters",
+          practice: [
+            exercise(
+              "Read three texts as characters and as bytes",
+              ["Fit the character reading on the eighteen sentences and build the byte reading, which is fitted on nothing. Put the running sentence, the sentence with two Scandinavian letters and the Greek sentence to both, and print for each how many numbers it became, how many of them are the stand-in, and whether decoding the numbers gives the text back exactly.", "The rows should be the table of section 13 with the round trip of section 14 beside it. The two readings agree on the first text and on nothing else, and the byte reading should be exact three times out of three."],
+              `from oop_ml import ByteTokenizer, CharacterTokenizer
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+texts = {
+    "running": "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "accented": "Dr. Alvarez didn't expect the low-cost re-analysis in Ångström units.",
+    "greek": "Η έκθεση έφτασε αργά.",
+}
+
+# Fit a CharacterTokenizer on the corpus and build a ByteTokenizer, and
+# print how many entries each table holds. Then, for each text under each
+# reading, print the count of numbers, the count of tokens whose text is
+# the table's unknown token, and whether decode gives the text back.`,
+              `from oop_ml import ByteTokenizer, CharacterTokenizer
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+texts = {
+    "running": "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "accented": "Dr. Alvarez didn't expect the low-cost re-analysis in Ångström units.",
+    "greek": "Η έκθεση έφτασε αργά.",
+}
+
+readings = {"characters": CharacterTokenizer().fit(corpus), "bytes": ByteTokenizer()}
+for name, reading in readings.items():
+    print(f"{name} table: {reading.vocabulary.n_tokens} entries")
+
+for label, text in texts.items():
+    for name, reading in readings.items():
+        encoding = reading.encode(text)
+        stand_in = reading.vocabulary.unknown_token
+        unseen = sum(token.text == stand_in for token in encoding)
+        exact = reading.decode(encoding.ids) == text
+        print(f"{label:9s} {name:10s} {encoding.n_tokens} numbers  {unseen} unseen  exact {exact}")`,
+              `characters table: 37 entries
+bytes table: 256 entries
+running   characters 51 numbers  0 unseen  exact True
+running   bytes      51 numbers  0 unseen  exact True
+accented  characters 69 numbers  2 unseen  exact False
+accented  bytes      71 numbers  0 unseen  exact True
+greek     characters 21 numbers  17 unseen  exact False
+greek     bytes      38 numbers  0 unseen  exact True`,
+              { hints: ["CharacterTokenizer is constructed with nothing and fitted on the list of sentences, and fit answers the fitted reading. ByteTokenizer is constructed with nothing and never fitted.", "Either reading’s table is its vocabulary, which knows n_tokens and its unknown_token. The byte table’s unknown token is None, so no token’s text can equal it and its count of stand-ins is always zero.", "encode answers an encoding with n_tokens and ids, and iterating over it gives tokens that carry text. decode takes the ids and answers a string to compare with the text."], check: numberCheck("How many numbers does the Greek sentence become under the byte reading?", 38, 0.0, "The Greek sentence is 21 characters, 17 of them letters at two bytes each and 4 of them spaces and a full stop at one byte each, which comes to 38. The character reading spends 21 numbers on it and 17 of those are the stand-in, so the shorter reading is the one that lost the sentence, and only the byte reading gives it back.") },
+            ),
+            exercise(
+              "Charge one sentence in twelve languages",
+              ["Section 19 wrote one short sentence in twelve languages and measured what the byte reading charges for each. Encode each of the twelve under the byte reading, and print the characters, the bytes and the bytes per character to two places, then the totals across all twelve.", "The twelve rows should match the table in section 19, with Chinese cheapest at 18 and Hindi dearest at 48. The page does not add the column up, so read off how many numbers the twelve sentences cost altogether and what the ratio is across all of them."],
+              `from oop_ml import ByteTokenizer
+
+sentences = {
+    "English": "The report arrived late.",
+    "French": "Le rapport est arrivé en retard.",
+    "German": "Der Bericht kam zu spät.",
+    "Spanish": "El informe llegó tarde.",
+    "Polish": "Raport dotarł późno.",
+    "Greek": "Η έκθεση έφτασε αργά.",
+    "Russian": "Отчёт пришёл поздно.",
+    "Arabic": "وصل التقرير متأخرا.",
+    "Hindi": "रिपोर्ट देर से आई।",
+    "Korean": "보고서가 늦게 도착했다.",
+    "Japanese": "報告書は遅れて届いた。",
+    "Chinese": "报告迟到了。",
+}
+reading = ByteTokenizer()
+
+# For each language, encode its sentence and print the language, the
+# number of characters, the number of bytes, and the ratio to two places.
+# Keep running totals of both counts and print them with their ratio.`,
+              `from oop_ml import ByteTokenizer
+
+sentences = {
+    "English": "The report arrived late.",
+    "French": "Le rapport est arrivé en retard.",
+    "German": "Der Bericht kam zu spät.",
+    "Spanish": "El informe llegó tarde.",
+    "Polish": "Raport dotarł późno.",
+    "Greek": "Η έκθεση έφτασε αργά.",
+    "Russian": "Отчёт пришёл поздно.",
+    "Arabic": "وصل التقرير متأخرا.",
+    "Hindi": "रिपोर्ट देर से आई।",
+    "Korean": "보고서가 늦게 도착했다.",
+    "Japanese": "報告書は遅れて届いた。",
+    "Chinese": "报告迟到了。",
+}
+reading = ByteTokenizer()
+
+total_characters = 0
+total_bytes = 0
+for language, sentence in sentences.items():
+    n_bytes = reading.encode(sentence).n_tokens
+    total_characters += len(sentence)
+    total_bytes += n_bytes
+    print(f"{language:9s} {len(sentence):3d} characters {n_bytes:3d} bytes  {n_bytes / len(sentence):.2f}")
+
+print(f"all twelve: {total_characters} characters, {total_bytes} bytes")
+print(f"bytes per character over all twelve: {total_bytes / total_characters:.2f}")`,
+              `English    24 characters  24 bytes  1.00
+French     32 characters  33 bytes  1.03
+German     24 characters  25 bytes  1.04
+Spanish    23 characters  24 bytes  1.04
+Polish     20 characters  23 bytes  1.15
+Greek      21 characters  38 bytes  1.81
+Russian    20 characters  37 bytes  1.85
+Arabic     19 characters  35 bytes  1.84
+Hindi      18 characters  48 bytes  2.67
+Korean     13 characters  33 bytes  2.54
+Japanese   11 characters  33 bytes  3.00
+Chinese     6 characters  18 bytes  3.00
+all twelve: 231 characters, 371 bytes
+bytes per character over all twelve: 1.61`,
+              { hints: ["The byte reading gives one number per byte, so the n_tokens of a sentence’s encoding is its length in bytes, and len of the sentence is its length in characters as the page counts them.", "Print only the language name and the counts. The sentences themselves are in a dozen scripts, and a terminal that cannot show one of them would stop the script part way.", "The ratio over all twelve is the total of the bytes divided by the total of the characters, which is not the average of the twelve ratios."], check: numberCheck("How many numbers do the twelve sentences cost altogether under the byte reading?", 371, 0.0, "The twelve sentences are 231 characters and 371 bytes, so the byte reading charges 1.61 numbers a character across the whole list. English contributes 24 of those and Hindi 48 for the same meaning, which is section 19’s point that the bill is set by the total a sentence comes to, where the per-character ratio says only what the writing system costs.") },
+            ),
+            exercise(
+              "Stop a run of byte numbers at every position",
+              ["Section 15 stopped the byte reading of a sentence after every number in turn and asked whether what had arrived so far was text. Do that for the Greek, the English and the Chinese sentence. Decode the first one, two, three numbers and so on, and count the stopping points where the decoded string holds the mark for a character that could not be read.", "Greek should break at 17 of its 38 stopping points and English at none of its 24, as the page says. The page does not print the Chinese figure, so work out what you expect for six characters of three bytes each before you run it."],
+              `from oop_ml import ByteTokenizer
+
+sentences = {
+    "Greek": "Η έκθεση έφτασε αργά.",
+    "English": "The report arrived late.",
+    "Chinese": "报告迟到了。",
+}
+BROKEN = "\\ufffd"
+reading = ByteTokenizer()
+
+# For each sentence, take the ids of its encoding as a list. For every
+# cut from 1 to the number of ids, decode the first cut ids and count the
+# cuts whose decoded string contains BROKEN. Print the count for each.`,
+              `from oop_ml import ByteTokenizer
+
+sentences = {
+    "Greek": "Η έκθεση έφτασε αργά.",
+    "English": "The report arrived late.",
+    "Chinese": "报告迟到了。",
+}
+BROKEN = "\\ufffd"
+reading = ByteTokenizer()
+
+for language, sentence in sentences.items():
+    numbers = list(reading.encode(sentence).ids)
+    broken = 0
+    for cut in range(1, len(numbers) + 1):
+        if BROKEN in reading.decode(numbers[:cut]):
+            broken += 1
+    print(f"{language}: {broken} of {len(numbers)} stopping points are not text")`,
+              `Greek: 17 of 38 stopping points are not text
+English: 0 of 24 stopping points are not text
+Chinese: 12 of 18 stopping points are not text`,
+              { hints: ["The ids of an encoding can be turned into a list, and a slice of that list up to cut is the run a model would have produced had it been stopped there.", "decode does not refuse a run that stops inside a character. It answers a string with the broken-character mark at each broken position, so the test is whether that mark is in the string.", "A three-byte character has two stopping points inside it and one at its end. Only the one at its end leaves text behind."], check: numberCheck("At how many of its 18 stopping points is the Chinese sentence not text?", 12, 0.0, "Each of the six characters takes three bytes, so two of every three stopping points fall inside a character and 12 of the 18 leave a run that is not text. Greek breaks at 17 of 38 because its 17 letters are two bytes each, with one stopping point inside each letter, and English never breaks because every character is complete after one byte. The scripts that pay most in length are also the ones a half-finished run is most likely to break in.") },
+            ),
+            exercise(
+              "Price the byte reading against a vocabulary that was learned",
+              ["Fit the library’s byte pair encoder on the eighteen sentences the way Part 1 does, with no byte fallback and a vocabulary size of 300, which is more than this corpus can fill, so the merging runs until no pair occurs twice. Print the entries and merges it finished with, read the running sentence with it and decode the numbers, then count what the whole corpus costs under it and under the byte reading.", "The table should come to 137 entries after 85 merges, the sentence to 25 numbers that do not decode to the sentence, and the corpus to 263 numbers against 763. The ratio of the last two, to two places, is the price Part 5 puts on refusing to learn a vocabulary."],
+              `from oop_ml import BytePairEncoding, ByteTokenizer
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+# Fit BytePairEncoding(byte_fallback=False, vocabulary_size=300) on the
+# corpus and print its table size and number of merges. Encode the
+# sentence, print how many numbers it became and what they decode to.
+# Then total the numbers the corpus costs under the merged reading and
+# under a ByteTokenizer, and print both with their ratio to two places.`,
+              `from oop_ml import BytePairEncoding, ByteTokenizer
+
+corpus = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+merged = BytePairEncoding(byte_fallback=False, vocabulary_size=300).fit(corpus)
+print(f"{merged.vocabulary.n_tokens} entries after {merged.n_merges} merges")
+
+encoding = merged.encode(sentence)
+print(f"the sentence: {encoding.n_tokens} numbers")
+print(merged.decode(encoding.ids))
+
+reading = ByteTokenizer()
+merged_cost = sum(merged.encode(text).n_tokens for text in corpus)
+byte_cost = sum(reading.encode(text).n_tokens for text in corpus)
+print(f"the corpus: {merged_cost} merged, {byte_cost} as bytes")
+print(f"ratio {byte_cost / merged_cost:.2f}")`,
+              `137 entries after 85 merges
+the sentence: 25 numbers
+Dr. Alvare[UNK]didn't expect the low-cost re-analysis.
+the corpus: 263 merged, 763 as bytes
+ratio 2.90`,
+              { hints: ["The encoder takes its settings as keywords when it is constructed and the list of sentences when it is fitted. Fitted, it knows n_merges, and its vocabulary knows n_tokens.", "The cost of the corpus under a reading is the sum over the eighteen sentences of the n_tokens of each one’s encoding.", "Compare the decoded sentence with the original by eye here. The stand-in sits where the last letter of the surname was, and the space after it has gone with it."], check: numberCheck("How many times as many numbers does the corpus cost as bytes as it does merged, to two places?", 2.9, 0.005, "The eighteen sentences are 763 bytes and 263 merged pieces, and 763 over 263 is 2.90. That is the standing price of the coverage guarantee on English, where the byte reading is at its cheapest, and it buys the thing the merged reading just failed at, since the merged reading of the sentence put a stand-in where the z of the surname was and lost the space after it.") },
+            ),
+          ],
         },
       ]}
     />

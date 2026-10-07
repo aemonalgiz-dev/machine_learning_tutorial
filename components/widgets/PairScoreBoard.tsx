@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // Every candidate pair on the four-word corpus, orderable by either figure.
 //
@@ -129,28 +131,9 @@ export function PairScoreBoard() {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        {ordering === "count" ? (
-          <>
-            Ordered this way the top pair is {winner.left} {winner.right}, seen{" "}
-            {winner.count} times, and its halves are seen {winner.left_count} and{" "}
-            {winner.right_count} times on their own. Its ratio is{" "}
-            {formatScore(winner.score)}, which is{" "}
-            {rows.filter((pair) => pair.score > winner.score).length} places from
-            the top of the other ordering.
-          </>
-        ) : (
-          <>
-            Ordered this way the top pair is {winner.left} {winner.right}, seen
-            only {winner.count} times, but its halves are seen{" "}
-            {winner.left_count} and {winner.right_count} times in total, which is
-            to say never anywhere else.{" "}
-            {tied
-              ? `It ties exactly with ${runnerUp.left} ${runnerUp.right} at ${formatScore(runnerUp.score)}.`
-              : ""}
-          </>
-        )}
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">The selected ordering makes {winner.left} {winner.right} the leading pair. It occurs {winner.count} times; its separate pieces occur {winner.left_count} and {winner.right_count} times. Frequency and normalized association use those counts differently.</p><Equation>{"Pair ratio score: " + formatScore(winner.score)}</Equation><p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{ordering === "count" ? "There are " + rows.filter((pair) => pair.score > winner.score).length + " candidates with a higher ratio score. A frequent pair need not lead under the other criterion." : tied ? "The leading ratio is tied with " + runnerUp.left + " " + runnerUp.right + " at " + formatScore(runnerUp.score) + ". The tie rule decides which is chosen." : "The ratio ranking rewards this pair's joint occurrence relative to its individual-piece counts."}</p>
+</>
     </div>
   );
 }

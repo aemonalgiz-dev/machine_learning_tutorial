@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { UnitLeaningChart } from "@/components/widgets/UnitLeaningChart";
 export const metadata: Metadata = {
   title: "Dropout · oop_ml",
   description:
-    "While learning, silence a random share of a layer's units on every pass so no unit can lean on another. While predicting, silence none, and the scaling that makes those two agree is the whole trick.",
+    "Randomly mask activations during training and measure whether the network generalises better.",
 };
 
 const link =
@@ -30,8 +33,12 @@ const link =
 export default function DropoutPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["dropout"]}
+      technicalStart="Part 2. One Draw"
+      openingTitle="What if a Useful Neuron Is Missing?"
+      playgroundIntro="Compare the original activations with one masked draw, then draw again. Notice the difference between a training pass and a prediction pass."
       title="Dropout"
-      tagline="Silence a random share of the units while learning, none while predicting, and make the two agree by arithmetic."
+      tagline="Randomly mask activations during training and measure whether the network generalises better."
       prerequisites={
         <>
           The row of units this page silences is a{" "}
@@ -59,83 +66,23 @@ export default function DropoutPage() {
           .
         </>
       }
-      history={
-        <>
-          <p>
-            By 2012 the networks doing best on hard problems held far more
-            weights than there were rows to pin them down. The network that
-            Alex Krizhevsky, Ilya Sutskever and Geoffrey Hinton entered in that
-            year&rsquo;s ImageNet contest had sixty million parameters and 1.2
-            million training pictures, and its two widest layers, the dense
-            ones at the top, could learn the training set outright while
-            getting worse on pictures they had not seen. The known cure was
-            the one the bagging pages use, train many separate networks and
-            average their answers, and for a network that already took days
-            to train once it was out of reach. The ensemble was what
-            Hinton&rsquo;s group could not afford, and the reason a single wide
-            layer went wrong in that particular way was what they had not yet
-            put into words.
-          </p>
-          <p>
-            Hinton, Nitish Srivastava, Krizhevsky, Sutskever and Ruslan
-            Salakhutdinov posted the answer in July 2012 as &ldquo;Improving
-            neural networks by preventing co-adaptation of feature
-            detectors&rdquo;, and the full account came out in the Journal of
-            Machine Learning Research in 2014 under the title &ldquo;Dropout: A
-            Simple Way to Prevent Neural Networks from Overfitting&rdquo;.
-            The diagnosis in the title is that a unit deep in a wide layer
-            learns to be useful only in the company of some particular other
-            unit, a partnership that fits the training rows and falls apart
-            on anything new, and the 2014 paper reaches for sexual
-            reproduction as the analogy, a gene that has to work alongside a
-            random half of the other genes cannot rely on any one of them.
-            The remedy is to silence a random half of a layer&rsquo;s units on
-            every training pass, so that no unit can count on any other being
-            there, and to silence none when the network is used. Every pass
-            then trains a different thinned network sharing one set of
-            weights, which is the ensemble for the price of one model.
-            Krizhevsky, Sutskever and Hinton put it into those two wide
-            layers of the ImageNet network the same year, and it has been in
-            nearly every large network since.
-          </p>
-          <p>
-            Their recipe scaled the weights down at prediction time by the
-            keep probability. The inverted form on this page scales the
-            survivors up while training instead, which is what every current
-            library does, because it leaves prediction as plain arithmetic
-            with nothing to remember. The page asks six questions in order.
-            Why does a wide network memorise the people it was shown? What
-            does one draw do to a layer&rsquo;s outputs? Why are the survivors
-            scaled up, and why does that leave prediction untouched? Why must
-            the mask be carried rather than read back, and what does the
-            backward pass do through it? What are the two purposes a pass can
-            have, and what does forgetting each cost? And on a small network
-            that memorises the tangled crowd, does dropout help?
-          </p>
-        </>
-      }
+
       playground={<DropoutPlayground />}
       sections={[
         {
           title: "Part 1. Why a Network Memorises",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. A wide network on a mixed crowd">
-                <p>
-                  Take the tangled crowd from the bagging page, twenty-five
-                  people measured by height and weight, twelve of them children
-                  and thirteen adults, with the middle of the crowd mixed on
-                  purpose so that no smooth boundary separates the two. Give
-                  a network sixteen rectified hidden units, which for twenty
-                  rows of two numbers is far more than it needs, and train it
-                  hard, four hundred full-batch steps at a stride of one. It
-                  learns the mixed middle person by person. Held out fold by
-                  fold, five folds so every person is left out once and
-                  averaged over five seeds, it calls 99.2 percent of the rows
-                  it trained on correctly and 74.4 percent of the people it
-                  did not see.
+                <>
+<p>
+                  Take the tangled crowd from the bagging page, twenty-five people measured by height and weight, twelve of them children and thirteen adults, with the middle of the crowd mixed on purpose so that no smooth boundary separates the two. Give a network sixteen rectified hidden units, which for twenty rows of two numbers is far more than it needs, and train it hard, four hundred full-batch steps at a stride of one.
                 </p>
+                <p>
+                  It learns the mixed middle person by person. Held out fold by fold, five folds so every person is left out once and averaged over five seeds, it calls 99.2 percent of the rows it trained on correctly and 74.4 percent of the people it did not see.
+                </p>
+</>
                 <MemorisationCurves showLoss={false} />
                 <p>
                   Under the first seed, whose folds the chart pools, the
@@ -167,18 +114,14 @@ export default function DropoutPage() {
                   with it.
                 </p>
                 <UnitLeaningChart />
-                <p>
-                  On the network trained without dropout, eleven of the
-                  sixteen units can be silenced at no cost at all, and the
-                  whole fit turns out to rest on two of them. Silencing the
-                  thirteenth unit drops the training accuracy from 1.00 to
-                  0.76 and silencing the twelfth drops it to 0.84, with the
-                  sixteenth, third and fourteenth costing 0.12, 0.08 and 0.04.
-                  The right-hand panel is the same measurement on a network
-                  trained with dropout at one half, and Part 7 comes back to
-                  it; for now notice that silencing any one of its sixteen
-                  units changes its accuracy by exactly nothing.
+                <>
+<p>
+                  On the network trained without dropout, eleven of the sixteen units can be silenced at no cost at all, and the whole fit turns out to rest on two of them. Silencing the thirteenth unit drops the training accuracy from 1.00 to 0.76 and silencing the twelfth drops it to 0.84, with the sixteenth, third and fourteenth costing 0.12, 0.08 and 0.04.
                 </p>
+                <p>
+                  The right-hand panel is the same measurement on a network trained with dropout at one half, and Part 7 comes back to it; for now notice that silencing any one of its sixteen units changes its accuracy by exactly nothing.
+                </p>
+</>
                 <KeepInMind>
                   The failure dropout addresses has a shape. A wide layer
                   trained to convergence arrives at units that are useful only
@@ -188,20 +131,14 @@ export default function DropoutPage() {
               </SubSection>
 
               <SubSection title="3. What dropout proposes">
-                <p>
-                  The ensemble cure, many networks averaged, fixes this by
-                  making the partnerships disagree with one another, and it
-                  costs as many trainings as there are members. Dropout gets
-                  the same effect from one training run by breaking the
-                  partnerships as they form. On every training pass, each
-                  unit in the layer is independently silenced with some
-                  probability, so a unit that only means something beside its
-                  neighbour finds the neighbour missing on a share of the
-                  passes and is pushed toward carrying weight by itself.
-                  Nothing is penalised and no weight is shrunk. The layer is
-                  made unreliable while it learns, and section 23 measures
-                  what the units did about that.
+                <>
+<p>
+                  The ensemble cure, many networks averaged, fixes this by making the partnerships disagree with one another, and it costs as many trainings as there are members. Dropout gets the same effect from one training run by breaking the partnerships as they form. On every training pass, each unit in the layer is independently silenced with some probability, so a unit that only means something beside its neighbour finds the neighbour missing on a share of the passes and is pushed toward carrying weight by itself.
                 </p>
+                <p>
+                  Nothing is penalised and no weight is shrunk. The layer is made unreliable while it learns, and section 23 measures what the units did about that.
+                </p>
+</>
                 <p>
                   Each pass therefore trains a different thinned network, and
                   since the thinnings share one set of weights, the thing that
@@ -220,7 +157,7 @@ export default function DropoutPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. One Draw",
@@ -239,12 +176,18 @@ export default function DropoutPage() {
                 </p>
                 <Equation>{"training     out_j = value_j · m_j / (1 − p),   m_j ∈ {0, 1}\npredicting   out_j = value_j"}</Equation>
                 <WorkedExample title="Four units, p of one half, seed 10">
-                  <p>
-                    The units hold 1, 2, 3 and 4. At a drop probability of one
-                    half the scale is 1 over 1 − 0.5, which is 2, so every
-                    survivor is doubled. Under seed 10 the first draw keeps the
-                    first and third units and silences the second and fourth.
-                  </p>
+                  <>
+                    <p>
+                      The four units hold 1, 2, 3 and 4. The drop probability is one
+                      half. Inverted dropout rescales each surviving value by the
+                      reciprocal of the keep probability.
+                    </p>
+                    <Equation>{"keep probability = 1 − 0.5 = 0.5\nsurvivor multiplier = 1 / 0.5 = 2"}</Equation>
+                    <p>
+                      Every surviving value doubles. Under seed 10, the first draw keeps
+                      the first and third units and silences the second and fourth.
+                    </p>
+                  </>
                   <Equation>{"1 · 2 = 2,   2 · 0 = 0,   3 · 2 = 6,   4 · 0 = 0\ntraining reads    2, 0, 6, 0\npredicting reads  1, 2, 3, 4"}</Equation>
                   <p>
                     Press the worked example button above and the bars show
@@ -410,24 +353,44 @@ export default function DropoutPage() {
                   average, roughly as one over the square root of the number
                   of draws.
                 </p>
+                <WhyThisWorks title="How wide the spread is, worked for one unit">
+                  <>
+                    <p>
+                      The spread can be worked from the same two outcomes the
+                      mean was. A unit holding v sends 0 with probability p and
+                      v over 1 − p otherwise. Its variance is the mean of the
+                      square of what it sends, less the square of its mean,
+                      and the standard deviation is the square root of that.
+                    </p>
+                    <Equation>{"E[out²]   = (1 − p) · (v / (1 − p))²  =  v² / (1 − p)\nVar[out]  = v² / (1 − p) − v²        =  v² · p / (1 − p)\nsd[out]   = v · √(p / (1 − p))\n\nat p = 0.5     sd[out] = v"}</Equation>
+                    <p>
+                      At one half the standard deviation of a single pass is
+                      the value itself, which is the sense in which the spread
+                      is on the order of the value. The mean of n independent
+                      draws has that standard deviation divided by the square
+                      root of n, and at four hundred draws the square root is
+                      twenty.
+                    </p>
+                    <Equation>{"unit    value    sd of one pass    sd of the mean of 400    gap measured\nu1      1        1                 1 / 20 = 0.05            0.00\nu2      2        2                 2 / 20 = 0.10            0.08\nu3      3        3                 3 / 20 = 0.15            0.15\nu4      4        4                 4 / 20 = 0.20            0.08"}</Equation>
+                    <p>
+                      None of the four measured gaps of section 8 is larger
+                      than the figure the arithmetic allows it. A hundred times
+                      as many draws would shrink each of those figures by a
+                      factor of ten and no further, which is why the chart
+                      settles slowly.
+                    </p>
+                  </>
+                </WhyThisWorks>
                 <InAModel title="On the network trained with dropout at one half">
                   <ExperimentReadout panel="averaging" />
-                  <p>
-                    The output layer here is straight, so its raw score is a
-                    weighted sum of what dropout sends and the derivation
-                    applies to it exactly. The largest predicting score in the
-                    crowd is 61.3 in magnitude. A single thinned pass puts some
-                    person&rsquo;s score as far as 62.0 from where the
-                    predicting pass puts it, and the mean over four hundred
-                    thinned passes is still 1.39 away, because four hundred is
-                    not many draws when the numbers being averaged swing by
-                    sixty. After the squash into a chance the widest gap is
-                    0.077, and that gap does not shrink with more draws. The
-                    mean of the squashed scores is not the squash of the mean
-                    score, so the agreement between the two modes holds for
-                    the sum the next layer reads and stops being exact at the
-                    next bend.
+                  <>
+<p>
+                    The output layer here is straight, so its raw score is a weighted sum of what dropout sends and the derivation applies to it exactly. The largest predicting score in the crowd is 61.3 in magnitude. A single thinned pass puts some person&rsquo;s score as far as 62.0 from where the predicting pass puts it, and the mean over four hundred thinned passes is still 1.39 away, because four hundred is not many draws when the numbers being averaged swing by sixty.
                   </p>
+                  <p>
+                    After the squash into a chance the widest gap is 0.077, and that gap does not shrink with more draws. The mean of the squashed scores is not the squash of the mean score, so the agreement between the two modes holds for the sum the next layer reads and stops being exact at the next activation function.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   The two modes agree in expectation, for the linear sum the
@@ -464,6 +427,54 @@ export default function DropoutPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            choice(
+              "Silencing one hidden unit at a time, on the network trained without dropout, showed what?",
+              [
+                "Each unit costs about a sixteenth of the training accuracy",
+                "Eleven of the sixteen cost nothing at all, and silencing the thirteenth takes the training accuracy from 1.00 to 0.76",
+                "Every unit is dead, so nothing changes",
+                "The accuracy rises, since the network was overfitted",
+              ],
+              1,
+              "The whole fit rests on two units, with the twelfth taking it to 0.84 and the sixteenth, third and fourteenth costing 0.12, 0.08 and 0.04. A wide layer trained to convergence arrives at units that are useful only together, and the fit is fragile in exactly the places those partnerships sit.",
+            ),
+            choice(
+              "How is the coin tossed when a layer answers a whole batch?",
+              [
+                "Once per unit, shared across every row of the batch",
+                "Separately over every entry, so two people in one batch go through different thinned networks",
+                "Once per batch, so the whole block is either kept or dropped",
+                "Once per epoch",
+              ],
+              1,
+              "A mask shared across the batch would let a unit rely on its neighbour for the whole batch and lose it only on the next one, which is a much weaker version of the rule. Under seed 10 the three rows of the worked block keep two, three and two units, and no two rows keep the same set.",
+            ),
+            choice(
+              "The worked row holds 1, 2, 3 and 4 and the drop probability is one half. Under seed 10 the first draw keeps the first and third units. What does the training pass send on?",
+              [
+                "2, 0, 6, 0",
+                "1, 0, 3, 0",
+                "0.5, 0, 1.5, 0",
+                "2, 4, 6, 8",
+              ],
+              0,
+              "Each survivor is multiplied by one over the keep probability, which is 2 here, and each silenced unit sends nothing. Leaving the survivors at 1 and 3 would hand the next layer a total of 4 where the whole row totals 10, and the doubled survivors total 8, which is nearer. Nearer and not equal, because the scaling restores the sum on average over many draws and not on this one.",
+            ),
+            trueFalse(
+              "Because the layer is unbiased, a training pass and a predicting pass agree exactly rather than only on average.",
+              false,
+              "The agreement holds for the linear sum the next layer reads and stops being exact at the next activation function, since the mean of the squashed scores is not the squash of the mean score. On the crowd network one thinned pass put a person’s score as far as 62.0 from the predicting score, and the mean over four hundred thinned passes was still 1.39 away. After the squash the widest gap is 0.077, and that one does not shrink with more draws.",
+            ),
+            trueFalse(
+              "The inverted form puts the whole of the arithmetic on the training side, so a predicting pass returns the row bit for bit.",
+              true,
+              "The original recipe trained with silencing alone and scaled the weights down by the keep probability at prediction time, which makes a saved model impossible to evaluate without knowing the probability it was trained with. Both forms agree in expectation, by the same cancellation. The inverted one scales the survivors up while training, so prediction is the identity and the layer disappears once learning is over.",
+            ),
+        ],
         },
         {
           title: "Part 4. The Mask Is a Draw",
@@ -539,23 +550,9 @@ export default function DropoutPage() {
                   numbers the response already holds. A mask is a draw, and
                   nothing that survives the forward pass can reproduce it.
                 </p>
-                <p>
-                  The draw is also why the layer holds the one piece of
-                  mutable state in the network vocabulary. A seeded layer is
-                  reproducible over a sequence of passes rather than one at a
-                  time, so the four hundred draws behind the chart at the top
-                  are one generator advancing four hundred times, the way it
-                  would inside a training loop, and the first ten draws of a
-                  long run are the ten draws of a short one under the same
-                  seed. The layer&rsquo;s step returns the layer itself rather
-                  than a rebuilt copy, which matters more than it sounds.
-                  Rebuilding would rebuild the generator, a seeded network
-                  would then draw the identical mask on every pass, and a layer
-                  that silences the same units forever is a smaller network
-                  with an odd initialisation and not dropout at all. A layer
-                  built with no seed draws from fresh entropy, and two such
-                  layers asked the same question answer differently.
-                </p>
+                <p>A seeded dropout layer must be reproducible across a sequence of passes while still producing new masks on later passes. Its random generator therefore advances after every draw.</p>
+<p>The layer keeps that generator state when a training step occurs. Reconstructing a seeded generator from its initial seed after every step would repeat the same mask, permanently removing the same contributions instead of varying them across training passes.</p>
+<p>The chart uses four hundred successive draws from one generator. Under the same seed and call sequence, repeating the experiment reproduces those draws. An unseeded construction does not promise the same sequence on another run.</p>
                 <KeepInMind>
                   The mask is carried because nothing that survives the
                   forward pass can reproduce a draw, where a pooling winner
@@ -649,6 +646,23 @@ export default function DropoutPage() {
                   and one dropped, are owed entirely different amounts, and
                   nothing in the answers distinguishes them.
                 </p>
+                <WorkedExample title="The first row, by both masks">
+                  <>
+                    <p>
+                      The row holds 0, 2, 0 and 4, and the draw kept its first
+                      and third units, so the scaled mask the layer carries is
+                      2, 0, 2, 0. Multiply the arriving slope by it entry by
+                      entry. Then do the same with the mask the shortcut would
+                      have read off the outputs, which are all zero.
+                    </p>
+                    <Equation>{"arriving slope         1,  2,  3,  4\n\nmask the layer drew    2,  0,  2,  0\npassed down            1 × 2,  2 × 0,  3 × 2,  4 × 0   =   2, 0, 6, 0\n\nmask read off outputs  0,  0,  0,  0\npassed down            1 × 0,  2 × 0,  3 × 0,  4 × 0   =   0, 0, 0, 0"}</Equation>
+                    <p>
+                      The shortcut returns nothing to the two units that were
+                      present. Their inputs were zero on this pass, and the
+                      slope at those inputs was not.
+                    </p>
+                  </>
+                </WorkedExample>
                 <p>
                   That is the whole argument for storing the mask, made with
                   numbers. Press the rectified block button in section 14 and
@@ -708,24 +722,9 @@ export default function DropoutPage() {
                   drawn from a coin.
                 </p>
                 <ExperimentReadout panel="purposes" />
-                <p>
-                  Both are measured on the crowd network trained with dropout
-                  at one half. Asked properly, it calls 0.84 of the crowd
-                  correctly. Asked twenty times while still thinning, it
-                  answers 0.84 on fifteen of the calls and 0.80 on five, so on
-                  this small crowd the coin moves one person&rsquo;s call at
-                  most, because the memorised scores are far enough from the
-                  halfway mark that most of them survive the thinning. The
-                  chances underneath move far more. Follow the one person
-                  whose chance swung most and the predicting pass puts them at
-                  0.996 adult, while the twenty thinned passes put them
-                  anywhere from 0.29 to 1.00. The other mistake costs nothing
-                  that shows. A network trained with a dropout layer at rate
-                  zero and one trained with no dropout layer at all, same
-                  seed, same steps, differ in their outputs by exactly 0.0,
-                  which is what a caller who never said training would have
-                  built.
-                </p>
+                <p>The two mode errors have different effects. First, take the network trained with a dropout probability of one half. In prediction mode, its classification accuracy on this crowd is 0.84.</p>
+<p>Leaving dropout active makes the prediction depend on a fresh mask. Across twenty calls, accuracy is 0.84 on fifteen calls and 0.80 on five. The class decisions change less than the probabilities: one observation&apos;s predicted adult probability ranges from 0.29 to 1.00 across those calls, compared with 0.996 in prediction mode.</p>
+<p>Second, omitting dropout during training means the intended regularization never takes place. The zero-dropout and no-dropout versions in the matched experiment produce identical outputs. The mode setting therefore determines whether the model actually receives the intervention being studied.</p>
                 <KeepInMind>
                   Forgetting to say training gave the plain network, which
                   differed from the idle-layer one by exactly 0.0 on the
@@ -735,20 +734,14 @@ export default function DropoutPage() {
               </SubSection>
 
               <SubSection title="19. Why the default is predicting">
-                <p>
-                  Given that asymmetry the default is chosen to protect against
-                  the worse mistake. A pass that does not say why it is
-                  running is a predicting pass, so a caller who forgets gets a
-                  slightly slower descent rather than a random model. The
-                  backward pass states training for itself, since a backward
-                  pass is training by definition and a dropout layer that
-                  answered deterministically inside one would have the
-                  gradient describe a network the step is not about to build,
-                  so an ordinary training loop never thinks about the purpose
-                  at all. The only place a caller says it is when reading a
-                  training-mode answer on purpose, which is what the
-                  experiment above did to measure the swing.
+                <>
+<p>
+                  Given that asymmetry the default is chosen to protect against the worse mistake. A pass that does not say why it is running is a predicting pass, so a caller who forgets gets a slightly slower descent rather than a random model. The backward pass states training for itself, since a backward pass is training by definition and a dropout layer that answered deterministically inside one would have the gradient describe a network the step is not about to build, so an ordinary training loop never thinks about the purpose at all.
                 </p>
+                <p>
+                  The only place a caller says it is when reading a training-mode answer on purpose, which is what the experiment above did to measure the swing.
+                </p>
+</>
                 <KeepInMind>
                   The default is predicting because the worse mistake to
                   forget is the other one, and the backward pass says training
@@ -759,25 +752,66 @@ export default function DropoutPage() {
           ),
         },
         {
+          title: "Questions on Parts 4 to 6",
+          quiz: [
+            trueFalse(
+              "The mask can be read back off the outputs, since a dropped unit sends zero.",
+              false,
+              "A zero in the output is ambiguous between dropped and kept but already zero, and nothing in the outputs tells the two apart. On the crowd network at one half, 282 of the 400 readings in a single training pass are exactly zero and the mask keeps 142 of them, so the shortcut would misfile more than a third of the entries, quietly, while the network went on training and its loss went on falling.",
+            ),
+            choice(
+              "The pooling layer recomputes its winners and this one stores its mask. Why the difference?",
+              [
+                "Recomputing a pooling winner is cheaper than storing it",
+                "A pooling winner is a function of numbers the response already holds, where a mask is a draw",
+                "A dropout layer has no response object to recompute from",
+                "Pooling runs only while predicting",
+              ],
+              1,
+              "Nothing that survives the forward pass can reproduce a draw, so the layer carries the mask on its response, already scaled and ready to multiply, and its backward step refuses a response that arrives without one rather than guess. The generator is runtime state rather than learned state, which is the same line a tree’s generator sits on.",
+            ),
+            trueFalse(
+              "Having no weights of its own, the layer reports no parameter gradient at all, rather than a block of zeros.",
+              true,
+              "A block of zeros would be a small lie about having something to learn. What the layer does pass down is the arriving blame times the scaled mask, so with a block of ones arriving, what comes down is the mask itself. On the rectified block’s first row an arriving slope of 1, 2, 3, 4 comes down as 2, 0, 6, 0, although every output in that row was zero.",
+            ),
+            choice(
+              "What happens to an implementation that forgets the scale on the way back down?",
+              [
+                "It raises on the first step",
+                "It still converges, with the effective learning rate quietly not the one that was configured",
+                "It produces non-finite gradients",
+                "It trains only the units that were dropped",
+              ],
+              1,
+              "A backward step wrong by a constant factor still trains, and the slope is too small by the keep probability everywhere. What settles it is a finite difference, rerunning the forward pass under the same seed so the same mask is drawn, which agrees to 2.1e−09 on the worked block and 4.1e−09 on the rectified one. Forgetting the scale would disagree by a factor of two at every kept entry.",
+            ),
+            choice(
+              "Which way of getting the pass purpose wrong is worse, and which way does the default guard?",
+              [
+                "Forgetting training is worse, and the default is training",
+                "Forgetting predicting is worse, and the default is predicting",
+                "Both are equally bad, so there is no default",
+                "Forgetting predicting is worse, and the default is training",
+              ],
+              1,
+              "Forgetting to say training gave the plain network, which differed from the idle-layer one by exactly 0.0 on this crowd, so the cost is a slightly slower descent. Forgetting to say predicting put one person anywhere from 0.29 to 1.00 adult across twenty calls, against 0.996 in prediction mode. The backward pass states training for itself, so an ordinary training loop never thinks about the purpose at all.",
+            ),
+        ],
+        },
+        {
           title: "Part 7. Dropout Measured on the Crowd",
           content: (
             <>
               <SubSection title="20. The experiment">
-                <p>
-                  Whether dropout helps is a measurement, and at this scale the
-                  measurement has to be arranged carefully or the answer is
-                  noise. Twenty-five people are too few to hold out a fixed
-                  group, so each run deals the crowd into five folds, trains on
-                  twenty and holds out five, and repeats until every person has
-                  been held out once, so the held-out accuracy is counted over
-                  all twenty-five. Heights and weights are put into standard
-                  units using the training rows of each fold only, so no
-                  held-out person&rsquo;s measurements reach the fit. The whole
-                  of that is repeated under five seeds, each seeding the
-                  weights, the deal and the draws together, at three settings,
-                  no dropout layer at all, dropout at 0.2, and dropout at 0.5,
-                  which is seventy-five training runs of four hundred epochs.
+                <>
+<p>
+                  Whether dropout helps is a measurement, and at this scale the measurement has to be arranged carefully or the answer is noise. Twenty-five people are too few to hold out a fixed group, so each run deals the crowd into five folds, trains on twenty and holds out five, and repeats until every person has been held out once, so the held-out accuracy is counted over all twenty-five.
                 </p>
+                <p>
+                  Heights and weights are put into standard units using the training rows of each fold only, so no held-out person&rsquo;s measurements reach the fit. The whole of that is repeated under five seeds, each seeding the weights, the deal and the draws together, at three settings, no dropout layer at all, dropout at 0.2, and dropout at 0.5, which is seventy-five training runs of four hundred epochs.
+                </p>
+</>
                 <KeepInMind>
                   A held-out score on twenty-five people moves by 0.04 per
                   person, so the spread across seeds, and not any one number,
@@ -787,21 +821,14 @@ export default function DropoutPage() {
 
               <SubSection title="21. What the sweep found">
                 <DropoutSweep />
-                <p>
-                  Across the five seeds the plain network trains to 0.992 and
-                  holds out at 0.744. Dropout at 0.2 trains to 0.950 and holds
-                  out at 0.752, and dropout at 0.5 trains to 0.886 and holds
-                  out at 0.728. The gap between training and held-out
-                  accuracy narrows from 0.248 to 0.198 to 0.158, and it narrows
-                  almost entirely from the training side; the held-out means
-                  are 0.008 above and 0.016 below the plain network&rsquo;s,
-                  where the seeds at any one setting spread from 0.64 to
-                  0.84. The textbook claim is
-                  that dropout raises held-out accuracy, and on this crowd it
-                  did not hold in any way the seed spread can distinguish from
-                  chance. What it did do is stop the network reporting a
-                  training score it would not keep.
+                <>
+<p>
+                  Across the five seeds the plain network trains to 0.992 and holds out at 0.744. Dropout at 0.2 trains to 0.950 and holds out at 0.752, and dropout at 0.5 trains to 0.886 and holds out at 0.728. The gap between training and held-out accuracy narrows from 0.248 to 0.198 to 0.158, and it narrows almost entirely from the training side; the held-out means are 0.008 above and 0.016 below the plain network&rsquo;s, where the seeds at any one setting spread from 0.64 to 0.84.
                 </p>
+                <p>
+                  The textbook claim is that dropout raises held-out accuracy, and on this crowd it did not hold in any way the seed spread can distinguish from chance. What it did do is stop the network reporting a training score it would not keep.
+                </p>
+</>
                 <NumberTable
                   headings={["setting", "training accuracy", "held out", "gap", "held out across seeds"]}
                   rows={[
@@ -830,18 +857,14 @@ export default function DropoutPage() {
                   one every epoch.
                 </p>
                 <MemorisationCurves />
-                <p>
-                  Without dropout the measured loss rises between consecutive
-                  readings on only 1 of 99 occasions. At 0.2 it rises on 40 of 99
-                  and at 0.5 on 48 of 99, about as often as it falls, while the
-                  accuracy read while predicting still climbs underneath. At
-                  the end of the four hundred epochs the plain network stands
-                  at 0.99 trained and 0.84 held out on this seed, dropout at
-                  0.2 at 0.97 and 0.80, and dropout at 0.5 at 0.89 and 0.72.
-                  This is the seed on which the plain network did best of the
-                  five, and on it dropout helped least, which is worth seeing
-                  beside the averages.
+                <>
+<p>
+                  Without dropout the measured loss rises between consecutive readings on only 1 of 99 occasions. At 0.2 it rises on 40 of 99 and at 0.5 on 48 of 99, about as often as it falls, while the accuracy read while predicting still climbs underneath. At the end of the four hundred epochs the plain network stands at 0.99 trained and 0.84 held out on this seed, dropout at 0.2 at 0.97 and 0.80, and dropout at 0.5 at 0.89 and 0.72.
                 </p>
+                <p>
+                  This is the seed on which the plain network did best of the five, and on it dropout helped least, which is worth seeing beside the averages.
+                </p>
+</>
                 <KeepInMind>
                   Under dropout the training loss is a noisy reading of a
                   different network each epoch. Judge progress by the
@@ -880,22 +903,14 @@ export default function DropoutPage() {
               </SubSection>
 
               <SubSection title="24. Where it earns its keep">
-                <p>
-                  The network the method was built for had sixty million
-                  parameters and two dense layers of 4096 units each
-                  above a stack of convolutions, and the paper reports it
-                  overfitting badly without dropout and not with it. The
-                  network on this page has sixteen hidden units and
-                  twenty-five people, and the only thing it can overfit is the
-                  mixed middle of the crowd, which no method can generalise
-                  from because there is nothing there to generalise. Between
-                  those two lies most of practice, and the rule of thumb the
-                  measurements support is that dropout is a way of spending
-                  capacity you already have more carefully. It is not a
-                  substitute for having enough data, and on data this small
-                  its visible effect is on the gap and on the fragility rather
-                  than on the score.
+                <>
+<p>
+                  The network the method was built for had sixty million parameters and two dense layers of 4096 units each above a stack of convolutions, and the paper reports it overfitting badly without dropout and not with it. The network on this page has sixteen hidden units and twenty-five people, and the only thing it can overfit is the mixed middle of the crowd, which no method can generalise from because there is nothing there to generalise.
                 </p>
+                <p>
+                  Between those two lies most of practice, and the rule of thumb the measurements support is that dropout is a way of spending capacity you already have more carefully. It is not a substitute for having enough data, and on data this small its visible effect is on the gap and on the fragility rather than on the score.
+                </p>
+</>
                 <KeepInMind>
                   Reach for dropout when the network is wide relative to the
                   rows and the gap between training and held-out accuracy is
@@ -967,6 +982,212 @@ export default function DropoutPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 7 and 8",
+          quiz: [
+            trueFalse(
+              "Across the five seeds dropout narrowed the gap between training and held-out accuracy without measurably raising the held-out accuracy.",
+              true,
+              "The gap narrowed from 0.248 to 0.198 at 0.2 and to 0.158 at 0.5, almost entirely from the training side. The plain network holds out at 0.744, dropout at 0.2 at 0.752 and dropout at 0.5 at 0.728, where the seeds at any one setting spread from 0.64 to 0.84, so the held-out differences cannot be told from chance. The textbook claim that dropout raises held-out accuracy did not hold on this crowd.",
+            ),
+            choice(
+              "Why does the training loss stop falling steadily once dropout is on?",
+              [
+                "The step size has become too large",
+                "The backward pass measures the loss of one thinned network, a different one every epoch",
+                "Held-out rows have leaked into the fit",
+                "The scale on the survivors inflates the loss",
+              ],
+              1,
+              "Without dropout the measured loss rises between consecutive readings on only 1 of 99 occasions, at 0.2 on 40 of 99 and at 0.5 on 48 of 99, which is about as often as it falls, while the accuracy read while predicting still climbs underneath. Judge progress by the predicting-mode accuracy, or by the loss read while predicting, rather than by the number the backward pass reports.",
+            ),
+            several(
+              "Which of these hold of the network trained with dropout at one half?",
+              [
+                "It stands at 0.84 with every unit present and at 0.84 with any one of the sixteen silenced",
+                "The largest drop from silencing a single unit is 0.000",
+                "The insensitivity is because most of its units are dead",
+                "The plain network, by contrast, loses 0.24 when its thirteenth unit is silenced",
+              ],
+              [0, 1, 3],
+              "None of the sixteen units is dead, so this is not a network with nothing left to lose. That is the co-adaptation of the paper’s title, removed and measured. On this crowd the dropped network is not measurably better at new people, and it is a great deal less fragile.",
+            ),
+            trueFalse(
+              "Dropout can stand in for data the network does not have, which is why its clearest effect on these twenty-five people was on the held-out score.",
+              false,
+              "Dropout is a way of spending capacity you already have more carefully, and it is not a substitute for having enough data. Twenty-five people pin very little down, and the only thing this network can overfit is the mixed middle of the crowd, where there is nothing to generalise from. Its visible effect here was on the gap and on the fragility, and the held-out means sat 0.008 above and 0.016 below the plain network’s.",
+            ),
+            several(
+              "Which of these edges does the layer accept?",
+              [
+                "A drop probability of 0",
+                "A drop probability of 0.999",
+                "A drop probability of exactly 1",
+                "A backward step handed a predicting response",
+              ],
+              [0, 1],
+              "At zero the layer is the identity and keeps everything, which is what a control in a search over this setting needs. At 0.999 the scale is 1000, large and finite, so a survivor is raised a thousandfold. A probability of 1 silences the whole layer and leaves nothing to scale, so it is refused at construction. A predicting response carries no mask, and guessing one from the outputs is the mistake Part 4 is about, so the backward step refuses it.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Drawing Masks With the Library",
+          practice: [
+            exercise(
+              "One draw, and then four hundred",
+              ["Build the worked layer of Part 2, a Dropout reading four units with a drop probability of one half under seed 10, and send the row 1, 2, 3, 4 through it once while predicting and once while training. Part 2 says the predicting pass returns the row untouched and the first training draw reads 2, 0, 6, 0.", "Then build the layer afresh under the same seed and send the row through four hundred times while training, keeping every output. Print how many times each unit survived and the mean of what each unit sent, which section 8 gives as 200, 192, 190 and 204 survivals and means of 1.00, 1.92, 2.85 and 4.08. Finish with a count the lesson does not make, the number of the four hundred passes on which all four units were silenced at once and the next layer was sent nothing at all."],
+              `import numpy as np
+from oop_ml import Dropout, PassPurpose
+
+row = np.array([[1.0, 2.0, 3.0, 4.0]])
+
+# Build Dropout(reads=4, drop_probability=0.5, random_seed=10). Print what a
+# predicting pass and then a training pass send on for the row.
+
+# Build the same layer again, run four hundred training passes on the row and
+# stack their outputs into one array of shape (400, 4). Print each unit's
+# survival count, each unit's mean output to two places, and the number of
+# passes on which every unit was silenced.`,
+              `import numpy as np
+from oop_ml import Dropout, PassPurpose
+
+row = np.array([[1.0, 2.0, 3.0, 4.0]])
+
+layer = Dropout(reads=4, drop_probability=0.5, random_seed=10)
+print(f"predicting reads {layer.respond_to(row).outputs[0].tolist()}")
+print(f"training reads {layer.respond_to(row, PassPurpose.TRAINING).outputs[0].tolist()}")
+
+layer = Dropout(reads=4, drop_probability=0.5, random_seed=10)
+sent = np.array([layer.respond_to(row, PassPurpose.TRAINING).outputs[0] for _ in range(400)])
+survived = sent > 0
+print(f"times kept {survived.sum(axis=0).tolist()}")
+print(f"mean sent {sent.mean(axis=0).round(2).tolist()}")
+print(f"passes with every unit silenced {int((~survived).all(axis=1).sum())}")`,
+              `predicting reads [1.0, 2.0, 3.0, 4.0]
+training reads [2.0, 0.0, 6.0, 0.0]
+times kept [200, 192, 190, 204]
+mean sent [1.0, 1.92, 2.85, 4.08]
+passes with every unit silenced 26`,
+              { hints: ["respond_to takes a block with one row per example and, as its second argument, the purpose of the pass. Left out, the purpose is PassPurpose.PREDICTING, which is the default Part 6 argues for.", "The layer’s generator advances on every training pass, so one layer called four hundred times gives four hundred different draws. Building a new layer under the same seed starts the sequence again, which is why the second half builds its own.", "Every value in this row is above zero, so here a unit survived a pass exactly when what it sent is above zero. That is safe for this row only, and Part 4 is about the rows where it is not. A pass silenced everything when no unit survived it."], check: numberCheck("On how many of the four hundred training passes were all four units silenced at once?", 26, 0.5, "Each unit is silenced with probability one half, independently, so all four go together with probability one sixteenth, which over four hundred passes is 25 in expectation. This seed gave 26. On those passes the next layer read a row of zeros where the predicting pass sends a total of 10, which is how far one pass can sit from the average that section 8 measured.") },
+            ),
+            exercise(
+              "Send blame back through a mask the outputs cannot show",
+              ["The block below is the rectified block of Part 4, three rows that already hold exact zeros. Send it through the layer once while training, and print the outputs, which entries the layer’s own mask kept, and which entries a mask read back off the outputs would have called kept. Section 11 says four of the twelve disagree.", "Then ask the layer for its backward step with a slope of 1, 2, 3, 4 arriving at every row. Print what it passes down, whether it reports a parameter gradient, and the total blame it passes down beside the total the shortcut’s mask would have passed. Section 16 gives the first row as 2, 0, 6, 0. Last, hand the backward step a predicting response and print what the layer says."],
+              `import numpy as np
+from oop_ml import Dropout, MLLibError, PassPurpose
+
+block = np.array([[0.0, 2.0, 0.0, 4.0], [3.0, 0.0, 0.0, 1.0], [0.0, 0.0, 5.0, 0.0]])
+arriving = np.array([[1.0, 2.0, 3.0, 4.0]] * 3)
+layer = Dropout(reads=4, drop_probability=0.5, random_seed=10)
+
+# Run one training pass. The response carries outputs and the scaled mask,
+# kept. Print the outputs, the mask as 0s and 1s, the mask read off the
+# outputs as 0s and 1s, and how many entries the two disagree on.
+
+# Ask the layer for correction_for(response, arriving). Print passed_down,
+# whether gradient is None, the total passed down, and the total the
+# shortcut would pass, which is arriving times 2 wherever an output is nonzero.
+
+# Try correction_for with a predicting response and print the refusal.`,
+              `import numpy as np
+from oop_ml import Dropout, MLLibError, PassPurpose
+
+block = np.array([[0.0, 2.0, 0.0, 4.0], [3.0, 0.0, 0.0, 1.0], [0.0, 0.0, 5.0, 0.0]])
+arriving = np.array([[1.0, 2.0, 3.0, 4.0]] * 3)
+layer = Dropout(reads=4, drop_probability=0.5, random_seed=10)
+
+response = layer.respond_to(block, PassPurpose.TRAINING)
+kept = response.kept > 0
+read_back = response.outputs != 0
+print(f"outputs {response.outputs.tolist()}")
+print(f"mask the layer drew {kept.astype(int).tolist()}")
+print(f"mask read off outputs {read_back.astype(int).tolist()}")
+print(f"misfiled {int((kept != read_back).sum())} of {kept.size}")
+
+correction = layer.correction_for(response, arriving)
+print(f"passed down {correction.passed_down.tolist()}")
+print(f"parameter gradient is None, {correction.gradient is None}")
+print(f"total blame passed down {correction.passed_down.sum():.1f}")
+print(f"total the shortcut would pass {(arriving * 2.0 * read_back).sum():.1f}")
+
+try:
+    layer.correction_for(layer.respond_to(block), arriving)
+except MLLibError as refusal:
+    print(f"refused, {refusal}")`,
+              `outputs [[0.0, 0.0, 0.0, 0.0], [6.0, 0.0, 0.0, 2.0], [0.0, 0.0, 10.0, 0.0]]
+mask the layer drew [[1, 0, 1, 0], [1, 0, 1, 1], [0, 1, 1, 0]]
+mask read off outputs [[0, 0, 0, 0], [1, 0, 0, 1], [0, 0, 1, 0]]
+misfiled 4 of 12
+passed down [[2.0, 0.0, 6.0, 0.0], [2.0, 0.0, 6.0, 8.0], [0.0, 4.0, 6.0, 0.0]]
+parameter gradient is None, True
+total blame passed down 34.0
+total the shortcut would pass 16.0
+refused, a dropout layer's backward step needs the mask its own forward pass drew, and this response carries none -- it came from a prediction pass or from another layer`,
+              { hints: ["A training pass through Dropout answers a response with one more thing on it than an ordinary one, kept, the mask already multiplied by the scale. An entry was kept where that is above zero.", "correction_for takes the response the layer itself produced and the block of slopes arriving from above, and answers an object with passed_down, the slopes at the layer’s inputs, and gradient, which is None for a layer with nothing to learn.", "A predicting response carries no mask. The layer refuses it with one of the library’s own errors, all of which derive from MLLibError, so wrap that call in try and except."], check: numberCheck("How much blame in total does the layer pass down for this block?", 34.0, 0.05, "The mask kept seven of the twelve entries, and each one passes down its arriving slope times the scale of 2, which comes to 2 + 6 in the first row, 2 + 6 + 8 in the second and 4 + 6 in the third. Four of those seven sat at inputs of exactly zero, so their outputs were zero too, and a mask read off the outputs would have passed down 16 of the 34 and left the other 18 unpaid with nothing raised.") },
+            ),
+            exercise(
+              "Train with and without, then silence one unit at a time",
+              ["The starter builds the network of Part 1 on the tangled crowd twice from the same seed, sixteen rectified hidden units under one straight output, once plain and once with a dropout layer at one half between the two. Train each for four hundred full-batch steps at a rate of 1 under BinaryCrossEntropy, then measure its accuracy on the crowd while predicting. A person is called an adult when the raw score is at least zero.", "Then repeat section 2’s measurement. Take what the hidden layer answers, zero one column at a time, hand the thinned block straight to the output layer, and score it. Print the intact accuracy, the lowest accuracy with one unit silenced, how many units cost nothing, and the mean drop over the sixteen. The lesson gives the plain network 1.00 intact, 0.76 at worst and eleven units costing nothing, and gives the dropped network a mean drop of 0.000. It does not give the plain network’s mean drop."],
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, Dropout, Identity, LayerStack, Neuron, RectifiedLinear
+
+crowd = np.array([
+    (147, 41, 0), (156, 53, 1), (145, 57, 0), (159, 57, 1), (162, 61, 1), (120, 25, 0), (122, 28, 0),
+    (118, 24, 0), (180, 80, 1), (183, 83, 1), (178, 78, 1), (145, 45, 0), (145, 55, 1), (151, 45, 1),
+    (151, 55, 0), (157, 45, 0), (157, 55, 1), (148, 50, 1), (154, 50, 0), (160, 50, 1), (147, 58, 0),
+    (153, 58, 1), (150, 42, 1), (156, 42, 0), (143, 50, 0),
+], dtype=float)
+rows = (crowd[:, :2] - crowd[:, :2].mean(axis=0)) / crowd[:, :2].std(axis=0)
+labels = crowd[:, 2]
+
+for name, extra in [("plain", []), ("dropout at 0.5", [Dropout(reads=16, drop_probability=0.5, random_seed=1001)])]:
+    draw = np.random.default_rng(1)
+    hidden = DenseLayer([Neuron(draw.normal(0.0, 1.0, 2), bias=0.0, activation=RectifiedLinear()) for _ in range(16)])
+    output = DenseLayer([Neuron(draw.normal(0.0, 0.125 ** 0.5, 16), bias=0.0, activation=Identity())])
+    network = LayerStack([hidden, *extra, output])
+    # Four hundred times, replace the network with the one stepped at 1.0 by
+    # its own backward pass on the rows and the labels as a column.
+
+    # Print the intact accuracy. Then, for each of the sixteen hidden units,
+    # zero that column of the hidden layer's outputs, send the block through
+    # the last layer of the network, and score it. Print the lowest of the
+    # sixteen accuracies, how many equal the intact one, and the mean drop.`,
+              `import numpy as np
+from oop_ml import BinaryCrossEntropy, DenseLayer, Dropout, Identity, LayerStack, Neuron, RectifiedLinear
+
+crowd = np.array([
+    (147, 41, 0), (156, 53, 1), (145, 57, 0), (159, 57, 1), (162, 61, 1), (120, 25, 0), (122, 28, 0),
+    (118, 24, 0), (180, 80, 1), (183, 83, 1), (178, 78, 1), (145, 45, 0), (145, 55, 1), (151, 45, 1),
+    (151, 55, 0), (157, 45, 0), (157, 55, 1), (148, 50, 1), (154, 50, 0), (160, 50, 1), (147, 58, 0),
+    (153, 58, 1), (150, 42, 1), (156, 42, 0), (143, 50, 0),
+], dtype=float)
+rows = (crowd[:, :2] - crowd[:, :2].mean(axis=0)) / crowd[:, :2].std(axis=0)
+labels = crowd[:, 2]
+
+for name, extra in [("plain", []), ("dropout at 0.5", [Dropout(reads=16, drop_probability=0.5, random_seed=1001)])]:
+    draw = np.random.default_rng(1)
+    hidden = DenseLayer([Neuron(draw.normal(0.0, 1.0, 2), bias=0.0, activation=RectifiedLinear()) for _ in range(16)])
+    output = DenseLayer([Neuron(draw.normal(0.0, 0.125 ** 0.5, 16), bias=0.0, activation=Identity())])
+    network = LayerStack([hidden, *extra, output])
+    for _ in range(400):
+        network = network.stepped_by(network.backward_pass(rows, labels.reshape(-1, 1), BinaryCrossEntropy()), 1.0)
+
+    intact = np.mean((network.respond_to(rows).outputs.ravel() >= 0) == labels)
+    answers = np.array(network[0].respond_to(rows).outputs)
+    silenced = []
+    for unit in range(16):
+        thinned = answers.copy()
+        thinned[:, unit] = 0.0
+        scores = network[len(network) - 1].respond_to(thinned).outputs.ravel()
+        silenced.append(np.mean((scores >= 0) == labels))
+    free = sum(accuracy == intact for accuracy in silenced)
+    print(f"{name}: intact {intact:.2f}, lowest with one unit silenced {min(silenced):.2f}, units costing nothing {free}, mean drop {intact - np.mean(silenced):.4f}")`,
+              `plain: intact 1.00, lowest with one unit silenced 0.76, units costing nothing 11, mean drop 0.0400
+dropout at 0.5: intact 0.84, lowest with one unit silenced 0.84, units costing nothing 16, mean drop 0.0000`,
+              { hints: ["backward_pass takes the rows, the targets as a block of one column, and the loss, and it states the training purpose for itself, so the dropout layer draws a fresh mask on every one of the four hundred steps without being told to.", "respond_to with no purpose is a predicting pass, where the dropout layer is the identity. That is why the hidden layer’s outputs can be handed straight to the last layer for both networks, skipping the dropout layer in the one that has it.", "A stack is indexed by position, the hidden layer at 0 and the output layer at len(network) - 1. The trained layers are the ones inside the stepped network, not the hidden and output you built before the loop."], check: numberCheck("What is the mean drop in training accuracy over the sixteen units of the plain network, to four places?", 0.04, 5e-05, "Eleven units cost nothing, and the other five cost 0.24, 0.16, 0.12, 0.08 and 0.04, which total 0.64 and average 0.04 over sixteen. The mean hides the shape. A mean drop of 0.04 reads like a fit spread evenly, where in fact one unit carries a quarter of the accuracy alone. The dropped network’s mean and its largest drop are both zero, which is the difference section 23 is pointing at.") },
+            ),
+          ],
         },
       ]}
     />

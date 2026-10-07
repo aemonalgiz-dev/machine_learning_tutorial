@@ -1,5 +1,8 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -18,19 +21,22 @@ import { TagTrellis } from "@/components/widgets/TagTrellis";
 import { ThreeMethodsOneCorpus } from "@/components/widgets/ThreeMethodsOneCorpus";
 import { TwinLanguages } from "@/components/widgets/TwinLanguages";
 
-const TAGLINE =
-  "Ask of every character where in its word it sits, beginning, middle, end or alone, and let the boundaries fall out of the answers. A hidden Markov model over four places, what it counts from tagged sentences, and the words it finds that no dictionary could.";
+
 
 export const metadata: Metadata = {
   title: "Segmenting With a Hidden Model · oop_ml",
-  description: TAGLINE,
+  description: "Infer word boundaries from a sequence of hidden character-position labels.",
 };
 
 export default function SegmentingWithAHiddenModelPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["segmenting-with-a-hidden-model"]}
+      technicalStart="Part 2. Four Places, and Why Four Are Enough"
+      openingTitle="A Word the Dictionary Has Never Seen"
+      playgroundIntro="Compare the character observations with their proposed position labels. Follow the complete label sequence and check how it determines the word boundaries."
       title="Segmenting With a Hidden Model"
-      tagline={TAGLINE}
+      tagline="Infer word boundaries from a sequence of hidden character-position labels."
       prerequisites={
         <>
           The two dictionary pages of this section, since this one is the repair
@@ -41,75 +47,14 @@ export default function SegmentingWithAHiddenModelPage() {
           run over places in a word rather than words in a sentence.
         </>
       }
-      history={
-        <>
-          <p>
-            By the end of the 1990s the dictionary segmenters had settled into
-            the shape the previous page describes, and everybody who used one
-            knew where it broke. It broke on names. A system reading Chinese
-            newswire met a foreign surname, a company nobody had floated when the
-            dictionary was compiled, a place in a province the lexicographers had
-            not covered, and each of them came back as its separate characters,
-            because a reading built out of a word the list lacks is not a reading
-            the method can produce. Adding the word fixed that word and nothing
-            else. The people building these systems were adding entries faster
-            than the language was coining them and still losing.
-          </p>
-          <p>
-            Nianwen Xue turned the problem inside out in a 2003 article in
-            Computational Linguistics and Chinese Language Processing, called
-            Chinese word segmentation as character tagging, written while he was
-            working on the Penn Chinese Treebank at the University of
-            Pennsylvania. His move was to stop asking which word a stretch of
-            characters is and start asking, of each character on its own, where
-            in its word that character sits. There are only four answers, and a
-            character has one of them whether or not its word has ever been
-            written down before, so the question has an answer for a surname
-            nobody has seen. He learned the answers from a corpus somebody had
-            cut up by hand and tagged with a maximum entropy classifier; Fuchun
-            Peng, Fangfang Feng and Andrew McCallum took the same four answers to
-            conditional random fields at COLING in 2004, under a title that named
-            the prize directly, new word detection.
-          </p>
-          <p>
-            The machinery this page uses to choose among the answers is older
-            than the idea it serves. Leonard Baum and Ted Petrie published the
-            statistics of a Markov chain you cannot see, watched through the
-            symbols it emits, in the Annals of Mathematical Statistics in 1966,
-            and Andrew Viterbi published the recurrence that finds its most
-            probable run of states in the IEEE Transactions on Information Theory
-            in 1967, for decoding convolutional codes off a noisy channel. Set
-            the hidden states to be the four places and the emitted symbols to be
-            the characters, and the segmentation problem is a decoding problem.
-            The first international Chinese word segmentation bakeoff, run by
-            Richard Sproat and Thomas Emerson in 2003, is where the character
-            methods and the dictionary methods were first measured against each
-            other on the same data, and it is also where it became impossible to
-            ignore that the annotated corpora disagreed with one another about
-            what a word is. The segmenter most people reach for in Python today
-            runs the word lattice of the previous page over its dictionary and
-            hands the stretches its dictionary missed to exactly this model.
-          </p>
-          <p>
-            This page asks six questions in order. What can neither dictionary
-            method do, however good its counts become? What is there to ask of a
-            character, and why are four answers enough to say anything a cut can
-            say? What is counted from tagged sentences, and what has to be added
-            to those counts before they can be used at all? How is the best run
-            of answers found without trying the runs? What does the method buy
-            over a word list, what does it give up, and how much tagged text does
-            the trade need? And where does it stop deciding, so that something
-            outside it has to?
-          </p>
-        </>
-      }
+
       playground={<HiddenModelPlayground />}
       sections={[
         {
           title: "Part 1. The Word No List Can Reach",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. What both dictionary methods have in common">
                 <p>
                   The greedy scan and the best whole path disagree about a great
@@ -189,7 +134,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Four Places, and Why Four Are Enough",
@@ -270,17 +215,14 @@ export default function SegmentingWithAHiddenModelPage() {
                   ]}
                   caption="Counted by trying every run of four letters of each length and keeping the ones that describe a cutting, which is the check written from the definition rather than from the recurrence. Most runs of letters describe nothing; the ones that survive are in step with the cuts exactly."
                 />
-                <p>
-                  This is a sharper statement than it looks, and it is worth
-                  setting against the previous page. A word lattice contains only
-                  the readings its list permits, which on twenty-eight characters
-                  of ordinary English was 2,592 out of 134,217,728. The places
-                  here reach every cut there is, the 134,217,728 rather than the
-                  2,592, including all the ones no dictionary would ever allow.
-                  That is the same fact as section 1 seen from the other side,
-                  since a word nobody listed sits on some cut of the characters
-                  that spell it, and every cut is reachable here.
+                <>
+<p>
+                  This is a sharper statement than it looks, and it is worth setting against the previous page. A word lattice contains only the readings its list permits, which on twenty-eight characters of ordinary English was 2,592 out of 134,217,728. The places here reach every cut there is, the 134,217,728 rather than the 2,592, including all the ones no dictionary would ever allow.
                 </p>
+                <p>
+                  That is the same fact as section 1 seen from the other side, since a word nobody listed sits on some cut of the characters that spell it, and every cut is reachable here.
+                </p>
+</>
                 <KeepInMind>
                   Every cut has exactly one run of letters and every admissible
                   run of letters has exactly one cut, so working in letters keeps
@@ -357,6 +299,54 @@ export default function SegmentingWithAHiddenModelPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "What question does this method ask in place of the question a word list answers?",
+              [
+                "Of one character, where in its word it happens to sit",
+                "Of a stretch of characters, which word it is, scored more carefully",
+                "Of a stretch of characters, how often the corpus contained it",
+                "Of each gap between characters, whether some entry of the list permits a boundary there",
+              ],
+              0,
+              "Asking which word a stretch is has no answer for a stretch nobody has written down, and a list can be added to and a scoring improved without that changing. Asking where a character sits has an answer for every character in every text, because a character sits somewhere whatever word it is in.",
+            ),
+            trueFalse(
+              "This method and a word list need the same evidence, sentences somebody has already cut into words.",
+              true,
+              "To build a word list somebody has to have decided where the words were, and to count what this method counts somebody has to have decided exactly the same thing. The two differ only in what they take from that evidence, which is why every measurement on the page can hand both of them the identical sentences.",
+            ),
+            choice(
+              "On twenty-eight characters of ordinary English a word lattice held 2,592 readings out of 134,217,728. How many does a run of the four letters reach?",
+              [
+                "All 134,217,728, including every cut no dictionary would allow",
+                "The same 2,592, since the letters are only another way of writing a lattice",
+                "Four per character, so 112",
+                "Two per character, so 56",
+              ],
+              0,
+              "Every cut has exactly one run of letters and every admissible run of letters has exactly one cut, and both counts come to two to the power of n minus one. That is the same fact as the unlistable word seen from the other side, since a word nobody listed sits on some cut of the characters that spell it.",
+            ),
+            several(
+              "Eight of the sixteen pairs of places are ruled out before any text is looked at. Which of these follow?",
+              [
+                "A place has two possible successors rather than four",
+                "The search cannot answer something like B B, which is a run that cannot be cut into words at all",
+                "The counting decides which of the remaining eight steps are common and never gets a say in whether the other eight are possible",
+                "The eight are learned from the corpus and smoothed down toward zero",
+              ],
+              [0, 1, 2],
+              "The eight are refused rather than learned, which is why half the structure of this model was fixed by what a word is before a single sentence was counted. Smoothing adds a helping only to an outcome that could have occurred and did not, so the refused steps get no helping and stay impossible rather than merely rare, which is what keeps the search from answering a run of letters that is not a cut. The refusal is also why the counting stays as small as it does, two successors per place rather than four.",
+            ),
+            trueFalse(
+              "Turning a run of the four letters back into words needs the pieces looked up somewhere.",
+              false,
+              "Going that way is a rule with no choices in it. Walk the letters from the left, keep collecting characters, and finish a word whenever the letter is E or S, so B E B E B E gives back three two-character words and B M E S B E gives back a three, a one and a two. The letters already say where the boundaries are.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. What Is Counted, and What Is Added To It",
           content: (
             <>
@@ -378,16 +368,14 @@ export default function SegmentingWithAHiddenModelPage() {
                   letters are B M E.
                 </p>
                 <LearnedTables corpusKeys={["two sentences", "five sentences"]} />
-                <p>
-                  Read the middle table across. Both sentences started with a
-                  character that begins a word, so of the two starts, two were B
-                  and none was S. After a B there was one M and one E. After the
-                  only M there was one E and no further M. After the only E there
-                  was one S and no B. And after S there was nothing at all, since
-                  the one S in the corpus was the last character of its sentence.
-                  That last row is the interesting one, and the next section is
-                  about it.
+                <>
+<p>
+                  Read the middle table across. Both sentences started with a character that begins a word, so of the two starts, two were B and none was S. After a B there was one M and one E. After the only M there was one E and no further M. After the only E there was one S and no B.
                 </p>
+                <p>
+                  And after S there was nothing at all, since the one S in the corpus was the last character of its sentence. That last row is the interesting one, and the next section is about it.
+                </p>
+</>
                 <KeepInMind>
                   Every number in those three tables is a count over a total.
                   There is no fitting, no optimisation and nothing to converge, so
@@ -417,15 +405,25 @@ export default function SegmentingWithAHiddenModelPage() {
                   eight could not have occurred.
                 </p>
                 <WorkedExample>
-                  <p>
-                    On the two sentences above, with one added to every outcome
-                    that can happen, a run starts in B with share (2 + 1) over (2
-                    + 2), which is three quarters, and in S with one quarter. A B
-                    is followed by M or E with one half each, since each was seen
-                    once out of two. An M is followed by M with (0 + 1) over (1 +
-                    2), a third, and by E with two thirds. An E is followed by B
-                    with a third and S with two thirds.
-                  </p>
+                  <>
+                    <p>
+                      Add one to every legal outcome before normalizing. In the
+                      two-sentence example, both sentences start in B, and neither
+                      starts in S. There are two legal start states.
+                    </p>
+                    <Equation>{"P(start B) = (2 + 1) / (2 + 2) = 3/4\nP(start S) = (0 + 1) / (2 + 2) = 1/4"}</Equation>
+                    <p>
+                      A B is followed once by M and once by E, so those alternatives
+                      remain equally likely. M has been followed by E once and by M zero
+                      times.
+                    </p>
+                    <Equation>{"P(M | B) = P(E | B) = (1 + 1) / (2 + 2) = 1/2\nP(M | M) = (0 + 1) / (1 + 2) = 1/3\nP(E | M) = (1 + 1) / (1 + 2) = 2/3"}</Equation>
+                    <p>
+                      The same counting rule gives E a one-third probability of
+                      transitioning to B and a two-thirds probability of transitioning
+                      to S.
+                    </p>
+                  </>
                   <p>
                     The row for S is the one worth staring at. Nothing at all
                     followed an S in this corpus, so the counts are zero over
@@ -457,14 +455,18 @@ export default function SegmentingWithAHiddenModelPage() {
                 <Equation>
                   {"P(character | place)  =  (count of that pair + a) / (count of the place + a × (alphabet + 1))"}
                 </Equation>
-                <p>
-                  On the two sentences the alphabet is a, b and c, so there are
-                  four slots. The place that begins a word produced a twice and
-                  nothing else, so a gets (2 + 1) over (2 + 4), one half, and b, c
-                  and anything at all get one sixth each. The place that stands
-                  for a word alone produced c once, so c gets two fifths and
-                  everything else a fifth.
-                </p>
+                <>
+                  <p>
+                    The observed alphabet contains a, b and c. Add an unknown-character
+                    slot, giving four possible emissions. State B emitted a twice and no
+                    other character.
+                  </p>
+                  <Equation>{"P(a | B) = (2 + 1) / (2 + 4) = 1/2\nP(b | B) = P(c | B) = P(unknown | B) = (0 + 1) / (2 + 4) = 1/6"}</Equation>
+                  <p>
+                    State S emitted c once. Apply the same rule with its own counts.
+                  </p>
+                  <Equation>{"P(c | S) = (1 + 1) / (1 + 4) = 2/5\nP(a | S) = P(b | S) = P(unknown | S) = (0 + 1) / (1 + 4) = 1/5"}</Equation>
+                </>
                 <p>
                   Notice what that last sentence quietly concedes. A character the
                   corpus contains but that this place never produced gets exactly
@@ -491,19 +493,14 @@ export default function SegmentingWithAHiddenModelPage() {
                   to a hundredth and watch the answer turn over.
                 </p>
                 <SmoothingDial />
-                <p>
-                  At the usual value of one, and at a half, and at a quarter, the
-                  model answers the majority reading and therefore fails to
-                  reproduce a sentence it was itself trained on. Below about
-                  0.238 it answers the minority reading and the training sentence
-                  comes back as written. The middle figure in the widget is what
-                  moves. The share of the place inside a word producing
-                  the second character rises from 0.1429 at a helping of two to
-                  0.9182 at a hundredth, because that place produced that
-                  character every one of the very few times it produced anything,
-                  and a large helping drowns a small count while a small one lets
-                  it through.
+                <>
+<p>
+                  At the usual value of one, and at a half, and at a quarter, the model answers the majority reading and therefore fails to reproduce a sentence it was itself trained on. Below about 0.238 it answers the minority reading and the training sentence comes back as written. The middle figure in the widget is what moves.
                 </p>
+                <p>
+                  The share of the place inside a word producing the second character rises from 0.1429 at a helping of two to 0.9182 at a hundredth, because that place produced that character every one of the very few times it produced anything, and a large helping drowns a small count while a small one lets it through.
+                </p>
+</>
                 <InAModel>
                   <p>
                     Both answers are defensible and the method contains no
@@ -533,17 +530,14 @@ export default function SegmentingWithAHiddenModelPage() {
           content: (
             <>
               <SubSection title="10. What a whole run of places is worth">
-                <p>
-                  A run of letters over a text is worth the chance of it having
-                  happened, and by the three tables that chance is a product. The
-                  chance that the first character sat where it did, times the
-                  chance it produced the character it produced, times for every
-                  character after it the chance of the step that reached it and
-                  the chance of the character it produced. Taking logarithms turns
-                  that product into a sum for the same reason it did on the
-                  previous page, which is that a product of many numbers below one
-                  falls below what a computer can tell from zero.
+                <>
+<p>
+                  A run of letters over a text is worth the chance of it having happened, and by the three tables that chance is a product. The chance that the first character sat where it did, times the chance it produced the character it produced, times for every character after it the chance of the step that reached it and the chance of the character it produced.
                 </p>
+                <p>
+                  Taking logarithms turns that product into a sum for the same reason it did on the previous page, which is that a product of many numbers below one falls below what a computer can tell from zero.
+                </p>
+</>
                 <Equation>
                   {"score  =  log P(t₁) + log P(c₁ | t₁) + Σ over i ≥ 2 of [ log P(tᵢ | tᵢ₋₁) + log P(cᵢ | tᵢ) ]"}
                 </Equation>
@@ -564,17 +558,14 @@ export default function SegmentingWithAHiddenModelPage() {
               </SubSection>
 
               <SubSection title="11. The same recurrence as the lattice, one level down">
-                <p>
-                  There are two to the power of n minus one runs of letters over n
-                  characters, so scoring them all is not a method. The word
-                  lattice page derived the way round it, and the argument is
-                  reused here rather than rebuilt. If the best run of letters over
-                  a whole text passes through a particular place at a particular
-                  character, then the part of it up to there is the best way of
-                  reaching that place at that character. Otherwise a better head
-                  could be swapped in, leaving the tail untouched and raising the
-                  total, which contradicts the run having been best.
+                <>
+<p>
+                  There are two to the power of n minus one runs of letters over n characters, so scoring them all is not a method. The word lattice page derived the way round it, and the argument is reused here rather than rebuilt. If the best run of letters over a whole text passes through a particular place at a particular character, then the part of it up to there is the best way of reaching that place at that character.
                 </p>
+                <p>
+                  Otherwise a better head could be swapped in, leaving the tail untouched and raising the total, which contradicts the run having been best.
+                </p>
+</>
                 <Equation>
                   {"best(i, t)  =  log P(cᵢ | t)  +  max over places s that may precede t of [ best(i − 1, s) + log P(t | s) ]"}
                 </Equation>
@@ -590,30 +581,23 @@ export default function SegmentingWithAHiddenModelPage() {
                 <TagTrellis
                   scenarioKeys={["research", "student", "two-sentence"]}
                 />
-                <p>
-                  Read the first column. Only two of its four cells carry a
-                  number, because a text cannot start in the middle or at the end
-                  of a word, and the cells that carry no number carry no number for
-                  a reason fixed in the fifth section rather than for want of
-                  evidence. Every cell after that is a maximum over the two places
-                  that could have led to it. The filled cells are the winners at
-                  each character and the line joining them is the answer, which for
-                  those six characters is B E B E B E and therefore three
-                  two-character words.
+                <>
+<p>
+                  Read the first column. Only two of its four cells carry a number, because a text cannot start in the middle or at the end of a word, and the cells that carry no number carry no number for a reason fixed in the fifth section rather than for want of evidence. Every cell after that is a maximum over the two places that could have led to it.
                 </p>
+                <p>
+                  The filled cells are the winners at each character and the line joining them is the answer, which for those six characters is B E B E B E and therefore three two-character words.
+                </p>
+</>
                 <WhyThisWorks>
-                  <p>
-                    It is worth being exact about what is the same as the previous
-                    page and what is not. There, the thing being chosen at each
-                    position was a word from a list and the table had one entry per
-                    position; here, the thing being chosen is a place out of four
-                    and the table has four entries per character. Both are the
-                    recurrence Bellman described and Viterbi published, and the
-                    difference is only what the states are. The consequence of the
-                    change is the whole page, since a state that is a word can only
-                    ever be a word somebody listed and a state that is a place is
-                    available at every character of every text.
+                  <>
+<p>
+                    It is worth being exact about what is the same as the previous page and what is not. There, the thing being chosen at each position was a word from a list and the table had one entry per position; here, the thing being chosen is a place out of four and the table has four entries per character.
                   </p>
+                  <p>
+                    Both are the recurrence Bellman described and Viterbi published, and the difference is only what the states are. The consequence of the change is the whole page, since a state that is a word can only ever be a word somebody listed and a state that is a place is available at every character of every text.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   Four numbers per character settle a choice among two to the
@@ -668,6 +652,60 @@ export default function SegmentingWithAHiddenModelPage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Why is a fixed amount added to every outcome that could have happened?",
+              [
+                "A run of letters is scored as a product, so one zero makes the whole product zero and a reading would be ruled out by an accident of what the corpus held",
+                "To make each row of each table sum to one",
+                "To keep the counts from growing without bound as the corpus grows",
+                "To refine the estimates that the counting had already produced",
+              ],
+              0,
+              "A row that never occurred would not merely be unfavoured; it would be impossible. Smoothing here makes an estimate exist at all for the outcomes a small corpus did not happen to show, rather than improving one that was already there.",
+            ),
+            choice(
+              "The word lattice kept one number per position. Why does this search keep four per character?",
+              [
+                "A tail depends on which place the head finished in, and there are four places it could have finished in",
+                "Each place can be followed by four others, so four candidates have to be compared at every character",
+                "The start table and the three learned tables contribute one number each",
+                "Four is how many characters the longest word of the corpus has",
+              ],
+              0,
+              "A place summarises everything about the head of a reading that the tail is allowed to care about, so the best way of arriving at each of the four places has to be carried separately, together with the place it came from, and at the end the better of the two places a text may finish in is taken and the record walked backwards. Each place is reached from at most two others, not four, which is the refusal of the fifth section at work. The lattice needed one number because its state was a position; here the state is a place, and a place is available at every character of every text.",
+            ),
+            choice(
+              "Nothing at all followed the single S in the two-sentence corpus. What does the fitted model say about what follows an S?",
+              [
+                "One half each for the two admissible successors, which is the model reporting that it has never seen what follows a one-character word",
+                "Zero for both, so any reading using that step is impossible",
+                "One quarter each across all four places, since nothing was observed to narrow it",
+                "The same shares as the row for E, since both of them close a word",
+              ],
+              0,
+              "The counts there are zero over zero, and the helping is what gives the row numbers at all. One half each is the honest report, and it arrives at two successors rather than four because the other two were refused before any counting began.",
+            ),
+            several(
+              "Four sentences contradict each other about the same three characters. Walking the helping down from two to a hundredth showed which of these?",
+              [
+                "At one, at a half and at a quarter the model answers the majority reading, so it fails to reproduce a sentence it was itself trained on",
+                "Below about 0.238 it answers the minority reading and the training sentence comes back as written",
+                "The share of the place inside a word producing the second character rises from 0.1429 at a helping of two to 0.9182 at a hundredth",
+                "Nothing inside the method prefers either value, and the effect shrinks only as the counts grow",
+              ],
+              [0, 1, 2, 3],
+              "All four hold. Both answers are defensible and the method contains no argument for either. Failing to reproduce your own training sentence is the ordinary consequence of not trusting a single observation, and reproducing it is one step from memorising every accident of the corpus. The helping is an estimation question, so more data does settle it as the counts outweigh whatever is added, which on four sentences leaves it deciding outright. What the measurement shows is narrower, that the number is not a formality and a segmentation quoted without it has left out something that changed the answer.",
+            ),
+            trueFalse(
+              "Two texts of the same length cost the search exactly the same, however large the corpus they were learned from.",
+              true,
+              "Each character offers four places and each place is reached from at most two, so the work is eight comparisons per character after the first plus two to start, and both of those numbers were fixed by what a word is before any data arrived. On the previous page the bound was the length of the text times the length of the longest entry, and it grew whenever a longer word joined the list; here there is no list to grow, so a longer corpus costs nothing at all at reading time and is paid for in tagged text instead.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. What the Places Buy and What They Cost",
           content: (
             <>
@@ -680,28 +718,22 @@ export default function SegmentingWithAHiddenModelPage() {
                   previous page&rsquo;s lattice is a single character.
                 </p>
                 <TagTrellis scenarioKeys={["novel", "name"]} />
-                <p>
-                  What decides is the character table. In those three sentences a,
-                  c and e only ever produced under the place that begins a word,
-                  and b, d and f only under the place that ends one, so at the
-                  first character the cell for begins carries a much larger number
-                  than the cell for alone, and at the second the cell for ends
-                  carries a much larger number than the cell for begins. The run
-                  that wins alternates, and reading it off gives three words that
-                  were never in the corpus and are the right three.
+                <>
+<p>
+                  What decides is the character table. In those three sentences a, c and e only ever produced under the place that begins a word, and b, d and f only under the place that ends one, so at the first character the cell for begins carries a much larger number than the cell for alone, and at the second the cell for ends carries a much larger number than the cell for begins.
                 </p>
                 <p>
-                  The second text is the same trick failing, and it is our own
-                  sentence, so it is worth dwelling on. The surname in front of the
-                  research characters is five characters the corpus has never
-                  seen. The word list answers eight pieces, five of them single
-                  characters. The places answer seven, having glued the first two
-                  characters of the name together into a two-character word, which
-                  is one piece closer and still wrong, and the four-word reading a
-                  person gives is out of reach for both. The nineteenth section is
-                  about why that particular wrong answer, and it turns out to have
-                  nothing to do with the name.
+                  The run that wins alternates, and reading it off gives three words that were never in the corpus and are the right three.
                 </p>
+</>
+                <>
+<p>
+                  The second text is the same trick failing, and it is our own sentence, so it is worth dwelling on. The surname in front of the research characters is five characters the corpus has never seen. The word list answers eight pieces, five of them single characters. The places answer seven, having glued the first two characters of the name together into a two-character word, which is one piece closer and still wrong, and the four-word reading a person gives is out of reach for both.
+                </p>
+                <p>
+                  The nineteenth section is about why that particular wrong answer, and it turns out to have nothing to do with the name.
+                </p>
+</>
                 <KeepInMind>
                   The mechanism that finds an unseen word is that a character keeps
                   its habits when it moves into a word nobody has written down. It
@@ -711,18 +743,14 @@ export default function SegmentingWithAHiddenModelPage() {
               </SubSection>
 
               <SubSection title="14. How much tagged text the trade needs">
-                <p>
-                  Everything so far has been read off corpora of two to five
-                  sentences, which is enough to see a mechanism and not enough to
-                  say what it is worth. So here is a measurement. A language is
-                  generated with a fixed seed, seventy words spelled out of forty
-                  characters, with a few words carrying most of the text and a long
-                  tail behind them, which is the shape a real vocabulary has. Both
-                  methods are fitted on the first two sentences of one corpus, then
-                  the first five, and so on, and both are scored on the same two
-                  hundred held-out sentences, a word counting as found only when
-                  both its ends land where the sentence put them.
+                <>
+<p>
+                  Everything so far has been read off corpora of two to five sentences, which is enough to see a mechanism and not enough to say what it is worth. So here is a measurement. A language is generated with a fixed seed, seventy words spelled out of forty characters, with a few words carrying most of the text and a long tail behind them, which is the shape a real vocabulary has.
                 </p>
+                <p>
+                  Both methods are fitted on the first two sentences of one corpus, then the first five, and so on, and both are scored on the same two hundred held-out sentences, a word counting as found only when both its ends land where the sentence put them.
+                </p>
+</>
                 <CorpusSizeCurve corpusKeys={["characters"]} />
                 <p>
                   The curves cross between thirty and forty sentences, and they
@@ -733,19 +761,14 @@ export default function SegmentingWithAHiddenModelPage() {
                   every word of a seventy-word language and scores exactly 1.0000
                   while the places have flattened out at 0.9178.
                 </p>
-                <p>
-                  The split recall says why. Against words the training sentences
-                  contained, the list is at 0.9983 and better at every size; against
-                  words they did not, the list is at 0.0000 from ten sentences on and
-                  the places are between 0.42 and 0.66. So the
-                  crossing is not really about sentence counts at all. It sits
-                  where the share of held-out words that are new falls below about
-                  a tenth, and it is a crossing at all only because a language of
-                  seventy words runs out of new words. A real vocabulary does not,
-                  which is the honest caveat on this measurement and the reason the
-                  method is used on real text at corpus sizes far past forty
-                  sentences.
+                <>
+<p>
+                  The split recall says why. Against words the training sentences contained, the list is at 0.9983 and better at every size; against words they did not, the list is at 0.0000 from ten sentences on and the places are between 0.42 and 0.66. So the crossing is not really about sentence counts at all. It sits where the share of held-out words that are new falls below about a tenth, and it is a crossing at all only because a language of seventy words runs out of new words.
                 </p>
+                <p>
+                  A real vocabulary does not, which is the honest caveat on this measurement and the reason the method is used on real text at corpus sizes far past forty sentences.
+                </p>
+</>
                 <KeepInMind>
                   Thirty tagged sentences is where the places stopped being ahead
                   on this language. The quantity that actually moved was the share
@@ -808,17 +831,14 @@ export default function SegmentingWithAHiddenModelPage() {
                   out, and everything changes.
                 </p>
                 <CorpusSizeCurve corpusKeys={["letters"]} />
-                <p>
-                  Before you read a character, which of the four places it is in is
-                  worth 1.5590 bits of uncertainty on the English words and 1.7518
-                  on the character language. Reading the character removes 0.4869
-                  of those bits on the English and 0.9207 on the characters, which
-                  is roughly twice as much. That is the whole difference, and it
-                  shows up as a ceiling. The places top out at 0.6087 on the
-                  English words and then fall back to 0.5186 as the corpus grows,
-                  because a wider vocabulary uses every letter in every position,
-                  while on the character language they climb past 0.92.
+                <>
+<p>
+                  Before you read a character, which of the four places it is in is worth 1.5590 bits of uncertainty on the English words and 1.7518 on the character language. Reading the character removes 0.4869 of those bits on the English and 0.9207 on the characters, which is roughly twice as much. That is the whole difference, and it shows up as a ceiling.
                 </p>
+                <p>
+                  The places top out at 0.6087 on the English words and then fall back to 0.5186 as the corpus grows, because a wider vocabulary uses every letter in every position, while on the character language they climb past 0.92.
+                </p>
+</>
                 <p>
                   Our own sentence is where this lands. Handed the sentence with
                   its spaces taken out, a model fitted on 1,280 English sentences
@@ -947,19 +967,14 @@ export default function SegmentingWithAHiddenModelPage() {
                   thirteenth section left hanging, and it was never an answer about
                   the surname.
                 </p>
-                <p>
-                  There is a genuine choice underneath this and it is worth naming,
-                  since it is the sort of thing that is usually left to whoever
-                  writes the code. The spare slot could be one share per place, as
-                  it is here, or the four places could be given different shares
-                  for unfamiliar characters, or a stretch of them could be refused
-                  outright and left uncut for something else to look at. Taking
-                  the first, as here, gives a confident answer that on the surname
-                  is wrong; taking the second means estimating four numbers from
-                  the one thing the corpus cannot show; taking the third gives no
-                  answer and marks the stretch for whatever comes next. Nothing in
-                  the mathematics prefers any of the three.
+                <>
+<p>
+                  There is a genuine choice underneath this and it is worth naming, since it is the sort of thing that is usually left to whoever writes the code. The spare slot could be one share per place, as it is here, or the four places could be given different shares for unfamiliar characters, or a stretch of them could be refused outright and left uncut for something else to look at.
                 </p>
+                <p>
+                  Taking the first, as here, gives a confident answer that on the surname is wrong; taking the second means estimating four numbers from the one thing the corpus cannot show; taking the third gives no answer and marks the stretch for whatever comes next. Nothing in the mathematics prefers any of the three.
+                </p>
+</>
                 <KeepInMind>
                   On a stretch of entirely unfamiliar characters the character
                   table falls out of the comparison and only the steps remain, so
@@ -971,17 +986,14 @@ export default function SegmentingWithAHiddenModelPage() {
               </SubSection>
 
               <SubSection title="20. What has to be decided before any counting begins">
-                <p>
-                  Two decisions sit in front of every number on this page and
-                  neither is settled by anything in the method. The first is that
-                  somebody had to cut the training sentences into words. That is
-                  the input, it is expensive, and it is an opinion, since whether
-                  a Chinese compound is one word or two is unsettled in the
-                  language itself, and the annotated corpora built for this problem disagree
-                  with one another about the same strings. So a model fitted on one
-                  of them is right by that corpus&rsquo;s standard and can be
-                  measured wrong by another with nothing having gone amiss.
+                <>
+<p>
+                  Two decisions sit in front of every number on this page and neither is settled by anything in the method. The first is that somebody had to cut the training sentences into words. That is the input, it is expensive, and it is an opinion, since whether a Chinese compound is one word or two is unsettled in the language itself, and the annotated corpora built for this problem disagree with one another about the same strings.
                 </p>
+                <p>
+                  So a model fitted on one of them is right by that corpus&rsquo;s standard and can be measured wrong by another with nothing having gone amiss.
+                </p>
+</>
                 <p>
                   The second is the helping added to the counts, and the ninth
                   section makes that concrete rather than theoretical. On the same
@@ -1085,6 +1097,222 @@ export default function SegmentingWithAHiddenModelPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            several(
+              "Seventy words spelled out of forty characters, both methods fitted on the same sentences and scored on the same two hundred held-out ones. Which of these did that measurement report?",
+              [
+                "The curves cross between thirty and forty sentences, with the places ahead at thirty by 0.8659 against 0.8501",
+                "Against the words the training sentences contained, the places beat the list at every size measured",
+                "Against words the training sentences did not contain, the list is at 0.0000 from ten sentences on where the places are between 0.42 and 0.66",
+                "The crossing is a fact about sentence counts, so any language crosses at about the same size",
+              ],
+              [0, 2],
+              "The places are worse than the list on exactly the words the corpus contained, at every size and on both languages, because a table of four places holds a habit that the characters on either side can talk it out of, where a list holds the word. By a hundred and sixty sentences the list has seen every word of a seventy-word language and scores exactly 1.0000 while the places have flattened out at 0.9178. The quantity that actually moved was the share of held-out words that are new, and the crossing sits where that falls below about a tenth, so it is a crossing at all only because a language of seventy words runs out of new words, and a real vocabulary does not.",
+            ),
+            choice(
+              "What makes this a method for a writing system with a large character set rather than for an alphabet?",
+              [
+                "How much a single character tells you about where it sits, which is 0.9207 bits removed on the character language against 0.4869 on the English words",
+                "That the language is written without spaces, so no word list can be built from it",
+                "That its words are shorter, so there are fewer runs of letters to search",
+                "That corpora of it are smaller, so a word list has too few entries to compete",
+              ],
+              0,
+              "On the English words the places top out at 0.6087 and then fall back to 0.5186 as the corpus grows, because a wider vocabulary uses every letter in every position, while on the character language they climb past 0.92. So on an alphabet the method is not merely weaker; it stops improving and then gets worse. The deciding quantity can be computed from a corpus before any segmenter is built.",
+            ),
+            trueFalse(
+              "Handing the word lattice’s stretches of single characters to the places improves the reading of our own sentence.",
+              false,
+              "It changes nothing there. The five characters of the transliterated surname are exactly a stretch no entry covers, so they are handed over and the places answer the same four pieces they answered on their own. The combination cannot be better than its second half on the stretch where the first half has nothing, though on both generated languages and at every size measured it is at least as good as either method alone, reaching 0.9262 on the character language at thirty sentences where the better single reaches 0.8659.",
+            ),
+            trueFalse(
+              "Two languages over the same four characters, one making its words by joining the first character to the second and the other by crossing them over, leave exactly the same counts behind, so no quantity of text in either could tell them apart.",
+              true,
+              "Every count either language leaves behind is the same count, thirty-six numbers compared and thirty-six equal, so no quantity of text in either language could separate them. A fit shown only the first reads four characters of the second into two words of the second, words its own language could never contain, with exactly the confidence it reads its own. No term in the score reads two characters together, so the evidence for such a boundary has nowhere in the model to be recorded.",
+            ),
+            choice(
+              "A run of five characters no corpus ever held comes back as B E S S S, four pieces, for a transliterated surname, five Latin capitals and five pictograms alike. Why?",
+              [
+                "Every unfamiliar character contributes the same number under every place, so those numbers cancel out of every comparison and only the steps are left",
+                "Five characters is too short for the search to use more than two of its places",
+                "The model refuses the stretch and falls back to a fixed cut",
+                "Those particular characters happen to carry those habits in the corpus",
+              ],
+              0,
+              "What comes back is a fact about the corpus’s habits over word lengths rather than about the stretch, and nothing in the output distinguishes the two. The spare slot exists so an unfamiliar character has a number at all rather than to tell one from another, and the alternatives, four shares instead of one or a refusal that leaves the stretch uncut, are choices the mathematics does not prefer between.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Tagging the Places With the Library",
+          practice: [
+            exercise(
+              "Read the three tables off two sentences",
+              ["Part 3 counts the tables of a corpus of two sentences, ab followed by c and then abc on its own, and smooths every admissible outcome by one. Fit the model on those two sentences and print the start shares, every step share the model allows, and the share each of two places gives to a, to c and to a character the corpus never contained.", "The eight refused steps come back as a log probability of minus infinity rather than a number, so print only the steps whose share is above zero. Part 3 worked P(E | M) out as two thirds and P(c | S) as two fifths."],
+              `import math
+from oop_ml import BoundaryTag, HiddenMarkovSegmenter
+
+model = HiddenMarkovSegmenter(smoothing=1.0).fit([["ab", "c"], ["abc"]])
+print(f"alphabet {model.alphabet}, {model.n_characters} characters plus one spare slot")
+
+# Print the share of each admissible start place, then every step share the model
+# allows, then for a, c and z the share under the place that begins a word and
+# under the place that is a word on its own.`,
+              `import math
+from oop_ml import BoundaryTag, HiddenMarkovSegmenter
+
+model = HiddenMarkovSegmenter(smoothing=1.0).fit([["ab", "c"], ["abc"]])
+print(f"alphabet {model.alphabet}, {model.n_characters} characters plus one spare slot")
+
+for tag in (BoundaryTag.BEGIN, BoundaryTag.SINGLE):
+    print(f"P(start {tag.value}) = {math.exp(model.initial_log_probability(tag)):.4f}")
+
+for previous in BoundaryTag:
+    for following in BoundaryTag:
+        log_share = model.transition_log_probability(previous, following)
+        if log_share > -math.inf:
+            print(f"P({following.value} | {previous.value}) = {math.exp(log_share):.4f}")
+
+for character in ("a", "c", "z"):
+    begins = math.exp(model.emission_log_probability(BoundaryTag.BEGIN, character))
+    alone = math.exp(model.emission_log_probability(BoundaryTag.SINGLE, character))
+    print(f"P({character} | B) = {begins:.4f}, P({character} | S) = {alone:.4f}")`,
+              `alphabet ('a', 'b', 'c'), 3 characters plus one spare slot
+P(start B) = 0.7500
+P(start S) = 0.2500
+P(M | B) = 0.5000
+P(E | B) = 0.5000
+P(M | M) = 0.3333
+P(E | M) = 0.6667
+P(B | E) = 0.3333
+P(S | E) = 0.6667
+P(B | S) = 0.5000
+P(S | S) = 0.5000
+P(a | B) = 0.5000, P(a | S) = 0.2000
+P(c | B) = 0.1667, P(c | S) = 0.4000
+P(z | B) = 0.1667, P(z | S) = 0.2000`,
+              { hints: ["fit takes a list of sentences, each a list of its words. A sentence given as one string would be read as one-character words, which the corpus refuses.", "The four places are the members of BoundaryTag, and the model answers initial_log_probability, transition_log_probability and emission_log_probability, all in log space, so math.exp turns each into a share.", "A forbidden step answers minus infinity, which math.exp turns into zero, so testing the log value against -math.inf is what leaves the eight admissible steps."], check: numberCheck("What share does the model give to a word ending straight after a middle character, P(E | M)?", 0.6667, 0.0005, "The only middle character in the corpus, the b of abc, was followed by an end once and by another middle never, so the counts are one and zero over one. Adding one to each of the two admissible successors gives (1 + 1) over (1 + 2), which is two thirds, and the middle that never occurred gets the remaining third rather than nothing, which is the whole point of the helping.") },
+            ),
+            exercise(
+              "Find three words the sentences never held",
+              ["Part 1 fits the model on three sentences, ab cd, ab ef and cd ef, counts a word list from the same three, and hands both the six characters adcfeb. Do the same, print the places the model chooses and the words each method answers, and then print the share of the character a under each of the four places.", "The lesson says a only ever began a word in those sentences, so the place that begins a word should give it a much larger share than the place that ends one. That ratio is the whole mechanism."],
+              `import math
+from oop_ml import BoundaryTag, DictionaryLatticeSegmenter, HiddenMarkovSegmenter, WordDictionary
+
+sentences = [["ab", "cd"], ["ab", "ef"], ["cd", "ef"]]
+text = "adcfeb"
+
+tagger = HiddenMarkovSegmenter().fit(sentences)
+lattice = DictionaryLatticeSegmenter(dictionary=WordDictionary.from_segmented_corpus(sentences))
+
+# Print the places the tagger assigns to the text as one string of letters, the
+# words the tagger answers, the words the word list answers, and the share of
+# a under each of the four places.`,
+              `import math
+from oop_ml import BoundaryTag, DictionaryLatticeSegmenter, HiddenMarkovSegmenter, WordDictionary
+
+sentences = [["ab", "cd"], ["ab", "ef"], ["cd", "ef"]]
+text = "adcfeb"
+
+tagger = HiddenMarkovSegmenter().fit(sentences)
+lattice = DictionaryLatticeSegmenter(dictionary=WordDictionary.from_segmented_corpus(sentences))
+
+places = "".join(tag.value for tag in tagger.tags_of(text))
+print(f"places {places}")
+print(f"tagger: {' | '.join(tagger.split(text).texts)}")
+print(f"word list: {' | '.join(lattice.split(text).texts)}")
+for tag in BoundaryTag:
+    share = math.exp(tagger.emission_log_probability(tag, "a"))
+    print(f"P(a | {tag.value}) = {share:.4f}")`,
+              `places BEBEBE
+tagger: ad | cf | eb
+word list: a | d | c | f | e | b
+P(a | B) = 0.2308
+P(a | M) = 0.1429
+P(a | E) = 0.0769
+P(a | S) = 0.1429`,
+              { hints: ["tags_of answers one BoundaryTag per character, and each tag's value is its letter, so joining the values gives the run of places.", "WordDictionary.from_segmented_corpus counts a list from the same sentences, and a lattice segmenter over it answers only single characters here, since none of its three words is in the text.", "The default smoothing is one, and the alphabet is the six characters a to f plus the spare slot, so a place that produced six characters divides by six plus seven."], check: numberCheck("What share does the place that begins a word give to the character a?", 0.2308, 0.0005, "The place that begins a word produced six characters in those three sentences, two of them a, and the alphabet is six characters plus the spare slot, so the share is (2 + 1) over (6 + 7). Under the place that ends a word the same character scores (0 + 1) over (6 + 7), which is 0.0769, and that gap at the first character, with its mirror image for d at the second, is what makes the winning run alternate and give three words that were never in the corpus.") },
+            ),
+            exercise(
+              "Walk the helping down on a corpus that contradicts itself",
+              ["Part 3 fits four sentences in which the first two of three characters are a word twice and all three are a word once, and watches the reading of 研究生很多 turn over as the helping shrinks. Fit at seven values from two down to a hundredth, print what the model answers at each, say whether it reproduces the training sentence, and print the share the place inside a word gives to 究.", "The lesson quotes that share at 0.1429 for a helping of two and 0.9182 for a hundredth, and says the answer turns at about 0.238. The value at the usual helping of one is not on the page."],
+              `import math
+from oop_ml import BoundaryTag, HiddenMarkovSegmenter
+
+sentences = [["研究", "生命", "起源"], ["研究生", "很", "多"], ["生命", "很", "好"], ["起源", "研究"]]
+text = "研究生很多"
+
+for smoothing in (2.0, 1.0, 0.5, 0.25, 0.23, 0.1, 0.01):
+    # Fit a model with this smoothing, split the text, say whether the words are
+    # the training sentence as written, and print the share of 究 under the
+    # place inside a word.
+    pass`,
+              `import math
+from oop_ml import BoundaryTag, HiddenMarkovSegmenter
+
+sentences = [["研究", "生命", "起源"], ["研究生", "很", "多"], ["生命", "很", "好"], ["起源", "研究"]]
+text = "研究生很多"
+
+for smoothing in (2.0, 1.0, 0.5, 0.25, 0.23, 0.1, 0.01):
+    model = HiddenMarkovSegmenter(smoothing=smoothing).fit(sentences)
+    words = model.split(text).texts
+    verdict = "as written" if list(words) == ["研究生", "很", "多"] else "majority reading"
+    inside = math.exp(model.emission_log_probability(BoundaryTag.MIDDLE, "究"))
+    print(f"helping {smoothing}: {' | '.join(words)} ({verdict}), P(究 | M) = {inside:.4f}")`,
+              `helping 2.0: 研究 | 生 | 很 | 多 (majority reading), P(究 | M) = 0.1429
+helping 1.0: 研究 | 生 | 很 | 多 (majority reading), P(究 | M) = 0.1818
+helping 0.5: 研究 | 生 | 很 | 多 (majority reading), P(究 | M) = 0.2500
+helping 0.25: 研究 | 生 | 很 | 多 (majority reading), P(究 | M) = 0.3571
+helping 0.23: 研究生 | 很 | 多 (as written), P(究 | M) = 0.3727
+helping 0.1: 研究生 | 很 | 多 (as written), P(究 | M) = 0.5500
+helping 0.01: 研究生 | 很 | 多 (as written), P(究 | M) = 0.9182`,
+              { hints: ["smoothing is a field of the constructor, so each value needs its own model fitted on the same sentences.", "The middle place produced exactly one character in the corpus, the 究 of 研究生, and the alphabet holds nine characters plus the spare slot, so the share is (1 + a) over (1 + 10a).", "Comparing the words to the training sentence is an ordinary list comparison, since texts answers the pieces as strings."], check: numberCheck("What share does the place inside a word give to 究 at the usual helping of one?", 0.1818, 0.0005, "That place produced one character in the whole corpus and it was 究, so the count is one over one, and the helping of one spread over the nine-character alphabet and the spare slot makes it (1 + 1) over (1 + 10), two elevenths. At a helping of two the same fraction is 3 over 21, the 0.1429 the lesson quotes, and at a hundredth it is 1.01 over 1.1, the 0.9182. The answer turns between 0.24 and 0.23, which is the 0.238 nothing in the method predicts.") },
+            ),
+            exercise(
+              "Hand the stretch nothing covered to the places",
+              ["Part 5 ends with the arrangement a working segmenter uses. Fit the model on the five sentences that agree with themselves, count a word list from the same five, and read the surname sentence 阿尔瓦雷斯研究生命起源 three ways, with the list alone, with the places alone, and with the list handing its uncovered stretches to the places.", "The lesson says the places glue the first two characters of the name together and the combination changes nothing on this sentence. Print the places the model gives the surname on its own to see why."],
+              `from oop_ml import DictionaryLatticeSegmenter, HiddenMarkovSegmenter, WordDictionary
+
+sentences = [
+    ["研究", "生命", "起源"], ["学生", "很", "多"], ["生命", "很", "好"],
+    ["起源", "研究"], ["学生", "研究", "生命"],
+]
+text = "阿尔瓦雷斯研究生命起源"
+
+dictionary = WordDictionary.from_segmented_corpus(sentences)
+tagger = HiddenMarkovSegmenter().fit(sentences)
+# Build a lattice segmenter over the dictionary alone and one that hands unknown
+# stretches to the tagger, print what each of the three answers with its piece
+# count, and print the places the tagger gives the five-character surname alone.`,
+              `from oop_ml import DictionaryLatticeSegmenter, HiddenMarkovSegmenter, WordDictionary
+
+sentences = [
+    ["研究", "生命", "起源"], ["学生", "很", "多"], ["生命", "很", "好"],
+    ["起源", "研究"], ["学生", "研究", "生命"],
+]
+text = "阿尔瓦雷斯研究生命起源"
+
+dictionary = WordDictionary.from_segmented_corpus(sentences)
+tagger = HiddenMarkovSegmenter().fit(sentences)
+lattice = DictionaryLatticeSegmenter(dictionary=dictionary)
+together = DictionaryLatticeSegmenter(dictionary=dictionary, unknown_segmenter=tagger)
+
+for label, segmenter in (("word list", lattice), ("places", tagger), ("both", together)):
+    pieces = segmenter.split(text)
+    print(f"{label}: {' | '.join(pieces.texts)} ({pieces.n_words} pieces)")
+
+places = "".join(tag.value for tag in tagger.tags_of("阿尔瓦雷斯"))
+print(f"the surname alone is tagged {places}")`,
+              `word list: 阿 | 尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源 (8 pieces)
+places: 阿尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源 (7 pieces)
+both: 阿尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源 (7 pieces)
+the surname alone is tagged BESSS`,
+              { hints: ["DictionaryLatticeSegmenter takes an optional unknown_segmenter, a fitted tagger it hands every stretch of consecutive single characters no entry covers. An unfitted one is refused at the first split.", "All three answer Words, so texts and n_words read the same way for each.", "The five characters of the surname are all unfamiliar, so every one of them scores the same under every place and only the steps decide, which is why the run comes back the way Part 6 describes."], check: numberCheck("How many pieces does the combination answer for the eleven characters?", 7, 0.5, "The list answers eight pieces, five lone characters and three words. Those five characters are exactly a stretch no entry covers, so they are handed to the places, which tag them B E S S S and glue the first two together, four pieces where the list had five. The places alone answer the same seven, since the three words after the name are ones the corpus taught, so on this sentence the combination cannot do better than its second half on the stretch where its first half had nothing.") },
+            ),
+          ],
         },
       ]}
     />

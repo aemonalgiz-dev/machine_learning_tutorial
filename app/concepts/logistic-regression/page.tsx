@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -27,7 +30,7 @@ import { ThresholdExplorer } from "@/components/widgets/ThresholdExplorer";
 export const metadata: Metadata = {
   title: "Logistic Regression · oop_ml",
   description:
-    "Model a probability with a straight line in the log-odds, fit it by likelihood, turn it into a decision with a threshold, and keep those four things apart.",
+    "Turn measurements into a probability, then choose how that probability becomes a decision.",
 };
 
 const linkClass =
@@ -36,8 +39,12 @@ const linkClass =
 export default function LogisticRegressionPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["logistic-regression"]}
+      technicalStart="Part 2. Score, Probability, and Decision"
+      openingTitle="A Prediction Between Yes and No"
+      playgroundIntro="Read the score, probability, and predicted class as three different quantities. Move the query point and watch where the class changes."
       title="Logistic Regression"
-      tagline="A straight line in the log-odds, a probability out of the sigmoid, and a decision only when you ask for one."
+      tagline="Turn measurements into a probability, then choose how that probability becomes a decision."
       prerequisites={
         <>
           This page assumes{" "}
@@ -55,63 +62,14 @@ export default function LogisticRegressionPage() {
           &rsquo;s probability half is where odds come from.
         </>
       }
-      history={
-        <>
-          <p>
-            The curve is older than the problem. Pierre-François Verhulst, in
-            Brussels in 1838, wrote it down to describe a population that
-            grows quickly while it is small and slows as it approaches
-            whatever the land can support, and he named it the logistic curve
-            in 1845. Raymond Pearl and Lowell Reed rediscovered the same curve
-            in 1920 and fitted it to the census population of the United
-            States, and neither they nor Verhulst were modelling a
-            probability. The S shape entered statistics through bioassay,
-            where Chester Bliss in 1934 was estimating how the fraction of
-            insects killed rises with the dose of an insecticide, and his
-            probit used the cumulative normal for the rise. Joseph Berkson, at
-            the Mayo Clinic, argued in a 1944 paper in the Journal of the
-            American Statistical Association that the logistic curve served
-            the same purpose and was easier to work with, and he coined the
-            word logit for the log of the odds, which is the quantity this
-            page&rsquo;s line is straight in. The argument between the two
-            curves ran for a decade, and they answer nearly the same thing,
-            since they differ mostly in the tails.
-          </p>
-          <p>
-            Every model before this page predicts a number, and a category
-            outcome does not want one. Did the patient recover, did the
-            student pass. A straight line pointed at zeros and ones predicts
-            one and a half and minus two, and the difficulty underneath is
-            deeper than the range. The thing being modelled is a probability,
-            and no single person ever shows you one; each student either
-            passed or did not, and the chance that someone studying four and a
-            half hours passes has to be inferred from the students near them.
-            David Cox&rsquo;s 1958 paper on the regression analysis of binary
-            sequences put the logit on a line with whatever inputs a study had
-            measured, and Jerome Cornfield, working with the Framingham heart
-            study, fitted the multiple logistic to the risk of coronary heart
-            disease from age, blood pressure, cholesterol and smoking,
-            published with Truett and Kannel in 1967. That is the model a
-            doctor is handed today, one slope per risk factor, and it is the
-            model this page fits to twelve students and their hours. Berkson
-            could not fit it the way we will, by walking down the loss, since
-            the fit has no closed form and the iterations were expensive by
-            hand, so he proposed a shortcut estimator instead; the walk is why
-            this page follows the fitting-by-walking page. This page keeps
-            four things apart that are easy to run together, modelling a
-            probability, fitting the model, turning the probability into a
-            decision, and judging what came out, and they arrive in that
-            order.
-          </p>
-        </>
-      }
+
       playground={<LogisticPlayground />}
       sections={[
         {
           title: "Part 1. From Numeric Outcomes to Categories",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. A binary prediction problem">
                 <p>
                   Each dot in the box above is one student. The input x is the
@@ -151,7 +109,7 @@ export default function LogisticRegressionPage() {
                 </p>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Score, Probability, and Decision",
@@ -183,16 +141,20 @@ export default function LogisticRegressionPage() {
               <SubSection title="4. The linear score">
                 <p>Start with the calculation every linear model starts with.</p>
                 <Equation>{"z = β·x + α"}</Equation>
-                <p>
-                  z can be any real number. Under the model a positive score
-                  favours passing, a negative score favours failing, and a
-                  score of exactly zero is neutral. What z is not is a
-                  probability. It is the familiar weighted sum, and the fitted
-                  values for the twelve students are β = 1.69 and α = −7.18,
-                  so a student who studied four hours scores 1.69 × 4 − 7.18 =
-                  −0.40, slightly against, and one who studied five scores
-                  1.29, moderately for.
-                </p>
+                <>
+                  <p>
+                    The score can be any real number. Positive scores favour passing,
+                    negative scores favour failing, and zero is neutral. The score
+                    itself is not a probability. The fitted slope is about 1.69 and the
+                    intercept about −7.18.
+                  </p>
+                  <Equation>{"score after four study hours = 1.69 × 4 − 7.18 = −0.42\nscore after five study hours = 1.69 × 5 − 7.18 = 1.27"}</Equation>
+                  <p>
+                    These calculations use rounded coefficients. The full fitted values
+                    give approximately −0.40 and 1.29. The sigmoid will turn each score
+                    into a probability.
+                  </p>
+                </>
               </SubSection>
 
               <SubSection title="5. Converting scores with the sigmoid">
@@ -325,18 +287,14 @@ export default function LogisticRegressionPage() {
               <SubSection title="10. Reading the intercept">
                 <p>At zero hours the score is α on its own.</p>
                 <Equation>{"z(0) = α          p(0) = σ(α) = σ(−7.18) = 0.0008"}</Equation>
-                <p>
-                  The intercept is the log-odds when the input is zero, and
-                  the sigmoid of it is the probability there. For these
-                  students that is a chance of passing of eight in ten
-                  thousand with no study at all, which is the fitted
-                  model&rsquo;s baseline. Its practical meaning is only as good
-                  as zero is as an input. Nobody here studied zero hours, so
-                  the number is the line&rsquo;s position more than a claim
-                  about anyone, exactly as the regression page&rsquo;s
-                  intercept of −68 kg was. Centring the hours would make the
-                  intercept the log-odds at the average study time instead.
+                <>
+<p>
+                  The intercept is the log-odds when the input is zero, and the sigmoid of it is the probability there. For these students that is a chance of passing of eight in ten thousand with no study at all, which is the fitted model&rsquo;s baseline. Its practical meaning is only as good as zero is as an input.
                 </p>
+                <p>
+                  Nobody here studied zero hours, so the number is the line&rsquo;s position more than a claim about anyone, exactly as the regression page&rsquo;s intercept of −68 kg was. Centring the hours would make the intercept the log-odds at the average study time instead.
+                </p>
+</>
               </SubSection>
 
               <SubSection title="11. Reading the coefficient">
@@ -385,18 +343,70 @@ export default function LogisticRegressionPage() {
                   gives a flat line at σ(α).
                 </p>
                 <WhyThisWorks title="How steep the curve is">
-                  <p>
-                    The slope of the probability curve in x is dp/dx = β p(1
-                    − p), which is the sigmoid&rsquo;s own derivative times
-                    β. At p = 0.5 that is β / 4, so the fitted curve rises at
-                    1.69 / 4 ≈ 0.42 per hour where it crosses one half, and
-                    more slowly everywhere else. Section 24 derives the
-                    sigmoid&rsquo;s derivative.
-                  </p>
+                  <>
+                    <p>
+                      The probability changes fastest where it is one half. Its slope
+                      with respect to study hours combines the fitted score slope with
+                      the sigmoid’s derivative.
+                    </p>
+                    <Equation>{"dp/dx = βp(1 − p)\nat p = 0.5: dp/dx = β × 0.5 × 0.5 = β/4\nwith β ≈ 1.69: dp/dx ≈ 1.69 / 4 ≈ 0.42 per hour"}</Equation>
+                    <p>
+                      The curve changes more slowly toward either end. Section 24
+                      derives the sigmoid’s derivative.
+                    </p>
+                  </>
                 </WhyThisWorks>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on the Score, the Odds and the Fit",
+          quiz: [
+            trueFalse(
+              "The score the straight line produces is itself a probability.",
+              false,
+              "The score can be any real number, positive favouring passing and negative favouring failing. The probability is what the score becomes once the sigmoid has it, and the decision is a separate rule laid on top of that probability. Only the decision has a threshold in it.",
+            ),
+            choice(
+              "Three moves of exactly one unit along the score axis, at −4, at 0 and at 4. Which buys the largest change in probability?",
+              [
+                "The move at 0, where the probability is one half",
+                "The move at −4, where the probability has the most room to grow",
+                "The move at 4, where the model is most confident",
+                "All three equally, since the model is linear in its score",
+              ],
+              0,
+              "The model is linear in its score, and its probability does not move by a constant amount. The sigmoid changes fastest where its output is one half, with a maximum slope of 0.25, and flattens toward either end, which is why a model that has already assigned a 98% chance has less room to become more convinced. On the fitted curve that steepest rate is about 0.42 per hour, the slope of 1.69 divided by four.",
+            ),
+            choice(
+              "A student is given a probability of exactly one half. What are the odds and the log-odds?",
+              [
+                "Odds of one, and log-odds of zero",
+                "Odds of zero, and log-odds of one",
+                "Odds of one half, and log-odds of one half",
+                "Odds of one, and log-odds of one",
+              ],
+              0,
+              "Odds compare the passes with the fails rather than with everyone, so an even chance is one to one. The logarithm of one is zero, which is why a score of zero is the neutral point of the fitted line.",
+            ),
+            choice(
+              "The fitted slope is about 1.69. What does one more study hour do under this model?",
+              [
+                "Multiplies the odds of passing by about 5.44",
+                "Adds about 1.69 to the probability of passing",
+                "Multiplies the probability of passing by about 1.69",
+                "Adds about 5.44 to the odds of passing",
+              ],
+              0,
+              "An extra hour raises the score, and so the log-odds, by the slope. Raising a logarithm by the slope multiplies the quantity itself by e to that slope, which here is 5.44. A probability could not be multiplied this way, since it is bounded above by one.",
+            ),
+            trueFalse(
+              "The sigmoid of the intercept, 0.0008, is the fitted chance of passing with no study at all, and nobody among the twelve studied zero hours, so it is the line’s position rather than a claim about anyone.",
+              true,
+              "The intercept is the log-odds when the input is zero, and its practical meaning is only as good as zero is as an input. Nobody here studied zero hours, exactly as nobody on the regression page was zero centimetres tall, so the eight in ten thousand positions the curve rather than describing a student. Centring the hours would make the intercept the log-odds at the average study time instead.",
+            ),
+        ],
         },
         {
           title: "Part 5. From Probability to a Classification",
@@ -625,16 +635,20 @@ export default function LogisticRegressionPage() {
                   climb itself, recorded pass by pass.
                 </p>
                 <LogisticWalkPlayground panels={["surface", "curve"]} maxEpochs={300} />
-                <p>
-                  The walk starts at α = 0, β = 0, which is a flat curve at
-                  one half for everyone and a log loss of ln 2 = 0.693. It
-                  heads for the bottom of the bowl at (−7.18, 1.69) and a loss
-                  of 0.293. At a rate of 0.5 the first stride overshoots, the
-                  loss rises to 0.743 before it falls, which the walking page
-                  explained, and the climb settles after a few thousand passes.
-                  Fitting logistic regression means searching parameter space
-                  for the probability curve with the lowest log loss.
-                </p>
+                <>
+                  <p>
+                    The walk starts with both coefficients at zero. That assigns a
+                    probability of one half to every student, regardless of study hours.
+                  </p>
+                  <Equation>{"initial log loss = −ln(0.5) = ln 2 ≈ 0.693"}</Equation>
+                  <p>
+                    The optimum on this dataset is near intercept −7.18 and slope 1.69,
+                    with loss 0.293. At learning rate 0.5, the first update overshoots
+                    and the loss rises to 0.743 before falling. It settles after a few
+                    thousand passes. Fitting means finding coefficients whose
+                    probability predictions minimize the loss.
+                  </p>
+                </>
               </SubSection>
 
               <SubSection title="22. One optimization pass">
@@ -711,12 +725,13 @@ export default function LogisticRegressionPage() {
                 </WhyThisWorks>
                 <SigmoidExplorer showDerivative />
                 <p>
-                  The derivative is p(1 − p), largest at p = 0.5 where it is
-                  exactly one quarter, and vanishing as p approaches either
-                  end. The sigmoid changes fastest around one half and
-                  flattens near its extremes, which is section 6 again, now
-                  with the formula.
+                  The sigmoid changes fastest when its output is one half.
+                  Substitute that output into the derivative to see the maximum slope.
                 </p>
+                <Equation>{"Maximum sigmoid slope = 0.5 × (1 − 0.5) = 0.25"}</Equation>
+                <p>The slope approaches zero as the output approaches either
+                  extreme. This explains why a saturated sigmoid responds so
+                  little to a small change in its input score.</p>
               </SubSection>
 
               <SubSection title="25. Deriving the parameter gradients">
@@ -857,6 +872,16 @@ export default function LogisticRegressionPage() {
                   calibration, and a model can classify well while being
                   poorly calibrated.
                 </p>
+                <p>
+                  Reading a calibration table takes three steps. Sort the
+                  students by the probability the curve gave them and cut that
+                  range into bins. Inside each bin, average the predicted
+                  probabilities, which is what the curve claimed on average for
+                  those students. Then count how many of them actually passed,
+                  which is what happened. A calibrated curve has the two
+                  columns agree in every bin that holds enough students for a
+                  rate to mean anything.
+                </p>
                 <WorkedExample title="A calibration table on the twelve, which is too few">
                   <NumberTable
                     headings={["probability bin", "students", "mean predicted p", "observed pass rate"]}
@@ -869,6 +894,25 @@ export default function LogisticRegressionPage() {
                     caption="The shape is right at the ends and the middle bins hold one student each, which says nothing. And these are the students the curve was fitted to. Calibration has to be judged on students it never saw."
                   />
                 </WorkedExample>
+                <p>
+                  The lowest bin holds the five students who studied three and
+                  a half hours or less. The curve put them at 0.074 on average
+                  and none of them passed, so claim and outcome agree. The
+                  highest bin holds the five who studied five hours or more.
+                  The curve put them at 0.924 on average and four of the five
+                  passed, the five-hour fail being the exception, so the curve
+                  claimed a little more there than it delivered. The two middle
+                  bins are the four-hour pass at 0.401 and the
+                  four-and-a-half-hour pass at 0.610, one student each, and a
+                  pass rate over one student is not a rate.
+                </p>
+                <KeepInMind>
+                  Accuracy and calibration are different tests of the same
+                  curve. Part 5 raised the accuracy from 0.833 to 0.917 by
+                  moving the threshold without touching a single probability,
+                  and this table would not have changed at all, because it
+                  reads the probabilities and never the decisions.
+                </KeepInMind>
               </SubSection>
             </>
           ),
@@ -878,18 +922,43 @@ export default function LogisticRegressionPage() {
           content: (
             <SubSection title="30. Extending to several features">
               <p>
-                With several inputs the score is the multiple regression
+                So far the score has read one number, the hours. Suppose each
+                student were measured twice, hours studied and, say, hours
+                slept. Each input gets a coefficient of its own, and the score
+                is each input times its coefficient, added up, plus the
+                intercept. That weighted sum is the multiple regression
                 page&rsquo;s dot product, and everything after it is unchanged.
               </p>
-              <Equation>{"z = β·x + α          p = σ(z)"}</Equation>
+              <Equation>{"z = β₁x₁ + β₂x₂ + α          p = σ(z)\n\nwritten for any number of inputs:  z = β·x + α"}</Equation>
+              <p>
+                The sigmoid turns the score into a probability exactly as
+                before, the log loss scores that probability against what
+                happened, and the fit is the same walk with one more direction
+                to move in. The gradient gains one component per input, and
+                each component is the gap between outcome and probability
+                times that input, summed over the students. It is the
+                single-input gradient of Part 7 with the second input standing
+                where the hours stood.
+              </p>
+              <Equation>{"∂ℓ/∂βⱼ = Σ (yᵢ − pᵢ)·xᵢⱼ          one such sum for each input j"}</Equation>
               <p>
                 Each coefficient changes the log-odds while the other inputs
-                are held fixed, with the same qualification about held-fixed
-                comparisons the multiple regression page gave. The threshold of
-                one half falls where z = 0, and with two features that is a
-                line across the plane of the two inputs. With three it is a
-                plane, and with more it is a flat surface in more dimensions
-                than can be drawn. Adding features changes the geometry of the
+                are held fixed, so one more hour of study multiplies the odds
+                by e to the first coefficient among students who slept the
+                same amount, with the same qualification about held-fixed
+                comparisons the multiple regression page gave.
+              </p>
+              <p>
+                The threshold of one half falls where z = 0, and with two
+                features that is a line across the plane of the two inputs.
+                Every student on one side of it is called a pass and every
+                student on the other a fail, however far from the line they
+                sit. With three it is a plane, and with more it is a flat
+                surface in more dimensions than can be drawn.
+              </p>
+              <Equation>{"boundary at t = 0.5:  β₁x₁ + β₂x₂ + α = 0"}</Equation>
+              <p>
+                Adding features changes the geometry of the
                 boundary and nothing about the mechanism. The{" "}
                 <Link href="/concepts/multiclass-classification" className={linkClass}>
                   multiclass page
@@ -898,6 +967,197 @@ export default function LogisticRegressionPage() {
               </p>
             </SubSection>
           ),
+        },
+        {
+          title: "Questions on Scoring and Fitting",
+          quiz: [
+            choice(
+              "Lowering the threshold from 0.5 to 0.3 moves the boundary to 3.74 hours and raises accuracy from 0.833 to 0.917. What happens to the log loss?",
+              [
+                "It stays at 0.2933, because the probabilities never changed",
+                "It falls, since more students are classified correctly",
+                "It rises, since the threshold has moved away from one half",
+                "It becomes undefined once the threshold is below one half",
+              ],
+              0,
+              "The threshold is a decision rule laid on top of the probabilities and not part of the model, so sliding it moves the boundary on the hours axis and nothing else. Accuracy evaluates the thresholded decisions and says nothing about the probabilities that produced them, which is why it can change while the log loss, which reads only the probabilities, cannot. Raise the threshold to 0.8 instead and the boundary moves to 5.06 hours, the five-hour fail is caught and two passes are missed.",
+            ),
+            trueFalse(
+              "A student who passed, predicted at 0.9 and at 0.6, is scored the same by accuracy.",
+              true,
+              "Both predictions cross a threshold of one half, so both count as a correct pass and accuracy cannot separate them. The first gave more probability to what actually happened and ought to count as the better prediction, which is why fitting needs a loss over probabilities rather than a count of correct decisions.",
+            ),
+            choice(
+              "The walk starts with both coefficients at zero. What is the loss there?",
+              [
+                "About 0.693, because every student is given a probability of one half",
+                "Zero, because the model has not yet made a mistake",
+                "0.293, which is the optimum on this dataset",
+                "0.743, the value the first update reaches",
+              ],
+              0,
+              "Both coefficients at zero make every score zero, and the sigmoid of zero is one half for every student whatever their hours. Giving a half to each outcome costs the negative logarithm of a half, which is ln 2. The optimum of 0.293 and the overshoot of 0.743 both come later in the same walk.",
+            ),
+            several(
+              "Which of these hold for the walk on this dataset?",
+              [
+                "The optimum is near an intercept of −7.18 and a slope of 1.69",
+                "At a learning rate of 0.5 the first update raises the loss before it falls",
+                "The loss falls on every pass, starting from the first",
+                "The walk settles within a few dozen passes",
+              ],
+              [0, 1],
+              "The first update at that rate overshoots, taking the loss to 0.743 before it begins to fall, so the descent is not downhill from the very first step. It settles after a few thousand passes rather than a few dozen, and the optimum it reaches carries a loss of 0.293.",
+            ),
+            trueFalse(
+              "On the twelve students with no mixed middle, the climb reaches an accuracy of one by pass 100 and then settles on a finite slope.",
+              false,
+              "Accuracy reaches one by pass 100 and never changes again, and the slope keeps growing, 1.05 at pass 100, 2.32 at pass 1000 and 3.50 at pass 5000, while the log loss keeps falling, 0.133, 0.024 and 0.006. Every steepening makes the observed outcomes more likely because there is no student in the middle to be wrong about, so the climb never finds a top and what is reported is wherever the pass budget ran out, labelled as not converged. Overlap is what holds the answer finite, and a penalty on the size of the coefficients is the repair.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Fitting the Twelve Students With the Library",
+          practice: [
+            exercise(
+              "Fit the twelve students",
+              ["Fit the curve of Part 4 to the twelve students with the library, at the learning rate of 0.5 the page’s widgets use, and read off the slope, the intercept, where the probability crosses one half, and what one more hour multiplies the odds by.", "Part 4 quotes a slope of about 1.69, an intercept of about −7.18, a boundary at 4.24 hours and an odds multiplier of 5.44. Print how many passes the climb took as well, which the page does not say."],
+              `from oop_ml import Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 3, 3.5, 5, 4, 4.5, 5.5, 6, 7, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+model = LogisticRegression(learning_rate=0.5)
+# Fit the model to the hours and outcomes, then print the slope, the
+# intercept, the boundary where the probability crosses one half, what one
+# more hour multiplies the odds by, and how many passes the climb ran.`,
+              `from oop_ml import Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 3, 3.5, 5, 4, 4.5, 5.5, 6, 7, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+model = LogisticRegression(learning_rate=0.5)
+model.fit([Feature("hours", hours)], Feature("passed", passed))
+
+print(f"slope {model.coefficients['hours']:.4f}")
+print(f"intercept {model.intercept:.4f}")
+print(f"boundary {model.decision_boundary_at('hours'):.2f} hours")
+print(f"odds multiplier per hour {model.odds_multiplier_for('hours'):.2f}")
+print(f"passes run {model.epochs_run}, converged {model.converged}")`,
+              `slope 1.6945
+intercept -7.1789
+boundary 4.24 hours
+odds multiplier per hour 5.44
+passes run 6453, converged True`,
+              { hints: ["The inputs go in as a list of Feature objects and the outcome as one Feature of zeros and ones. Construction takes the learning rate; the data goes to fit.", "coefficients is addressable by the feature’s name, and intercept is a property of its own.", "decision_boundary_at and odds_multiplier_for each take the feature’s name. The first is minus the intercept over the slope, where the score is zero; the second is e to the slope.", "epochs_run and converged are the walk’s own record of how it ended."], check: numberCheck("Where does the fitted curve cross one half, in hours?", 4.24, 0.005, "The probability is one half where the score is zero, so the boundary is the intercept divided by the slope with the sign flipped, 7.18 over 1.69. Everyone to the right of it is called a pass at a threshold of one half, which is how the curve gets ten of the twelve right and misses the five-hour fail and the four-hour pass.") },
+            ),
+            exercise(
+              "Score the probabilities rather than the decisions",
+              ["Part 6 scores a curve by how much probability it gave to what actually happened. Take the fitted curve’s probability for each student, keep p for a pass and 1 − p for a fail, and turn each into a loss, minus its logarithm.", "Print the probability and the loss for the five-hour fail and the four-hour pass, the two students in the mixed middle, then the likelihood, which is the product over all twelve, and the log loss, which is the mean of the twelve losses. Part 6 quotes 1.536 and 0.914 for the two students, a likelihood of 0.0296 and a log loss of 0.2933."],
+              `import math
+
+from oop_ml import Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 3, 3.5, 5, 4, 4.5, 5.5, 6, 7, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+model = LogisticRegression(learning_rate=0.5).fit([Feature("hours", hours)], Feature("passed", passed))
+probabilities = [float(p) for p in model.predict_probability([Feature("hours", hours)])]
+# For each student keep the probability the curve gave the outcome that
+# happened, p for a pass and 1 - p for a fail, and take minus its logarithm
+# as the loss. Print the probability and loss for the students at positions
+# 5 and 6 in the lists, then the likelihood and the log loss.`,
+              `import math
+
+from oop_ml import Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 3, 3.5, 5, 4, 4.5, 5.5, 6, 7, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+model = LogisticRegression(learning_rate=0.5).fit([Feature("hours", hours)], Feature("passed", passed))
+probabilities = [float(p) for p in model.predict_probability([Feature("hours", hours)])]
+
+assigned = [p if outcome == 1 else 1 - p for p, outcome in zip(probabilities, passed)]
+losses = [-math.log(value) for value in assigned]
+for position in (5, 6):
+    print(f"{hours[position]} hours, passed {passed[position]}: p {probabilities[position]:.3f}, loss {losses[position]:.3f}")
+
+print(f"likelihood {math.prod(assigned):.4f}")
+print(f"log loss {sum(losses) / len(losses):.4f}")`,
+              `5 hours, passed 0: p 0.785, loss 1.536
+4 hours, passed 1: p 0.401, loss 0.914
+likelihood 0.0296
+log loss 0.2933`,
+              { hints: ["predict_probability answers one probability per student, in the order the hours were given, so position 5 is the five-hour fail and position 6 the four-hour pass.", "The probability assigned to what happened is p when the outcome is 1 and 1 − p when it is 0, which is the exponent trick of Part 6 written as a choice.", "math.prod multiplies a list together and math.log is the natural logarithm, so a loss is -math.log of the assigned probability."], check: numberCheck("What log loss does the fitted curve earn on the twelve students?", 0.2933, 0.0005, "The likelihood of 0.0296 is the chance of twelve specific things all happening, and it is small because it is a product. Taking logarithms turns the product into a sum, and averaging the twelve negative logarithms gives 0.2933. The two largest terms are the two students in the mixed middle, 1.536 for the five-hour fail the curve put at 0.785 and 0.914 for the four-hour pass it put at 0.401, which is log loss penalising confidence in the wrong outcome.") },
+            ),
+            exercise(
+              "Move the threshold without refitting",
+              ["Part 5 slides the threshold while the curve stays put. Call a pass wherever the fitted probability reaches the threshold, at 0.3, at 0.5 and at 0.8, and score those decisions against the outcomes each time.", "Print the accuracy beside the boundary on the hours axis, which is the threshold’s own log-odds less the intercept, over the slope. Part 5 quotes 0.917 at 0.3 with the boundary at 3.74 hours, and 0.833 at 0.5 with it at 4.24."],
+              `import math
+
+from oop_ml import ClassificationEvaluation, Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 3, 3.5, 5, 4, 4.5, 5.5, 6, 7, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+model = LogisticRegression(learning_rate=0.5).fit([Feature("hours", hours)], Feature("passed", passed))
+probabilities = [float(p) for p in model.predict_probability([Feature("hours", hours)])]
+slope, intercept = model.coefficients["hours"], model.intercept
+
+for threshold in (0.3, 0.5, 0.8):
+    # Call a pass wherever the probability reaches the threshold, evaluate
+    # those decisions against the outcomes, and print the accuracy beside
+    # the boundary, (logit(threshold) - intercept) / slope.
+    pass`,
+              `import math
+
+from oop_ml import ClassificationEvaluation, Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 3, 3.5, 5, 4, 4.5, 5.5, 6, 7, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+model = LogisticRegression(learning_rate=0.5).fit([Feature("hours", hours)], Feature("passed", passed))
+probabilities = [float(p) for p in model.predict_probability([Feature("hours", hours)])]
+slope, intercept = model.coefficients["hours"], model.intercept
+
+for threshold in (0.3, 0.5, 0.8):
+    decisions = [1 if p >= threshold else 0 for p in probabilities]
+    evaluation = ClassificationEvaluation(passed, decisions)
+    boundary = (math.log(threshold / (1 - threshold)) - intercept) / slope
+    print(f"threshold {threshold}: accuracy {evaluation.accuracy:.3f}, boundary {boundary:.3f} hours")`,
+              `threshold 0.3: accuracy 0.917, boundary 3.737 hours
+threshold 0.5: accuracy 0.833, boundary 4.237 hours
+threshold 0.8: accuracy 0.833, boundary 5.055 hours`,
+              { hints: ["A decision is 1 where the probability is at least the threshold and 0 elsewhere, which is one comparison per student.", "ClassificationEvaluation pairs the actual outcomes with the decisions, in that order, and accuracy is a property of it. Its confusion_matrix holds the four counts under the widget in Part 5.", "logit(t) is the natural logarithm of t over 1 − t, and the boundary is where the score reaches it, so subtract the intercept and divide by the slope."], check: numberCheck("What accuracy do the decisions reach at a threshold of 0.3?", 0.917, 0.0005, "Lowering the threshold moves the boundary down to 3.74 hours, so the four-hour pass is now called a pass and eleven of the twelve are right, with nothing about the curve changed. At 0.8 the boundary moves up past five hours, the five-hour fail is caught instead and two passes are missed, so accuracy is back at 0.833. The log loss is the same number at all three thresholds, because it reads the probabilities and never the decisions.") },
+            ),
+            exercise(
+              "Separate the classes completely",
+              ["Part 9 fits the twelve students with no mixed middle, every fail at three and a half hours or less and every pass at five and a half or more. Fit them at a learning rate of 0.5 with pass budgets of 100, 1000 and 5000, and read the slope each climb reached.", "Part 9 quotes slopes of 1.05, 2.32 and 3.50, an accuracy of one from pass 100 onward, and a climb that never converges. Print all three for each budget and see whether the library says the same."],
+              `from oop_ml import Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 2.5, 3, 3.5, 5.5, 6, 6.5, 7, 7.5, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+for budget in (100, 1000, 5000):
+    model = LogisticRegression(learning_rate=0.5, max_epochs=budget)
+    # Fit the model, then print the slope it reached, its accuracy on the
+    # twelve, and whether it converged.`,
+              `from oop_ml import Feature, LogisticRegression
+
+hours = [1, 1.5, 2, 2.5, 3, 3.5, 5.5, 6, 6.5, 7, 7.5, 8]
+passed = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+
+for budget in (100, 1000, 5000):
+    model = LogisticRegression(learning_rate=0.5, max_epochs=budget)
+    model.fit([Feature("hours", hours)], Feature("passed", passed))
+    accuracy = model.score([Feature("hours", hours)], Feature("passed", passed))
+    print(f"budget {budget}: slope {model.coefficients['hours']:.2f}, accuracy {accuracy:.3f}, converged {model.converged}")`,
+              `budget 100: slope 1.05, accuracy 1.000, converged False
+budget 1000: slope 2.32, accuracy 1.000, converged False
+budget 5000: slope 3.50, accuracy 1.000, converged False`,
+              { hints: ["max_epochs is the pass budget, set at construction beside the learning rate.", "score answers the accuracy at a threshold of one half, which is the fraction of the twelve the curve calls correctly.", "converged is False when the walk ran out of passes before its steps fell under the tolerance, which on separated data is every time."], check: numberCheck("What slope has the climb reached when a budget of 5000 passes runs out?", 3.5, 0.005, "With no student in the middle to be wrong about, every steepening of the curve makes the observed outcomes more likely, so the slope keeps growing, 1.05 at 100 passes, 2.32 at 1000 and 3.50 at 5000, and the climb never finds a top. Accuracy is one throughout, which is exactly why it cannot be the thing to check. What the library reports is wherever the budget ran out, honestly labelled as not converged, and overlap is what would hold the answer finite.") },
+            ),
+          ],
         },
       ]}
     />

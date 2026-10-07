@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -26,7 +29,7 @@ import { Word2vecWindowPairs } from "@/components/widgets/Word2vecWindowPairs";
 export const metadata: Metadata = {
   title: "Word2vec · oop_ml",
   description:
-    "Train a model to predict a word from its neighbours, or its neighbours from the word, then throw the model away and keep the weights it needed.",
+    "Train on nearby words, then keep the vectors that helped make those predictions.",
 };
 
 const link =
@@ -35,8 +38,12 @@ const link =
 export default function Word2vecPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["word2vec"]}
+      technicalStart="Part 3. Which Side Predicts Which"
+      openingTitle="Learn a Word by Trying to Predict Its Neighbours"
+      playgroundIntro="Inspect the centre-context training pairs before the learned neighbours. Compare the resulting similarities across training settings and random starts."
       title="Word2vec"
-      tagline="Word2vec trains a model to predict a neighbour, then keeps the weights the prediction needed and throws the predictor away."
+      tagline="Train on nearby words, then keep the vectors that helped make those predictions."
       prerequisites={
         <>
           Every score on this page is a dot product turned into a probability by
@@ -58,84 +65,23 @@ export default function Word2vecPage() {
           before the first fit.
         </>
       }
-      history={
-        <>
-          <p>
-            The idea that a word can be described by the company it keeps is
-            older than any way of computing it. Zellig Harris argued in 1954, in
-            &ldquo;Distributional structure&rdquo;, that the distribution of
-            environments a word occurs in is what a linguist can actually
-            observe about its meaning, and J. R. Firth put the same thought in a
-            sentence in 1957 that has been quoted ever since. Turning that into
-            arithmetic gives a table with a row for every word and a column for
-            every word it might occur near, and by the 1990s that table was
-            being built and squeezed down, which is what latent semantic
-            analysis does. The difficulty was that the table is as wide as the
-            vocabulary, most of it is zero, and it has to be built before
-            anything can be squeezed.
-          </p>
-          <p>
-            Yoshua Bengio and colleagues showed in 2003, in &ldquo;A neural
-            probabilistic language model&rdquo;, that a network could learn a
-            short vector per word as a side effect of predicting the next word,
-            which removed the table but replaced it with a cost of its own,
-            since predicting one word out of the whole vocabulary means scoring
-            every candidate for every position. Frederic Morin and Bengio
-            answered part of that in 2005 by arranging the vocabulary as a
-            binary tree, so reaching a word is a sequence of yes-or-no choices
-            and the cost falls from the size of the vocabulary to the logarithm
-            of it. The tree they used to make that cheap was David
-            Huffman&rsquo;s code of 1952, which gives frequent words short paths
-            and was invented for a quite different purpose.
-          </p>
-          <p>
-            Tomáš Mikolov had been building recurrent language models at Brno
-            University of Technology, and at Google in Mountain View in 2013 he
-            and Kai Chen, Greg Corrado and Jeffrey Dean published
-            &ldquo;Efficient estimation of word representations in vector
-            space&rdquo;, which threw away almost everything in the network
-            except the word vectors themselves and gave two ways round the
-            window, so that the centre word is predicted from the words around it,
-            or the words around it from the centre. A second paper that year with Ilya
-            Sutskever added negative sampling, which replaces the choice among
-            all words with a handful of yes-or-no questions, and the released C
-            program gave the method the name it now has. The analogy result that
-            made it famous, that the direction from one word to another can be
-            added to a third, was reported by Mikolov, Wen-tau Yih and Geoffrey
-            Zweig in the same year. Omer Levy and Yoav Goldberg showed in 2014
-            that the first of the two objectives is, underneath, factorising a
-            table of exactly the kind the method appeared to have escaped.
-          </p>
-          <p>
-            This page asks six questions in order. What does counting a
-            word&rsquo;s neighbours actually give you, and what does it cost?
-            What is the change of question that word2vec makes? Which side
-            predicts which, and what does swapping the direction change? Why is
-            scoring every candidate word unaffordable, and what are the two ways
-            round it? What do the four combinations of those choices produce on
-            one corpus? And where does the method stop being defined?
-          </p>
-        </>
-      }
+
       playground={<Word2vecPlayground />}
       sections={[
         {
           title: "Part 1. Counting a Word’s Neighbours",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Two lists of words that never meet">
-                <p>
-                  Everything on this page is fitted to one small corpus, and it
-                  is worth knowing exactly what is in it before any method
-                  touches it. Two hundred sentences of five to eight words each,
-                  and every sentence is drawn from one of two word lists and
-                  never from both. One list holds twenty forms of five verbs,
-                  play, stay, say, walk and talk, in their various endings; the
-                  other holds eleven words about money, stock, bond, market,
-                  price and so on. That comes to 1,311 word occurrences across
-                  31 distinct words, and no word appears in both lists.
+                <>
+<p>
+                  Everything on this page is fitted to one small corpus, and it is worth knowing exactly what is in it before any method touches it. Two hundred sentences of five to eight words each, and every sentence is drawn from one of two word lists and never from both. One list holds twenty forms of five verbs, play, stay, say, walk and talk, in their various endings; the other holds eleven words about money, stock, bond, market, price and so on.
                 </p>
+                <p>
+                  That comes to 1,311 word occurrences across 31 distinct words, and no word appears in both lists.
+                </p>
+</>
                 <p>
                   The sentences themselves are nonsense, which is the point.
                   Nothing in them is grammatical and nothing means anything, so
@@ -187,17 +133,14 @@ export default function Word2vecPage() {
                   the words end up.
                 </p>
                 <Word2vecBookSpace />
-                <p>
-                  The toggle is the rest of this page in one control. The same
-                  words are drawn twice, once from a row of 364 counts and once
-                  from a vector of 24 numbers that a fit produced, and the
-                  figure to watch is how much of the spread three directions can
-                  hold. For the counted rows it is 19.8%, so the picture is
-                  showing a fifth of what is there and the description really is
-                  as wide as it looks. For the learned vectors it is 76.4%. The
-                  second description was small all along; the first was merely
-                  large.
+                <>
+<p>
+                  The toggle is the rest of this page in one control. The same words are drawn twice, once from a row of 364 counts and once from a vector of 24 numbers that a fit produced, and the figure to watch is how much of the spread three directions can hold. For the counted rows it is 19.8%, so the picture is showing a fifth of what is there and the description really is as wide as it looks.
                 </p>
+                <p>
+                  For the learned vectors it is 76.4%. The second description was small all along; the first was merely large.
+                </p>
+</>
                 <KeepInMind>
                   Counting works, and on a corpus this size it works very well.
                   What follows is not a repair of a broken method; it is a
@@ -217,19 +160,14 @@ export default function Word2vecPage() {
                   distinct pairs that actually occur grows nothing like as fast,
                   so the zeros take over.
                 </p>
-                <p>
-                  The alternative is to fix the width in advance. Give every word
-                  twelve numbers whatever the vocabulary holds, and the whole
-                  description of this corpus is 372 numbers rather than 961, and
-                  the description of a forty-thousand-word vocabulary is 480,000
-                  rather than 1.6 billion. That is only worth having if twelve
-                  numbers can carry what thirty one counts carried, and nothing
-                  suggests the counts themselves could be read back out of
-                  twelve numbers. What has to survive the squeezing is the
-                  comparisons rather than the counts, so that words of one list
-                  still come out near each other and words of different lists
-                  still do not.
+                <>
+<p>
+                  The alternative is to fix the width in advance. Give every word twelve numbers whatever the vocabulary holds, and the whole description of this corpus is 372 numbers rather than 961, and the description of a forty-thousand-word vocabulary is 480,000 rather than 1.6 billion. That is only worth having if twelve numbers can carry what thirty one counts carried, and nothing suggests the counts themselves could be read back out of twelve numbers.
                 </p>
+                <p>
+                  What has to survive the squeezing is the comparisons rather than the counts, so that words of one list still come out near each other and words of different lists still do not.
+                </p>
+</>
                 <NumberTable
                   headings={["vocabulary", "cells in the counting table", "numbers at a fixed width of 12"]}
                   rows={[
@@ -248,7 +186,7 @@ export default function Word2vecPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Predicting a Neighbour Instead",
@@ -365,20 +303,25 @@ export default function Word2vecPage() {
                 <Equation>{"cost = −log(probability) when the pair occurred,  −log(1 − probability) when it did not"}</Equation>
                 <Word2vecPairStep />
                 <WorkedExample title="One pair, three rows, by hand">
-                  <p>
-                    Put the word&rsquo;s vector at half a unit along the first
-                    coordinate, the true neighbour&rsquo;s row at one unit along
-                    the same coordinate, and two drawn words at one unit
-                    backwards and one unit sideways. The three scores are 0.5,
-                    −0.5 and 0, so the three probabilities are 0.622459, 0.377541
-                    and 0.5. The true pair is asked to be one and costs
-                    −log(0.622459) = 0.474077; the backwards row is asked to be
-                    zero and, having said 0.377541, costs the same 0.474077; the
-                    sideways row scored exactly nothing, so it says a half and
-                    costs log 2, which is 0.693147. The three add to 1.641301,
-                    and the step the word&rsquo;s own vector is asked to take is
-                    (0.755081, −0.5) before the step size shrinks it.
-                  </p>
+                  <>
+                    <p>
+                      Put the input word at (0.5, 0). Give the true neighbour vector (1,
+                      0), and give two sampled alternatives vectors (−1, 0) and (0, 1).
+                      Their dot products are 0.5, −0.5 and zero. Sigmoid converts those
+                      scores into the probabilities used by the loss.
+                    </p>
+                    <Equation>{"true pair probability = sigmoid(0.5) ≈ 0.622459\nfirst sampled probability = sigmoid(−0.5) ≈ 0.377541\nsecond sampled probability = sigmoid(0) = 0.5"}</Equation>
+                    <p>
+                      The true pair has target one; each sampled pair has target zero.
+                      Calculate each cost with that target before adding them.
+                    </p>
+                    <Equation>{"true pair loss = −ln(0.622459) ≈ 0.474077\nfirst sampled loss = −ln(1 − 0.377541) ≈ 0.474077\nsecond sampled loss = −ln(1 − 0.5) ≈ 0.693147\ntotal loss ≈ 0.474077 + 0.474077 + 0.693147 ≈ 1.641301"}</Equation>
+                    <p>
+                      The update direction for the input vector is approximately
+                      (0.755081, −0.5), before multiplication by the learning rate. The
+                      sampled rows contribute to that direction as well as to the loss.
+                    </p>
+                  </>
                 </WorkedExample>
                 <KeepInMind>
                   Two vectors per word is not an accident of the arrangement. A
@@ -397,19 +340,14 @@ export default function Word2vecPage() {
                   first table, and the second is deleted.
                 </p>
                 <Word2vecTwoTables />
-                <p>
-                  The right-hand column is the model doing the job it was
-                  actually trained for, and it does it. Asked which words belong
-                  beside walked, the discarded table names says, player, stays,
-                  stayed and walked itself, all of them verb forms, at
-                  probabilities between 0.28 and 0.31, while every word about
-                  money comes back far lower. Averaged over the whole
-                  vocabulary its readiness to say a verb form appeared beside
-                  walked is 0.2672 and its readiness to say a word about money
-                  did is 0.0061, which is a working, if not very confident,
-                  predictor of neighbours. Half of everything the fit learned
-                  goes into it, and none of it is kept.
+                <>
+<p>
+                  The right-hand column is the model doing the job it was actually trained for, and it does it. Asked which words belong beside walked, the discarded table names says, player, stays, stayed and walked itself, all of them verb forms, at probabilities between 0.28 and 0.31, while every word about money comes back far lower.
                 </p>
+                <p>
+                  Averaged over the whole vocabulary its readiness to say a verb form appeared beside walked is 0.2672 and its readiness to say a word about money did is 0.0061, which is a working, if not very confident, predictor of neighbours. Half of everything the fit learned goes into it, and none of it is kept.
+                </p>
+</>
                 <KeepInMind>
                   Some later methods keep both tables and add or join them, and
                   word2vec keeps only the first, so what is thrown away is
@@ -420,6 +358,54 @@ export default function Word2vecPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "Two rows of the counting table give a cosine of 0.8558 on average within a list and exactly 0.0000 across the two. Why exactly zero?",
+              [
+                "Two words from different lists share no neighbour at all, so their rows are perpendicular",
+                "The cosine was clipped at zero before being reported",
+                "A table with 45.8% of its cells at zero compares any two of its rows at zero",
+                "The discount leaves a neighbour three away contributing nothing",
+              ],
+              0,
+              "No sentence is drawn from both lists, so no word of one list ever turns up within reach of a word of the other, and no coordinate is nonzero in both rows. The zeros alone do not do it, since two rows of one list compare at 0.8558 in the same table, and a neighbour three away still counts a third.",
+            ),
+            trueFalse(
+              "What has to survive a fixed width of twelve numbers is the comparisons between words, not the counts themselves.",
+              true,
+              "Nothing suggests the 31 counts of a row could be read back out of twelve numbers, and nothing needs them to be. Words of one list still have to come out near each other and words of different lists apart, which is why word2vec does not squeeze the table at all and sets a prediction task instead.",
+            ),
+            choice(
+              "Why does every word get two vectors rather than one?",
+              [
+                "A word predicting itself as its own neighbour would score its vector against itself, which is always large and positive",
+                "One is for skip-gram and the other for the bag of words",
+                "The second table is what the negatives are drawn from",
+                "A single table could not be rotated without changing the cost",
+              ],
+              0,
+              "One table holds a vector per word for when the word is read and the other a row per word for when it is being predicted, and a single table would make that self-scoring unavoidable. The two come out the same size, 372 numbers each on this corpus, and only the first is kept.",
+            ),
+            several(
+              "Which of these are true of the window word2vec slides along a sentence?",
+              [
+                "Word order inside the window is discarded",
+                "Sentence boundaries stop the window",
+                "A word dropped for being too rare is removed before the windows are formed, so its neighbours become each other’s neighbours",
+                "On the two-list corpus the reach is redrawn at random between one and three at every position",
+              ],
+              [0, 1, 2, 3],
+              "All four hold. A window is the whole of what word2vec means by context, with no parse, no grammar and no notion of which side a neighbour was on. Redrawing the reach puts a word next door inside the window three times as often as a word three away, which is why the pair count moves from 3,968 to 3,865 to 3,901 across passes.",
+            ),
+            trueFalse(
+              "The second table is deleted because it had learned nothing useful.",
+              false,
+              "Asked which words belong beside walked it names five verb forms at probabilities between 0.28 and 0.31, and averages 0.2672 for a verb form against 0.0061 for a word about money. Half of everything the fit learned goes into it, and there is no argument from the mathematics that the kept table is the right one to keep.",
+            ),
+        ],
         },
         {
           title: "Part 3. Which Side Predicts Which",
@@ -463,6 +449,35 @@ export default function Word2vecPage() {
                   correction, which is a much weaker signal than the same word
                   would get as a centre under skip-gram.
                 </p>
+                <WorkedExample title="The twelve and the nine, counted">
+                  <>
+                    <p>
+                      Part 2 left two counts unexplained. At a reach of one the
+                      three short sentences gave twelve pieces of training one
+                      way round and nine the other. Take the first of them,
+                      walk walked talks. The middle word has a neighbour on
+                      each side and each end word has one neighbour.
+                    </p>
+                    <NumberTable
+                      headings={["centre", "words within reach", "pieces, centre predicting", "pieces, neighbours predicting"]}
+                      rows={[
+                        ["walk", "walked", "1", "1"],
+                        ["walked", "walk, talks", "2", "1"],
+                        ["talks", "walked", "1", "1"],
+                      ]}
+                      caption="One sentence of three words at a reach of one. The other two sentences have the same shape."
+                    />
+                    <Equation>{"centre predicting each neighbour = (1 + 2 + 1) × 3 sentences = 12\nneighbours predicting the centre = (1 + 1 + 1) × 3 sentences = 9"}</Equation>
+                    <p>
+                      The first arrangement counts neighbours and the second
+                      counts positions. Widen the reach to two and every word
+                      of a three-word sentence has two neighbours, so the first
+                      count becomes eighteen. The second stays at nine, because
+                      a position is still one average and one prediction
+                      however many vectors went into the average.
+                    </p>
+                  </>
+                </WorkedExample>
               </SubSection>
 
               <SubSection title="10. What swapping the direction changes">
@@ -480,7 +495,7 @@ export default function Word2vecPage() {
                   drawn wrong answers separates the lists by 0.8266 and the bag
                   of words by 0.2813, which is the same ordering the counts
                   predict, since the bag of words saw a third of the training. At
-                  the published first step, which the next Part comes to, the
+                  the published first step, which Part 5 comes to, the
                   same pair reads 0.7033 and 0.0034, and that second number is a
                   fit that did not separate anything.
                 </p>
@@ -550,17 +565,14 @@ export default function Word2vecPage() {
                   accumulate in one place.
                 </p>
                 <WhyThisWorks title="Why contrasting against noise is enough">
-                  <p>
-                    A model that only ever saw true pairs could satisfy every one
-                    of them by making all vectors identical and very long, since
-                    then every score is large and every probability near one. The
-                    drawn words are what stops that, because the same trick would
-                    make their probabilities near one too and they are asked for
-                    zero. The pull and the push together force a geometry in
-                    which some words are near a given word and others are not,
-                    and there is no cheaper way to satisfy both than to put words
-                    with the same neighbours in the same place.
+                  <>
+<p>
+                    A model that only ever saw true pairs could satisfy every one of them by making all vectors identical and very long, since then every score is large and every probability near one. The drawn words are what stops that, because the same trick would make their probabilities near one too and they are asked for zero.
                   </p>
+                  <p>
+                    The pull and the push together force a geometry in which some words are near a given word and others are not, and there is no cheaper way to satisfy both than to put words with the same neighbours in the same place.
+                  </p>
+</>
                 </WhyThisWorks>
               </SubSection>
 
@@ -583,18 +595,14 @@ export default function Word2vecPage() {
                 <Equation>{"share of the draw for word w  ∝  count(w) ^ 0.75"}</Equation>
                 <Word2vecSampler />
                 <WorkedExample title="Three words, counts of a thousand, ten and one">
-                  <p>
-                    In proportion to frequency the three shares are 0.989120,
-                    0.009891 and 0.000989, so the rarest word is drawn about once
-                    in a thousand draws. At the three-quarters power they become
-                    0.964091, 0.030487 and 0.005421, so the rarest word is drawn
-                    five and a half times as often as before and the commonest
-                    gives up two and a half points of share. On the two-list
-                    corpus the counts are much flatter, running from 73 down to
-                    17, so the effect is correspondingly smaller, and the odds
-                    between the commonest and rarest word fall from 4.2941 to
-                    2.9830.
+                  <>
+<p>
+                    In proportion to frequency the three shares are 0.989120, 0.009891 and 0.000989, so the rarest word is drawn about once in a thousand draws. At the three-quarters power they become 0.964091, 0.030487 and 0.005421, so the rarest word is drawn five and a half times as often as before and the commonest gives up two and a half points of share.
                   </p>
+                  <p>
+                    On the two-list corpus the counts are much flatter, running from 73 down to 17, so the effect is correspondingly smaller, and the odds between the commonest and rarest word fall from 4.2941 to 2.9830.
+                  </p>
+</>
                 </WorkedExample>
                 <KeepInMind>
                   The exponent does more where the counts are more spread out.
@@ -652,18 +660,14 @@ export default function Word2vecPage() {
                   a factor of about six, and against the six rows negative
                   sampling touches it is a saving of about one row.
                 </p>
-                <p>
-                  The second disappointment is that Huffman&rsquo;s arrangement
-                  is barely earning its keep here either. Its average path is
-                  4.9008 where a tree that ignored the counts entirely and split
-                  evenly would cost 4.9542, a difference of five hundredths of a
-                  branch point, because the counts on this corpus run from 73
-                  down to 17 and there is no long tail of rare words to give long
-                  paths to. Give the same construction counts that fall as one
-                  over the rank, which is roughly how word counts really fall,
-                  and at forty thousand words the average path is 10.7469 against
-                  the balanced tree&rsquo;s 15.2877.
+                <>
+<p>
+                  The second disappointment is that Huffman&rsquo;s arrangement is barely earning its keep here either. Its average path is 4.9008 where a tree that ignored the counts entirely and split evenly would cost 4.9542, a difference of five hundredths of a branch point, because the counts on this corpus run from 73 down to 17 and there is no long tail of rare words to give long paths to.
                 </p>
+                <p>
+                  Give the same construction counts that fall as one over the rank, which is roughly how word counts really fall, and at forty thousand words the average path is 10.7469 against the balanced tree&rsquo;s 15.2877.
+                </p>
+</>
                 <NumberTable
                   headings={["vocabulary", "rows a sweep touches", "a path, flat counts", "a path, realistic counts", "drawn wrong answers"]}
                   rows={[
@@ -686,6 +690,54 @@ export default function Word2vecPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "The bag of words produces 1,311 pieces of training in a pass on this corpus. Why that number?",
+              [
+                "One per word occurrence, whatever the reach",
+                "One per sentence",
+                "One per distinct word",
+                "One per neighbour of each centre word",
+              ],
+              0,
+              "The context vectors are averaged into one vector and that average predicts the centre, so a position is one piece of training however wide the window is. Skip-gram makes one per neighbour instead, which is why it produces 3,968 in a pass and is the slower of the two.",
+            ),
+            trueFalse(
+              "At the published first step the bag of words with drawn wrong answers still separated the two lists.",
+              false,
+              "It came out at 0.0034, which is a fit that did not separate anything, where skip-gram at the same step reads 0.7033. At the doubled step the same pair reads 0.8266 and 0.2813, so skip-gram is ahead at both and the bag of words, which saw a third of the training, needs the larger step to separate anything.",
+            ),
+            choice(
+              "Why does word2vec raise each count to the power three quarters before drawing negatives?",
+              [
+                "It sits between drawing in proportion to frequency and drawing uniformly, and the paper reports it as the value that worked",
+                "It is derived from the logistic function the pairs are scored with",
+                "It is what makes the shares add to one",
+                "It guarantees every word is drawn at least once in a pass",
+              ],
+              0,
+              "In proportion to frequency nearly every negative is one of the commonest words, and uniformly a word seen seventeen times is offered as often as one seen seventy three. The exponent has no derivation behind it, and on this corpus, whose counts run from 73 down to 17, it has little to flatten.",
+            ),
+            several(
+              "Which of these are true of arranging the vocabulary as the leaves of a binary tree?",
+              [
+                "The probabilities of all the words still add to one, so nothing has been approximated",
+                "A tree over n words has n − 1 branch points, so its table is one row shorter than a sweep would need",
+                "On the two-list corpus Huffman’s arrangement saves more than a whole branch point over a tree that split evenly",
+                "The number of rows touched is six, whatever the vocabulary holds",
+              ],
+              [0, 1],
+              "The probabilities at every branch point add to one and the paths partition the leaves, which is why the tree keeps the honest question and only changes the route to the answer. Huffman’s average path here is 4.9008 against 4.9542 for an even split, five hundredths of a branch point, because the counts run only from 73 down to 17. Touching six rows at every size is negative sampling, which gives the distribution up.",
+            ),
+            trueFalse(
+              "Which of the tree and negative sampling touches fewer rows depends on the size of the vocabulary.",
+              true,
+              "Negative sampling touches six rows at every vocabulary size while a path down the tree touches a number that grows with it, and by a thousand words the ordering has already reversed. What the tree has in exchange is that it is still computing the real distribution.",
+            ),
+        ],
         },
         {
           title: "Part 5. Running a Fit",
@@ -737,17 +789,14 @@ export default function Word2vecPage() {
                   original program ships with is 0.025, and on this corpus one of
                   the four arrangements does not work at that value.
                 </p>
-                <p>
-                  Fitted at 0.025 with the bag of words and drawn wrong answers,
-                  five passes leave the two lists at 0.9907 within a list and
-                  0.9873 across the two, a difference of 0.0034. Every vector
-                  points very nearly the same way as every other, which is the
-                  state a fit starts in and has barely left, and the nearest words
-                  to market come back as trade, stock, cash, bond and stays, with
-                  a verb form fifth. Doubling the step size to 0.05 takes the same
-                  arrangement to 0.9929 and 0.7116, a difference of 0.2813, and
-                  the verb form is gone from the list.
+                <>
+<p>
+                  Fitted at 0.025 with the bag of words and drawn wrong answers, five passes leave the two lists at 0.9907 within a list and 0.9873 across the two, a difference of 0.0034. Every vector points very nearly the same way as every other, which is the state a fit starts in and has barely left, and the nearest words to market come back as trade, stock, cash, bond and stays, with a verb form fifth.
                 </p>
+                <p>
+                  Doubling the step size to 0.05 takes the same arrangement to 0.9929 and 0.7116, a difference of 0.2813, and the verb form is gone from the list.
+                </p>
+</>
                 <NumberTable
                   headings={["arrangement", "at 0.025, apart by", "at 0.05, apart by"]}
                   rows={[
@@ -758,17 +807,14 @@ export default function Word2vecPage() {
                   ]}
                   caption="The mean cosine within a list minus the mean cosine across the two, after five passes at a width of twelve and a reach of three."
                 />
-                <p>
-                  This is worth dwelling on because it is a published default
-                  producing a result that looks like a working fit. Nothing
-                  raises, the cost curve falls from 4.1568 to 2.8830, and the
-                  nearest-word list for a verb form is full of verb forms. It is
-                  only the second number, how alike two words from different
-                  lists came out, that says the fit answered the same thing for
-                  everything. The default is not wrong; it was chosen for
-                  corpora of billions of words, where five passes is tens of
-                  billions of corrections and a small first step is plenty.
+                <>
+<p>
+                  This is worth dwelling on because it is a published default producing a result that looks like a working fit. Nothing raises, the cost curve falls from 4.1568 to 2.8830, and the nearest-word list for a verb form is full of verb forms. It is only the second number, how alike two words from different lists came out, that says the fit answered the same thing for everything.
                 </p>
+                <p>
+                  The default is not wrong; it was chosen for corpora of billions of words, where five passes is tens of billions of corrections and a small first step is plenty.
+                </p>
+</>
                 <KeepInMind>
                   The value a program ships with was chosen against the data its
                   author had, and this corpus is four orders of magnitude smaller
@@ -953,17 +999,14 @@ export default function Word2vecPage() {
                   directions without anything being wrong.
                 </p>
                 <Word2vecLongerTraining />
-                <p>
-                  Measured on this corpus, they do. Going from five passes to ten
-                  to twenty, the mean cost per pair falls at every step, 2.0872 to
-                  2.0617 to 2.0267, exactly as the fit intends. The separation of
-                  the two lists rises to 0.8404 at ten passes and then falls back
-                  to 0.7397 at twenty, and the mean cosine within a list falls
-                  from 0.9962 to 0.8510, so the verb forms are coming apart from
-                  each other while the objective keeps improving. A reader
-                  watching only the cost curve would have concluded that twenty
-                  passes was better than ten.
+                <>
+<p>
+                  Measured on this corpus, they do. Going from five passes to ten to twenty, the mean cost per pair falls at every step, 2.0872 to 2.0617 to 2.0267, exactly as the fit intends. The separation of the two lists rises to 0.8404 at ten passes and then falls back to 0.7397 at twenty, and the mean cosine within a list falls from 0.9962 to 0.8510, so the verb forms are coming apart from each other while the objective keeps improving.
                 </p>
+                <p>
+                  A reader watching only the cost curve would have concluded that twenty passes was better than ten.
+                </p>
+</>
                 <KeepInMind>
                   Choosing how long to train, or how wide to make the vectors, or
                   what to draw negatives from, cannot be settled from inside the
@@ -982,18 +1025,14 @@ export default function Word2vecPage() {
                   than the other. There is nothing in the method that would
                   distinguish them.
                 </p>
-                <p>
-                  Worse for anyone hoping to compare two fits, the objective is
-                  invariant to a whole family of transformations of the answer.
-                  Rotate every vector in the kept table and every row in the
-                  discarded table by the same rotation and every dot product is
-                  unchanged, so the cost is unchanged, so the rotated answer is
-                  exactly as good. The coordinates therefore have no meaning
-                  individually, and the fifth coordinate of one run has no
-                  relation whatever to the fifth coordinate of another. Measured
-                  on the two starts of Part 5, the mean gap coordinate by
-                  coordinate is 0.7816 while the pairwise cosines agree to 0.0073.
+                <>
+<p>
+                  Worse for anyone hoping to compare two fits, the objective is invariant to a whole family of transformations of the answer. Rotate every vector in the kept table and every row in the discarded table by the same rotation and every dot product is unchanged, so the cost is unchanged, so the rotated answer is exactly as good.
                 </p>
+                <p>
+                  The coordinates therefore have no meaning individually, and the fifth coordinate of one run has no relation whatever to the fifth coordinate of another. Measured on the two starts of Part 5, the mean gap coordinate by coordinate is 0.7816 while the pairwise cosines agree to 0.0073.
+                </p>
+</>
                 <KeepInMind>
                   Anything read off a set of these vectors has to survive a
                   rotation, which a cosine or a distance does and a single
@@ -1078,6 +1117,268 @@ export default function Word2vecPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            trueFalse(
+              "A word that occurs twice gets a trustworthy vector if the fit is given enough extra passes.",
+              false,
+              "Further training visits the same two windows again, so everything else about where the word ends up is where it started, which was a draw. Across four starts the made-up word came out 0.8790, 0.9591, 0.9448 and 0.9532 alike to walked, a spread of 0.0801, where walk, seen 42 times, spread by 0.0025. Nothing in the answer marks the difference, which is why a minimum count is applied before any fitting.",
+            ),
+            choice(
+              "The two tree fits report cosines of −0.5570 and −0.9618 across the lists where the two negative sampling fits report 0.1696 and 0.7116. What does that show?",
+              [
+                "A different geometry, since every branch point pushes the words on its two sides to opposite ends of one direction",
+                "The tree separating the lists about four times better",
+                "That the tree fits had not finished converging",
+                "That a cosine is not defined for vectors fitted through a tree",
+              ],
+              0,
+              "Drawn wrong answers only ever push a pair towards being unrelated, which is an angle near ninety degrees rather than near a hundred and eighty, so the four numbers are not on a common scale. What can be compared is whether the lists came apart, and at the doubled step all four separate them.",
+            ),
+            trueFalse(
+              "On this corpus, comparing rows of the counting table separates the two lists more cleanly than the best of the four word2vec arrangements.",
+              true,
+              "Counting gives 0.8558 within a list and exactly 0.0000 across the two, in one pass with nothing to tune and no seed. Skip-gram with drawn wrong answers at the doubled step gives 0.9962 and 0.1696, which separates the lists without separating them cleanly. The method’s argument is about forty thousand words and a billion occurrences, so losing at thirty one words says nothing about it at the size it was built for.",
+            ),
+            choice(
+              "Going from five passes to ten to twenty, the mean cost per pair falls at every step. What happened to the vectors?",
+              [
+                "The separation rose to 0.8404 at ten passes and fell back to 0.7397 at twenty, with the within-list cosine falling from 0.9962 to 0.8510",
+                "They improved at every step, as the cost did",
+                "They stopped changing after ten passes",
+                "They separated the lists further at twenty passes, but became harder to read",
+              ],
+              0,
+              "The method is defined as an optimisation of one thing and used for another, so the two can move in opposite directions without anything being wrong. A reader watching only the cost curve would have concluded that twenty passes was better than ten.",
+            ),
+            several(
+              "Rotating every vector in both tables by the same rotation leaves every dot product, and so the cost, unchanged. Which of these follow?",
+              [
+                "A single coordinate carries no meaning, and the fifth coordinate of one run has no relation to the fifth of another",
+                "Averaging two runs’ tables together is undefined rather than approximate",
+                "A cosine or a distance survives the rotation and can be read off",
+                "Two runs from different starts disagree about which words are alike",
+              ],
+              [0, 1, 2],
+              "The two starts of Part 5 differ by 0.7816 on average coordinate by coordinate and by 2.5336 at the widest, while their pairwise cosines correlate at 0.9996. What the corpus determines is the geometry, and the coordinates are whatever fell out of where the vectors happened to start.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Fitting the Two Lists With the Library",
+          practice: [
+            exercise(
+              "Fit the two lists and score them with two numbers",
+              ["The starter builds the corpus of Part 1, two hundred sentences drawn from a list of verb forms or a list of money words and never from both. Fit Word2Vec to it at a width of twelve, a reach of three, five passes, a first step of 0.05 and seed 0, which is the skip-gram fit with drawn wrong answers that Part 5 scores.", "Print the mean cosine over every pair of words in the same list, the mean cosine over every pair with a word from each, and their difference, to four places. Then print the cosine between walked and market on its own, a single pair the lesson never quotes."],
+              `import random
+from itertools import combinations
+from statistics import mean
+
+from oop_ml import Word2Vec
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+# Fit Word2Vec with the settings in the task and keep its embeddings.
+
+# within: the mean similarity over every pair inside VERBS and inside MONEY.
+# across: the mean similarity over every pair with one word from each list.
+
+# Print within, across and their difference to four places,
+# then the similarity of walked and market.`,
+              `import random
+from itertools import combinations
+from statistics import mean
+
+from oop_ml import Word2Vec
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+model = Word2Vec(dimension=12, window=3, epochs=5, learning_rate=0.05, random_seed=0)
+vectors = model.fit(corpus).embeddings
+
+within = mean(
+    vectors.similarity(first, second)
+    for group in (VERBS, MONEY)
+    for first, second in combinations(group, 2)
+)
+across = mean(vectors.similarity(verb, money) for verb in VERBS for money in MONEY)
+
+print(f"within a list:     {within:.4f}")
+print(f"across the two:    {across:.4f}")
+print(f"apart by:          {within - across:.4f}")
+print(f"walked and market: {vectors.similarity('walked', 'market'):.4f}")`,
+              `within a list:     0.9962
+across the two:    0.1696
+apart by:          0.8266
+walked and market: 0.1757`,
+              { hints: ["The constructor takes dimension, window, epochs, learning_rate and random_seed. Skip-gram with negative sampling is the default, so neither needs naming.", "fit takes the list of sentences and returns the model, and the model’s embeddings property is the kept table.", "embeddings.similarity(first, second) is the cosine between two words. combinations(group, 2) gives every pair inside one list once."], check: numberCheck("By how much does the mean cosine within a list exceed the mean cosine across the two, to four places?", 0.8266, 5e-05, "It is the 0.9962 within a list less the 0.1696 across the two that Part 6 sets beside counting. The second number is the one that says the lists came apart, and no word of either list was ever told which list it belonged to.") },
+            ),
+            exercise(
+              "Run the published first step on the bag of words",
+              ["Part 5 reports that one of the four arrangements fails at the first step the original program ships with. Fit the bag of words with drawn wrong answers twice on the same corpus, once at a first step of 0.025 and once at 0.05, keeping the width at twelve, the reach at three, five passes and seed 0.", "For each fit print the two mean cosines and their difference to four places, and the five words nearest market. Look at which of the two numbers gives the first fit away."],
+              `import random
+from itertools import combinations
+from statistics import mean
+
+from oop_ml import Word2Vec, Word2VecArchitecture
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+for rate in (0.025, 0.05):
+    # Fit the bag of words at this first step and keep its embeddings.
+
+    # Compute within and across exactly as in the first problem.
+
+    # Print the rate, within, across, their difference,
+    # and the five words nearest market.
+    pass`,
+              `import random
+from itertools import combinations
+from statistics import mean
+
+from oop_ml import Word2Vec, Word2VecArchitecture
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+for rate in (0.025, 0.05):
+    model = Word2Vec(
+        dimension=12,
+        window=3,
+        architecture=Word2VecArchitecture.CONTINUOUS_BAG_OF_WORDS,
+        epochs=5,
+        learning_rate=rate,
+        random_seed=0,
+    )
+    vectors = model.fit(corpus).embeddings
+    within = mean(
+        vectors.similarity(first, second)
+        for group in (VERBS, MONEY)
+        for first, second in combinations(group, 2)
+    )
+    across = mean(vectors.similarity(verb, money) for verb in VERBS for money in MONEY)
+    nearest = " ".join(vectors.most_similar("market", 5).words)
+    print(f"step {rate}: within {within:.4f}  across {across:.4f}  apart by {within - across:.4f}")
+    print(f"  nearest market: {nearest}")`,
+              `step 0.025: within 0.9907  across 0.9873  apart by 0.0034
+  nearest market: trade stock cash bond stays
+step 0.05: within 0.9929  across 0.7116  apart by 0.2813
+  nearest market: cash trade bond fund bank`,
+              { hints: ["The direction is the architecture field, and the bag of words is Word2VecArchitecture.CONTINUOUS_BAG_OF_WORDS.", "The first step is learning_rate. Everything else stays as it was in the first problem.", "embeddings.most_similar(word, 5) answers the five nearest words, and its words property is their spellings in order."], check: numberCheck("At a first step of 0.025, by how much does the within-list cosine exceed the across-list one, to four places?", 0.0034, 5e-05, "The fit left the lists at 0.9907 within and 0.9873 across, so every vector points very nearly the same way as every other and a verb form sits fifth in the list for market. The within-list number alone would have passed this fit, which is why the second number is worth computing every time.") },
+            ),
+            exercise(
+              "Count how long the tree’s paths are",
+              ["Part 4 says Huffman’s arrangement barely earns its keep on this corpus, with an average path of 4.9008 branch points against 4.9542 for a tree that split evenly. Build the tree from the corpus’s own word counts and see why.", "Print the average path per word occurrence to four places, then how many of the 31 words sit at each depth. The lesson quotes the average and not the depths."],
+              `import random
+from collections import Counter
+
+from oop_ml import HuffmanTree
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+occurrences = Counter(" ".join(corpus).split())
+words = sorted(occurrences)
+counts = [occurrences[word] for word in words]
+print(f"commonest {max(counts)}, rarest {min(counts)}")
+
+# Build the tree from the counts.
+
+# Print its average path per occurrence to four places.
+
+# Count how many words sit at each depth and print one line per depth.`,
+              `import random
+from collections import Counter
+
+from oop_ml import HuffmanTree
+
+VERBS = (
+    "play played plays player stay stayed stays staying say said says saying "
+    "walk walked walks walking talk talked talks talking"
+).split()
+MONEY = "stock bond market price trade fund bank cash debt yield share".split()
+
+draw = random.Random(11)
+corpus = []
+for _ in range(100):
+    for words in (VERBS, MONEY):
+        length = draw.randint(5, 8)
+        corpus.append(" ".join(draw.choice(words) for _ in range(length)))
+
+occurrences = Counter(" ".join(corpus).split())
+words = sorted(occurrences)
+counts = [occurrences[word] for word in words]
+print(f"commonest {max(counts)}, rarest {min(counts)}")
+
+tree = HuffmanTree.from_counts(counts)
+print(f"average path: {tree.expected_depth(counts):.4f}")
+
+depths = Counter(tree.code_of(position).depth for position in range(tree.n_words))
+for depth in sorted(depths):
+    print(f"depth {depth}: {depths[depth]} words")`,
+              `commonest 73, rarest 17
+average path: 4.9008
+depth 4: 4 words
+depth 5: 21 words
+depth 6: 6 words`,
+              { hints: ["HuffmanTree.from_counts takes the list of counts, one per word, in the order the words are numbered.", "tree.expected_depth(counts) is the path length averaged over word occurrences, which is the figure Part 4 quotes.", "tree.code_of(position) is one word’s route from the root, and its depth property is how many branch points the route passes."], check: numberCheck("How many of the 31 words sit five branch points down?", 21, 0, "The counts run only from 73 down to 17, so there is no long tail of rare words to give long paths to and the tree comes out nearly even. Most words sit at five, a few commoner ones at four and a few rarer ones at six, which is how the average lands at 4.9008, five hundredths under the 4.9542 of an even split.") },
+            ),
+          ],
         },
       ]}
     />

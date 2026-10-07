@@ -54,7 +54,7 @@ export function SharedRowLedger() {
           .
         </span>
         <label className="flex items-center gap-2">
-          bend
+          activation function
           <select
             value={activation}
             onChange={(event) =>

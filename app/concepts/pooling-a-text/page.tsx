@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -22,7 +25,7 @@ import { SharedDirectionProbe } from "@/components/widgets/SharedDirectionProbe"
 export const metadata: Metadata = {
   title: "Pooling a Text · oop_ml",
   description:
-    "Turn a whole text into one position by combining the positions of its words, and measure what each way of combining them keeps and throws away.",
+    "Combine word representations into a fixed-size text representation and inspect what the combination loses.",
 };
 
 const link =
@@ -31,8 +34,12 @@ const link =
 export default function PoolingATextPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["pooling-a-text"]}
+      technicalStart="Part 3. Averaging The Positions Instead"
+      openingTitle="One Vector for a Sentence Full of Words"
+      playgroundIntro="Compare sentence vectors under different weighting rules. Try sentences with the same words in a different order and inspect what each representation can distinguish."
       title="Pooling a Text"
-      tagline="Pooling turns a whole text into one position by combining the positions of its words, and the three ways of doing it here differ only in how much each word is allowed to count."
+      tagline="Combine word representations into a fixed-size text representation and inspect what the combination loses."
       prerequisites={
         <>
           Everything here starts from a table that has already given every word a
@@ -58,97 +65,31 @@ export default function PoolingATextPage() {
           rather than asserts.
         </>
       }
-      history={
-        <>
-          <p>
-            The counting half of this page is older than the averaging half by
-            forty years, and it starts with a cataloguing problem rather than a
-            computing one. Karen Sp&auml;rck Jones, at the Cambridge Language
-            Research Unit, was working on which words a retrieval system should
-            index on, and in &ldquo;A statistical interpretation of term
-            specificity and its application in retrieval&rdquo; in 1972 she
-            argued that a term&rsquo;s value falls with the number of documents
-            that hold it, so that a word appearing in every document in the
-            collection distinguishes none of them and should count for nothing.
-            Gerard Salton&rsquo;s group at Cornell already had documents written
-            as vectors over a vocabulary and compared by the cosine of the angle
-            between them, and her measure is what those vectors were missing.
-            The same weighting appears twice below, once on counts and once
-            inside an average of positions, which is one small piece of evidence
-            that the two halves of the page are answering one question.
-          </p>
-          <p>
-            Once a word had a position rather than a column, how to combine
-            several of them was genuinely open, and Jeff Mitchell and Mirella
-            Lapata, at the University of Edinburgh, put the question directly in
-            &ldquo;Vector-based models of semantic composition&rdquo; in 2008.
-            They compared adding the words&rsquo; vectors against multiplying
-            them coordinate by coordinate, scored both against people&rsquo;s
-            judgements of how alike two short phrases were, and found the
-            multiplicative form ahead on their task. What the paper settled for
-            the field was smaller and more useful than which form won, which is
-            that composition is a modelling choice with alternatives that can be
-            measured against each other, rather than something a vector space
-            comes with. Adding, divided by the number of words, is the plain
-            average this page starts from.
-          </p>
-          <p>
-            Sanjeev Arora, Yingyu Liang and Tengyu Ma, at Princeton, published
-            &ldquo;A Simple but Tough-to-Beat Baseline for Sentence
-            Embeddings&rdquo; in 2017, and its two changes to that average are
-            the last two sections of Part 4 and the whole of Part 5. Each word is
-            weighted by a small constant divided by that constant plus how
-            probable the word is, and then the leading direction of the
-            collection&rsquo;s own sentence vectors is subtracted from every one
-            of them. The title is the claim, since what they reported was that
-            this beat trained recurrent networks on the standard sentence
-            similarity benchmarks, and a method with no parameters to fit beating
-            one with millions was the result worth publishing. The six questions
-            this page works through, in order, are these. Why does a model that
-            reads a text need one position rather than a list of them? What can
-            counting the words give us, and what can it never see? What does
-            averaging the positions buy instead, and what does the average get
-            wrong? How much of that does weighting a word by how rare it is
-            repair? What is the one direction every text of a collection shares,
-            and what turns out to be in it? And what do all of these throw away
-            that no weighting puts back?
-          </p>
-        </>
-      }
+
       playground={<PoolingWorkbench />}
       sections={[
         {
           title: "Part 1. One Position For A Whole Text",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Why a model needs one position and not a list of them">
-                <p>
-                  Suppose every word already has a position, so that a text of
-                  eight words is eight positions, and suppose we want to ask
-                  whether two texts are about the same thing. Nothing about eight
-                  positions answers that. We could compare them word against
-                  word, but the two texts will not be the same length, and even
-                  where they are, the third word of one has no reason to line up
-                  with the third word of the other. Anything downstream that
-                  reads a fixed number of inputs, which is most things, cannot
-                  take a text at all until the text has been reduced to a fixed
-                  number of them.
+                <>
+<p>
+                  Suppose every word already has a position, so that a text of eight words is eight positions, and suppose we want to ask whether two texts are about the same thing. Nothing about eight positions answers that. We could compare them word against word, but the two texts will not be the same length, and even where they are, the third word of one has no reason to line up with the third word of the other.
                 </p>
                 <p>
-                  The obvious answer is to lay the positions end to end. Each
-                  position here is four numbers, so an eight-word text becomes
-                  thirty-two of them and a three-word text becomes twelve, and
-                  the two cannot be handed to the same reader. Padding the short
-                  one out to the length of the long one buys a fixed width and
-                  loses the meaning, because the fourth word of one text now
-                  shares a slot with the fourth word of the other and there is no
-                  sense in which they belong together. Pooling is the other
-                  answer. Combine the positions into one position of the same
-                  width, so that a text of three words and a text of thirty both
-                  come back as four numbers, and let the combining rule decide
-                  what survives.
+                  Anything downstream that reads a fixed number of inputs, which is most things, cannot take a text at all until the text has been reduced to a fixed number of them.
                 </p>
+</>
+                <>
+<p>
+                  The obvious answer is to lay the positions end to end. Each position here is four numbers, so an eight-word text becomes thirty-two of them and a three-word text becomes twelve, and the two cannot be handed to the same reader. Padding the short one out to the length of the long one buys a fixed width and loses the meaning, because the fourth word of one text now shares a slot with the fourth word of the other and there is no sense in which they belong together.
+                </p>
+                <p>
+                  Pooling is the other answer. Combine the positions into one position of the same width, so that a text of three words and a text of thirty both come back as four numbers, and let the combining rule decide what survives.
+                </p>
+</>
                 <Equation>
                   {"one text  ↦  one position of a fixed width"}
                 </Equation>
@@ -162,29 +103,22 @@ export default function PoolingATextPage() {
               </SubSection>
 
               <SubSection title="2. The collection everything here is pooled from">
-                <p>
-                  A word&rsquo;s position is learned from usage, so nothing here
-                  can be shown on a single sentence, and every number on this page
-                  comes from one of two collections. The larger is twenty-four
-                  documents of six words each, twelve about cooking and twelve
-                  about sailing, written from ten cooking words and ten sailing
-                  words with no content word appearing in both halves. Every
-                  document also carries exactly one of three words that carry no
-                  subject at all, and, the and we. Twenty-three words in all, and
-                  each of them has a position of four numbers, found by counting
-                  which words keep company with which inside a short window.
+                <>
+<p>
+                  A word&rsquo;s position is learned from usage, so nothing here can be shown on a single sentence, and every number on this page comes from one of two collections. The larger is twenty-four documents of six words each, twelve about cooking and twelve about sailing, written from ten cooking words and ten sailing words with no content word appearing in both halves.
                 </p>
                 <p>
-                  The smaller collection is six documents of four words each,
-                  built on a table of seven positions written down by hand rather
-                  than fitted. Three of its words point along the first axis and
-                  three along the second, so it has two subjects the way the
-                  larger one does, and the seventh word, the, points along a third
-                  axis and is twice as long as any of the others. It is here
-                  because every number that comes out of it can be checked with a
-                  pencil, and because it is arranged so that the failure Part 3
-                  is about is visible in a single document.
+                  Every document also carries exactly one of three words that carry no subject at all, and, the and we. Twenty-three words in all, and each of them has a position of four numbers, found by counting which words keep company with which inside a short window.
                 </p>
+</>
+                <>
+<p>
+                  The smaller collection is six documents of four words each, built on a table of seven positions written down by hand rather than fitted. Three of its words point along the first axis and three along the second, so it has two subjects the way the larger one does, and the seventh word, the, points along a third axis and is twice as long as any of the others.
+                </p>
+                <p>
+                  It is here because every number that comes out of it can be checked with a pencil, and because it is arranged so that the failure Part 3 is about is visible in a single document.
+                </p>
+</>
                 <KeepInMind>
                   Nobody tells any rule below which half a document belongs to.
                   The two numbers this page keeps reporting, how alike two
@@ -238,7 +172,7 @@ export default function PoolingATextPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Counting, Which Needs No Positions At All",
@@ -297,14 +231,22 @@ export default function PoolingATextPage() {
                   <Equation>
                     {"idf(w)  =  log( (1 + N) / (1 + documents holding w) )  +  1"}
                   </Equation>
-                  <p>
-                    With three documents that gives log(4 / 3) + 1 = 1.2877 for
-                    cat, sat and the, and log(4 / 2) + 1 = 1.6931 for a and dog.
-                    So the dog sat, which is the vector (0, 1, 1, 0, 1) under
-                    counts, becomes (0, 1.2877, 1.2877, 0, 1.6931) under the
-                    weighting, and dog, being the rarer word, now counts a third
-                    more than either of the others.
-                  </p>
+                  <>
+                    <p>
+                      With three documents, the smoothed inverse-document-frequency rule
+                      gives a smaller weight to words occurring in two documents than to
+                      words occurring in only one.
+                    </p>
+                    <Equation>{"cat, sat, the: ln((3 + 1) / (2 + 1)) + 1 ≈ 1.2877\na, dog:        ln((3 + 1) / (1 + 1)) + 1 ≈ 1.6931"}</Equation>
+                    <p>
+                      Apply these weights to the count vector for the dog sat.
+                    </p>
+                    <Equation>{"counts:   (0, 1, 1, 0, 1)\nweighted: (0, 1.2877, 1.2877, 0, 1.6931)"}</Equation>
+                    <p>
+                      Dog now contributes about a third more than either of the other
+                      words because it appears in fewer documents.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   The last thing this small collection shows is what happens to a
@@ -359,16 +301,19 @@ export default function PoolingATextPage() {
                   three pairs.
                 </p>
                 <WhyThisWorks>
-                  <p>
-                    Write one of the texts as its counts. The slot for the holds
-                    2, the slot for and holds 2, we holds 1, and three content
-                    slots hold 1 each, so the squared length is 4 + 4 + 1 + 1 + 1
-                    + 1 = 12. Two of the texts overlap only on the, and and we,
-                    and the products there are 2 &times; 2, 2 &times; 2 and 1
-                    &times; 1, so the dot product is 9. Nine over twelve is three
-                    quarters, and nothing in the calculation ever consulted which
-                    content words were involved.
-                  </p>
+                  <>
+                    <p>
+                      Each text contains the and and twice, we once, and three content
+                      words once. The shared function words therefore contribute most of
+                      the similarity even when the content words differ.
+                    </p>
+                    <Equation>{"squared length = 2² + 2² + 1² + 1² + 1² + 1² = 12\ndot product from shared words = 2 × 2 + 2 × 2 + 1 × 1 = 9\ncosine similarity = 9 / (√12 × √12) = 9/12 = 0.75"}</Equation>
+                    <p>
+                      The shared content vocabulary contributes nothing in this
+                      comparison. The high similarity comes entirely from the repeated
+                      function words.
+                    </p>
+                  </>
                 </WhyThisWorks>
                 <NumberTable
                   headings={[
@@ -440,17 +385,14 @@ export default function PoolingATextPage() {
               </SubSection>
 
               <SubSection title="9. What the average buys over counting">
-                <p>
-                  Here is the whole argument for pooling in one number. The first
-                  and third texts share no content word, so counting scored them
-                  at exactly the same 0.7500 it scored every other pair. Averaging
-                  their words&rsquo; positions puts them at 0.8737 against each
-                  other and at 0.6631 and 0.6142 against the cooking text, so the
-                  two that are about the same thing come out ahead by 0.2106.
-                  Nothing told the average which texts were about sailing. It
-                  reached that because crew, boat and sail sit near wind, tide and
-                  anchor in the table it was handed.
+                <>
+<p>
+                  Here is the whole argument for pooling in one number. The first and third texts share no content word, so counting scored them at exactly the same 0.7500 it scored every other pair. Averaging their words&rsquo; positions puts them at 0.8737 against each other and at 0.6631 and 0.6142 against the cooking text, so the two that are about the same thing come out ahead by 0.2106.
                 </p>
+                <p>
+                  Nothing told the average which texts were about sailing. It reached that because crew, boat and sail sit near wind, tide and anchor in the table it was handed.
+                </p>
+</>
                 <SeparationLadder />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   Every rule on the page, scored across the whole of a
@@ -480,17 +422,14 @@ export default function PoolingATextPage() {
               </SubSection>
 
               <SubSection title="10. Why the comparison is the angle and not the distance">
-                <p>
-                  A pooled position has a length, and it is worth asking what the
-                  length is a fact about before using it for anything. Under the
-                  plain average the three texts come out at lengths 0.4886,
-                  0.5083 and 0.5279, close to each other because all three texts
-                  are eight words long and the words of each point broadly the
-                  same way. Under the smooth weights they come out between 0.0104
-                  and 0.0112, because no weight there is above 0.028. Under the
-                  last rule they come out between 0.0048 and 0.0062, because most
-                  of what was there has been taken out.
+                <>
+<p>
+                  A pooled position has a length, and it is worth asking what the length is a fact about before using it for anything. Under the plain average the three texts come out at lengths 0.4886, 0.5083 and 0.5279, close to each other because all three texts are eight words long and the words of each point broadly the same way.
                 </p>
+                <p>
+                  Under the smooth weights they come out between 0.0104 and 0.0112, because no weight there is above 0.028. Under the last rule they come out between 0.0048 and 0.0062, because most of what was there has been taken out.
+                </p>
+</>
                 <p>
                   None of those lengths says anything about the text. They say
                   which rule produced the vector and how big its weights happened
@@ -539,6 +478,21 @@ export default function PoolingATextPage() {
                     tokens and four fifths of the answer, from a word that is in
                     every document of the collection.
                   </p>
+                  <p>
+                    A share is worked out in two steps. First take what the
+                    word added to the mean, which is its position times the
+                    number of times it was used, divided by the four words of
+                    the document. Then measure that along the answer and divide
+                    by the answer&rsquo;s own squared length, so that the
+                    shares of all the words add to one.
+                  </p>
+                  <Equation>{"answer = (0.5, 0, 1, 0)          answer · answer = 0.5² + 1² = 1.25\nshare(word) = (what the word added) · answer / (answer · answer)\nthe:  (0, 0, 1, 0) · (0.5, 0, 1, 0) / 1.25 = 1 / 1.25 = 0.8000\ncat:  (0.25, 0, 0, 0.025) · (0.5, 0, 1, 0) / 1.25 = 0.125 / 1.25 = 0.1000\ndog:  (0.25, 0, 0, −0.025) · (0.5, 0, 1, 0) / 1.25 = 0.125 / 1.25 = 0.1000"}</Equation>
+                  <p>
+                    The two uses of the added (0, 0, 1, 0) between them, which
+                    is the whole of the answer&rsquo;s largest coordinate. Cat
+                    and dog added a quarter each to the first coordinate, and
+                    their small fourth coordinates cancelled.
+                  </p>
                 </WorkedExample>
                 <ContributionBars corpus="sketch" text="the cat the dog" />
                 <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -565,17 +519,14 @@ export default function PoolingATextPage() {
               </SubSection>
 
               <SubSection title="12. On this collection it does not, and the reason is worth having">
-                <p>
-                  I expected the same ranking on the twenty-four documents and did
-                  not get it. Taking the first of the three texts and asking which
-                  of its words supplied most of its average, the answer is crew at
-                  0.2069, then sail at 0.1839, then and at 0.1736 across its two
-                  uses, then the at 0.1532 across its two. Two tokens of and
-                  together supply less than one token of crew. Across all
-                  twenty-four documents, the one word in six that carries no
-                  subject supplies 0.0649 of its document&rsquo;s average, where an
-                  equal share would be 0.1667.
+                <>
+<p>
+                  I expected the same ranking on the twenty-four documents and did not get it. Taking the first of the three texts and asking which of its words supplied most of its average, the answer is crew at 0.2069, then sail at 0.1839, then and at 0.1736 across its two uses, then the at 0.1532 across its two.
                 </p>
+                <p>
+                  Two tokens of and together supply less than one token of crew. Across all twenty-four documents, the one word in six that carries no subject supplies 0.0649 of its document&rsquo;s average, where an equal share would be 0.1667.
+                </p>
+</>
                 <ContributionBars
                   corpus="documents"
                   text="the crew and the boat and we sail"
@@ -585,18 +536,14 @@ export default function PoolingATextPage() {
                   grey bars are the words carrying no subject, and here they are
                   at the bottom rather than the top.
                 </p>
-                <p>
-                  The reason is in the table of positions rather than in the
-                  averaging. The three words carrying no subject own the three
-                  shortest positions in it, and at 0.3708, the at 0.3667 and we at
-                  0.5770, against content words running from 0.7327 up to
-                  1.1628,
-                  because the table was fitted by measuring
-                  how much more often two words occur together than chance would
-                  explain, and a word that occurs with everything has no company
-                  worth reporting. The rule that made the positions had already
-                  done part of the work the weighting was invented to do.
+                <>
+<p>
+                  The reason is in the table of positions rather than in the averaging. The three words carrying no subject own the three shortest positions in it, and at 0.3708, the at 0.3667 and we at 0.5770, against content words running from 0.7327 up to 1.1628, because the table was fitted by measuring how much more often two words occur together than chance would explain, and a word that occurs with everything has no company worth reporting.
                 </p>
+                <p>
+                  The rule that made the positions had already done part of the work the weighting was invented to do.
+                </p>
+</>
                 <KeepInMind>
                   How much a common word distorts a plain average depends on how
                   the word positions were made, not on the averaging. The textbook
@@ -607,6 +554,54 @@ export default function PoolingATextPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            choice(
+              "Counting scores all three of the running texts at 0.7500 against one another. Why is it the same number for every pair?",
+              [
+                "Because any two of them overlap in exactly the same five tokens and differ in exactly three",
+                "Because two of the three are about sailing and one is about cooking",
+                "Because counting gives any two texts of eight words the same angle",
+                "Because the collection is too small for a count to separate anything",
+              ],
+              0,
+              "Each text uses the twice, and twice, we once, and three content words no other text shares, so the shared part of any pair is the same and the angle has to be the same angle. The content words contribute nothing to the comparison, since no pair shares one, and the whole of the 9 in 9/12 comes from the repeated words carrying no subject. Length alone does not fix the angle, since two six-word documents of the collection score 0.0000 or 0.1667 against each other depending on what they share.",
+            ),
+            trueFalse(
+              "Across the twenty-four documents, the least alike pair from one half is further apart under counting than the most alike pair from different halves.",
+              true,
+              "Two documents of one half that happen to share no content word score exactly zero against each other, while two documents of different halves that share a word carrying no subject score 0.1667, so the gap runs the wrong way by 0.1667. Weighting the counts by rarity does not repair it, since its worst same-half pair is at zero too.",
+            ),
+            choice(
+              "What does averaging the word positions do for the first and third texts, which share no content word?",
+              [
+                "It puts them at 0.8737 against each other and at 0.6631 and 0.6142 against the cooking text",
+                "It leaves them where counting put them, since neither rule reads order",
+                "It separates them, because averaging is pulled towards whichever words are longest",
+                "It puts them at 0.7500, the same as counting, since the same words went in",
+              ],
+              0,
+              "Nothing told the average which texts were about sailing. It reached that because crew, boat and sail sit near wind, tide and anchor in the table it was handed, which is the whole argument for pooling in one number. Across the full collection the plain average puts same-half pairs at 0.7947 and different-half pairs at 0.1346, and its margin is positive for the first time, at 0.0622.",
+            ),
+            trueFalse(
+              "On the twenty-four documents the three words carrying no subject supply most of a plain average, as the usual complaint predicts.",
+              false,
+              "They supply least. Taking the first of the three texts, crew supplies 0.2069, sail 0.1839, and 0.1736 across its two uses and the 0.1532 across its two, and across the whole collection a word carrying no subject supplies 0.0649 where an equal share would be 0.1667. Those three own the shortest positions in the table, at 0.3708, 0.3667 and 0.5770 against content words running from 0.7327 to 1.1628, because a word that occurs with everything has no company worth reporting.",
+            ),
+            choice(
+              "Why is every comparison on the page an angle rather than a distance?",
+              [
+                "Because a pooled vector’s length is an artefact of the weights and the number of words rather than a fact about the text",
+                "Because distances cannot be computed between vectors of four numbers",
+                "Because the angle is cheaper to compute than the distance",
+                "Because the word positions were normalised before pooling",
+              ],
+              0,
+              "Under the plain average the three texts come out at lengths 0.4886, 0.5083 and 0.5279, under the smooth weights between 0.0104 and 0.0112, and under the last rule between 0.0048 and 0.0062. Those lengths say which rule produced the vector and how big its weights happened to be, so comparing by distance would mostly be comparing the arithmetic that made them.",
+            ),
+        ],
         },
         {
           title: "Part 4. Weighting A Word By How Rare It Is",
@@ -626,13 +621,18 @@ export default function PoolingATextPage() {
                 <Equation>
                   {"v(text)  =  ∑ idf(w) · v(w)   /   ∑ idf(w)"}
                 </Equation>
-                <p>
-                  On the hand-built collection the weight of the is exactly one,
-                  since it is used by all six documents, and every other word,
-                  being in two of six, weighs log(7 / 3) + 1 = 1.8473. So each
-                  content word now counts 1.8473 times what the counts, which is a
-                  ratio the plain average did not have.
-                </p>
+                <>
+                  <p>
+                    In the hand-built collection, the appears in all six documents. Each
+                    other word appears in two. Their inverse-document-frequency weights
+                    are:
+                  </p>
+                  <Equation>{"weight(the) = ln((6 + 1) / (6 + 1)) + 1 = 1\nweight(other word) = ln((6 + 1) / (2 + 1)) + 1 ≈ 1.8473"}</Equation>
+                  <p>
+                    Each content word now counts about 1.85 times as much as the. Plain
+                    averaging gave them equal weight.
+                  </p>
+                </>
                 <KeepInMind>
                   Dividing by the total weight rather than by the word count is
                   what makes this a mean. The alternative, dividing by the count,
@@ -648,8 +648,8 @@ export default function PoolingATextPage() {
                   share of the answer supplied by the falls from 0.8000 to 0.5396
                   and each of cat and dog rises from 0.1000 to 0.2302, and the
                   margin between the two subjects goes from 0.1640 to 0.3871,
-                  which is more than double. The word furthest apart across the
-                  subjects falls from 0.8349 to 0.6105.
+                  which is more than double. The most alike pair of documents
+                  across the two subjects falls from 0.8349 to 0.6105.
                 </p>
                 <p>
                   On the twenty-four documents it is worth much less, for the
@@ -768,19 +768,14 @@ export default function PoolingATextPage() {
                 <Equation>
                   {"v  ←  v − u · (u · v)     where u is the leading direction"}
                 </Equation>
-                <p>
-                  Two details of how the direction is found are decisions rather
-                  than consequences. It is found from the table exactly as it
-                  stands, without first subtracting each coordinate&rsquo;s mean
-                  across the documents, which is what makes this different from
-                  the decomposition on the principal components page. Centring
-                  would take the mean direction away before the search began, and
-                  the mean direction is precisely what is meant to be removed. And
-                  a direction found this way is determined only up to its sign,
-                  since a direction and its opposite span the same line, so a
-                  convention is needed if the answer is to be a function of the
-                  collection alone. The projection is the same either way.
+                <>
+<p>
+                  Two details of how the direction is found are decisions rather than consequences. It is found from the table exactly as it stands, without first subtracting each coordinate&rsquo;s mean across the documents, which is what makes this different from the decomposition on the principal components page. Centring would take the mean direction away before the search began, and the mean direction is precisely what is meant to be removed.
                 </p>
+                <p>
+                  And a direction found this way is determined only up to its sign, since a direction and its opposite span the same line, so a convention is needed if the answer is to be a function of the collection alone. The projection is the same either way.
+                </p>
+</>
                 <KeepInMind>
                   The direction belongs to the collection and not to any text.
                   Nothing about a particular document decides it, and every
@@ -977,6 +972,48 @@ export default function PoolingATextPage() {
           ),
         },
         {
+          title: "Questions on Parts 4 and 5",
+          quiz: [
+            trueFalse(
+              "The rarity weighting bought about the same improvement on the hand-built collection as on the twenty-four documents.",
+              false,
+              "It bought 0.2231 in one place and 0.0197 in the other, and nothing about the method changed between those two numbers. On the hand-built collection the margin goes from 0.1640 to 0.3871 and the share of the answer supplied by the falls from 0.8000 to 0.5396. On the twenty-four documents the margin moves only from 0.0622 to 0.0819, because the weights themselves barely differ where every content word is used about equally often.",
+            ),
+            choice(
+              "After the best weighting, two documents of different halves still point substantially the same way. Why can no weighting fix that?",
+              [
+                "Because a weight can shrink a word’s contribution towards zero and no further, and it cannot subtract",
+                "Because the weights are estimated from the same collection they are applied to",
+                "Because the word positions were fitted on too little text",
+                "Because the angle is insensitive to how long each vector is",
+              ],
+              0,
+              "The plain average of a document of this collection lies at a cosine of 0.6797 from one particular direction, never below 0.5820 and never above 0.7774, so roughly two thirds of every document’s answer is the same answer for all twenty-four. A quantity every document has some of survives every weighting that leaves the words in, and getting rid of it means subtracting it.",
+            ),
+            trueFalse(
+              "On both collections the words leaning furthest along the removed direction are the ones carrying no subject.",
+              false,
+              "On the twenty-four documents they are, with and at 0.9897, we at 0.9848 and the at 0.9032 against a furthest content word of 0.7087. On the hand-built collection the leading direction is (0.6384, 0.6384, 0.4299, 0) and the words furthest along it are pet and market at 0.7050, with the at only 0.4299, because two perfectly symmetric halves and one shared word make the average of everything the thing the documents most agree on. What is removed is whatever the collection has in common, and only sometimes is that a set of words a person would have named in advance.",
+            ),
+            trueFalse(
+              "The least alike pair of documents from one half reads as less alike after the shared direction is removed than it did under the plain average.",
+              true,
+              "It scores 0.3202 under the plain average and −0.0767 after the removal, so two documents about the same subject have been pushed past perpendicular. What every document had in common was also part of what two documents of one half had in common, so removing it takes some genuine agreement along with the spurious kind, and a pair sharing no content word was relying on it most. On this one measure the plain average is the best rule on the page.",
+            ),
+            several(
+              "Part 5 ends by counting what pooling costs against counting. Which of these does it report?",
+              [
+                "Only the plain average can give a position to a text that arrives on its own",
+                "A pooled text is as wide as one word’s position whatever the vocabulary does",
+                "Asking which words lie nearest a pooled position recovers 4.3333 of a document’s six words on average under the plain average",
+                "A pooled vector keeps the text’s vocabulary readable straight off it",
+              ],
+              [0, 1, 2],
+              "Counting needs a collection to fix the vocabulary, the rarity weight to count documents, the smooth weight to estimate probabilities and the removal to find a direction, so a lone text can only be averaged plainly. The width is four numbers against counting’s twenty-three, which is the trade a fixed width was bought with. The sharpest rule recovers 4.1667 words of six, so a little under three quarters of a document is still readable and the rest has gone. Reading the vocabulary straight off the vector is what a counted vector allows, because a counted vector is the words, and a pooled one is not.",
+            ),
+        ],
+        },
+        {
           title: "Part 6. Where Pooling Stops Being Defined",
           content: (
             <>
@@ -1079,18 +1116,14 @@ export default function PoolingATextPage() {
                   rule. The first rules put it near both, and the last one picks a
                   side.
                 </p>
-                <p>
-                  Both failures are on display. Under the plain average the mixed
-                  text scores 0.8862 against the sailing text and 0.9202 against
-                  the cooking one, both of which are higher than the 0.6631 those
-                  two score against each other, so the text reads as more like each
-                  of them than they are like each other, which is the answer of
-                  something that is vaguely like everything. Under the last rule it
-                  scores &minus;0.1187 against sailing and 0.5057 against cooking,
-                  and all four of the documents it comes out nearest are cooking
-                  documents, so a text holding crew and boat has been placed in the
-                  kitchen.
+                <>
+<p>
+                  Both failures are on display. Under the plain average the mixed text scores 0.8862 against the sailing text and 0.9202 against the cooking one, both of which are higher than the 0.6631 those two score against each other, so the text reads as more like each of them than they are like each other, which is the answer of something that is vaguely like everything.
                 </p>
+                <p>
+                  Under the last rule it scores &minus;0.1187 against sailing and 0.5057 against cooking, and all four of the documents it comes out nearest are cooking documents, so a text holding crew and boat has been placed in the kitchen.
+                </p>
+</>
                 <KeepInMind>
                   This is a limit of the shape of the answer rather than of the
                   rule producing it. Representing a text that is about two things
@@ -1156,6 +1189,255 @@ export default function PoolingATextPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Part 6",
+          quiz: [
+            trueFalse(
+              "Crew sail the boat and boat sail the crew come back as one position under every rule on the page.",
+              true,
+              "Under both counting rules they agree in every bit, and under the four averaging rules the largest disagreement first appears in the seventeenth decimal place, which is the order the additions ran in. Every rule here is a sum over the words divided by something that depends on the multiset and not on the arrangement, so this follows from the shape of the calculation and cannot be repaired by choosing better weights.",
+            ),
+            choice(
+              "The same text is scored against all twenty-four documents and then against the twelve sailing ones. The two positions sit at a cosine of −0.6124. What changed?",
+              [
+                "What the collection agrees on, since in the sailing half sail leads the direction at 0.9031 where across all twenty-four it reached only 0.6551",
+                "The word positions, which are refitted for each collection",
+                "The weights, which are the only quantity a smaller collection changes",
+                "Nothing real, since the two directions differ only by their sign",
+              ],
+              0,
+              "A weight learned from a collection is a statement about that collection, and so is a direction. In the whole collection the three words carrying no subject lead, because that is what all twenty-four documents agree on; in the sailing half every document is about sailing, so sail is now shared too. The two directions themselves agree only to 0.7812, and two such positions may only be compared when they were produced against the same collection.",
+            ),
+            choice(
+              "A text holds two sailing words and two cooking words. What do the rules do with it?",
+              [
+                "The plain average puts it nearer each subject than the two subjects are to each other, and the last rule places it among the cooking documents",
+                "Both rules place it exactly between the two subjects, which is the right answer",
+                "Both rules refuse it, since a mixed text has no single direction",
+                "The plain average picks a side and the last rule keeps it between the two",
+              ],
+              0,
+              "Under the plain average it scores 0.8862 against the sailing text and 0.9202 against the cooking one, both above the 0.6631 those two score against each other, which is the answer of something vaguely like everything. Under the last rule it scores −0.1187 and 0.5057, and all four documents it comes out nearest are cooking ones. Being about two things is not a direction, so this is a limit of the shape of the answer rather than of the rule producing it.",
+            ),
+            trueFalse(
+              "A text made entirely of words the collection has never met comes back as a position at the origin, with no similarity to anything.",
+              true,
+              "Every rule on the page answers it the same way, and it is the undefined case that arises in ordinary use rather than in a constructed example. The same honesty appears in the small collection, where the zebra sat comes back as (0, 1.2877, 1.2877, 0, 0) with zebra contributing nothing, because a word with no slot has nowhere to put anything.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Pooling The Three Texts With The Library",
+          practice: [
+            exercise(
+              "Score the three texts by counting and by averaging",
+              ["The starter builds the twenty-four documents of Part 1, twelve about cooking and twelve about sailing, and holds the three running texts. Fit a position of four numbers per word with PointwiseMutualInformationEmbeddings at a window of two, which is how the page’s table was made.", "Then fit BagOfWords with normalise=True and MeanPooling on those positions, transform the three texts under each, and print the cosine for each of the three pairs to four places. The first and third texts are the two about sailing."],
+              `from oop_ml import BagOfWords, MeanPooling, PointwiseMutualInformationEmbeddings
+
+COOKING = "flour sugar butter eggs oven bake stir whisk dough pan".split()
+SAILING = "sail wind boat harbour anchor tide mast rope deck crew".split()
+FILLERS = [(2, "and"), (3, "the"), (0, "we")]
+
+documents = []
+for topic in (COOKING, SAILING):
+    for start in range(12):
+        words = [topic[(start + step) % 10] for step in range(5)]
+        place, filler = FILLERS[start % 3]
+        words.insert(place, filler)
+        documents.append(" ".join(words))
+
+texts = [
+    "the crew and the boat and we sail",
+    "the flour and the dough and we bake",
+    "the wind and the tide and we anchor",
+]
+
+# Fit the word positions on the documents and keep the embeddings.
+
+# Build the two rules, a normalised BagOfWords and a MeanPooling on the positions.
+
+# For each rule, fit it on the documents, transform the three texts, and print
+# the similarity of each pair, (0, 2), (0, 1) and (1, 2), to four places.`,
+              `from oop_ml import BagOfWords, MeanPooling, PointwiseMutualInformationEmbeddings
+
+COOKING = "flour sugar butter eggs oven bake stir whisk dough pan".split()
+SAILING = "sail wind boat harbour anchor tide mast rope deck crew".split()
+FILLERS = [(2, "and"), (3, "the"), (0, "we")]
+
+documents = []
+for topic in (COOKING, SAILING):
+    for start in range(12):
+        words = [topic[(start + step) % 10] for step in range(5)]
+        place, filler = FILLERS[start % 3]
+        words.insert(place, filler)
+        documents.append(" ".join(words))
+
+texts = [
+    "the crew and the boat and we sail",
+    "the flour and the dough and we bake",
+    "the wind and the tide and we anchor",
+]
+
+positions = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+
+rules = {"counted": BagOfWords(normalise=True), "averaged": MeanPooling(embeddings=positions)}
+for name, rule in rules.items():
+    pooled = rule.fit(documents).transform(texts)
+    print(name)
+    print(f"  the two about sailing: {pooled.similarity(0, 2):.4f}")
+    print(f"  first against cooking: {pooled.similarity(0, 1):.4f}")
+    print(f"  third against cooking: {pooled.similarity(1, 2):.4f}")`,
+              `counted
+  the two about sailing: 0.7500
+  first against cooking: 0.7500
+  third against cooking: 0.7500
+averaged
+  the two about sailing: 0.8737
+  first against cooking: 0.6631
+  third against cooking: 0.6142`,
+              { hints: ["PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents) returns the fitted model, and its embeddings property is the table of positions.", "MeanPooling takes that table as embeddings. Both rules are fitted on the documents first, since counting needs them to fix its vocabulary.", "transform takes a list of texts and answers one vector per text. similarity(first, second) on what comes back takes two positions in that list."], check: numberCheck("What cosine does the plain average give the two texts about sailing, to four places?", 0.8737, 5e-05, "The two share no content word, which is why counting leaves them at the same 0.7500 as every other pair. The average reaches 0.8737 because crew, boat and sail sit near wind, tide and anchor in the table of positions, against 0.6631 and 0.6142 for the pairs that cross subjects.") },
+            ),
+            exercise(
+              "Take the shared direction out and count what it costs",
+              ["Part 5 reports that removing the shared direction separates the two halves and hurts the least alike pair inside one. Measure both on all twenty-four documents. Pool them once with MeanPooling and once with SmoothInverseFrequency at a smoothing of 0.001 with the first component removed.", "For each rule print the mean and the smallest cosine over the pairs of documents from the same half, and the mean and the largest over the pairs from different halves, to four places. The first twelve documents are the cooking half. The lesson never quotes the same-half mean after the removal."],
+              `from itertools import combinations
+from statistics import mean
+
+from oop_ml import MeanPooling, PointwiseMutualInformationEmbeddings, SmoothInverseFrequency
+
+COOKING = "flour sugar butter eggs oven bake stir whisk dough pan".split()
+SAILING = "sail wind boat harbour anchor tide mast rope deck crew".split()
+FILLERS = [(2, "and"), (3, "the"), (0, "we")]
+
+documents = []
+for topic in (COOKING, SAILING):
+    for start in range(12):
+        words = [topic[(start + step) % 10] for step in range(5)]
+        place, filler = FILLERS[start % 3]
+        words.insert(place, filler)
+        documents.append(" ".join(words))
+
+positions = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+
+# Build the two rules, a MeanPooling and a SmoothInverseFrequency, on the positions.
+
+# For each rule, fit it and transform the documents themselves.
+# same: the similarity of every pair inside the first twelve and inside the last twelve.
+# different: the similarity of every pair with one document from each half.
+# Print the mean and min of same, and the mean and max of different.`,
+              `from itertools import combinations
+from statistics import mean
+
+from oop_ml import MeanPooling, PointwiseMutualInformationEmbeddings, SmoothInverseFrequency
+
+COOKING = "flour sugar butter eggs oven bake stir whisk dough pan".split()
+SAILING = "sail wind boat harbour anchor tide mast rope deck crew".split()
+FILLERS = [(2, "and"), (3, "the"), (0, "we")]
+
+documents = []
+for topic in (COOKING, SAILING):
+    for start in range(12):
+        words = [topic[(start + step) % 10] for step in range(5)]
+        place, filler = FILLERS[start % 3]
+        words.insert(place, filler)
+        documents.append(" ".join(words))
+
+positions = PointwiseMutualInformationEmbeddings(window=2, dimension=4).fit(documents).embeddings
+
+rules = {
+    "plain average": MeanPooling(embeddings=positions),
+    "direction removed": SmoothInverseFrequency(
+        embeddings=positions, smoothing=0.001, remove_first_component=True
+    ),
+}
+halves = (range(12), range(12, 24))
+for name, rule in rules.items():
+    pooled = rule.fit(documents).transform(documents)
+    same = [pooled.similarity(a, b) for half in halves for a, b in combinations(half, 2)]
+    different = [pooled.similarity(a, b) for a in halves[0] for b in halves[1]]
+    print(name)
+    print(f"  same half:        mean {mean(same):.4f}   least alike {min(same):.4f}")
+    print(f"  different halves: mean {mean(different):.4f}   most alike {max(different):.4f}")`,
+              `plain average
+  same half:        mean 0.7947   least alike 0.3202
+  different halves: mean 0.1346   most alike 0.2581
+direction removed
+  same half:        mean 0.6212   least alike -0.0767
+  different halves: mean -0.6370   most alike -0.3520`,
+              { hints: ["SmoothInverseFrequency takes embeddings, smoothing and remove_first_component. It learns its weights and its direction from the documents it is fitted on.", "combinations(range(12), 2) gives every pair inside the cooking half once, and the same over range(12, 24) gives the sailing half.", "The pairs across the halves are every a in range(12) with every b in range(12, 24)."], check: numberCheck("After the direction is removed, what is the mean cosine between two documents of the same half, to four places?", 0.6212, 5e-05, "The removal lowered both means. Different halves fell from 0.1346 to −0.6370, which is the separation it was bought for, and the same half fell from 0.7947 to 0.6212, because what every document shared was also part of what two documents of one half shared. The least alike same-half pair shows the same cost at its worst, 0.3202 down to −0.0767.") },
+            ),
+            exercise(
+              "Weight the cat the dog by rarity",
+              ["Part 3 worked the cat the dog under the plain average and found the supplying 0.8000 of the answer. Part 4 says the rarity weight brings that down to 0.5396. The starter holds the hand-built table of seven positions and its six documents. Fit MeanPooling with the inverse document frequency weighting and reproduce the figure.", "Print the weight of the and of cat, the pooled position of the cat the dog, which the lesson does not give, and the share of that position the two uses of the supply, all to four places."],
+              `import numpy as np
+from oop_ml import MeanPooling, PoolingWeighting, Vocabulary, WordEmbeddings
+
+words = ["the", "cat", "dog", "pet", "stock", "bond", "market"]
+table = [
+    (0.0, 0.0, 2.0, 0.0),
+    (1.0, 0.0, 0.0, 0.1),
+    (1.0, 0.0, 0.0, -0.1),
+    (0.9, 0.1, 0.0, 0.0),
+    (0.0, 1.0, 0.0, 0.1),
+    (0.0, 1.0, 0.0, -0.1),
+    (0.1, 0.9, 0.0, 0.0),
+]
+positions = WordEmbeddings(Vocabulary(words), np.asarray(table))
+documents = [
+    "the cat the dog", "the pet the cat", "the dog the pet",
+    "the stock the bond", "the market the stock", "the bond the market",
+]
+
+# Fit MeanPooling on the positions with the inverse document frequency weighting.
+
+# weights: the model's inverse document frequencies, one per word in table order.
+
+# answer: the pooled position of "the cat the dog".
+
+# added_by_the: two uses, times the weight of the, times its position,
+# divided by the total weight of the document's four words.
+
+# Print the two weights, the answer, and (added_by_the . answer) / (answer . answer).`,
+              `import numpy as np
+from oop_ml import MeanPooling, PoolingWeighting, Vocabulary, WordEmbeddings
+
+words = ["the", "cat", "dog", "pet", "stock", "bond", "market"]
+table = [
+    (0.0, 0.0, 2.0, 0.0),
+    (1.0, 0.0, 0.0, 0.1),
+    (1.0, 0.0, 0.0, -0.1),
+    (0.9, 0.1, 0.0, 0.0),
+    (0.0, 1.0, 0.0, 0.1),
+    (0.0, 1.0, 0.0, -0.1),
+    (0.1, 0.9, 0.0, 0.0),
+]
+positions = WordEmbeddings(Vocabulary(words), np.asarray(table))
+documents = [
+    "the cat the dog", "the pet the cat", "the dog the pet",
+    "the stock the bond", "the market the stock", "the bond the market",
+]
+
+model = MeanPooling(
+    embeddings=positions, weighting=PoolingWeighting.INVERSE_DOCUMENT_FREQUENCY
+).fit(documents)
+
+weights = np.asarray(model.inverse_document_frequencies)
+print(f"weight of the: {weights[0]:.4f}   weight of cat: {weights[1]:.4f}")
+
+answer = np.asarray(model.transform(["the cat the dog"]).vector_of(0))
+print("pooled position:", ", ".join(f"{value:.4f}" for value in answer))
+
+total = 2 * weights[0] + weights[1] + weights[2]
+added_by_the = 2 * weights[0] * np.asarray(table[0]) / total
+share = added_by_the @ answer / (answer @ answer)
+print(f"share supplied by the: {share:.4f}")`,
+              `weight of the: 1.0000   weight of cat: 1.8473
+pooled position: 0.6488, 0.0000, 0.7024, 0.0000
+share supplied by the: 0.5396`,
+              { hints: ["The weighting field takes PoolingWeighting.INVERSE_DOCUMENT_FREQUENCY, and the fitted model’s inverse_document_frequencies holds one weight per word in the order of the table.", "transform takes a list of texts, and vector_of(0) on the result is the first text’s pooled position.", "The total weight of the document is the weight of the twice, plus cat’s, plus dog’s. A word’s share is what it added, dotted with the answer, divided by the answer dotted with itself."], check: numberCheck("What share of the weighted answer do the two uses of the supply, to four places?", 0.5396, 5e-05, "The is in all six documents and weighs 1, where cat and dog are in two each and weigh 1.8473. That pulls the answer from (0.5, 0, 1, 0) towards the first axis, and the share of the falls from 0.8000 to 0.5396, still more than half from the one word every document holds.") },
+            ),
+          ],
         },
       ]}
     />

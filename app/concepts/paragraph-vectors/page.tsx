@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { ParagraphVectorWorkbench } from "@/components/widgets/ParagraphVectorWo
 export const metadata: Metadata = {
   title: "Paragraph Vectors · oop_ml",
   description:
-    "Give a whole text a coordinate of its own and learn it alongside the words, then measure what a text the fit never saw costs to place.",
+    "Train a document vector through word prediction and infer vectors for new text.",
 };
 
 const link =
@@ -30,8 +33,12 @@ const link =
 export default function ParagraphVectorsPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["paragraph-vectors"]}
+      technicalStart="Part 2. A Document As A Word That Is Always There"
+      openingTitle="Give the Whole Document Something to Learn"
+      playgroundIntro="Compare the word and document contributions to a prediction. Inspect how a new document's vector changes during inference while the trained word representations remain fixed."
       title="Paragraph Vectors"
-      tagline="Paragraph vectors give a whole text a coordinate of its own and train it by the same predict-a-neighbour objective the words are trained by, so the text learns whatever helps predict its own words."
+      tagline="Train a document vector through word prediction and infer vectors for new text."
       prerequisites={
         <>
           The training loop here is the one{" "}
@@ -56,63 +63,14 @@ export default function ParagraphVectorsPage() {
           , which Part 4 leans on heavily.
         </>
       }
-      history={
-        <>
-          <p>
-            Quoc Le and Tomáš Mikolov published &ldquo;Distributed
-            Representations of Sentences and Documents&rdquo; at the
-            International Conference on Machine Learning in 2014, and the problem
-            they set out in its first page is a narrow one. A text written as
-            counts over a vocabulary loses the order of its words entirely, and,
-            worse for them, it makes every pair of distinct words equally
-            unrelated, so that a text about powerful and a text about strong have
-            nothing in common at all under that description. Mikolov had spent
-            the previous year at Google showing that a word could be given a
-            position by asking it to help predict its neighbours, which fixed the
-            second half of that complaint for single words, and the question left
-            over was what to do with a text.
-          </p>
-          <p>
-            Their answer was to change almost nothing. Treat the document as one
-            more token, present at every window inside it and at no window
-            outside it, and let the same loop learn a row for it alongside the
-            rows for the words. Their phrase for the paragraph vector was another
-            word that acts as a memory, and the two arrangements they described
-            are the two this page measures, one in which the document is averaged
-            in with the surrounding words to predict the centre one, and one in
-            which the document is asked to predict a word of its own on its own.
-            They reported results on the Stanford Sentiment Treebank and on a
-            large collection of film reviews that were the best on those tasks at
-            the time, and they recommended the first arrangement.
-          </p>
-          <p>
-            What happened next is worth knowing before reading any of the numbers
-            below. The implementation most people met the method through calls it
-            doc2vec, and that has become the commoner name. Jey Han Lau and
-            Timothy Baldwin, at the University of Melbourne, published &ldquo;An
-            Empirical Evaluation of doc2vec with Practical Insights into Document
-            Embedding Generation&rdquo; in 2016, having found the original
-            results hard to reproduce, and among their conclusions was that the
-            second arrangement, the one the paper had not recommended, was
-            usually both better and cheaper. Every architecture comparison on
-            this page lands on the same side of that question, which is a small
-            piece of evidence and not a replication. The five questions worked
-            through here, in order, are these. What can averaging a text&rsquo;s
-            words never say? What does the document&rsquo;s own row learn, and
-            from what? What do the two arrangements each do with that row? Why
-            does a text the fit never saw have to be searched for rather than
-            looked up, and how long does that search take? And where does the
-            method stop being defined at all?
-          </p>
-        </>
-      }
+
       playground={<ParagraphVectorWorkbench />}
       sections={[
         {
           title: "Part 1. What Averaging A Text Cannot Do",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The collection every number here comes from">
                 <p>
                   A position for a text has to be learned from usage, so nothing
@@ -210,7 +168,7 @@ export default function ParagraphVectorsPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Document As A Word That Is Always There",
@@ -249,35 +207,52 @@ export default function ParagraphVectorsPage() {
 
               <SubSection title="5. One position, worked all the way through">
                 <p>
-                  Take one position of one document at a width of three, so the
-                  arithmetic fits on a line. The document&rsquo;s row is (0.2,
-                  &minus;0.1, 0.4) and the one context word&rsquo;s row is (0,
-                  0.3, &minus;0.2), and the vector the prediction is made from is
-                  the mean of those two.
+                  Take one position of one document with three coordinates per
+                  vector. There is one context word, so the prediction uses the
+                  mean of the document vector and that word&rsquo;s vector.
                 </p>
                 <Equation>
                   {"h  =  ( d  +  ∑ v(c) )  /  ( 1 + n )     over the n context words"}
                 </Equation>
                 <WorkedExample title="One position of one document">
                   <p>
-                    The mean of (0.2, &minus;0.1, 0.4) and (0, 0.3, &minus;0.2) is
-                    (0.1, 0.1, 0.1). Suppose the row for the word actually there
-                    is (1, 0, 0) and the row for the one wrong word drawn against
-                    it is (0, 1, 0), so both scores come out at 0.1 and both
-                    probabilities at 0.524979. The right answer wanted a one and
-                    got 0.524979, so its error is &minus;0.475021; the wrong
-                    answer wanted a zero and got the same 0.524979, so its error
-                    is +0.524979. Reading those back onto the coordinates gives a
-                    gradient of (&minus;0.475021, 0.524979, 0).
+                    First average the two input vectors, coordinate by coordinate.
                   </p>
+                  <Equation>{[
+                    "document vector d = (0.2, −0.1, 0.4)",
+                    "context vector v = (0, 0.3, −0.2)",
+                    "h = (d + v) / 2",
+                    "  = (0.2 / 2, 0.2 / 2, 0.2 / 2)",
+                    "  = (0.1, 0.1, 0.1)",
+                  ].join("\n")}</Equation>
                   <p>
-                    That gradient is with respect to the mean, and the mean was
-                    over two rows, so each row is answerable for half of it. At a
-                    step size of 0.025 the step every averaged row takes is the
-                    same vector, (0.005938, &minus;0.006562, 0), added to the
-                    document&rsquo;s row and to the context word&rsquo;s row
-                    alike.
+                    Use one output vector for the observed word and one for a
+                    sampled negative word. Each dot product gives a score;
+                    sigmoid turns it into the probability used by the
+                    positive-versus-negative training task.
                   </p>
+                  <Equation>{[
+                    "observed-word output vector u₊ = (1, 0, 0)",
+                    "negative-word output vector u₋ = (0, 1, 0)",
+                    "s₊ = h · u₊ = 0.1",
+                    "s₋ = h · u₋ = 0.1",
+                    "p₊ = p₋ = sigmoid(0.1) ≈ 0.524979",
+                    "",
+                    "observed-word error = p₊ − 1 ≈ −0.475021",
+                    "negative-word error = p₋ − 0 ≈ 0.524979",
+                    "g = (p₊ − 1)u₊ + p₋u₋ ≈ (−0.475021, 0.524979, 0)",
+                  ].join("\n")}</Equation>
+                  <p>
+                    The gradient describes a change to the mean. Each input
+                    contributed equally to that mean, so each receives half of
+                    this gradient. Apply the chosen learning rate to obtain
+                    the update added to both input vectors.
+                  </p>
+                  <Equation>{[
+                    "learning rate = 0.025",
+                    "Δd = Δv = −0.025 × g / 2",
+                    "         ≈ (0.005938, −0.006562, 0)",
+                  ].join("\n")}</Equation>
                 </WorkedExample>
                 <Equation>
                   {"Δ  =  −rate · g / ( 1 + n )     the same step for every averaged row"}
@@ -306,30 +281,27 @@ export default function ParagraphVectorsPage() {
                   handful of words drawn at random, at every one of that
                   document&rsquo;s eight positions.
                 </p>
-                <p>
-                  A row that leaned towards one cooking word and away from
-                  everything else would do well at one position and badly at seven,
-                  so the only row that does well across all eight is one that
-                  leans towards all eight words at once. Here the eight words are
-                  drawn from a list of ten, and any two cooking documents are
-                  drawing from the same ten, so the rows that serve two cooking
-                  documents well are similar rows. That is the whole of why the
-                  fitted positions come out separated by subject, and it depends
-                  on the collection having a structure of that kind rather than on
-                  anything in the method.
+                <>
+<p>
+                  A row that leaned towards one cooking word and away from everything else would do well at one position and badly at seven, so the only row that does well across all eight is one that leans towards all eight words at once. Here the eight words are drawn from a list of ten, and any two cooking documents are drawing from the same ten, so the rows that serve two cooking documents well are similar rows.
                 </p>
+                <p>
+                  That is the whole of why the fitted positions come out separated by subject, and it depends on the collection having a structure of that kind rather than on anything in the method.
+                </p>
+</>
                 <WhyThisWorks>
-                  <p>
-                    An untrained pair costs a fixed amount that can be worked out
-                    in advance. The output table starts at zero, so every score is
-                    zero and every probability is a half, and a half costs the
-                    logarithm of two whichever side it was wanted on. Each
-                    position is scored against the right word and five drawn wrong
-                    ones, so six halves at log 2 each gives 6 log 2 = 4.1589, and
-                    the first pass over the collection comes in at 4.1529, just
-                    below it, because the rows begin to move inside the first pass
-                    rather than waiting for the end of it.
-                  </p>
+                  <>
+                    <p>
+                      The output table starts at zero, so every score starts at zero and
+                      every sigmoid probability at one half. Each position is compared
+                      with one observed word and five sampled alternatives.
+                    </p>
+                    <Equation>{"loss for either target at probability 0.5 = −ln(0.5) = ln 2\ninitial loss per position = 6 ln 2 ≈ 4.1589"}</Equation>
+                    <p>
+                      The measured first-epoch mean is 4.1529, slightly lower, because
+                      updates begin during that epoch rather than waiting until it ends.
+                    </p>
+                  </>
                 </WhyThisWorks>
                 <KeepInMind>
                   The objective is about predicting words and not about grouping
@@ -395,6 +367,29 @@ export default function ParagraphVectorsPage() {
                   is nothing to share it with, and it takes the step whole. That
                   one difference is behind almost every number in Part 4.
                 </p>
+                <WorkedExample title="The same position under this arrangement">
+                  <p>
+                    Take the position section 5 worked, with the same document
+                    vector, the same two output vectors and the same learning
+                    rate. The context vector is no longer read, so the
+                    document&rsquo;s row is scored against the output vectors on
+                    its own.
+                  </p>
+                  <Equation>{[
+                    "h = d = (0.2, −0.1, 0.4)",
+                    "s₊ = h · u₊ = 0.2         p₊ = sigmoid(0.2) ≈ 0.549834",
+                    "s₋ = h · u₋ = −0.1        p₋ = sigmoid(−0.1) ≈ 0.475021",
+                    "g = (p₊ − 1)u₊ + p₋u₋ ≈ (−0.450166, 0.475021, 0)",
+                    "Δd = −0.025 × g ≈ (0.011254, −0.011876, 0)",
+                  ].join("\n")}</Equation>
+                  <p>
+                    There is no division by two, because nothing else went into
+                    h. Under the first arrangement this position moved the
+                    document&rsquo;s row by (0.005938, &minus;0.006562, 0), so
+                    here the row travels close to twice as far in both
+                    coordinates, and no word&rsquo;s row moves at all.
+                  </p>
+                </WorkedExample>
                 <KeepInMind>
                   Discarding the context makes this arrangement cheaper per
                   position and blind, by construction, to which words stood beside
@@ -477,17 +472,14 @@ export default function ParagraphVectorsPage() {
                   draw it was given at the start, which is a fact about the method
                   and not a shortcoming of any particular run.
                 </p>
-                <p>
-                  Measured, that is exactly what it looks like. Under distributed
-                  memory butter and garlic reach a cosine of 0.994 against 0.120
-                  for butter and anchor, which is the separation of the two lists
-                  showing up in the words as well as the documents. Under the plain
-                  bag of words the same two pairs read 0.4206 and &minus;0.2104,
-                  which are the values two random draws happen to have and mean
-                  nothing whatever. Adding an ordinary word pair alongside each
-                  document pair, which is the usual repair, brings them back to
-                  0.9666 and 0.0965 in a third of the passes.
+                <>
+<p>
+                  Measured, that is exactly what it looks like. Under distributed memory butter and garlic reach a cosine of 0.994 against 0.120 for butter and anchor, which is the separation of the two lists showing up in the words as well as the documents. Under the plain bag of words the same two pairs read 0.4206 and &minus;0.2104, which are the values two random draws happen to have and mean nothing whatever.
                 </p>
+                <p>
+                  Adding an ordinary word pair alongside each document pair, which is the usual repair, brings them back to 0.9666 and 0.0965 in a third of the passes.
+                </p>
+</>
                 <NumberTable
                   headings={[
                     "what was fitted",
@@ -537,6 +529,48 @@ export default function ParagraphVectorsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            trueFalse(
+              "A better weighting of the word positions would let an averaged text tell two arrangements of the same words apart.",
+              false,
+              "Every rule of that kind is a sum over the words divided by something that depends on which words they were and not on the order they came in, so no weighting repairs it. Measured here, the held-out cooking text and its own eight words shuffled come out at a cosine of exactly 1.0000, which is the same position rather than a very near one.",
+            ),
+            choice(
+              "What makes a document train alongside the words inside word2vec’s own loop?",
+              [
+                "It is put into the window as one more token, present at every position inside that document and at no position anywhere else",
+                "A second objective is added for documents",
+                "The document’s row is reset to the mean of its words before each pass",
+                "The output table is given a separate half for documents",
+              ],
+              0,
+              "The loop never asks where the row it is training came from, so nothing in it has to change. Every property the objective had, including that the answer depends on the random start, comes across unchanged.",
+            ),
+            trueFalse(
+              "At the reference settings of ten passes from a step size of 0.025, the fit still separates the two subjects, only less sharply.",
+              false,
+              "It separates nothing. Two documents of one subject come out at a mean cosine of 0.0330 and two of different subjects at 0.0437, which is what thirty directions drawn at random in eight dimensions look like, and the cost only falls from 4.1586 to 4.1155. The collection offers 2,400 positions at those settings, so the defaults do not fail loudly and simply return the starting draw, which is why every other number on the page uses thirty passes at 0.1.",
+            ),
+            choice(
+              "Two documents about different subjects come out at a cosine of 0.2811 under distributed memory. How should that be read?",
+              [
+                "Against the within-subject figures of 0.8974 and 0.8696, since a shared output table pushes every document the same way",
+                "As a failure, since two unrelated things ought to come out near zero or below it",
+                "As evidence that the two word lists overlap after all",
+                "As the level of noise left by the random start",
+              ],
+              0,
+              "Every document in the collection is trained against one shared table of output rows, so every position picks up a component pointing the same way as every other. The quantity to read is the gap between the within figure and the across figure, never the sign of either.",
+            ),
+            trueFalse(
+              "The word table the plain bag of words hands back at the end of a fit is the random draw it was given at the start.",
+              true,
+              "The prediction is made from the document’s row, and the correction goes to that row and to the output rows, so the input row belonging to butter is never touched from the beginning of the fit to the end. Measured, butter and garlic read 0.4206 there and butter and anchor −0.2104, which are plausible-looking numbers that mean nothing whatever.",
+            ),
+        ],
         },
         {
           title: "Part 4. A Text The Fit Never Saw",
@@ -719,6 +753,48 @@ export default function ParagraphVectorsPage() {
           ),
         },
         {
+          title: "Questions on Part 4",
+          quiz: [
+            choice(
+              "A text that arrives after the fit has no row. How is one produced?",
+              [
+                "The same loop is run again with the word and output tables frozen, moving that one row",
+                "Its words’ rows are averaged",
+                "The row of the nearest fitted document is copied",
+                "A row is interpolated between the two subject centres",
+              ],
+              0,
+              "Its position was never a function of its words in the first place, so there is nothing to look up. The answer is gradient descent, which means it depends on where it started and on how long it was allowed to run, so placing one text is a search rather than a lookup.",
+            ),
+            trueFalse(
+              "After the fit under distributed memory the word rows are nearly six times as long as the document rows.",
+              true,
+              "Word rows measure between 1.7429 and 2.6753 with a mean of 2.2348, against document rows between 0.2909 and 0.5249 with a mean of 0.3897. How far a row travelled is a count of how often it was stepped, and a document’s row is stepped eight times a pass and never again while each cooking word turns up in between seven and twelve of the fifteen cooking documents.",
+            ),
+            choice(
+              "At the published twenty passes under distributed memory, where does the held-out cooking text land?",
+              [
+                "At 0.4786 to the cooking documents and 0.7608 to the sailing ones, with all five of its nearest documents sailing",
+                "At 0.8347 to cooking and 0.3303 to sailing",
+                "At 0.9081 to cooking and 0.1405 to sailing",
+                "Exactly between the two subjects, having learned nothing either way",
+              ],
+              0,
+              "It is in the wrong half and not narrowly. The crossing happens between twenty and fifty passes, with fifty giving 0.8347 against 0.3303 and two hundred giving 0.9081 against 0.1405, after which very little more is bought. The failure is silent, since a wrong answer here looks exactly like a right one.",
+            ),
+            trueFalse(
+              "Under the bag of words, running more passes on a held-out text keeps improving its cosine to its own subject.",
+              false,
+              "Twenty passes give 0.8565 against 0.1420 and two hundred give 0.7665 against 0.0924, so the distance to the wrong subject keeps improving while the distance to the right one gets worse, and four hundred passes leave the text at 0.6954. The row is becoming a better description of its own eight particular words, which is exactly what it was asked to do.",
+            ),
+            trueFalse(
+              "Watching the objective fall is enough to catch that inference has run too long.",
+              false,
+              "The objective being minimised falls monotonically with passes, since that is what descent does, while the quantity anybody actually wanted turns and comes back down. There is nothing held out to detect it with, which is the same disagreement the word2vec page finds between the cost of a training pair and the separation of two word lists.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. What It Costs, And Where Averaging Wins",
           content: (
             <>
@@ -861,18 +937,14 @@ export default function ParagraphVectorsPage() {
                   two arrangements come out. Only where the dot is well to the left
                   of the band did the order do anything.
                 </p>
-                <p>
-                  One row of five passes the test. Under distributed memory at two
-                  hundred passes the two arrangements agree to 0.8548 while two
-                  starting draws of one arrangement agree to 0.9823 and 0.9905, so
-                  the two arrangements are about three times further apart in angle
-                  than two draws of one arrangement are.
-                  At twenty passes the same comparison reads 0.9874 against 0.6076,
-                  which is the opposite verdict, because the descent has not gone
-                  far enough for anything but the starting point to matter. The bag
-                  of words gives 0.9996 and 0.9998 at the two lengths, reading no
-                  order at all, and the average gives exactly one.
+                <>
+<p>
+                  One row of five passes the test. Under distributed memory at two hundred passes the two arrangements agree to 0.8548 while two starting draws of one arrangement agree to 0.9823 and 0.9905, so the two arrangements are about three times further apart in angle than two draws of one arrangement are. At twenty passes the same comparison reads 0.9874 against 0.6076, which is the opposite verdict, because the descent has not gone far enough for anything but the starting point to matter.
                 </p>
+                <p>
+                  The bag of words gives 0.9996 and 0.9998 at the two lengths, reading no order at all, and the average gives exactly one.
+                </p>
+</>
                 <NumberTable
                   headings={[
                     "rule",
@@ -959,17 +1031,14 @@ export default function ParagraphVectorsPage() {
               </SubSection>
 
               <SubSection title="21. The table means two different things">
-                <p>
-                  Both arrangements answer with a word table and a document table
-                  of the same shapes, and the two word tables do not mean the same
-                  thing. Under distributed memory a word&rsquo;s row was trained
-                  against the same objective the documents were, so a document and
-                  a word live in one space and the angle between them is a quantity
-                  the fit actually pushed on. Under the plain bag of words a
-                  word&rsquo;s row was never touched, so the angle between a
-                  document and a word is the angle between something learned and
-                  something drawn at random.
+                <>
+<p>
+                  Both arrangements answer with a word table and a document table of the same shapes, and the two word tables do not mean the same thing. Under distributed memory a word&rsquo;s row was trained against the same objective the documents were, so a document and a word live in one space and the angle between them is a quantity the fit actually pushed on.
                 </p>
+                <p>
+                  Under the plain bag of words a word&rsquo;s row was never touched, so the angle between a document and a word is the angle between something learned and something drawn at random.
+                </p>
+</>
                 <p>
                   Nothing in the shape of the answer records which of those it is.
                   Two tables of twenty rows by eight numbers arrive, and only a
@@ -1068,6 +1137,246 @@ export default function ParagraphVectorsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "Which comparison does the page use to judge the three ways of placing a text, and which one wins it?",
+              [
+                "The margin between the least alike pair inside a subject and the most alike pair across the two, which averaging wins at +0.8383",
+                "The mean similarity inside a subject, which distributed memory wins at 0.8974",
+                "The cost in positions, which the bag of words wins",
+                "The cosine of the held-out text to its own subject, which distributed memory wins",
+              ],
+              0,
+              "A mean similarity inside a subject can be raised simply by making everything more alike. On the margin the two fitted methods come out at −0.0840 and −0.0442, so their groups overlap, where averaging’s two groups are cleanly apart.",
+            ),
+            choice(
+              "The same eight words were inferred in two arrangements and, as a control, from two starting draws. Where did the order move the answer more than the draw did?",
+              [
+                "Only under distributed memory at two hundred passes, where two arrangements agree to 0.8548 and two draws of one arrangement to 0.9823",
+                "Under distributed memory at the published twenty passes",
+                "Under both arrangements, once enough passes were run",
+                "Nowhere, since every rule on the page is a sum over the words",
+              ],
+              0,
+              "One row of five passes the test. At twenty passes distributed memory reads 0.9874 across two arrangements against 0.6076 across two draws, the opposite verdict, because the descent has not gone far enough for anything but the starting point to matter. The bag of words discards the context and gives 0.9996 and 0.9998, and the average gives exactly one. The escape from order blindness is real, small, and at ten times the published number of passes.",
+            ),
+            choice(
+              "Where is the cost of this method actually paid?",
+              [
+                "Every time a text arrives afterwards, for as long as the model is in use",
+                "Once at fitting time, which is where anybody would look for it",
+                "In the size of the output table the fit needs",
+                "In the number of words the vocabulary holds",
+              ],
+              0,
+              "A held-out text of eight words at two hundred passes costs 1,600 positions, which is more than six times what one training document contributed to the whole fit and is 22 per cent of the entire fit, for one document out of thirty.",
+            ),
+            several(
+              "Which of these make a held-out position something other than a function of the text alone?",
+              [
+                "The starting draw, since two draws agree only to 0.6076 at twenty passes",
+                "The number of passes, which the caller picks",
+                "The word table, which the descent goes on adjusting while it places the text",
+                "The order of the text’s own words, which both arrangements read",
+              ],
+              [0, 1],
+              "The definition names a unique answer only if the quantity has a unique minimum and the search is run until it gets there. Neither holds, since the objective is not convex in the row and the caller stops the search, so the position depends on the text, the draw and the pass count. More passes narrow the spread without closing it, with two draws agreeing to 0.9823 at two hundred. The word table and the output table are frozen while a text is placed, and the bag of words reads no order at all, answering 0.9996 and 0.9998 across two arrangements.",
+            ),
+            trueFalse(
+              "A text of entirely unknown words comes back from this method with a position of ordinary length.",
+              true,
+              "The objective is an empty sum whose gradient is zero everywhere, so the search returns wherever it started, at the 0.11516 of a fresh random draw. That is a random direction, which is confidently something, where pooling the same text gives the origin, which is honestly nothing. The random direction is the harder mistake to notice, and it arrives on exactly the inputs a careful caller most wants warning about.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Placing The Held-Out Texts With The Library",
+          practice: [
+            exercise(
+              "Fit the thirty documents under both arrangements",
+              ["The starter draws the collection of Part 1, fifteen cooking documents and then fifteen sailing ones, eight words each. Fit ParagraphVectors to it under each arrangement at a width of eight, a window of three, thirty passes, a step size of 0.1, seed 0 and a minimum count of 1.", "For each fit print the mean cosine between two cooking documents, between two sailing documents, and between one of each, to four places. Compare the last figure with the other two and not with zero."],
+              `from itertools import combinations
+from statistics import mean
+
+import numpy as np
+from oop_ml import ParagraphArchitecture, ParagraphVectors
+
+COOKING = "simmer onion garlic butter saucepan whisk flour season ladle broth".split()
+SAILING = "mainsail rudder harbour anchor keel tide starboard rigging mooring gust".split()
+
+generator = np.random.default_rng(7)
+documents = []
+for words in (COOKING, SAILING):
+    for _ in range(15):
+        documents.append(" ".join(generator.choice(words, 8)))
+
+for architecture in ParagraphArchitecture:
+    # Fit ParagraphVectors with this architecture and the settings in the task.
+
+    # fitted: the model's document vectors, one per training document.
+
+    # Mean similarity over pairs inside the first fifteen, inside the last
+    # fifteen, and over pairs with one document from each.
+
+    # Print the architecture's name and the three means.
+    pass`,
+              `from itertools import combinations
+from statistics import mean
+
+import numpy as np
+from oop_ml import ParagraphArchitecture, ParagraphVectors
+
+COOKING = "simmer onion garlic butter saucepan whisk flour season ladle broth".split()
+SAILING = "mainsail rudder harbour anchor keel tide starboard rigging mooring gust".split()
+
+generator = np.random.default_rng(7)
+documents = []
+for words in (COOKING, SAILING):
+    for _ in range(15):
+        documents.append(" ".join(generator.choice(words, 8)))
+
+for architecture in ParagraphArchitecture:
+    model = ParagraphVectors(
+        dimension=8, window=3, epochs=30, learning_rate=0.1,
+        random_seed=0, architecture=architecture, minimum_count=1,
+    ).fit(documents)
+    fitted = model.document_vectors
+    cooking = mean(fitted.similarity(a, b) for a, b in combinations(range(15), 2))
+    sailing = mean(fitted.similarity(a, b) for a, b in combinations(range(15, 30), 2))
+    across = mean(fitted.similarity(a, b) for a in range(15) for b in range(15, 30))
+    print(architecture.name)
+    print(f"  two cooking {cooking:.4f}   two sailing {sailing:.4f}   one of each {across:.4f}")`,
+              `DISTRIBUTED_MEMORY
+  two cooking 0.8974   two sailing 0.8696   one of each 0.2811
+DISTRIBUTED_BAG_OF_WORDS
+  two cooking 0.7763   two sailing 0.8078   one of each 0.1445`,
+              { hints: ["ParagraphArchitecture has two members, DISTRIBUTED_MEMORY and DISTRIBUTED_BAG_OF_WORDS, and looping over the enum visits both.", "After fit, model.document_vectors holds one row per training document, and its similarity(first, second) takes two positions in the collection.", "The cooking documents are positions 0 to 14 and the sailing ones 15 to 29. combinations(range(15), 2) gives every cooking pair once."], check: numberCheck("Under distributed memory, what is the mean cosine between a cooking document and a sailing one, to four places?", 0.2811, 5e-05, "It is positive because every document is trained against one shared table of output rows, so every position picks up a component pointing the same way. The figure to read is the gap to the 0.8974 and 0.8696 inside a subject, and no fit was told which document belonged to which list.") },
+            ),
+            exercise(
+              "Give the held-out cooking text twenty passes, then two hundred",
+              ["Part 4 says the published twenty passes file the held-out cooking text under sailing. The number of passes a new text is given is the inference_epochs field. Fit distributed memory, the default arrangement, once with twenty and once with two hundred, and place butter garlic onion simmer broth whisk flour ladle with each.", "Print the mean cosine from the inferred position to the fifteen cooking documents and to the fifteen sailing ones, to four places, and the positions of the five documents it comes out nearest. Positions 15 and above are sailing documents."],
+              `import numpy as np
+from oop_ml import ParagraphVectors, cosine_similarity
+
+COOKING = "simmer onion garlic butter saucepan whisk flour season ladle broth".split()
+SAILING = "mainsail rudder harbour anchor keel tide starboard rigging mooring gust".split()
+
+generator = np.random.default_rng(7)
+documents = []
+for words in (COOKING, SAILING):
+    for _ in range(15):
+        documents.append(" ".join(generator.choice(words, 8)))
+
+text = "butter garlic onion simmer broth whisk flour ladle"
+
+for passes in (20, 200):
+    # Fit ParagraphVectors as in the first problem, with inference_epochs=passes.
+
+    # vector: the position the model infers for the text.
+
+    # table: the fitted document vectors as an array, one row per document.
+
+    # Mean cosine from vector to the first fifteen rows, and to the last fifteen.
+
+    # Print the passes, the two means, and the five nearest documents.
+    pass`,
+              `import numpy as np
+from oop_ml import ParagraphVectors, cosine_similarity
+
+COOKING = "simmer onion garlic butter saucepan whisk flour season ladle broth".split()
+SAILING = "mainsail rudder harbour anchor keel tide starboard rigging mooring gust".split()
+
+generator = np.random.default_rng(7)
+documents = []
+for words in (COOKING, SAILING):
+    for _ in range(15):
+        documents.append(" ".join(generator.choice(words, 8)))
+
+text = "butter garlic onion simmer broth whisk flour ladle"
+
+for passes in (20, 200):
+    model = ParagraphVectors(
+        dimension=8, window=3, epochs=30, learning_rate=0.1,
+        inference_epochs=passes, random_seed=0, minimum_count=1,
+    ).fit(documents)
+    vector = model.infer_vector(text)
+    table = np.asarray(model.document_vectors.vectors)
+    to_cooking = np.mean([cosine_similarity(vector, row) for row in table[:15]])
+    to_sailing = np.mean([cosine_similarity(vector, row) for row in table[15:]])
+    nearest = list(model.document_vectors.similar_to_vector(vector, 5))
+    print(f"{passes:3d} passes: to cooking {to_cooking:.4f}   to sailing {to_sailing:.4f}   nearest {nearest}")`,
+              ` 20 passes: to cooking 0.4786   to sailing 0.7608   nearest [26, 28, 22, 16, 23]
+200 passes: to cooking 0.9081   to sailing 0.1405   nearest [10, 1, 3, 9, 0]`,
+              { hints: ["model.infer_vector(text) runs the descent for a text the fit never saw and answers its position as an array of eight numbers.", "model.document_vectors.vectors is the fitted table, thirty rows of eight. cosine_similarity(first, second) compares two arrays.", "model.document_vectors.similar_to_vector(vector, 5) answers the positions of the five nearest fitted documents."], check: numberCheck("At twenty passes, what is the mean cosine from the held-out cooking text to the cooking documents, to four places?", 0.4786, 5e-05, "Against 0.7608 to the sailing documents, so the text is in the wrong half and all five of its nearest documents are sailing ones. A new row starts at a short random draw and takes only its share of each step beside word rows nearly six times as long as a document’s, so twenty passes have not carried it far enough. Two hundred give 0.9081 against 0.1405.") },
+            ),
+            exercise(
+              "Place the sailing text, and see what twenty passes was reading",
+              ["The lesson follows the cooking text and never quotes the other held-out text, anchor tide rudder harbour keel gust mooring mainsail. Place both texts at twenty passes and at two hundred under distributed memory, and print the same two means and five nearest documents for each.", "Look at the twenty-pass rows first. Before deciding the sailing text was placed correctly there, compare its five nearest documents with the cooking text’s."],
+              `import numpy as np
+from oop_ml import ParagraphVectors, cosine_similarity
+
+COOKING = "simmer onion garlic butter saucepan whisk flour season ladle broth".split()
+SAILING = "mainsail rudder harbour anchor keel tide starboard rigging mooring gust".split()
+
+generator = np.random.default_rng(7)
+documents = []
+for words in (COOKING, SAILING):
+    for _ in range(15):
+        documents.append(" ".join(generator.choice(words, 8)))
+
+texts = {
+    "cooking": "butter garlic onion simmer broth whisk flour ladle",
+    "sailing": "anchor tide rudder harbour keel gust mooring mainsail",
+}
+
+for passes in (20, 200):
+    # Fit as in the second problem, with inference_epochs=passes.
+
+    for name, text in texts.items():
+        # Infer the text's position and compute the two means and the five
+        # nearest documents exactly as before.
+
+        # Print the passes, the text's name, the two means and the nearest five.
+        pass`,
+              `import numpy as np
+from oop_ml import ParagraphVectors, cosine_similarity
+
+COOKING = "simmer onion garlic butter saucepan whisk flour season ladle broth".split()
+SAILING = "mainsail rudder harbour anchor keel tide starboard rigging mooring gust".split()
+
+generator = np.random.default_rng(7)
+documents = []
+for words in (COOKING, SAILING):
+    for _ in range(15):
+        documents.append(" ".join(generator.choice(words, 8)))
+
+texts = {
+    "cooking": "butter garlic onion simmer broth whisk flour ladle",
+    "sailing": "anchor tide rudder harbour keel gust mooring mainsail",
+}
+
+for passes in (20, 200):
+    model = ParagraphVectors(
+        dimension=8, window=3, epochs=30, learning_rate=0.1,
+        inference_epochs=passes, random_seed=0, minimum_count=1,
+    ).fit(documents)
+    table = np.asarray(model.document_vectors.vectors)
+    for name, text in texts.items():
+        vector = model.infer_vector(text)
+        to_cooking = np.mean([cosine_similarity(vector, row) for row in table[:15]])
+        to_sailing = np.mean([cosine_similarity(vector, row) for row in table[15:]])
+        nearest = list(model.document_vectors.similar_to_vector(vector, 5))
+        print(f"{passes:3d} passes, {name} text: to cooking {to_cooking:.4f}   to sailing {to_sailing:.4f}   nearest {nearest}")`,
+              ` 20 passes, cooking text: to cooking 0.4786   to sailing 0.7608   nearest [26, 28, 22, 16, 23]
+ 20 passes, sailing text: to cooking 0.3339   to sailing 0.6671   nearest [26, 28, 22, 16, 23]
+200 passes, cooking text: to cooking 0.9081   to sailing 0.1405   nearest [10, 1, 3, 9, 0]
+200 passes, sailing text: to cooking 0.2827   to sailing 0.9025   nearest [16, 20, 19, 28, 22]`,
+              { hints: ["Nothing new is needed from the library. The inner loop is the body of the second problem run once per text.", "Fit once per pass count, outside the inner loop, since both texts are placed against the same frozen tables."], check: numberCheck("At two hundred passes, what is the mean cosine from the held-out sailing text to the sailing documents, to four places?", 0.9025, 5e-05, "At twenty passes the sailing text reads 0.6671 to its own half, which looks right, but its five nearest documents are the very five the cooking text had, and both texts began from the same starting draw. Part 5 reached the same finding with its control, that at twenty passes the descent has not gone far enough for anything but the starting point to matter. By two hundred passes each text sits with its own subject, 0.9025 here beside the cooking text’s 0.9081.") },
+            ),
+          ],
         },
       ]}
     />

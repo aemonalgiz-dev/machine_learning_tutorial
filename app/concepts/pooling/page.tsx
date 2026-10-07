@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -22,7 +25,7 @@ import { WindowSummaries } from "@/components/widgets/WindowSummaries";
 export const metadata: Metadata = {
   title: "Pooling · oop_ml",
   description:
-    "Shrink a picture by summarising each window, keeping the largest value or the average, and follow where the correction goes on the way back, which is the whole difference between the two.",
+    "Replace each small window with a maximum or an average and inspect the information lost.",
 };
 
 const link =
@@ -31,8 +34,12 @@ const link =
 export default function PoolingPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["pooling"]}
+      technicalStart="Part 2. What Each Kind Keeps"
+      openingTitle="Keep a Summary of the Neighbourhood"
+      playgroundIntro="Compare maximum and average summaries for the same window. Then look at which input values receive a gradient on the backward pass."
       title="Pooling"
-      tagline="Shrink a picture by summarising each window, and see which cells the layer holds responsible on the way back."
+      tagline="Replace each small window with a maximum or an average and inspect the information lost."
       prerequisites={
         <>
           The picture being pooled is the bank of maps a convolution answers
@@ -54,78 +61,23 @@ export default function PoolingPage() {
           do.
         </>
       }
-      history={
-        <>
-          <p>
-            In 1959, and again in the longer 1962 paper, David Hubel and
-            Torsten Wiesel recorded from single neurons in the striate cortex of
-            anaesthetised cats while moving a bar of light across a screen, and
-            found two kinds of cell. A simple
-            cell fired for an edge at one orientation in one small place, and
-            moving the bar a little killed the response. A complex cell fired
-            for the same orientation anywhere within a larger patch, which is a
-            cell that has been told a feature is present and has not been told
-            where. Nobody knew how to build a machine with the second property.
-            A detector that reports a position reports a different position when
-            the picture moves one pixel, and everything above it has to be
-            taught the new coordinates from scratch.
-          </p>
-          <p>
-            Kunihiko Fukushima built the two kinds into a network in 1980 and
-            put the difficulty in the title, a self-organising model of pattern
-            recognition unaffected by shift in position. His Neocognitron
-            alternated layers of detectors with layers whose units answered
-            wherever a detector had fired inside their window, and the second
-            kind is what this page is about. Yann LeCun&rsquo;s 1989 zip-code
-            network shrank its maps by stepping each kernel two cells at a time
-            rather than by adding a layer, and the LeNet-5 of 1998 made the
-            shrink a layer of its own. That layer averaged each two by two
-            window and then multiplied by a learned coefficient and added a
-            learned bias, so it is worth saying that it was not the
-            parameterless average of today. Keeping the largest value came back
-            from the cortex. Maximilian Riesenhuber and Tomaso Poggio argued in
-            1999 that a maximum was closer to what the complex cells were
-            computing, Dominik Scherer, Andreas Müller and Sven Behnke compared
-            the two on images in 2010 and found the maximum trained better, and
-            the 2012 ImageNet network of Alex Krizhevsky, Ilya Sutskever and
-            Geoffrey Hinton took maxima over windows of three at a stride of
-            two, overlapping on purpose.
-          </p>
-          <p>
-            The layer has since been argued with rather than settled. Min Lin,
-            Qiang Chen and Shuicheng Yan proposed in 2013 that the last of these
-            layers take the average of a whole map, one number per detector,
-            which removes the dense layers a classifier used to end with. Jost
-            Tobias Springenberg and his colleagues argued in 2014 that a
-            convolution taking every second position does the same job, so the
-            layer can be dropped from the middle of a network without loss. Each
-            argument is about what the shrinking is worth, and neither is easy to
-            weigh until the layer itself is unambiguous, which is what the
-            sections below try to make it. The running example throughout is a
-            four by four patch of a feature map, small enough that both kinds
-            can be worked with a pencil and every correction counted by hand.
-          </p>
-        </>
-      }
+
       playground={<PoolingPlayground />}
       sections={[
         {
           title: "Part 1. Why a Network Shrinks a Picture",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The map a convolution hands over is mostly repetition">
-                <p>
-                  A convolution reads a picture and answers with a map nearly as
-                  large as the picture it read, one map per detector. Most of
-                  what those maps hold says the same thing twice. A detector
-                  that responds to a short vertical edge responds again when the
-                  window slides one cell along, since almost the same cells are
-                  under it, so a single edge in the picture shows up as a small
-                  bright patch in the map rather than as one bright cell.
-                  Carrying every position of that patch forward means carrying
-                  the same finding several times.
+                <>
+<p>
+                  A convolution reads a picture and answers with a map nearly as large as the picture it read, one map per detector. Most of what those maps hold says the same thing twice. A detector that responds to a short vertical edge responds again when the window slides one cell along, since almost the same cells are under it, so a single edge in the picture shows up as a small bright patch in the map rather than as one bright cell.
                 </p>
+                <p>
+                  Carrying every position of that patch forward means carrying the same finding several times.
+                </p>
+</>
                 <p>
                   The layers above pay for it twice over. They have more numbers
                   to read, and they have to learn that a finding two cells to the
@@ -151,17 +103,14 @@ export default function PoolingPage() {
                   two cells across and did it again, and four windows gave four
                   answers. Nothing was multiplied and nothing was learned.
                 </p>
-                <p>
-                  What is thrown away is the point of the exercise. The answer
-                  for a window says something was found in this neighbourhood and
-                  deliberately does not say where inside it, which is the complex
-                  cell&rsquo;s property written as arithmetic. Press the vertical
-                  stroke button and then nudge right once. The picture has moved a
-                  whole column and the pooled map has not changed by a single
-                  number, because the stroke stayed inside the same windows. Nudge
-                  again and the bright column of the pooled map moves one cell
-                  along, because this time the stroke crossed a boundary.
+                <>
+<p>
+                  What is thrown away is the point of the exercise. The answer for a window says something was found in this neighbourhood and deliberately does not say where inside it, which is the complex cell&rsquo;s property written as arithmetic. Press the vertical stroke button and then nudge right once. The picture has moved a whole column and the pooled map has not changed by a single number, because the stroke stayed inside the same windows.
                 </p>
+                <p>
+                  Nudge again and the bright column of the pooled map moves one cell along, because this time the stroke crossed a boundary.
+                </p>
+</>
                 <KeepInMind>
                   A pooling layer answers with one number per window, which
                   shrinks the map and at the same time stops recording where
@@ -199,13 +148,123 @@ export default function PoolingPage() {
                 </KeepInMind>
               </SubSection>
             </>
+</>),
+        },
+        {
+          title: "Part 2. What Each Kind Keeps",
+          content: (
+            <>
+              <SubSection title="4. The largest value in the window">
+                <p>
+                  The first summary keeps the largest number under the window and
+                  discards the other three. On the running patch, with a window
+                  of two at a stride of two, the top left window holds 1, 5, 4 and
+                  2, so the answer is 5. The other three windows hold 1, 3, 4, 0
+                  and 0, 1, 2, 1 and 3, 1, 7, 5.
+                </p>
+                <Equation>{"max      [[5, 4],\n          [2, 7]]"}</Equation>
+                <p>
+                  Reading that map as a report, it says the strongest response in
+                  this neighbourhood was 5, and it says nothing about how many
+                  cells were nearly as strong. Section 6 has two windows in it
+                  that make the omission plain, one holding a single 8 among three
+                  zeros and one holding four 2s, and a maximum answers 8 and 2,
+                  which is the difference between them stated as loudly as it can
+                  be.
+                </p>
+                <KeepInMind>
+                  A maximum reports the strongest evidence in the window and
+                  discards how much other evidence there was.
+                </KeepInMind>
+              </SubSection>
+
+              <SubSection title="5. The mean of the window">
+                <p>
+                  The second summary keeps the mean. The same four windows of the
+                  patch sum to 12, 8, 4 and 16, and each holds four cells.
+                </p>
+                <Equation>
+                  {
+                    "12 / 4 = 3,   8 / 4 = 2,   4 / 4 = 1,   16 / 4 = 4\n\naverage  [[3, 2],\n          [1, 4]]"
+                  }
+                </Equation>
+                <p>
+                  Now go back to the two windows of the previous section and the
+                  reading reverses. The one holding a single 8 and the one holding
+                  four 2s both average 2, so a mean cannot tell them apart at all
+                  where a maximum could. In exchange, a mean is pulled down by the
+                  quiet cells around a strong one, which a maximum ignores. Which
+                  of those two behaviours is wanted is a question about the data
+                  rather than about the layer, and the layer itself has no
+                  opinion.
+                </p>
+                <KeepInMind>
+                  A mean reports how much response there was on average, so a
+                  strong reading among quiet ones and several moderate readings
+                  can come out alike.
+                </KeepInMind>
+              </SubSection>
+
+              <SubSection title="6. Both on one window">
+                <p>
+                  The two kinds differ by one function, and one window is enough
+                  to see the whole of it. The grid on the left below is a window
+                  and the two on the right are what each kind owes each position
+                  in it, which is the derivative of the answer with respect to
+                  that position. The next part is about why those grids matter;
+                  they are here because they are what the two layers actually
+                  differ by.
+                </p>
+                <WindowSummaries />
+                <WorkedExample title="The patch’s top left window">
+                  <>
+<p>
+                    The four cells 1, 5, 4 and 2 sum to 12. A maximum keeps 5 and owes all of it to the single cell in row 0, column 1, so its grid of shares is 0, 1, 0, 0 and exactly one of the four cells receives anything. An average keeps 3 and owes a quarter to each, so its grid is four quarters and all four receive something.
+                  </p>
+                  <p>
+                    Both grids add up to 1. On a window of three by three the average hands out ninths, each 0.1111111111111111, and the nine of them still come to exactly 1.
+                  </p>
+</>
+                </WorkedExample>
+                <KeepInMind>
+                  A kind of pooling amounts to two functions of one window, the
+                  number it keeps and the shares it owes. The sweep, the extents
+                  and every refusal are common to both kinds.
+                </KeepInMind>
+              </SubSection>
+
+              <SubSection title="7. Pooling has no learned weights">
+                <p>
+                  A dense layer forms a weighted sum and then applies an activation function, and a
+                  convolution multiplies a kernel at every position. This layer
+                  does neither. There is no weight anywhere in it, so there is
+                  nothing for a training step to move and nothing for a saved
+                  model to store, and asking such a layer to take a step gives
+                  back the same layer object it was asked of.
+                </p>
+                <p>
+                  Pooling applies its summary directly, without a separate
+                  activation stage. Max pooling is itself a nonlinear operation;
+                  average pooling is linear. This library therefore stores the
+                  same result as both the layer&rsquo;s score and output.
+                  Neither pooling method has parameter gradients, since neither
+                  has trainable parameters. Both still calculate input gradients
+                  so earlier layers can learn.
+                </p>
+                <KeepInMind>
+                  A pooling layer has no parameters at all. It still takes part in
+                  the backward pass, because it has to pass a correction down to
+                  the layer beneath it.
+                </KeepInMind>
+              </SubSection>
+            </>
           ),
         },
         {
-          title: "Part 2. The Arrangement, Settled Before Any Data",
+          title: "Part 3. The Arrangement, Settled Before Any Data",
           content: (
             <>
-              <SubSection title="4. The window, the stride, and the sweep">
+              <SubSection title="8. The window, the stride, and the sweep">
                 <p>
                   A pooling layer is three settings and no more. How wide the
                   square window is, how far it moves between positions, and which
@@ -228,7 +287,7 @@ export default function PoolingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="5. The output extent, in integers">
+              <SubSection title="9. The output extent, in integers">
                 <p>
                   Along one side, the first window occupies positions zero up to
                   the window width, and each later one starts a stride further
@@ -265,7 +324,7 @@ export default function PoolingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="6. What a stride that does not divide the side leaves out">
+              <SubSection title="10. What a stride that does not divide the side leaves out">
                 <p>
                   When the stride divides the side evenly and equals the window,
                   every cell belongs to exactly one window and nothing is left
@@ -278,18 +337,14 @@ export default function PoolingPage() {
                   reaches them.
                 </p>
                 <PoolingArrangement />
-                <p>
-                  Choose the rows in the table and watch the grid beside it. At a
-                  window of two and a stride of two nothing is pale. At a window
-                  of three and a stride of three the last two rows and the last
-                  two columns are, twenty-eight cells again by a different route.
-                  At a window of one and a stride of two, which throws away three
-                  cells in four without looking at them, forty-eight are pale.
-                  There is no padding here, so the far edge is simply dropped
-                  rather than extended with zeros, and a five by five patch under
-                  a window of two at a stride of two comes out two by two with
-                  its fifth row and fifth column ignored.
+                <>
+<p>
+                  Choose the rows in the table and watch the grid beside it. At a window of two and a stride of two nothing is pale. At a window of three and a stride of three the last two rows and the last two columns are, twenty-eight cells again by a different route. At a window of one and a stride of two, which throws away three cells in four without looking at them, forty-eight are pale.
                 </p>
+                <p>
+                  There is no padding here, so the far edge is simply dropped rather than extended with zeros, and a five by five patch under a window of two at a stride of two comes out two by two with its fifth row and fifth column ignored.
+                </p>
+</>
                 <NumberTable
                   headings={[
                     "window, stride",
@@ -315,7 +370,7 @@ export default function PoolingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="7. Overlap, and a stride larger than the window">
+              <SubSection title="11. Overlap, and a stride larger than the window">
                 <p>
                   A stride smaller than the window makes consecutive windows
                   share cells, which is legal and is what the 2012 ImageNet
@@ -355,7 +410,7 @@ export default function PoolingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="8. How many numbers are carried forward">
+              <SubSection title="12. How many numbers are carried forward">
                 <p>
                   The count of numbers a layer answers with is the product of the
                   extents it answers with, and for a pooling layer the channel
@@ -395,120 +450,50 @@ export default function PoolingPage() {
           ),
         },
         {
-          title: "Part 3. What Each Kind Keeps",
-          content: (
-            <>
-              <SubSection title="9. The largest value in the window">
-                <p>
-                  The first summary keeps the largest number under the window and
-                  discards the other three. On the running patch, with a window
-                  of two at a stride of two, the top left window holds 1, 5, 4 and
-                  2, so the answer is 5. The other three windows hold 1, 3, 4, 0
-                  and 0, 1, 2, 1 and 3, 1, 7, 5.
-                </p>
-                <Equation>{"max      [[5, 4],\n          [2, 7]]"}</Equation>
-                <p>
-                  Reading that map as a report, it says the strongest response in
-                  this neighbourhood was 5, and it says nothing about how many
-                  cells were nearly as strong. Section 11 has two windows in it
-                  that make the omission plain, one holding a single 8 among three
-                  zeros and one holding four 2s, and a maximum answers 8 and 2,
-                  which is the difference between them stated as loudly as it can
-                  be.
-                </p>
-                <KeepInMind>
-                  A maximum reports the strongest evidence in the window and
-                  discards how much other evidence there was.
-                </KeepInMind>
-              </SubSection>
-
-              <SubSection title="10. The mean of the window">
-                <p>
-                  The second summary keeps the mean. The same four windows of the
-                  patch sum to 12, 8, 4 and 16, and each holds four cells.
-                </p>
-                <Equation>
-                  {
-                    "12 / 4 = 3,   8 / 4 = 2,   4 / 4 = 1,   16 / 4 = 4\n\naverage  [[3, 2],\n          [1, 4]]"
-                  }
-                </Equation>
-                <p>
-                  Now go back to the two windows of the previous section and the
-                  reading reverses. The one holding a single 8 and the one holding
-                  four 2s both average 2, so a mean cannot tell them apart at all
-                  where a maximum could. In exchange, a mean is pulled down by the
-                  quiet cells around a strong one, which a maximum ignores. Which
-                  of those two behaviours is wanted is a question about the data
-                  rather than about the layer, and the layer itself has no
-                  opinion.
-                </p>
-                <KeepInMind>
-                  A mean reports how much response there was on average, so a
-                  strong reading among quiet ones and several moderate readings
-                  can come out alike.
-                </KeepInMind>
-              </SubSection>
-
-              <SubSection title="11. Both on one window">
-                <p>
-                  The two kinds differ by one function, and one window is enough
-                  to see the whole of it. The grid on the left below is a window
-                  and the two on the right are what each kind owes each position
-                  in it, which is the derivative of the answer with respect to
-                  that position. The next part is about why those grids matter;
-                  they are here because they are what the two layers actually
-                  differ by.
-                </p>
-                <WindowSummaries />
-                <WorkedExample title="The patch’s top left window">
-                  <p>
-                    The four cells 1, 5, 4 and 2 sum to 12. A maximum keeps 5 and
-                    owes all of it to the single cell in row 0, column 1, so its
-                    grid of shares is 0, 1, 0, 0 and exactly one of the four cells
-                    receives anything. An average keeps 3 and owes a quarter to
-                    each, so its grid is four quarters and all four receive
-                    something. Both grids add up to 1. On a window of three by
-                    three the average hands out ninths, each 0.1111111111111111,
-                    and the nine of them still come to exactly 1.
-                  </p>
-                </WorkedExample>
-                <KeepInMind>
-                  A kind of pooling amounts to two functions of one window, the
-                  number it keeps and the shares it owes. The sweep, the extents
-                  and every refusal are common to both kinds.
-                </KeepInMind>
-              </SubSection>
-
-              <SubSection title="12. Nothing is multiplied and nothing is learned">
-                <p>
-                  A dense layer forms a weighted sum and then bends it, and a
-                  convolution multiplies a kernel at every position. This layer
-                  does neither. There is no weight anywhere in it, so there is
-                  nothing for a training step to move and nothing for a saved
-                  model to store, and asking such a layer to take a step gives
-                  back the same layer object it was asked of.
-                </p>
-                <p>
-                  One consequence is easy to miss. Since there is no bend, there
-                  is no value before the bend that differs from the answer, so the
-                  score and the output of a pooling layer are the same block of
-                  numbers rather than two blocks that happen to be equal. And
-                  since there are no parameters, the layer reports no gradient of
-                  its own on the way back, which is a truer answer than a block of
-                  zeros would be. A block of zeros claims there is something here
-                  whose slope happens to be flat.
-                </p>
-                <KeepInMind>
-                  A pooling layer has no parameters at all. It still takes part in
-                  the backward pass, because it has to pass a correction down to
-                  the layer beneath it.
-                </KeepInMind>
-              </SubSection>
-            </>
-          ),
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            several(
+              "A bank of eight detectors answers with eight maps of twenty-six by twenty-six. Which of these hold when that goes through a pooling layer?",
+              [
+                "Each map is pooled by itself and the answers are never combined across maps",
+                "At a window of two and a stride of two the arrangement becomes eight maps of thirteen by thirteen",
+                "A shape that counted only the 5408 numbers could not tell that stack from a single row of 5408",
+                "The channel count shrinks along with the two spatial extents",
+              ],
+              [0, 1, 2],
+              "Two detectors are two different questions, and the largest response of one says nothing whatever about the other, so the leading extent is carried through untouched. That is why an arrangement has to be written as extents per side rather than as one count, since the stack of maps is something a pooling layer can read and the single row is not.",
+            ),
+            choice(
+              "One window holds a single 8 among three zeros and another holds four 2s. What do the two summaries answer?",
+              [
+                "A maximum answers 8 and 2; an average answers 2 and 2",
+                "A maximum answers 8 and 8; an average answers 2 and 2",
+                "Both summaries tell the two windows apart",
+                "Neither summary tells the two windows apart",
+              ],
+              0,
+              "A maximum reports the strongest evidence and discards how much other evidence there was, which is the difference between those two windows stated as loudly as it can be. A mean reports how much response there was on average, so a strong reading among quiet ones and several moderate readings come out alike. Which behaviour is wanted is a question about the data rather than about the layer.",
+            ),
+            trueFalse(
+              "A pooling layer applies an activation function after taking its summary.",
+              false,
+              "It applies the summary directly and there is no separate activation stage. Max pooling is itself a nonlinear operation and average pooling is linear, and because there is nothing between the two the library stores the same result as both the layer’s score and its output. There are no parameters anywhere in the layer either, so a training step gives back the same layer object.",
+            ),
+            choice(
+              "A window of two at a stride of three sweeps an eight by eight patch. How many cells lie in no window at all?",
+              ["Twelve", "Sixteen", "Twenty-eight", "None, since every cell is covered"],
+              2,
+              "The windows sit at columns zero, three and six, so columns two and five are covered by nothing, and twenty-eight of the sixty-four cells are never read. The layer never reads them, the answers do not depend on them, and no correction ever reaches them. Nothing warns about it, which is why the count is worth working out when the numbers are chosen.",
+            ),
+            trueFalse(
+              "Three pooling layers at a window of two and a stride of two leave a sixty-fourth of the spatial extent.",
+              true,
+              "A window of two at a stride of two halves each spatial side, and halving two sides quarters their product, so the effect compounds across layers. That is how a network gets from a picture to a few hundred numbers a dense layer can read, and the channel count is a constant factor throughout.",
+            ),
+        ],
         },
         {
-          title: "Part 4. Where the Blame Goes",
+          title: "Part 4. Where the Gradients Go",
           content: (
             <>
               <SubSection title="13. A slope arrives at an answer">
@@ -629,7 +614,7 @@ export default function PoolingPage() {
 
               <SubSection title="17. Why the shares in a window sum to one">
                 <p>
-                  Both grids of shares in section 11 added up to one, and that is
+                  Both grids of shares in section 6 added up to one, and that is
                   a property of the family rather than a coincidence of those two
                   members. Each answer here is a weighted mean of its window with
                   weights adding to one, a maximum putting all the weight on one
@@ -663,17 +648,14 @@ export default function PoolingPage() {
                   rest are a matter of which way the rounding went.
                 </p>
                 <ShareTotalsChart />
-                <p>
-                  Sixteen of the first thirty-two sides miss, which is half of
-                  them, and the furthest away is side 31, at 1.0000000000000004,
-                  which is 4.4e-16 above one. That is far below the rounding
-                  already present in any gradient reaching the layer, so the
-                  practical answer is that this does not matter. The reason it is worth a section is
-                  that a test asserting the sum is exactly one passes at side 2
-                  and fails at side 7, and a test written only against a window of
-                  two would never find out. A maximum, whose shares are a single
-                  1 and some zeros, is exact at every side.
+                <>
+<p>
+                  Sixteen of the first thirty-two sides miss, which is half of them, and the furthest away is side 31, at 1.0000000000000004, which is 4.4e-16 above one. That is far below the rounding already present in any gradient reaching the layer, so the practical answer is that this does not matter. The reason it is worth a section is that a test asserting the sum is exactly one passes at side 2 and fails at side 7, and a test written only against a window of two would never find out.
                 </p>
+                <p>
+                  A maximum, whose shares are a single 1 and some zeros, is exact at every side.
+                </p>
+</>
                 <KeepInMind>
                   The shares sum to one to within float64. Any check on them needs
                   a tolerance and needs to include a side whose reciprocal is
@@ -793,6 +775,48 @@ export default function PoolingPage() {
           ),
         },
         {
+          title: "Questions on Parts 4 and 5",
+          quiz: [
+            choice(
+              "A slope of one arrives at each of the four answers from a four by four patch at a window of two and a stride of two. What is handed down?",
+              [
+                "A maximum gives 1 to each of four cells and 0 to the other twelve; an average gives 0.25 to all sixteen",
+                "A maximum gives 0.25 to each of four cells; an average gives 1 to all sixteen",
+                "Both give 0.25 to all sixteen, since the shares must sum to one",
+                "A maximum gives 1 to all sixteen, since each cell belongs to one window",
+              ],
+              0,
+              "Over the range where the winning cell keeps winning, the answer simply is that cell, so the whole arriving slope goes to the winner and the rest of the window receives nothing. An average enters every cell with the same coefficient, one over the number of cells, so each of the four cells in a two by two window takes a quarter whatever it holds.",
+            ),
+            trueFalse(
+              "Under a maximum, a cell that never wins a window still receives some correction, scaled by how close it came.",
+              false,
+              "It receives nothing at all, however large it is. In the top left window the answer 5 was 5 because of the cell holding 5, and the cells holding 1, 4 and 2 could each have been anything smaller without changing the answer, so a correction reaching them would be a correction for something they did not cause. A different four may win on the next step, which is an argument about the data rather than a guarantee.",
+            ),
+            trueFalse(
+              "An average over a window of seven hands out forty-nine shares that add up to 0.9999999999999999 rather than to exactly one.",
+              true,
+              "One forty-ninth has no exact representation in float64, so the forty-nine copies of it add up a rounding step short. Sides 2, 4 and 8 are exact because their reciprocals are, sixteen of the first thirty-two sides miss, and the furthest is side 31 at 1.0000000000000004. That is far below the rounding already present in any gradient reaching the layer, and it matters only because a test asserting exact equality passes at side 2 and fails at side 7, so a check on the shares needs a tolerance and a side whose reciprocal is inexact.",
+            ),
+            choice(
+              "The stride drops from two to one with the window left at two. What happens to the blame handed down?",
+              [
+                "The total is unchanged, and what moves is where it lands",
+                "The total rises, because there are now nine windows sending it rather than four",
+                "The total falls, because the overlapping windows divide it between them",
+                "The total is unchanged and every cell receives the same amount it did before",
+              ],
+              0,
+              "The shares inside a window add up to one, so whatever arrives at a window is handed down in full, and the total blame equals the total arriving at every stride. What changes is the distribution. At a stride of one the cell holding 4 in the second row wins three of the nine windows and receives 3, while under an average an interior cell belongs to four windows and takes four quarters, which is exactly 1.",
+            ),
+            trueFalse(
+              "A backward pass that writes into the gradient block instead of adding into it produces a gradient of exactly the right arrangement, full of plausible finite numbers, on a layer that carries on training.",
+              true,
+              "Writing keeps only whichever window was visited last, so a cell that belongs to several windows is credited for one of them, and nothing about the shapes would catch it and no answer would look wrong. The disjoint case hides the question entirely, since there each cell belongs to one window and each sum has one term, which is why the mistake is only visible at a stride smaller than the window, where the cell in the middle of the patch is owed the sum of four arriving slopes.",
+            ),
+        ],
+        },
+        {
           title: "Part 6. Ties, Winners and Small Shifts",
           content: (
             <>
@@ -807,18 +831,14 @@ export default function PoolingPage() {
                   second. There is no single right answer to compute, so an
                   implementation chooses one.
                 </p>
-                <p>
-                  This one chooses the first cell in row-major order, the top row
-                  before the bottom and the left before the right. Load the flat
-                  patch in the box at the top, where every window is a four-way
-                  tie, and each window sends its whole slope to its own top left
-                  cell, four of the sixteen in total. The alternative, splitting
-                  the slope evenly among the tied cells, is a perfectly legitimate
-                  reading of the corner and is what a symmetric argument suggests.
-                  It is not what established implementations do, and on data where
-                  exact ties in float64 are essentially confined to constant
-                  regions there is nothing to choose between them.
+                <>
+<p>
+                  This one chooses the first cell in row-major order, the top row before the bottom and the left before the right. Load the flat patch in the box at the top, where every window is a four-way tie, and each window sends its whole slope to its own top left cell, four of the sixteen in total.
                 </p>
+                <p>
+                  The alternative, splitting the slope evenly among the tied cells, is a perfectly legitimate reading of the corner and is what a symmetric argument suggests. It is not what established implementations do, and on data where exact ties in float64 are essentially confined to constant regions there is nothing to choose between them.
+                </p>
+</>
                 <KeepInMind>
                   On a tie the backward pass follows a stated convention rather
                   than a derivative. A gradient check cannot arbitrate it, because
@@ -874,18 +894,14 @@ export default function PoolingPage() {
                 </p>
                 <ShiftTolerance />
                 <InAModel title="One column, moved">
-                  <p>
-                    Moving the stroke one column changes 16 of the picture&rsquo;s
-                    64 cells, since eight go dark and eight light up, and changes
-                    0 of the pooled map&rsquo;s 16 cells under either kind. The
-                    third and fourth columns share a window, so the stroke moved
-                    within it and the summaries did not notice. Move it a second
-                    column and it crosses into the next window, 8 of the 16 pooled
-                    cells change, and the bright column of the map moves one cell
-                    along. The largest single change is 9 under a maximum and 4.5
-                    under an average, which is the stroke&rsquo;s own value and
-                    half of it.
+                  <>
+<p>
+                    Moving the stroke one column changes 16 of the picture&rsquo;s 64 cells, since eight go dark and eight light up, and changes 0 of the pooled map&rsquo;s 16 cells under either kind. The third and fourth columns share a window, so the stroke moved within it and the summaries did not notice. Move it a second column and it crosses into the next window, 8 of the 16 pooled cells change, and the bright column of the map moves one cell along.
                   </p>
+                  <p>
+                    The largest single change is 9 under a maximum and 4.5 under an average, which is the stroke&rsquo;s own value and half of it.
+                  </p>
+</>
                 </InAModel>
                 <p>
                   That is the complex cell&rsquo;s property in four numbers. The
@@ -901,20 +917,14 @@ export default function PoolingPage() {
               </SubSection>
 
               <SubSection title="25. What that tolerance is not">
-                <p>
-                  Four things are easy to read into the previous section that are
-                  not there. The layer is not invariant to shift in general, only
-                  to shift that stays inside a window, and the measurement above
-                  shows exactly where the second column crosses the line. It is not
-                  invariant to rotation or to scale, which nothing in a window
-                  summary addresses. Stacking several such layers widens the
-                  window in the original picture rather than removing the boundary,
-                  so the same knife edge is there at a coarser spacing. And a
-                  network can be tolerant to shift without this layer at all, by
-                  learning from examples at many positions, which is more expensive
-                  and is what the argument for replacing the layer with a strided
-                  convolution turns on.
+                <>
+<p>
+                  Four things are easy to read into the previous section that are not there. The layer is not invariant to shift in general, only to shift that stays inside a window, and the measurement above shows exactly where the second column crosses the line. It is not invariant to rotation or to scale, which nothing in a window summary addresses.
                 </p>
+                <p>
+                  Stacking several such layers widens the window in the original picture rather than removing the boundary, so the same knife edge is there at a coarser spacing. And a network can be tolerant to shift without this layer at all, by learning from examples at many positions, which is more expensive and is what the argument for replacing the layer with a strided convolution turns on.
+                </p>
+</>
                 <KeepInMind>
                   Pooling buys tolerance to small shifts within a window, cheaply
                   and with no parameters. It does not buy general invariance, and
@@ -959,7 +969,7 @@ export default function PoolingPage() {
                     {
                       expression: "padding",
                       reason:
-                        "none. There is no padding setting, so the far margin is dropped and the output extent is the floor formula of section 5.",
+                        "none. There is no padding setting, so the far margin is dropped and the output extent is the floor formula of section 9.",
                     },
                     {
                       expression: "the tie in a maximum",
@@ -1007,17 +1017,14 @@ export default function PoolingPage() {
                   wanted.
                 </p>
                 <PoolingEdgeCases />
-                <p>
-                  Three are accepted, and each of the three is a decision rather
-                  than an oversight. A stride larger than the window is legal, and
-                  a window of two at a stride of three over a four by four patch
-                  answers with a single number and leaves fifteen of the sixteen
-                  cells outside every window, which is section 7 as a refusal that
-                  never comes. A window of one at a stride of one is the identity,
-                  answering with the arrangement it read and handing every one of
-                  the sixteen cells exactly 1. And a step asked of a layer with
-                  nothing to learn gives back the same layer object.
+                <>
+<p>
+                  Three are accepted, and each of the three is a decision rather than an oversight. A stride larger than the window is legal, and a window of two at a stride of three over a four by four patch answers with a single number and leaves fifteen of the sixteen cells outside every window, which is section 11 as a refusal that never comes.
                 </p>
+                <p>
+                  A window of one at a stride of one is the identity, answering with the arrangement it read and handing every one of the sixteen cells exactly 1. And a step asked of a layer with nothing to learn gives back the same layer object.
+                </p>
+</>
                 <p>
                   Two things a reader might expect are missing from that table, and
                   both are missing for the same reason. There is no unfitted state
@@ -1046,16 +1053,14 @@ export default function PoolingPage() {
                   mistake between two layers whose extents agree.
                 </p>
                 <WorkedExample title="Two layers of one shape">
-                  <p>
-                    A window of three at a stride of one over a four by four patch
-                    answers 2 by 2. So does a window of two at a stride of two. Ask
-                    the first to pool a picture, then hand its response to the
-                    second along with four arriving values 1, 2, 3 and 4. Nothing
-                    is raised. Both hand down a total of 10, which agrees to the
-                    last bit. And 6 of the 16 cells receive something different,
-                    with the second layer routing three of the four values to cells
-                    that never won the windows they came from.
+                  <>
+<p>
+                    A window of three at a stride of one over a four by four patch answers 2 by 2. So does a window of two at a stride of two. Ask the first to pool a picture, then hand its response to the second along with four arriving values 1, 2, 3 and 4. Nothing is raised.
                   </p>
+                  <p>
+                    Both hand down a total of 10, which agrees to the last bit. And 6 of the 16 cells receive something different, with the second layer routing three of the four values to cells that never won the windows they came from.
+                  </p>
+</>
                 </WorkedExample>
                 <p>
                   Closing it would mean every response carrying a record of which
@@ -1076,6 +1081,226 @@ export default function PoolingPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 6 and 7",
+          quiz: [
+            choice(
+              "Two cells in a window hold the same largest value. What does this implementation do?",
+              [
+                "It gives the whole slope to the first cell in row-major order, as a stated convention",
+                "It splits the slope evenly between the tied cells, which the symmetry requires",
+                "It refuses the window, since the derivative does not exist there",
+                "It picks one of the tied cells at random so that no cell is favoured over many steps",
+              ],
+              0,
+              "The maximum of two crossing lines has a corner at the crossing, and the one-sided slopes give the whole of it to different cells, so there is no single right answer to compute. Splitting evenly is a legitimate reading and is not what established implementations do. A gradient check cannot arbitrate it, because the one-sided differences genuinely disagree, so the convention has to be tested directly.",
+            ),
+            trueFalse(
+              "The forward pass records which cell won each window and hands that record to the backward pass.",
+              false,
+              "It does not. What the forward pass hands on already includes the block it read, and the winner is a function of those frozen numbers, so the backward pass asks the same question of the same numbers with the same tie rule and cannot arrive at a different answer. The cost is a second scan of every window, which is real rather than negligible, and the dropout layer reaches the opposite conclusion because a random draw cannot be recomputed at all.",
+            ),
+            choice(
+              "An eight by eight patch lit along its third column is pooled at a window of two and a stride of two, then the stroke moves one column right and it is pooled again. What changed?",
+              [
+                "16 of the picture’s 64 cells, and none of the pooled map’s 16",
+                "16 of the picture’s 64 cells, and 8 of the pooled map’s 16",
+                "8 of the picture’s 64 cells, and none of the pooled map’s 16",
+                "Nothing in either, since the layer is invariant to shift",
+              ],
+              0,
+              "Eight cells go dark and eight light up, and the third and fourth columns share a window, so the stroke moved within it and the summaries did not notice. Move it a second column and it crosses into the next window, 8 of the 16 pooled cells change, and the bright column of the map moves one cell along. The tolerance is exactly as wide as a window and no wider.",
+            ),
+            several(
+              "Which of these are named as things pooling does not buy?",
+              [
+                "Invariance to shift in general, rather than to shift inside a window",
+                "Invariance to rotation",
+                "Invariance to scale",
+                "Removal of the window boundary, once several such layers are stacked",
+              ],
+              [0, 1, 2, 3],
+              "Nothing in a window summary addresses rotation or scale, and the measured shift tolerance ends exactly where the second column crosses a boundary. Stacking widens the window in the original picture rather than removing the boundary, so the same knife edge is there at a coarser spacing. A network can also be tolerant to shift with no such layer at all, by learning from examples at many positions, which is more expensive.",
+            ),
+            choice(
+              "A window of three at a stride of one and a window of two at a stride of two both answer two by two from a four by four patch. What happens if a response from the first is handed to the second?",
+              [
+                "Nothing is raised, both hand down a total of 10, and 6 of the 16 cells receive something different",
+                "The second layer refuses the response, because the window widths differ",
+                "The two layers hand down different totals, which is how the mistake shows up",
+                "The second layer silently reproduces the first layer’s answer",
+              ],
+              0,
+              "The backward pass checks that the arriving block has this layer’s own arrangement, which catches every mistake about extents and cannot separate two layers whose extents agree. The totals agree to the last bit because the shares sum to one either way, and the second layer routes three of the four arriving values to cells that never won the windows they came from. A stack pairs layer k with response k by construction, so the exposure is to a caller pairing them by hand.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Pooling the Four by Four Patch With the Library",
+          practice: [
+            exercise(
+              "Pool the running patch both ways",
+              ["Build a maximum pooling layer and an average pooling layer that each read one channel of four by four with a window of two at a stride of two, hand each the page’s patch as a block of one row and one channel, and print the arrangement each answers with and its pooled map.", "Part 2 arrived at a maximum map of 5, 4, 2 and 7 and an average map of 3, 2, 1 and 4. Then add up the four averages, which the page does not do, and think about why that total is a quarter of the patch’s own total."],
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+patch = np.array([[1.0, 5.0, 1.0, 3.0], [4.0, 2.0, 4.0, 0.0], [0.0, 1.0, 3.0, 1.0], [2.0, 1.0, 7.0, 5.0]])
+
+for kind in (MaxPool2d, AveragePool2d):
+    # Build the layer reading (1, 4, 4) with a window of two at a stride of
+    # two, respond to the patch, and print the arrangement it answers with,
+    # the pooled map, and what the four answers add up to.
+    pass`,
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+patch = np.array([[1.0, 5.0, 1.0, 3.0], [4.0, 2.0, 4.0, 0.0], [0.0, 1.0, 3.0, 1.0], [2.0, 1.0, 7.0, 5.0]])
+
+for kind in (MaxPool2d, AveragePool2d):
+    layer = kind(reads=(1, 4, 4), window=2, stride=2)
+    pooled = np.asarray(layer.respond_to(patch[None, None]).outputs)[0, 0]
+    print(f"{kind.__name__} answers {layer.shape.answers}")
+    print(pooled)
+    print(f"the four answers add up to {pooled.sum():.0f}")`,
+              `MaxPool2d answers (1, 2, 2)
+[[5. 4.]
+ [2. 7.]]
+the four answers add up to 18
+AveragePool2d answers (1, 2, 2)
+[[3. 2.]
+ [1. 4.]]
+the four answers add up to 10`,
+              { hints: ["A pooling layer takes the arrangement it reads as three extents, channels then height then width, and a window and a stride that default to two.", "A layer reads a block whose leading axis is rows, so one four by four patch goes in as patch[None, None], one row holding one channel.", "The response’s outputs are arranged the same way, so the map for the one row and the one channel is the slice at [0, 0]."], check: numberCheck("What do the four averages add up to?", 10, 0.5, "At a window of two and a stride of two the four windows cover the patch exactly once each, so each average is a quarter of its window’s total and the four averages together are a quarter of the patch’s total of 40. The maximum map adds up to 18, which says nothing so tidy, because a maximum keeps the strongest reading in each window and discards how much else there was.") },
+            ),
+            exercise(
+              "Hand a slope of one back down, at both strides",
+              ["Part 4 sends a slope of one to each answer at a stride of two, and Part 5 drops the stride to one so that the windows overlap. Do both, for both kinds. Build the layer, respond to the patch, build a block of ones the shape of the answer, and ask the layer for its correction.", "For each layer print how many windows there were, the total blame handed down, how many cells received anything, and what the 4 at row 1, column 2 received. Part 5 says that cell wins three of the nine overlapping windows and receives 3, and that the total handed down always equals the total that arrived."],
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+patch = np.array([[1.0, 5.0, 1.0, 3.0], [4.0, 2.0, 4.0, 0.0], [0.0, 1.0, 3.0, 1.0], [2.0, 1.0, 7.0, 5.0]])
+
+for stride in (2, 1):
+    for kind in (MaxPool2d, AveragePool2d):
+        layer = kind(reads=(1, 4, 4), window=2, stride=stride)
+        response = layer.respond_to(patch[None, None])
+        # Build a block of ones the shape of the outputs, take the layer's
+        # correction, and print the number of windows, the total blame
+        # handed down, how many cells received anything, and the blame on
+        # the cell at row 1, column 2, which holds the 4.`,
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+patch = np.array([[1.0, 5.0, 1.0, 3.0], [4.0, 2.0, 4.0, 0.0], [0.0, 1.0, 3.0, 1.0], [2.0, 1.0, 7.0, 5.0]])
+
+for stride in (2, 1):
+    for kind in (MaxPool2d, AveragePool2d):
+        layer = kind(reads=(1, 4, 4), window=2, stride=stride)
+        response = layer.respond_to(patch[None, None])
+        arriving = np.ones_like(np.asarray(response.outputs))
+        blame = np.asarray(layer.correction_for(response, arriving).passed_down)[0, 0]
+        print(
+            f"{kind.__name__} at stride {stride}: {arriving.size} windows, total blame {blame.sum():.0f}, "
+            f"cells receiving anything {np.count_nonzero(blame)}, "
+            f"the 4 at row 1, column 2 receives {blame[1, 2]:.2f}"
+        )`,
+              `MaxPool2d at stride 2: 4 windows, total blame 4, cells receiving anything 4, the 4 at row 1, column 2 receives 1.00
+AveragePool2d at stride 2: 4 windows, total blame 4, cells receiving anything 16, the 4 at row 1, column 2 receives 0.25
+MaxPool2d at stride 1: 9 windows, total blame 9, cells receiving anything 5, the 4 at row 1, column 2 receives 3.00
+AveragePool2d at stride 1: 9 windows, total blame 9, cells receiving anything 16, the 4 at row 1, column 2 receives 1.00`,
+              { hints: ["correction_for takes the response the forward pass produced and the slope arriving at each answer, and what it hands down to the input is passed_down, arranged like the patch.", "The number of windows is the number of answers, which is the size of the arriving block.", "Counting the cells whose blame is not zero is what separates a maximum, which trains only its winners, from an average, which trains everything in every window a little."], check: numberCheck("Under a maximum at a stride of one, how many of the sixteen cells receive anything?", 5, 0.5, "Nine overlapping windows have nine winners, but a cell that is large relative to a whole neighbourhood wins every window that contains it. The 4 at row 1, column 2 wins three windows, the 5 and the 7 win two each, and the other 4 in that row and the 2 in the bottom left corner win one each, so only five distinct cells collect the nine units of blame. The total is still 9, the same as what arrived, because overlap redistributes correction rather than adding any.") },
+            ),
+            exercise(
+              "Ask one window for its summary and its shares, then test the sum",
+              ["Part 2 says a kind of pooling amounts to two functions of one window, the number it keeps and the shares it owes. Ask both kinds for both, on the page’s top left window of 1, 5, 4 and 2, through summarise and shares_of.", "Part 4 then says the shares sum to one only to within float64. Build an average over a window that is the whole picture at every side from one to eight, add up its shares, and print each total exactly. One of the eight sides should miss."],
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+window = np.array([[1.0, 5.0], [4.0, 2.0]])
+for kind in (MaxPool2d, AveragePool2d):
+    layer = kind(reads=(1, 2, 2), window=2, stride=2)
+    # Print what the layer keeps from the window, the grid of shares it owes,
+    # and what those shares add up to.
+
+for side in range(1, 9):
+    # Build an average pooling layer whose window is the whole side by side
+    # picture, ask it for the shares of a window of zeros that size, and print
+    # the side, how many shares there are, and their exact total.
+    pass`,
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+window = np.array([[1.0, 5.0], [4.0, 2.0]])
+for kind in (MaxPool2d, AveragePool2d):
+    layer = kind(reads=(1, 2, 2), window=2, stride=2)
+    shares = layer.shares_of(window)
+    print(f"{kind.__name__} keeps {layer.summarise(window):.0f}")
+    print(shares)
+    print(f"its shares add up to {float(shares.sum())!r}")
+
+for side in range(1, 9):
+    layer = AveragePool2d(reads=(1, side, side), window=side, stride=side)
+    total = float(layer.shares_of(np.zeros((side, side))).sum())
+    print(f"side {side}: {side * side} shares add up to {total!r}")`,
+              `MaxPool2d keeps 5
+[[0. 1.]
+ [0. 0.]]
+its shares add up to 1.0
+AveragePool2d keeps 3
+[[0.25 0.25]
+ [0.25 0.25]]
+its shares add up to 1.0
+side 1: 1 shares add up to 1.0
+side 2: 4 shares add up to 1.0
+side 3: 9 shares add up to 1.0
+side 4: 16 shares add up to 1.0
+side 5: 25 shares add up to 1.0
+side 6: 36 shares add up to 1.0
+side 7: 49 shares add up to 0.9999999999999999
+side 8: 64 shares add up to 1.0`,
+              { hints: ["summarise and shares_of each take one square window of plain numbers rather than a block, and shares_of answers a grid the same shape holding the derivative of the summary with respect to each position.", "An average’s shares do not depend on the values in the window at all, so a window of zeros is as good as any other for adding them up.", "Printing a Python float with !r shows every digit it holds, which is what separates 1.0 from a total one rounding step short of it, and float() turns the number numpy hands back into one."], check: numberCheck("At which window side between one and eight do the shares fail to add up to exactly one?", 7, 0.5, "A window of seven hands out forty-nine shares of one forty-ninth, which has no exact representation in float64, and the forty-nine of them add up to 0.9999999999999999. Sides 2, 4 and 8 are exact because their reciprocals are, and the other sides up to eight happen to round back to one. A test asserting that the sum is exactly one would pass at every side but seven, which is why such a check needs a tolerance.") },
+            ),
+            exercise(
+              "Measure the shift tolerance",
+              ["Part 6 lights the third column of an eight by eight patch, pools it at a window of two and a stride of two, and moves the stroke one column at a time. Draw the patch with a stroke of 9 down column 2, pool it under both kinds, then slide it one and two columns right with zeros entering at the left and pool again.", "Print, for each kind and each shift, how many of the 64 picture cells changed, how many of the 16 pooled cells changed, and the largest change in any pooled cell. The page says a shift of one changes nothing in the pooled map and a shift of two changes 8 of its 16 cells, by 9 under a maximum and by 4.5 under an average."],
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+stroke = np.zeros((8, 8))
+stroke[:, 2] = 9.0
+for kind in (MaxPool2d, AveragePool2d):
+    layer = kind(reads=(1, 8, 8), window=2, stride=2)
+    settled = np.asarray(layer.respond_to(stroke[None, None]).outputs)[0, 0]
+    for shift in (1, 2):
+        # Slide the stroke shift columns to the right, pool it, and print how
+        # many picture cells changed, how many pooled cells changed, and the
+        # largest change in any pooled cell.
+        pass`,
+              `import numpy as np
+from oop_ml import AveragePool2d, MaxPool2d
+
+stroke = np.zeros((8, 8))
+stroke[:, 2] = 9.0
+for kind in (MaxPool2d, AveragePool2d):
+    layer = kind(reads=(1, 8, 8), window=2, stride=2)
+    settled = np.asarray(layer.respond_to(stroke[None, None]).outputs)[0, 0]
+    for shift in (1, 2):
+        moved = np.zeros_like(stroke)
+        moved[:, shift:] = stroke[:, : 8 - shift]
+        pooled = np.asarray(layer.respond_to(moved[None, None]).outputs)[0, 0]
+        print(
+            f"{kind.__name__} shift {shift}: {np.count_nonzero(moved != stroke)} of 64 picture cells changed, "
+            f"{np.count_nonzero(pooled != settled)} of 16 pooled cells changed, "
+            f"largest change {np.abs(pooled - settled).max()}"
+        )`,
+              `MaxPool2d shift 1: 16 of 64 picture cells changed, 0 of 16 pooled cells changed, largest change 0.0
+MaxPool2d shift 2: 16 of 64 picture cells changed, 8 of 16 pooled cells changed, largest change 9.0
+AveragePool2d shift 1: 16 of 64 picture cells changed, 0 of 16 pooled cells changed, largest change 0.0
+AveragePool2d shift 2: 16 of 64 picture cells changed, 8 of 16 pooled cells changed, largest change 4.5`,
+              { hints: ["A picture moved one column right holds, at column j, what the original held at column j minus one, so slice the first seven columns into the last seven and leave column 0 dark.", "Columns 2 and 3 share a window at a stride of two, so a stroke moving from column 2 to column 3 stays inside the same windows and the summaries cannot notice. Moving on to column 4 crosses into the next window."], check: numberCheck("How many of the sixteen pooled cells change when the stroke has moved two columns?", 8, 0.5, "At a window of two and a stride of two the third and fourth columns share a window, so the first move changes 16 picture cells and no pooled cell. The second move carries the stroke across a window boundary, the bright column of the pooled map moves one cell along, and the eight cells in the two affected columns change, by the stroke’s own 9 under a maximum and by half of it under an average. The tolerance is exactly as wide as a window and no wider.") },
+            ),
+          ],
         },
       ]}
     />

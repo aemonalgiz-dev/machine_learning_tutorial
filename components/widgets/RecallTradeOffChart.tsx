@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // Recall of the true ten nearest against the share of the collection read.
 //
@@ -124,9 +126,9 @@ export function RecallTradeOffChart() {
       <p className="mt-2 min-h-[1.25rem] font-mono text-xs text-slate-700 dark:text-slate-300">
         {hovered ?? "Point at a dot to read its setting."}
       </p>
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        The inverted file is scored against the exact Euclidean ten, the hashing against the exact cosine ten, since each stands in for its own distance. Settings reading more than half the collection are left off, since every one of them recovers at least {Math.min(...report.cell_counts.flatMap((cells) => cells.rows.filter((row) => row.touched_share > X_MAX).map((row) => row.recall)), ...report.hashing.flatMap((table) => table.rows.filter((row) => row.touched_share > X_MAX).map((row) => row.recall))).toFixed(4)} of it.
-      </p>
+      <>
+<p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Approximate search needs a reference answer. The inverted-file results are compared with the exact ten nearest Euclidean neighbors. The hashing results are compared with the exact ten nearest cosine neighbors.</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Each method must be judged against the distance it approximates. The chart omits settings that examine more than half the collection.</p><Equation>{"Smallest measured recall among the omitted settings: " + Math.min(...report.cell_counts.flatMap((cells) => cells.rows.filter((row) => row.touched_share > X_MAX).map((row) => row.recall)), ...report.hashing.flatMap((table) => table.rows.filter((row) => row.touched_share > X_MAX).map((row) => row.recall))).toFixed(4)}</Equation>
+</>
     </div>
   );
 }

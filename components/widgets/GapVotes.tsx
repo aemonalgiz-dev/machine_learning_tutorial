@@ -154,18 +154,9 @@ export function GapVotes({ gapKeys }: { gapKeys: string[] }) {
         <Stat label="the score of the gap" value={signed(opened.total)} />
       </div>
 
-      <p className="mt-3 text-xs text-slate-600 dark:text-slate-400">
-        {opened.n_identity_seen} of {opened.n_identity} questions about which
-        characters these are carry any weight at all;{" "}
-        {opened.n_kind_seen} of {opened.n_kind} about what kinds they are do.
-        The gap is {opened.cut ? "cut" : "kept together"}, and a reader
-        {opened.expected === null
-          ? " has not said what it should be"
-          : opened.expected
-            ? " cuts it too"
-            : " keeps it together"}
-        .
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-600 dark:text-slate-400">The model uses features about character identity and character type to score this gap. Here {opened.n_identity_seen} of {opened.n_identity} identity features and {opened.n_kind_seen} of {opened.n_kind} type features have learned contributions.</p><p className="mt-3 text-xs text-slate-600 dark:text-slate-400">Its decision is to {opened.cut ? "insert a boundary" : "keep the characters together"}. {opened.expected === null ? "No reader-supplied boundary is available for comparison." : opened.expected ? "The supplied reading also places a boundary here." : "The supplied reading keeps the characters together."} Inspect the contributions to see which observed features support that decision.</p>
+</>
 
       <p className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
         {Object.entries(FAMILY_COLOURS).map(([family, colour]) => (

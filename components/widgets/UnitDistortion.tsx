@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // One neighbour vote, taken four times, with the heights in a different unit
 // each time.
@@ -139,12 +141,9 @@ export function UnitDistortion() {
               <VotePanel key={vote.unit} vote={vote} query={query} />
             ))}
           </div>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            {disagree
-              ? "The four readings do not agree about this person. Nothing about them changed between panels; only the unit the height was written in."
-              : "The four readings agree about this person. Drag the query toward the middle of the crowd, where the two columns pull against each other, to find one they do not."}
-            {" "}Standardizing divided height by {answer.height_deviation.toFixed(1)} cm and weight by {answer.weight_deviation.toFixed(1)} kg.
-          </p>
+          <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The panels contain the same observations expressed with different feature units. {disagree ? "Their different predictions therefore come from the changed distance geometry, not a change to the person being classified." : "The current predictions agree. Move the query toward a region between groups to inspect where different feature contributions can change the neighbors."}</p><Equation>{"Training standard deviations used for scaling:\nHeight: " + answer.height_deviation.toFixed(1) + " cm\nWeight: " + answer.weight_deviation.toFixed(1) + " kg"}</Equation>
+</>
         </>
       )}
       {message && <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">{message}</p>}

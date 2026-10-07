@@ -202,28 +202,41 @@ export function KernelLiftPlayground() {
       </svg>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Drag to turn the room. Indigo is healthy, amber is unwell, the green
-        wireframe is a flat plane, and a green ring marks a support vector.
+        Drag to rotate the expanded-feature plot. Indigo is healthy, amber is
+        unwell, and the green plane is the fitted boundary. Both routes use
+        the pure squared kernel&apos;s three features. Green rings identify training
+        observations retained in the prediction rule, called support vectors.
       </p>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mt-3 grid grid-cols-2 gap-3">
         <Stat
           label="Accuracy of the flat plane"
           value={lift ? lift.lifted.accuracy.toFixed(3) : "…"}
         />
         <Stat
-          label="Support vectors, either route"
-          value={lift ? `${lift.lifted.n_support_vectors} and ${lift.kernel.n_support_vectors}` : "…"}
-        />
-        <Stat
-          label="Largest multiplier gap"
-          value={lift ? lift.multiplier_gap.toExponential(1) : "…"}
-        />
-        <Stat
-          label="Largest decision gap"
+          label="Largest prediction score difference"
           value={lift ? lift.decision_gap.toExponential(1) : "…"}
         />
       </div>
+
+      <details className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+        <summary className="cursor-pointer font-medium">Compare the fitted coefficients</summary>
+        <p className="mt-2">
+          Both fits use the same observations and settings. The first count is
+          for explicitly expanded features; the second is for kernel comparisons.
+          Small coefficient and score differences can arise from numerical rounding.
+        </p>
+        <div className="mt-2 grid grid-cols-2 gap-3">
+          <Stat
+            label="Support vector counts"
+            value={lift ? `${lift.lifted.n_support_vectors} and ${lift.kernel.n_support_vectors}` : "…"}
+          />
+          <Stat
+            label="Largest coefficient difference"
+            value={lift ? lift.multiplier_gap.toExponential(1) : "…"}
+          />
+        </div>
+      </details>
 
       {message && (
         <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">{message}</p>

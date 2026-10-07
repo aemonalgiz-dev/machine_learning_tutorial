@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -23,7 +26,7 @@ import { TermAssembler } from "@/components/widgets/TermAssembler";
 export const metadata: Metadata = {
   title: "Polynomial Features · oop_ml",
   description:
-    "Square a column, multiply two together, and a straight-line model can bend. What that buys, what it costs in columns, and where it stops being defined.",
+    "Build powers and products of inputs so a linear model can represent curved relationships.",
 };
 
 const link =
@@ -32,8 +35,12 @@ const link =
 export default function PolynomialFeaturesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["polynomial-features"]}
+      technicalStart="Part 3. Powers and Products"
+      openingTitle="Give a Straight-Line Model Something Curved to Read"
+      playgroundIntro="Compare the generated columns at different degrees. Relate each new power or product to the extra flexibility in the fitted curve."
       title="Polynomial Features"
-      tagline="Square a column, multiply two of them together, and a straight-line model has something to bend along."
+      tagline="Build powers and products of inputs so a linear model can represent curved relationships."
       prerequisites={
         <>
           The fit this page hands its new columns to is the one from{" "}
@@ -56,67 +63,14 @@ export default function PolynomialFeaturesPage() {
           page measures on plain columns, arriving here several times larger.
         </>
       }
-      history={
-        <>
-          <p>
-            Joseph Diez Gergonne, teaching at Nîmes and then at Montpellier,
-            published a paper in 1815 in the Annales de Mathématiques on
-            applying least squares to fitting a curve through measurements, and
-            the question he set himself was not how to fit the curve but where
-            to take the measurements and how high a power to allow. He wrote
-            that the degree is not given by the physics in advance and has to be
-            settled against the data, and that observations should therefore be
-            taken at more settings than the chosen degree strictly needs, so
-            that the residual misses can be looked at and the degree revised.
-            Stephen Stigler brought the paper back to notice in 1974 in
-            Biometrika, and what is striking in it is that the two halves of
-            this page, the freedom a power buys and the difficulty of choosing
-            how much of it to take, arrived together at the very beginning.
-          </p>
-          <p>
-            The other half of the warning is Carl Runge&rsquo;s, at Hannover in
-            1901, in a paper on interpolating between equally spaced ordinates.
-            He took a smooth, perfectly well-behaved bell-shaped function, laid
-            equally spaced points along it, and passed a polynomial through
-            every one of them, which is the obvious thing to do and gets better
-            and better in the middle as the degree rises. Near the two ends it
-            gets worse without limit, and the swings grow rather than shrink as
-            more points are added. The failure this page measures on twenty-two
-            people, where a fit that reproduces every person it was given scores
-            below nothing on the people it was not, is the same swing between the
-            points that Runge described, and it is why the degree cannot simply
-            be turned up.
-          </p>
-          <p>
-            The products came from a chemical plant. George Box and Kenneth
-            Wilson, working for Imperial Chemical Industries, published
-            &ldquo;On the Experimental Attainment of Optimum Conditions&rdquo; in
-            1951, and their problem was that the yield of a reaction depends on
-            temperature and pressure and concentration together, so the
-            temperature that works best is different at each pressure. A fit
-            with one coefficient per input cannot say that, since one
-            coefficient is one number and one number cannot change with the
-            other inputs, and their answer was to fit a second-degree surface in
-            a small region, including the terms that multiply two inputs
-            together. Those cross terms are exactly what Part 3 measures on
-            people of different builds. The page asks six questions in order.
-            What does a straight line do to a relationship that genuinely bends?
-            Why can the same fit produce a curve without becoming a different
-            method? What columns does the expansion actually build, and why do
-            the products matter as much as the powers? What does it cost? Where
-            does a rising degree stop helping, and what makes a high one
-            survivable? And where does the choice stop being one the data can
-            make?
-          </p>
-        </>
-      }
+
       playground={<CurveThroughACrowd />}
       sections={[
         {
-          title: "Part 1. A Line Through People Who Bend",
+          title: "Part 1. A Straight Line Through a Curved Relationship",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Twenty-two people, and the shape weight really follows">
                 <p>
                   We have twenty-two people measured three ways, height in
@@ -166,19 +120,14 @@ export default function PolynomialFeaturesPage() {
                   below with no relation to how tall they are.
                 </p>
                 <MissesInAPattern />
-                <p>
-                  Under the straight line they are not scattered. The two
-                  youngest people are above the line by 8.30 and 4.05
-                  kilograms, then the six people from 118 to 149 centimetres are
-                  all below it, and the tall end climbs back above. That is a
-                  bow, and a bow in the misses is the fit telling us that the
-                  line is too straight for these people rather than that these
-                  people are noisy. Add the squared column and the longest
-                  stretch on one side falls from six people to five, and the
-                  child the line put at 7.80 lands at 14.02. Add the cube as
-                  well and the longest stretch is three and the child lands at
-                  16.67 against a measured 16.1.
+                <>
+<p>
+                  Under the straight line they are not scattered. The two youngest people are above the line by 8.30 and 4.05 kilograms, then the six people from 118 to 149 centimetres are all below it, and the tall end climbs back above. That is a bow, and a bow in the misses is the fit telling us that the line is too straight for these people rather than that these people are noisy.
                 </p>
+                <p>
+                  Add the squared column and the longest stretch on one side falls from six people to five, and the child the line put at 7.80 lands at 14.02. Add the cube as well and the longest stretch is three and the child lands at 16.67 against a measured 16.1.
+                </p>
+</>
                 <KeepInMind>
                   Read the misses as well as the score. Six people in a row all
                   below the line, at heights 118 through 149, is the fit telling
@@ -187,7 +136,7 @@ export default function PolynomialFeaturesPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Linear in the Coefficients, Not in the Columns",
@@ -351,7 +300,7 @@ export default function PolynomialFeaturesPage() {
                 <p>
                   The powers and the products are usually taught together as
                   though they were the same idea, and they answer quite different
-                  questions. A power lets a column&rsquo;s own effect bend. A
+                  questions. A power lets a column&rsquo;s own effect vary nonlinearly. A
                   product lets one column&rsquo;s effect depend on another
                   column, and no amount of squaring or cubing will give a fit
                   that ability, since each power still contributes its own fixed
@@ -445,6 +394,49 @@ export default function PolynomialFeaturesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            trueFalse(
+              "A score of 0.9620 for the straight line is evidence that the shape of the fit is right.",
+              false,
+              "It says that most of the variation in weight is accounted for, and over a range where taller mostly means heavier a straight line accounts for most of it whether or not the relationship is straight. The misses are what tell us otherwise. The two youngest people sit above the line by 8.30 and 4.05 kilograms, the six people from 118 to 149 centimetres are all below it, and the line answers 7.80 kilograms for a child who weighs 16.1.",
+            ),
+            choice(
+              "A fit with a squared height column draws a curve. In what sense is it still a linear model?",
+              [
+                "It is linear in the weights it learns rather than in the measurements it reads",
+                "It is linear because the curve it draws is close to a straight line over this range",
+                "It is linear only until the cube is added as well",
+                "It is not; the expansion replaces least squares with a different method",
+              ],
+              0,
+              "A linear model is a weighted sum of its columns, and nothing in the method says a column has to be something a tape measure produced. The same weighted sum is formed, the same squared misses are added up and the same system is solved, and the only difference is that there are three numbers to find rather than two. The squared misses fall from 548.33 to 307.18, which is the design changing rather than the fitting.",
+            ),
+            choice(
+              "How many columns does a degree-two expansion of height and girth produce?",
+              ["Four", "Five", "Six", "Three"],
+              1,
+              "A term is any product of the two whose exponents add up to no more than the degree, which gives height, girth, height squared, height times girth, and girth squared. The term where every exponent is zero is the constant, and it belongs to the fit’s intercept rather than to any column.",
+            ),
+            choice(
+              "On the twelve people arranged with four girths at each of three heights, what did adding the product column do?",
+              [
+                "It took the total of the squared misses from 28.07 to 1.83, removing 93 percent of what was left",
+                "It left the misses unchanged, since the powers already covered the curve",
+                "It halved the misses, which is the usual gain from a cross term",
+                "It made the fit worse, because the product duplicates the square",
+              ],
+              0,
+              "Going from a girth of 66 to a girth of 96 adds 44.50 kilograms at 150 centimetres, 49.30 at 165 and 54.80 at 180, and a fit with one coefficient for girth has to answer one number, which it does at 49.45 everywhere. With the product column the coefficient of girth has height inside it, and the fit answers 44.59, 49.45 and 54.31.",
+            ),
+            trueFalse(
+              "On the twenty-two people the product column earns almost nothing, an eight percent reduction in the misses against a factor of fifteen on the twelve arranged ones.",
+              true,
+              "The pure powers leave 98.89 on the crowd and the powers with the products leave 91.03, where on the twelve builds the same column took the misses from 28.07 to 1.83. The two measurements agree at 0.9886 in the crowd, since taller people there are also thicker, so the product of the two is nearly a multiple of height squared and the squared column is already in the expansion. Whether a cross term is worth its column is decided by the data, by how much the two columns already agree, and not by the method.",
+            ),
+        ],
         },
         {
           title: "Part 4. What the Expansion Costs",
@@ -661,7 +653,7 @@ export default function PolynomialFeaturesPage() {
                 </p>
                 <KeepInMind>
                   A penalty and a high degree belong together. The degree
-                  supplies the freedom to bend and the penalty stops that freedom
+                  supplies the ability to represent curved relationships and the penalty stops that freedom
                   being spent on the gaps between the people, and neither of them
                   removes the need to measure on people the fit never saw.
                 </KeepInMind>
@@ -671,10 +663,10 @@ export default function PolynomialFeaturesPage() {
                 <p>
                   It would be dishonest to leave the impression that a curved
                   relationship demands an expansion. A fit made of straight cuts
-                  on the raw height column can follow a bend too, by answering
+                  on the raw height column can approximate a curved relationship too, by answering
                   one weight for everybody below some height, another for the
                   band above that, and so on, with no squared column anywhere. It approximates the
-                  curve with steps rather than bending, and the question is which
+                  curve with piecewise constant predictions, and the question is which
                   of the two does better on these people.
                 </p>
                 <StepsAgainstACurve />
@@ -687,17 +679,14 @@ export default function PolynomialFeaturesPage() {
                   stops rising, and each step spends people on deciding where to
                   cut rather than on the shape.
                 </p>
-                <p>
-                  The other column of the comparison goes the other way. The
-                  worst the stepped fit does across its depths is 0.6438, at a
-                  single cut, and the worst the expansion does across its degrees
-                  is −24,967. Both methods have one dial and both can have it set
-                  badly, and only one of them can be set badly enough to produce
-                  an answer that is thousands of times worse than saying nothing.
-                  The steps also need no decision about scale, which the last
-                  Part measures, and they read a column that has not been touched
-                  at all.
+                <>
+<p>
+                  The other column of the comparison goes the other way. The worst the stepped fit does across its depths is 0.6438, at a single cut, and the worst the expansion does across its degrees is −24,967. Both methods have one dial and both can have it set badly, and only one of them can be set badly enough to produce an answer that is thousands of times worse than saying nothing.
                 </p>
+                <p>
+                  The steps also need no decision about scale, which the last Part measures, and they read a column that has not been touched at all.
+                </p>
+</>
                 <KeepInMind>
                   On a smooth relationship the expanded fit is the better
                   instrument here, 0.9762 against 0.9502. What the stepped fit
@@ -721,17 +710,14 @@ export default function PolynomialFeaturesPage() {
                   by any quantity computed from them. It is chosen before the fit
                   and the fit then answers the question it was asked.
                 </p>
-                <p>
-                  We could hope that the score on held-back people picks it out,
-                  which is the best available procedure and is still not a
-                  principle. That score is itself a measurement made on a handful
-                  of people and carries their noise, so it can prefer one degree
-                  to a neighbour for reasons that have nothing to do with either.
-                  On this page&rsquo;s seven held-back people it reads 0.9785 at
-                  degree ten, the highest reading anywhere in the sweep, and
-                  0.3641 at degree eleven, and no property of the relationship
-                  between height and weight changes between those two settings.
+                <>
+<p>
+                  We could hope that the score on held-back people picks it out, which is the best available procedure and is still not a principle. That score is itself a measurement made on a handful of people and carries their noise, so it can prefer one degree to a neighbour for reasons that have nothing to do with either.
                 </p>
+                <p>
+                  On this page&rsquo;s seven held-back people it reads 0.9785 at degree ten, the highest reading anywhere in the sweep, and 0.3641 at degree eleven, and no property of the relationship between height and weight changes between those two settings.
+                </p>
+</>
                 <InAModel title="What that reading is worth">
                   <p>
                     Degree ten scoring above degree four is a fact about these
@@ -762,16 +748,14 @@ export default function PolynomialFeaturesPage() {
               </SubSection>
 
               <SubSection title="17. The expansion is blind to what a column means">
-                <p>
-                  The expansion builds every product up to the degree, and it has
-                  no way of knowing what any of the columns are. Multiply a
-                  height in centimetres by a girth in centimetres and the result
-                  is an area, which is a quantity a person could reason about.
-                  Multiply a height by a code that happens to say which of four
-                  clinics a person attends, written as 1, 2, 3 and 4, and the
-                  result is arithmetic that means nothing whatever. Both columns
-                  are built, both are handed to the fit, and both get a weight.
+                <>
+<p>
+                  The expansion builds every product up to the degree, and it has no way of knowing what any of the columns are. Multiply a height in centimetres by a girth in centimetres and the result is an area, which is a quantity a person could reason about. Multiply a height by a code that happens to say which of four clinics a person attends, written as 1, 2, 3 and 4, and the result is arithmetic that means nothing whatever.
                 </p>
+                <p>
+                  Both columns are built, both are handed to the fit, and both get a weight.
+                </p>
+</>
                 <p>
                   The table gathers four such cases. Two of them are failures
                   of the mathematics rather than of taste, and they fail in
@@ -825,19 +809,14 @@ export default function PolynomialFeaturesPage() {
                   people did not change.
                 </p>
                 <PowersAndUnits />
-                <p>
-                  Plain least squares does not feel it, and the widget shows why
-                  it is tempting to conclude there is no problem. A change of
-                  unit multiplies a column by a constant, a coefficient can
-                  divide by that same constant, and the fit lands in exactly the
-                  same place, 0.984072 in both readings. The moment a penalty is
-                  switched on it feels it severely, because the penalty is a
-                  statement about the size of the coefficients and the
-                  coefficients have just changed size by four orders of
-                  magnitude. At a penalty of 100 the centimetre fit scores
-                  0.977374 and the metre fit 0.703648, from the same people and
-                  the same instruction.
+                <>
+<p>
+                  Plain least squares does not feel it, and the widget shows why it is tempting to conclude there is no problem. A change of unit multiplies a column by a constant, a coefficient can divide by that same constant, and the fit lands in exactly the same place, 0.984072 in both readings. The moment a penalty is switched on it feels it severely, because the penalty is a statement about the size of the coefficients and the coefficients have just changed size by four orders of magnitude.
                 </p>
+                <p>
+                  At a penalty of 100 the centimetre fit scores 0.977374 and the metre fit 0.703648, from the same people and the same instruction.
+                </p>
+</>
                 <InAModel title="And where least squares does feel it">
                   <p>
                     At degree fourteen on fifteen people the fit has one number
@@ -932,6 +911,266 @@ export default function PolynomialFeaturesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 to 6",
+          quiz: [
+            choice(
+              "Three measurements at degree four make 34 columns. Why can the twenty-two people not be fitted?",
+              [
+                "Because 34 columns plus the intercept is 35 numbers, and a fit cannot set more numbers than it has people",
+                "Because the degree must not exceed the number of measurements",
+                "Because the fourth powers of a height overflow",
+                "Because the fit would be untrustworthy, so it is declined as a matter of policy",
+              ],
+              0,
+              "The growth table is also a table of how many people each expansion demands, and the fit is refused rather than answered. At degree three the same three measurements make 19 columns, which is 20 numbers and comfortably inside twenty-two people, so one step of the degree did it. On a wide table the ceiling arrives at degree two, since ten measurements already ask for 66 numbers there.",
+            ),
+            several(
+              "Which of these hold, about what the expansion and the fit behind it can and cannot do?",
+              [
+                "The score on the fitted people cannot fall as the degree rises, whatever the shape of the data",
+                "A column that takes only the values zero and one expands into a square identical to itself, and the fit is refused for having no unique answer",
+                "A column holding a clinic code written as 1, 2, 3 and 4 is refused, since its products mean nothing",
+                "A column with only a few distinct values keeps responding to the degree, since every power is a new column",
+              ],
+              [0, 1],
+              "Every column a higher degree adds is a new one, so the lower degree’s answer is still available by setting the new weight to zero, which is why the training score climbs from 0.9620 to 0.9998 across the sweep and is no evidence about the degree. A two-valued column’s square is the column over again, so the fit is handed two identical columns and has no unique answer, and it is refused. The clinic code is the quiet failure, since the expansion builds its products, the fit goes through, and the result claims that clinic 4 is twice as much of something as clinic 2. And a column with only a few distinct values quietly stops responding to the degree at all, which looks like a flat curve rather than like an error.",
+            ),
+            choice(
+              "The held-back seven read 0.9762 at degree four, 0.9105 at nine, 0.9785 at ten and 0.3641 at eleven. What is the honest reading?",
+              [
+                "The instrument is too coarse to separate the settings, so take the lowest degree whose reading is near the best",
+                "Degree ten is the right degree, since it is the highest reading in the sweep",
+                "The relationship between height and weight changes between degrees ten and eleven",
+                "The sweep should be rerun until the curve is smooth",
+              ],
+              0,
+              "That score is a measurement made on a handful of people and carries their noise, so it can prefer one degree to a neighbour for reasons that have nothing to do with either. Degree ten scoring above degree four is a fact about those seven people rather than about the relationship, and the degree has no setting a derivation could supply.",
+            ),
+            choice(
+              "A penalty of one thousandth is applied across the sweep. What did it measure?",
+              [
+                "Degree fourteen moves from −24,967.20 to 0.9631, while degree four moves from 0.9762 to 0.9675",
+                "Every degree improves, with the largest gain at the degree that was already best",
+                "Degree fourteen is unaffected, since the penalty is far too small to matter there",
+                "The penalty removes the need to measure on people the fit never saw",
+              ],
+              0,
+              "The wild swings come from very large weights cancelling almost exactly at the people and not at all between them, so making large weights expensive repairs them. The shrinkage is insurance. Where the degree was already sensible it costs 0.0087 of the held-back score, and where it was not it is worth about twenty-five thousand.",
+            ),
+            several(
+              "Which of these did the page measure about writing the heights in metres rather than centimetres?",
+              [
+                "Plain least squares lands in the same place, 0.984072 under either unit",
+                "At a penalty of 100 the centimetre fit scores 0.977374 and the metre fit 0.703648",
+                "The stepped fit reads 0.990159 under both units, identical to the last digit",
+                "The expansion refuses the metre columns, because the cubes are too small to separate",
+              ],
+              [0, 1, 2],
+              "A change of unit multiplies a column by a constant and a coefficient can divide by that same constant, so an unpenalised fit cannot feel it. A penalty is a statement about the size of the coefficients, and those have just changed size by four orders of magnitude. The stepped fit only ever asks which side of a threshold a value falls on, and a change of unit moves the value and the threshold together.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Expanding the Crowd With the Library",
+          practice: [
+            exercise(
+              "Build the columns, and meet one that duplicates another",
+              ["Part 3 hands the fit four people, the corners of the twelve builds, and every column a degree-two expansion makes from their height and girth. Build that expansion with PolynomialFeatures and print the columns, then build the same expansion with the products left out and print only its column names.", "Part 6 says a column that takes only two values announces itself, because its square is the column over again. Expand the height of eight people beside a column that records whether each one swims as 0 or 1, print the swims column next to its square, and then try to fit MultipleLinearRegression on the result, catching what the library raises."],
+              `from oop_ml import Feature, MLLibError, MultipleLinearRegression, PolynomialFeatures
+
+corners = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
+expansion = PolynomialFeatures(degree=2).fit(corners)
+# Print how many columns the expansion built, then each column's name and
+# its four values, then the names of a degree-two expansion with
+# include_interactions=False.
+
+people = [Feature("height", [150, 160, 170, 180, 155, 165, 175, 185]), Feature("swims", [0, 1, 0, 1, 1, 0, 1, 0])]
+weight = Feature("weight", [50, 62, 70, 84, 54, 63, 77, 88])
+# Expand people to degree two, print the swims column and the swims^2 column,
+# and try to fit a MultipleLinearRegression on all the columns, printing the
+# name of the error the library raises.`,
+              `from oop_ml import Feature, MLLibError, MultipleLinearRegression, PolynomialFeatures
+
+corners = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
+expansion = PolynomialFeatures(degree=2).fit(corners)
+print(f"{expansion.terms.n_terms} columns")
+for column in expansion.transform(corners):
+    print(f"  {column.name}: {[int(value) for value in column.values]}")
+powers_only = PolynomialFeatures(degree=2, include_interactions=False).fit(corners)
+print(f"powers alone: {powers_only.terms.names}")
+
+people = [Feature("height", [150, 160, 170, 180, 155, 165, 175, 185]), Feature("swims", [0, 1, 0, 1, 1, 0, 1, 0])]
+weight = Feature("weight", [50, 62, 70, 84, 54, 63, 77, 88])
+columns = PolynomialFeatures(degree=2).fit(people).transform(people)
+for column in columns:
+    if column.name in ("swims", "swims^2"):
+        print(f"  {column.name}: {[int(value) for value in column.values]}")
+try:
+    MultipleLinearRegression().fit(columns, weight)
+except MLLibError as refusal:
+    print(f"the fit is refused with {type(refusal).__name__}")`,
+              `5 columns
+  height: [150, 150, 180, 180]
+  girth: [66, 96, 66, 96]
+  height^2: [22500, 22500, 32400, 32400]
+  height*girth: [9900, 14400, 11880, 17280]
+  girth^2: [4356, 9216, 4356, 9216]
+powers alone: ('height', 'girth', 'height^2', 'girth^2')
+  swims: [0, 1, 0, 1, 1, 0, 1, 0]
+  swims^2: [0, 1, 0, 1, 1, 0, 1, 0]
+the fit is refused with CollinearFeaturesError`,
+              { hints: ["fit fixes the list of terms from the column names and transform builds the columns, so the four values of every term come from transform, one Feature per term, each carrying its name.", "The learned list of terms is on terms, which has n_terms and names, and the names are written with ^ for a power and * for a product.", "The refusal comes from the fit, not from the expansion, which builds the duplicate without complaint. Every refusal the library makes derives from MLLibError, so catching that is enough."], check: numberCheck("What does the product column hold for the person 180 tall with a girth of 96?", 17280, 0.5, "The product column holds each person's height multiplied by their girth, and 180 times 96 is 17,280, where Part 3 gave the 150 by 66 person's 9,900 and the 180 by 66 person's 11,880. The fit treats it like any measurement. The two-valued column is the other half of the lesson, since 0 squared is 0 and 1 squared is 1, so swims^2 is swims over again and a fit handed two identical columns has no unique answer, which the library refuses rather than picking one.") },
+            ),
+            exercise(
+              "Hold seven back and bend the line through the fifteen",
+              ["Every score on this page comes from one split, fifteen people fitted and seven held back, drawn with TrainTestSplitter at a test fraction of 0.3 under seed 3, and the height column is standardized on the fitted fifteen before it is raised. Make that split, then for degrees one to four expand the standardized height, fit MultipleLinearRegression and print the score on the fitted people, the score on the seven held back, the total of the squared misses over all twenty-two, and the prediction for the 104 cm child.", "Part 1 arrives at 0.9620 and 548.33 for the straight line, with the child at 7.80 kg, and Part 2 at 307.18 and 225.56 for the next two degrees. The held-back score at degree one is a number the lesson does not print."],
+              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, Standardizer, TrainTestSplitter
+
+heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
+weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
+
+split = TrainTestSplitter(test_fraction=0.3, random_seed=3).split(
+    Dataset([Feature("height", heights)], Feature("weight", weights))
+)
+scaler = Standardizer().fit(list(split.training.input_features))
+fitted_rows = scaler.transform(list(split.training.input_features))
+held_rows = scaler.transform(list(split.testing.input_features))
+everyone = scaler.transform([Feature("height", heights)])
+
+for degree in (1, 2, 3, 4):
+    # Fit a PolynomialFeatures of this degree on fitted_rows, fit a
+    # MultipleLinearRegression on the expanded fitted rows and the training
+    # target, and print the fitted score, the held-back score, the residual sum
+    # of squares over everyone, and the prediction for the first person.
+    pass`,
+              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, Standardizer, TrainTestSplitter
+
+heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
+weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
+
+split = TrainTestSplitter(test_fraction=0.3, random_seed=3).split(
+    Dataset([Feature("height", heights)], Feature("weight", weights))
+)
+scaler = Standardizer().fit(list(split.training.input_features))
+fitted_rows = scaler.transform(list(split.training.input_features))
+held_rows = scaler.transform(list(split.testing.input_features))
+everyone = scaler.transform([Feature("height", heights)])
+
+for degree in (1, 2, 3, 4):
+    expansion = PolynomialFeatures(degree=degree).fit(fitted_rows)
+    line = MultipleLinearRegression().fit(expansion.transform(fitted_rows), split.training.target_feature)
+    fitted = line.score(expansion.transform(fitted_rows), split.training.target_feature)
+    held = line.score(expansion.transform(held_rows), split.testing.target_feature)
+    misses = line.evaluate(expansion.transform(everyone), Feature("weight", weights)).residual_sum_of_squares
+    child = float(line.predict(expansion.transform(everyone))[0])
+    print(f"degree {degree}: fitted {fitted:.4f}, held back {held:.4f}, squared misses {misses:.2f}, child {child:.2f} kg")`,
+              `degree 1: fitted 0.9620, held back 0.9512, squared misses 548.33, child 7.80 kg
+degree 2: fitted 0.9834, held back 0.9623, squared misses 307.18, child 14.02 kg
+degree 3: fitted 0.9864, held back 0.9755, squared misses 225.56, child 16.67 kg
+degree 4: fitted 0.9864, held back 0.9762, squared misses 222.79, child 16.57 kg`,
+              { hints: ["A split holds two Datasets, training and testing, and each carries input_features and target_feature. The scaler and the expansion are both fitted on the training rows alone and then applied to everything.", "score takes the expanded columns and the target and answers R squared. evaluate takes the same two and answers an object whose residual_sum_of_squares is the total of the squared misses.", "The expansion of everyone is in the original order, so the 104 cm child is the first prediction."], check: numberCheck("What score do the seven held-back people give the straight line?", 0.9512, 0.0005, "The straight line scores 0.9620 on the fifteen it was fitted to and 0.9512 on the seven it never saw, and the two climb together through the early degrees, the held-back score reaching 0.9762 at degree four. The squared misses fall 548.33, 307.18, 225.56 as the curve bends, and the child the line put at 7.80 kg lands at 14.02 with the square and 16.67 with the cube, against a measured 16.1.") },
+            ),
+            exercise(
+              "Run the degree up to fourteen, with and without a penalty",
+              ["Part 5 runs the same split up to degree fourteen, where the fit has fifteen numbers to set and fifteen people to set them from. Extend the loop to degrees 9, 10, 11, 12 and 14 and print the fitted and held-back scores and what the curve answers for the 131 cm person, who weighs 27.6 kg.", "Then fit RidgeRegression with a penalty of 0.001 at degrees 4 and 14 and print the held-back score of each. Part 5 says the penalty takes degree fourteen from −24,967.20 to 0.9631 and degree four from 0.9762 to 0.9675."],
+              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, RidgeRegression, Standardizer, TrainTestSplitter
+
+heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
+weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
+
+split = TrainTestSplitter(test_fraction=0.3, random_seed=3).split(
+    Dataset([Feature("height", heights)], Feature("weight", weights))
+)
+scaler = Standardizer().fit(list(split.training.input_features))
+fitted_rows = scaler.transform(list(split.training.input_features))
+held_rows = scaler.transform(list(split.testing.input_features))
+everyone = scaler.transform([Feature("height", heights)])
+
+for degree in (9, 10, 11, 12, 14):
+    expansion = PolynomialFeatures(degree=degree).fit(fitted_rows)
+    line = MultipleLinearRegression().fit(expansion.transform(fitted_rows), split.training.target_feature)
+    # Print the fitted score, the held-back score, and the prediction for the
+    # fifth person, who is 131 cm tall.
+
+for degree in (4, 14):
+    # Fit a RidgeRegression with penalty=0.001 on the same expanded rows and
+    # print its held-back score.
+    pass`,
+              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, RidgeRegression, Standardizer, TrainTestSplitter
+
+heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
+weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
+
+split = TrainTestSplitter(test_fraction=0.3, random_seed=3).split(
+    Dataset([Feature("height", heights)], Feature("weight", weights))
+)
+scaler = Standardizer().fit(list(split.training.input_features))
+fitted_rows = scaler.transform(list(split.training.input_features))
+held_rows = scaler.transform(list(split.testing.input_features))
+everyone = scaler.transform([Feature("height", heights)])
+
+for degree in (9, 10, 11, 12, 14):
+    expansion = PolynomialFeatures(degree=degree).fit(fitted_rows)
+    line = MultipleLinearRegression().fit(expansion.transform(fitted_rows), split.training.target_feature)
+    fitted = line.score(expansion.transform(fitted_rows), split.training.target_feature)
+    held = line.score(expansion.transform(held_rows), split.testing.target_feature)
+    at_131 = float(line.predict(expansion.transform(everyone))[4])
+    print(f"degree {degree}: fitted {fitted:.4f}, held back {held:.2f}, the 131 cm person {at_131:.2f} kg")
+
+for degree in (4, 14):
+    expansion = PolynomialFeatures(degree=degree).fit(fitted_rows)
+    shrunk = RidgeRegression(penalty=0.001).fit(expansion.transform(fitted_rows), split.training.target_feature)
+    print(f"degree {degree} with the penalty: held back {shrunk.score(expansion.transform(held_rows), split.testing.target_feature):.4f}")`,
+              `degree 9: fitted 0.9874, held back 0.91, the 131 cm person 25.45 kg
+degree 10: fitted 0.9881, held back 0.98, the 131 cm person 21.56 kg
+degree 11: fitted 0.9888, held back 0.36, the 131 cm person 2.83 kg
+degree 12: fitted 0.9970, held back -36.35, the 131 cm person -261.97 kg
+degree 14: fitted 0.9998, held back -24967.20, the 131 cm person -9002.94 kg
+degree 4 with the penalty: held back 0.9761
+degree 14 with the penalty: held back 0.9631`,
+              { hints: ["The setup is the previous problem's, and the only change inside the loop is which person is read off the predictions. The 131 cm person is the fifth in the list, which is index 4.", "RidgeRegression takes the same expanded columns that MultipleLinearRegression took, and its one hyperparameter is penalty, set at construction.", "The held-back score at degree fourteen is a large negative number, so it is printed to two places rather than four to keep the line readable."], check: numberCheck("What does the degree-fourteen curve answer for the 131 cm person, in kilograms?", -9002.94, 0.05, "The 131 cm person is one of the seven held back, and the degree-fourteen curve passes through every one of the fifteen fitted people while swinging to −9,002.94 kg between them, which is why its fitted score reads 0.9998 and its held-back score −24,967.20. The penalty makes large weights expensive and takes that fit to 0.9631, a working model built from a ruinous one, while costing degree four 0.0087 of its held-back score.") },
+            ),
+            exercise(
+              "Give the fit a product column on the twelve builds",
+              ["Part 3 lays out twelve people as four girths at each of three heights and fits them three ways, a plane in height and girth, the powers alone at degree two, and the powers with the products. Fit all three with MultipleLinearRegression and print each one's column count, the total of its squared misses, and how much weight going from a girth of 66 to a girth of 96 adds at 150 cm and at 180 cm.", "Part 3 arrives at 28.07 for the powers alone and 1.83 with the products, and at 49.45 everywhere for a fit with one coefficient for girth against 44.59 and 54.31 with the product in. The misses the plane leaves are a number the lesson does not print."],
+              `from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
+
+heights = [150, 150, 150, 150, 165, 165, 165, 165, 180, 180, 180, 180]
+girths = [66, 76, 86, 96, 66, 76, 86, 96, 66, 76, 86, 96]
+weights = [38.5, 51.6, 67.5, 83.0, 41.6, 56.9, 72.3, 90.9, 45.5, 62.2, 79.6, 100.3]
+columns = [Feature("height", heights), Feature("girth", girths)]
+target = Feature("weight", weights)
+ends = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
+
+for label, degree, products in (("a plane", 1, True), ("the powers alone", 2, False), ("the powers and the products", 2, True)):
+    # Build the expansion, fit the line on the expanded columns, read the
+    # residual sum of squares off evaluate, predict the four ends through the
+    # same expansion, and print the column count, the misses, and the two gains.
+    pass`,
+              `from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
+
+heights = [150, 150, 150, 150, 165, 165, 165, 165, 180, 180, 180, 180]
+girths = [66, 76, 86, 96, 66, 76, 86, 96, 66, 76, 86, 96]
+weights = [38.5, 51.6, 67.5, 83.0, 41.6, 56.9, 72.3, 90.9, 45.5, 62.2, 79.6, 100.3]
+columns = [Feature("height", heights), Feature("girth", girths)]
+target = Feature("weight", weights)
+ends = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
+
+for label, degree, products in (("a plane", 1, True), ("the powers alone", 2, False), ("the powers and the products", 2, True)):
+    expansion = PolynomialFeatures(degree=degree, include_interactions=products).fit(columns)
+    fit = MultipleLinearRegression().fit(expansion.transform(columns), target)
+    misses = fit.evaluate(expansion.transform(columns), target).residual_sum_of_squares
+    predicted = [float(value) for value in fit.predict(expansion.transform(ends))]
+    print(f"{label}: {expansion.terms.n_terms} columns, squared misses {misses:.2f}, "
+          f"girth 66 to 96 adds {predicted[1] - predicted[0]:.2f} kg at 150 cm and {predicted[3] - predicted[2]:.2f} kg at 180 cm")`,
+              `a plane: 2 columns, squared misses 36.87, girth 66 to 96 adds 49.45 kg at 150 cm and 49.45 kg at 180 cm
+the powers alone: 4 columns, squared misses 28.07, girth 66 to 96 adds 49.45 kg at 150 cm and 49.45 kg at 180 cm
+the powers and the products: 5 columns, squared misses 1.83, girth 66 to 96 adds 44.59 kg at 150 cm and 54.31 kg at 180 cm`,
+              { hints: ["A degree-one expansion with products is just the two columns, so the same loop builds the plane. include_interactions=False at degree two is the powers alone.", "The expansion fitted on the twelve people is the one to transform the four ends through, so the ends get the same columns in the same order.", "The gain at a height is the prediction at girth 96 less the prediction at girth 66 for that height, which is two differences of the four predictions."], check: numberCheck("What total of squared misses does the fit with the products leave?", 1.83, 0.01, "The plane leaves 36.87 and the powers alone 28.07, because every fit with one coefficient for girth has to answer one number for the gain, 49.45 at every height, when the people say 44.50, 49.30 and 54.80. The product column lets the coefficient of girth carry height inside it, the fit answers 44.59 and 54.31 at the two ends, and one extra column removes 93 percent of what was left.") },
+            ),
+          ],
         },
       ]}
     />

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -26,7 +29,7 @@ import { VarianceFloorChart } from "@/components/widgets/VarianceFloorChart";
 export const metadata: Metadata = {
   title: "Random Forests · oop_ml",
   description:
-    "The bagged committee with disagreement built in. Each split is offered a random subset of the features, and the page follows what that one rule costs and buys.",
+    "Give each tree different feature choices so their combined prediction depends less on the same few splits.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -34,70 +37,34 @@ const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dar
 export default function RandomForestsPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["random-forests"]}
+      technicalStart="Part 2. The One Rule Random Forests Change"
+      openingTitle="A Crowd That Keeps Making the Same Mistake"
+      playgroundIntro="Compare the questions and predictions of individual trees. Change how many features each split may consider and watch what happens to their agreement."
       title="Random Forests"
-      tagline="The bagged committee with disagreement built in, one random subset of features per question."
+      tagline="Give each tree different feature choices so their combined prediction depends less on the same few splits."
       prerequisites={
         <>
           This page changes one rule of{" "}
           <Link href="/concepts/bagging" className={link}>
             bagging
           </Link>
-          , so read that page first, including its closing count of how alike
-          the bagged trees turned out to be. The out-of-bag score is used
-          here as evidence and not explained again; the{" "}
+          . Its worked example shows why resampling alone can leave trees
+          making similar mistakes. For the out-of-bag score used here, the{" "}
           <Link href="/concepts/bagging" className={link}>
             bagging page
           </Link>{" "}
           covers how it is built and what it can and cannot say.
         </>
       }
-      history={
-        <>
-          <p>
-            Bagging ended on its own limit. The committee cancels the errors
-            its members make privately, though members grown on resamples of
-            the same crowd still think largely alike, and 20 of the 25 bagged
-            trees on the tangled crowd opened with a question about height.
-            Two groups working on handwriting reached the fix first. Tin Kam
-            Ho at AT&amp;T Bell Laboratories published &ldquo;Random Decision
-            Forests&rdquo; in 1995, training each tree of a committee on a
-            random subset of the pixel features of handwritten digits, so that
-            no two trees read the same coordinates and their errors were less
-            alike. Yali Amit and Donald Geman, in a 1997 paper on recognising
-            shapes with randomised trees, moved the randomness inside the
-            tree, drawing a fresh random subset of features at every split
-            rather than once per tree. Leo Breiman cited both when he folded
-            the idea into the bagged committee in &ldquo;Random Forests&rdquo;
-            in 2001, hiding features from each split, and he called the
-            result a random forest.
-          </p>
-          <p>
-            What his paper added beyond the recipe was a bound on the
-            forest&rsquo;s error in terms of two numbers, the strength of the
-            individual trees and the correlation between them, and the bound
-            falls as the trees get stronger and as they get less alike. The
-            change to bagging is one sentence. At every split of every tree,
-            instead of letting the search consider every feature, offer it a
-            random subset and make it choose from that, and everything else,
-            the resamples, the deep trees, the vote, the out-of-bag score,
-            carries over unchanged. The whole page is about the trade that
-            sentence sets up and that Breiman&rsquo;s bound names. Restricting
-            the features makes the trees less alike, and it can make each
-            tree worse, and the forest improves on bagging only when the
-            first effect is worth more than the second. On this page&rsquo;s
-            crowd there are only two features to hide, so the restriction is
-            as severe as it can be, and the page measures which way the trade
-            went rather than assuming it.
-          </p>
-        </>
-      }
+
       playground={<CommitteeScrubber maxFeatures={1} />}
       sections={[
         {
           title: "Part 1. The Limit Bagging Leaves Behind",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The similarity left behind by bagging">
                 <p>
                   Here is where the bagging page left the tangled crowd. The
@@ -183,7 +150,7 @@ export default function RandomForestsPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The One Rule Random Forests Change",
@@ -533,22 +500,66 @@ export default function RandomForestsPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 to 4",
+          quiz: [
+            trueFalse(
+              "Resampling alone still left 20 of the 25 bagged trees opening with a question about height.",
+              true,
+              "At the root two candidates compete and the tree takes whichever earns the larger impurity reduction on the rows it was given. Changing the rows changes both gains, and a feature that is consistently the strongest keeps winning anyway. Across every pair of bagged members the two agreed on 72.4 percent of the people neither had seen, at an error correlation of 0.463.",
+            ),
+            choice(
+              "What exactly does a random forest change about how a tree grows?",
+              [
+                "It draws a random subset of the features before each search, so the tree picks the best of a smaller board",
+                "It scores the candidate splits differently, favouring features that earlier splits did not use",
+                "It grows each tree on a random subset of the features chosen once at the start",
+                "It replaces the impurity reduction with a random tie-break among the top candidates",
+              ],
+              0,
+              "The tree still chooses the best available split by exactly the same scoring, and what changed is which splits were available to choose from. On the tangled crowd p is 2, so the only forest possible is m = 1 and each feature is offered at any given split with probability one half.",
+            ),
+            trueFalse(
+              "The feature subset is drawn once for a tree and used at every node of it.",
+              false,
+              "It is redrawn at every split. The root gets a draw, then the left child gets its own, then the right child, and so on down every branch still eligible to split, so the randomness compounds through the tree. A tree denied height at the root can be offered it one level down and take the same 147.5 threshold the ordinary tree would have taken first.",
+            ),
+            choice(
+              "One resample is held fixed and only the lottery seed is varied. What came out?",
+              [
+                "Seed 1 roots on height at 147.5 and finishes at depth 4 with 7 leaves, while seeds 2, 3 and 4 root on weight less than 41.5 and grow deeper",
+                "All four seeds produced the same tree, since the training rows were identical",
+                "The four trees differed in their thresholds but all rooted on height",
+                "The trees differed only below the root, since the first draw always offers every feature",
+              ],
+              0,
+              "Whatever differs between those trees was caused by the permissions and by nothing else, which is the cleanest way to see what the lottery does. A tree offered both features roots on height, so a seed whose first draw withholds it opens on weight less than 41.5, the question the ordinary tree ranked second, and every node below is searched on different rows. The first two trees agree on 88 percent of the crowd, 22 of the 25 people, from identical training rows.",
+            ),
+            several(
+              "Bagging and the forest are run on the same crowd under the same seed. Which of these did the lottery do?",
+              [
+                "Spread the roots from 20 and 5 to 8 and 17",
+                "Left the prediction agreement almost where it was, 0.724 against 0.731",
+                "Lowered the error correlation, which is the thing the restriction is for",
+                "Lowered the mean out-of-bag strength of a member from 0.641 to 0.572",
+              ],
+              [0, 1, 3],
+              "The error correlation went the wrong way, from 0.463 to 0.517, so on this crowd under this seed the lottery rearranged the trees without making their mistakes less shared, and paid for it in strength. The committee’s own out-of-bag score fell from 0.64 to 0.52. The census is the most visible readout and the easiest to over-read, since it says nothing about whether the predictions diverged.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. The Two-Feature Teaching Example",
           content: (
             <>
               <SubSection title="16. Why two features make the restriction severe">
-                <p>
-                  With height and weight only, m = 1 is the harshest
-                  restriction the rule can impose. Every node loses half of
-                  everything it has, and the two halves are not equal. At the
-                  root of the whole crowd the best height question earns
-                  0.188 and the best weight question 0.103, so a node offered
-                  weight alone cannot compare it with anything and takes a
-                  question worth just over half as much. Section 5&rsquo;s
-                  lottery counts how often the strongest feature was denied,
-                  and at m = 1 it was withheld in 8 of the 12 draws shown,
-                  about what a coin should manage.
+                <>
+<p>
+                  With height and weight only, m = 1 is the harshest restriction the rule can impose. Every node loses half of everything it has, and the two halves are not equal. At the root of the whole crowd the best height question earns 0.188 and the best weight question 0.103, so a node offered weight alone cannot compare it with anything and takes a question worth just over half as much.
                 </p>
+                <p>
+                  Section 5&rsquo;s lottery counts how often the strongest feature was denied, and at m = 1 it was withheld in 8 of the 12 draws shown, about what a coin should manage.
+                </p>
+</>
                 <KeepInMind>
                   A one-feature subset is a particularly strong restriction
                   when the complete dataset contains only two features. The
@@ -570,22 +581,17 @@ export default function RandomForestsPage() {
                     ["out-of-bag accuracy", "0.64", "0.52"],
                   ]}
                 />
-                <p>
-                  The forest&rsquo;s roots are more evenly spread across the
-                  two features, and that much is directly supported. The
-                  particular 8 to 17 split is random variation under this
-                  run, not a finding that weight became the better predictor,
-                  since height was denied at half the roots by the coin
-                  rather than by the data. And under this dataset, this
-                  configuration, 25 trees and this random draw, the forest
-                  scored worse. The restriction appears to have cost more
-                  strength than it recovered through lower correlation, and
-                  section 13 showed the correlation did not fall at all.
-                  What this one result does not establish is that bagging is
-                  generally better on two-feature problems, and 25 trees is
-                  few enough that a different seed could tell a different
-                  story. So run the seeds.
+                <>
+<p>
+                  The forest&rsquo;s roots are more evenly spread across the two features, and that much is directly supported. The particular 8 to 17 split is random variation under this run, not a finding that weight became the better predictor, since height was denied at half the roots by the coin rather than by the data. And under this dataset, this configuration, 25 trees and this random draw, the forest scored worse.
                 </p>
+                <p>
+                  The restriction appears to have cost more strength than it recovered through lower correlation, and section 13 showed the correlation did not fall at all. What this one result does not establish is that bagging is generally better on two-feature problems, and 25 trees is few enough that a different seed could tell a different story.
+                </p>
+                <p>
+                  So run the seeds.
+                </p>
+</>
               </SubSection>
 
               <SubSection title="18. Repeating the comparison across seeds">
@@ -627,34 +633,22 @@ export default function RandomForestsPage() {
                   a node is offered, something useful is on the board.
                 </p>
                 <StrengthCorrelationSweep />
-                <p>
-                  The same restriction does two different things. In the
-                  sparse world the members lose strength fast as m falls,
-                  from 0.932 at m = 6 to 0.757 at m = 1, because a node
-                  offered only noise columns asks a useless question. Their
-                  errors become far less shared at the same time, the
-                  correlation falling from 0.694 to 0.141, and the two
-                  effects cancel almost exactly, so the committee&rsquo;s
-                  score sits between 0.933 and 0.95 at every m and the
-                  restriction is close to free. In the shared world no
-                  feature is much better than another, so restriction costs
-                  almost no strength, 0.68 to 0.69 at every m, while the
-                  correlation still falls, 0.205 to 0.117, and the committee
-                  gains, from 0.75 at m = 6 to 0.80 at m = 1 and 0.817 at
-                  m = 2.
+                <>
+<p>
+                  The same restriction does two different things. In the sparse world the members lose strength fast as m falls, from 0.932 at m = 6 to 0.757 at m = 1, because a node offered only noise columns asks a useless question. Their errors become far less shared at the same time, the correlation falling from 0.694 to 0.141, and the two effects cancel almost exactly, so the committee&rsquo;s score sits between 0.933 and 0.95 at every m and the restriction is close to free.
                 </p>
                 <p>
-                  Put the three measured cases side by side. On the tangled
-                  crowd the restriction cost 0.12. In the sparse world it
-                  cost nothing to speak of. In the shared world it gained
-                  0.05 to 0.07. A fourth arrangement, three noisy copies of
-                  one feature beside three noise columns, was measured at 25
-                  members and lost 0.06 at m = 1, which is the world the
-                  phrase redundant features usually brings to mind, and at
-                  a committee size section 18 has already shown to be
-                  unstable. What decided each case was whether a node denied
-                  its best feature was offered something nearly as good.
+                  In the shared world no feature is much better than another, so restriction costs almost no strength, 0.68 to 0.69 at every m, while the correlation still falls, 0.205 to 0.117, and the committee gains, from 0.75 at m = 6 to 0.80 at m = 1 and 0.817 at m = 2.
                 </p>
+</>
+                <>
+<p>
+                  Put the three measured cases side by side. On the tangled crowd the restriction cost 0.12. In the sparse world it cost nothing to speak of. In the shared world it gained 0.05 to 0.07. A fourth arrangement, three noisy copies of one feature beside three noise columns, was measured at 25 members and lost 0.06 at m = 1, which is the world the phrase redundant features usually brings to mind, and at a committee size section 18 has already shown to be unstable.
+                </p>
+                <p>
+                  What decided each case was whether a node denied its best feature was offered something nearly as good.
+                </p>
+</>
                 <KeepInMind>
                   The same amount of feature randomness can help when the
                   signal is spread across several features and can hurt when
@@ -779,17 +773,20 @@ export default function RandomForestsPage() {
               </SubSection>
 
               <SubSection title="25. A numerical strength-correlation example">
-                <p>
-                  Two hypothetical committees of 25. Bagging has σ² = 1.0 and
-                  ρ = 0.5, so its variance is 0.5 + 0.5 / 25 = 0.52. A forest
-                  whose members are noisier, σ² = 1.2, but far less
-                  correlated, ρ = 0.25, sits at 0.3 + 0.9 / 25 = 0.336, and
-                  the trade paid. Now let σ² rise to 1.6 while ρ only slips
-                  to 0.45. That forest sits at 0.72 + 0.88 / 25 = 0.755,
-                  worse than bagging, because the fall in ρ was too small to
-                  pay for the rise in σ². The calculator lets you find the
-                  crossing yourself.
-                </p>
+                <>
+                  <p>
+                    Compare three hypothetical committees of twenty-five trees. Each
+                    calculation has a shared-error contribution that averaging cannot
+                    remove and a remaining contribution divided by the committee size.
+                  </p>
+                  <Equation>{"bagging, σ² = 1.0 and ρ = 0.5:\n  variance = 0.5 + 0.5 / 25 = 0.52\n\nforest A, σ² = 1.2 and ρ = 0.25:\n  variance = 0.3 + 0.9 / 25 = 0.336\n\nforest B, σ² = 1.6 and ρ = 0.45:\n  variance = 0.72 + 0.88 / 25 = 0.7552"}</Equation>
+                  <p>
+                    Forest A’s reduced correlation more than pays for its noisier
+                    members. Forest B loses too much individual accuracy for its smaller
+                    reduction in correlation. Use the calculator to find where the trade
+                    changes sign.
+                  </p>
+                </>
                 <TradeCalculator />
                 <KeepInMind>
                   Lower correlation is valuable only relative to the
@@ -798,6 +795,60 @@ export default function RandomForestsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 8",
+          quiz: [
+            choice(
+              "The same comparison is run across eight seeds. What does that add to the single run?",
+              [
+                "The forest beats bagging on one seed and the mean difference is 0.06 in bagging’s favour, so the single run was a fair sample of the procedure",
+                "The forest wins on most seeds, so the single run was unlucky",
+                "The two are indistinguishable once the seeds are averaged",
+                "The census varies wildly across seeds, so no reading of it is safe",
+              ],
+              0,
+              "The census is the steady part. Bagging opens on height in 16 to 23 of 25 trees at every seed and the forest in 7 to 9, which is the coin doing what a coin does. One forest’s census is a random outcome and repeated runs reveal the behaviour of the procedure, and it took eight runs to know that the first one was representative.",
+            ),
+            several(
+              "Two simulated worlds share 120 people and six measurements and differ only in where the signal lives. Which of these did they measure?",
+              [
+                "In the sparse world member strength falls from 0.932 at m = 6 to 0.757 at m = 1 while correlation falls from 0.694 to 0.141, and the committee stays between 0.933 and 0.95",
+                "In the shared world strength barely moves while correlation falls from 0.205 to 0.117, and the committee gains from 0.75 at m = 6 to 0.817 at m = 2",
+                "What decided each case was whether a node denied its best feature was offered something nearly as good",
+                "A fourth arrangement, three noisy copies of one feature beside three noise columns, lost 0.06 at m = 1 with 25 members",
+              ],
+              [0, 1, 2, 3],
+              "All four were measured. In the sparse world the two effects cancel almost exactly, so the restriction is close to free rather than helpful, and the world of three noisy copies behaved like the sparse one, at a committee size the seed check had already shown to be unstable. A long feature list is not itself the thing a forest benefits from, since hundreds of mostly irrelevant columns make a small subset weak in the way the sparse world is weak, only more so.",
+            ),
+            trueFalse(
+              "A 60 percent vote from the committee is a claim that about six in ten such people are adults.",
+              false,
+              "A vote fraction measures committee agreement and is not automatically a calibrated probability. Two cells can be painted the same class with the forest nearly unanimous in one and split 13 to 12 in the other, and the majority map cannot tell them apart, which is why the two are drawn separately.",
+            ),
+            choice(
+              "In Var(committee) = ρσ² + (1 − ρ)σ²/B, what happens as the number of trees grows without bound?",
+              [
+                "The variance approaches ρσ², a floor set by the correlation rather than by the committee size",
+                "The variance approaches zero, since averaging more members removes more noise",
+                "The variance approaches σ², since the members share a common variance",
+                "The variance stops depending on ρ, which is why more trees are the main lever",
+              ],
+              0,
+              "More trees shrink the part of the variance the members do not share and leave the part they do untouched, so lowering ρ is the one lever the forest is pulling. Restriction reaches into both symbols at once, raising σ² where a member is denied its best question and lowering ρ where members are denied it at different moments, and at any finite B both terms are in play.",
+            ),
+            choice(
+              "Three hypothetical committees of twenty-five trees are compared. Which comes out best and why?",
+              [
+                "Forest A at 0.336, because its lower correlation more than pays for its noisier members",
+                "Bagging at 0.52, because its members are the least noisy of the three",
+                "Forest B at 0.7552, because it has the lowest correlation of the three",
+                "All three are equal once the committee size is taken into account",
+              ],
+              0,
+              "Bagging comes to 0.52 and forest B to 0.7552, which loses too much individual accuracy for its smaller reduction in correlation. Forest B does not have the lowest correlation either. Lower correlation is valuable only relative to the accompanying change in member variance, and the model is used to say which way things push rather than to predict a score.",
+            ),
+        ],
         },
         {
           title: "Part 9. Choosing the Feature Subset",
@@ -1017,19 +1068,251 @@ export default function RandomForestsPage() {
                     { expression: "a bootstrap sample missing a class", reason: "the committee states the class width to every member, so a member that saw one class still votes over both." },
                     { expression: "vote ties", reason: "settled by one stated rule, the same rule the bagging page uses." },
                     { expression: "a fixed seed", reason: "reproduces the samples, the lotteries and the committee exactly; each member's lottery is seeded from the committee's seed and its position." },
+                    { expression: "a base tree handed in", reason: "refused at construction; the forest builds its own trees, so depth, the minimum sizes and the subset size are set on the forest itself." },
                   ]}
                 />
                 <p>
                   Several of those were measured on this crowd. A
                   single-class target is refused with a named
-                  error, max_features of zero is refused when the forest is
-                  constructed, and asking for three features of two is
-                  accepted and offers both, which is the bagging column of
-                  the dashboard by another route.
+                  error, and so is a crowd of one person, since one row is
+                  one class. A max_features of zero is refused when the
+                  forest is constructed, before any data is seen, because a
+                  lottery that offers nothing cannot be run. Asking for three
+                  features of two is accepted and offers both, and what comes
+                  back under seed 7 is the bagged committee exactly, the
+                  same 20 and 5 roots, the same 0.96 on the training crowd
+                  and the same 0.64 out of bag, with every member answering
+                  as its bagged twin does. Nothing is drawn when every
+                  feature is already on the board, and the bootstrap samples
+                  come from the same seed, so there is nothing left to
+                  differ.
+                </p>
+                <p>
+                  The seeding row is the one the bagging page recorded being
+                  got wrong. A committee that handed every member its own
+                  single seed made every tree draw the same features at every
+                  node, which is bagging wearing a forest&rsquo;s name, and
+                  the census was what caught it, since twenty trees that all
+                  rooted on the same feature are not a lottery. Each
+                  member&rsquo;s lottery is seeded from the committee&rsquo;s
+                  seed and its own position, so two members never share a
+                  draw, and a refit under the same seed reproduces every
+                  draw. That is also why a forest refuses a base tree handed
+                  to it. The restriction is a setting on the tree, and a tree
+                  handed in already configured would carry its own seed into
+                  every member, which is the fault by another route.
                 </p>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 9 to 12",
+          quiz: [
+            trueFalse(
+              "With m set equal to the number of features, a random forest is exactly bagging.",
+              true,
+              "At m = p nothing is withheld, so every split sees the whole board and chooses what an ordinary tree would, and the only randomness left is the bootstrap. Asking for three features of two on the tangled crowd reaches the same place, since the request is accepted and every split is offered both. The conventional defaults, the square root of p for classification and a third of p for regression, are starting points a dataset is under no obligation to respect, and m is chosen by comparing out-of-bag scores and watching how much they move across seeds.",
+            ),
+            choice(
+              "Impurity importance gives height 0.527 and weight 0.473 on the forest, and height 0.711 and weight 0.289 on the bagged committee from the same seed. What explains the difference?",
+              [
+                "The lottery, which made the trees spend roughly equal impurity reductions on both features",
+                "The data, which the two committees read differently",
+                "The bagged committee saw more rows, so it could tell the two features apart",
+                "The forest normalises its shares and the bagged committee does not",
+              ],
+              0,
+              "The data did not change between the two figures. A forest’s impurity importance describes how that forest used its features, which the lottery decided as much as the data did. The measure can also favour continuous features and features with many candidate thresholds, and correlated features can divide or obscure one another’s share.",
+            ),
+            choice(
+              "Permutation importance gives height 0.64 and weight 0.36 over five shuffles. What is being measured?",
+              [
+                "How much predictive performance depends on a feature, under one particular evaluation procedure",
+                "How causally important the feature is to the label",
+                "How often the feature was chosen at the root",
+                "How much impurity the feature removed across every split",
+              ],
+              0,
+              "The column is shuffled so it keeps its distribution and loses its relationship with the label, and the drop in score is read as reliance. It is a stronger lean than the impurity measure reported and the same ordering the root board gave. Correlated features can substitute for one another, so permuting one may show little loss even when the group matters, and no importance measure establishes causation.",
+            ),
+            choice(
+              "The seed 7 forest is asked about someone 250 centimetres tall weighing 30 kilograms, and returns an adult share of 0.493. At 300 centimetres and 200 kilograms it returns 1.0. What should be read from that?",
+              [
+                "That the forest keeps answering far from its data and the vote share does not know how far away the query is",
+                "That the near tie at 250 centimetres correctly reports the model’s uncertainty about an unusual person",
+                "That the unanimous answer at 300 centimetres is the more trustworthy of the two",
+                "That a classification forest refuses queries beyond the range it saw",
+              ],
+              0,
+              "The near tie is assembled from leaves that were about small children and tall adults, and the unanimous answer is no less far from anything the forest saw. The existence of a prediction does not establish that it is reliable, and distance from the training support is a separate check the forest will not make for you.",
+            ),
+            several(
+              "Which of these were measured on this crowd as part of the implementation contract?",
+              [
+                "A single-class target is refused with a named error",
+                "A max_features of zero is refused when the forest is constructed",
+                "A max_features above the feature count is refused, since there are not enough features to draw from",
+                "A query far outside the crowd is refused rather than answered",
+              ],
+              [0, 1],
+              "Asking for three features of two is accepted, and every split is then offered both, which reaches the bagging column of the dashboard by another route. A refusal for a query far outside the crowd is what the limitations section denies, because a forest still returns a prediction outside familiar data and says nothing about how far away the query was.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Growing the Forest With the Library",
+          practice: [
+            exercise(
+              "Switch the lottery on and read the dashboard’s top rows",
+              ["Fit the bagged committee and the forest the dashboard in section 7 compares. Both have twenty-five members and draw their resamples from seed 7, so they grow on the same twenty-five samples in the same order, and the forest offers each split one feature of the two. Read each committee’s out-of-bag score and count its roots on height and on weight.", "Section 7 reported the roots spreading from 20 and 5 to 8 and 17 and the out-of-bag score falling from 0.64 to 0.52. The seed fixes every draw, so the four numbers should come back exactly."],
+              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+
+bagged = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
+# Fit the forest with the same members and seed, offering one feature per
+# split, then print each committee's out-of-bag score to two places and how
+# many of its members root on height and on weight.`,
+              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+
+bagged = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
+forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit(
+    [heights, weights], is_adult
+)
+
+for name, committee in (("bagging", bagged), ("forest", forest)):
+    roots = [member.root.split.feature_name for member in committee.members]
+    print(f"{name}: out of bag {committee.out_of_bag_score():.2f}, "
+          f"roots on height {roots.count('height')}, on weight {roots.count('weight')}")`,
+              `bagging: out of bag 0.64, roots on height 20, on weight 5
+forest: out of bag 0.52, roots on height 8, on weight 17`,
+              { hints: ["The forest is constructed like the bagged committee with one more setting, max_features, which is how many features each split is offered. On two features the only forest possible is max_features of 1.", "The forest builds its own trees, so it takes no base_model. Depth and the minimum sizes, if you want them, are fields on the forest itself.", "The members are a tuple on either committee, and each member is a tree whose root holds a split, and the split knows the name of the feature it asks about."], check: numberCheck("What out-of-bag score does the forest report, to two places?", 0.52, 0.005, "Thirteen of the twenty-five people are called correctly by the members whose samples omitted them, and 13 over 25 is 0.52, against bagging’s 0.64 on the very same samples. The lottery spread the roots, which section 7 calls the easy part, and on this crowd under this seed it paid for the spread in strength without making the members’ mistakes less shared.") },
+            ),
+            exercise(
+              "Measure each member’s strength out of bag",
+              ["Section 13 defines a member’s strength as its accuracy on the people its own resample omitted, and section 7 reported the mean falling from 0.641 under bagging to 0.572 in the forest. Compute both means yourself from the members and their samples.", "For each member, ask it about the whole crowd, keep only the people in its sample’s out-of-bag positions, and score those against the truth. Print the mean strength of each committee to three places and the weakest and strongest member in each, which the page does not quote."],
+              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+truth = list(is_adult.values)
+
+bagged = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
+forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit(
+    [heights, weights], is_adult
+)
+# For each committee, score every member on the people its own sample omitted,
+# then print the mean strength to three places and the weakest and strongest
+# member to two places.`,
+              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+truth = list(is_adult.values)
+
+bagged = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
+forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit(
+    [heights, weights], is_adult
+)
+
+for name, committee in (("bagging", bagged), ("forest", forest)):
+    strengths = []
+    for member, sample in zip(committee.members, committee.samples):
+        answers = list(member.predict([heights, weights]))
+        omitted = list(sample.out_of_bag)
+        right = sum(1 for person in omitted if answers[person] == truth[person])
+        strengths.append(right / len(omitted))
+    print(f"{name}: mean strength {sum(strengths) / len(strengths):.3f}, "
+          f"weakest {min(strengths):.2f}, strongest {max(strengths):.2f}")`,
+              `bagging: mean strength 0.641, weakest 0.43, strongest 0.88
+forest: mean strength 0.572, weakest 0.33, strongest 0.75`,
+              { hints: ["members and samples are two tuples in the same order, so zipping them pairs every tree with the resample it grew on.", "A sample’s out_of_bag is the list of positions it never drew. Those positions index into the crowd, so they pick out the same people in the member’s answers and in the truth.", "A member answers the whole crowd at once through predict, and the truth is the target’s values. Comparing the two at the omitted positions and dividing by how many there are is the member’s strength."], check: numberCheck("What is the forest’s mean member strength, to three places?", 0.572, 0.0005, "A member denied height at a node takes a weaker question there, and sometimes needs more questions to recover what one would have captured, so the forest’s members are weaker on the people they never saw, 0.572 against bagging’s 0.641. That 0.07 is the price of the lottery, and section 14 is about whether a drop in shared error pays for it, which on this crowd it did not.") },
+            ),
+            exercise(
+              "Ask the forest which feature mattered",
+              ["Section 28 reads impurity importance off the forest as height 0.527 and weight 0.473, against height 0.711 and weight 0.289 on the bagged committee, and section 29 reads permutation importance as height 0.64 and weight 0.36 over five shuffles. Reproduce all three readings.", "Impurity importance is a property of each fitted committee. Permutation importance is a separate measurer that takes the fitted forest, the features and the target, shuffles one column at a time, and reads the drop in score. Five repeats under seed 1 give the page’s figures. Print each share to three places."],
+              `from oop_ml import Feature, BaggingClassifier, PermutationImportance, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+
+bagged = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
+forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit(
+    [heights, weights], is_adult
+)
+# Print the impurity importances of both committees, then the permutation
+# importances of the forest over five shuffles under seed 1, each share to
+# three places.`,
+              `from oop_ml import Feature, BaggingClassifier, PermutationImportance, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+
+bagged = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
+forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit(
+    [heights, weights], is_adult
+)
+
+for name, committee in (("bagging", bagged), ("forest", forest)):
+    shares = ", ".join(f"{each.name} {each.value:.3f}" for each in committee.feature_importances)
+    print(f"{name}, impurity importance: {shares}")
+
+shuffled = PermutationImportance(n_repeats=5, random_seed=1).measure(forest, [heights, weights], is_adult)
+shares = ", ".join(f"{each.name} {each.value:.3f}" for each in shuffled)
+print(f"forest, permutation importance: {shares}")`,
+              `bagging, impurity importance: height 0.711, weight 0.289
+forest, impurity importance: height 0.527, weight 0.473
+forest, permutation importance: height 0.640, weight 0.360`,
+              { hints: ["feature_importances on a fitted committee is the members’ impurity shares averaged, and it is iterable, each entry carrying a name and a value.", "PermutationImportance is constructed with n_repeats and random_seed, and its measure takes the fitted model, the features and the target. It never refits anything.", "Both readings are shares that sum to one, so the two numbers on each line should add up to 1.000."], check: numberCheck("What permutation importance does the forest give height, to two places?", 0.64, 0.005, "Shuffling the height column so it keeps its distribution and loses its relationship with the label costs the forest more than shuffling weight does, nearly two to one, which is the same ordering the root board in section 4 gave. The impurity reading is nearly even, 0.527 to 0.473, because the lottery made the trees spend roughly equal impurity reductions on both features. The data did not change between the two readings. What they measure did.") },
+            ),
+            exercise(
+              "Ask about people far from the crowd",
+              ["Section 31 asks the seed 7 forest about someone 250 centimetres tall weighing 30 kilograms, someone 100 centimetres and 120 kilograms, and someone 300 centimetres and 200 kilograms, and reads the adult share for each. Put the three questions to the forest yourself.", "The adult share is the second column of the forest’s averaged probabilities, since adult is class 1. Print it for each person to three places, and notice that the forest answers all three without any sign of how far away they are."],
+              `from oop_ml import Feature, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+
+forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit(
+    [heights, weights], is_adult
+)
+# Ask the forest for its class probabilities at the three far-off people and
+# print each one's adult share to three places.`,
+              `from oop_ml import Feature, RandomForestClassifier
+
+heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
+weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
+is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
+
+forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit(
+    [heights, weights], is_adult
+)
+
+far_heights = [250, 100, 300]
+far_weights = [30, 120, 200]
+shares = forest.predict_probabilities(
+    [Feature("height", far_heights), Feature("weight", far_weights)]
+)
+for height, weight, row in zip(far_heights, far_weights, shares):
+    print(f"{height} cm and {weight} kg: adult share {row[1]:.3f}")`,
+              `250 cm and 30 kg: adult share 0.493
+100 cm and 120 kg: adult share 0.465
+300 cm and 200 kg: adult share 1.000`,
+              { hints: ["predict_probabilities takes features named exactly as the fit saw them and answers one row per person, with one column per class in class order.", "Iterating over the probability matrix gives one row at a time, and the adult share is the entry at position 1 of each row."], check: numberCheck("What adult share does the forest give the person 250 centimetres tall and 30 kilograms, to three places?", 0.493, 0.0005, "A classification forest lets the outermost regions of every tree extend to infinity, so a query far outside the crowd inherits whichever leaf its ray ends in. At 250 centimetres and 30 kilograms the members are split almost evenly between leaves that were about small children and leaves that were about tall adults, which is the 0.493, and at 300 centimetres and 200 kilograms they are unanimous at 1.000 and no less far from anything they saw. The share measures agreement, not distance from the data.") },
+            ),
+          ],
         },
       ]}
     />

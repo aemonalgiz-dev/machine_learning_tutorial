@@ -84,13 +84,9 @@ export function CrossingMerges() {
         </tbody>
       </table>
 
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        The shaded rows hold a {MARK} somewhere other than at the front, so
-        each is a piece that reaches past the end of one word. The first is the
-        first merge of all, a letter joined to the space that follows it, and
-        by rank 20 the piece is the ending of one word, a space, and the whole
-        of the next.
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">To see whether a token can cross a word boundary, look for the space marker {MARK} inside the piece rather than only at its beginning. The shaded rows identify those cases.</p><p className="mt-3 text-xs text-slate-500 dark:text-slate-400">The first learned merge joins a letter to its following space. By rank 20, one piece spans a word ending, a space, and the next word. These are consequences of the permitted merge regions, not grammatical decisions about which words belong together.</p>
+</>
     </div>
   );
 }

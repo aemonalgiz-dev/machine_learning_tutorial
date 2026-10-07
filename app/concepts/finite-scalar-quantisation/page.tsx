@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -19,7 +22,7 @@ import { RungLadder } from "@/components/widgets/RungLadder";
 export const metadata: Metadata = {
   title: "Finite Scalar Quantisation · oop_ml",
   description:
-    "Squash each coordinate on its own and round it to one of a few levels, so the set of codes is a product of the per-coordinate choices and nothing has to be fitted at all.",
+    "Map each coordinate to a few fixed levels and combine the level choices into a code.",
 };
 
 const link =
@@ -28,8 +31,12 @@ const link =
 export default function FiniteScalarQuantisationPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["finite-scalar-quantisation"]}
+      technicalStart="Part 2. Squashing and Rounding, One Coordinate at a Time"
+      openingTitle="Round Each Coordinate Instead of Learning a Table"
+      playgroundIntro="Follow a vector through bounding, rounding, and code construction. Compare the selected coordinate levels with the original values."
       title="Finite Scalar Quantisation"
-      tagline="Squash each coordinate on its own and round it to one of a few levels, so the set of codes is a product of the per-coordinate choices and nothing has to be fitted at all."
+      tagline="Map each coordinate to a few fixed levels and combine the level choices into a code."
       prerequisites={
         <>
           Two pages sit under this one. The page on{" "}
@@ -55,75 +62,14 @@ export default function FiniteScalarQuantisationPage() {
           asks it.
         </>
       }
-      history={
-        <>
-          <p>
-            The problem is older than any of the models it is now used in. Stuart
-            Lloyd, at Bell Laboratories in 1957, was asked how to choose the
-            levels of a pulse code modulation system, which is to say how to pick
-            a small set of numbers so that replacing a measurement by the nearest
-            of them loses as little as possible. He wrote the answer as an
-            internal report, &ldquo;Least Squares Quantization in PCM&rdquo;,
-            gave the alternating procedure that is now the ordinary way of
-            grouping rows around centres, and the report was not published in a
-            journal until 1982. Joel Max reached the same conditions
-            independently in 1960. Robert Gray&rsquo;s 1984 survey
-            &ldquo;Vector Quantization&rdquo; is where the version that rounds a
-            whole vector at once, rather than each of its numbers separately, was
-            laid out for a general audience, and it is that version that carried
-            the field for the next thirty years.
-          </p>
-          <p>
-            It arrived inside neural models in 2017. A&auml;ron van den Oord,
-            Oriol Vinyals and Koray Kavukcuoglu, at DeepMind, wanted a model
-            whose internal description of a picture was a grid of whole numbers
-            rather than a grid of real vectors, so that a second model could be
-            trained over those numbers the way a language model is trained over
-            words. Their &ldquo;Neural Discrete Representation Learning&rdquo;
-            put a table of code vectors inside the network and snapped the
-            encoder&rsquo;s output at each position to the nearest of them. The
-            table has to be learned along with everything else, and that is where
-            the trouble started, because a code only moves when something is
-            assigned to it, the encoder has to be held near the codes it is being
-            snapped to, and the snapping itself has no derivative, so the
-            gradient has to be passed around it. Patrick Esser, Robin Rombach and
-            Bj&ouml;rn Ommer&rsquo;s VQGAN in 2021 made the arrangement famous
-            and inherited every one of those difficulties.
-          </p>
-          <p>
-            Fabian Mentzer, David Minnen, Eirikur Agustsson and Michael
-            Tschannen, at Google Research in 2023, asked what would happen if the
-            table were not learned at all. Their paper is called &ldquo;Finite
-            Scalar Quantization: VQ-VAE Made Simple&rdquo;, and the proposal is
-            the whole of it. Bound each coordinate of the encoder&rsquo;s output
-            to a fixed interval, round it to one of a small number of evenly
-            spaced levels, and take the set of codes to be every combination of
-            those per-coordinate choices. Nothing is fitted, so there is no table
-            to collapse and nothing to hold the encoder near. The configuration
-            they report most often is four coordinates rounded to eight, five,
-            five and five levels, which is a thousand codes, and Part 3 here is
-            about why that multiplication is the right arithmetic.
-          </p>
-          <p>
-            The page answers six questions in order. What does a learned table of
-            representative vectors actually cost, and which of those costs made
-            somebody want to be rid of it? What is the method, exactly, and what
-            is fixed rather than fitted? How does a handful of per-coordinate
-            choices become one whole number, and how many such numbers are there?
-            What is the rounding rule, and why does the version anybody writes
-            first lose a level whenever the level count is even? What does giving
-            up the fit cost, measured against a table of the same size fitted to
-            the same vectors? And where does the method stop being defined?
-          </p>
-        </>
-      }
+
       playground={<QuantiserPlayground />}
       sections={[
         {
           title: "Part 1. The Table Somebody Had to Learn",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Where a word becomes four numbers, and where it has to become one">
                 <p>
                   Take the eighteen short English sentences about reports and
@@ -135,17 +81,14 @@ export default function FiniteScalarQuantisationPage() {
                   them. The word cost comes out as 0.5904, 0.5241, &minus;0.1293
                   and &minus;0.3151.
                 </p>
-                <p>
-                  Four real numbers are exactly what a model that reads
-                  continuous vectors wants and exactly what a model that reads
-                  whole numbers cannot use. If we want the second kind of model,
-                  which is the kind that predicts the next unit of a sequence the
-                  way a language model predicts the next word, then cost has to
-                  become one number out of a fixed and finite set. That is the
-                  question this page answers, and it is the same question a
-                  tokenizer answers for a piece of text, asked of something that
-                  was never text in the first place.
+                <>
+<p>
+                  Four real numbers are exactly what a model that reads continuous vectors wants and exactly what a model that reads whole numbers cannot use. If we want the second kind of model, which is the kind that predicts the next unit of a sequence the way a language model predicts the next word, then cost has to become one number out of a fixed and finite set.
                 </p>
+                <p>
+                  That is the question this page answers, and it is the same question a tokenizer answers for a piece of text, asked of something that was never text in the first place.
+                </p>
+</>
                 <KeepInMind>
                   Everything on this page rounds vectors rather than strings. The
                   sentence this section carries, about Dr Alvarez and the
@@ -221,7 +164,7 @@ export default function FiniteScalarQuantisationPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Squashing and Rounding, One Coordinate at a Time",
@@ -257,13 +200,16 @@ export default function FiniteScalarQuantisationPage() {
               </SubSection>
 
               <SubSection title="5. The levels, and how they are spaced">
-                <p>
-                  Inside that interval we place a small number of levels, evenly
-                  spaced, with one at each end. Call the number of them L. Then
-                  the levels run from &minus;1 to 1 in steps of 2 divided by
-                  L &minus; 1, and every coordinate of every vector will be
-                  rounded to one of them.
-                </p>
+                <>
+                  <p>
+                    Place L evenly spaced levels between minus one and one, including
+                    both endpoints. There is one fewer interval than there are levels.
+                  </p>
+                  <Equation>{"level spacing = (1 − (−1)) / (L − 1) = 2 / (L − 1)"}</Equation>
+                  <p>
+                    Every bounded coordinate will be rounded to one of those levels.
+                  </p>
+                </>
                 <Equation>
                   {"level j  =  −1 + 2 j / (L − 1),   for j = 0 … L − 1"}
                 </Equation>
@@ -290,14 +236,19 @@ export default function FiniteScalarQuantisationPage() {
               </SubSection>
 
               <SubSection title="6. Rounding to the nearest level">
-                <p>
-                  With the coordinate bounded and the levels fixed, the rounding
-                  is the obvious thing. It is convenient to do it on whole
-                  numbers rather than on fractions, so the bounded value is first
-                  multiplied by the half width, which is L &minus; 1 over 2, and
-                  that puts the levels at consecutive whole numbers with the two
-                  ends at plus and minus the half width.
-                </p>
+                <>
+                  <p>
+                    Scale the bounded coordinate so that neighbouring levels are one
+                    unit apart. The rounding step can then operate on a unit-spaced
+                    grid.
+                  </p>
+                  <Equation>{"half width = (L − 1) / 2\nscaled coordinate = bounded coordinate × half width"}</Equation>
+                  <p>
+                    The endpoints lie at minus and plus the half width. With an even
+                    number of levels, those endpoints are half-integers, so the grid
+                    convention must account for that offset.
+                  </p>
+                </>
                 <Equation>
                   {"h  =  (L − 1) / 2\n\nposition  =  round( tanh(z) × h )"}
                 </Equation>
@@ -378,11 +329,18 @@ export default function FiniteScalarQuantisationPage() {
                 <Equation>
                   {"code  =  d₀ + L₀ d₁ + L₀ L₁ d₂ + L₀ L₁ L₂ d₃"}
                 </Equation>
-                <p>
-                  With eight, five, five and five levels the multipliers are 1,
-                  8, 40 and 200. The word cost&rsquo;s digits were 5, 3, 2 and 1,
-                  so its code is 5 + 24 + 80 + 200, which is 309.
-                </p>
+                <>
+                  <p>
+                    The four coordinates have eight, five, five and five possible
+                    levels. Their place-value multipliers are one, eight, forty and two
+                    hundred. The word cost was assigned digits 5, 3, 2 and 1.
+                  </p>
+                  <Equation>{"code = 5 × 1 + 3 × 8 + 2 × 40 + 1 × 200\n     = 5 + 24 + 80 + 200\n     = 309"}</Equation>
+                  <p>
+                    This packs four discrete choices into one integer without losing
+                    which level was chosen in each coordinate.
+                  </p>
+                </>
                 <WorkedExample title="The same arithmetic on four chosen numbers">
                   <p>
                     Take 1.0, &minus;0.5, 0.2 and 3.0, which are picked so that
@@ -457,6 +415,28 @@ export default function FiniteScalarQuantisationPage() {
                   its level, and the four levels together are the vector the code
                   stands for.
                 </p>
+                <WorkedExample title="The code 309 back into its digits">
+                  <p>
+                    Section 8 composed the word cost&rsquo;s digits 5, 3, 2 and 1
+                    into the code 309. Undoing that is four divisions, each by
+                    the next level count, keeping the remainder as the digit and
+                    carrying the quotient on to the next.
+                  </p>
+                  <Equation>
+                    {"309 ÷ 8  =  38 remainder 5   →   d₀ = 5\n" +
+                      " 38 ÷ 5  =   7 remainder 3   →   d₁ = 3\n" +
+                      "  7 ÷ 5  =   1 remainder 2   →   d₂ = 2\n" +
+                      "  1 ÷ 5  =   0 remainder 1   →   d₃ = 1"}
+                  </Equation>
+                  <p>
+                    The digits name the levels 3/7, 1/2, 0 and &minus;1/2 of
+                    section 7, which is the vector the code stands for. The
+                    quotient reaching zero on the last division is what being one
+                    to one looks like from this side, since a code of 1000 or more
+                    would leave a quotient over after the fourth division and
+                    name no combination of digits at all.
+                  </p>
+                </WorkedExample>
                 <p>
                   Two corners are worth knowing. Code 0 is the vector with every
                   coordinate at &minus;1, and code 999 in the published
@@ -513,6 +493,49 @@ export default function FiniteScalarQuantisationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            several(
+              "What does a learned table of representative vectors cost that the fixed rule does not?",
+              [
+                "A fit, which is an iterative search that has to be run before a single vector can be rounded",
+                "A collection to fit on, which has to look like the vectors that will arrive later",
+                "Rows that nothing is ever assigned to, however the table was learned",
+                "A distance to every row at the moment a vector is rounded",
+              ],
+              [0, 1, 3],
+              "The fit and the collection to fit on are unconditional costs. Rows nothing lands on are a cost of one way of learning the table, since fitted by grouping on these six hundred vectors a table of any size from sixteen up to a hundred and sixty used every one of its rows. The grid instead costs one multiplication and one rounding per coordinate, with no search at all.",
+            ),
+            choice(
+              "At five levels the levels are −1, −0.5, 0, 0.5 and 1. Why is zero not a level at eight?",
+              [
+                "Because the squashing never returns exactly zero",
+                "Because the levels are symmetric about zero, and an even number of symmetric levels cannot include the centre",
+                "Because the first level is placed at zero and the rest are counted upward from it",
+                "Because the offset of a half is applied before rounding and not undone",
+              ],
+              1,
+              "A coordinate of exactly zero therefore comes back as 1/7 at eight levels, carrying a squared error of 1/49, where at five levels it comes back as zero and costs nothing. Both are correct, and if the middle matters for a particular coordinate the argument is for giving it an odd level count rather than for changing the rounding.",
+            ),
+            choice(
+              "The four coordinates have eight, five, five and five levels, and the word cost chose digits 5, 3, 2 and 1. What code does it get?",
+              ["11", "309", "875", "1000"],
+              1,
+              "The place-value multipliers are the level counts themselves, so they are one, eight, forty and two hundred, and the code is 5 plus 24 plus 80 plus 200. The composition is arbitrary in the same way that writing the units digit on the right is arbitrary, and what matters is only that it is one to one.",
+            ),
+            trueFalse(
+              "Rounding each coordinate on its own gives the nearest point of the grid.",
+              true,
+              "The squared distance to a grid point is a sum of squared gaps, one per coordinate, and each coordinate of a grid point is free to be chosen, so making every term smallest on its own makes the sum smallest. That fails when the set of codes is a list rather than a product, which is exactly why a table has to be searched, and materialising the thousand grid points gives the same code and the same error as the four roundings.",
+            ),
+            trueFalse(
+              "Doubling the first coordinate’s levels from eight to sixteen doubles the number of codes without adding a single fitted parameter.",
+              true,
+              "The number of codes is the product of the per-coordinate level counts, which is what makes the published eight, five, five, five a thousand codes, or 9.9658 bits at each position of the sequence. A table of a hundred thousand rows is a hundred thousand vectors to hold and to move during training, where the grid of the same size is five small numbers in a configuration file.",
+            ),
+        ],
         },
         {
           title: "Part 4. The Rounding Rule, and Where the Obvious One Fails",
@@ -600,18 +623,14 @@ export default function FiniteScalarQuantisationPage() {
                   help, and measuring it turns up something the objection does
                   not predict.
                 </p>
-                <p>
-                  Including inputs large enough that the squashing returns
-                  exactly 1, the obvious rule at eight levels reaches nine
-                  distinct levels rather than seven, one more at each end. At
-                  twelve it reaches thirteen and at four it reaches five. But at
-                  two, six and ten it reaches one, five and nine, which is no
-                  more than before. The reason is the tie rule. A value landing
-                  exactly half way between two whole numbers is rounded to the
-                  even one, so 3.5 becomes 4 and 2.5 becomes 2, and whether the
-                  extra levels appear depends on whether the half width&rsquo;s
-                  whole part is odd or even.
+                <>
+<p>
+                  Including inputs large enough that the squashing returns exactly 1, the obvious rule at eight levels reaches nine distinct levels rather than seven, one more at each end. At twelve it reaches thirteen and at four it reaches five. But at two, six and ten it reaches one, five and nine, which is no more than before.
                 </p>
+                <p>
+                  The reason is the tie rule. A value landing exactly half way between two whole numbers is rounded to the even one, so 3.5 becomes 4 and 2.5 becomes 2, and whether the extra levels appear depends on whether the half width&rsquo;s whole part is odd or even.
+                </p>
+</>
                 <NumberTable
                   headings={[
                     "levels asked for",
@@ -700,19 +719,14 @@ export default function FiniteScalarQuantisationPage() {
                   ]}
                   caption="Six hundred vectors, rounded both ways. The error is the mean squared distance from the bounded vector to its code."
                 />
-                <p>
-                  All-even configurations are where it bites. At four levels
-                  across four coordinates the obvious rule reaches eighty-one of
-                  the two hundred and fifty-six codes configured and the error is
-                  79 per cent higher; at two levels it reaches one code out of
-                  sixteen and the whole arrangement answers the same number for
-                  every vector. The published configuration is the interesting
-                  case, because three of its four level counts are odd, so only
-                  the first coordinate is affected, the reachable codes fall from
-                  a thousand to eight hundred and seventy-five, and the error
-                  rises by four per cent. A system built on the obvious rule and
-                  tested at eight, five, five and five would look almost right.
+                <>
+<p>
+                  All-even configurations are where it bites. At four levels across four coordinates the obvious rule reaches eighty-one of the two hundred and fifty-six codes configured and the error is 79 per cent higher; at two levels it reaches one code out of sixteen and the whole arrangement answers the same number for every vector. The published configuration is the interesting case, because three of its four level counts are odd, so only the first coordinate is affected, the reachable codes fall from a thousand to eight hundred and seventy-five, and the error rises by four per cent.
                 </p>
+                <p>
+                  A system built on the obvious rule and tested at eight, five, five and five would look almost right.
+                </p>
+</>
                 <KeepInMind>
                   Test a rounding rule at an all-even configuration, and at two
                   levels in particular. A configuration with one even count out
@@ -873,17 +887,14 @@ export default function FiniteScalarQuantisationPage() {
                   that nothing in the collection went near.
                 </p>
                 <GridUsage />
-                <p>
-                  Of the 420 that were reached, 293 hold exactly one vector, 88
-                  hold two, 28 hold three, 9 hold four and two codes hold five and
-                  six. That is about as even a spread as six hundred vectors over
-                  a thousand codes can be, and the emptiness is a consequence of
-                  having more codes than vectors rather than of anything going
-                  wrong. The fitted table of the same size is not available for
-                  comparison at a thousand codes, but at every size where it is,
-                  from sixteen up to a hundred and sixty, it uses every single one
-                  of its codes while the grid uses 152 of 160 and 80 of 81.
+                <>
+<p>
+                  Of the 420 that were reached, 293 hold exactly one vector, 88 hold two, 28 hold three, 9 hold four and two codes hold five and six. That is about as even a spread as six hundred vectors over a thousand codes can be, and the emptiness is a consequence of having more codes than vectors rather than of anything going wrong.
                 </p>
+                <p>
+                  The fitted table of the same size is not available for comparison at a thousand codes, but at every size where it is, from sixteen up to a hundred and sixty, it uses every single one of its codes while the grid uses 152 of 160 and 80 of 81.
+                </p>
+</>
                 <p>
                   The seventy-two word vectors are the harder case, and switching
                   the widget to them shows why. They reach 19 codes of the
@@ -903,6 +914,54 @@ export default function FiniteScalarQuantisationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 and 5",
+          quiz: [
+            choice(
+              "Multiply by the half width and round is right for an odd level count. What does it do at an even one?",
+              [
+                "It delivers one level fewer than was asked for, at every even level count",
+                "It delivers one level more than was asked for",
+                "It delivers the right number of levels but shifts them all off centre",
+                "It raises a complaint, because the half width is not a whole number",
+              ],
+              0,
+              "An interval of width 2h holds 2h + 1 whole numbers when h is a whole number and 2h when it is not, and the half width is a whole number exactly when the level count is odd. Across two hundred thousand inputs at every count from two to twelve the pattern is exact, and the worst case is the smallest, since asked for two levels the rule produces one and the coordinate carries no information at all.",
+            ),
+            trueFalse(
+              "Letting the squashing reach exactly 1 brings the missing outer levels back.",
+              false,
+              "At eight levels it reaches nine distinct levels rather than seven, one more at each end, and at two, six and ten it reaches one, five and nine, which is no more than before, because a value landing exactly half way is rounded to the even whole number. Even where the extra levels appear they fire only on inputs past the point where the squashing has flattened, so eight configured levels become seven in ordinary use and nine in total, which is worse than being one short.",
+            ),
+            choice(
+              "At which configuration would a system built on the obvious rounding rule look almost right?",
+              [
+                "Two levels across all four coordinates",
+                "Four levels across all four coordinates",
+                "Eight levels for the first coordinate and five for each of the others",
+                "Any of them, since the error rises by the same amount everywhere",
+              ],
+              2,
+              "Three of those four counts are odd, so only the first coordinate is affected, the reachable codes fall from a thousand to eight hundred and seventy-five and the error rises by four per cent, which reads as noise. All-even configurations are where it bites, since four levels across four coordinates reaches eighty-one of two hundred and fifty-six codes at 79 per cent higher error, and two levels reaches one code out of sixteen and answers the same number for every vector.",
+            ),
+            several(
+              "Which of these did the comparison on the six hundred vectors find?",
+              [
+                "The fitted table is better everywhere, by between 2.04 and 4.96 times",
+                "Giving eight levels to one coordinate and two to each of the other three is the worst of the three ways of spending sixty-four codes, at 0.6228",
+                "Sixty-four codes spent as four, four, two, two cost 0.4828, while fifty-four codes spent as three, three, three, two cost 0.3918",
+                "From sixteen codes up to a hundred and sixty the fitted table uses every one of its codes, while the grid uses 152 of 160 and 80 of 81",
+              ],
+              [0, 1, 2, 3],
+              "The table was fitted on precisely the vectors it was then judged on, which is the honest price of doing without a fit. The grid’s curve is not monotone, since sixteen codes cost 0.8200, eighty-one cost 0.2312 and a hundred and sixty cost 0.2828, and three configurations of exactly sixty-four codes differ by 29 per cent in error on nothing but how the levels are spread, so the level counts are a real design choice rather than a formality.",
+            ),
+            trueFalse(
+              "Of the 981 codes the seventy-two word vectors leave empty, only sixteen are the rounding’s doing.",
+              true,
+              "The seventy-two words hold only thirty-five distinct vectors between them, so at most thirty-five codes could have been reached before anything was rounded, and 965 of the thousand were empty by counting alone. Rounding then takes the thirty-five down to nineteen, which is where lower and estimate, arriving as different vectors, come back identical. The grid has empty codes for a different reason than a learned table does, and on these collections it has more of them.",
+            ),
+        ],
         },
         {
           title: "Part 6. Where the Method Stops Being Defined",
@@ -943,19 +1002,14 @@ export default function FiniteScalarQuantisationPage() {
                   ]}
                   caption="The same vectors and the same thousand codes, at seven scales."
                 />
-                <p>
-                  Read the first and fourth rows together. At a tenth of the
-                  scale the error is 0.0564 and at full scale it is 0.0565, which
-                  is the same number to three places, and yet the first reaches
-                  thirty codes and the second reaches four hundred and twenty. At
-                  eight times the scale the error is six times lower and only a
-                  hundred and seventeen codes are reached, because 81 per cent of
-                  all coordinates have been pushed past 0.99 and are landing on
-                  the ends, where they are reproduced almost exactly and describe
-                  almost nothing. A low rounding error is therefore not by itself
-                  evidence that the arrangement is working, and the number of
-                  codes reached has to be read beside it.
+                <>
+<p>
+                  Read the first and fourth rows together. At a tenth of the scale the error is 0.0564 and at full scale it is 0.0565, which is the same number to three places, and yet the first reaches thirty codes and the second reaches four hundred and twenty. At eight times the scale the error is six times lower and only a hundred and seventeen codes are reached, because 81 per cent of all coordinates have been pushed past 0.99 and are landing on the ends, where they are reproduced almost exactly and describe almost nothing.
                 </p>
+                <p>
+                  A low rounding error is therefore not by itself evidence that the arrangement is working, and the number of codes reached has to be read beside it.
+                </p>
+</>
                 <KeepInMind>
                   Where the data sits relative to the squashing is the single
                   most important thing about a system built this way, and the
@@ -1001,17 +1055,14 @@ export default function FiniteScalarQuantisationPage() {
                   Structure between two coordinates is therefore unrepresentable,
                   not badly represented.
                 </p>
-                <p>
-                  Take six hundred vectors whose first two coordinates rise
-                  together, at a correlation of 0.9486, and the same draw with
-                  that lean taken out. At sixty-four codes the grid&rsquo;s error
-                  is 0.4583 on the leaning collection and 0.4574 on the straight
-                  one, which is the same number, so the grid does not notice the
-                  lean at all. What changes is how much of the grid is reachable,
-                  since the vectors now occupy a diagonal band and the corners off
-                  that band are visited by nothing. Forty-six of the sixty-four
-                  codes are used against all sixty-four before.
+                <>
+<p>
+                  Take six hundred vectors whose first two coordinates rise together, at a correlation of 0.9486, and the same draw with that lean taken out. At sixty-four codes the grid&rsquo;s error is 0.4583 on the leaning collection and 0.4574 on the straight one, which is the same number, so the grid does not notice the lean at all.
                 </p>
+                <p>
+                  What changes is how much of the grid is reachable, since the vectors now occupy a diagonal band and the corners off that band are visited by nothing. Forty-six of the sixty-four codes are used against all sixty-four before.
+                </p>
+</>
                 <NumberTable
                   headings={[
                     "collection",
@@ -1121,6 +1172,298 @@ export default function FiniteScalarQuantisationPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Part 6",
+          quiz: [
+            choice(
+              "At a tenth of the scale the error is 0.0564 and at full scale it is 0.0565. What does that show?",
+              [
+                "That the method is insensitive to the scale of the coordinates arriving at it",
+                "That a low rounding error is not by itself evidence the arrangement is working, since one reaches thirty codes and the other four hundred and twenty",
+                "That the error is the right quantity to tune the scale against",
+                "That both scales are too small for the squashing to matter",
+              ],
+              1,
+              "At eight times the scale the error is six times lower and only a hundred and seventeen codes are reached, because 81 per cent of all coordinates have been pushed past 0.99 and land on the ends, where they are reproduced almost exactly and describe almost nothing. The number of codes reached has to be read beside the error.",
+            ),
+            trueFalse(
+              "Removing the fit removes the need to know something about the data.",
+              false,
+              "The level counts have to be chosen by somebody who has looked at the vectors, which is a fit performed by a person rather than by an algorithm. What removing the fit does is move that knowledge out of a fitted table and into a configuration, where it is written down by hand and nothing checks it.",
+            ),
+            choice(
+              "Six hundred vectors whose first two coordinates rise together at a correlation of 0.9486 are set beside the same draw with the lean taken out. What did the grid do?",
+              [
+                "Its error fell on the leaning collection, since a concentrated collection is easier to cover",
+                "It answered 0.4583 against 0.4574, which is the same number, so it did not notice the lean at all",
+                "It reached more of its codes on the leaning collection",
+                "It refused the leaning collection, since a product of per-coordinate choices cannot describe a band",
+              ],
+              1,
+              "What changed is how much of the grid is reachable, with forty-six of the sixty-four codes used where all sixty-four had been. The fitted table went the other way, its error falling from 0.1327 to 0.0834, so a dependence between coordinates is information that one arrangement uses and the other cannot, and the gap widened from 3.45 times to 5.50 times on that account.",
+            ),
+            choice(
+              "How many of the method’s edge cases are genuine refusals?",
+              [
+                "Two, a level count of one and a coordinate that is not a number",
+                "None, because a product grid always has an answer",
+                "Every case where a configuration wastes most of its codes",
+                "Every case where the squashing saturates",
+              ],
+              0,
+              "Everything else is defined, which is the difficulty. A configuration that wastes most of its codes, or that cannot see the shape of its own data, still answers every question it is asked, and the answer looks like any other.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Rounding the Word Cost With the Library",
+          practice: [
+            exercise(
+              "Take the word cost through the grid",
+              ["Give every word of the eighteen sentences four numbers the way Part 1 does, by decomposing the term-document table to four directions and dividing the table by four, then round the word cost on the published grid of eight, five, five and five levels. Print its four numbers, the four squashed values, the digit chosen in each coordinate, the code, the vector the code stands for and the squared distance it moved.", "Section 7 arrived at digits 5, 3, 2 and 1 and a squared distance of 0.065215, and section 8 composed those digits into the code 309. The library should land on all of them."],
+              `import numpy as np
+from oop_ml import FiniteScalarQuantizer, LatentSemanticAnalysis
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+
+embeddings = LatentSemanticAnalysis(dimension=4).fit(sentences).embeddings
+table = np.asarray(embeddings.table) / 4.0
+cost = table[list(embeddings.vocabulary).index("cost")]
+# Build the quantizer with levels (8, 5, 5, 5), quantise cost as a block of
+# one row, and print its four numbers and their squashed values to four
+# places, its digits, its code, its reconstruction and its squared
+# distance to six places.`,
+              `import numpy as np
+from oop_ml import FiniteScalarQuantizer, LatentSemanticAnalysis
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+
+embeddings = LatentSemanticAnalysis(dimension=4).fit(sentences).embeddings
+table = np.asarray(embeddings.table) / 4.0
+cost = table[list(embeddings.vocabulary).index("cost")]
+quantizer = FiniteScalarQuantizer(levels=(8, 5, 5, 5))
+assignment = quantizer.quantize([cost])
+code = assignment.ids[0]
+
+print(f"cost {np.round(cost, 4).tolist()}")
+print(f"squashed {np.round(np.tanh(cost), 4).tolist()}")
+print(f"digits {quantizer.digits_of(code)}")
+print(f"code {code} of {quantizer.n_codes}")
+print(f"stands for {np.round(assignment.reconstruction[0], 4).tolist()}")
+print(f"squared distance moved {assignment.distortion:.6f}")`,
+              `cost [0.5904, 0.5241, -0.1293, -0.3151]
+squashed [0.5302, 0.4809, -0.1285, -0.3051]
+digits (5, 3, 2, 1)
+code 309 of 1000
+stands for [0.4286, 0.5, 0.0, -0.5]
+squared distance moved 0.065215`,
+              { hints: ["The quantizer is configured and never fitted, so its one argument is the tuple of level counts, and quantize takes a block of rows even when there is one row.", "The code is the first entry of ids, and digits_of takes a code back to its four digits, which is section 10 as a single call.", "The reconstruction is the grid point the code names, in the squashed coordinates, and the distortion is the mean squared distance from the squashed input to that point, which for one row is the squared distance itself."], check: numberCheck("What code does the word cost receive on the published grid?", 309, 0.5, "The digits are 5, 3, 2 and 1 and the place values are one, eight, forty and two hundred, so the code is 5 plus 24 plus 80 plus 200. The squared distance of 0.065215 is measured in the bounded interval, from the squashed values to the levels 3/7, 1/2, 0 and minus 1/2, which is where the grid lives.") },
+            ),
+            exercise(
+              "Count what each rounding rule reaches",
+              ["Section 13 swept two hundred thousand inputs spread across the range through both rounding rules at every level count from two to twelve. Repeat the sweep, counting the distinct codes the library reaches at each level count beside the distinct positions the obvious rule of section 12 reaches, which is multiply by the half width and round.", "The library rounds the corrected way, so the obvious rule has to be written out, and it is three operations. Then round a coordinate of exactly zero at eight levels and at five, which section 17 says come back as 1/7 and as zero."],
+              `import numpy as np
+from oop_ml import FiniteScalarQuantizer
+
+inputs = np.linspace(-10.0, 10.0, 200_001)
+squashed = np.tanh(inputs)
+
+for n_levels in range(2, 13):
+    # Count the distinct codes the quantizer reaches on the inputs, and the
+    # distinct values of round(squashed * half width) where the half width
+    # is (n_levels - 1) / 2, and print both beside the level count.
+    pass
+
+# Quantise the single coordinate 0.0 at eight levels and at five, and print
+# what it comes back as and its squared distance to six places.`,
+              `import numpy as np
+from oop_ml import FiniteScalarQuantizer
+
+inputs = np.linspace(-10.0, 10.0, 200_001)
+squashed = np.tanh(inputs)
+
+for n_levels in range(2, 13):
+    quantizer = FiniteScalarQuantizer(levels=(n_levels,))
+    reached = len(set(quantizer.quantize(inputs.reshape(-1, 1)).ids))
+    half_width = (n_levels - 1) / 2
+    obvious = len(np.unique(np.rint(squashed * half_width)))
+    print(f"{n_levels:2d} levels: library reaches {n_levels:2d}, obvious rule reaches {obvious:2d}")
+
+for n_levels in (8, 5):
+    zero = FiniteScalarQuantizer(levels=(n_levels,)).quantize([[0.0]])
+    print(f"zero at {n_levels} levels comes back as {zero.reconstruction[0][0]:.4f}, squared distance {zero.distortion:.6f}")`,
+              ` 2 levels: library reaches  2, obvious rule reaches  1
+ 3 levels: library reaches  3, obvious rule reaches  3
+ 4 levels: library reaches  4, obvious rule reaches  3
+ 5 levels: library reaches  5, obvious rule reaches  5
+ 6 levels: library reaches  6, obvious rule reaches  5
+ 7 levels: library reaches  7, obvious rule reaches  7
+ 8 levels: library reaches  8, obvious rule reaches  7
+ 9 levels: library reaches  9, obvious rule reaches  9
+10 levels: library reaches 10, obvious rule reaches  9
+11 levels: library reaches 11, obvious rule reaches 11
+12 levels: library reaches 12, obvious rule reaches 11
+zero at 8 levels comes back as 0.1429, squared distance 0.020408
+zero at 5 levels comes back as 0.0000, squared distance 0.000000`,
+              { hints: ["A quantizer over one coordinate takes a tuple of one level count, and quantize wants a block with one column, which reshape(-1, 1) gives the sweep.", "The distinct codes are the set of the ids, and the obvious rule is np.rint of the squashed values times the half width, counted with np.unique.", "A coordinate of exactly zero at eight levels lands on a half-way tie, which the rounding sends to the even whole number, so it comes back as 1/7 rather than minus 1/7."], check: numberCheck("How many distinct positions does the obvious rule reach at twelve levels?", 11, 0.5, "At twelve levels the half width is 5.5, and the whole numbers strictly inside minus 5.5 to 5.5 run from minus 5 to 5, which is eleven of them. The corrected rule subtracts a half before rounding and adds it back after, so it reaches all twelve, and the two rules agree at every odd count because the half width is then a whole number.") },
+            ),
+            exercise(
+              "The same six hundred vectors at three scales",
+              ["Draw the six hundred four-coordinate vectors of Part 5, which are a seeded normal draw of spread 1.5 about the origin, and round them on the published grid of a thousand codes at a tenth of their scale, at their own scale and at eight times it. Print the rounding error, the number of codes reached and the share of coordinates past 0.99 after squashing at each scale.", "Section 22 arrived at errors of 0.0564, 0.0565 and 0.0095, with 30, 420 and 117 codes reached. The error and the codes reached do not move together, which is the finding."],
+              `import numpy as np
+from oop_ml import FiniteScalarQuantizer
+
+vectors = np.random.default_rng(7).normal(0.0, 1.5, size=(600, 4))
+quantizer = FiniteScalarQuantizer(levels=(8, 5, 5, 5))
+
+for factor in (0.1, 1.0, 8.0):
+    # Quantise the vectors multiplied by the factor, then print the rounding
+    # error to four places, how many distinct codes were reached, and the
+    # share of squashed coordinates whose size exceeds 0.99, to four places.
+    pass`,
+              `import numpy as np
+from oop_ml import FiniteScalarQuantizer
+
+vectors = np.random.default_rng(7).normal(0.0, 1.5, size=(600, 4))
+quantizer = FiniteScalarQuantizer(levels=(8, 5, 5, 5))
+
+for factor in (0.1, 1.0, 8.0):
+    scaled = vectors * factor
+    assignment = quantizer.quantize(scaled)
+    past_the_edge = np.mean(np.abs(np.tanh(scaled)) > 0.99)
+    print(f"multiplied by {factor}: error {assignment.distortion:.4f}, "
+          f"codes reached {len(set(assignment.ids))} of {quantizer.n_codes}, "
+          f"past 0.99 {past_the_edge:.4f}")`,
+              `multiplied by 0.1: error 0.0564, codes reached 30 of 1000, past 0.99 0.0000
+multiplied by 1.0: error 0.0565, codes reached 420 of 1000, past 0.99 0.0737
+multiplied by 8.0: error 0.0095, codes reached 117 of 1000, past 0.99 0.8121`,
+              { hints: ["The grid never changes, so one quantizer serves all three scales and only the block handed to quantize is multiplied.", "The codes reached are the distinct ids, so a set of the ids and its length.", "The squashing is the hyperbolic tangent, so the share past the edge is the mean of a comparison between the absolute squashed values and 0.99."], check: numberCheck("How many of the thousand codes are reached at eight times the scale?", 117, 0.5, "At eight times the scale 81 per cent of all coordinates have been pushed past 0.99 and land on the ends, where they are reproduced almost exactly and describe almost nothing, so the error is six times lower than at full scale while only 117 codes are reached against 420. A low rounding error is not by itself evidence that the arrangement is working.") },
+            ),
+            exercise(
+              "The seventy-two words on the thousand-code grid",
+              ["Round all seventy-two word vectors of Part 1 on the published grid and count what happens to them. Print how many words there are, how many distinct vectors they hold between them, how many codes they reach, how many codes are left empty, and how many words share the busiest code.", "Section 21 arrived at nineteen codes reached and 981 empty, from thirty-five distinct vectors. The size of the busiest code is not on the page. Finish by printing the code of lower and the code of estimate, which section 21 says come back identical."],
+              `from collections import Counter
+
+import numpy as np
+from oop_ml import FiniteScalarQuantizer, LatentSemanticAnalysis
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+
+embeddings = LatentSemanticAnalysis(dimension=4).fit(sentences).embeddings
+table = np.asarray(embeddings.table) / 4.0
+words = list(embeddings.vocabulary)
+# Quantise the whole table at levels (8, 5, 5, 5). Print the number of
+# words, the number of distinct rows in the table, the codes reached, the
+# codes left empty, the largest number of words on one code, and the codes
+# of lower and of estimate.`,
+              `from collections import Counter
+
+import numpy as np
+from oop_ml import FiniteScalarQuantizer, LatentSemanticAnalysis
+
+sentences = [
+    "The report was expected on Monday.",
+    "The costs were lower than the first estimate.",
+    "We reviewed the results and rewrote the summary.",
+    "Dr. Bell asked for the analysis of the samples.",
+    "A second analysis agreed with the first analysis.",
+    "The low readings weren't expected.",
+    "The team rechecked the costing and the totals.",
+    "Every report carries the date and the analyst's name.",
+    "The revised estimate was lower again.",
+    "Nobody expected the samples to arrive early.",
+    "The cost of the analysis was the reason.",
+    "The analysts reran the tests on Tuesday.",
+    "The lowest cost was the reason the report was late.",
+    "The reviewers expected a lower estimate.",
+    "The high-cost option was dropped.",
+    "The size of the August batch was fixed.",
+    "Dr. Bell rewrote the costing and the report.",
+    "The analysis was expected to cost less.",
+]
+
+embeddings = LatentSemanticAnalysis(dimension=4).fit(sentences).embeddings
+table = np.asarray(embeddings.table) / 4.0
+words = list(embeddings.vocabulary)
+quantizer = FiniteScalarQuantizer(levels=(8, 5, 5, 5))
+assignment = quantizer.quantize(table)
+usage = Counter(assignment.ids)
+
+print(f"words {len(words)}")
+print(f"distinct vectors {len(set(tuple(row) for row in np.round(table, 12)))}")
+print(f"codes reached {len(usage)} of {quantizer.n_codes}")
+print(f"codes left empty {quantizer.n_codes - len(usage)}")
+print(f"words on the busiest code {usage.most_common(1)[0][1]}")
+print(f"lower is code {assignment.ids[words.index('lower')]}")
+print(f"estimate is code {assignment.ids[words.index('estimate.')]}")`,
+              `words 72
+distinct vectors 35
+codes reached 19 of 1000
+codes left empty 981
+words on the busiest code 28
+lower is code 748
+estimate is code 748`,
+              { hints: ["The whole table goes to quantize at once, since it is already a block with one row per word, and the ids come back in vocabulary order.", "A Counter over the ids gives the codes reached as its length and the busiest code with its count as most_common(1).", "The vocabulary was split on whitespace, so estimate keeps the full stop that followed it in every sentence that used it, and the word to look up is estimate with the full stop attached."], check: numberCheck("How many words share the busiest code?", 28, 0.5, "A word occurring in only one sentence comes out with the same vector as every other word in that sentence, so the busiest code is where those single-sentence words from several sentences land once rounding has merged them. Twenty-eight of the seventy-two words answer one number, and nothing downstream can tell them apart, which is the cost section 21 measures as 981 empty codes read from the other side.") },
+            ),
+          ],
         },
       ]}
     />

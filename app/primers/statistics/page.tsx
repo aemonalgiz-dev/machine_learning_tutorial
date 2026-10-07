@@ -1,10 +1,16 @@
+import { lessonIntuitions } from "@/lib/intuition";
+import { GuidedIntuition, IntuitionConnection } from "@/components/concept/GuidedIntuition";
 import type { Metadata } from "next";
 import {
   Equation,
   PrimerPage,
   PrimerPlayground,
+  PrimerPractice,
+  PrimerQuiz,
   PrimerSection,
 } from "@/components/concept/PrimerPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import {
   InAModel,
   KeepInMind,
@@ -19,14 +25,15 @@ import { StatisticsPlayground } from "@/components/widgets/StatisticsPlayground"
 export const metadata: Metadata = {
   title: "Statistics Primer · oop_ml",
   description:
-    "Mean, spread, covariance and correlation on five people, then what changes once those five are a sample of something larger.",
+    "Describe a sample, compare variables, and separate the observed pattern from uncertainty about new data.",
 };
 
 export default function StatisticsPrimerPage() {
   return (
     <PrimerPage
+      technicalStart="10. Covariance"
       title="Statistics and Probability Primer"
-      tagline="Summarising one column, then two, then asking what any of it says about the people you did not measure."
+      tagline="Describe a sample, compare variables, and separate the observed pattern from uncertainty about new data."
       prerequisites={
         <>
           Arithmetic, and a willingness to add five numbers by hand. The same
@@ -35,25 +42,14 @@ export default function StatisticsPrimerPage() {
         </>
       }
     >
-      <PrimerSection title="Where This Came From">
-        <p>
-          Statistics grew out of a practical problem, several careful people
-          measuring the same thing and getting different answers. Astronomers in
-          the 1700s could not simply pick the observation they liked, so they
-          needed a principled way to combine disagreeing measurements into one
-          number, and then a way to say how much that number could be trusted.
-          Those two questions, what does this data say and how sure can we be,
-          are the two halves of this primer.
-        </p>
-        <p>
-          The first half describes data you have. The second asks what data you
-          have says about data you do not, which is the question every model is
-          really answering when it makes a prediction about someone it never
-          saw.
-        </p>
-      </PrimerSection>
+      <PrimerSection title="What Can a Handful of Measurements Tell Us?">
+{lessonIntuitions["statistics"].opening.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+<GuidedIntuition lesson={lessonIntuitions["statistics"]} />
+<IntuitionConnection lesson={lessonIntuitions["statistics"]} />
+</PrimerSection>
 
       <PrimerSection title="1. Observations and Variables">
+
         <p>
           Five people, each measured twice. That is the whole dataset, and it
           carries every idea on this page.
@@ -69,6 +65,16 @@ export default function StatisticsPrimerPage() {
           Almost everything in this primer is a statement about a column, or
           about how two columns relate. The rows are what we have; the columns
           are what we describe.
+        </p>
+        <p>
+          The distinction earns its keep because the two directions answer
+          different questions. Reading across a row describes one person and
+          nobody else, which is what a model does each time it makes a
+          prediction. Reading down a column compares the same quantity across
+          everybody, and every summary on this page is computed that way, down
+          a column. The units belong to the column too, centimetres for one
+          and kilograms for the other, which is a small point now and returns
+          in section 10.
         </p>
       </PrimerSection>
 
@@ -133,9 +139,20 @@ export default function StatisticsPrimerPage() {
           <Equation>{"height:          160   165   170   175   180\nheight − mean:   −10    −5     0     5    10      sum = 0"}</Equation>
           <p>
             Negative below the mean, positive above it, zero for the person
-            sitting exactly on it.
+            sitting exactly on it. The same subtraction for weight, around its
+            mean of 68, cancels in the same way.
           </p>
+          <Equation>{"weight:           58    66    68    74    74\nweight − mean:   −10    −2     0     6     6      sum = 0"}</Equation>
         </WorkedExample>
+        <p>
+          A deviation carries two pieces of information. Its sign says which
+          side of the centre a person is on, and its size says how far out they
+          sit. The shortest person is 10 below the mean height and the tallest
+          is 10 above it, the same distance in opposite directions, which is
+          what lets the two cancel. Every summary that follows, the variance,
+          the covariance and the correlation, is built from these signed
+          distances.
+        </p>
         <p>
           That the deviations sum to zero is not a coincidence of these numbers.
           It is the balance point from the last section, stated arithmetically,
@@ -162,11 +179,72 @@ export default function StatisticsPrimerPage() {
           separates them is not centre, and the mean cannot see it at all.
         </p>
         <p>
+          The deviations already see what the mean cannot. Subtract 170 from
+          each value and the two groups stop looking alike.
+        </p>
+        <Equation>{"tightly packed:    −1     0     0     0     1      sum = 0\nwidely spread:    −30   −15     0    15    30      sum = 0"}</Equation>
+        <p>
+          Both lists sum to zero, as every list of deviations does, so adding
+          them up cannot tell the groups apart either. The sizes can. One group
+          never strays more than a centimetre from its centre and the other
+          strays thirty.
+        </p>
+        <p>
           So a second summary is needed, one that answers how far from the centre
           the values tend to sit. The deviations from section 4 are exactly the
-          raw material for it.
+          raw material for it, and the whole difficulty, which section 6 opens
+          with, is using their sizes without letting their signs cancel.
         </p>
       </PrimerSection>
+
+      <PrimerQuiz
+        title="Questions on Sections 1 to 5"
+        questions={[
+          trueFalse(
+            "The five height deviations sum to zero, and so do the deviations of every column there has ever been.",
+            true,
+            "It is the balance point from section 3 stated arithmetically. The pull of the values above the mean exactly cancels the pull of those below it, so the signed distances always add to zero, for these five heights, for the five weights, and for any column at all. That is also what makes it inconvenient, since averaging the deviations can never measure spread.",
+          ),
+          choice(
+            "Four people earn 25,000 and one earns 500,000. What is the mean, and what does it tell you about them?",
+            [
+              "120,000, which describes none of the five",
+              "25,000, since that is what four of the five earn",
+              "262,500, which sits halfway between the two amounts present",
+              "500,000, because one large value dominates the sum",
+            ],
+            0,
+            "The mean is still the balance point, where the pull of the values above it cancels the pull of those below. It just stops being a good answer to what someone here looks like, because a measure of centre is not the same thing as a typical observation. Four of the five earn 25,000, and the mean is nowhere near it.",
+          ),
+          choice(
+            "One group of five reads 169, 170, 170, 170, 171 and another reads 140, 155, 170, 185, 200. What do their means do?",
+            [
+              "Both come to 170, and the mean cannot see what separates the groups",
+              "The spread group has the higher mean, since its values reach further up",
+              "The tight group has the higher mean, since its values cluster above",
+              "They differ, and that difference is what separates the groups",
+            ],
+            0,
+            "Identical means, and nobody would describe the two groups as the same. Their deviations tell them apart at once, running from −1 to 1 in one group and from −30 to 30 in the other, so whatever separates them is not centre, and a second summary is needed to say how far from the centre the values tend to sit.",
+          ),
+          several(
+            "Which of these hold for the five people as sections 1 to 3 set them up?",
+            [
+              "An observation is one person, one row, everything measured about a single case",
+              "A variable is one of the two measurements taken across all five, one column",
+              "The mean height is 170 and the mean weight is 68",
+              "Every summary of a column discards something",
+            ],
+            [0, 1, 2, 3],
+            "Almost everything in this primer is a statement about a column, or about how two columns relate. The rows are what we have and the columns are what we describe, and the two means are the first summaries computed down them. The cost is stated up front, which is that every summary trades detail for something a person can hold in mind.",
+          ),
+          trueFalse(
+            "One reason a summary is worth having is that it can be compared across columns and across datasets in a way a list of raw values cannot.",
+            true,
+            "Five heights can simply be read, and five thousand cannot, nor can the columns a model is usually handed. Two numbers about a column, one saying roughly where its values sit and one saying how spread out they are, answer most of what anyone asks of it.",
+          ),
+        ]}
+      />
 
       <PrimerSection title="6. Variance">
         <p>
@@ -235,11 +313,14 @@ export default function StatisticsPrimerPage() {
         </p>
         <p>Take the square root and the units come back.</p>
         <Equation>{"standard deviation of height = √50 ≈ 7.07 cm"}</Equation>
-        <p>
-          Now it is comparable to the heights themselves. The same arithmetic on
-          the weights gives a variance of 176 divided by 5, which is 35.2, and a
-          standard deviation of about 5.93 kg.
-        </p>
+        <>
+          <p>
+            Taking the square root restores the original unit, so a standard deviation
+            can be compared with the measurements themselves. Repeat the same
+            calculation for weight.
+          </p>
+          <Equation>{"weight variance = 176 / 5 = 35.2 kg²\nweight standard deviation = √35.2 ≈ 5.93 kg"}</Equation>
+        </>
         <KeepInMind>
           <p>
             It is tempting to call this the typical distance from the mean, and
@@ -258,9 +339,11 @@ export default function StatisticsPrimerPage() {
         <p>
           Three experiments in the box below separate centre from spread. Move
           one point a little and both shift slightly. Move one point a long way
-          and the spread jumps while the centre barely stirs. Then move every
-          point together by the same amount, and the centre travels while the
-          spread does not change at all.
+          and the spread jumps while the centre barely stirs. Then drag each of
+          the five points up by the same amount, one after another. The centre
+          travels with them and the spread ends up where it started, give or
+          take the precision of a drag, because a shift shared by everybody
+          changes nobody&rsquo;s distance from the centre.
         </p>
         <PrimerPlayground>
           <StatisticsPlayground />
@@ -278,6 +361,22 @@ export default function StatisticsPrimerPage() {
           about each other, and knowing one tells you something about the other.
           That is exactly what a prediction is, so a summary of how two columns
           move together is the last descriptive idea this primer needs.
+        </p>
+        <p>
+          Look down the two columns together and the pattern is already visible.
+          The shortest person, at 160 cm, is also the lightest at 58 kg. The
+          tallest, at 180 cm, shares the heaviest weight of 74 kg. Each step up
+          in height comes with a step up in weight, apart from the last, where
+          175 and 180 weigh the same. Nobody is tall and light, and nobody is
+          short and heavy.
+        </p>
+        <p>
+          What is missing is a number for &ldquo;tend to&rdquo;. Reading five
+          rows is easy and reading five thousand is not, which is the problem
+          section 2 raised for one column, now asked of two at once. The summary
+          wanted has to say how strongly the two columns move together, and the
+          next two sections build it out of the deviations each column already
+          has.
         </p>
       </PrimerSection>
 
@@ -310,7 +409,69 @@ export default function StatisticsPrimerPage() {
             with each other throughout. Nobody is tall and light.
           </p>
         </WorkedExample>
+        <p>
+          Reading down the table, the 160 cm person is ten below the mean in
+          height and ten below it in weight, and that agreement in both
+          directions gives the largest product, 100. The 170 cm person sits
+          exactly on both means and contributes nothing, since a deviation of
+          zero times anything is zero. A short, heavy person would have
+          contributed a negative product, a positive weight deviation times a
+          negative height one, and would have pulled the sum down.
+        </p>
+        <p>
+          The products have units of their own, centimetres times kilograms,
+          which is about to matter.
+        </p>
       </PrimerSection>
+
+      <PrimerQuiz
+        title="Questions on Sections 6 to 9"
+        questions={[
+          choice(
+            "Why does this primer square the deviations rather than take their absolute values?",
+            [
+              "Squares are easier to work with algebraically, and they punish a large deviation far more than several small ones",
+              "Absolute values do not stop the signs from cancelling",
+              "Absolute values are not used in practice",
+              "Squaring is the only way to get a positive number out of a deviation",
+            ],
+            0,
+            "Both fixes stop the cancellation and both are used in practice. Averaging the absolute values gives the mean absolute deviation, a perfectly respectable statistic this primer simply does not follow, and squaring is the one that matters once calculus starts differentiating it.",
+          ),
+          trueFalse(
+            "Moving every one of the five people up by the same amount changes the mean and leaves the standard deviation exactly where it was.",
+            true,
+            "Each deviation is a distance from the centre, and the centre moves with everybody, so no deviation changes. The squares, their average and the root are all unchanged with them. That is the third experiment in the box in section 7, dragging each point up by the same amount one after another, and it is why centre and spread are two summaries rather than one.",
+          ),
+          trueFalse(
+            "The standard deviation is the average distance of the values from the mean.",
+            false,
+            "It is the root-mean-square distance, which squares first, averages, then takes the root, and that is a different number. For the five heights the average absolute distance is 6 while the standard deviation is 7.07, because squaring gives the far-out values more say.",
+          ),
+          several(
+            "Which of these hold for the spread of the five heights as sections 6 and 7 compute it?",
+            [
+              "The variance is 50, and it is in square centimetres",
+              "The standard deviation is about 7.07 cm, the square root of the variance",
+              "Averaging the deviations themselves would also have come to 50",
+              "Dividing the 250 by 4 instead of 5 gives 62.5, which is the figure this primer uses throughout",
+            ],
+            [0, 1],
+            "Averaging the deviations gives zero for every column that has ever existed, which is the whole reason for squaring them first. Squaring squares the units too, which is why the root is taken. The 62.5 is the sample variance, for when the five stand for a larger group, and section 16 is where they do; this primer divides by 5 because the five are the group being described.",
+          ),
+          several(
+            "Which of these hold once the deviations are paired up person by person, as sections 8 and 9 do?",
+            [
+              "A person below average in both height and weight gives a positive product",
+              "A person above average in both gives a negative product",
+              "If taller people tend to be heavier, knowing someone’s height says something about their weight, which is what a prediction is",
+              "Every product among the five is positive or zero, so nobody here is tall and light",
+            ],
+            [0, 2, 3],
+            "A negative times a negative is positive, and so is a positive times a positive, so agreement in either direction gives a positive product. Only disagreement goes negative, tall but light or short but heavy. The 160 cm person is 10 below in both and gives the largest product, 100, the 170 cm person sits on both means and gives 0, and the five sum to 200.",
+          ),
+        ]}
+      />
 
       <PrimerSection title="10. Covariance">
         <p>
@@ -392,6 +553,39 @@ export default function StatisticsPrimerPage() {
             ["near 0", "no straight-line relationship worth speaking of"],
           ]}
         />
+        <WorkedExample title="The five people, in standard deviations">
+          <p>
+            Section 11 said r is an average of products once each column is
+            measured in its own standard deviations. Here is that calculation,
+            with every height deviation divided by 7.07 and every weight
+            deviation by 5.93.
+          </p>
+          <NumberTable
+            headings={["height − mean", "÷ 7.07", "weight − mean", "÷ 5.93", "product"]}
+            rows={[
+              ["−10", "−1.414", "−10", "−1.685", "2.384"],
+              ["−5", "−0.707", "−2", "−0.337", "0.238"],
+              ["0", "0", "0", "0", "0"],
+              ["5", "0.707", "6", "1.011", "0.715"],
+              ["10", "1.414", "6", "1.011", "1.430"],
+            ]}
+          />
+          <Equation>{"r = (2.384 + 0.238 + 0 + 0.715 + 1.430) / 5 = 4.767 / 5 ≈ 0.953"}</Equation>
+          <p>
+            The same 0.953 as the covariance over the two spreads, reached by a
+            route with no units anywhere in it. Pressing the button for the
+            measured five in the box above shows the same figure in its
+            correlation readout.
+          </p>
+        </WorkedExample>
+        <p>
+          The bounds come from that same table. Each column now has a spread of
+          exactly one, so the products can only average 1 when every person
+          sits in the same place in both columns, as many standard deviations
+          up or down in weight as in height, which is a perfect rising line.
+          Every departure from it, somebody further out in one column than the
+          other, lowers the average, and a perfect falling line pins it at −1.
+        </p>
         <p>
           Our 0.953 says these five people sit very close to a rising line, which
           the plot confirms at a glance. Drag one person well off the trend in
@@ -436,6 +630,55 @@ export default function StatisticsPrimerPage() {
           </p>
         </KeepInMind>
       </PrimerSection>
+
+      <PrimerQuiz
+        title="Questions on Sections 10 to 13"
+        questions={[
+          trueFalse(
+            "Measuring the same five heights in metres rather than centimetres changes the covariance without changing anything about the people.",
+            true,
+            "Every height deviation shrinks by a hundred, so the covariance falls from 40 to 0.4. A number that moves with the choice of ruler cannot be compared against anything, including itself, which is why only the sign of a covariance can be read and not its size.",
+          ),
+          choice(
+            "What does dividing the covariance by both standard deviations achieve?",
+            [
+              "It keeps the relationship and takes the units away",
+              "It forces the result to come out positive",
+              "It makes the result easier to compute by hand",
+              "It removes the influence of one unusual observation",
+            ],
+            0,
+            "Covariance carries the scale of height and the scale of weight at once, and the standard deviations are exactly the measures of each column’s own spread. In metres the covariance becomes 0.4 and the height standard deviation becomes 0.0707, the two hundredfolds cancel, and r is 0.953 either way. Section 12 shows the same thing from the other side, each person turned into a count of standard deviations, the shortest at −1.414 in height and −1.685 in weight, and r the average of the products.",
+          ),
+          trueFalse(
+            "A correlation near zero means there is no relationship between the two columns.",
+            false,
+            "Correlation measures linear co-movement and only that. Along a symmetric U shape the left arm falls and the right arm rises, the two contributions cancel exactly, and r comes out near zero while every point sits on an exact curve. Reporting no correlation there would be arithmetically true and completely misleading.",
+          ),
+          several(
+            "The five people have a correlation of 0.953 between height and weight. Which of these does that support?",
+            [
+              "They sit very close to a rising straight line",
+              "Height and weight vary together in this sample",
+              "Being taller causes someone to be heavier",
+              "Some third thing driving both has been ruled out",
+            ],
+            [0, 1],
+            "Correlation says two columns vary together and says nothing about why. What it cannot distinguish includes the first influencing the second, the second influencing the first, some third thing driving both, an artefact of how the data was selected, and plain coincidence in a small sample. That makes it a description rather than an explanation.",
+          ),
+          choice(
+            "How much can one unusual observation move a correlation?",
+            [
+              "A long way, since a single far-out point contributes a large product to the average",
+              "Not at all, since the products are averaged over everybody",
+              "Not at all, since dividing by the standard deviations removes that point’s influence",
+              "Only if the point is far out in both columns at once",
+            ],
+            0,
+            "Correlation is built from an average of paired deviations, so one far-out point contributes a large product and pulls the average with it. Dragging one person well off the trend in the box makes r fall away from 1.",
+          ),
+        ]}
+      />
 
       <PrimerSection title="14. Covariance, Variance, and Regression Slope">
         <p>
@@ -488,6 +731,24 @@ export default function StatisticsPrimerPage() {
           cannot sensibly be negative here, and squaring is what removes the
           direction.
         </p>
+        <WhyThisWorks title="Why the two numbers coincide">
+          <p>
+            R² is the share of the variation in weight that the fitted line
+            accounts for. The line&rsquo;s predictions move only with height,
+            so the variation they carry is the slope squared times the
+            variation in height, and section 14 showed the slope is the
+            covariance over the variance of height. Put those together and both
+            quantities are the squared covariance over the product of the two
+            variances, once written with sums and once with averages.
+          </p>
+          <Equation>{"variation the line accounts for = 0.8² × 250 = 160\ntotal variation in weight = 176\nR² = 160 / 176 ≈ 0.909\nleft over = 176 − 160 = 16\n\nr² = 40² / (50 × 35.2) = 1600 / 1760 ≈ 0.909"}</Equation>
+          <p>
+            What the line leaves unaccounted for is the 16 the regression page
+            scored the line at. Splitting the total into an accounted-for part
+            and a left-over part is what needs the intercept, and the conditions
+            in the table above are the conditions for that split to hold.
+          </p>
+        </WhyThisWorks>
         <KeepInMind>
           <p>
             This identity does not carry over unchanged. With more than one
@@ -530,6 +791,21 @@ export default function StatisticsPrimerPage() {
           to the population mean is a question the five people cannot answer by
           themselves.
         </p>
+        <p>
+          One debt from section 6 comes due here. While the five were the whole
+          group, their spread divided by five. The moment they stand for a
+          larger population, the spread being estimated is the
+          population&rsquo;s, and the sample mean sits a little closer to these
+          five values than the population mean would, so the deviations measured
+          from it run slightly small. Dividing by one fewer corrects for that.
+        </p>
+        <Equation>{"as the whole group:   variance = 250 / 5 = 50       SD ≈ 7.07 cm\nas a sample:          variance = 250 / 4 = 62.5     SD ≈ 7.91 cm"}</Equation>
+        <p>
+          The mean needs no such correction, and 170 is the estimate of the
+          population mean either way. Only the spread is adjusted, and only
+          because the centre it is measured from was itself estimated from the
+          same five people.
+        </p>
       </PrimerSection>
 
       <PrimerSection title="17. What Probability Describes">
@@ -538,6 +814,14 @@ export default function StatisticsPrimerPage() {
           Probability goes the other way, starting from a process and describing
           what it might produce, and the second half of this primer needs a
           little of it.
+        </p>
+        <p>
+          It is needed for one reason. To say what five people tell us about
+          anybody else, there has to be a way of describing the process that
+          produced the five, and that is what probability provides. The box in
+          section 19 is built on exactly this. A population with a fixed mean
+          height sits underneath it, and every press draws people from that
+          process rather than from a list somebody wrote down.
         </p>
         <p>
           Four words carry the whole of what is needed here. An outcome is
@@ -574,6 +858,14 @@ export default function StatisticsPrimerPage() {
           might have long tails that occasionally produce extreme values where
           another never does.
         </p>
+        <p>
+          Section 3 already met the lopsided case. Four incomes of 25,000 and
+          one of 500,000 lean entirely to one side, and the mean of 120,000
+          lands where nobody is. That is skew, and neither a centre nor a spread
+          can report it, since a column shaped symmetrically about 120,000 could
+          be built to share both numbers while looking nothing like those five
+          incomes.
+        </p>
         <NumberTable
           headings={["feature of a distribution", "what it describes"]}
           rows={[
@@ -586,9 +878,61 @@ export default function StatisticsPrimerPage() {
         />
         <p>
           The mean and the standard deviation summarise a distribution. They do
-          not describe it.
+          not describe it. That is why the shape of a column is worth looking at
+          before either number is trusted, and why section 21 introduces one
+          particular shape as one distribution among many rather than as what
+          data looks like.
         </p>
       </PrimerSection>
+
+      <PrimerQuiz
+        title="Questions on Sections 14 to 18"
+        questions={[
+          choice(
+            "The regression slope for these five people is 0.8. What is that number, in this primer’s vocabulary?",
+            [
+              "The covariance of height and weight divided by the variance of height",
+              "The correlation divided by the variance of height",
+              "The covariance divided by the standard deviation of height",
+              "The share of the variation in weight the fit accounts for",
+            ],
+            0,
+            "Dividing the top and the bottom of the regression formula by the same count of five changes nothing and turns both halves into things this primer has named. The covariance measures how height and weight move together, the variance measures how much height moves on its own, and their ratio credits the joint movement to each centimetre of height.",
+          ),
+          trueFalse(
+            "R² equals the square of the correlation for any fitted model.",
+            false,
+            "It holds under four stated conditions, one predictor, one response, an intercept fitted, and both numbers computed on the same observations. On the five people both routes give 0.909, the line accounting for 160 of the 176 in weight and 40² over 50 × 35.2 coming to the same ratio. With more than one predictor, without an intercept, or when R² is computed on data the model did not fit, the two come apart, so it is a fact about simple linear regression rather than a general law.",
+          ),
+          choice(
+            "What separates a statistic from a parameter?",
+            [
+              "A statistic is computed from the sample you have, and a parameter is the corresponding number for the population",
+              "A statistic describes one column and a parameter describes two",
+              "A statistic is an estimate and a parameter is the same number measured exactly on the sample",
+              "A statistic changes with the choice of units and a parameter does not",
+            ],
+            0,
+            "The population is the whole group we care about, the sample is what we actually got, and the parameter is usually unknown and is what the statistic is trying to estimate. The mean height of 170 was a statistic all along, and whether it is close to the population mean is a question the five people cannot answer by themselves. It is also where the spread starts dividing by 4 rather than 5, giving 62.5 instead of 50, because the centre it is measured from was estimated from the same five.",
+          ),
+          choice(
+            "Which way round do statistics and probability work?",
+            [
+              "Statistics looks at observations and reasons back to the process, and probability starts from a process and describes what it might produce",
+              "Probability reasons back to the process, and statistics describes what a process might produce",
+              "Both reason from observations back to the process, and differ only in which summaries they use",
+              "Statistics describes a sample and probability describes a larger sample",
+            ],
+            0,
+            "That is the whole division, and the second half of this primer needs a little of each. Picking a person at random makes which person gets picked the outcome, their height the random variable, and which heights are common in the population the distribution.",
+          ),
+          trueFalse(
+            "Two columns can have identical means and identical standard deviations and still look nothing alike.",
+            true,
+            "One might be symmetric and another lean heavily to one side, one might have a single peak and another two, which usually means two groups have been mixed together, and one might have long tails that occasionally produce extreme values where another never does. The mean and the standard deviation summarise a distribution, they do not describe it.",
+          ),
+        ]}
+      />
 
       <PrimerSection title="19. Sampling Variability">
         <p>
@@ -631,12 +975,42 @@ export default function StatisticsPrimerPage() {
           mean tends toward the population mean.
         </p>
         <p>
-          It is the reason averages are worth computing at all, and the reason
-          more data usually helps. It is also narrower than it first sounds, and
-          the two qualifications are the ones from the last section. The
-          observations have to represent the population you mean to describe, and
-          collecting more of a biased sample does not undo the bias.
+          The mechanism is cancellation. Each person drawn is as far from the
+          true mean as people ever are, since the population&rsquo;s own spread
+          does not shrink. But the people above the truth and the people below
+          it pull the average in opposite directions, and the more of them there
+          are, the more completely those pulls cancel. The typical gap between a
+          sample mean and the population mean shrinks with the square root of
+          the count, which is slower than it sounds.
         </p>
+        <Equation>{"typical gap ≈ population SD / √count\n\n  5 people:   7 / √5    ≈ 3.1 cm\n 40 people:   7 / √40   ≈ 1.1 cm\n400 people:   7 / √400  ≈ 0.35 cm"}</Equation>
+        <p>
+          The 7 is the spread of the population behind the box in section 19,
+          which draws heights with a true mean of 170 cm and a standard
+          deviation of 7 cm. Four times the people halves the typical gap, and a
+          hundred times the people cuts it to a tenth. The box opens on forty
+          people already drawn, and their mean reads 167.24 cm, nearly three
+          centimetres under the truth, a larger gap than is usual for forty and
+          exactly the kind of excursion a few more presses settle.
+        </p>
+        <p>
+          The law is the reason averages are worth computing at all, and the
+          reason more data usually helps. It is also narrower than it first
+          sounds, and the two qualifications are the ones from the last section.
+          The observations have to represent the population you mean to
+          describe, and collecting more of a biased sample does not undo the
+          bias.
+        </p>
+        <KeepInMind>
+          <p>
+            The rule describes the typical gap across the many samples that
+            could have been drawn, not the gap of the sample in front of you. A
+            particular forty can land further off than a particular five. And it
+            says nothing about the next person drawn, who is as likely to be far
+            from the mean as anyone before them. The settling is in the average
+            and nowhere else.
+          </p>
+        </KeepInMind>
       </PrimerSection>
 
       <PrimerSection title="21. The Normal Distribution">
@@ -651,6 +1025,28 @@ export default function StatisticsPrimerPage() {
           fix it completely. The mean slides the bell left or right, and the
           standard deviation makes it narrow and tall or wide and flat.
         </p>
+        <WorkedExample title="What the two numbers fix">
+          <p>
+            Fixing the mean and the standard deviation fixes how much of the
+            population sits within any distance of the centre, and the shares
+            are the same for every bell. For the population behind the box, mean
+            170 cm and standard deviation 7 cm, they come out as follows.
+          </p>
+          <NumberTable
+            headings={["within", "band of heights", "share of the population"]}
+            rows={[
+              ["one standard deviation", "163 to 177 cm", "about 68%"],
+              ["two standard deviations", "156 to 184 cm", "about 95%"],
+              ["three standard deviations", "149 to 191 cm", "about 99.7%"],
+            ]}
+          />
+          <p>
+            So a person more than two standard deviations from the centre is
+            about one in twenty, and the bars in the box thin out at the same
+            rate on both sides. The shares belong to the bell and to nothing
+            else, which is the point of the warning below.
+          </p>
+        </WorkedExample>
         <KeepInMind>
           <p>
             Many measurements are approximately normal, and many important ones
@@ -748,6 +1144,23 @@ export default function StatisticsPrimerPage() {
             ["sampling variability", "how might this estimate change", "generalisation"],
           ]}
         />
+        <p>
+          Two rows of the table are this primer&rsquo;s own numbers wearing
+          other names. Standardising a column subtracts its mean and divides by
+          its standard deviation, which for the five heights means 170 and
+          7.07, and the result is exactly the unit-free column section 12
+          multiplied by its partner. The slope of 0.8 is the covariance of 40
+          over the variance of 50 from section 14, so a regression coefficient
+          is a statement about how two columns move together, scaled by how
+          much one of them moves alone.
+        </p>
+        <p>
+          The last row is the second half of the primer in one line. A score
+          measured on the rows a model was fitted to says how well it
+          summarised its sample, and the question that matters is how it would
+          have come out on different rows, which is why data is held back
+          before fitting.
+        </p>
         <InAModel>
           <p>
             The through line is that a model is a summary too. It compresses many
@@ -761,6 +1174,229 @@ export default function StatisticsPrimerPage() {
           </p>
         </InAModel>
       </PrimerSection>
+
+      <PrimerQuiz
+        title="Questions on Sections 19 to 24"
+        questions={[
+          trueFalse(
+            "Drawing more people from the population makes the individual heights cluster more tightly around the true mean.",
+            false,
+            "The people drawn are as varied at four hundred as they were at forty. It is the mean that steadies, not the population, which is why the solid line stops making large excursions while the scatter of the people does not change.",
+          ),
+          several(
+            "Which of these does drawing more people from the population do?",
+            [
+              "Steadies the sample mean, with the typical gap to the truth shrinking with the square root of the count",
+              "Fills in the shape of the population, since the people are piled into bins",
+              "Pulls each person drawn closer to the true mean",
+              "Repairs a sample whose drawing process favours some people over others",
+            ],
+            [0, 1],
+            "The pulls above and below the truth cancel more completely as the count grows, so the typical gap goes from about 3.1 cm for five people to 1.1 cm for forty and 0.35 cm for four hundred, while each person drawn is as far from the mean as people ever are. More of a biased sample produces a more confident wrong answer rather than a right one, since the law needs observations that represent the population you mean to describe.",
+          ),
+          choice(
+            "The box draws individual people and piles them into bins. Which result does that demonstrate?",
+            [
+              "The law of large numbers, with the empirical distribution converging alongside it",
+              "The central limit theorem, since the piles come out bell shaped",
+              "Both at once, since a sample mean and a distribution are each on show",
+              "Neither, because the population it draws from is already normal",
+            ],
+            0,
+            "What fills in as you press is the shape of the population itself, and what settles is the one sample mean. The central limit theorem is a claim about a different quantity, the distribution of many sample means across repeated samples, and showing it would mean drawing many separate samples and plotting the distribution of those means instead of the people.",
+          ),
+          several(
+            "Which of these hold for the normal distribution as section 21 introduces it?",
+            [
+              "It is symmetric about its mean",
+              "Two numbers fix it completely",
+              "About two thirds of the population sits within one standard deviation of the mean, between 163 and 177 cm for the box’s population",
+              "A column being numerical is a reason to expect it",
+            ],
+            [0, 1, 2],
+            "The mean slides the bell left or right and the standard deviation makes it narrow and tall or wide and flat, and fixing both fixes the shares, about 68% within one standard deviation and about 95% within two. Being numerical is not a reason to assume the bell. Incomes, waiting times, city populations and word frequencies are all strongly skewed, and treating any of them as normal produces confident nonsense about their tails.",
+          ),
+          choice(
+            "The slope of 0.8 was computed from five people. What follows from treating it as a statistic?",
+            [
+              "Five different people would have given a different number, and more relevant data would make such estimates steadier",
+              "It is the population slope, since it was computed exactly",
+              "It cannot be used for prediction until the population is known",
+              "More data of any kind would bring it closer to the truth",
+            ],
+            0,
+            "A fitted coefficient is a statistic like any other and the training data is the sample, so these estimates steady with more relevant data for the same reason sample means steady. More data from the wrong source instead makes the model more confident about the wrong thing. That is the closing section’s point that a model is a summary too, computed from a sample and discarding whatever its form cannot represent, so the questions worth asking of a mean are the questions worth asking of it.",
+          ),
+        ]}
+      />
+
+      <PrimerPractice
+        title="Practice. Summarising the Five People With the Library"
+        exercises={[
+          exercise(
+            "Take one column apart around its mean",
+            ["Build a Feature for each column and read its column object, which owns the arithmetic of sections 3 to 7. Print the deviations, their total, the sum of squared deviations, the variance and the standard deviation, for height and then for weight.", "Sections 3 to 7 arrived at 170, 250, 50 and 7.07 for height. Weight should come out at 68, 176, 35.2 and 5.93, which are the figures sections 7 and 9 use, and both deviation totals should be exactly zero."],
+            `from oop_ml import Feature
+
+people = [
+    Feature("height", [160, 165, 170, 175, 180]),
+    Feature("weight", [58, 66, 68, 74, 74]),
+]
+
+for feature in people:
+    column = feature.column
+    print(feature.name)
+    # Print the deviations, the mean and the deviation total, the sum of
+    # squared deviations, the variance and the standard deviation.`,
+            `from oop_ml import Feature
+
+people = [
+    Feature("height", [160, 165, 170, 175, 180]),
+    Feature("weight", [58, 66, 68, 74, 74]),
+]
+
+for feature in people:
+    column = feature.column
+    print(feature.name)
+    print("  deviations " + " ".join(f"{deviation:.0f}" for deviation in column.deviations))
+    print(f"  mean {column.mean:.1f}, deviation total {sum(column.deviations):.1f}")
+    print(f"  sum of squared deviations {column.sum_of_squared_deviations:.1f}")
+    print(f"  variance {column.sum_of_squared_deviations / column.n_samples:.1f}")
+    print(f"  standard deviation {column.standard_deviation:.2f}")`,
+            `height
+  deviations -10 -5 0 5 10
+  mean 170.0, deviation total 0.0
+  sum of squared deviations 250.0
+  variance 50.0
+  standard deviation 7.07
+weight
+  deviations -10 -2 0 6 6
+  mean 68.0, deviation total 0.0
+  sum of squared deviations 176.0
+  variance 35.2
+  standard deviation 5.93`,
+            { hints: ["A Feature carries a validated column behind it, reached through its column property, and that column is where the mean and the deviations live.", "The column’s properties are named for what they are, mean, deviations, sum_of_squared_deviations and standard_deviation. There is no variance property, so divide the sum of squared deviations by n_samples yourself.", "The library’s standard deviation divides by the count rather than by one fewer, which is the primer’s own choice in section 6, so 7.07 and not 7.91 is what should come back."], check: numberCheck("What variance does the weight column come to?", 35.2, 0.05, "The weight deviations are −10, −2, 0, 6 and 6, whose squares sum to 176, and 176 over the five people is 35.2 square kilograms. Its square root, 5.93 kg, is the standard deviation section 7 reports, and dividing by five rather than four is the same choice the primer makes throughout.") },
+          ),
+          exercise(
+            "Standardise both columns and average the products",
+            ["Use a Standardizer to turn each column into counts of standard deviations from its mean, multiply the two person by person and average the five products. Then fit the line, evaluate it on the same five people, and print r squared beside the R squared it reports.", "Section 11 says correlation is covariance computed after both columns have had their units removed, and section 12 works the five products by hand. Section 15 says R² is r² under four conditions, and every one of them holds here, so the two figures should agree to every printed place."],
+            `from oop_ml import Feature, SimpleLinearRegression, Standardizer
+
+heights = [160, 165, 170, 175, 180]
+weights = [58, 66, 68, 74, 74]
+
+scaler = Standardizer()
+# Fit the scaler to both columns and transform them, print each standardised
+# column to three places, multiply them person by person and print the
+# products, then print their mean as r. Fit the line, evaluate it on the
+# same five people, and print r squared beside the R squared it reports.`,
+            `from oop_ml import Feature, SimpleLinearRegression, Standardizer
+
+heights = [160, 165, 170, 175, 180]
+weights = [58, 66, 68, 74, 74]
+
+scaler = Standardizer()
+standard_height, standard_weight = scaler.fit_transform(
+    [Feature("height", heights), Feature("weight", weights)]
+)
+print("height in standard deviations " + " ".join(f"{value:.3f}" for value in standard_height.values))
+print("weight in standard deviations " + " ".join(f"{value:.3f}" for value in standard_weight.values))
+
+products = standard_height.values * standard_weight.values
+print("products " + " ".join(f"{product:.3f}" for product in products))
+correlation = float(products.mean())
+print(f"correlation r {correlation:.4f}")
+
+evaluation = SimpleLinearRegression().fit(heights, weights).evaluate(heights, weights)
+print(f"r squared {correlation ** 2:.4f}")
+print(f"R squared {evaluation.r2_score:.4f}")`,
+            `height in standard deviations -1.414 -0.707 0.000 0.707 1.414
+weight in standard deviations -1.685 -0.337 0.000 1.011 1.011
+products 2.384 0.238 0.000 0.715 1.430
+correlation r 0.9535
+r squared 0.9091
+R squared 0.9091`,
+            { hints: ["fit_transform takes a list of Features and answers a list of Features in the same order, so the two standardised columns can be unpacked straight into two names.", "A Feature’s values is an array, so the two columns multiply element by element and the product’s mean is one call, with no loop.", "evaluate answers an object whose r2_score is a property. Scoring the line on the five people it was fitted to is one of the four conditions, and one predictor, one response and a fitted intercept are the other three."], check: numberCheck("What correlation does the average of the five products come to?", 0.9535, 0.001, "The products pair each person’s standardised height with their standardised weight, 2.384, 0.238, 0, 0.715 and 1.430, which sum to 4.767, and 4.767 over 5 is 0.9535. Squared it is 0.9091, exactly the R squared the evaluation reports, because the four conditions of section 15 all hold for this fit.") },
+          ),
+          exercise(
+            "Collect the debt from section 14",
+            ["Ask the model for its least_squares_line, which keeps the two sums the fit is built from rather than only the slope. Divide each by five and show that covariance over variance is the slope the library reports.", "Section 10 noted that the regression page built the sum of 200 without naming it, and section 14 collects the debt. The intercept should land the line on the pair of means, the point the cross in the box in section 7 marks."],
+            `from oop_ml import SimpleLinearRegression
+
+heights = [160, 165, 170, 175, 180]
+weights = [58, 66, 68, 74, 74]
+
+line = SimpleLinearRegression().least_squares_line(heights, weights)
+count = len(heights)
+# Divide the two sums on the line by the count to get the covariance and the
+# variance of height, print both with the sums they came from, print
+# covariance over variance beside the slope the line reports, and print
+# the intercept with the pair of means the line is anchored at.`,
+            `from oop_ml import SimpleLinearRegression
+
+heights = [160, 165, 170, 175, 180]
+weights = [58, 66, 68, 74, 74]
+
+line = SimpleLinearRegression().least_squares_line(heights, weights)
+count = len(heights)
+
+covariance = line.covariation / count
+variance = line.input_variation / count
+print(f"sum of products {line.covariation:.1f}, covariance {covariance:.1f}")
+print(f"sum of squared height deviations {line.input_variation:.1f}, variance {variance:.1f}")
+print(f"covariance over variance {covariance / variance:.4f}")
+print(f"slope the library reports {line.slope:.4f}")
+print(f"intercept {line.intercept:.1f}, anchored at the means ({line.input_mean:.0f}, {line.target_mean:.0f})")`,
+            `sum of products 200.0, covariance 40.0
+sum of squared height deviations 250.0, variance 50.0
+covariance over variance 0.8000
+slope the library reports 0.8000
+intercept -68.0, anchored at the means (170, 68)`,
+            { hints: ["least_squares_line takes the same two lists fit does but records the stages instead of fitting, so the model is not fitted afterwards and only the line object is needed here.", "Its properties are covariation and input_variation, the two sums, with input_mean and target_mean giving the point the line is anchored at and slope and intercept the result.", "Covariance and variance are the two sums over the same count, so the count cancels in the ratio and the slope is 200 over 250 as much as it is 40 over 50."], check: numberCheck("What covariance does the sum of products give once divided by five?", 40.0, 0.05, "The five paired products sum to 200, and 200 over five is the covariance of 40 from section 10. The variance of height is 250 over five, which is 50, and 40 over 50 is the slope of 0.8, so the regression was computing a covariance over a variance the whole time.") },
+          ),
+          exercise(
+            "Leave one person out and refit",
+            ["Fit the line five more times, each time with one of the five people left out, and print the slope each fit reports. Then print the smallest and largest of the five slopes and the spread between them.", "Section 23 says the slope of 0.8 was computed from five people and that five different people would have given a different number. These are not even different people, only four of the same five, and the lesson does not print what they do to the slope."],
+            `from oop_ml import SimpleLinearRegression
+
+heights = [160, 165, 170, 175, 180]
+weights = [58, 66, 68, 74, 74]
+
+everyone = SimpleLinearRegression().fit(heights, weights)
+print(f"all five: slope {everyone.slope:.4f}")
+
+slopes = []
+# For each person in turn, fit a fresh model on the other four, print the
+# slope and intercept it reports, and collect the slope. Then print the
+# smallest and largest slope and the spread between them.`,
+            `from oop_ml import SimpleLinearRegression
+
+heights = [160, 165, 170, 175, 180]
+weights = [58, 66, 68, 74, 74]
+
+everyone = SimpleLinearRegression().fit(heights, weights)
+print(f"all five: slope {everyone.slope:.4f}")
+
+slopes = []
+for left_out in range(len(heights)):
+    four_heights = [height for index, height in enumerate(heights) if index != left_out]
+    four_weights = [weight for index, weight in enumerate(weights) if index != left_out]
+    four = SimpleLinearRegression().fit(four_heights, four_weights)
+    slopes.append(four.slope)
+    print(f"without the {heights[left_out]} cm person: slope {four.slope:.4f}, intercept {four.intercept:.1f}")
+
+print(f"smallest {min(slopes):.4f}, largest {max(slopes):.4f}, spread {max(slopes) - min(slopes):.4f}")`,
+            `all five: slope 0.8000
+without the 160 cm person: slope 0.6000, intercept -33.0
+without the 165 cm person: slope 0.8571, intercept -78.3
+without the 170 cm person: slope 0.8000, intercept -68.0
+without the 175 cm person: slope 0.7429, intercept -58.9
+without the 180 cm person: slope 1.0000, intercept -101.0
+smallest 0.6000, largest 1.0000, spread 0.4000`,
+            { hints: ["A list comprehension over enumerate can drop the person at one index from both lists, and the two lists have to lose the same person or the pairs no longer match.", "Each refit is a fresh SimpleLinearRegression, since fitting the same object again would overwrite the slope it already holds.", "Leaving out the 170 cm person, who sits exactly on both means, changes neither mean and gives the same 0.8, which is a good check that the loop is doing what it should."], check: numberCheck("What slope comes back when the 180 cm person is left out?", 1.0, 0.0005, "Without the tallest person the four left have mean height 167.5 and mean weight 66.5, their paired products sum to 125 and so do their squared height deviations, so the slope is exactly 1. One person out of five moves the slope from 0.8 up to 1.0, or down to 0.6 when the shortest is left out instead, which is sampling variability acting on a fitted coefficient exactly as it acts on a mean.") },
+          ),
+        ]}
+      />
     </PrimerPage>
   );
 }

@@ -45,7 +45,7 @@ export function ResponseLedger() {
     <div>
       <div className="flex flex-wrap items-center gap-3 pb-3 text-sm text-slate-600 dark:text-slate-300">
         <label className="flex items-center gap-2">
-          hidden bend
+          hidden activation function
           <select
             value={activation}
             onChange={(event) =>
@@ -124,11 +124,11 @@ export function ResponseLedger() {
           value={show(pass.output)}
         />
         <Stat
-          label="Hidden scores, unchanged by the bend"
+          label="Hidden scores, unchanged by the activation function"
           value={vector(pass.layers[0].scores)}
         />
         <Stat
-          label="Hidden outputs, the bend's work"
+          label="Hidden outputs, the activation function's work"
           value={vector(pass.layers[0].outputs)}
         />
       </div>

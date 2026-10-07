@@ -66,18 +66,9 @@ export function SentencePair() {
           </div>
         ))}
       </div>
-      <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
-        At the largest of the three sizes the two agree on{" "}
-        <span className="font-mono">Dr.</span> and{" "}
-        <span className="font-mono">the</span> and part everywhere else. Gluing
-        the probability cut back together gives{" "}
-        <span className="font-mono">{largest.unigram_decoded}</span>, which is
-        not what went in, because one symbol of the sentence is a letter the
-        corpus never used at the end of a word. The same sentence with that
-        symbol taken out of it,{" "}
-        <span className="font-mono">{view.control_text}</span>, comes back
-        exactly and costs {view.control_pieces} pieces.
-      </p>
+      <>
+<p className="mt-4 text-xs text-slate-500 dark:text-slate-400">At the largest displayed vocabulary size, the two schemes agree on Dr. and the but choose different pieces elsewhere. Compare the segmentations before comparing their lengths.</p><p className="mt-4 text-xs text-slate-500 dark:text-slate-400">The unigram reading decodes to {largest.unigram_decoded}. The difference comes from a symbol absent from the learned word-ending representation. Removing that symbol gives the control text {view.control_text}, which round-trips exactly using {view.control_pieces} pieces. This separates a coverage failure from an ordinary difference in segmentation.</p>
+</>
     </div>
   );
 }

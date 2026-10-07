@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { WhoNoticed } from "@/components/widgets/WhoNoticed";
 export const metadata: Metadata = {
   title: "The Standard Score · oop_ml",
   description:
-    "Subtract a column’s average and divide by its spread, so every column arrives measured in its own deviations, and see which fits that rescues and which never noticed the units at all.",
+    "Express a value as a number of standard deviations above or below the training mean.",
 };
 
 const link =
@@ -30,8 +33,12 @@ const link =
 export default function TheStandardScorePage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["the-standard-score"]}
+      technicalStart="Part 2. Subtract the Average, Divide by the Spread"
+      openingTitle="How Unusual Is That Number?"
+      playgroundIntro="Compare each original value with its standard score. Identify the mean at zero and check what one unit on the new scale represents."
       title="The Standard Score"
-      tagline="Subtract a column&rsquo;s average and divide by its spread, and every value becomes a count of deviations that means the same thing in every column."
+      tagline="Express a value as a number of standard deviations above or below the training mean."
       prerequisites={
         <>
           The average and the standard deviation come from the{" "}
@@ -62,66 +69,14 @@ export default function TheStandardScorePage() {
           needs it.
         </>
       }
-      history={
-        <>
-          <p>
-            Karl Pearson gave the standard deviation its name in 1893, lecturing
-            at Gresham College and then in the series of papers on the
-            mathematical theory of evolution he was writing at University
-            College London. What he had named was a way of saying how far from
-            typical one measurement was without saying it in the unit the
-            measurement came in, and the older statisticians of errors had been
-            circling the same want for a century under the name of the probable
-            error. A deviation of four is large or small depending entirely on
-            what four means in that column, and dividing it by the spread of the
-            column is the move that makes the question answerable at all.
-          </p>
-          <p>
-            The problem that turned this into a routine was not an astronomer&rsquo;s
-            and not a biologist&rsquo;s. Edward Thorndike, writing An
-            Introduction to the Theory of Mental and Social Measurements at
-            Teachers College in New York in 1904, was faced with pupils who had
-            taken an arithmetic test of forty questions and a spelling test of
-            twenty-five, and with no way at all to say whether a given child was
-            better at arithmetic than at spelling. Nothing in the two raw totals
-            can be compared, since the tests differ in length, in difficulty and
-            in how much the class varied on them, so Thorndike argued that a
-            score had to be reported relative to the variability of the group
-            that sat the test. William McCall, at the same institution, set that
-            out as a working recipe in How to Measure in Education in 1922 and
-            put the result on a scale with an average of fifty and a spread of
-            ten, so that a pupil&rsquo;s standing would never be reported as a
-            negative number. The name standard score comes from that literature
-            rather than from statistics proper.
-          </p>
-          <p>
-            The step from there to machine learning is short and was taken in the
-            same journals. Harold Hotelling&rsquo;s 1933 paper on analysing a
-            complex of statistical variables into principal components appeared
-            in the Journal of Educational Psychology and worked from the
-            correlations between the tests rather than from their covariances,
-            which is the same thing as working from columns already divided by
-            their spreads. Every method since that reads several columns at once
-            has inherited that decision or quietly failed to make it, and this
-            page asks six questions about it in order. How wrong does a fit go
-            when one column is recorded in a smaller unit than another? What
-            exactly are the two numbers a column teaches, and what does the
-            transformation promise back? What does a standard score mean, and
-            why can two of them be compared when the raw values cannot? Which
-            fits need it, and which never noticed the units at all? Why must the
-            two numbers come from the training rows, and how much does breaking
-            that rule really cost? And where does the arithmetic stop being
-            defined?
-          </p>
-        </>
-      }
+
       playground={<StandardScorePlayground />}
       sections={[
         {
           title: "Part 1. When the Unit Decides the Answer",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Twenty-four trees, two units">
                 <p>
                   The orchard this page works through is twenty-four apple
@@ -171,18 +126,14 @@ export default function TheStandardScorePage() {
                 <Equation>{"distance² = (trunk gap in mm)² + (water gap in m)²"}</Equation>
                 <OrchardNeighbours />
                 <InAModel title="The wettest tree in the orchard">
-                  <p>
-                    That tree has a trunk of 369 mm, was given 0.95 m of water,
-                    the most of any tree, and bore 55.14 kg, the most of any
-                    tree. Asked in the recorded units, its three nearest are the
-                    trees of 362, 359 and 354 mm, whose water was 0.59, 0.48 and
-                    0.52 m, and the trunk column owned between 0.9974 and 0.9992
-                    of every one of those squared distances. Their average fruit
-                    is 33.84 kg, which is 21.30 kg short. Asked in standard
-                    scores the three nearest were given 0.91, 0.90 and 0.93 m,
-                    their average fruit is 52.73 kg, and the answer is 2.41 kg
-                    short.
+                  <>
+<p>
+                    That tree has a trunk of 369 mm, was given 0.95 m of water, the most of any tree, and bore 55.14 kg, the most of any tree. Asked in the recorded units, its three nearest are the trees of 362, 359 and 354 mm, whose water was 0.59, 0.48 and 0.52 m, and the trunk column owned between 0.9974 and 0.9992 of every one of those squared distances.
                   </p>
+                  <p>
+                    Their average fruit is 33.84 kg, which is 21.30 kg short. Asked in standard scores the three nearest were given 0.91, 0.90 and 0.93 m, their average fruit is 52.73 kg, and the answer is 2.41 kg short.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   Click a different tree and the two rings move together for
@@ -254,7 +205,7 @@ export default function TheStandardScorePage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Subtract the Average, Divide by the Spread",
@@ -399,6 +350,54 @@ export default function TheStandardScorePage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "Rewriting a column in a unit a thousand times smaller multiplies every gap in it by a thousand. What does that do to its say in a squared distance?",
+              [
+                "Multiplies it by a million",
+                "Multiplies it by a thousand",
+                "Leaves it untouched",
+                "Multiplies it by the square root of a thousand",
+              ],
+              0,
+              "A squared distance sees the square of the multiplier, so what decides the balance between two columns is the ratio of their spreads, squared. On the orchard that ratio is 659.21 and its square is 434,551, which is why the whole width of the water column counts for what 0.54 of a millimetre of trunk counts for.",
+            ),
+            choice(
+              "Scored over all twenty-four trees, the nearest-neighbour fit on the recorded columns comes to −0.7175. Which other reading does that almost exactly match?",
+              [
+                "The trunk column alone, unstandardized, at −0.7238",
+                "The water column alone, unstandardized, at 0.9544",
+                "Both columns in standard scores, at 0.9126",
+                "None of the others, since a negative score cannot be compared",
+              ],
+              0,
+              "That agreement is what it means to say the unit chose the column. A negative score means the fit did worse than answering the orchard’s average weight to every tree, and it did so quietly, since every distance was computed correctly and every neighbour really was the nearest under the sum it was given.",
+            ),
+            trueFalse(
+              "Adding a thousand millimetres to every trunk in the orchard changes the largest standard score by exactly zero.",
+              true,
+              "The average moves by exactly a thousand and the spread does not move at all, so the quotient is untouched, and a shift is exact in the arithmetic as well as in the mathematics. A stretch is exact only in the mathematics. The nursery row and the whole-number column it was built from disagree by 2.2 × 10⁻¹⁶, the last bit of a number near one, so two implementations that disagree in the sixteenth decimal are disagreeing about rounding and not about the column.",
+            ),
+            several(
+              "Which of these hold for a standardized column, whatever went into it?",
+              [
+                "Its average is exactly zero",
+                "Its spread is exactly one, where the spread was worked out by dividing the sum of squares by the count of values",
+                "Two values that were equal before come out equal",
+                "Its values all lie between minus one and one",
+              ],
+              [0, 1, 2],
+              "The distances from an average always cancel, which is what makes an average an average, and dividing them all by one number leaves them cancelling still. The two saplings of 210 mm come out at the same score because the transformation asks nothing about a value except what it is. The nursery row’s widest sapling comes out at 1.57, which settles the claim that every score lies between minus one and one, and the lopsided column of Part 5 reaches 3.34.",
+            ),
+            trueFalse(
+              "With the spread worked out by dividing the sum of squares by the count of values, reading the variance of the scores back by dividing by one fewer still reports exactly one.",
+              false,
+              "The spread was built by dividing the nursery row’s 13,000 by five, so its five squared scores add to exactly five, and dividing that by four reports 1.25 rather than 1. The promise of exactly one holds when the count that built the spread is the count that reads the variance back, which is why the convention has to be stated rather than assumed.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. A Value Measured in Its Own Deviations",
           content: (
             <>
@@ -442,17 +441,14 @@ export default function TheStandardScorePage() {
                   coming to &minus;0.0826.
                 </p>
                 <InAModel title="The widest trunk against the wettest tree">
-                  <p>
-                    The widest trunk in the orchard is 620 mm, which is 2.04
-                    spreads above the average trunk. The most water any tree was
-                    given is 0.95 m, which is 1.57 spreads above the average
-                    drink. So the widest trunk is the more unusual of the two
-                    readings, by about half a spread, and no arrangement of the
-                    raw numbers could have told you that. The tree with the
-                    widest trunk is also the one that most needed telling apart
-                    from the rest, since it was given only 0.47 m of water, a
-                    reading 1.21 spreads below average, and it bore 30.82 kg.
+                  <>
+<p>
+                    The widest trunk in the orchard is 620 mm, which is 2.04 spreads above the average trunk. The most water any tree was given is 0.95 m, which is 1.57 spreads above the average drink. So the widest trunk is the more unusual of the two readings, by about half a spread, and no arrangement of the raw numbers could have told you that.
                   </p>
+                  <p>
+                    The tree with the widest trunk is also the one that most needed telling apart from the rest, since it was given only 0.47 m of water, a reading 1.21 spreads below average, and it bore 30.82 kg.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   Comparable does not mean equally important. Putting the two
@@ -706,6 +702,54 @@ export default function TheStandardScorePage() {
           ),
         },
         {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "The widest trunk is 2.04 spreads above the average trunk, and the wettest tree was given water 1.57 spreads above the average drink. Which reading is the more unusual?",
+              [
+                "The trunk, by about half a spread",
+                "The water, by about half a spread",
+                "Neither, since millimetres and metres answer no common question",
+                "The water, since water very nearly decides the fruit",
+              ],
+              0,
+              "In standard scores both numbers are counts of the same kind of thing, namely how far a value is from typical measured in that column’s own spreads, so the question has an answer that no arrangement of the raw numbers could have given. Comparable does not mean equally important, which is what crediting the water because it decides the fruit confuses; the ranking says where each reading sits in its own column and nothing about which column matters.",
+            ),
+            choice(
+              "On the recorded columns the fitted weights are 0.0038802 on trunk and 49.560 on water. On standard scores they are 0.4410 and 8.5446. What does the second pair say?",
+              [
+                "Moving a tree one spread along the water column is worth about nineteen times as much fruit as moving it one spread along the trunk column",
+                "Water matters nearly thirteen thousand times as much as trunk girth",
+                "The two fits are different lines, and the standardized one is the better of them",
+                "Trunk girth is worth 0.4410 kilograms per millimetre",
+              ],
+              0,
+              "Both standardized weights are in kilograms per spread of their own column, so the ranking is a real one, where the recorded pair are in kilograms per millimetre and kilograms per metre and cannot be ranked at all. Dividing each standardized weight by its column’s spread returns the recorded pair, so the two fits are one line described twice. The ratio is a statement about this orchard’s spreads rather than a law about trunks and water.",
+            ),
+            several(
+              "Which of these fits are left unchanged by standardizing their inputs?",
+              [
+                "A decision tree, which compares values only within a column",
+                "A plain least-squares line, which has a free weight per column",
+                "A penalised line, which adds the squared size of every weight to what it makes small",
+                "k-means, whose centres are chosen to minimise a squared distance",
+              ],
+              [0, 1],
+              "A fit is untouched when a change of unit can be absorbed entirely into what the fit is free to choose. A tree absorbs it into its thresholds and a least-squares line into its weights. A penalty takes that freedom away by charging for the weights, and a distance never had it, since its weights are all fixed at one.",
+            ),
+            trueFalse(
+              "The tree grown on standard scores roots on water below −0.08217, and its twenty-four predictions are identical to those of the tree grown on the recorded columns.",
+              true,
+              "That threshold multiplied by the water spread and put back about the average water is 0.665, which is the recorded tree’s own threshold, because the threshold was chosen from the same column that was rescaled and moves along with it. The largest gap between the two sets of twenty-four predictions is exactly zero, both trees have eight leaves, and both score 0.8940 held out tree by tree. Any rescaling that keeps a column’s order leaves a tree unchanged, so this holds for the whole scaling family and not only for the standard score.",
+            ),
+            trueFalse(
+              "On this orchard the standard score was the best of the readings measured.",
+              false,
+              "The water column alone, unstandardized, scores 0.9544 held out tree by tree where both columns in standard scores score 0.9126, so dropping the useless column beats standardizing both of them by 0.042 and takes no fitting at all. The honest ordering puts the standard score second. It repaired a fit worse than a constant and did not reach what simply knowing which column mattered would have reached, and what it bought is that it needed no such knowledge, which is the trade made whenever a column of unknown worth is standardized rather than dropped.",
+            ),
+        ],
+        },
+        {
           title: "Part 5. The Two Numbers Belong to the Training Rows",
           content: (
             <>
@@ -739,21 +783,14 @@ export default function TheStandardScorePage() {
                 </p>
                 <HeldOutTrees />
                 <InAModel title="Four trees that were all wet">
-                  <p>
-                    The twenty kept trees have an average drink of 0.6305 m and
-                    a spread of 0.1462, so the four held-out trees come out at
-                    2.05, 2.18, 1.84 and 1.91 spreads above average, which is
-                    the right description of four trees that were the wettest in
-                    the orchard. Standardized against themselves they come out
-                    at 0.39, 1.43, &minus;1.17 and &minus;0.65, announcing that
-                    two of the four wettest trees in the orchard were drier than
-                    average, because the only average they were compared with
-                    was their own. Put through the line fitted on the twenty,
-                    the first reading predicts 54.81, 56.10, 53.73 and 53.94 kg
-                    against true weights of 53.00, 55.14, 52.10 and 53.08, worst
-                    error 1.81 kg. The second predicts 42.15, 50.64, 31.63 and
-                    34.73, worst error 20.47 kg.
+                  <>
+<p>
+                    The twenty kept trees have an average drink of 0.6305 m and a spread of 0.1462, so the four held-out trees come out at 2.05, 2.18, 1.84 and 1.91 spreads above average, which is the right description of four trees that were the wettest in the orchard. Standardized against themselves they come out at 0.39, 1.43, &minus;1.17 and &minus;0.65, announcing that two of the four wettest trees in the orchard were drier than average, because the only average they were compared with was their own.
                   </p>
+                  <p>
+                    Put through the line fitted on the twenty, the first reading predicts 54.81, 56.10, 53.73 and 53.94 kg against true weights of 53.00, 55.14, 52.10 and 53.08, worst error 1.81 kg. The second predicts 42.15, 50.64, 31.63 and 34.73, worst error 20.47 kg.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   The damage is largest exactly when the held-out rows are
@@ -877,20 +914,14 @@ export default function TheStandardScorePage() {
                     },
                   ]}
                 />
-                <p>
-                  Because the quotient does not exist, an implementation has a
-                  genuine choice to make rather than a bug to avoid, and the
-                  three answers in use cost different things. Refusing tells the
-                  caller at once that a column they thought was informative is
-                  not, and stops a fit that was about to be built on nothing.
-                  Substituting a spread of one and passing the column through
-                  turns it into a constant column of zeros, which most fits
-                  ignore and a penalised fit charges nothing for, so the run
-                  completes and nobody learns anything about the data.
-                  Dropping the column silently changes how many columns come out
-                  of the transformation, which breaks anything downstream that
-                  matched columns by position.
+                <>
+<p>
+                  Because the quotient does not exist, an implementation has a genuine choice to make rather than a bug to avoid, and the three answers in use cost different things. Refusing tells the caller at once that a column they thought was informative is not, and stops a fit that was about to be built on nothing.
                 </p>
+                <p>
+                  Substituting a spread of one and passing the column through turns it into a constant column of zeros, which most fits ignore and a penalised fit charges nothing for, so the run completes and nobody learns anything about the data. Dropping the column silently changes how many columns come out of the transformation, which breaks anything downstream that matched columns by position.
+                </p>
+</>
                 <KeepInMind>
                   The case is not rare in practice, since a column that was
                   constant in the whole dataset can also become constant inside
@@ -1017,6 +1048,238 @@ export default function TheStandardScorePage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "The four wettest trees are held out and the fit is built on the twenty that remain. Standardized against their own average and their own spread, what do those four report?",
+              [
+                "That two of the four wettest trees in the orchard were drier than average",
+                "That all four stood between 1.8 and 2.2 spreads above average",
+                "That all four sat exactly at the average",
+                "Nothing, since four rows are too few to have a spread",
+              ],
+              0,
+              "They come out at 0.39, 1.43, −1.17 and −0.65, because the only average they were compared with was their own. Against the twenty training rows they come out between 1.84 and 2.18 spreads above average, which is the right description of four trees that were the wettest in the orchard, and the worst prediction error goes from 1.81 kg to 20.47 kg.",
+            ),
+            trueFalse(
+              "Standardizing the whole orchard before splitting it into folds changed the cross-validated scores of the tree and of the least-squares line by exactly zero.",
+              true,
+              "Neither fit is touched by any affine rescaling of a column, as Part 4 measured, so which rows the average and the spread were read from cannot reach them. The largest difference any of the six fits showed was 0.0037, on the heavily penalised line, and it went the wrong way, with the leaked version scoring slightly worse, so the leak flattered nothing on this orchard. The rule is still worth keeping, because a transformer that consults the target leaks a great deal more than this one does.",
+            ),
+            trueFalse(
+              "Standardizing a strongly lopsided column reduces its lopsidedness.",
+              false,
+              "Subtracting an average and dividing by a spread moves a column and rescales it and does nothing else whatever. On the fifteen lopsided readings the usual measure of lopsidedness is 2.4896725430 before and 2.4896725430 after, agreeing to the last bit the arithmetic keeps. If a column needs a logarithm or a rank or a cap, standardizing is not that repair and does not stand in for it.",
+            ),
+            choice(
+              "One trunk of 438 mm is typed as 4380. What happens to the other twenty-three trees?",
+              [
+                "They are pressed into 0.52 of a spread, where they had spanned 3.68 between them",
+                "Their scores are untouched, since only the mistyped value moved",
+                "They spread further apart, because the spread of the column grew",
+                "They all come out at exactly zero",
+              ],
+              0,
+              "The average trunk moves from 387.6 to 551.9 and the spread from 113.7 to 806.2, so the widest real trunk falls from 2.04 spreads above average to 0.08 while the mistyped one sits alone at 4.75. The transformation is still exactly correct, the scores still average zero and still have a spread of one, and what is lost is every distinction among the real trees.",
+            ),
+            several(
+              "The standard score is defined for any column whose spread is positive, and the definition promises exactly two numbers. Which of these follow?",
+              [
+                "A column in which every value is 300 has no standard scores, since every distance from its average is zero and so is its spread",
+                "Nine readings each one machine epsilon apart do have standard scores, running evenly from −1.55 to 1.55",
+                "Substituting a spread of one for a constant column lets the fit learn what that column carried",
+                "A standardized column is ready for a method that assumes normality",
+              ],
+              [0, 1],
+              "The quotient does not exist when the spread is zero, and it does exist at a spread of 2.6 × 10⁻¹⁶, however suspicious that spread is, since nothing in the numbers says whether the nine readings really vary at that scale or a sum lost its last bits. Substituting a spread of one passes through a constant column of zeros, which most fits ignore and a penalised fit charges nothing for, so the run completes and nobody learns anything about the data. And standardizing a column that is nothing like a bell gives a column that is nothing like a bell; on the fifteen lopsided readings a score of 3 is exceeded by one value in fifteen, so a method that assumes normality still needs a transformation of the shape.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Standardizing the Orchard With the Library",
+          practice: [
+            exercise(
+              "Take the nursery row through the standardizer",
+              ["Part 2 works the five saplings through by hand, 210, 210, 260, 160 and 310 millimetres, and arrives at an average of 230, a spread of 50.990195 and five standard scores. Fit a Standardizer on that one column and read the same numbers off it.", "Then check the two promises on the scores it hands back, that they average zero and that their variance is one, and read the variance a second time dividing by four rather than five, which is where Part 2 says a convention hides."],
+              `from oop_ml import Feature, Standardizer
+
+saplings = Feature("trunk", [210, 210, 260, 160, 310])
+
+scaler = Standardizer().fit([saplings])
+# Print the average and the spread the scaler learned for "trunk", then the
+# five standard scores it produces, then the average of those scores, their
+# variance dividing by five, and their variance dividing by four.`,
+              `from oop_ml import Feature, Standardizer
+
+saplings = Feature("trunk", [210, 210, 260, 160, 310])
+
+scaler = Standardizer().fit([saplings])
+learned = scaler.scalings["trunk"]
+print(f"average {learned.mean:.1f} mm, spread {learned.standard_deviation:.6f} mm")
+
+scores = [float(value) for value in scaler.transform([saplings])[0].values]
+print("scores", [round(score, 6) for score in scores])
+
+average = sum(scores) / len(scores)
+squares = sum((score - average) ** 2 for score in scores)
+print(f"average of the scores {average:.6f}")
+print(f"variance dividing by five {squares / 5:.6f}")
+print(f"variance dividing by four {squares / 4:.6f}")`,
+              `average 230.0 mm, spread 50.990195 mm
+scores [-0.392232, -0.392232, 0.588348, -1.372813, 1.568929]
+average of the scores 0.000000
+variance dividing by five 1.000000
+variance dividing by four 1.250000`,
+              { hints: ["fit takes a list of Features, even when there is only one, and transform answers a list of the same length, so the scored column is the first item of what comes back.", "The learned numbers live on scalings, addressed by the feature's name, as properties called mean and standard_deviation.", "The scores come back as a Feature whose values are an array. Converting each to a float keeps the rest plain Python."], check: numberCheck("What standard score does the 310 mm sapling get?", 1.568929, 1e-06, "The 310 mm sapling is 80 mm above the average of 230, and 80 divided by the spread of 50.990195 is 1.568929, the same number Part 2 reaches by hand. The variance comes out at exactly one when the sum of squared scores is divided by five, the count that built the spread, and at 1.25 when it is divided by four.") },
+            ),
+            exercise(
+              "Read the orchard's two numbers and fit the line twice",
+              ["Part 1 says the trunk spread is 659.21 times the water spread. Fit a Standardizer on both orchard columns, print the average and the spread of each, and confirm the ratio and its square.", "Part 3 then fits the least-squares line on the recorded columns and on the standard scores and says the two are one line described twice. Fit both, print the two weights for each column, divide each standardized weight by its column's spread to get the recorded weight back, and print the two intercepts beside the orchard's average fruit weight, which the lesson does not quote."],
+              `from oop_ml import Feature, MultipleLinearRegression, Standardizer
+
+girth = [620, 385, 226, 297, 515, 240, 289, 202, 430, 202, 362, 302,
+         438, 439, 494, 354, 369, 465, 426, 534, 359, 598, 418, 339]
+water = [0.47, 0.55, 0.49, 0.93, 0.58, 0.45, 0.70, 0.79, 0.66, 0.84, 0.59, 0.76,
+         0.41, 0.59, 0.51, 0.52, 0.95, 0.88, 0.90, 0.83, 0.48, 0.84, 0.67, 0.91]
+fruit = [30.82, 36.40, 30.94, 53.00, 37.46, 30.61, 43.42, 47.20, 41.40, 49.00, 36.57, 46.92,
+         27.78, 38.58, 37.01, 32.90, 55.14, 53.50, 52.10, 48.77, 32.04, 51.50, 42.89, 53.08]
+
+columns = [Feature("girth", girth), Feature("water", water)]
+target = Feature("fruit", fruit)
+# Fit a Standardizer on the two columns and print each column's average and
+# spread, then the ratio of the two spreads and its square. Fit a
+# MultipleLinearRegression on the recorded columns and another on the
+# standardized ones, and for each column print the recorded weight, the
+# standardized weight, and the standardized weight divided by the spread.
+# Finally print both intercepts and the average of the fruit column.`,
+              `from oop_ml import Feature, MultipleLinearRegression, Standardizer
+
+girth = [620, 385, 226, 297, 515, 240, 289, 202, 430, 202, 362, 302,
+         438, 439, 494, 354, 369, 465, 426, 534, 359, 598, 418, 339]
+water = [0.47, 0.55, 0.49, 0.93, 0.58, 0.45, 0.70, 0.79, 0.66, 0.84, 0.59, 0.76,
+         0.41, 0.59, 0.51, 0.52, 0.95, 0.88, 0.90, 0.83, 0.48, 0.84, 0.67, 0.91]
+fruit = [30.82, 36.40, 30.94, 53.00, 37.46, 30.61, 43.42, 47.20, 41.40, 49.00, 36.57, 46.92,
+         27.78, 38.58, 37.01, 32.90, 55.14, 53.50, 52.10, 48.77, 32.04, 51.50, 42.89, 53.08]
+
+columns = [Feature("girth", girth), Feature("water", water)]
+target = Feature("fruit", fruit)
+scaler = Standardizer().fit(columns)
+for scaling in scaler.scalings:
+    print(f"{scaling.name}: average {scaling.mean:.4f}, spread {scaling.standard_deviation:.4f}")
+ratio = scaler.scalings["girth"].standard_deviation / scaler.scalings["water"].standard_deviation
+print(f"ratio of spreads {ratio:.2f}, squared {ratio ** 2:,.0f}")
+
+recorded = MultipleLinearRegression().fit(columns, target)
+standardized = MultipleLinearRegression().fit(scaler.transform(columns), target)
+for name in ("girth", "water"):
+    spread = scaler.scalings[name].standard_deviation
+    print(
+        f"{name}: recorded {recorded.coefficients[name]:.7f}, "
+        f"standardized {standardized.coefficients[name]:.4f}, "
+        f"translated back {standardized.coefficients[name] / spread:.7f}"
+    )
+print(f"recorded intercept {recorded.intercept:.4f} kg")
+print(f"standardized intercept {standardized.intercept:.4f} kg")
+print(f"average fruit {sum(fruit) / len(fruit):.4f} kg")`,
+              `girth: average 387.6250, spread 113.6518
+water: average 0.6792, spread 0.1724
+ratio of spreads 659.21, squared 434,551
+girth: recorded 0.0038802, standardized 0.4410, translated back 0.0038802
+water: recorded 49.5603594, standardized 8.5446, translated back 49.5603594
+recorded intercept 6.8791 kg
+standardized intercept 42.0429 kg
+average fruit 42.0429 kg`,
+              { hints: ["A fitted Standardizer's scalings can be iterated, and each item carries name, mean and standard_deviation, so one loop prints both columns.", "transform answers a new list of Features in the same order, which is exactly what the second fit takes in place of columns.", "coefficients is addressed by the column's name and answers the weight as a plain number, and intercept is a property beside it."], check: numberCheck("What intercept does the line fitted on standard scores report, in kilograms?", 42.0429, 0.0005, "An intercept is the line's answer at a tree whose every column reads zero. On standard scores that is the tree sitting at the average of both columns, and the line's answer there is the orchard's average fruit weight, 42.0429 kg, which the two last lines of the output agree on. On the recorded columns the same intercept is 6.8791 kg, the line's answer at a tree with no trunk and no water, which no tree in the orchard resembles. The weights translate back exactly, which is what Part 3 means by one line described twice.") },
+            ),
+            exercise(
+              "Hold out the four wettest trees and read them both ways",
+              ["Part 5 holds out the four wettest trees, rows 3, 16, 18 and 23 of the orchard, fits on the twenty that remain, and reads the four two ways, once against the twenty trees' own average and spread and once against the four's own. Build one Standardizer on the twenty and another on the four.", "Fit the least-squares line on the standardized training rows, predict the four held-out trees under each reading, and print each reading's water scores and worst error. Part 5 arrives at 1.81 kg and 20.47 kg."],
+              `from oop_ml import Feature, MultipleLinearRegression, Standardizer
+
+girth = [620, 385, 226, 297, 515, 240, 289, 202, 430, 202, 362, 302,
+         438, 439, 494, 354, 369, 465, 426, 534, 359, 598, 418, 339]
+water = [0.47, 0.55, 0.49, 0.93, 0.58, 0.45, 0.70, 0.79, 0.66, 0.84, 0.59, 0.76,
+         0.41, 0.59, 0.51, 0.52, 0.95, 0.88, 0.90, 0.83, 0.48, 0.84, 0.67, 0.91]
+fruit = [30.82, 36.40, 30.94, 53.00, 37.46, 30.61, 43.42, 47.20, 41.40, 49.00, 36.57, 46.92,
+         27.78, 38.58, 37.01, 32.90, 55.14, 53.50, 52.10, 48.77, 32.04, 51.50, 42.89, 53.08]
+
+held = [3, 16, 18, 23]
+kept = [row for row in range(24) if row not in held]
+training = [Feature("girth", [girth[row] for row in kept]), Feature("water", [water[row] for row in kept])]
+held_out = [Feature("girth", [girth[row] for row in held]), Feature("water", [water[row] for row in held])]
+truth = [fruit[row] for row in held]
+
+# Fit one Standardizer on the training columns and another on the held-out
+# columns, and fit the line on what the first hands back for the training
+# rows. Then for each standardizer, transform the held-out columns, predict
+# the four trees, and print the water scores and the worst absolute error.`,
+              `from oop_ml import Feature, MultipleLinearRegression, Standardizer
+
+girth = [620, 385, 226, 297, 515, 240, 289, 202, 430, 202, 362, 302,
+         438, 439, 494, 354, 369, 465, 426, 534, 359, 598, 418, 339]
+water = [0.47, 0.55, 0.49, 0.93, 0.58, 0.45, 0.70, 0.79, 0.66, 0.84, 0.59, 0.76,
+         0.41, 0.59, 0.51, 0.52, 0.95, 0.88, 0.90, 0.83, 0.48, 0.84, 0.67, 0.91]
+fruit = [30.82, 36.40, 30.94, 53.00, 37.46, 30.61, 43.42, 47.20, 41.40, 49.00, 36.57, 46.92,
+         27.78, 38.58, 37.01, 32.90, 55.14, 53.50, 52.10, 48.77, 32.04, 51.50, 42.89, 53.08]
+
+held = [3, 16, 18, 23]
+kept = [row for row in range(24) if row not in held]
+training = [Feature("girth", [girth[row] for row in kept]), Feature("water", [water[row] for row in kept])]
+held_out = [Feature("girth", [girth[row] for row in held]), Feature("water", [water[row] for row in held])]
+truth = [fruit[row] for row in held]
+
+by_training = Standardizer().fit(training)
+by_their_own = Standardizer().fit(held_out)
+line = MultipleLinearRegression().fit(
+    by_training.transform(training), Feature("fruit", [fruit[row] for row in kept])
+)
+print(f"training water: average {by_training.scalings['water'].mean:.4f}, "
+      f"spread {by_training.scalings['water'].standard_deviation:.4f}")
+
+for label, scaler in (("training numbers", by_training), ("their own numbers", by_their_own)):
+    scored = scaler.transform(held_out)
+    predicted = line.predict(scored)
+    worst = max(abs(float(guess) - actual) for guess, actual in zip(predicted, truth))
+    print(f"{label}: water scores {[round(float(v), 2) for v in scored[1].values]}, worst error {worst:.2f} kg")`,
+              `training water: average 0.6305, spread 0.1462
+training numbers: water scores [2.05, 2.18, 1.84, 1.91], worst error 1.81 kg
+their own numbers: water scores [0.39, 1.43, -1.17, -0.65], worst error 20.47 kg`,
+              { hints: ["The line is fitted once, on the training rows as the training standardizer scored them. Only the held-out trees are read twice, and only the standardizer changes between the two readings.", "predict takes the list of Features that transform hands back, and answers one prediction per row that can be iterated beside the true weights.", "transform answers the columns in the order they were fitted, so the water scores are the values of the second Feature in the list."], check: numberCheck("What is the worst error, in kilograms, when the four trees are standardized against their own average and spread?", 20.47, 0.01, "Against their own average the four wettest trees in the orchard come out at 0.39, 1.43, −1.17 and −0.65, two of them apparently drier than average, because the only trees they were compared with were each other. The line was fitted on scores measured against the twenty training trees, so it reads those four numbers as four ordinary trees and misses by up to 20.47 kg. Read against the training numbers the same four trees sit between 1.84 and 2.18 spreads above average and the worst miss is 1.81 kg.") },
+            ),
+            exercise(
+              "Ask for a score where there is no spread, and where there is almost none",
+              ["Part 6 says a column in which every value is 300 has no standard score, since its spread is exactly zero, and that nine readings each one machine epsilon apart do have one, since their spread is positive. Hand both columns to a Standardizer.", "Catch what the library raises for the constant column and print the name of its class and its message. For the second column print the spread it learned and the nine scores, which Part 6 gives as about 2.6 × 10⁻¹⁶ and a run from −1.55 to 1.55."],
+              `from oop_ml import Feature, MLLibError, Standardizer
+
+constant = Feature("trunk", [300.0] * 9)
+almost_constant = Feature("trunk", [index * 1e-16 for index in range(9)])
+
+# Try to fit a Standardizer on the constant column, catching the library's own
+# error and printing the name of its class and its message. Then fit one on the
+# almost-constant column and print the spread it learned and its nine scores.`,
+              `from oop_ml import Feature, MLLibError, Standardizer
+
+constant = Feature("trunk", [300.0] * 9)
+almost_constant = Feature("trunk", [index * 1e-16 for index in range(9)])
+
+try:
+    Standardizer().fit([constant])
+except MLLibError as refusal:
+    print(type(refusal).__name__)
+    print(refusal)
+
+scaler = Standardizer().fit([almost_constant])
+print(f"spread {scaler.scalings['trunk'].standard_deviation:.3e}")
+print("scores", [round(float(value), 4) for value in scaler.transform([almost_constant])[0].values])`,
+              `AllSameValuesError
+feature_values must not be constant (zero variance)
+spread 2.582e-16
+scores [-1.5492, -1.1619, -0.7746, -0.3873, 0.0, 0.3873, 0.7746, 1.1619, 1.5492]`,
+              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal a constant column turns out to be.", "The refusal happens inside fit, not transform, because the spread is learned there and it is the spread that is zero.", "The second fit goes through without complaint. Nothing in the library judges whether a spread of 2.6 × 10⁻¹⁶ is real variation or lost bits, which is the choice Part 6 says an implementation has to make and state."] },
+            ),
+          ],
         },
       ]}
     />

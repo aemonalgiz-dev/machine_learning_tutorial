@@ -167,17 +167,9 @@ export function PrefixListPanel() {
         </div>
       </div>
 
-      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-        A dark chip is an entry these eighteen sentences actually consulted and a
-        pale one is an entry that was never asked. The question was asked{" "}
-        {coverage.n_words_ending_in_one_stop} times and{" "}
-        {coverage.n_reached} entries answered it, which leaves{" "}
-        {coverage.n_never_reached} carrying nothing here. In{" "}
-        {coverage.n_texts_ending_in_an_abbreviation} of the{" "}
-        {coverage.n_texts} sentences the last piece is a word that kept its stop,
-        which is a sentence ending in an abbreviation and has no right answer at
-        all.
-      </p>
+      <>
+<p className="mt-2 text-xs text-slate-500 dark:text-slate-400">The exception list protects specified abbreviations from ordinary full-stop splitting. Dark entries were consulted by this corpus; pale entries were not.</p><p className="mt-2 text-xs text-slate-500 dark:text-slate-400">There are {coverage.n_words_ending_in_one_stop} candidate words ending in a single stop. The corpus reaches {coverage.n_reached} list entries and does not reach {coverage.n_never_reached}. In {coverage.n_texts_ending_in_an_abbreviation} of {coverage.n_texts} sentences, the final piece is itself an abbreviation. That case needs a boundary convention because the abbreviation&apos;s stop also occurs at the sentence ending.</p>
+</>
     </div>
   );
 }

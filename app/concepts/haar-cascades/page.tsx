@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -25,7 +28,7 @@ import { SweepCostComparison } from "@/components/widgets/SweepCostComparison";
 export const metadata: Metadata = {
   title: "Haar Cascades · oop_ml",
   description:
-    "Crude rectangular readings, made free to take at any size, and ordered so that almost every window is thrown away after two of them.",
+    "Use cheap rectangular features and staged decisions to search an image efficiently.",
 };
 
 const link =
@@ -34,8 +37,12 @@ const link =
 export default function HaarCascadesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["haar-cascades"]}
+      technicalStart="Part 2. A Table Where Every Entry Is A Running Total"
+      openingTitle="Discard the Easy Negatives First"
+      playgroundIntro="Follow which windows survive each stage. Compare the total feature calculations with the detections retained, rather than looking at speed alone."
       title="Haar Cascades"
-      tagline="Crude rectangular readings, made free to take at any size, and ordered so that almost every window is thrown away after two of them."
+      tagline="Use cheap rectangular features and staged decisions to search an image efficiently."
       prerequisites={
         <>
           You should have met the idea of sliding a small window across a larger
@@ -52,67 +59,7 @@ export default function HaarCascadesPage() {
           matters most on this page is one subtraction repeated four times.
         </>
       }
-      history={
-        <>
-          <p>
-            In 2001 a detector that could find faces in a photograph existed and
-            a detector that could find them while the shutter was open did not.
-            The methods of the late nineties, including the one this page owes
-            most to, worked by scoring every position of a picture with a
-            classifier that read a great many measurements, and the cost was the
-            number of positions multiplied by the cost of one score. Constantine
-            Papageorgiou, Michael Oren and Tomaso Poggio, at the Center for
-            Biological and Computational Learning at MIT, had shown in 1998, in
-            &ldquo;A general framework for object detection&rdquo;, that a
-            dictionary of Haar wavelet responses over a patch was a better thing
-            to hand a classifier than the pixels themselves, since a difference
-            between neighbouring regions survives a change in lighting that the
-            pixel values do not. Their detector found pedestrians and faces, and
-            it was slow.
-          </p>
-          <p>
-            Paul Viola, at Mitsubishi Electric Research Laboratories, and
-            Michael Jones, then at the Compaq Cambridge Research Laboratory,
-            published &ldquo;Rapid object detection using a boosted cascade of
-            simple features&rdquo; at the 2001 computer vision conference, and
-            extended it in 2004 as &ldquo;Robust real-time face
-            detection&rdquo;. Three things are in that paper, and two of them
-            were borrowed. The first is the integral image, which is the
-            summed-area table Franklin Crow had described in 1984 for filtering
-            textures in graphics, borrowed to make a rectangle&rsquo;s total
-            cost four table lookups instead of its area. The second is choosing
-            which rectangle readings to use by boosting, which Yoav Freund and
-            Robert Schapire had put on a firm footing in the mid nineties. The
-            third, and the one the paper is actually remembered for, is
-            arranging the chosen rules in stages, ordered so that a stage of two
-            rules runs on every window and a stage of two hundred runs on the
-            few that got that far. Their published detector had thirty-eight
-            stages and over six thousand readings, was trained on a base window
-            of twenty-four pixels square and roughly five thousand hand-marked
-            faces, and ran at about fifteen frames a second on a 700 megahertz
-            machine.
-          </p>
-          <p>
-            The name is a small piece of history in itself. The readings are not
-            Haar wavelets, which are a proper orthogonal basis; they are
-            differences of neighbouring rectangle sums, which resemble the
-            simplest Haar basis functions closely enough that the community
-            called them Haar-like and then dropped the qualifier. Rainer
-            Lienhart and Jochen Maydt at Intel added rectangles turned
-            forty-five degrees in 2002, and the trained files that shipped with
-            the open source vision libraries from about that year are why so
-            much software of the following decade could draw a green box round a
-            face without anyone involved having read the paper. Fifteen frames a
-            second on the hardware of 2001 is what made finding a face something
-            that could happen while the shutter was open rather than something a
-            workstation did afterwards. The running example on this page is not
-            a face, since a face detector is this mechanism plus a corpus nobody
-            here has; it is a bright band across a cluttered twelve by twelve
-            window, which is small enough that every number below can be
-            checked.
-          </p>
-        </>
-      }
+
       playground={
         <div>
           <h2 className="mb-1 text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -130,20 +77,20 @@ export default function HaarCascadesPage() {
         {
           title: "Part 1. What A Search Costs Before Any Of This",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Looking for something means asking everywhere">
-                <p>
-                  Suppose we are looking for a bright band across a cluttered
-                  patch, and the patch is twelve pixels square. The thing we are
-                  looking for could be anywhere in the picture, so the only
-                  honest way to find it is to ask the question at every place it
-                  could be, which means sliding a twelve by twelve window one
-                  pixel at a time and asking about each position in turn. A
-                  scene sixty-six pixels square holds 3,025 such positions, and
-                  that number is fixed before we have decided anything at all
-                  about how the question is answered.
+                <>
+<p>
+                  Suppose we are looking for a bright band in a twelve-pixel-square
+                  patch. The band could appear at many locations in a larger
+                  picture. A straightforward baseline slides that window one
+                  pixel at a time and checks every position where it fits.
                 </p>
+                <p>
+                  A scene sixty-six pixels square holds 3,025 such positions, and that number is fixed before we have decided anything at all about how the question is answered.
+                </p>
+</>
                 <p>
                   That is already the whole difficulty in miniature. Whatever we
                   do to answer &ldquo;is the band here&rdquo;, we are going to
@@ -165,16 +112,14 @@ export default function HaarCascadesPage() {
               </SubSection>
 
               <SubSection title="2. And every question is a sum over a rectangle">
-                <p>
-                  What we want to ask about a window is something like whether
-                  its middle rows are brighter than the rows above and below
-                  them, and to ask that we have to add up the brightness inside
-                  each of those regions. Adding up a rectangle costs one
-                  addition per pixel, so the cost of a question grows with the
-                  size of the region it asks about. That is the wrong way round.
-                  A large region is exactly the one worth asking about, since it
-                  averages away the speckle, and it is the one that costs most.
+                <>
+<p>
+                  What we want to ask about a window is something like whether its middle rows are brighter than the rows above and below them, and to ask that we have to add up the brightness inside each of those regions. Adding up a rectangle costs one addition per pixel, so the cost of a question grows with the size of the region it asks about.
                 </p>
+                <p>
+                  That is the wrong way round. A large region is exactly the one worth asking about, since it averages away the speckle, and it is the one that costs most.
+                </p>
+</>
                 <p>
                   It is worth seeing how badly wrong. On a picture six hundred
                   pixels square, timing two thousand repetitions of each, adding
@@ -198,19 +143,14 @@ export default function HaarCascadesPage() {
               </SubSection>
 
               <SubSection title="3. What the method is, before any of its parts">
-                <p>
-                  The method on this page is the Viola and Jones detector, which
-                  everybody calls a Haar cascade, and it is three separable
-                  ideas that happen to fit together. The first is a table of
-                  running totals that makes any rectangle&rsquo;s sum cost four
-                  lookups whatever its size, so the cost of a question stops
-                  depending on how large a region it asks about. The second is a
-                  family of very crude readings built out of those sums, each of
-                  them the total over some bright cells minus the total over
-                  some dark ones. The third is an ordering, in which the
-                  readings are grouped into stages and a window that fails a
-                  stage is dropped without the later stages ever seeing it.
+                <>
+<p>
+                  The method on this page is the Viola and Jones detector, which everybody calls a Haar cascade, and it is three separable ideas that happen to fit together. The first is a table of running totals that makes any rectangle&rsquo;s sum cost four lookups whatever its size, so the cost of a question stops depending on how large a region it asks about.
                 </p>
+                <p>
+                  The second is a family of very crude readings built out of those sums, each of them the total over some bright cells minus the total over some dark ones. The third is an ordering, in which the readings are grouped into stages and a window that fails a stage is dropped without the later stages ever seeing it.
+                </p>
+</>
                 <p>
                   Each of the three is worth having on its own, and the third is
                   the one the method is named for. We take them in that order,
@@ -220,7 +160,7 @@ export default function HaarCascadesPage() {
                 </p>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Table Where Every Entry Is A Running Total",
@@ -241,17 +181,14 @@ export default function HaarCascadesPage() {
                     "table[r, c] = picture[r, c] + table[r−1, c] + table[r, c−1] − table[r−1, c−1]"
                   }
                 </Equation>
-                <p>
-                  The last term is there because the region above and the region
-                  to the left overlap in the whole corner above and to the left
-                  of both, so that corner would otherwise be counted twice. In
-                  practice the table is built one row and one column larger than
-                  the picture, with that extra first row and column holding
-                  zeros, which is not padding for its own sake. It is what lets
-                  a box touching the top edge be read by the same expression as
-                  a box in the middle, rather than by three special cases for
-                  the boxes whose first row or first column is zero.
+                <>
+<p>
+                  The last term is there because the region above and the region to the left overlap in the whole corner above and to the left of both, so that corner would otherwise be counted twice. In practice the table is built one row and one column larger than the picture, with that extra first row and column holding zeros, which is not padding for its own sake.
                 </p>
+                <p>
+                  It is what lets a box touching the top edge be read by the same expression as a box in the middle, rather than by three special cases for the boxes whose first row or first column is zero.
+                </p>
+</>
                 <KeepInMind>
                   <p>
                     The table is often called the integral image in vision and
@@ -287,16 +224,35 @@ export default function HaarCascadesPage() {
                   box, and watch the four lit entries move with it.
                 </p>
                 <WorkedExample>
-                  <p>
-                    The box three rows tall and three columns wide starting at
-                    row one, column two. Its four entries are 340 at the
-                    bottom-right, 10 at the top-right, 124 at the bottom-left
-                    and 1 at the top-left, so the total is 340 − 10 − 124 + 1,
-                    which is 207. Adding up the nine pixels inside it gives 207
-                    as well, and over all 588 boxes that six by seven picture
-                    holds, the two routes agree 588 times with a largest gap of
-                    exactly zero.
-                  </p>
+                  <>
+                    <p>
+                      Take the three-by-three box starting at row one, column two. The
+                      integral image gives four corner entries: 340 at the bottom-right,
+                      10 at the top-right, 124 at the bottom-left and 1 at the top-left.
+                    </p>
+                    <Equation>{"box sum = bottom-right − top-right − bottom-left + top-left\n        = 340 − 10 − 124 + 1\n        = 207"}</Equation>
+                    <p>
+                      Each of the four entries is itself a total, of everything
+                      above and to the left of one corner of the box.
+                    </p>
+                    <NumberTable
+                      headings={["entry", "what it is the total of", "value"]}
+                      rows={[
+                        ["bottom-right", "rows 0 to 3, columns 0 to 4", "340"],
+                        ["top-right", "row 0, columns 0 to 4", "10"],
+                        ["bottom-left", "rows 0 to 3, columns 0 to 1", "124"],
+                        ["top-left", "row 0, columns 0 to 1", "1"],
+                      ]}
+                    />
+                    <p>
+                      Adding its nine pixels directly gives the same answer.
+                    </p>
+                    <Equation>{"(12 + 13 + 14) + (22 + 23 + 24) + (32 + 33 + 34) = 39 + 69 + 99 = 207"}</Equation>
+                    <p>
+                      Across all 588 boxes in this six-by-seven picture, the two
+                      methods agree exactly.
+                    </p>
+                  </>
                 </WorkedExample>
                 <IntegralCornerBoard />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -369,22 +325,72 @@ export default function HaarCascadesPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "Reading a box off the table takes the entry at its bottom-right corner, subtracts the entries at the top-right and the bottom-left, and adds the entry at the top-left. Why is that one added back?",
+              [
+                "The region above and to the left of the box was taken away twice, once with each strip",
+                "The border of zeros has to be undone before the total is right",
+                "The box’s own top-left pixel was never counted in the first place",
+                "Four signs have to cancel for the read to cost the same at every size",
+              ],
+              0,
+              "The bottom-right entry holds the box, a strip above it, a strip to its left and the corner region above and left of both. Each subtraction removes one strip and the corner region with it, so the corner goes twice and has to come back once. On the worked box that is 340 − 10 − 124 + 1, which is 207, the same as adding the nine pixels.",
+            ),
+            choice(
+              "Read off the table of running totals, how does a box of 360,000 pixels compare with a box of one pixel?",
+              [
+                "Between 1.01 and 1.11 times as long, since both name four table entries",
+                "Between 107 and 130 times as long",
+                "Exactly the same, to the last microsecond",
+                "Four times as long, one lookup per corner",
+              ],
+              0,
+              "Adding the pixels up instead is what takes between 107 and 130 times as long. The small residue above one is the cache, since the four entries of the large box are four corners of a large table where the small box’s four sit next to each other.",
+            ),
+            trueFalse(
+              "The table costs nothing, so there is never a reason not to build it.",
+              false,
+              "It is one pass over the picture and it allocates a grid slightly larger than the picture. Measured on the six hundred pixel square picture, building it took about 6,900 microseconds where one whole-picture read off it took about 1.4 and adding the pixels up took about 171, so it repays after roughly forty whole-picture reads and is a loss before that.",
+            ),
+            choice(
+              "Why is the table built one row and one column larger than the picture, with zeros in the extra row and column?",
+              [
+                "So a box touching the top edge is read by the same expression as a box in the middle",
+                "So the running totals cannot overflow near the corners",
+                "So the four corner lookups never name the same entry twice",
+                "So one table can serve several window sizes",
+              ],
+              0,
+              "Without it the boxes whose first row or first column is zero would need three special cases of their own. Drag the box into the top-left corner and two of the four lit entries fall into the border of zeros while the expression is unchanged.",
+            ),
+            several(
+              "The detector is three separable ideas. Which of these are among them?",
+              [
+                "A table of running totals, so a rectangle’s sum costs four lookups whatever its size",
+                "A family of crude readings, each the total over some bright cells less the total over some dark ones",
+                "An ordering, in which a window that fails a stage is dropped without the later stages ever seeing it",
+                "A normalising step, which rescales every window to the same brightness before it is read",
+              ],
+              [0, 1, 2],
+              "The readings are only affordable given the table, and the ordering only becomes necessary once the readings a window offers have been counted. The method is named for the ordering, the cascade, and each of the three is worth having on its own. Normalising each window is what the original paper adds on top, and nothing on this page does it.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. What The Detector Actually Reads",
           content: (
             <>
               <SubSection title="8. Bright cells minus dark ones">
-                <p>
-                  Given that any rectangle total is now cheap, the detector
-                  never reads a pixel again. What it reads is a small
-                  arrangement of neighbouring boxes, all the same size, some of
-                  which are added and some subtracted, and the number that comes
-                  back is the total over the added ones minus the total over the
-                  subtracted ones. A reading of that kind says something about
-                  contrast between neighbouring regions, which is roughly what
-                  survives when the light in the room changes, where the raw
-                  brightness of a region says almost nothing that a lamp cannot
-                  change.
+                <>
+<p>
+                  Given that any rectangle total is now cheap, the detector never reads a pixel again. What it reads is a small arrangement of neighbouring boxes, all the same size, some of which are added and some subtracted, and the number that comes back is the total over the added ones minus the total over the subtracted ones.
                 </p>
+                <p>
+                  A reading of that kind says something about contrast between neighbouring regions, which is roughly what survives when the light in the room changes, where the raw brightness of a region says almost nothing that a lamp cannot change.
+                </p>
+</>
                 <p>
                   A reading is fixed by five things and nothing else. Which
                   layout of cells it uses, how far down and how far across its
@@ -397,29 +403,24 @@ export default function HaarCascadesPage() {
               </SubSection>
 
               <SubSection title="9. Five layouts, worked on pictures small enough to count">
-                <p>
-                  The original paper uses five layouts, and it is worth seeing
-                  what each answers on a picture with four pixels on a side. Two
-                  cells side by side, or two stacked, answer the question of
-                  whether there is an edge running one way or the other. Three
-                  in a row, or three in a column, set the middle cell against
-                  both flanks and so answer whether there is a strip or a band.
-                  Four in a chequer sets one diagonal pair against the other,
-                  which neither of the first two kinds can see at all.
+                <>
+<p>
+                  The original paper uses five layouts, and it is worth seeing what each answers on a picture with four pixels on a side. Two cells side by side, or two stacked, answer the question of whether there is an edge running one way or the other. Three in a row, or three in a column, set the middle cell against both flanks and so answer whether there is a strip or a band.
                 </p>
+                <p>
+                  Four in a chequer sets one diagonal pair against the other, which neither of the first two kinds can see at all.
+                </p>
+</>
                 <ArrangementGallery />
                 <WorkedExample>
-                  <p>
-                    On a four by four picture whose top two rows are one and
-                    whose bottom two are zero, two cells stacked answer eight,
-                    since eight ones sit above and eight zeros below. The same
-                    layout turned, two cells side by side, answers exactly zero
-                    on the same picture, because each cell holds two bright rows
-                    and two dark ones and they cancel. Three cells in a column
-                    over one bright row between two dark ones answer two, and
-                    over two bright rows out of four they answer zero, because
-                    the band and one flank now hold the same amount of light.
+                  <>
+<p>
+                    On a four by four picture whose top two rows are one and whose bottom two are zero, two cells stacked answer eight, since eight ones sit above and eight zeros below. The same layout turned, two cells side by side, answers exactly zero on the same picture, because each cell holds two bright rows and two dark ones and they cancel.
                   </p>
+                  <p>
+                    Three cells in a column over one bright row between two dark ones answer two, and over two bright rows out of four they answer zero, because the band and one flank now hold the same amount of light.
+                  </p>
+</>
                 </WorkedExample>
                 <KeepInMind>
                   <p>
@@ -441,21 +442,14 @@ export default function HaarCascadesPage() {
                   The three-cell layouts have one added cell against two
                   subtracted, and they do not cancel.
                 </p>
-                <p>
-                  Measured on a flat four by four picture with one-pixel cells,
-                  the two-cell layouts and the chequer answer 0.0 whether the
-                  picture reads 0.25 or 0.9, and both three-cell layouts answer
-                  −0.25 on the first and −0.9 on the second. So two of the five
-                  readings move when the lamp moves, which is the opposite of
-                  the property the whole family was chosen for. This is not a
-                  slip in the arrangement, it is what the original paper
-                  describes, and the original paper answers it by normalising
-                  each window&rsquo;s variance before any threshold is compared
-                  against anything. No such normalising happens here, so on this
-                  page the three-cell readings are the ones that would break
-                  first under a change in lighting, and Part 6 measures what
-                  that costs.
+                <>
+<p>
+                  Measured on a flat four by four picture with one-pixel cells, the two-cell layouts and the chequer answer 0.0 whether the picture reads 0.25 or 0.9, and both three-cell layouts answer −0.25 on the first and −0.9 on the second. So two of the five readings move when the lamp moves, which is the opposite of the property the whole family was chosen for.
                 </p>
+                <p>
+                  This is not a slip in the arrangement, it is what the original paper describes, and the original paper answers it by normalising each window&rsquo;s variance before any threshold is compared against anything. No such normalising happens here, so on this page the three-cell readings are the ones that would break first under a change in lighting, and Part 6 measures what that costs.
+                </p>
+</>
                 <WhyThisWorks>
                   <p>
                     Write the value of a layout as the sum over its cells of the
@@ -489,6 +483,21 @@ export default function HaarCascadesPage() {
                   over every cell size that fits at all and then over the five
                   layouts.
                 </p>
+                <WorkedExample title="A window two pixels square, counted by hand">
+                  <p>
+                    Two cells side by side are two cells wide, so in a window
+                    two pixels wide each cell can only be one pixel wide. It
+                    can be one pixel tall or two.
+                  </p>
+                  <Equation>{"cells 1 tall, 1 wide   (2 − 1 + 1) × (2 − 2 + 1)  =  2 positions\ncells 2 tall, 1 wide   (2 − 2 + 1) × (2 − 2 + 1)  =  1 position\n\ntwo cells side by side  =  2 + 1  =  3 readings"}</Equation>
+                  <p>
+                    Two cells stacked give 3 by the same count turned on its
+                    side. Neither three-cell layout fits, since each needs
+                    three pixels in one direction. The chequer fits once, with
+                    one-pixel cells.
+                  </p>
+                  <Equation>{"3 + 3 + 0 + 0 + 1 = 7 readings, on 4 pixels"}</Equation>
+                </WorkedExample>
                 <NumberTable
                   headings={[
                     "Window side",
@@ -506,17 +515,22 @@ export default function HaarCascadesPage() {
                   ]}
                   caption="Counted by the arithmetic above and checked against actually building them all, on the window sizes small enough to enumerate."
                 />
-                <p>
-                  The twenty-four pixel window is the one Viola and Jones used,
-                  and it holds 576 pixels and admits 162,336 readings, which is
-                  281.83 times its own pixel count. Doubling the side of a
-                  window multiplies its pixels by four and its readings by
-                  15.69. That number is the reason the rest of the method
-                  exists, since a detector that measured every reading at every
-                  position of even the small scene in the playground would be
-                  doing 3,025 times 10,344, which is 31,290,600 readings, to
-                  search one postage-stamp picture once.
-                </p>
+                <>
+                  <p>
+                    A twenty-four-by-twenty-four window has far more candidate Haar
+                    features than pixels. The counts grow rapidly as the window grows.
+                  </p>
+                  <Equation>{"pixels = 24 × 24 = 576\nfeatures per pixel = 162,336 / 576 ≈ 281.83"}</Equation>
+                  <p>
+                    Even the small playground scene would be expensive if every feature
+                    were evaluated at every window position.
+                  </p>
+                  <Equation>{"exhaustive evaluations = 3,025 windows × 10,344 features\n                       = 31,290,600"}</Equation>
+                  <p>
+                    The later stages select a small subset of useful features and reject
+                    many windows early.
+                  </p>
+                </>
                 <FeatureCountCurve />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   Both counts are drawn on a scale where each step up is a
@@ -536,22 +550,14 @@ export default function HaarCascadesPage() {
                   3.12 compensates its rounding over a run of floating point
                   numbers and is therefore more accurate.
                 </p>
-                <p>
-                  Over 200 readings taken on five small pictures, the two totals
-                  disagreed on exactly one of them, by 2.2 times ten to the
-                  minus sixteen. The accurate total was −0.8391149931171449 and
-                  the one-at-a-time total was −0.8391149931171447. That is the
-                  last bit of a double and would be beneath notice anywhere
-                  else, and it is not beneath notice here, because a
-                  stage&rsquo;s threshold is chosen to sit exactly on one of
-                  these values. Set the threshold at the accurate total and ask
-                  whether a reading is above it, and the accurate route says no
-                  while the one-at-a-time route says yes. The two routes have to
-                  round identically or a rule chosen on one and applied on the
-                  other lands on the wrong side of its own threshold, so the
-                  accurate spelling is the wrong one and both routes here add
-                  one cell at a time.
+                <>
+<p>
+                  Over 200 readings taken on five small pictures, the two totals disagreed on exactly one of them, by 2.2 times ten to the minus sixteen. The accurate total was −0.8391149931171449 and the one-at-a-time total was −0.8391149931171447. That is the last bit of a double and would be beneath notice anywhere else, and it is not beneath notice here, because a stage&rsquo;s threshold is chosen to sit exactly on one of these values.
                 </p>
+                <p>
+                  Set the threshold at the accurate total and ask whether a reading is above it, and the accurate route says no while the one-at-a-time route says yes. The two routes have to round identically or a rule chosen on one and applied on the other lands on the wrong side of its own threshold, so the accurate spelling is the wrong one and both routes here add one cell at a time.
+                </p>
+</>
                 <KeepInMind>
                   <p>
                     A threshold placed exactly on a measured value quietly makes
@@ -570,18 +576,14 @@ export default function HaarCascadesPage() {
           content: (
             <>
               <SubSection title="13. The windows the detector was trained on">
-                <p>
-                  This is the only method in this part of the site that is
-                  fitted rather than designed, so it needs examples. The target
-                  here is a bright band four rows deep across the middle of a
-                  twelve by twelve window, jittered one row up or down, laid
-                  over a cluttered ground and finished with a little speckle. A
-                  background is that cluttered ground with no band in it. The
-                  clutter is blocky rather than per-pixel, in three by three
-                  blocks, and that choice is load-bearing, since per-pixel noise
-                  averages away inside the very first rectangle total and would
-                  have left the two classes trivially apart.
+                <>
+<p>
+                  This is the only method in this part of the site that is fitted rather than designed, so it needs examples. The target here is a bright band four rows deep across the middle of a twelve by twelve window, jittered one row up or down, laid over a cluttered ground and finished with a little speckle.
                 </p>
+                <p>
+                  A background is that cluttered ground with no band in it. The clutter is blocky rather than per-pixel, in three by three blocks, and that choice is load-bearing, since per-pixel noise averages away inside the very first rectangle total and would have left the two classes trivially apart.
+                </p>
+</>
                 <p>
                   There are 50 targets and 2,000 backgrounds. That ratio is not
                   an accident of the fixture, it is the ratio the method exists
@@ -663,17 +665,14 @@ export default function HaarCascadesPage() {
               </SubSection>
 
               <SubSection title="16. A stage keeps every target it was shown, so it keeps backgrounds too">
-                <p>
-                  Now the part that makes a stage a stage rather than a
-                  classifier. A boosted vote ordinarily accepts a window when
-                  the rules that voted yes hold at least half the total voice. A
-                  cascade stage is allowed to lower that demand, and only to
-                  lower it, until the stage keeps every target it was trained
-                  on. The reasoning is asymmetric on purpose. A background that
-                  gets through only means the next stage has a little more to
-                  look at, whereas a target that is dropped is gone, since no
-                  later stage ever sees it.
+                <>
+<p>
+                  Now the part that makes a stage a stage rather than a classifier. A boosted vote ordinarily accepts a window when the rules that voted yes hold at least half the total voice. A cascade stage is allowed to lower that demand, and only to lower it, until the stage keeps every target it was trained on.
                 </p>
+                <p>
+                  The reasoning is asymmetric on purpose. A background that gets through only means the next stage has a little more to look at, whereas a target that is dropped is gone, since no later stage ever sees it.
+                </p>
+</>
                 <Equation>
                   {
                     "demand = min(½, the smallest share of the voice any training target attracted)"
@@ -687,6 +686,25 @@ export default function HaarCascadesPage() {
                   of what reaches it, cheaply, and the accuracy is supposed to
                   come from the fractions multiplying.
                 </p>
+                <WorkedExample title="The shares a two-rule stage can give">
+                  <p>
+                    The share of the voice a window attracts is the voice of
+                    the rules that said yes to it, divided by the voice of all
+                    the rules in the stage. The first stage fitted in step 17
+                    holds two rules, with voices of 1.8067 and 1.5669, so a
+                    window can attract only four different shares.
+                  </p>
+                  <Equation>{"total voice  ≈  3.3737\n\nonly the louder rule says yes    1.8067 / 3.3737  ≈  0.5355\nonly the quieter rule says yes   1.5669 / 3.3737  ≈  0.4645\nboth say yes                     1\nneither says yes                 0"}</Equation>
+                  <p>
+                    Against a demand of a half, a window passes when the louder
+                    rule says yes and fails when it does not, whatever the
+                    quieter rule says. That is what the first stage did on
+                    every one of the 2,050 training windows. Lowering the
+                    demand to 0.4645 would have let either rule pass a window
+                    on its own, and that is the only other thing a stage of two
+                    rules can be asked to do.
+                  </p>
+                </WorkedExample>
                 <KeepInMind>
                   <p>
                     On this fixture the lowering never actually bit. The least
@@ -694,6 +712,10 @@ export default function HaarCascadesPage() {
                     the first stage, 0.5121 in the second and all of it in the
                     third, so the plain half was already enough to keep all
                     fifty and the demand stayed at a half in every stage. The
+                    0.5355 is a target only the louder of the two rules
+                    recognised, which was true of two of the fifty, and the
+                    0.5121 is the same arithmetic on the second stage&rsquo;s
+                    voices of 2.1171 and 2.0171. The
                     mechanism matters when a stage is harder than these are, and
                     reporting that it did nothing here is more useful than
                     describing it as though it had.
@@ -746,16 +768,25 @@ export default function HaarCascadesPage() {
                   which is what the cascade is for, while the right one stays
                   nearly flat, which is what the calibration bought.
                 </p>
+                <>
+<p>
+                  The first stage on its own lets 117 of 2,000 fresh backgrounds through where all three together let 1, which is the whole argument for having three. The shares one stage passes to the next are 0.0585, then 0.0256, then 0.3333, and multiplying those three gives 0.0005, which is the 1 in 2,000 that arrives at the end.
+                </p>
                 <p>
-                  The first stage on its own lets 117 of 2,000 fresh backgrounds
-                  through where all three together let 1, which is the whole
-                  argument for having three. The shares one stage passes to the
-                  next are 0.0585, then 0.0256, then 0.3333, and multiplying
-                  those three gives 0.0005, which is the 1 in 2,000 that arrives
-                  at the end. Overall the fresh draw is scored at 0.998
-                  accuracy, 0.94 recall and 0.9792 precision, and the recall is
-                  the honest cost of the calibration, which keeps every target
-                  it saw and promises nothing about a target it did not.
+                  Overall the fresh draw is scored at 0.998 accuracy, 0.94 recall and 0.9792 precision, and the recall is the honest cost of the calibration, which keeps every target it saw and promises nothing about a target it did not.
+                </p>
+</>
+                <p>
+                  All three scores come from the two ends of the funnels. Of
+                  the 50 fresh targets 47 are accepted, and of the 2,000 fresh
+                  backgrounds 1 is accepted and 1,999 are turned away.
+                </p>
+                <Equation>{"recall     =  47 / 50                  =  0.94\nprecision  =  47 / (47 + 1)            ≈  0.9792\naccuracy   =  (47 + 1,999) / 2,050     ≈  0.998"}</Equation>
+                <p>
+                  The accuracy is the least informative of the three here. A
+                  detector that turned every window away would score 2,000 out
+                  of 2,050 on the same draw, because the backgrounds outnumber
+                  the targets forty to one.
                 </p>
                 <KeepInMind>
                   <p>
@@ -769,6 +800,60 @@ export default function HaarCascadesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "On a picture of uniform brightness, which of the five layouts answer zero?",
+              [
+                "The two two-cell layouts and the chequer, whose cell signs add to zero",
+                "All five, which is the property the family was chosen for",
+                "Only the chequer, since it is the only one with a diagonal",
+                "The two three-cell layouts, which set one cell against two",
+              ],
+              0,
+              "A reading on a flat picture is the cell area times the brightness times the sum of the cell signs, and the three-cell signs are one added against two subtracted, so they add to −1. Measured with one-pixel cells those two answer −0.25 on a picture reading 0.25 and −0.9 on one reading 0.9, so two of the five readings move when the lamp moves. That is what the original paper describes, and its answer is to normalise each window’s variance, which nothing here does.",
+            ),
+            trueFalse(
+              "The first fitted stage threw away 1,895 of the 2,000 training backgrounds, and the second stage was then fitted against only the 105 that survived.",
+              true,
+              "Each stage is boosted on the backgrounds that got past the ones before it, so each in turn faces a smaller and harder problem. The second threw away 102 of its 105 and the third threw away the last 3, which left a fourth stage nothing to be fitted against. All fifty targets came through every stage.",
+            ),
+            choice(
+              "On a fresh draw of 50 targets and 2,000 backgrounds the detector scores 0.94 recall and 0.9792 precision. What are those two numbers made of?",
+              [
+                "47 of the 50 targets were accepted, and 1 background was accepted beside them",
+                "47 of the 50 targets were accepted, and 3 backgrounds were accepted beside them",
+                "All 50 targets were accepted, and 117 backgrounds were accepted beside them",
+                "47 of the 50 targets were accepted, and no background was",
+              ],
+              0,
+              "The targets fall 50 to 47 at the first stage and then not at all, so recall is 47 over 50. The backgrounds fall 2,000 to 117 to 3 to 1, and the precision is the 47 over the 48 windows accepted. The 117 and the 3 are what reach the second and third stages, not what comes out of the end.",
+            ),
+            choice(
+              "Two ways of totalling a reading’s cells disagreed on one of 200 readings, by 2.2 times ten to the minus sixteen. Why does that matter here?",
+              [
+                "A stage’s threshold is chosen to sit exactly on one of these values, which quietly makes an equality test out of what looks like an inequality",
+                "The arithmetic off the table is fragile, so the error accumulates across cells",
+                "A reading’s sign is decided by its last bit",
+                "Boosting multiplies the weights, so a small difference grows round by round",
+              ],
+              0,
+              "Set the threshold at the accurate total and the accurate route says no where the one-at-a-time route says yes. Both routes here add one cell at a time, so the more accurate spelling is the wrong one, and what makes the last bit matter is the placement of the threshold rather than any fragility in the arithmetic.",
+            ),
+            several(
+              "Which of these hold for a cascade stage as it is fitted here?",
+              [
+                "The demand on the vote may only be lowered, as far as the smallest share of the voice any training target attracted",
+                "A rule that would earn a voice of zero or less ends the stage rather than joining it",
+                "Half the starting weight goes to the targets and half to the backgrounds",
+                "On this fixture the plain half was already enough to keep all fifty training targets",
+              ],
+              [0, 1, 2, 3],
+              "All four hold. The lowering never actually bit here, since the least confident training target attracted 0.5355 of the voice in the first stage, 0.5121 in the second and all of it in the third. The 0.5355 is the louder rule’s 1.8067 out of a total voice of 3.3737, a target that only that rule recognised. The reasoning behind the lowering is asymmetric on purpose, because a background that gets through only gives the next stage more to look at where a dropped target is gone for good.",
+            ),
+        ],
         },
         {
           title: "Part 5. The Ordering Is The Whole Method",
@@ -813,14 +898,17 @@ export default function HaarCascadesPage() {
                   method comes to.
                 </p>
                 <WorkedExample>
-                  <p>
-                    Putting those shares into the expression above gives 2 times
-                    1, plus 2 times 0.0777, plus 1 times 0.0453, which is 2.2007
-                    rules per window. Counted directly, the sweep evaluated
-                    6,657 rules over 3,025 windows, which is 2.2007 rules per
-                    window. The two routes agree because they are the same sum
-                    written twice.
-                  </p>
+                  <>
+                    <p>
+                      Weight each stage’s rule count by the fraction of windows reaching
+                      it. This gives the average number of rules evaluated per window.
+                    </p>
+                    <Equation>{"expected rules ≈ 2 × 1 + 2 × 0.0777 + 1 × 0.0453 ≈ 2.2007\nmeasured rules = 6,657 / 3,025 ≈ 2.2007"}</Equation>
+                    <p>
+                      Both calculations describe the same work. The stage shares are
+                      rounded in the displayed expression.
+                    </p>
+                  </>
                 </WorkedExample>
                 <p>
                   Broken out by stage, that is 6,050 evaluations in the first
@@ -860,18 +948,14 @@ export default function HaarCascadesPage() {
                   ]}
                   caption="One sweep of the same scene, counted four ways."
                 />
-                <p>
-                  The second row is the honest comparison for the ordering
-                  alone, holding the rules fixed, and it is only a factor of
-                  2.27. That is worth saying plainly rather than hiding behind
-                  the last row, because the saving from ordering is bounded by
-                  how many rules there are to skip and this cascade has five of
-                  them. A window rejected by the first stage skips at most three
-                  rules. The published detector has thirty-eight stages and over
-                  six thousand readings, and a window rejected by its first
-                  stage skips essentially all of them, which is where the famous
-                  numbers come from.
+                <>
+<p>
+                  The second row is the honest comparison for the ordering alone, holding the rules fixed, and it is only a factor of 2.27. That is worth saying plainly rather than hiding behind the last row, because the saving from ordering is bounded by how many rules there are to skip and this cascade has five of them.
                 </p>
+                <p>
+                  A window rejected by the first stage skips at most three rules. The published detector has thirty-eight stages and over six thousand readings, and a window rejected by its first stage skips essentially all of them, which is where the famous numbers come from.
+                </p>
+</>
                 <p>
                   The last row is the comparison the method actually exists to
                   win. Answering &ldquo;is the band here&rdquo; by measuring
@@ -901,19 +985,14 @@ export default function HaarCascadesPage() {
                   offsets, and the other 83 are patches of ground that happen to
                   be brighter across their middle than above and below it.
                 </p>
-                <p>
-                  That is what a three-stage cascade is, rather than a failure
-                  of this one. Each stage keeps every target and therefore keeps
-                  a fair share of the backgrounds, and the three shares of
-                  0.0777, 0.583 and 0.810 multiply to 0.0367, which is small
-                  without being anywhere near zero. The answer is more stages,
-                  each multiplying the survival share down again, which is why
-                  the published cascade has thirty-eight of them and not three.
-                  A real detector also merges the clusters of overlapping
-                  acceptances into one box per target, which nothing here does,
-                  so the 28 near-misses would be reported as three finds and not
-                  twenty-eight.
+                <>
+<p>
+                  That is what a three-stage cascade is, rather than a failure of this one. Each stage keeps every target and therefore keeps a fair share of the backgrounds, and the three shares of 0.0777, 0.583 and 0.810 multiply to 0.0367, which is small without being anywhere near zero. The answer is more stages, each multiplying the survival share down again, which is why the published cascade has thirty-eight of them and not three.
                 </p>
+                <p>
+                  A real detector also merges the clusters of overlapping acceptances into one box per target, which nothing here does, so the 28 near-misses would be reported as three finds and not twenty-eight.
+                </p>
+</>
                 <KeepInMind>
                   <p>
                     The share of stages a window survived is sometimes handed
@@ -934,18 +1013,14 @@ export default function HaarCascadesPage() {
           content: (
             <>
               <SubSection title="23. A signed reading says nothing about its mirror">
-                <p>
-                  Every reading in this family is signed. A layout that says
-                  &ldquo;the added cells are brighter than the subtracted
-                  ones&rdquo; answers a large positive number on that pattern
-                  and a large negative number on the same pattern with bright
-                  and dark exchanged, and a rule thresholding it in one
-                  direction therefore rejects the exchanged pattern outright.
-                  There is nothing gradual about it, and the method has no way
-                  to express &ldquo;this contrast, either way round&rdquo;,
-                  because the reading it is built from has a sign and the rule
-                  it is built into has a direction.
+                <>
+<p>
+                  Every reading in this family is signed. A layout that says &ldquo;the added cells are brighter than the subtracted ones&rdquo; answers a large positive number on that pattern and a large negative number on the same pattern with bright and dark exchanged, and a rule thresholding it in one direction therefore rejects the exchanged pattern outright.
                 </p>
+                <p>
+                  There is nothing gradual about it, and the method has no way to express &ldquo;this contrast, either way round&rdquo;, because the reading it is built from has a sign and the rule it is built into has a direction.
+                </p>
+</>
                 <p>
                   Measured on fifty of the same targets with bright and dark
                   exchanged, the detector finds 0 of 50, where fresh upright
@@ -963,17 +1038,14 @@ export default function HaarCascadesPage() {
               </SubSection>
 
               <SubSection title="24. Nor does an upright layout say anything about a turned one">
-                <p>
-                  The same argument applies to orientation, by a different
-                  route. The layouts are axis-aligned, and the layout of two
-                  cells stacked and the layout of two cells side by side are
-                  different members of the family, so a rule that reads one of
-                  them has nothing at all to say about the other. Turning the
-                  target a quarter does not weaken the evidence the fitted rules
-                  read; it moves the evidence into readings those rules never
-                  look at. The measurement is 0 of 50 again, on the same fifty
-                  targets with the band running down instead of across.
+                <>
+<p>
+                  The same argument applies to orientation, by a different route. The layouts are axis-aligned, and the layout of two cells stacked and the layout of two cells side by side are different members of the family, so a rule that reads one of them has nothing at all to say about the other. Turning the target a quarter does not weaken the evidence the fitted rules read; it moves the evidence into readings those rules never look at.
                 </p>
+                <p>
+                  The measurement is 0 of 50 again, on the same fifty targets with the band running down instead of across.
+                </p>
+</>
                 <p>
                   This is a fact about the family of readings rather than about
                   any fit, and it is why real implementations fit one cascade
@@ -999,19 +1071,14 @@ export default function HaarCascadesPage() {
                   how much of each scene is target. Watch the average cost climb
                   towards the ceiling of five rules a window.
                 </p>
-                <p>
-                  Measured, a window costs 2.1597 rules on ground with no target
-                  in it, 2.2007 on the scene with three planted, and 2.6552 when
-                  the ground is tiled edge to edge with them, while the saving
-                  over running the same five rules everywhere falls from 2.315
-                  to 1.883. The ceiling is five rules a window and a saving of
-                  exactly one, which is what a scene entirely made of targets
-                  would cost, and at that point the flat classifier is the
-                  better arrangement because it does the same work without the
-                  per-window bookkeeping of deciding whether to continue. This
-                  is the only regime measured on this page where the obvious
-                  alternative wins.
+                <>
+<p>
+                  Measured, a window costs 2.1597 rules on ground with no target in it, 2.2007 on the scene with three planted, and 2.6552 when the ground is tiled edge to edge with them, while the saving over running the same five rules everywhere falls from 2.315 to 1.883. The ceiling is five rules a window and a saving of exactly one, which is what a scene entirely made of targets would cost, and at that point the flat classifier is the better arrangement because it does the same work without the per-window bookkeeping of deciding whether to continue.
                 </p>
+                <p>
+                  This is the only regime measured on this page where the obvious alternative wins.
+                </p>
+</>
               </SubSection>
 
               <SubSection title="26. What is learned is a fact about contrast">
@@ -1093,6 +1160,307 @@ export default function HaarCascadesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "Sweeping the fitted detector across the scene, 3,025 windows enter the first stage, 235 reach the second and 137 the third. What does a window cost on average?",
+              [
+                "About 2.2007 rules, which is also the 6,657 readings taken divided by the 3,025 windows",
+                "Five rules, since the detector holds five",
+                "About one rule, since nearly everything is rejected at the first stage",
+                "About 2.27 rules, which is the factor the ordering saves",
+              ],
+              0,
+              "Weighting each stage’s rule count by the share of windows reaching it gives the same figure as the measured count. Broken out by stage it is 6,050 evaluations in the first, 470 in the second and 137 in the third, so 91 percent of the readings taken are the two cheapest rules in the whole detector.",
+            ),
+            choice(
+              "Holding the rules fixed, the ordering is worth a factor of 2.27 here. Why is the famous figure so much larger?",
+              [
+                "A window rejected by the first stage here skips at most three rules, where the published detector has thirty-eight stages and over six thousand readings",
+                "The published detector reads pixels directly rather than rectangles",
+                "The published detector normalises each window’s variance",
+                "The scene here is too small for the ordering to apply at all",
+              ],
+              0,
+              "The saving from ordering is bounded by how many rules there are to skip, and this cascade has five. Two separate savings are stacked and often conflated, since boosting is what takes 10,344 candidate readings down to five and happens once, where the ordering takes five rules a window down to 2.2 and happens on every window forever.",
+            ),
+            several(
+              "Which of these does the page say about what the detector has learned?",
+              [
+                "It has learned that certain rectangles tend to be brighter than certain neighbouring ones, which is a statement about contrast rather than about an object",
+                "The 83 accepted windows of plain clutter are exactly what that buys",
+                "Enough extra training would let it tell apart two things that agree on every rectangle contrast",
+                "The share of stages a window survived is the probability that it holds a target",
+              ],
+              [0, 1],
+              "The limit is in the vocabulary rather than in the fit, so any two things agreeing on every rectangle contrast are indistinguishable to any cascade built from these readings however many stages it has. Extra training buys a longer list of contrasts to check without changing the kind of fact being checked. The share of stages survived orders windows sensibly and is not a probability of anything, because no likelihood is computed anywhere in a sequence of hard accept-or-reject decisions.",
+            ),
+            choice(
+              "On ground tiled edge to edge with targets a window costs 2.6552 rules and the saving over running all five everywhere falls to 1.883. What follows?",
+              [
+                "At the ceiling the flat classifier is the better arrangement, since it does the same work without the per-window bookkeeping",
+                "The cascade still wins, since 2.6552 is comfortably below five",
+                "The detector should be refitted with more stages for that scene",
+                "The stage shares are a property of the detector, so they can be tuned for it",
+              ],
+              0,
+              "The shares of windows reaching the later stages are a property of the scene rather than of the detector, so a scene in which most windows are the thing being looked for rejects almost nothing early. This is the only regime measured on the page where the obvious alternative wins.",
+            ),
+            choice(
+              "Fifty of the same targets with bright and dark exchanged are found 0 of 50, where fresh upright ones are found 43 of 50. Why?",
+              [
+                "Every reading in the family is signed and every rule has a direction, so the exchanged pattern is rejected outright",
+                "The exchanged targets are dimmer, so they fall below every threshold",
+                "The window variance was not normalised, so the readings drift",
+                "Boosting weighted the upright targets more heavily than the rest",
+              ],
+              0,
+              "The first rule’s layout answers −7.1856 on one target and 7.3344 on that same target relit, and the rule votes yes at or below −2.6449. Turning the band a quarter measures 0 of 50 as well, by a different route, since the layouts are axis-aligned and the evidence moves into readings the fitted rules never look at, which is why real implementations fit one cascade per pose.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Reading A Box, A Layout And A Fitted Cascade",
+          practice: [
+            exercise(
+              "Read two boxes off the table",
+              ["Build the six by seven picture of Part 2, whose pixel at row r and column c is 10r + c, and its table of running totals. Read the three by three box that starts at row one, column two, printing the four entries the read names, the sign each enters with, and the total. Then do the same for the two by two box in the picture’s bottom-right corner, and add that box’s four pixels up directly as a check.", "Part 2 works the first box to 340 − 10 − 124 + 1, which is 207. The second box is not on the page. Look at which of its four entries you have already met."],
+              `from oop_ml.core.computer_vision.cascade import IntegralImage, Rectangle
+from oop_ml.core.computer_vision.picture import Picture
+
+picture = Picture([[10.0 * row + column for column in range(7)] for row in range(6)])
+table = IntegralImage.of(picture)
+
+boxes = {"worked": Rectangle(1, 2, 3, 3), "corner": Rectangle(4, 5, 2, 2)}
+# For each box, ask the table for its four corners and print each one's row,
+# column, sign and the table's entry there. Then print the total the table
+# gives for the box, and the total of the same pixels added up directly.
+
+# Print the corner box's total on a line of its own.`,
+              `from oop_ml.core.computer_vision.cascade import IntegralImage, Rectangle
+from oop_ml.core.computer_vision.picture import Picture
+
+picture = Picture([[10.0 * row + column for column in range(7)] for row in range(6)])
+table = IntegralImage.of(picture)
+
+boxes = {"worked": Rectangle(1, 2, 3, 3), "corner": Rectangle(4, 5, 2, 2)}
+for name, box in boxes.items():
+    print(name)
+    for corner in table.corners_for(box):
+        entry = table.table[corner.row, corner.column]
+        print(f"  table[{corner.row}, {corner.column}] = {entry:.0f}, sign {corner.sign:+d}")
+    pixels = picture.values[box.top : box.bottom, box.left : box.right]
+    print(f"  from the table {table.sum_over(box):.0f}, from the pixels {pixels.sum():.0f}")
+
+print(f"corner box total: {table.sum_over(boxes['corner']):.0f}")`,
+              `worked
+  table[4, 5] = 340, sign +1
+  table[1, 5] = 10, sign -1
+  table[4, 2] = 124, sign -1
+  table[1, 2] = 1, sign +1
+  from the table 207, from the pixels 207
+corner
+  table[6, 7] = 1176, sign +1
+  table[4, 7] = 504, sign -1
+  table[6, 5] = 810, sign -1
+  table[4, 5] = 340, sign +1
+  from the table 202, from the pixels 202
+corner box total: 202`,
+              { hints: ["A Rectangle is its top row, its left column, its height and its width. corners_for takes one and answers the four lookups a read of it makes, each with a row, a column and a sign.", "The table itself is on the IntegralImage as table. It is one row and one column larger than the picture, so its indices are the picture’s shifted by the border of zeros.", "sum_over does the four reads for you. A box also knows its bottom and its right, one past its last row and column, which is exactly what a slice of the picture’s values wants."], check: numberCheck("What do the four pixels of the corner box total?", 202, 0.5, "The four entries are 1,176, 504, 810 and 340, and 1,176 − 504 − 810 + 340 is 202, the same as 45 + 46 + 55 + 56. The 340 is the entry the worked box took as its bottom-right corner. Here it is the top-left corner and is added back, because it totals the region above and to the left of this box, which the two subtractions each removed.") },
+            ),
+            exercise(
+              "Predict five readings on a picture with nothing in it",
+              ["Part 3 says two of the five layouts read the lamp as well as the picture. Take a flat six by six picture, read each of the five layouts on it with cells two pixels on a side, and do it at two brightnesses, 0.6 and 0.9.", "Before running it, use Part 3’s expression for a flat picture, the pixels in one cell times the brightness times the sum of the cell signs, to predict all ten numbers. The lesson measures one-pixel cells and these are four-pixel cells, so its −0.25 and −0.9 will not be what comes back."],
+              `import numpy as np
+from oop_ml.core.computer_vision.cascade import (
+    FeatureArrangement,
+    IntegralImage,
+    Rectangle,
+    RectangleFeature,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+window = Rectangle(0, 0, 6, 6)
+for brightness in (0.6, 0.9):
+    table = IntegralImage.of(Picture(np.full((6, 6), brightness)))
+    print(f"brightness {brightness}")
+    # Loop over the five members of FeatureArrangement. Build a
+    # RectangleFeature of each at the window's top-left corner with cells two
+    # tall and two wide, and print its value in the window to four places.
+
+# Print the three-cell column's reading at 0.6 on a line of its own.`,
+              `import numpy as np
+from oop_ml.core.computer_vision.cascade import (
+    FeatureArrangement,
+    IntegralImage,
+    Rectangle,
+    RectangleFeature,
+)
+from oop_ml.core.computer_vision.picture import Picture
+
+window = Rectangle(0, 0, 6, 6)
+readings = {}
+for brightness in (0.6, 0.9):
+    table = IntegralImage.of(Picture(np.full((6, 6), brightness)))
+    print(f"brightness {brightness}")
+    for arrangement in FeatureArrangement:
+        feature = RectangleFeature(arrangement, 0, 0, 2, 2)
+        value = round(feature.value_in(table, window), 4) + 0.0
+        readings[brightness, arrangement] = value
+        print(f"  {arrangement.value}: {feature.n_cells} cells, reading {value:.4f}")
+
+column = readings[0.6, FeatureArrangement.THREE_VERTICAL]
+print(f"three cells in a column at 0.6: {column:.4f}")`,
+              `brightness 0.6
+  two_horizontal: 2 cells, reading 0.0000
+  two_vertical: 2 cells, reading 0.0000
+  three_horizontal: 3 cells, reading -2.4000
+  three_vertical: 3 cells, reading -2.4000
+  four_chequer: 4 cells, reading 0.0000
+brightness 0.9
+  two_horizontal: 2 cells, reading 0.0000
+  two_vertical: 2 cells, reading 0.0000
+  three_horizontal: 3 cells, reading -3.6000
+  three_vertical: 3 cells, reading -3.6000
+  four_chequer: 4 cells, reading 0.0000
+three cells in a column at 0.6: -2.4000`,
+              { hints: ["FeatureArrangement is a closed set of five, and looping over the class itself visits each member. A RectangleFeature takes the arrangement, then the row and column of its top-left corner inside the window, then the height and width of one cell.", "value_in takes the table and the window the feature sits in. The window here is the whole picture, a Rectangle starting at row zero, column zero.", "A total that should be exactly zero can come back as a zero with a minus sign in front. Rounding and then adding 0.0 prints it as a plain zero."], check: numberCheck("What does the three-cell column read on the flat picture at 0.6, to four places?", -2.4, 0.0005, "Each cell holds four pixels at 0.6, so each cell totals 2.4, and the three-cell signs are one added and two subtracted, which sum to −1. The reading is 4 × 0.6 × −1. At 0.9 the same layout reads −3.6, so it moved by half as much again when the lamp did, while the two-cell layouts and the chequer stayed at zero.") },
+            ),
+            exercise(
+              "Fit the cascade and read its stages",
+              ["The starter draws Part 4’s training windows, 50 bright bands on blocky clutter followed by 2,000 windows of clutter alone. Fit a cascade of at most five stages with two rules a stage, searching 600 readings, and print what each stage did to the backgrounds it was handed. Under each stage print every rule’s voice and that voice’s share of the stage’s total.", "Part 4 reports three stages and five rules, with the backgrounds falling 2,000 to 105 to 3 to none and all fifty targets kept throughout. The louder rule’s share in the first stage should be the 0.5355 the page quotes for the least confident training target."],
+              `import numpy as np
+from oop_ml import Feature
+from oop_ml.core.computer_vision.cascade import HaarCascade
+from oop_ml.core.computer_vision.picture import Picture
+
+generator = np.random.default_rng(7)
+pictures = []
+for index in range(2050):
+    values = np.full((12, 12), 0.25)
+    if index < 50:
+        top = 4 + int(generator.integers(-1, 2))
+        values[top : top + 4, :] = 0.85
+    ground = np.kron(generator.uniform(0.15, 0.85, (4, 4)), np.ones((3, 3)))
+    mixed = 0.55 * values + 0.45 * ground if index < 50 else ground
+    speckle = generator.normal(0.0, 0.05, (12, 12))
+    pictures.append(Picture(np.clip(mixed + speckle, 0.0, 1.0)))
+labels = Feature("target", [1.0] * 50 + [0.0] * 2000)
+
+cascade = HaarCascade(n_stages=5, rules_per_stage=2, n_candidate_features=600, random_seed=0)
+# Fit the cascade to the pictures and labels. Print how many stages and rules
+# it kept. Then pair each stage with its outcome and print how many
+# backgrounds reached it, how many it rejected and how many targets it kept,
+# and under that each rule's voice and its share of the stage's total voice.
+
+# Print how many backgrounds the first stage rejected on a line of its own.`,
+              `import numpy as np
+from oop_ml import Feature
+from oop_ml.core.computer_vision.cascade import HaarCascade
+from oop_ml.core.computer_vision.picture import Picture
+
+generator = np.random.default_rng(7)
+pictures = []
+for index in range(2050):
+    values = np.full((12, 12), 0.25)
+    if index < 50:
+        top = 4 + int(generator.integers(-1, 2))
+        values[top : top + 4, :] = 0.85
+    ground = np.kron(generator.uniform(0.15, 0.85, (4, 4)), np.ones((3, 3)))
+    mixed = 0.55 * values + 0.45 * ground if index < 50 else ground
+    speckle = generator.normal(0.0, 0.05, (12, 12))
+    pictures.append(Picture(np.clip(mixed + speckle, 0.0, 1.0)))
+labels = Feature("target", [1.0] * 50 + [0.0] * 2000)
+
+cascade = HaarCascade(n_stages=5, rules_per_stage=2, n_candidate_features=600, random_seed=0)
+cascade.fit(pictures, labels)
+
+print(f"{cascade.n_stages_fitted} stages, {cascade.n_rules} rules")
+for stage, outcome in zip(cascade.stages, cascade.stage_outcomes):
+    print(f"stage {outcome.stage_number}: {outcome.negatives_reaching} backgrounds in, "
+          f"{outcome.negatives_rejected} rejected, {outcome.positives_kept} targets kept")
+    for weighted in stage.weighted_rules:
+        share = weighted.voice / stage.total_voice
+        print(f"  voice {weighted.voice:.4f}, share of the stage {share:.4f}")
+
+print(f"first stage rejected: {cascade.stage_outcomes[0].negatives_rejected}")`,
+              `3 stages, 5 rules
+stage 1: 2000 backgrounds in, 1895 rejected, 50 targets kept
+  voice 1.8067, share of the stage 0.5355
+  voice 1.5669, share of the stage 0.4645
+stage 2: 105 backgrounds in, 102 rejected, 50 targets kept
+  voice 2.1171, share of the stage 0.5121
+  voice 2.0171, share of the stage 0.4879
+stage 3: 3 backgrounds in, 3 rejected, 50 targets kept
+  voice 1.0000, share of the stage 1.0000
+first stage rejected: 1895`,
+              { hints: ["fit takes the list of pictures and the label feature, the same shape of call as every other model in the library, and what was learned is read off properties afterwards.", "stages and stage_outcomes run in step, one outcome per stage. An outcome carries negatives_reaching, negatives_rejected, negatives_surviving and positives_kept.", "A stage’s rules are its weighted_rules, each with a voice, and the stage knows its total_voice. Dividing one by the other is the share a window attracts when that rule alone says yes."], check: numberCheck("How many of the 2,000 training backgrounds does the first stage reject?", 1895, 0.5, "That is 94.75 percent of them, thrown away by two rules that both straddle the middle rows where the band is. The 105 that survive are what the second stage is boosted against, which is why its rules can be more particular. The first stage’s shares come out at 0.5355 and 0.4645, so at a demand of a half the louder rule decides on its own.") },
+            ),
+            exercise(
+              "Score the detector on windows it never saw",
+              ["Draw three sets of windows the same way, from seeds 7, 99 and 11. Fit the cascade on the first, which is the training set, and evaluate it on the other two. Seed 99 is the fresh draw of Part 4. Seed 11 is one the lesson never looks at.", "Part 4 scores the fresh draw at 0.998 accuracy, 0.94 recall and 0.9792 precision. The calibration keeps every target it was trained on and promises nothing about any other, so watch which of the three numbers moves most between the two draws."],
+              `import numpy as np
+from oop_ml import Feature
+from oop_ml.core.computer_vision.cascade import HaarCascade
+from oop_ml.core.computer_vision.picture import Picture
+
+draws = {}
+for seed in (7, 99, 11):
+    generator = np.random.default_rng(seed)
+    draws[seed] = []
+    for index in range(2050):
+        values = np.full((12, 12), 0.25)
+        if index < 50:
+            top = 4 + int(generator.integers(-1, 2))
+            values[top : top + 4, :] = 0.85
+        ground = np.kron(generator.uniform(0.15, 0.85, (4, 4)), np.ones((3, 3)))
+        mixed = 0.55 * values + 0.45 * ground if index < 50 else ground
+        speckle = generator.normal(0.0, 0.05, (12, 12))
+        draws[seed].append(Picture(np.clip(mixed + speckle, 0.0, 1.0)))
+labels = Feature("target", [1.0] * 50 + [0.0] * 2000)
+
+cascade = HaarCascade(n_stages=5, rules_per_stage=2, n_candidate_features=600, random_seed=0)
+# Fit on the draw from seed 7. Evaluate on the draws from seeds 99 and 11 and
+# print the accuracy, recall and precision of each to four places.
+
+# Print the recall on the draw from seed 11 on a line of its own, to two places.`,
+              `import numpy as np
+from oop_ml import Feature
+from oop_ml.core.computer_vision.cascade import HaarCascade
+from oop_ml.core.computer_vision.picture import Picture
+
+draws = {}
+for seed in (7, 99, 11):
+    generator = np.random.default_rng(seed)
+    draws[seed] = []
+    for index in range(2050):
+        values = np.full((12, 12), 0.25)
+        if index < 50:
+            top = 4 + int(generator.integers(-1, 2))
+            values[top : top + 4, :] = 0.85
+        ground = np.kron(generator.uniform(0.15, 0.85, (4, 4)), np.ones((3, 3)))
+        mixed = 0.55 * values + 0.45 * ground if index < 50 else ground
+        speckle = generator.normal(0.0, 0.05, (12, 12))
+        draws[seed].append(Picture(np.clip(mixed + speckle, 0.0, 1.0)))
+labels = Feature("target", [1.0] * 50 + [0.0] * 2000)
+
+cascade = HaarCascade(n_stages=5, rules_per_stage=2, n_candidate_features=600, random_seed=0)
+cascade.fit(draws[7], labels)
+
+for seed in (99, 11):
+    evaluation = cascade.evaluate(draws[seed], labels)
+    print(f"seed {seed}: accuracy {evaluation.accuracy:.4f}, "
+          f"recall {evaluation.recall:.4f}, precision {evaluation.precision:.4f}")
+
+print(f"recall on the draw from seed 11: {evaluation.recall:.2f}")`,
+              `seed 99: accuracy 0.9980, recall 0.9400, precision 0.9792
+seed 11: accuracy 0.9971, recall 0.9000, precision 0.9783
+recall on the draw from seed 11: 0.90`,
+              { hints: ["evaluate takes pictures and labels, predicts once, and answers an object that has already paired every prediction with its truth. accuracy, recall and precision are properties of that object.", "The same labels serve all three draws, since every draw is fifty targets followed by two thousand backgrounds in that order."], check: numberCheck("What recall does the detector score on the draw from seed 11, to two places?", 0.9, 0.005, "It finds 45 of those fifty targets, where it found 47 of the fifty from seed 99 and all fifty it was trained on. The accuracy barely moves between the draws, because two thousand backgrounds swamp fifty targets in it. The recall is the number the calibration cannot promise, and Part 6’s own fresh draw of upright targets found 43 of 50.") },
+            ),
+          ],
         },
       ]}
     />

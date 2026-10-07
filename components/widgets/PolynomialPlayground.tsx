@@ -116,12 +116,12 @@ function statusText(fit: PolynomialFit | null, degree: number, range: RangeChoic
     return `Beyond the measurements the fitted curve reads ${formatHeight(first.y)} m at t = ${first.x} and ${formatHeight(last.y)} m at t = ${last.x}. Nothing in the data vouches for either.`;
   }
   if (degree === 1) {
-    return "A straight line cannot bend, so it cuts across the arc and explains almost none of it.";
+    return "A straight line cuts across this curved pattern and accounts for little of its variation.";
   }
   if (fit.r_squared > 0.999 && degree >= 5) {
     return "The curve now passes through nearly every point and R² reads close to 1, though look at what it does between them.";
   }
-  return "The curve bends with the data, and R² reports how much of the spread it accounts for.";
+  return "The fitted curve follows the observed pattern, and R² reports how much of the spread it accounts for.";
 }
 
 export function PolynomialPlayground() {

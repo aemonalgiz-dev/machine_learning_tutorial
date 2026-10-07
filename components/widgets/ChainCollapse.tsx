@@ -88,7 +88,7 @@ export function ChainCollapse() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <span className="text-sm text-slate-600 dark:text-slate-300">
-          Bend between the two
+          Activation Function between the two
         </span>
         {ACTIVATION_NAMES.map((name) => (
           <button

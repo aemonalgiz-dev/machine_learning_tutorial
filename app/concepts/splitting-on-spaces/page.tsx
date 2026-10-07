@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -20,7 +23,7 @@ import { WhitespaceKindsTable } from "@/components/widgets/WhitespaceKindsTable"
 export const metadata: Metadata = {
   title: "Splitting on Spaces · oop_ml",
   description:
-    "Every run of characters that is not white space is a word. The whole rule in one sentence, what it gets right, and the kinds of writing it mangles.",
+    "Split text at whitespace and inspect which words, punctuation, and positions the rule preserves.",
 };
 
 const link =
@@ -29,8 +32,12 @@ const link =
 export default function SplittingOnSpacesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["splitting-on-spaces"]}
+      technicalStart="Part 2. A Piece, and the Place It Came From"
+      openingTitle="The Simplest Word Rule Already Makes a Choice"
+      playgroundIntro="Inspect the extracted pieces and their source spans. Try punctuation beside a word and repeated whitespace, then compare the pieces with the original text."
       title="Splitting on Spaces"
-      tagline="Every run of characters that is not white space is one word, and that is the whole rule."
+      tagline="Split text at whitespace and inspect which words, punctuation, and positions the rule preserves."
       prerequisites={
         <>
           The{" "}
@@ -44,76 +51,14 @@ export default function SplittingOnSpacesPage() {
           it each repair one of the failures measured here.
         </>
       }
-      history={
-        <>
-          <p>
-            The space between words is an invention with a date and a place, and
-            for most of the history of alphabetic writing it was not there.
-            Greek and Latin were written in <em>scriptio continua</em>, letters
-            running on with no gaps at all, and a reader recovered the words by
-            sounding the text out. Paul Saenger, in{" "}
-            <em>Space Between Words: The Origins of Silent Reading</em>{" "}
-            (Stanford, 1997), traces systematic word separation to Irish and
-            Anglo-Saxon scribes copying Latin in the seventh and eighth
-            centuries, who were reading a language they did not speak and so
-            could not lean on its sound to find the joints. They put the gaps in
-            to make the parsing easier. A rule that cuts at spaces is therefore
-            reading a piece of typography a scribe added, and it works on this
-            page&rsquo;s sentence only because somebody in the intervening
-            twelve hundred years kept the habit.
-          </p>
-          <p>
-            The rule reached computing as a utility rather than as a proposal.
-            The Unix word counter has counted whitespace-delimited words since
-            the early 1970s, and the definition later written into the POSIX
-            standard is a non-empty run of characters delimited by white space,
-            which is this rule exactly. The interesting moment came in June 1986,
-            when Jon Bentley&rsquo;s Programming Pearls column in{" "}
-            <em>Communications of the ACM</em> set Donald Knuth the problem of
-            printing the most common words in a file with their counts. Knuth
-            answered with a long literate program built around a purpose-made
-            data structure, and Doug McIlroy, reviewing it, replied with a
-            six-command shell pipeline. The lesson everyone took away was about
-            program length. The part that matters here is that McIlroy&rsquo;s
-            first command had to say where the words were before anything could
-            be counted, and it chose a different rule from the word
-            counter&rsquo;s, cutting at every run of characters that were not
-            letters rather than at white space. So the two shortest published
-            answers to one counting problem, by people who agreed about
-            everything else in it, would already have cut{" "}
-            <span className="font-mono">didn&rsquo;t</span> in different places.
-          </p>
-          <p>
-            Counting needs the same decision. Henry Kučera and Nelson Francis
-            assembled the Brown corpus at Brown University in 1967 so
-            that frequencies could be taken from American prose, and a frequency
-            is a count of something, so a definition of a word had to be settled
-            before the first number existed. Thirty years on, the rule had not
-            gone away. When Rico Sennrich, Barry Haddow and Alexandra Birch
-            published &ldquo;Neural Machine Translation of Rare Words with
-            Subword Units&rdquo; at Edinburgh in 2016 and made whole words stop
-            being the unit, their learner still read its corpus as
-            whitespace-separated words and cut those into pieces. The method
-            that replaced this one is built on top of it.
-          </p>
-          <p>
-            The page answers five questions in order. What is the rule, and what
-            counts as a space? What does a piece carry besides its letters, and
-            why does that matter to everything downstream? Which kinds of writing
-            does the rule mangle, and what does each mangling cost? What does it
-            get right that the rules repairing it give up? And where does the
-            rule stop being defined, so that the answer it gives is a choice
-            somebody made rather than a fact about the text?
-          </p>
-        </>
-      }
+
       playground={<SpaceSplitExplorer />}
       sections={[
         {
           title: "Part 1. The Rule, and Why It Comes First",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Where the words are, before anything else can be decided">
                 <p>
                   We carry one sentence through this page, the same one the rest
@@ -133,17 +78,14 @@ export default function SplittingOnSpacesPage() {
                   every other question about text, and it is asked once, before
                   any model exists.
                 </p>
-                <p>
-                  It is worth separating that question from the one it is usually
-                  confused with. Deciding where the words are is a claim about
-                  the writing system, since English puts gaps between its words
-                  and Chinese does not. Deciding what a model&rsquo;s units are
-                  is a claim about a corpus, since a vocabulary of forty thousand
-                  entries has to spell every text it will ever meet out of pieces
-                  it has already seen. This page is entirely about the first, and
-                  the rule it describes is the shortest of the answers these
-                  pages cover, which is why it comes before the rest of them.
+                <>
+<p>
+                  It is worth separating that question from the one it is usually confused with. Deciding where the words are is a claim about the writing system, since English puts gaps between its words and Chinese does not. Deciding what a model&rsquo;s units are is a claim about a corpus, since a vocabulary of forty thousand entries has to spell every text it will ever meet out of pieces it has already seen.
                 </p>
+                <p>
+                  This page is entirely about the first, and the rule it describes is the shortest of the answers these pages cover, which is why it comes before the rest of them.
+                </p>
+</>
                 <KeepInMind>
                   Nothing in a run of characters says where a word begins. Every
                   answer to that question, including the one on this page, is a
@@ -173,17 +115,14 @@ export default function SplittingOnSpacesPage() {
                   the answer.
                 </p>
                 <WhyThisWorks title="Why the runs and the gaps are the same statement">
-                  <p>
-                    Every character of a text is either white space or it is not,
-                    so the text is a sequence of stretches of one kind alternating
-                    with stretches of the other. Naming the runs of one kind names
-                    the runs of the other kind by omission, and the two
-                    descriptions carry the same information. That is why the rule
-                    needs no notion of a separator at all. It never asks how many
-                    spaces there were, only whether the character it is looking at
-                    is one, and section 7 is where the consequence of never asking
-                    turns up.
+                  <>
+<p>
+                    Every character of a text is either white space or it is not, so the text is a sequence of stretches of one kind alternating with stretches of the other. Naming the runs of one kind names the runs of the other kind by omission, and the two descriptions carry the same information. That is why the rule needs no notion of a separator at all.
                   </p>
+                  <p>
+                    It never asks how many spaces there were, only whether the character it is looking at is one, and section 7 is where the consequence of never asking turns up.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   One rule, no exceptions and no settings, which is why the
@@ -273,7 +212,7 @@ export default function SplittingOnSpacesPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Piece, and the Place It Came From",
@@ -345,17 +284,14 @@ export default function SplittingOnSpacesPage() {
                   ]}
                   caption="The second row is the running sentence with one doubled space and one line break, which is section 7, and the third and fourth are section 16 and section 17 arriving early."
                 />
-                <p>
-                  The share kept has to be read carefully, since it says how
-                  much of the writing was spacing and says nothing about whether
-                  the answer was any good. It is 88.2 per cent on this sentence
-                  because English spends roughly a seventh of its characters on
-                  spaces, and it is exactly one on the Chinese line because that
-                  script spends none, which is section 11. The fourth row is the
-                  reverse case, a text where the rule keeps none of the writing
-                  at all and is entirely correct to, since three spaces hold no
-                  run of anything else.
+                <>
+<p>
+                  The share kept has to be read carefully, since it says how much of the writing was spacing and says nothing about whether the answer was any good. It is 88.2 per cent on this sentence because English spends roughly a seventh of its characters on spaces, and it is exactly one on the Chinese line because that script spends none, which is section 11.
                 </p>
+                <p>
+                  The fourth row is the reverse case, a text where the rule keeps none of the writing at all and is entirely correct to, since three spaces hold no run of anything else.
+                </p>
+</>
                 <KeepInMind>
                   Everything the pieces do not cover is white space, always, by
                   the shape of the rule. That is the one thing lost at the cut,
@@ -375,17 +311,14 @@ export default function SplittingOnSpacesPage() {
                   a single space between each pair.
                 </p>
                 <SpanRepairPanel />
-                <p>
-                  On the running sentence a single space is right in all six
-                  places, so the sentence comes back exactly and the rule looks
-                  lossless. On the same sentence with one doubled space and one
-                  line break it is right in four places out of six, and the text
-                  that comes back is the first one, which is not the text that
-                  went in. Both texts give the identical seven pieces, so nothing
-                  a model reads could tell them apart, and no amount of training
-                  recovers the difference, since it was thrown away before the
-                  model was reached.
+                <>
+<p>
+                  On the running sentence a single space is right in all six places, so the sentence comes back exactly and the rule looks lossless. On the same sentence with one doubled space and one line break it is right in four places out of six, and the text that comes back is the first one, which is not the text that went in.
                 </p>
+                <p>
+                  Both texts give the identical seven pieces, so nothing a model reads could tell them apart, and no amount of training recovers the difference, since it was thrown away before the model was reached.
+                </p>
+</>
                 <p>
                   The spans are where it can be got back. Putting each piece back
                   at the offsets it came from, and taking the source between one
@@ -406,6 +339,55 @@ export default function SplittingOnSpacesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "A rule that cut at each space and kept whatever fell between two cuts would agree with this one on the running sentence and part company with it wherever two spaces meet.",
+              true,
+              "The running sentence is singly spaced, so the two rules give the same seven pieces there. Where two spaces meet, cutting at each one leaves an empty word between them, and an empty word is not a word of anything. Taking maximal runs instead skips the spacing rather than dividing at it, which is why the word maximal is carrying the weight, and why a single space, a double space and a line break all do the same thing to the answer.",
+            ),
+            choice(
+              "The seven pieces hold 45 of the sentence’s 51 characters. What are the six characters that no piece holds?",
+              [
+                "The six spaces",
+                "The two full stops, the apostrophe, the two hyphens and one space",
+                "The six characters of the abbreviation and the compound",
+                "The six characters the rule rewrote on the way out",
+              ],
+              0,
+              "Everything the pieces do not cover is white space, by the shape of the rule, since the gaps between the runs are made of exactly the characters the runs exclude. That is true of every text rather than of this one, which is why the share kept says how much of the writing was spacing and nothing about whether the answer was any good.",
+            ),
+            several(
+              "Ten characters were put between the letters a and b one at a time. Which of these left the two letters in a single piece?",
+              [
+                "A hyphen",
+                "The zero width space",
+                "The soft hyphen",
+                "A no-break space",
+                "An ideographic space",
+              ],
+              [0, 1, 2],
+              "Seven of the ten end a word and three do not. The hyphen is expected there, since a hyphen is visibly a mark rather than a gap, and the other two are the surprise, because the rule asks whether a character is white space and never what it is called. The no-break space and the ideographic space are white space by that test, which is why recognising the whole family rather than the space alone is a real piece of correctness.",
+            ),
+            trueFalse(
+              "Cutting the running sentence and gluing the pieces straight back with a single space between each pair returns it exactly, so the rule is lossless.",
+              false,
+              "It does come back exactly, because a single space is right in all six places on that sentence. Put in one doubled space and one line break and the glue is right in four places of six, and the text that comes back is the first sentence rather than the second. Both texts give the identical seven pieces, so a rule of this kind discards the spacing even where a test on ordinary prose comes back exact.",
+            ),
+            choice(
+              "Why is a piece’s span half-open rather than the offset of its first character and the offset of its last?",
+              [
+                "The length is then the difference of the two offsets with no correction, and one piece ending where the next begins is one number rather than two kept a step apart",
+                "It lets a piece be stored without keeping its characters",
+                "It marks which of the stretches between the pieces were white space",
+                "It allows the rule to rewrite a character and still say where the piece came from",
+              ],
+              0,
+              "Half-open is the convention every slice of a sequence uses, and for the same reasons. An empty stretch also comes out as a span whose two offsets agree. Letting a rule rewrite a character and still say where the piece came from is something the spans do allow, but it belongs to the rules later in the section that rewrite, where this one only ever cuts.",
+            ),
+        ],
         },
         {
           title: "Part 3. The Kinds of Writing It Mangles",
@@ -473,17 +455,14 @@ export default function SplittingOnSpacesPage() {
                   a list for one language.
                 </p>
                 <WhyThisWorks title="Why this case has no clean answer at all">
-                  <p>
-                    Consider a sentence ending in an abbreviation, which in
-                    English is written with one full stop rather than two. That
-                    single character is doing both jobs at once, closing the
-                    abbreviation and closing the sentence, so there is no
-                    division of the text that assigns it correctly to one and not
-                    the other. A rule can keep it, and lose the sentence
-                    boundary, or cut it away, and lose the abbreviation. Neither
-                    answer is a repair, and any rule that claims to have solved
-                    this has chosen one of the two losses and not said so.
+                  <>
+<p>
+                    Consider a sentence ending in an abbreviation, which in English is written with one full stop rather than two. That single character is doing both jobs at once, closing the abbreviation and closing the sentence, so there is no division of the text that assigns it correctly to one and not the other. A rule can keep it, and lose the sentence boundary, or cut it away, and lose the abbreviation.
                   </p>
+                  <p>
+                    Neither answer is a repair, and any rule that claims to have solved this has chosen one of the two losses and not said so.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   Six of the seven full stops here are noise on the end of a word
@@ -609,19 +588,14 @@ export default function SplittingOnSpacesPage() {
                   since those properties are why it is still where a pipeline
                   starts.
                 </p>
-                <p>
-                  It reads no corpus, so there is no fitting step and no data to
-                  gather, and the answer it gives today is the answer it gave
-                  last year. It has no settings, so two people applying it to one
-                  sentence get the same seven pieces and cannot have configured
-                  it differently. It carries no list of exceptions, so it cannot
-                  be out of date, and it makes no claim about any particular
-                  language, so it cannot be wrong about a language it has never
-                  seen in the way that a list of English abbreviations is wrong
-                  about German. And it never rewrites a character, so every piece
-                  is exactly the slice of the source its span names, and the
-                  writing can be recovered from the pieces and their offsets.
+                <>
+<p>
+                  It reads no corpus, so there is no fitting step and no data to gather, and the answer it gives today is the answer it gave last year. It has no settings, so two people applying it to one sentence get the same seven pieces and cannot have configured it differently. It carries no list of exceptions, so it cannot be out of date, and it makes no claim about any particular language, so it cannot be wrong about a language it has never seen in the way that a list of English abbreviations is wrong about German.
                 </p>
+                <p>
+                  And it never rewrites a character, so every piece is exactly the slice of the source its span names, and the writing can be recovered from the pieces and their offsets.
+                </p>
+</>
                 <InAModel>
                   <p>
                     That last property is why it is the usual first step in front
@@ -653,17 +627,14 @@ export default function SplittingOnSpacesPage() {
                   positions, and the cost of reading text grows at least in step
                   with the number of positions.
                 </p>
-                <p>
-                  The sharper difference is what happens to the characters. On
-                  the running sentence the boundary rules keep 41 of the 51
-                  characters, against 45 here. The ten they leave behind are the
-                  six spaces and, unlike this rule, both hyphens and both full
-                  stops, since a mark that is not part of a word is not returned
-                  as one. Gluing their nine pieces back with single spaces gives
-                  a line with the abbreviation&rsquo;s stop gone, the compound
-                  split in two and the sentence&rsquo;s own full stop missing, so
-                  the loss is not confined to the spacing the way it is here.
+                <>
+<p>
+                  The sharper difference is what happens to the characters. On the running sentence the boundary rules keep 41 of the 51 characters, against 45 here. The ten they leave behind are the six spaces and, unlike this rule, both hyphens and both full stops, since a mark that is not part of a word is not returned as one.
                 </p>
+                <p>
+                  Gluing their nine pieces back with single spaces gives a line with the abbreviation&rsquo;s stop gone, the compound split in two and the sentence&rsquo;s own full stop missing, so the loss is not confined to the spacing the way it is here.
+                </p>
+</>
                 <KeepInMind>
                   The obvious repair to this rule buys a table with no attached
                   punctuation in it, splits the compounds while it is there, and
@@ -825,6 +796,241 @@ export default function SplittingOnSpacesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 to 5",
+          quiz: [
+            trueFalse(
+              "On the line of Chinese the rule scores better on both of the measures Part 2 built than it does on the English sentence.",
+              true,
+              "The single piece covers 9 characters of 9, so the share of the writing kept is exactly one against the sentence’s 88.2 per cent, and gluing one piece back reproduces the line character for character. That is what makes it the worst case rather than merely a bad one, since both numbers go up as the answer gets worse and neither can be quoted on its own.",
+            ),
+            choice(
+              "Both rules produce 47 entries on the six sentences. What does that agreement establish?",
+              [
+                "Nothing about either rule, since only 35 of the entries are held by both",
+                "That the two rules make the same cuts on this corpus",
+                "That the corpus holds no punctuation for them to disagree about",
+                "That the boundary rules are a strict improvement here",
+              ],
+              0,
+              "The two disagree about 12 entries in each direction, and in opposite ways. This rule spends its twelve on words wearing punctuation and on compounds kept whole, and the other spends its twelve on the bare forms and on the halves of those compounds. A count of entries is worth reading only beside what the entries are.",
+            ),
+            choice(
+              "Seven of the 47 entries end in a full stop, one an abbreviation and six the ends of sentences. What tells the two apart?",
+              [
+                "Nothing in the runs of characters, since what separates them is knowledge of a particular language",
+                "The abbreviation keeps its full stop where the sentence ends lose theirs",
+                "The abbreviation is the only one of the seven that also carries a hyphen",
+                "The sentence ends are the ones followed by white space",
+              ],
+              0,
+              "The rule does the same thing to both and does it for the same reason, which is that a full stop is a character like any other and joins whichever run it is touching. The information that would separate them is a fact about English usage, which is why the rules that get this right carry a list of abbreviations and why every such list is a list for one language.",
+            ),
+            several(
+              "Which of these are true of this rule?",
+              [
+                "It reads no corpus, so there is no fitting step and the answer it gives today is the answer it gave last year",
+                "It never rewrites a character, so every piece is exactly the slice of the source its span names",
+                "It checks that the writing in front of it separates its words with gaps before it answers",
+                "It declines to answer on writing that puts no gaps between its words",
+              ],
+              [0, 1],
+              "Reading no corpus and rewriting nothing are two of the four properties Part 4 names, and they are why the rule survives as the front half of methods whose whole purpose is to improve on it, since a learner that counts words needs its input words to be a deterministic function of the corpus. The other two describe a rule that does not exist. Part 5 says the assumption that words are separated by gaps is the one thing the rule never reports on and cannot check, since a text with no gaps is indistinguishable from a text that is one long word, and the rule is total, so every text has an answer and nothing that goes wrong announces itself.",
+            ),
+            trueFalse(
+              "Over the six sentences the boundary rules return fewer pieces than this rule, because a mark of punctuation is not returned as a word.",
+              false,
+              "They return more. On that corpus the boundary rules give 69 pieces where this one gives 63, so a model reading it would read about a tenth more positions, and the cost of reading text grows at least in step with the number of positions. Separating the marks and splitting the compounds adds positions faster than dropping the marks removes them.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Putting the Rule to the Running Sentence",
+          practice: [
+            exercise(
+              "Cut the running sentence and read the spans",
+              ["Put the sentence Part 1 carries to the library’s whitespace rule, print each piece beside the half-open span it came from, and then add the spans up to find how much of the sentence the pieces hold.", "Part 1 arrived at seven pieces and Part 2 at 45 of the 51 characters inside a piece. Both should come straight out of the spans, and the share kept, to one decimal place, should be the 88.2 per cent the page quotes."],
+              `from oop_ml import WhitespacePreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+rule = WhitespacePreTokenizer()
+# Split the sentence, print each piece with its start and end offsets,
+# then print the number of pieces, how many of the sentence's characters
+# lie inside a piece, and that count as a percentage of the sentence.`,
+              `from oop_ml import WhitespacePreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+
+rule = WhitespacePreTokenizer()
+words = rule.split(sentence)
+
+for word in words:
+    print(f"[{word.start:2d}, {word.end:2d})  {word.text}")
+
+covered = sum(word.end - word.start for word in words)
+print(f"{words.n_words} pieces")
+print(f"{covered} of {len(sentence)} characters inside a piece")
+print(f"share kept {100 * covered / len(sentence):.1f} per cent")`,
+              `[ 0,  3)  Dr.
+[ 4, 11)  Alvarez
+[12, 18)  didn't
+[19, 25)  expect
+[26, 29)  the
+[30, 38)  low-cost
+[39, 51)  re-analysis.
+7 pieces
+45 of 51 characters inside a piece
+share kept 88.2 per cent`,
+              { hints: ["The rule takes no settings, so it is constructed with nothing and the text goes to split, which answers a collection of words.", "Iterating over that collection gives one word at a time, and each word carries text, start and end. The collection itself knows n_words.", "The span is half-open, so the length of a piece is end minus start with no correction, and summing those lengths is the count of characters inside a piece."], check: numberCheck("What share of the sentence’s characters do the pieces hold, in per cent to one place?", 88.2, 0.05, "The seven spans add up to 45 characters of the 51, and 45 over 51 is 88.2 per cent. The six characters outside every piece are the six spaces, which is true of any text under this rule, since the gaps between the runs are made of exactly the characters the runs exclude.") },
+            ),
+            exercise(
+              "Put ten characters between two letters",
+              ["Section 4 put ten characters between the letters a and b one at a time and counted the pieces that came back. Do the same, building each character from its code point so that the invisible ones are written down unambiguously, and count how many of the ten end a word.", "Seven should end a word and three should not. Watch which three, since one of them has the word space in its name and another exists only to offer a line break."],
+              `from oop_ml import WhitespacePreTokenizer
+
+candidates = {
+    "space": 0x0020,
+    "character tabulation": 0x0009,
+    "line feed": 0x000A,
+    "no-break space": 0x00A0,
+    "thin space": 0x2009,
+    "ideographic space": 0x3000,
+    "paragraph separator": 0x2029,
+    "zero width space": 0x200B,
+    "soft hyphen": 0x00AD,
+    "hyphen-minus": 0x002D,
+}
+rule = WhitespacePreTokenizer()
+# For each candidate, split the letter a, the character, and the letter b,
+# print the code point, the name and how many pieces came back, and
+# finally print how many of the ten candidates ended a word.`,
+              `from oop_ml import WhitespacePreTokenizer
+
+candidates = {
+    "space": 0x0020,
+    "character tabulation": 0x0009,
+    "line feed": 0x000A,
+    "no-break space": 0x00A0,
+    "thin space": 0x2009,
+    "ideographic space": 0x3000,
+    "paragraph separator": 0x2029,
+    "zero width space": 0x200B,
+    "soft hyphen": 0x00AD,
+    "hyphen-minus": 0x002D,
+}
+rule = WhitespacePreTokenizer()
+
+ending = 0
+for name, code in candidates.items():
+    n_pieces = rule.split(f"a{chr(code)}b").n_words
+    ending += n_pieces > 1
+    print(f"U+{code:04X}  {name:22s}  {n_pieces}")
+print(f"{ending} of {len(candidates)} end a word")`,
+              `U+0020  space                   2
+U+0009  character tabulation    2
+U+000A  line feed               2
+U+00A0  no-break space          2
+U+2009  thin space              2
+U+3000  ideographic space       2
+U+2029  paragraph separator     2
+U+200B  zero width space        1
+U+00AD  soft hyphen             1
+U+002D  hyphen-minus            1
+7 of 10 end a word`,
+              { hints: ["chr turns a code point into the character itself, so the probe text for each row is the letter a, chr of the code, and the letter b.", "A character ends a word exactly when the probe comes back as two pieces rather than one, so the test is whether n_words is greater than one.", "Format the code point with a width of four in upper-case hexadecimal, which is how a character table writes it, and the rows will line up."], check: numberCheck("How many of the ten characters end a word?", 7, 0.0, "Seven of the ten are white space by the test the rule applies and three are not. The hyphen is expected there, since it is visibly a mark, and the zero width space and the soft hyphen are the surprise, because the rule asks whether a character is white space and never what it is called or what it is for.") },
+            ),
+            exercise(
+              "Glue the pieces with spaces, then rebuild them from the spans",
+              ["Take the running sentence with one doubled space and one line break, which is the second text of section 7. Cut it, glue the pieces back with a single space between each pair, and compare the result with the text that went in. Then put each piece back at its own offsets, taking the source between one piece and the next, and compare again.", "The pieces should be the same seven as the singly spaced sentence gives, the glue should fail and the spans should succeed. Count how many of the six gaps between the pieces are a single space, which is the number of places where the guess happens to be right."],
+              `from oop_ml import WhitespacePreTokenizer
+
+text = "Dr.  Alvarez didn't expect\\nthe low-cost re-analysis."
+words = WhitespacePreTokenizer().split(text)
+pieces = list(words)
+
+# Glue the texts of the pieces with one space between each pair and print
+# whether that equals the text. Collect the gap between each piece and the
+# next, and print how many of those gaps are a single space. Then rebuild
+# the text from the spans, taking the source between the pieces, and print
+# whether that equals the text.`,
+              `from oop_ml import WhitespacePreTokenizer
+
+text = "Dr.  Alvarez didn't expect\\nthe low-cost re-analysis."
+words = WhitespacePreTokenizer().split(text)
+pieces = list(words)
+
+glued = " ".join(words.texts)
+print(f"{words.n_words} pieces")
+print(f"glued with one space each, exact: {glued == text}")
+
+gaps = [text[before.end:after.start] for before, after in zip(pieces, pieces[1:])]
+print(f"gaps that are one space: {sum(gap == ' ' for gap in gaps)} of {len(gaps)}")
+
+rebuilt = ""
+previous = 0
+for piece in pieces:
+    rebuilt += text[previous:piece.start] + piece.text
+    previous = piece.end
+rebuilt += text[previous:]
+print(f"rebuilt from the spans, exact: {rebuilt == text}")`,
+              `7 pieces
+glued with one space each, exact: False
+gaps that are one space: 4 of 6
+rebuilt from the spans, exact: True`,
+              { hints: ["The collection of words has a texts property holding the strings alone, which is exactly what something holding the pieces without their spans would have, so the glue is one join over it.", "The gap between two neighbouring pieces is the slice of the text from the first one’s end to the next one’s start, and zip over the pieces and the pieces shifted by one pairs each with its neighbour.", "To rebuild, walk the pieces keeping the offset where the last one ended, and append the source between that offset and the next start before appending the piece. Whatever follows the last piece goes on at the end."], check: numberCheck("How many of the six gaps between the pieces are a single space?", 4, 0.0, "Four of the six are a single space, so the guess is right in four places and wrong at the doubled space and the line break, and the glued text is the singly spaced sentence rather than the one that went in. The seven pieces are identical to the ones the singly spaced sentence gives, so nothing a model reads could tell the two texts apart, and only the spans, which still say where each piece stood, give the second text back.") },
+            ),
+            exercise(
+              "Count the table over the six sentences",
+              ["Section 12 read six sentences under this rule and under the Unicode word boundary rules and found that both arrive at 47 entries. Build the same corpus, count the entries and the pieces each rule produces, and count how many entries the two rules hold in common.", "Then look up one word the page talks about. Section 8 says a word that turns up bare in one place and wearing a mark in another has two rows, each learned from half the occurrences it should have had. Count how many times analysis is an entry under each rule, which the page does not print."],
+              `from oop_ml import Corpus, UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+corpus = Corpus.of(notebook)
+rules = {"on spaces": WhitespacePreTokenizer(), "on word boundaries": UnicodeWordPreTokenizer()}
+
+# For each rule, count the corpus's words, and print how many distinct
+# entries and how many pieces in all it produced. Print how many entries
+# the two rules share, then how many times analysis is counted under each.`,
+              `from oop_ml import Corpus, UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+corpus = Corpus.of(notebook)
+rules = {"on spaces": WhitespacePreTokenizer(), "on word boundaries": UnicodeWordPreTokenizer()}
+
+tables = {}
+for name, rule in rules.items():
+    tables[name] = {count.word: count.count for count in corpus.word_counts(rule)}
+    print(f"{name}: {len(tables[name])} entries, {sum(tables[name].values())} pieces")
+
+shared = tables["on spaces"].keys() & tables["on word boundaries"].keys()
+print(f"entries held by both rules: {len(shared)}")
+
+for name, table in tables.items():
+    print(f"analysis {name}: counted {table.get('analysis', 0)} times")`,
+              `on spaces: 47 entries, 63 pieces
+on word boundaries: 47 entries, 69 pieces
+entries held by both rules: 35
+analysis on spaces: counted 2 times
+analysis on word boundaries: counted 4 times`,
+              { hints: ["Corpus.of takes the list of sentences, and word_counts takes the rule and answers one count per distinct entry, each carrying word and count.", "The sum of the counts is the number of pieces the six sentences produced in all, and the number of counts is the number of distinct entries.", "Turning each rule’s counts into a dictionary from word to count makes the shared entries the intersection of the two key sets, and a word’s count a lookup."], check: numberCheck("How many times is analysis counted as an entry under the word boundary rules?", 4, 0.0, "The six sentences use the word four times, twice bare and twice inside re-analysis. The boundary rules split the hyphenated compound, so all four reach one entry, while this rule counts two for the bare word and keeps the other two apart as re-analysis and re-analysis., the one entry section 12 names as a word the list already holds wearing a full stop. That is section 8’s two rows, each learned from a share of the occurrences the word actually had.") },
+            ),
+          ],
         },
       ]}
     />

@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -20,7 +23,7 @@ import { WalkFromTheMean } from "@/components/widgets/WalkFromTheMean";
 export const metadata: Metadata = {
   title: "Centring on the Mean · oop_ml",
   description:
-    "Subtract each column’s average and divide by nothing, and see which methods were measuring from a zero nobody in the data is near, and which never noticed where zero was.",
+    "Subtract each feature's mean and measure values relative to the average observation.",
 };
 
 const link =
@@ -29,8 +32,12 @@ const link =
 export default function CentringOnTheMeanPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["centring-on-the-mean"]}
+      technicalStart="Part 1. Moving the Zero to the Average Person"
+      openingTitle="Move Zero to Somewhere Useful"
+      playgroundIntro="Compare the original coordinates with the centred ones. Watch which distances stay fixed when the origin moves to the mean."
       title="Centring on the Mean"
-      tagline="Take each column&rsquo;s average away from every value in it and divide by nothing, and every method that measures from zero starts measuring from the average person."
+      tagline="Subtract each feature's mean and measure values relative to the average observation."
       prerequisites={
         <>
           The mean comes from the{" "}
@@ -62,92 +69,41 @@ export default function CentringOnTheMeanPage() {
           needs it.
         </>
       }
-      history={
-        <>
-          <p>
-            When Karl Pearson looked for the line lying closest to a cloud of
-            measured points, in his 1901 paper in the Philosophical Magazine
-            &ldquo;On lines and planes of closest fit to systems of points in
-            space&rdquo;, one of the first things he established was that the best
-            line passes through the centroid, the point whose coordinates are the
-            means. From then on the natural place to measure a cloud from was its
-            own middle, and every principal component calculation since has begun
-            by subtracting it. The older analysis-of-variance tables record the
-            same habit in their vocabulary, where the sum of squares about the
-            mean is the corrected sum of squares, the correction being for the
-            mean, and the raw sum of squares about zero is the uncorrected one
-            that nobody reports.
-          </p>
-          <p>
-            In regression the argument came later and was sharper. Ralph Bradley
-            and Sushil Srivastava, in &ldquo;Correlation in polynomial
-            regression&rdquo; in The American Statistician in 1979, showed that
-            the strong correlation between a column and its own square, which
-            makes curved fits unstable, depends on where that column&rsquo;s zero
-            happens to sit and can be removed by moving it. Donald Marquardt, in
-            &ldquo;You should standardize the predictor variables in your
-            regression models&rdquo; in the Journal of the American Statistical
-            Association in 1980, called that kind of trouble nonessential
-            ill-conditioning, to separate it from the essential kind that comes
-            from two measurements genuinely moving together. David Belsley
-            answered in 1984, in &ldquo;Demeaning conditioning diagnostics through
-            centering&rdquo;, that centring does not cure the ill-conditioning
-            involving the intercept; the intercept at a height of zero is known
-            no better than before, it has only stopped being asked for. The
-            disagreement was about whether a number that improves after centring
-            had measured a difficulty in the data or a difficulty in the question,
-            and both sides were partly right, which this page measures on the
-            crowd.
-          </p>
-          <p>
-            The ecologists had the opposite worry. Imanuel Noy-Meir, in
-            &ldquo;Data transformations in ecological ordination. I. Some
-            advantages of non-centering&rdquo; in the Journal of Ecology in 1973,
-            argued that for a table of how much of each species was found at each
-            site, where zero means a species is absent and is therefore a genuine
-            place, leaving the table uncentred can be the right question. Both
-            positions survive, since whether zero is a meaningful origin is a fact
-            about what the columns measure. The page asks six questions about it
-            in order, on eleven people measured by height and weight. What does
-            subtracting the mean change, and what does it keep? What does a
-            search for the longest direction find when zero is far from everyone?
-            Why is fitting an intercept the same thing as centring, and what goes
-            wrong for a line or a penalty without one? How does centring change
-            the number of steps a gradient walk takes? What happens to the angle
-            between two people? And which methods never notice, and where does a
-            mean stop being a place to measure from at all?
-          </p>
-        </>
-      }
+
       playground={<CentringPlayground />}
       sections={[
         {
           title: "Part 1. Moving the Zero to the Average Person",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Where zero sits in the crowd">
                 <p>
-                  The crowd is eleven people, five children and six adults, with
-                  heights between 118 and 183 centimetres and weights between 24
-                  and 83 kilograms. Every one of those numbers is measured from
-                  zero, and a height of zero and a weight of zero describe nobody
-                  in the crowd or anywhere else, so the point every number is
-                  measured from is 118 centimetres below the shortest person in
-                  it. Centring moves that point to the average person, by taking
-                  each column&rsquo;s mean away from every value in the column and
-                  dividing what is left by nothing.
+                  The crowd is eleven people, five children and six adults, with heights between 118 and 183 centimetres and weights between 24 and 83 kilograms. Every one of those numbers is measured from zero, and a height of zero and a weight of zero describe nobody in the crowd or anywhere else, so the point every number is measured from is 118 centimetres below the shortest person in it.
+                </p>
+                <p>
+                  Centring moves that point to the average person, by taking each column&rsquo;s mean away from every value in the column and dividing what is left by nothing.
                 </p>
                 <Equation>{"centred value = value − mean of its column"}</Equation>
                 <WorkedExample title="The crowd, centred">
-                  <p>
-                    The eleven heights add to 1670 and the eleven weights to 587,
-                    so the average person is 1670 / 11 = 151.82 centimetres tall
-                    and weighs 587 / 11 = 53.36 kilograms. The first child, 147 cm
-                    and 41 kg, becomes −4.82 and −12.36, a little shorter than the
-                    average person and a good deal lighter. The tallest adult, 183
-                    cm and 83 kg, becomes 31.18 and 29.64.
-                  </p>
+                  <>
+                    <p>
+                      The eleven heights add to 1670 centimetres and the eleven weights
+                      to 587 kilograms. Divide each total by the number of people to
+                      find the centre of that column.
+                    </p>
+                    <Equation>{"mean height = 1670 / 11 ≈ 151.82 cm\nmean weight = 587 / 11 ≈ 53.36 kg"}</Equation>
+                    <p>
+                      Now subtract the corresponding mean from each measurement. The
+                      first child is 147 centimetres tall and weighs 41 kilograms. The
+                      tallest adult is 183 centimetres tall and weighs 83 kilograms.
+                    </p>
+                    <Equation>{"first child:   (147 − 1670/11, 41 − 587/11) ≈ (−4.82, −12.36)\ntallest adult: (183 − 1670/11, 83 − 587/11) ≈ (31.18, 29.64)"}</Equation>
+                    <p>
+                      Negative values mean below the column average; positive values
+                      mean above it. The units remain centimetres and kilograms.
+                    </p>
+                  </>
                   <NumberTable
                     headings={["height", "weight", "centred height", "centred weight"]}
                     rows={[
@@ -177,16 +133,10 @@ export default function CentringOnTheMeanPage() {
 
               <SubSection title="2. What the subtraction keeps">
                 <p>
-                  Taking the same number away from every height moves the whole
-                  column along its ruler and changes nothing about how the heights
-                  sit relative to one another. The 145 cm child and the 147 cm
-                  child were two centimetres apart before and are two apart after,
-                  and so is every other pair; the largest change in the gap
-                  between any two people&rsquo;s heights came out at exactly zero.
-                  The spread survives as well, because spread is measured about
-                  the mean and the mean moved with the column, so the variance of
-                  the heights is 521.79 square centimetres before centring and
-                  after it.
+                  Taking the same number away from every height moves the whole column along its ruler and changes nothing about how the heights sit relative to one another. The 145 cm child and the 147 cm child were two centimetres apart before and are two apart after, and so is every other pair; the largest change in the gap between any two people&rsquo;s heights came out at exactly zero.
+                </p>
+                <p>
+                  The spread survives as well, because spread is measured about the mean and the mean moved with the column, so the variance of the heights is 521.79 square centimetres before centring and after it.
                 </p>
                 <Equation>{"(xᵢ − m) − (xⱼ − m) = xᵢ − xⱼ\nvariance of (x − m) = variance of x"}</Equation>
                 <p>
@@ -238,7 +188,7 @@ export default function CentringOnTheMeanPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. A Direction Measured From the Wrong Place",
@@ -262,17 +212,10 @@ export default function CentringOnTheMeanPage() {
                 <CentringPlayground panels={["direction"]} />
                 <InAModel title="On the crowd, measured from zero">
                   <p>
-                    The longest direction from zero runs at 20.09 degrees above
-                    the height axis. The arrow from zero to the average person
-                    runs at 19.37 degrees, and the cosine between those two is
-                    0.99992, so the search found where the crowd is. The first
-                    principal component of the centred columns runs at 42.21
-                    degrees, the direction in which taller people are also
-                    heavier, and its cosine with the uncentred answer is 0.926. On
-                    the measured four, whose average person is 170 cm and 68 kg,
-                    the uncentred direction is 21.85 degrees against an arrow to
-                    the mean at 21.80, while the centred component lies at exactly
-                    45.
+                    The longest direction from zero runs at 20.09 degrees above the height axis. The arrow from zero to the average person runs at 19.37 degrees, and the cosine between those two is 0.99992, so the search found where the crowd is. The first principal component of the centred columns runs at 42.21 degrees, the direction in which taller people are also heavier, and its cosine with the uncentred answer is 0.926.
+                  </p>
+                  <p>
+                    On the measured four, whose average person is 170 cm and 68 kg, the uncentred direction is 21.85 degrees against an arrow to the mean at 21.80, while the centred component lies at exactly 45.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -295,16 +238,20 @@ export default function CentringOnTheMeanPage() {
                 </p>
                 <Equation>{"mean of x² = variance of x + (mean of x)²\n26,849.4 = 952.9 + 25,896.4"}</Equation>
                 <WorkedExample title="The crowd&rsquo;s squared length, split">
-                  <p>
-                    Over both columns the eleven people lie a mean squared 26,849.4
-                    from zero. Their two variances add to 952.9, which is all the
-                    spread there is, and the squared length of the average person,
-                    151.82² + 53.36², is 25,896.4. So 96.5 percent of what the
-                    uncentred search was making as large as possible is the
-                    position of the crowd, and 3.5 percent is how its members
-                    differ. On the measured four the split comes out in whole
-                    numbers, 33,649 = 125 + 33,524, since 170² + 68² is 33,524.
-                  </p>
+                  <>
+                    <p>
+                      The average squared distance from zero contains two contributions:
+                      variation between people and the position of the average person.
+                      For the eleven people, only about 3.5 percent comes from
+                      variation. The remaining 96.5 percent comes from where the whole
+                      crowd sits relative to zero.
+                    </p>
+                    <Equation>{"mean squared distance from zero\n  = sum of column variances + squared length of column means\n  ≈ 952.9 + 25,896.4\n  ≈ 26,849.4  (figures rounded independently)"}</Equation>
+                    <p>
+                      The measured four make the same split with whole numbers.
+                    </p>
+                    <Equation>{"squared length of the mean = 170² + 68² = 33,524\nmean squared distance from zero = 125 + 33,524 = 33,649"}</Equation>
+                  </>
                 </WorkedExample>
                 <KeepInMind>
                   The uncentred direction claimed 0.9946 of the squared length,
@@ -350,6 +297,49 @@ export default function CentringOnTheMeanPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            several(
+              "What does a column keep when it is centred?",
+              [
+                "Its unit",
+                "Its spread",
+                "Every gap between two of its values",
+                "Where it was",
+              ],
+              [0, 1, 2],
+              "Centring subtracts a number and divides by nothing, so the heights are still in centimetres. The variance is 521.79 square centimetres before and after, because spread is measured about the mean and the mean moved with the column, and the largest change in the gap between any two people’s heights came out at exactly zero. What is lost is the level, the part of every value the whole crowd shares.",
+            ),
+            trueFalse(
+              "Centring a column on its median also leaves a column that averages zero.",
+              false,
+              "Only the mean makes that promise, because the mean is the value a column’s excesses and shortfalls balance around. Centring on the median, as the robust scaler does, leaves a column whose middle value is zero and whose average usually is not, so everything this page measures about the mean would have to be measured again for it.",
+            ),
+            choice(
+              "The longest direction from zero runs at 20.09 degrees and the first principal component of the centred columns at 42.21. What did the uncentred search find?",
+              [
+                "A slightly less accurate version of the centred component",
+                "The direction in which the whole crowd sits, at a cosine of 0.99992 to the arrow from zero to the average person",
+                "The direction along which the people spread least",
+                "Nothing usable, since the search failed to settle",
+              ],
+              1,
+              "It came back as a unit direction with a share of the total attached, computed correctly, and nothing about it signals that the question it answered is a different one. Its share of 0.9946 looks better than the centred component’s 0.9897 only because the two are fractions of different totals, and most of the first total is the location.",
+            ),
+            choice(
+              "Of the mean squared distance of the eleven people from zero, about how much comes from variation between people?",
+              ["About 3.5 percent", "About half", "About 96.5 percent", "About 99.5 percent"],
+              0,
+              "The mean of x² is the variance plus the square of the mean, which here splits 26,849.4 into 952.9 and 25,896.4. A column far from zero carries most of its squared length as location, so a search for the direction of largest squared length is mostly a search for where the crowd sits.",
+            ),
+            trueFalse(
+              "Recording every height as the distance above a mark on the wall turns the uncentred direction, while the centred component stays exactly where it was.",
+              true,
+              "The mark changes no gap between any two people, and the uncentred answer turns anyway, which is the sign that it was never a fact about the people. The centred component is the same at every mark, because centring takes away whatever the mark added before the search begins, and a component fit that centres for itself gave the same direction on the recorded columns as on columns centred beforehand, a gap of 0.0.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. Lines Forced Through Zero",
           content: (
             <>
@@ -366,22 +356,15 @@ export default function CentringOnTheMeanPage() {
                 <CentringPlayground panels={["line"]} />
                 <InAModel title="Weight on height, both ways">
                   <p>
-                    With an intercept the slope is 0.890 kg per centimetre and the
-                    line explains 0.9588 of the variation in weight, on the usual
-                    scale where one is perfect and zero is no better than giving
-                    everyone the mean weight. Forced through zero, the slope falls
-                    to 0.363 and the share explained to 0.6155, because a line from
-                    the origin has to split the difference between the children
-                    and the adults. Centre both columns first and the line through
-                    zero has a slope of 0.890 again and explains 0.9588 again. Move
-                    the zero to 100 cm on the playground and the forced slope
-                    becomes 1.007 with 0.9390 explained, better because the point
-                    it is forced through is nearer the people.
+                    With an intercept the slope is 0.890 kg per centimetre and the line explains 0.9588 of the variation in weight, on the usual scale where one is perfect and zero is no better than giving everyone the mean weight. Forced through zero, the slope falls to 0.363 and the share explained to 0.6155, because a line from the origin has to split the difference between the children and the adults.
+                  </p>
+                  <p>
+                    Centre both columns first and the line through zero has a slope of 0.890 again and explains 0.9588 again. Move the zero to 100 cm on the playground and the forced slope becomes 1.007 with 0.9390 explained, better because the point it is forced through is nearer the people.
                   </p>
                 </InAModel>
                 <KeepInMind>
                   Dropping an intercept is a claim that a person of no height
-                  weighs nothing, and on uncentred columns the fit is bent to
+                  weighs nothing, and on uncentred columns the fitted line is constrained to
                   honour that claim across a gap of 118 centimetres. On centred
                   columns zero is the average person, the average person does have
                   the average weight, and the same claim costs nothing.
@@ -496,21 +479,28 @@ export default function CentringOnTheMeanPage() {
                     is v whatever m is.
                   </p>
                   <Equation>{"[ 1    m     ]\n[ m    m² + v ]"}</Equation>
-                  <p>
-                    The two curvatures multiply to v and add to 1 + m² + v, so as m
-                    grows one of them grows like m² and the other shrinks like v /
-                    m². On the crowd m² + v + 1 is 23,571.6 and the product of the
-                    two curvatures is the variance, 521.8. Centring sets m to zero,
-                    the matrix becomes diagonal, and the curvatures are 1 and v.
-                  </p>
+                  <>
+                    <p>
+                      Write the two curvatures as c₁ and c₂, the mean height as m, and
+                      the height variance as v. Their sum and product explain why a
+                      large mean creates a narrow valley.
+                    </p>
+                    <Equation>{"c₁c₂ = v\nc₁ + c₂ = 1 + m² + v"}</Equation>
+                    <p>
+                      As the mean grows, one curvature grows roughly with its square
+                      while the other shrinks. On this crowd the sum is 23,571.6 and the
+                      product is 521.8. Centring sets the mean to zero, leaving a
+                      diagonal matrix with curvatures one and v.
+                    </p>
+                  </>
                 </WhyThisWorks>
                 <KeepInMind>
                   Centring removes the coupling between the intercept and each
                   column and leaves every other coupling where it was. Height and
                   weight used as two inputs to one fit keep their correlation of
                   0.979 after centring, since a correlation is measured about the
-                  means already, and that is the essential ill-conditioning of the
-                  history above, which no shift of zero can reach.
+                  means already, and that is ill-conditioning caused by strongly related features.
+                  Shifting the origin cannot remove that dependence.
                 </KeepInMind>
               </SubSection>
 
@@ -527,22 +517,10 @@ export default function CentringOnTheMeanPage() {
                 </p>
                 <WalkFromTheMean />
                 <InAModel title="Twenty thousand passes against 8415">
-                  <p>
-                    On centred heights the slope is right after the first pass,
-                    0.89008, because the step size was set by the steep direction
-                    and a step of that size removes the steep direction&rsquo;s
-                    whole error at once. The level then climbs the shallow
-                    direction, to 45.53 kg by pass 1000 and 52.21 by pass 2000,
-                    and the walk stops itself at pass 8415 with a level of 53.36,
-                    the same count the feature scaling page measured for
-                    centimetres. On the recorded heights the first pass puts the
-                    slope at 0.3634, the through-zero slope of step 7 to four
-                    decimals, since the steep direction is almost exactly the line
-                    through zero. The next twenty thousand passes creep along the
-                    floor of the valley to a slope of 0.3732 and a level of −1.52,
-                    against a destination of 0.8901 and −81.77, which is 1.9
-                    percent of the way, and the walk stops at its cap unfinished.
-                  </p>
+                  <p>Centering separates the mean level from variation in height, making the two parameter directions easier to optimize independently in this example.</p>
+<p>For centered heights, the first update reaches a slope of 0.89008. The learning rate was chosen for the steep direction, so that component of the quadratic error is corrected immediately. The level changes more slowly and reaches 53.36 when the run stops at pass 8415.</p>
+<p>For the original heights, the steep direction is close to the through-zero line. The first slope is 0.3634, but later updates make slow progress along the remaining shallow direction. After twenty thousand passes, the slope is 0.3732 and the level is −1.52, compared with the fitted solution&apos;s 0.8901 and −81.77.</p>
+<p>The run reaches its update limit before converging. Centering has not changed the regression task; it has changed the parameter geometry encountered by this particular update procedure.</p>
                 </InAModel>
                 <KeepInMind>
                   Both walks were heading for the same line, and a closed-form
@@ -576,14 +554,67 @@ export default function CentringOnTheMeanPage() {
                 <KeepInMind>
                   This is the collinearity centring removes, a correlation made by
                   where zero sits. It leaves a correlation between two different
-                  measurements alone, and whether a better condition number after
-                  centring means a difficulty was removed or a difficult question
-                  stopped being asked is the argument described in the history at
-                  the top of the page.
+                  measurements alone, and a better condition number after centring does not make
+                  extrapolation to an unobserved zero-height person more reliable.
+                  It changes which parameter describes the central prediction.
                 </KeepInMind>
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "Forced through zero on the recorded columns, the slope falls from 0.890 to 0.363 and the share explained from 0.9588 to 0.6155. What happens if both columns are centred first?",
+              [
+                "The slope falls further, since the centred heights are smaller numbers",
+                "The slope is 0.890 again and the share explained 0.9588 again",
+                "The line can no longer be fitted without an intercept",
+                "The slope recovers and the share explained does not",
+              ],
+              1,
+              "Dropping an intercept is a claim that a person of no height weighs nothing, and on the recorded columns the line has to honour that across a gap of 118 centimetres. On centred columns zero is the average person, the average person does have the average weight, and the claim costs nothing. Moving the zero only part of the way, to 100 cm, gives 1.007 and 0.9390.",
+            ),
+            trueFalse(
+              "Centring before a fit that has an intercept moves the fitted slope.",
+              false,
+              "It leaves the slope where it was and moves the intercept to the average person, where it can be read. The least-squares intercept always sends the line through the average person, so fitting an intercept is the same as centring both columns and fitting through zero, and the intercept is what appears when the centring is undone.",
+            ),
+            choice(
+              "Why does a ridge line leave its intercept out of the penalty?",
+              [
+                "The intercept is not a slope, so a squared size is not defined for it",
+                "Shrinking it would pull the line towards a weight of zero at a height of zero",
+                "The intercept is always small once the columns are centred",
+                "Penalising it would make the fit slower to solve",
+              ],
+              1,
+              "That is exactly the point a line through zero is forced through and which cost it half its explanatory share. Because the intercept is exempt, a ridge line with an intercept is exactly a ridge line through zero on centred columns, at any penalty, and an implementation that instead penalises every weight alike needs the columns centred.",
+            ),
+            choice(
+              "The two curvatures on the recorded heights are 0.0221 and 23,571.5, a condition number of 1,064,838. What are they after centring?",
+              [
+                "0.0221 and 521.8",
+                "1 and 521.8",
+                "1 and 1",
+                "Unchanged, since centring moves the bowl rather than reshaping it",
+              ],
+              1,
+              "Centring makes the height column add to zero, which is exactly the condition for it to be at right angles to the column of ones that carries the intercept, so the matrix becomes diagonal. The 521.8 left over is the variance of the heights in square centimetres, a matter of units, and dividing by the spread takes it to one.",
+            ),
+            several(
+              "Which of these does centring repair?",
+              [
+                "The coupling between the intercept and a column",
+                "The correlation of 0.979 between height and weight used as two inputs",
+                "The correlation of 0.9980 between height and height squared",
+                "The reliability of extrapolating to a person of no height",
+              ],
+              [0, 2],
+              "A correlation is measured about the means already, so shifting the origin cannot touch a dependence between two different measurements. Squaring after centring measures distance from the average person in either direction, which is a different shape from the height, and the correlation falls to −0.229. A better condition number changes which parameter describes the central prediction and makes no extrapolation safer.",
+            ),
+        ],
         },
         {
           title: "Part 5. Angles From the Average Person",
@@ -603,17 +634,22 @@ export default function CentringOnTheMeanPage() {
                 <Equation>{"cosine(a, b) = (a · b) / (‖a‖ ‖b‖)"}</Equation>
                 <AnglesFromTheMean />
                 <InAModel title="The smallest child and the tallest adult">
-                  <p>
-                    From zero, the child&rsquo;s arrow (118, 24) and the
-                    adult&rsquo;s arrow (183, 83) are 12.9 degrees apart, since an
-                    arrow from zero is fixed by how many kilograms a person carries
-                    per centimetre of height, and 24 / 118 and 83 / 183 are not
-                    very different ratios. From the average person their arrows
-                    are (−33.82, −29.36) and (31.18, 29.64), pointing almost
-                    exactly opposite ways, with a cosine of −0.9990 and an angle of
-                    177.4 degrees. The most opposite pair after centring is the 120
-                    cm child and the 178 cm adult, at −0.9996.
-                  </p>
+                  <>
+                    <p>
+                      From zero, the child at (118, 24) and the adult at (183, 83) point
+                      only 12.9 degrees apart. Both arrows have positive height and
+                      weight coordinates. Their weight-to-height ratios are:
+                    </p>
+                    <Equation>{"child: 24 / 118 ≈ 0.203\nadult: 83 / 183 ≈ 0.454"}</Equation>
+                    <p>
+                      From the average person, their coordinates instead become
+                      approximately (−33.82, −29.36) and (31.18, 29.64). Those arrows
+                      point almost opposite ways: their cosine is −0.9990 and their
+                      angle is 177.4 degrees. The most opposite pair after centring is
+                      the 120 centimetre child and the 178 centimetre adult, with cosine
+                      −0.9996.
+                    </p>
+                  </>
                 </InAModel>
                 <KeepInMind>
                   Measured from zero, the cosine compares weight per centimetre
@@ -712,21 +748,20 @@ export default function CentringOnTheMeanPage() {
               </SubSection>
 
               <SubSection title="17. A threshold, a group and a slope">
-                <p>
-                  A{" "}
-                  <Link href="/concepts/decision-trees" className={link}>
-                    decision tree
-                  </Link>{" "}
-                  asks whether a height is below a threshold, and centring moves
-                  the threshold along with the heights. Grown on the crowd, the
-                  tree&rsquo;s first question is whether height is below 151.5
-                  centimetres; grown on centred heights it asks whether height is
-                  below −0.318, which is 151.5 − 151.82, and its eleven answers are
-                  the same eleven answers. A least-squares fit of the child or
-                  adult label on both columns with an intercept has the same two
-                  slopes either way, to within 1.4 × 10⁻¹⁶, because the intercept
-                  takes up the shift exactly as step 8 showed.
-                </p>
+                <>
+                  <p>
+                    A decision tree asks whether a height is below a threshold. Centring
+                    shifts the threshold by the same amount as every height. The first
+                    split on this crowd uses 151.5 centimetres.
+                  </p>
+                  <Equation>{"centred threshold = 151.5 − 1670/11 ≈ −0.318 cm"}</Equation>
+                  <p>
+                    The eleven predictions stay the same. A least-squares fit with an
+                    intercept also preserves its predictions: the intercept absorbs the
+                    shift, as step 8 showed. Its slopes agree between the two coordinate
+                    systems to within floating-point rounding.
+                  </p>
+                </>
                 <KeepInMind>
                   The methods centring does nothing for build their answers from
                   differences, from order within a column, or from a fit with a
@@ -841,31 +876,17 @@ export default function CentringOnTheMeanPage() {
                 <BedtimeClock />
                 <InAModel title="Bedtimes on a clock face">
                   <p>
-                    The circular mean draws each time as a point on the rim of a
-                    clock face, averages the points, and reads the time off the
-                    direction of the average. For 23:00 and 01:00 it is midnight,
-                    with each time an hour either side, and the averaged point lies
-                    0.966 of the way out to the rim, which says the two agree
-                    closely. A week of bedtimes between half past ten and one in
-                    the morning has an arithmetic mean of 13.36, early afternoon,
-                    and a circular mean of 23.64, a little after twenty to
-                    midnight. Six in the morning and six in the evening have an
-                    arithmetic mean of noon and no circular mean at all, since
-                    their points average to the centre of the face, 6 × 10⁻¹⁷ from
-                    it, and a point at the centre has no direction.
+                    The circular mean draws each time as a point on the rim of a clock face, averages the points, and reads the time off the direction of the average. For 23:00 and 01:00 it is midnight, with each time an hour either side, and the averaged point lies 0.966 of the way out to the rim, which says the two agree closely.
+                  </p>
+                  <p>
+                    A week of bedtimes between half past ten and one in the morning has an arithmetic mean of 13.36, early afternoon, and a circular mean of 23.64, a little after twenty to midnight. Six in the morning and six in the evening have an arithmetic mean of noon and no circular mean at all, since their points average to the centre of the face, 6 × 10⁻¹⁷ from it, and a point at the centre has no direction.
                   </p>
                 </InAModel>
                 <p>
-                  A column of codes has the same trouble more quietly. Numbering
-                  four blood groups 1 to 4 gives the column a mean, and taking it
-                  away gives every person a number, but no position on that line
-                  is a blood group and the gap from group 1 to group 3 is twice the
-                  gap from 1 to 2 only because of the order the numbers were
-                  handed out in. A column of zeros and ones is the exception worth
-                  knowing, since its mean is the share of ones, 6 adults of 11 in
-                  the crowd or 0.545, and a centred label measures how much more
-                  or less adult than the crowd&rsquo;s average a person is, which
-                  is a real quantity.
+                  A column of codes has the same trouble more quietly. Numbering four blood groups 1 to 4 gives the column a mean, and taking it away gives every person a number, but no position on that line is a blood group and the gap from group 1 to group 3 is twice the gap from 1 to 2 only because of the order the numbers were handed out in.
+                </p>
+                <p>
+                  A column of zeros and ones is the exception worth knowing, since its mean is the share of ones, 6 adults of 11 in the crowd or 0.545, and a centred label measures how much more or less adult than the crowd&rsquo;s average a person is, which is a real quantity.
                 </p>
                 <KeepInMind>
                   Whether a column&rsquo;s mean is a meaningful place is a question
@@ -879,6 +900,203 @@ export default function CentringOnTheMeanPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 to 7",
+          quiz: [
+            choice(
+              "Measured from zero, the smallest cosine between any two of the eleven people is 0.9748. Why is every pair so alike?",
+              [
+                "The crowd really is homogeneous in height and weight",
+                "Every arrow from zero points up and to the right at a shallow angle, so the cosine compares weight per centimetre and nothing else",
+                "The cosine ignores length, and these people differ mostly in length",
+                "Eleven people are too few for the measure to separate",
+              ],
+              1,
+              "From the average person the same 118 cm child and 183 cm adult are at a cosine of −0.9990, nearly opposite, because the comparison is now which way from average each one lies. Neither reading is wrong. On data where zero means none, a count of each word in a document for instance, the uncentred question is often the one wanted.",
+            ),
+            trueFalse(
+              "Centring two columns turns the cosine between them into their correlation.",
+              true,
+              "A correlation is defined as exactly that cosine. On the recorded columns the cosine is 0.97439 and centred it is 0.97919, which is the correlation. The uncentred figure is pulled towards one by the level of both columns, whatever their relationship, and here it happened to land close only because height and weight really are closely related in this crowd.",
+            ),
+            several(
+              "Which of these see the same crowd before and after centring?",
+              [
+                "The straight-line distance between two people",
+                "A decision tree’s split",
+                "k-means asked for two groups",
+                "The cosine between two people",
+              ],
+              [0, 1, 2],
+              "A shared shift cancels from every difference, so the 110 distances agree to within 5.1 × 10⁻¹⁴ centimetres and k-means finds the same two groups with the same total of 2952.607. A tree’s threshold shifts by the same amount as every height and the eleven predictions stay the same. The cosine measures from zero itself, which is why moving zero changes it.",
+            ),
+            trueFalse(
+              "Centring held-out rows on their own mean is defined arithmetic and the wrong operation.",
+              true,
+              "Without the three tallest adults the other eight have a mean height of 141.125 cm, and the held-out heights centre on that to 38.875, 41.875 and 36.875, far from zero and correctly so. On their own mean of 180.33 they become −0.33, 2.67 and −2.33, which says one of the three tallest people in the crowd is below average, and hands the model numbers measured from a different zero from the one it learned on.",
+            ),
+            choice(
+              "Two bedtimes at eleven at night and one in the morning are written as 23 and 1 hours after midnight. What do the two kinds of mean give?",
+              [
+                "Both give midnight, since the two times are an hour either side of it",
+                "The arithmetic mean is noon, which neither is near, and the circular mean is midnight",
+                "The arithmetic mean is midnight and the circular mean is undefined",
+                "Neither mean exists, since the times wrap around",
+              ],
+              1,
+              "A mean is always a number and it is a place only when the column’s numbers are positions along a line. The circular mean reads the time off the direction of the averaged point on the rim, which here lies 0.966 of the way out, saying the two agree closely. Six in the morning and six in the evening have no circular mean at all, since their points average to the centre of the face and a point at the centre has no direction.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Centring the Crowd With the Library",
+          practice: [
+            exercise(
+              "Centre the crowd",
+              ["Centre the eleven people with the library, read the centre it learned for each column, and check what Part 1 says a centred column keeps and loses.", "Part 1 quotes a mean height of 151.82 and a mean weight of 53.36, the first child at (−4.82, −12.36) once centred, centred heights that average 5.2 × 10⁻¹⁵ rather than exactly zero, and a variance of 521.79 before centring and after it. Print all of those."],
+              `from statistics import pvariance
+
+from oop_ml import Feature, MeanCentrer
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+height = Feature("height", heights)
+weight = Feature("weight", weights)
+
+centrer = MeanCentrer()
+# Fit the centrer on both columns and print the centre it learned for each.
+# Then transform the columns and print the first child's centred pair, the
+# mean of the centred heights, and the variance of the heights before and
+# after centring.`,
+              `from statistics import pvariance
+
+from oop_ml import Feature, MeanCentrer
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+height = Feature("height", heights)
+weight = Feature("weight", weights)
+
+centrer = MeanCentrer()
+centrer.fit([height, weight])
+for scaling in centrer.scalings:
+    print(f"{scaling.name} centre {scaling.centre:.2f}")
+
+centred_height, centred_weight = centrer.transform([height, weight])
+centred_heights = [float(value) for value in centred_height.values]
+print(f"first child centred ({centred_heights[0]:.2f}, {float(centred_weight.values[0]):.2f})")
+print(f"mean of centred heights {sum(centred_heights) / len(centred_heights):.1e}")
+print(f"variance before {pvariance(heights):.2f}, after {pvariance(centred_heights):.2f}")`,
+              `height centre 151.82
+weight centre 53.36
+first child centred (-4.82, -12.36)
+mean of centred heights 5.2e-15
+variance before 521.79, after 521.79`,
+              { hints: ["fit takes a list of Feature objects. What it learned is in scalings, one per column, each with a name and a centre, and a spread of exactly one, since centring divides by nothing.", "transform answers a list of Feature objects in the same order, and each one’s values are the centred numbers.", "pvariance from the standard library is the variance about the mean, which is the figure the page quotes; the mean of the centred heights is a sum over a count and will not be exactly zero."], check: numberCheck("What is the first child’s centred height, in centimetres?", -4.82, 0.005, "The first child is 147 centimetres tall and the mean height is 1670 over 11, so the centred value is 147 less 151.82. Negative means below the column average, the unit is still centimetres, and the variance is 521.79 either way, because spread is measured about the mean and the mean moved with the column.") },
+            ),
+            exercise(
+              "Force the line through zero, then centre first",
+              ["Part 3 fits weight from height three ways. Fit the line with an intercept on the recorded columns, then force it through zero on the recorded columns, then force it through zero on columns centred first, and read the slope and the share of the variation explained each time.", "Part 3 quotes 0.890 and 0.9588 with an intercept of −81.77, then 0.363 and 0.6155 through zero, then 0.890 and 0.9588 again once both columns are centred. The third fit should agree with the first to every printed digit."],
+              `from oop_ml import Feature, MeanCentrer, MultipleLinearRegression
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+height = Feature("height", heights)
+weight = Feature("weight", weights)
+centred_height, centred_weight = MeanCentrer().fit([height, weight]).transform([height, weight])
+
+# Fit weight from height three ways and print each slope and the share it
+# explains: with an intercept on the recorded columns, forced through zero on
+# the recorded columns, and forced through zero on the centred columns. Print
+# the intercept of the first fit as well.`,
+              `from oop_ml import Feature, MeanCentrer, MultipleLinearRegression
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+height = Feature("height", heights)
+weight = Feature("weight", weights)
+centred_height, centred_weight = MeanCentrer().fit([height, weight]).transform([height, weight])
+
+with_intercept = MultipleLinearRegression().fit([height], weight)
+through_zero = MultipleLinearRegression(fit_intercept=False).fit([height], weight)
+centred_zero = MultipleLinearRegression(fit_intercept=False).fit([centred_height], centred_weight)
+
+print(f"with an intercept: slope {with_intercept.coefficients['height']:.4f}, intercept {with_intercept.intercept:.2f}, explains {with_intercept.score([height], weight):.4f}")
+print(f"through zero: slope {through_zero.coefficients['height']:.4f}, explains {through_zero.score([height], weight):.4f}")
+print(f"centred, through zero: slope {centred_zero.coefficients['height']:.4f}, explains {centred_zero.score([centred_height], centred_weight):.4f}")`,
+              `with an intercept: slope 0.8901, intercept -81.77, explains 0.9588
+through zero: slope 0.3634, explains 0.6155
+centred, through zero: slope 0.8901, explains 0.9588`,
+              { hints: ["fit_intercept is a field of the model, set at construction, and False is what forces the line through zero.", "coefficients is addressable by the feature’s name, intercept is a property, and score answers the share explained on the usual scale where one is perfect and zero is no better than guessing the mean weight.", "The centred fit takes the centred height and the centred weight, both from the one centrer fitted on both columns."], check: numberCheck("What slope does the line forced through zero have on the recorded columns?", 0.3634, 0.0005, "Dropping the intercept is a claim that a person of no height weighs nothing, and on the recorded columns the line has to honour it across a gap of 118 centimetres, so it swings down to split the difference between the children and the adults and explains only 0.6155. On centred columns zero is the average person, who does have the average weight, and the same claim costs nothing, which is why the centred fit through zero recovers the 0.8901 of the fit with an intercept.") },
+            ),
+            exercise(
+              "Centre the held-out rows on the training mean",
+              ["Part 7 holds out the three tallest adults and says their centre has to come from the eight training rows alone. Fit a centrer on the eight, use it to centre the three held-out heights, and then do the wrong thing on purpose by centring the three on their own mean.", "Part 7 quotes a training mean of 141.125, held-out values of 38.875, 41.875 and 36.875 averaging 39.21, and −0.33, 2.67 and −2.33 on their own mean of 180.33. Print all of them."],
+              `from oop_ml import Feature, MeanCentrer
+
+training_heights = [147, 156, 145, 159, 162, 120, 122, 118]
+held_out_heights = [180, 183, 178]
+
+centrer = MeanCentrer()
+# Fit the centrer on the eight training heights and print the mean it
+# learned. Transform the three held-out heights with it and print them and
+# their mean. Then fit a second centrer on the three held-out heights alone
+# and print its mean and what it makes of them.`,
+              `from oop_ml import Feature, MeanCentrer
+
+training_heights = [147, 156, 145, 159, 162, 120, 122, 118]
+held_out_heights = [180, 183, 178]
+
+centrer = MeanCentrer()
+centrer.fit([Feature("height", training_heights)])
+print(f"training mean {centrer.scalings['height'].centre:.3f}")
+
+centred = [float(value) for value in centrer.transform([Feature("height", held_out_heights)])[0].values]
+print(f"held out, centred on the training mean: {centred[0]:.3f}, {centred[1]:.3f}, {centred[2]:.3f}")
+print(f"their mean {sum(centred) / len(centred):.2f}")
+
+own = MeanCentrer().fit([Feature("height", held_out_heights)])
+own_centred = [float(value) for value in own.transform([Feature("height", held_out_heights)])[0].values]
+print(f"centred on their own mean of {own.scalings['height'].centre:.2f}: {own_centred[0]:.2f}, {own_centred[1]:.2f}, {own_centred[2]:.2f}")`,
+              `training mean 141.125
+held out, centred on the training mean: 38.875, 41.875, 36.875
+their mean 39.21
+centred on their own mean of 180.33: -0.33, 2.67, -2.33`,
+              { hints: ["A centrer fitted on one Feature can transform another Feature of the same name, which is exactly how a held-out row gets the training mean taken away unchanged.", "scalings is addressable by the column’s name, and the centre is the mean it learned.", "The second centrer is fitted on the held-out heights themselves, which is the defined arithmetic the page calls the wrong operation."], check: numberCheck("What do the three held-out heights average once centred on the training mean?", 39.21, 0.005, "The three are taller than anyone the mean was learned from, so centred on 141.125 they sit far above zero, and correctly so. Centred on their own mean of 180.33 one of the three tallest people in the crowd comes out below average, which hands a model numbers measured from a different zero from the one it learned on.") },
+            ),
+            exercise(
+              "Walk to the line from recorded heights and from centred ones",
+              ["Part 4 says the recorded heights make the bowl a gradient walk descends into long and narrow, and centring does not. Run the page’s two walks, one on the recorded heights and one on heights centred first, each stepping at half the rate that would make it diverge and each capped at twenty thousand passes, and read where each stops.", "Part 4 quotes a walk on the recorded heights that is still at a slope of 0.3732 and a level of −1.52 after all twenty thousand passes, against the fitted line’s 0.8901 and −81.77, and a centred walk that reaches a level of 53.36 when it stops at pass 8415. The two rates in the starter are one over twice the larger curvature the page quotes, 23,571.5 on the recorded heights and 521.8 on the centred ones."],
+              `from oop_ml import Feature, GradientDescentRegression, MeanCentrer
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+height = Feature("height", heights)
+weight = Feature("weight", weights)
+centred_height = MeanCentrer().fit([height]).transform([height])[0]
+
+for label, column, rate in (("recorded", height, 2.1212e-05), ("centred", centred_height, 0.000958249)):
+    walk = GradientDescentRegression(learning_rate=rate, max_epochs=20000)
+    # Fit the walk to the weights from this column and print the slope and
+    # the level it reached, how many passes it ran, and whether it converged.`,
+              `from oop_ml import Feature, GradientDescentRegression, MeanCentrer
+
+heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
+weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
+height = Feature("height", heights)
+weight = Feature("weight", weights)
+centred_height = MeanCentrer().fit([height]).transform([height])[0]
+
+for label, column, rate in (("recorded", height, 2.1212e-05), ("centred", centred_height, 0.000958249)):
+    walk = GradientDescentRegression(learning_rate=rate, max_epochs=20000)
+    walk.fit([column], weight)
+    print(f"{label} heights: slope {walk.coefficients['height']:.4f}, level {walk.intercept:.2f}, passes {walk.epochs_run}, converged {walk.converged}")`,
+              `recorded heights: slope 0.3732, level -1.52, passes 20000, converged False
+centred heights: slope 0.8901, level 53.36, passes 8415, converged True`,
+              { hints: ["learning_rate and max_epochs are set at construction, and the data goes to fit as a list of one Feature and the target Feature.", "coefficients is addressable by the column’s name, which the centrer kept as height, and intercept is the level.", "epochs_run and converged are the walk’s own record. A walk that used all twenty thousand passes reports converged False, which is what happens on the recorded heights."], check: numberCheck("What slope has the walk on the recorded heights reached after twenty thousand passes?", 0.3732, 0.0005, "On the recorded heights the column of ones and the height column point almost the same way, with curvatures of 0.0221 and 23,571.5 along the bowl’s two natural directions, so the first pass corrects the steep direction to a slope near the through-zero line’s 0.3634 and every later pass crawls along the shallow one. Centring makes the two columns perpendicular, the curvatures become 1 and 521.8, and the same walk lands on the fitted line at pass 8415.") },
+            ),
+          ],
         },
       ]}
     />

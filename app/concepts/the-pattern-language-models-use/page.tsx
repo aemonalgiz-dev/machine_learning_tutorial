@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -21,7 +24,7 @@ import { SpaceLedger } from "@/components/widgets/SpaceLedger";
 export const metadata: Metadata = {
   title: "The Pattern Language Models Use · oop_ml",
   description:
-    "One regular expression, run in front of almost every modern language model, which attaches the space to the word that follows it so the pieces join back into the writing with nothing added.",
+    "Use a regular expression to make initial text pieces while retaining their spacing.",
 };
 
 const link =
@@ -30,8 +33,12 @@ const link =
 export default function PatternWordsPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["the-pattern-language-models-use"]}
+      technicalStart="Part 2. One Expression, Twelve Branches"
+      openingTitle="The Space Has to Belong Somewhere"
+      playgroundIntro="Make the spaces visible and inspect which piece owns each one. Join the pieces and compare the result with the original text."
       title="The Pattern Language Models Use"
-      tagline="A whole rule list written as one regular expression, which gives the space to the word after it, so a piece is a stretch of the writing and joining the pieces is nothing but concatenation."
+      tagline="Use a regular expression to make initial text pieces while retaining their spacing."
       prerequisites={
         <>
           The{" "}
@@ -56,76 +63,14 @@ export default function PatternWordsPage() {
           to make the rule work, only to count what it does.
         </>
       }
-      history={
-        <>
-          <p>
-            The notation came first, and from a long way off. Stephen Kleene,
-            working at the RAND Corporation in 1951, was asking which events a
-            net of McCulloch and Pitts neurons could be made to recognise, and
-            his answer in{" "}
-            <em>Representation of Events in Nerve Nets and Finite Automata</em>{" "}
-            defined the regular events out of three operations, one thing after
-            another, one thing or another, and a thing repeated any number of
-            times. Ken Thompson turned that into something a person could type
-            in <em>Regular Expression Search Algorithm</em> in{" "}
-            <em>Communications of the ACM</em> in 1968, compiling an expression
-            into machine instructions inside the QED editor, and through{" "}
-            <span className="font-mono">ed</span> and{" "}
-            <span className="font-mono">grep</span> the notation reached
-            everybody who handled text at all. So by the time anybody needed to
-            say where the words in a page of the web were, there was already a
-            way of writing down &ldquo;these runs of characters are each one
-            thing&rdquo; that a reader of any language could follow.
-          </p>
-          <p>
-            The pattern itself was written for a concrete failure. Alec Radford,
-            Jeffrey Wu, Rewon Child, David Luan, Dario Amodei and Ilya
-            Sutskever described the second of their language models in{" "}
-            <em>Language Models are Unsupervised Multitask Learners</em> in 2019,
-            and the thing that separated it from the first, which Radford,
-            Karthik Narasimhan, Tim Salimans and Sutskever had described in
-            2018, was that it was to read raw text with no cleaning step and
-            learn its vocabulary over bytes. What they report going wrong is
-            that a vocabulary learned that way fills up with near-copies of the
-            same word, since{" "}
-            <span className="font-mono">dog.</span> and{" "}
-            <span className="font-mono">dog!</span> and{" "}
-            <span className="font-mono">dog?</span> each earn an entry of their
-            own and each takes a slot from something else. Their repair was to
-            stop the learning from joining characters of different kinds, with
-            one deliberate exception for the space, and the pattern on this page
-            is that repair written down. It ships in their released code as a
-            single expression on one line.
-          </p>
-          <p>
-            The exception for the space is the part worth pausing on, because
-            the alternative had been in print for three years. Rico Sennrich,
-            Barry Haddow and Alexandra Birch, in{" "}
-            <em>Neural Machine Translation of Rare Words with Subword Units</em>{" "}
-            at the 2016 meeting of the Association for Computational
-            Linguistics, marked the end of a word by appending a symbol to it,
-            which tells a reader where the spaces were at the cost of a piece
-            that is no longer a stretch of the writing. Attaching the space to
-            the front of the word that follows it instead adds nothing and
-            appends nothing, and the pieces go back together by being written
-            one after another. This page answers five questions in order. What
-            do the four earlier rules do with a space, and what does that cost
-            once somebody has to be handed the text back? What does the pattern
-            do instead, and what do its twelve branches actually say? Why do
-            contractions get seven branches of their own, and what do those
-            seven catch and miss? What does all of this cost, in pieces and in
-            rows? And where does a pattern stop being a rule, given that the
-            same expression read by two engines is not the same rule at all?
-          </p>
-        </>
-      }
+
       playground={<PatternPlayground />}
       sections={[
         {
           title: "Part 1. What Happens to the Space",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Four rules, and the character none of them keeps">
                 <p>
                   The four rules on the pages before this one disagree about
@@ -292,7 +237,7 @@ export default function PatternWordsPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. One Expression, Twelve Branches",
@@ -318,6 +263,75 @@ export default function PatternWordsPage() {
                   character after it. So the order carries weight of its own,
                   since it is what settles every position where two branches
                   could both have matched.
+                </p>
+                <p>
+                  A regular expression is a description of a set of strings,
+                  written in a small notation of its own, and an engine is the
+                  program that reads the description and finds the stretches
+                  of a text that fit it. The notation is large, and this
+                  expression uses very little of it. The ten marks below are
+                  all of them, and each of the next four sections is one or two
+                  of them at work.
+                </p>
+                <DerivationTable
+                  expressionHeading="the notation"
+                  reasonHeading="how to read it"
+                  rows={[
+                    {
+                      expression: "'t",
+                      reason:
+                        "those characters, exactly as written, an apostrophe and then the letter t",
+                    },
+                    {
+                      expression: "a|b",
+                      reason:
+                        "either the thing on the left or the thing on the right, with the left tried first",
+                    },
+                    {
+                      expression: " ?",
+                      reason:
+                        "one space if a space is there, and nothing if it is not",
+                    },
+                    {
+                      expression: "\\p{L}",
+                      reason: "any one letter, of any script",
+                    },
+                    {
+                      expression: "\\p{N}",
+                      reason:
+                        "any one character filed as a number, the ordinary digits among them",
+                    },
+                    {
+                      expression: "\\s",
+                      reason:
+                        "any one character of spacing, which covers a space, a tab and a line break",
+                    },
+                    {
+                      expression: "\\S",
+                      reason: "any one character that is not spacing",
+                    },
+                    {
+                      expression: "[^ ... ]",
+                      reason:
+                        "any one character that is none of the things listed between the brackets",
+                    },
+                    {
+                      expression: "+",
+                      reason:
+                        "one or more of whatever stands just before it, taking as many as it can",
+                    },
+                    {
+                      expression: "(?! ... )",
+                      reason:
+                        "succeeds only where the thing inside does not come next, and takes no characters itself",
+                    },
+                  ]}
+                />
+                <p>
+                  Read with those, the eighth branch says an optional space
+                  followed by one or more letters, and the eleventh says one or
+                  more characters of spacing with nothing but spacing, or
+                  nothing at all, coming next.
                 </p>
                 <p>
                   Three of the twelve read the writing, two read the spacing,
@@ -406,9 +420,18 @@ export default function PatternWordsPage() {
                   those three characters from the pattern and changing nothing
                   else turns our sentence from fourteen pieces into twenty, since
                   each of the six spaces then stands alone, and turns the six
-                  sentences of the notebook from 85 pieces into 142. That is 57
-                  pieces saved on six sentences, or a text forty per cent shorter
-                  for everything downstream to read.
+                  sentences of the notebook from 85 pieces into 142.
+                </p>
+                <Equation>
+                  {"142 − 85   =  57 pieces saved\n" +
+                    "57 / 142   ≈  40 per cent"}
+                </Equation>
+                <p>
+                  That is 57 pieces saved on six sentences, or a text forty per
+                  cent shorter for everything downstream to read. The 57 is
+                  also the number of spaces in the six sentences, since the
+                  only thing the change does is decide whether a space is a
+                  piece of its own or the front of the piece after it.
                 </p>
                 <KeepInMind>
                   One optional character, written in three places, is what puts
@@ -512,6 +535,50 @@ export default function PatternWordsPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            choice(
+              "The running sentence is fifty-one characters, six of them spaces. How many of the fourteen pieces begin with a space?",
+              ["Six", "None", "Eight", "Fourteen"],
+              0,
+              "Reading the spans down, they run from 0 to 51 with no gap anywhere, so every character of the sentence, spaces included, is inside some piece and inside exactly one. Six spaces therefore turn up at the front of six pieces rather than being thrown away.",
+            ),
+            trueFalse(
+              "Because its pieces give the sentence back exactly, the pattern is also better than the four earlier rules at saying where the words are.",
+              false,
+              "It is no better at that, and giving the writing back is a different property. What it does have is that its answer can be undone by somebody who knows nothing about English, where the three rules that read writing need a second set of conventions about the language before they can produce a sentence at all.",
+            ),
+            several(
+              "Which of these follow from the optional space at the front of the three writing branches?",
+              [
+                "The spacing ends up inside the pieces, so the pieces join back to the writing",
+                "A word beginning a line and the same word in the middle of a sentence become two different pieces",
+                "The six sentences give 85 pieces where the same pattern without it gives 142",
+                "A vocabulary learned over these pieces holds the with its space in front rather than without it",
+              ],
+              [0, 1, 2, 3],
+              "All four follow from one optional character written in three places. It puts the spacing inside the pieces, which is why they join back, and it saves 57 pieces on six sentences, one for every space, which is a text forty per cent shorter for everything downstream to read. The price is that a word with its space and the same word without are two pieces, which is why the pieces such a model works in so often look like words with a space stuck to the front.",
+            ),
+            choice(
+              "Over the six sentences, how many of the twelve branches claimed a piece?",
+              ["Four", "Five", "Nine", "All twelve"],
+              0,
+              "The letters branch took 68 of the 85, which is four pieces in five, the marks branch took 15, the digits branch took the year in the third sentence, and one of the seven contractions took the ending of didn’t. Both spacing branches never fired, because a single space is claimed by the word after it.",
+            ),
+            choice(
+              "What does the eleventh branch, a run of spacing not followed by anything other than spacing, buy?",
+              [
+                "That a word after two spaces is the same piece as the same word after one",
+                "Shorter texts, since a run of spacing becomes a single piece",
+                "That spacing at the very end of a text is never dropped",
+                "A guarantee that no piece is ever empty",
+              ],
+              0,
+              "It is eight pieces either way, so the branch is not buying length. It takes as much spacing as it can while stopping short of the next piece of writing, handing the final space back for the following word to claim, and without it the doubled-space reading leaves a bare word that the corpus then holds as a second spelling.",
+            ),
+        ],
+        },
+        {
           title: "Part 3. The Seven Spellings at the Front",
           content: (
             <>
@@ -605,7 +672,7 @@ export default function PatternWordsPage() {
                 </p>
                 <ContractionGallery />
                 <p>
-                  Three of the misses are the same word written slightly
+                  Two of the misses are the same word written slightly
                   differently. A sentence in capitals misses, because the seven
                   are written in small letters and the notation is case
                   sensitive, so{" "}
@@ -619,6 +686,14 @@ export default function PatternWordsPage() {
                   straight mark comes out as two. Both of those are the same
                   sentence to a reader and two different sequences to whatever
                   reads the pieces.
+                </p>
+                <p>
+                  One miss is no contraction at all. The apostrophe of{" "}
+                  <span className="font-mono">the students&rsquo; notes</span>{" "}
+                  has no letter after it, so none of the seven spellings can
+                  begin there, and it stands alone as a mark between{" "}
+                  <span className="font-mono">·students</span> and{" "}
+                  <span className="font-mono">·notes</span>.
                 </p>
                 <p>
                   The other three are words the list simply does not hold.{" "}
@@ -749,7 +824,14 @@ export default function PatternWordsPage() {
                 <p>
                   Over the six sentences the pattern gives 85 pieces where
                   splitting on spaces gives 63, the boundary rules give 69 and
-                  both rule lists give 72. That is 35 per cent more than the
+                  both rule lists give 72.
+                </p>
+                <Equation>
+                  {"85 − 63   =  22 more pieces\n" +
+                    "22 / 63   ≈  35 per cent"}
+                </Equation>
+                <p>
+                  That is 35 per cent more than the
                   crudest rule from identical writing, and it is the largest
                   count of the five. It also keeps all 375 characters where the
                   three rules that keep the writing keep 318 and the boundary
@@ -793,19 +875,14 @@ export default function PatternWordsPage() {
                   <span className="font-mono">re-analysis</span> twice.
                 </p>
                 <InAModel>
-                  <p>
-                    That reads like a defeat and the arithmetic is more
-                    interesting than that. Deleting the optional space, which
-                    removes the doubling entirely, gives 52 different pieces
-                    rather than 53. So the whole cost of attaching the space, on
-                    this corpus, is one extra row, and what it bought was 57
-                    fewer pieces. Six sentences are far too few to settle
-                    anything, and the direction is worth reporting, since the
-                    doubling is the objection that is always raised and it is
-                    bounded in a way the length saving is not. A word is spelt at
-                    most twice however often it appears, while every occurrence
-                    of it pays the length.
+                  <>
+<p>
+                    That reads like a defeat and the arithmetic is more interesting than that. Deleting the optional space, which removes the doubling entirely, gives 52 different pieces rather than 53. So the whole cost of attaching the space, on this corpus, is one extra row, and what it bought was 57 fewer pieces. Six sentences are far too few to settle anything, and the direction is worth reporting, since the doubling is the objection that is always raised and it is bounded in a way the length saving is not.
                   </p>
+                  <p>
+                    A word is spelt at most twice however often it appears, while every occurrence of it pays the length.
+                  </p>
+</>
                 </InAModel>
                 <KeepInMind>
                   53 different pieces against 47 for the crudest rule, and 53
@@ -891,6 +968,60 @@ export default function PatternWordsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 3 and 4",
+          quiz: [
+            choice(
+              "The branch that matches an apostrophe and a t was written for the end of didn’t. What does it do to ’twas cold?",
+              [
+                "It fires at the front of the word, giving ’t and was, so a piece standing for an elided it shares a row with every negation",
+                "Nothing, since the branch fires only at the end of a word",
+                "It leaves ’twas whole, since no letter stands in front of the apostrophe",
+                "It leaves the apostrophe standing alone, as it does in y’all",
+              ],
+              0,
+              "The seven branches are spellings, so each fires on its spelling wherever that stands, and a spelling short enough to be common is short enough to turn up inside something else. The pieces still join back to the word, and the piece is nonetheless the wrong one for everything downstream. A longer list moves which words are affected without changing that shape.",
+            ),
+            several(
+              "Twelve ordinary spellings were put to the contraction branches and six matched nothing. Which of these were among the misses?",
+              [
+                "A sentence in capitals, since the seven are written in small letters and the notation is case sensitive",
+                "A word processor’s curved apostrophe, since the seven name the straight one",
+                "she’d’ve, since two of the seven cannot match one after the other",
+                "didn’t typed with the straight mark, which the list was written for",
+              ],
+              [0, 1],
+              "IT’S and didn’t with a curved mark each come out as three pieces where the ordinary spelling gives two, and nothing anywhere reports that a list was consulted and found nothing. Two of the seven do match in a row, so she’d’ve comes apart into three pieces with both endings caught, and didn’t with the straight mark is the case the branch exists for. The other misses were y’all, o’clock, a French l’analyse and a possessive whose apostrophe has no letter after it.",
+            ),
+            choice(
+              "What did the tokenizers released for the models after this one change?",
+              [
+                "They made the seven spellings case insensitive and capped a run of digits at three characters",
+                "They added the curved apostrophe to the seven and made room for y’all",
+                "They moved the cut on didn’t to fall in front of the negation",
+                "They dropped the seven spellings so the pattern reads every language alike",
+              ],
+              0,
+              "One buys consistency at no cost, since a sentence shouted in capitals is then cut the way the same sentence written normally is. The other buys arithmetic at a cost in length, since a long figure becomes groups of digits the model has seen many times and the same sentence goes from seven pieces to nine. The curved apostrophe, y’all and the place of the cut on didn’t are exactly what did not change, and the seven spellings are still a list of English forms.",
+            ),
+            choice(
+              "The pattern gives 85 pieces over the six sentences. Which comparison does the page call the honest one?",
+              [
+                "85 against the 142 the same pattern gives with its optional space deleted",
+                "85 against the 63 of splitting on spaces",
+                "85 against the 69 of the boundary rules",
+                "85 against the 72 of both rule lists",
+              ],
+              0,
+              "The deleted-space version is the only other arrangement that also gives every sentence back, so it is the one comparison between two rules answering the same question. Against the crudest rule, 85 is 35 per cent more from identical writing and the largest count of the five, and which of the two numbers is fair depends entirely on whether a reader has to be handed the text at the end.",
+            ),
+            trueFalse(
+              "Over these six sentences, attaching the space to the following word costs one extra distinct piece and saves 57 pieces of length.",
+              true,
+              "The pattern produces 53 different pieces against 47 for the crudest rule, but deleting the optional space, which removes the doubling entirely, gives 52 rather than 53 and 142 pieces rather than 85. Only Alvarez and analysis are spelt both ways here. A word is spelt at most twice however often it appears, while every occurrence of it pays the length, so the doubling is bounded in a way the saving is not.",
+            ),
+        ],
         },
         {
           title: "Part 5. One Pattern, Two Engines",
@@ -1163,17 +1294,14 @@ export default function PatternWordsPage() {
                   pattern. An expression is a piece of notation, and a piece of
                   notation means whatever the thing reading it takes it to mean.
                 </p>
-                <p>
-                  Part 5 measured one instance of that and it is worth stating in
-                  general. The classes an expression names are defined by the
-                  engine, so two engines can agree about every operator and part
-                  company over what a letter is; and they can also part company
-                  over what the operators do, since the greedy and the lazy
-                  readings of a repetition, the meaning of a lookahead at the end
-                  of a text, and whether a match may be empty are all conventions
-                  rather than consequences. The same expression is then two
-                  different rules, and both are being applied faithfully.
+                <>
+<p>
+                  Part 5 measured one instance of that and it is worth stating in general. The classes an expression names are defined by the engine, so two engines can agree about every operator and part company over what a letter is; and they can also part company over what the operators do, since the greedy and the lazy readings of a repetition, the meaning of a lookahead at the end of a text, and whether a match may be empty are all conventions rather than consequences.
                 </p>
+                <p>
+                  The same expression is then two different rules, and both are being applied faithfully.
+                </p>
+</>
                 <p>
                   The practical consequence is about reporting rather than about
                   quality. Publishing the expression is not the same as
@@ -1256,6 +1384,266 @@ export default function PatternWordsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 5 and 6",
+          quiz: [
+            choice(
+              "The short form used here for the third class says everything that is not spacing and not a word character. What then happens to an underscore?",
+              [
+                "No branch matches at that position, the engine advances one character, and the character is gone",
+                "The letters branch claims it, since a word character is near enough a letter",
+                "The digits branch claims it",
+                "The engine refuses the pattern before it reads any text",
+              ],
+              0,
+              "The published third class says everything that is not spacing, a letter or a number, and the underscore is none of those three, so it is caught. Under the short form it falls into no class at all. Nothing is raised and the pieces look entirely reasonable, which is why the round trip is the test that finds it and reading the pieces is not.",
+            ),
+            choice(
+              "Unicode files 1,831 characters under a number category. How many of them land in a different class under the two readings?",
+              ["1,151", "680", "1,831", "136,104"],
+              0,
+              "The 680 decimal digits are numbers under both readings. The rest, where Roman numerals, vulgar fractions, superscripts and subscripts live, are numbers to the published classes and letters here, because the test for a letter used here is a word character that is not a decimal digit. In the other direction there is no disagreement at all.",
+            ),
+            trueFalse(
+              "Put any one of the 1,151 characters between two spaces and the two readings cut the text identically, even though they file the character under different classes.",
+              true,
+              "The classes only decide where one run stops and the next begins, so a character with spacing on both sides is a run of one whichever class it is in. None of the 1,151 split differently standing alone, and all of them did directly beside a letter or a digit. The condition is exactly adjacency, which is why the Roman numeral in chapter Ⅻ of the agreement is read identically by both and 1½ is not.",
+            ),
+            several(
+              "Which of these does the method genuinely leave open?",
+              [
+                "Which way the seven English branches should go, since dropping them is language-neutral and a list per language makes the rule a rule plus a data file",
+                "What a letter is, since the classes an expression names are defined by whatever engine reads it",
+                "Where the words are in writing that puts no spaces between them, which it answers with one piece for the whole sentence",
+                "Whether the pieces join back to the text, which depends on the corpus",
+              ],
+              [0, 1, 2],
+              "Which way the seven branches should go is a real decision rather than an oversight, and the published pattern took neither route and hard-coded one language. There is no word anywhere in the rule, so a sentence in a script without spaces comes back as one run of letters where the boundary rules find six pieces. The round trip is not open at all, because the three writing branches and the two spacing branches cover every character between them, so the pieces tile any text by construction.",
+            ),
+            trueFalse(
+              "Publishing the expression is the same thing as publishing the method.",
+              false,
+              "An expression is a piece of notation, and it means whatever the thing reading it takes it to mean. Two engines can agree about every operator and part company over what a letter is, and they can also differ over the greedy and lazy readings of a repetition or whether a match may be empty. So two people who ran the expression over one corpus with different engines have not necessarily measured the same thing, and nothing in either output would say so.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Running the Pattern and Taking It Apart",
+          practice: [
+            exercise(
+              "Cut the running sentence and write the pieces back",
+              ["Build the library’s pattern rule around the published pattern and put the running sentence to it. Print each piece beside its half-open span, with the piece in quotation marks so that a space at the front of it can be seen. Then write the pieces one after another with nothing between them and compare with the sentence.", "Part 1 arrived at fourteen pieces whose spans run from 0 to 51 with no gap, and at the sentence coming back exactly. Count the pieces that begin with a space and compare that with the number of spaces in the sentence.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
+              `from oop_ml import PatternPreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+rule = PatternPreTokenizer(pattern=GPT2_PATTERN)
+
+# Split the sentence and print each piece, formatted with !r so that it
+# is quoted, beside its start and end. Print how many pieces there are,
+# how many begin with a space, how many spaces the sentence holds, and
+# whether the texts joined with nothing between them equal the sentence.`,
+              `from oop_ml import PatternPreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+rule = PatternPreTokenizer(pattern=GPT2_PATTERN)
+
+words = rule.split(sentence)
+for word in words:
+    print(f"{word.text!r:11s} [{word.start}, {word.end})")
+
+leading = sum(word.text.startswith(" ") for word in words)
+print(f"{words.n_words} pieces, {leading} of them begin with a space")
+print(f"{sentence.count(' ')} spaces in the sentence")
+print(f"written one after another, exact: {''.join(words.texts) == sentence}")`,
+              `'Dr'        [0, 2)
+'.'         [2, 3)
+' Alvarez'  [3, 11)
+' didn'     [11, 16)
+"'t"        [16, 18)
+' expect'   [18, 25)
+' the'      [25, 29)
+' low'      [29, 33)
+'-'         [33, 34)
+'cost'      [34, 38)
+' re'       [38, 41)
+'-'         [41, 42)
+'analysis'  [42, 50)
+'.'         [50, 51)
+14 pieces, 6 of them begin with a space
+6 spaces in the sentence
+written one after another, exact: True`,
+              { hints: ["The rule takes the pattern by keyword when it is constructed, and the text goes to split, which answers words that each carry text, start and end.", "A piece’s text holds its space as an ordinary character. Inside an f-string, an exclamation mark and the letter r after a value prints it in quotation marks, and the test for a leading space is whether the text starts with one.", "The texts of the split, joined with the empty string, are the pieces written one after another. No space goes between them, because the spaces are already inside."], check: numberCheck("How many of the fourteen pieces begin with a space?", 6, 0.0, "Six pieces begin with a space and the sentence holds six spaces, which is the whole method in one count. Every space is at the front of the piece after it, so all 51 characters are inside a piece and the pieces written one after another are the sentence. The four earlier rules give back some arrangement of the other 45 characters and none of the six.") },
+            ),
+            exercise(
+              "Count the six sentences under five rules",
+              ["Part 4 counted the six sentences of the notebook under the four earlier rules and under the pattern. Do the same with the library’s five rules. For each, print how many pieces the six sentences became, how many different pieces there were, and how many of the six sentences come back when their pieces are written one after another with nothing between them.", "The counts should be 63, 69, 72, 72 and 85, with 53 different pieces under the pattern, and only the pattern should give any sentence back. Then count how often the pattern produces the word the with a space in front of it and how often without, which the page does not print.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
+              `from oop_ml import Corpus, MosesPreTokenizer, PatternPreTokenizer, PennTreebankPreTokenizer
+from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+pattern = PatternPreTokenizer(pattern=GPT2_PATTERN)
+rules = {
+    "at spaces": WhitespacePreTokenizer(),
+    "word boundaries": UnicodeWordPreTokenizer(),
+    "annotation rules": PennTreebankPreTokenizer(),
+    "translation rules": MosesPreTokenizer(),
+    "the pattern": pattern,
+}
+corpus = Corpus.of(notebook)
+
+# For each rule, print the total pieces, the different pieces, and how
+# many sentences equal their own pieces joined with nothing between.
+# Then print how many times the pattern counted " the" and "the".`,
+              `from oop_ml import Corpus, MosesPreTokenizer, PatternPreTokenizer, PennTreebankPreTokenizer
+from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+pattern = PatternPreTokenizer(pattern=GPT2_PATTERN)
+rules = {
+    "at spaces": WhitespacePreTokenizer(),
+    "word boundaries": UnicodeWordPreTokenizer(),
+    "annotation rules": PennTreebankPreTokenizer(),
+    "translation rules": MosesPreTokenizer(),
+    "the pattern": pattern,
+}
+corpus = Corpus.of(notebook)
+
+for name, rule in rules.items():
+    counts = corpus.word_counts(rule)
+    back = sum("".join(rule.split(text).texts) == text for text in notebook)
+    print(f"{name:17s} {counts.total} pieces, {counts.n_words} different, {back} of 6 come back")
+
+counts = corpus.word_counts(pattern)
+print(f"with its space: {counts.count_of(' the')}")
+print(f"without it: {counts.count_of('the')}")`,
+              `at spaces         63 pieces, 47 different, 0 of 6 come back
+word boundaries   69 pieces, 47 different, 0 of 6 come back
+annotation rules  72 pieces, 48 different, 0 of 6 come back
+translation rules 72 pieces, 49 different, 0 of 6 come back
+the pattern       85 pieces, 53 different, 6 of 6 come back
+with its space: 9
+without it: 0`,
+              { hints: ["The corpus’s word_counts takes a rule and answers the count of every distinct piece over all six sentences, with total for every piece counted and n_words for the different ones.", "A sentence comes back when its split’s texts, joined with the empty string, equal the sentence. A true answer adds as one, so the six tests can be summed.", "count_of takes a piece exactly as the rule produced it, so the with a space in front and the without one are two separate questions."], check: numberCheck("How many times does the pattern produce the word the with a space in front of it?", 9, 0.0, "All nine uses of the in the six sentences stand in the middle of a sentence, so every one is the piece with its space and the bare piece never occurs. That is why section 7 says a vocabulary learned over these pieces holds the word with a space stuck to the front. The capitalised word at the head of two sentences is a third piece again, which the pattern cannot fold together, since a capital is a different character.") },
+            ),
+            exercise(
+              "Delete one part of the pattern at a time",
+              ["Sections 7 and 10 each delete one part of the pattern and count what changes. The script starts with the pattern as the library writes it, with the seven contraction branches taken off the front, and with the optional space taken off the three runs. Build a rule around each, and print how many pieces the running sentence and the six sentences give, and how many of the six sentences still come back exactly.", "The running sentence should go from fourteen pieces to fifteen and to twenty, and the six sentences from 85 to the 142 of section 7. The page does not count the six sentences without the contraction branches, so work out what you expect from how many contractions they hold before you run it."],
+              `from oop_ml import PatternPreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+patterns = {
+    "the pattern": r"'s|'t|'re|'ve|'m|'ll|'d| ?[^\\W\\d_]+| ?\\d+| ?(?:[^\\s\\w]|_)+|\\s+(?!\\S)|\\s+",
+    "no contractions": r" ?[^\\W\\d_]+| ?\\d+| ?(?:[^\\s\\w]|_)+|\\s+(?!\\S)|\\s+",
+    "no optional space": r"'s|'t|'re|'ve|'m|'ll|'d|[^\\W\\d_]+|\\d+|(?:[^\\s\\w]|_)+|\\s+",
+}
+
+# For each pattern, build a PatternPreTokenizer around it and print the
+# number of pieces the first sentence gives, the number all six give, and
+# how many of the six equal their pieces joined with nothing between.`,
+              `from oop_ml import PatternPreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+patterns = {
+    "the pattern": r"'s|'t|'re|'ve|'m|'ll|'d| ?[^\\W\\d_]+| ?\\d+| ?(?:[^\\s\\w]|_)+|\\s+(?!\\S)|\\s+",
+    "no contractions": r" ?[^\\W\\d_]+| ?\\d+| ?(?:[^\\s\\w]|_)+|\\s+(?!\\S)|\\s+",
+    "no optional space": r"'s|'t|'re|'ve|'m|'ll|'d|[^\\W\\d_]+|\\d+|(?:[^\\s\\w]|_)+|\\s+",
+}
+
+for name, source in patterns.items():
+    rule = PatternPreTokenizer(pattern=source)
+    sentence = rule.split(notebook[0]).n_words
+    total = sum(rule.split(text).n_words for text in notebook)
+    back = sum("".join(rule.split(text).texts) == text for text in notebook)
+    print(f"{name:18s} sentence {sentence}, notebook {total}, {back} of 6 come back")`,
+              `the pattern        sentence 14, notebook 85, 6 of 6 come back
+no contractions    sentence 15, notebook 86, 6 of 6 come back
+no optional space  sentence 20, notebook 142, 6 of 6 come back`,
+              { hints: ["Each pattern is an ordinary string handed to PatternPreTokenizer by the keyword pattern. The r in front of the quotation mark keeps Python from reading the backslashes itself.", "The pieces of the notebook are the sum over the six sentences of the n_words of each split.", "Deleting the contraction branches changes only a text that holds one of the seven endings, and it turns that one piece into two, the apostrophe and the letters after it."], check: numberCheck("How many pieces do the six sentences give with the seven contraction branches deleted?", 86, 0.0, "The six sentences hold exactly one contraction, the one in the running sentence, so deleting the seven branches adds exactly one piece, 86 where there were 85. That is section 9’s count seen from the other side, since only one of the seven branches claimed a piece over the whole notebook. All three patterns still give every sentence back, because each still covers every character, which is why 142 is the comparison section 15 calls the honest one.") },
+            ),
+            exercise(
+              "Put twelve spellings to the seven branches",
+              ["Section 12 put twelve things a person actually types to the pattern and found that the contraction branches fired on half of them. Put the same twelve to the rule. For each, print how many pieces came back and whether any piece is exactly one of the seven spellings, and then count the texts on which one fired.", "Six should fire and six should not. The texts are printed with ascii so that the curved apostrophe shows up as the different character it is, which is the reason the fifth text misses while the first, the same words to a reader, does not.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
+              `from oop_ml import PatternPreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
+
+texts = [
+    "she didn't go", "it's here", "they're here", "IT'S HERE",
+    "she didn\\u2019t go", "y'all came", "o'clock struck", "the students' notes",
+    "'twas cold", "he can't won't shan't", "l'analyse est pr\\u00eate", "she'd've gone",
+]
+endings = {"'s", "'t", "'re", "'ve", "'m", "'ll", "'d"}
+rule = PatternPreTokenizer(pattern=GPT2_PATTERN)
+
+# For each text, split it and decide whether any of its pieces is one of
+# the seven endings. Print the number of pieces, the answer, and the text
+# formatted with !a. Then print on how many of the twelve a branch fired.`,
+              `from oop_ml import PatternPreTokenizer
+from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
+
+texts = [
+    "she didn't go", "it's here", "they're here", "IT'S HERE",
+    "she didn\\u2019t go", "y'all came", "o'clock struck", "the students' notes",
+    "'twas cold", "he can't won't shan't", "l'analyse est pr\\u00eate", "she'd've gone",
+]
+endings = {"'s", "'t", "'re", "'ve", "'m", "'ll", "'d"}
+rule = PatternPreTokenizer(pattern=GPT2_PATTERN)
+
+fired = 0
+for text in texts:
+    pieces = rule.split(text).texts
+    hit = any(piece in endings for piece in pieces)
+    fired += hit
+    print(f"{len(pieces)} pieces  {'fired ' if hit else 'missed'}  {text!a}")
+print(f"a contraction branch fired on {fired} of {len(texts)}")`,
+              `4 pieces  fired   "she didn't go"
+3 pieces  fired   "it's here"
+3 pieces  fired   "they're here"
+4 pieces  missed  "IT'S HERE"
+5 pieces  missed  'she didn\\u2019t go'
+4 pieces  missed  "y'all came"
+4 pieces  missed  "o'clock struck"
+4 pieces  missed  "the students' notes"
+3 pieces  fired   "'twas cold"
+7 pieces  fired   "he can't won't shan't"
+5 pieces  missed  "l'analyse est pr\\xeate"
+4 pieces  fired   "she'd've gone"
+a contraction branch fired on 6 of 12`,
+              { hints: ["A contraction branch fired exactly when one of the pieces is one of the seven spellings, since those branches carry no space and match nothing else.", "any over the pieces, asking of each whether it is in the set of endings, gives the answer for one text.", "Inside an f-string, an exclamation mark and the letter a after a value formats it with ascii, which writes a character outside the basic set as its code."], check: numberCheck("On how many of the twelve texts does a contraction branch fire?", 6, 0.0, "Six fire and six miss. The misses are the capitals, the curved apostrophe, two words and a French article the list does not hold, and a possessive with no letter after its mark. One of the six that fire is the archaic word at the start of the ninth text, where the branch written for a negation cuts a word at its own beginning, so a count of how often the list fired says nothing about how often it was right.") },
+            ),
+          ],
         },
       ]}
     />

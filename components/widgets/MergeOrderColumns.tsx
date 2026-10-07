@@ -140,24 +140,9 @@ export function MergeOrderColumns({
         />
       </div>
 
-      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-        {parted < 0 ? (
-          <>
-            The two columns agree everywhere they are shown, which on these
-            corpora does not happen.
-          </>
-        ) : (
-          <>
-            The two columns part at step {parted + 1}, where counting takes{" "}
-            {order.by_count[parted].left} {order.by_count[parted].right} at{" "}
-            {order.by_count[parted].count} and the ratio takes{" "}
-            {order.by_score[parted].left} {order.by_score[parted].right} at{" "}
-            {order.by_score[parted].count}. Everything after that is downstream
-            of the one choice, since each step counts the corpus the step before
-            left.
-          </>
-        )}
-      </p>
+      <>
+<p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{parted < 0 ? "The two criteria choose the same sequence throughout the displayed rounds." : <>The first different choice occurs at step {parted + 1}. Frequency chooses {order.by_count[parted].left} {order.by_count[parted].right}, observed {order.by_count[parted].count} times. The ratio criterion chooses {order.by_score[parted].left} {order.by_score[parted].right}, observed {order.by_score[parted].count} times.</>}</p><p className="mt-3 text-xs text-slate-500 dark:text-slate-400">A merge changes the corpus representation used for the next count. Once the criteria choose different pairs, later rounds operate on different sequences as well.</p>
+</>
     </div>
   );
 }

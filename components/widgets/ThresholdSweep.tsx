@@ -1,4 +1,6 @@
 "use client";
+import { Equation } from "@/components/concept/Equation";
+
 
 // The crudest possible edge decision, and the two ways it goes wrong at once.
 //
@@ -235,11 +237,9 @@ export function ThresholdSweep() {
             <Stat label="Wrong either way" value={String(row.n_wrong)} />
           </div>
 
-          <p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-500">
-            {clean
-              ? `Drawn by arithmetic the picture has no noise, so flat ground never answers above ${thresholds.clean_flat_high.toFixed(4)} and the faintest real boundary answers ${thresholds.highest_clean_threshold.toFixed(4)}. Every threshold between those two labels all ${thresholds.n_pixels} pixels correctly.`
-              : `With noise at ${thresholds.noise_level} the two ranges overlap, since flat ground reaches ${thresholds.noisy_flat_high.toFixed(4)} and the faintest boundary sits at ${thresholds.highest_clean_threshold.toFixed(4)}. The best threshold in the sweep is ${thresholds.best_threshold.toFixed(1)} and it still leaves ${thresholds.best_wrong} pixels on the wrong side.`}
-          </p>
+          <>
+<p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-500">A threshold succeeds only when the response ranges permit the desired separation. Compare the strongest background response with the weakest true boundary response.</p><p className="mt-3 text-center text-xs text-slate-500 dark:text-slate-500">{clean ? "The noise-free example has a gap between those ranges. Every tested threshold within that gap labels all " + thresholds.n_pixels + " pixels correctly." : "At noise level " + thresholds.noise_level + ", the response ranges overlap. One threshold cannot perfectly separate these background and boundary pixels."}</p><Equation>{clean ? "Largest background response: " + thresholds.clean_flat_high.toFixed(4) + "\nWeakest boundary response: " + thresholds.highest_clean_threshold.toFixed(4) : "Largest background response: " + thresholds.noisy_flat_high.toFixed(4) + "\nWeakest boundary response: " + thresholds.highest_clean_threshold.toFixed(4) + "\nBest tested threshold: " + thresholds.best_threshold.toFixed(1) + "\nIncorrect pixels at that threshold: " + thresholds.best_wrong}</Equation>
+</>
         </>
       ) : (
         <p className="py-12 text-center text-slate-400">…</p>

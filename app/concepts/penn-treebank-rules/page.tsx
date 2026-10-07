@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -20,7 +23,7 @@ import { TreebankPlayground } from "@/components/widgets/TreebankPlayground";
 export const metadata: Metadata = {
   title: "Penn Treebank Rules · oop_ml",
   description:
-    "The rule list a generation of English language research was annotated with. It splits contractions, separates punctuation, and rewrites quotation marks into something that no longer matches the source.",
+    "Separate contractions and punctuation using rules designed for annotated English text.",
 };
 
 const link =
@@ -29,8 +32,12 @@ const link =
 export default function PennTreebankRulesPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["penn-treebank-rules"]}
+      technicalStart="Part 2. The Contraction, Cut Where the Grammar Wants It"
+      openingTitle="A Written Word Can Contain More Than One Grammatical Piece"
+      playgroundIntro="Compare contractions and punctuation before and after tokenisation. Check both the output spelling and the span pointing back into the source."
       title="Penn Treebank Rules"
-      tagline="A short list of repairs to splitting on spaces, written so the pieces would be the pieces a grammar talks about."
+      tagline="Separate contractions and punctuation using rules designed for annotated English text."
       prerequisites={
         <>
           The{" "}
@@ -48,71 +55,14 @@ export default function PennTreebankRulesPage() {
           rules work, only to count what they do.
         </>
       }
-      history={
-        <>
-          <p>
-            In the late nineteen eighties a person who wanted to test a parser of
-            English had almost nothing to test it on. The Brown Corpus, assembled
-            at Brown University by Henry Ku&#269;era and W. Nelson Francis from
-            a million words of American printing sampled in 1961, had been tagged
-            for part of speech, so it could say that a particular word was a noun.
-            It said nothing about which words grouped with which, and a claim
-            that one parser was better than another was therefore a claim about a
-            handful of sentences its author had chosen. What was missing was a
-            large body of ordinary English in which somebody had already written
-            down the syntax by hand.
-          </p>
-          <p>
-            The Penn Treebank was the answer, built at the University of
-            Pennsylvania between 1989 and 1992 and described by Mitchell Marcus,
-            Beatrice Santorini and Mary Ann Marcinkiewicz in{" "}
-            <em>
-              Building a Large Annotated Corpus of English: The Penn Treebank
-            </em>
-            , which appeared in <em>Computational Linguistics</em> in 1993. The
-            first phase tagged more than four million words for part of speech,
-            most of them Wall Street Journal articles, and bracketed a large part
-            of them for syntax. Two documents told the annotators what to do,
-            Santorini&rsquo;s tagging guidelines of 1990 and the bracketing
-            guidelines that Ann Bies, Mark Ferguson, Karen Katz and Robert
-            MacIntyre wrote in 1995. Both are guidelines for people, and they are
-            worth remembering when reading the rules below, because the rules
-            exist to hand those people something to label.
-          </p>
-          <p>
-            Before an annotator could label anything the text had to be cut into
-            units, and that job fell to a short script written by Robert
-            MacIntyre and distributed with the corpus. It was a sequence of
-            substitutions that inserted spaces and then split on white space, run
-            over one sentence at a time. Nothing about it was proposed as a
-            theory of the English word. It was a working decision about what the
-            annotation would have rows for, and it turned out to matter far more
-            than a working decision usually does, because every parser trained on
-            the treebank learned from text cut that way and therefore expects new
-            text cut that way too. The rules outlived the corpus, and English
-            handed to a parser is still routinely called tokenized when it has
-            been through them.
-          </p>
-          <p>
-            The page answers five questions in order. What did annotating a
-            corpus for syntax need that reading it does not, and how does that
-            show in every choice these rules make? What happens to a contraction,
-            which is one word on the page and two words in the grammar? How can a
-            rule that carries no dictionary decide whether a full stop belongs to
-            an abbreviation or to the sentence? What changes when a piece stops
-            being a copy of the writing it came from? And where do the rules stop
-            being defined, so that following them is an agreement about one
-            corpus rather than a fact about the language?
-          </p>
-        </>
-      }
+
       playground={<TreebankPlayground />}
       sections={[
         {
           title: "Part 1. Rules Written for an Annotator",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. The pieces had to be the pieces a grammar talks about">
                 <p>
                   Both rules on the two pages before this one were answering a
@@ -293,7 +243,7 @@ export default function PennTreebankRulesPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. The Contraction, Cut Where the Grammar Wants It",
@@ -657,6 +607,54 @@ export default function PennTreebankRulesPage() {
           ),
         },
         {
+          title: "Questions on Parts 1 to 3",
+          quiz: [
+            choice(
+              "The rules cut didn’t in front of the n rather than at the apostrophe. Why there?",
+              [
+                "Because the negation is written n’t and is one morpheme, so that is where the row begins",
+                "Because an apostrophe is punctuation and always comes off as a piece of its own",
+                "Because the apostrophe stands between two letters and is therefore glue",
+                "Because the verb did happens to be three characters long",
+              ],
+              0,
+              "An annotator has to write down two facts, a past tense auxiliary verb and a negation, so two tags need two rows. The negation is spelled n’t, so the cut goes in front of the n, and the same treatment covers eight endings in all. The apostrophe is not being treated as punctuation here at all. The boundary rules read the same apostrophe as glue and keep didn’t whole, while cutting both compounds these rules keep, which is why the two rules’ nine pieces on the running sentence share only three, Alvarez, expect and the.",
+            ),
+            trueFalse(
+              "The rules cut can’t into ca and n’t, and the piece ca was placed there deliberately rather than falling out of the pattern by accident.",
+              true,
+              "English spelled that contraction by changing the verb as well as adding the negation, so no division of the characters gives both morphemes their own letters, and the rules take the position that the negation is the fixed part and the host absorbs the irregularity. Answering can instead would cost two things. A piece would no longer stand for a span of the source, and the repair would need a list, since knowing that ca is short for can is a fact about English that no reading of the characters supplies. Three pieces in the whole of English are not words, and they are the price of a rule that never rewrites what it cuts.",
+            ),
+            choice(
+              "The six sentences are handed to the rules joined into one string rather than one at a time. What happens?",
+              [
+                "72 pieces become 67, because five full stops stay attached to the word in front of them",
+                "Nothing changes, since the rules work one run of non-space characters at a time",
+                "72 pieces become 77, because the joins create new boundaries",
+                "The rules refuse the input, because they state that the text must be one sentence",
+              ],
+              0,
+              "The full stop is settled by position rather than by a list of abbreviations, so a stop that is not the last thing in the text is read as an abbreviation’s and stays put. Six stops came back on their own when the sentences arrived separately and one did when they arrived joined, and nothing raises an objection, which is why sentence boundaries have to be found before these rules run.",
+            ),
+            several(
+              "Which of these follow from the table naming the characters that are a piece on their own?",
+              [
+                "a@b.com comes back as three pieces",
+                "AT&T comes back as three pieces",
+                "3:30 is cut in two, as the boundary rules cut it",
+                "The comma in 1,000 is separated, since a comma is one of the marks the table names",
+              ],
+              [0, 1],
+              "The first two lines of the table carry no condition at all, so a mark from that set is separated whatever surrounds it, which is right on newspaper prose and pulls an address and a company name apart. The comma and the colon sit on a different line with a condition one character wide, separated unless the very next character is a digit, so 1,000 stays whole and so does 3:30, which the standard cuts into two. The test reads the character after the mark rather than asking whether the mark is inside a number, which is an approximation that happens to be exact on the writing the rules were built for.",
+            ),
+            trueFalse(
+              "A list of abbreviations would repair both of the full stop failures.",
+              false,
+              "It repairs the first and cannot touch the second. A sentence ending in an abbreviation is written with one stop doing both jobs, so knowing that al. is an abbreviation tells us the stop belongs to it and says nothing about where the sentence’s own stop went, because there is not a second one. No division of the characters can assign one character to two pieces at once.",
+            ),
+        ],
+        },
+        {
           title: "Part 4. A Piece That Is Not the Text It Came From",
           content: (
             <>
@@ -760,19 +758,14 @@ export default function PennTreebankRulesPage() {
                   different things there.
                 </p>
                 <WhyThisWorks title="Why the published form cannot say this at all">
-                  <p>
-                    The rules as published are a sequence of substitutions that
-                    insert spaces around the things to be separated, and then a
-                    split on white space. That form cannot report a span, because
-                    once an opening quotation mark has been replaced by two
-                    backquotes nothing records where in the original it stood, and
-                    every position after it has moved. Anything that wants to
-                    highlight a piece in the source, align two readings of one
-                    sentence, or check that no writing was lost has to recover
-                    that separately, and the usual recovery is to search the
-                    source for each piece in turn, which fails on precisely the
-                    pieces that were rewritten.
+                  <>
+<p>
+                    The rules as published are a sequence of substitutions that insert spaces around the things to be separated, and then a split on white space. That form cannot report a span, because once an opening quotation mark has been replaced by two backquotes nothing records where in the original it stood, and every position after it has moved.
                   </p>
+                  <p>
+                    Anything that wants to highlight a piece in the source, align two readings of one sentence, or check that no writing was lost has to recover that separately, and the usual recovery is to search the source for each piece in turn, which fails on precisely the pieces that were rewritten.
+                  </p>
+</>
                 </WhyThisWorks>
                 <KeepInMind>
                   A piece is a text and a place, and these rules are the first on
@@ -1058,18 +1051,14 @@ export default function PennTreebankRulesPage() {
                   a corpus keyed in the late nineteen eighties and are false of a
                   good deal of writing now.
                 </p>
-                <p>
-                  The apostrophe is one character to these rules and there are two
-                  in common use, since the curved one is what a word processor
-                  inserts by default. The same contraction typed the modern way is
-                  returned whole. Quotation marks have the same problem twice
-                  over, since the rules read the straight typewriter mark and
-                  rewrite it into a typewriter convention, and curved quotation
-                  marks are neither read nor produced. And the final-stop clause
-                  assumes a step before it that finds the sentences, which was
-                  true in a pipeline built around this script and is not true of a
-                  string arriving from anywhere else.
+                <>
+<p>
+                  The apostrophe is one character to these rules and there are two in common use, since the curved one is what a word processor inserts by default. The same contraction typed the modern way is returned whole. Quotation marks have the same problem twice over, since the rules read the straight typewriter mark and rewrite it into a typewriter convention, and curved quotation marks are neither read nor produced.
                 </p>
+                <p>
+                  And the final-stop clause assumes a step before it that finds the sentences, which was true in a pipeline built around this script and is not true of a string arriving from anywhere else.
+                </p>
+</>
                 <p>
                   There is a subtler one worth naming. The rules as published are
                   a pipeline of substitutions rather than a specification, so on
@@ -1203,6 +1192,254 @@ export default function PennTreebankRulesPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 4 to 6",
+          quiz: [
+            choice(
+              "Why is an opening quotation mark in treebank text two backquotes and a closing one two apostrophes?",
+              [
+                "To record whether the mark opens or closes, which the plain typewriter character does not say",
+                "Because the storage format reserved the quotation mark for its own use",
+                "Because the corpus was typed on machines that had no quotation mark at all",
+                "To keep every piece exactly one character wide",
+              ],
+              0,
+              "A reader can see which mark opens and which closes; the plain typewriter quotation mark is the same character both times, so the rules work it out once, from whether the mark begins the text or follows a space or an opening bracket, and write the answer into the piece. The two-character spelling was what a typist of the period used for directional quotes on a machine that had none.",
+            ),
+            trueFalse(
+              "The bracket rewriting gives a name to all eight brackets.",
+              false,
+              "It names six and leaves the angle brackets alone, because the file format never used them. A parsed sentence is written as a tree with round brackets around each group, so a round bracket belonging to the sentence had to be spelled differently, and the rule covers exactly what the storage needed escaping. That is the clearest sign on the page that these rules describe one corpus.",
+            ),
+            several(
+              "These rules give 266 pieces on the 22 sentences where splitting on spaces gives 155. Which of these does the page measure over those 266 pieces?",
+              [
+                "86 of them hold no letter and no digit anywhere in them",
+                "At most 26 of them come from the contraction and clitic clauses",
+                "Most of the extra length comes from separating the marks",
+                "14 of them are not the slice their span covers, and every one of the 14 is a quotation mark",
+                "The contraction clause is the largest single contributor, because it carries the most linguistics",
+              ],
+              [0, 1, 2, 3],
+              "Roughly one piece in three is a mark of punctuation standing on its own, which is 86 against at most 26 from the clause that looks most like a claim about language, so the clause responsible for most of the 111 extra pieces is the one that separates the marks, and the contraction clause being the largest contributor is the reading the measurement refuses. The 14 rewritten pieces are seven opening and seven closing quotation marks, 22 once the bracket spellings are switched on, and the small share says how much work reassembling the text is rather than whether it can be skipped.",
+            ),
+            trueFalse(
+              "Over the six sentences these rules keep 318 of the 375 characters, which is every character that is not a space.",
+              true,
+              "The space rule keeps the same 318 and the boundary rules keep 303, because they found the marks correctly and then discarded them as not being words. Here a hyphen, a comma and a full stop all survive as pieces, so what a caller has is a division of the writing rather than a selection from it, and the two rewritten quotation marks are the only characters that come back as something else.",
+            ),
+            several(
+              "Which of these does Part 6 say about where the rules stop being defined?",
+              [
+                "They are exact only relative to the linguistic analysis the treebank used, since nothing in the writing decides whether low-cost is one unit or two",
+                "A form that is not on the list comes back whole, which is the same answer a form examined and left alone gives",
+                "The same contraction typed with the curved apostrophe a word processor inserts is cut exactly as the straight one is",
+                "The original text can be pasted back together from the pieces alone, since every piece carries its span",
+              ],
+              [0, 1],
+              "What chose between keeping low-cost whole and cutting it was how many tags the annotation gave a compound modifier, which is a fact about the treebank rather than about the writing, and agreement about it is what makes the rules useful. A caller handed one piece cannot ask whether a clause looked at it, and six of the fifteen probes fall into that silence, including the curved spelling, which is one era’s typing rather than a contraction the rules know. And the pieces alone recover nothing exactly, since two apostrophes might have been a closing quotation mark or might have been two apostrophes. The pieces, their spans and the original text together recover everything.",
+            ),
+        ],
+        },
+        {
+          title: "Practice. Putting the Rules to the Running Sentence",
+          practice: [
+            exercise(
+              "Cut the running sentence, and check that every span is honest",
+              ["Put the running sentence to the treebank rules and print each piece beside its span and the slice of the sentence that span names. Section 2 says every span is honest, in that the slice gives back the piece character for character. Then do the same for the sentence inside quotation marks, which Part 4 says is where that stops being true.", "Nine pieces for the bare sentence, every one of them its own slice. For the quoted sentence, count the pieces and count how many are not the slice their span names. The two that differ should be two characters wide while pointing at a span one character wide."],
+              `from oop_ml import PennTreebankPreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+quoted = '"Dr. Alvarez didn\\'t expect the low-cost re-analysis," she wrote.'
+rules = PennTreebankPreTokenizer()
+
+# Split the sentence and print each piece with its span and the slice of the
+# sentence between the two offsets, then the number of pieces. Then split
+# the quoted sentence, print each piece whose text is not its slice, and
+# print how many pieces there are and how many of them were rewritten.`,
+              `from oop_ml import PennTreebankPreTokenizer
+
+sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
+quoted = '"Dr. Alvarez didn\\'t expect the low-cost re-analysis," she wrote.'
+rules = PennTreebankPreTokenizer()
+
+words = rules.split(sentence)
+for word in words:
+    print(f"[{word.start:2d}, {word.end:2d})  {word.text:12s}  slice {sentence[word.start:word.end]}")
+print(f"{words.n_words} pieces, every one its own slice")
+
+rewritten = 0
+quoted_words = rules.split(quoted)
+for word in quoted_words:
+    source = quoted[word.start:word.end]
+    if source != word.text:
+        rewritten += 1
+        print(f"[{word.start:2d}, {word.end:2d})  {word.text}  stands for  {source}")
+print(f"{quoted_words.n_words} pieces in the quoted sentence, {rewritten} of them rewritten")`,
+              `[ 0,  3)  Dr.           slice Dr.
+[ 4, 11)  Alvarez       slice Alvarez
+[12, 15)  did           slice did
+[15, 18)  n't           slice n't
+[19, 25)  expect        slice expect
+[26, 29)  the           slice the
+[30, 38)  low-cost      slice low-cost
+[39, 50)  re-analysis   slice re-analysis
+[50, 51)  .             slice .
+9 pieces, every one its own slice
+[ 0,  1)  \`\`  stands for  "
+[52, 53)  ''  stands for  "
+14 pieces in the quoted sentence, 2 of them rewritten`,
+              { hints: ["The rules take one setting, for the brackets, and the default leaves it off, so the rules are constructed with nothing and the text goes to split.", "Each word carries text, start and end, and the slice its span names is the text indexed from start to end. For the bare sentence the two are equal in every row.", "A rewritten piece is one whose text differs from that slice. Count those as the loop goes, and read n_words off the collection for the total."], check: numberCheck("How many pieces does the quoted sentence give?", 14, 0.0, "The sentence inside the quotation marks gives the same pieces as before with the final stop replaced by a comma, plus the two quotation marks, she, wrote and the stop that now ends the whole text. Two of the fourteen are the quotation marks, rewritten into two backquotes and two apostrophes while each still points at the one character it came from, which is the first place on the site where a piece’s text and its span disagree.") },
+            ),
+            exercise(
+              "Hand the six sentences over one at a time, then joined",
+              ["Section 11 says the final stop rule assumes the text is exactly one sentence. Split the six sentences one at a time and count the pieces, then join them into one string with a space between each pair and count again. In both cases, count the pieces that are exactly a full stop, and list the pieces that are a word with a full stop still attached.", "The page arrives at 72 pieces separately and 67 joined, with six lone stops becoming one. Only Dr. should be on the attached list the first time, and it should have five sentence endings for company the second."],
+              `from oop_ml import PennTreebankPreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rules = PennTreebankPreTokenizer()
+
+# Split each sentence on its own and gather every piece's text into one
+# list, then split the six joined by single spaces into a second list. For
+# each list print the number of pieces, the number that are exactly a full
+# stop, and the pieces that end in a full stop but are more than one.`,
+              `from oop_ml import PennTreebankPreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+rules = PennTreebankPreTokenizer()
+
+separately = [text for sentence in notebook for text in rules.split(sentence).texts]
+together = list(rules.split(" ".join(notebook)).texts)
+
+for name, pieces in [("one at a time", separately), ("joined", together)]:
+    lone_stops = sum(piece == "." for piece in pieces)
+    attached = [piece for piece in pieces if piece.endswith(".") and piece != "."]
+    print(f"{name}: {len(pieces)} pieces, {lone_stops} of them a lone full stop")
+    print(f"  still wearing a stop: {attached}")`,
+              `one at a time: 72 pieces, 6 of them a lone full stop
+  still wearing a stop: ['Dr.']
+joined: 67 pieces, 1 of them a lone full stop
+  still wearing a stop: ['Dr.', 're-analysis.', 'room.', 'arrived.', 'afternoon.', 'expected.']`,
+              { hints: ["The collection split answers has a texts property, so one comprehension over the sentences gathers every piece of every sentence in order.", "Joining the six with a single space gives one text, and the rules read it as one sentence, so only the last character of the whole thing counts as a final stop.", "A lone stop is a piece equal to a full stop, and an attached one ends in a full stop without being one."], check: numberCheck("How many pieces do the six sentences give when they arrive joined into one string?", 67, 0.0, "Five pieces went missing, and they are the five full stops that stayed attached to the word in front of them, because a stop that is not the last thing in the text is read as an abbreviation’s. Six lone stops became one, and the joined corpus gained five entries that are a word with a stop on it, including re-analysis. beside the re-analysis that was already there. Only Dr. is an abbreviation, and the rules cannot tell it from the other five.") },
+            ),
+            exercise(
+              "Put the fifteen contraction probes to the rules",
+              ["Section 7 puts fifteen short texts to the rules, nine that a clause covers and six that none does. Split each, print what came back, and count how many were cut at all. A text is cut when it gives more pieces than it has runs of non-space characters.", "The first nine should come apart and the last six should come back whole, including the running sentence’s own contraction typed with a curved apostrophe. Nothing in the output of a whole piece says whether a clause looked at it, which is the point."],
+              `from oop_ml import PennTreebankPreTokenizer
+
+probes = [
+    "didn't", "can't", "won't", "shan't", "the dogs' bowls", "cannot", "gonna",
+    "'twas the night", '"It\\'s fine,"',
+    "didn\\u2019t", "l'analyse", "dell'analisi", "gotcha", "y'all", "o'clock",
+]
+rules = PennTreebankPreTokenizer()
+
+# For each probe, split it and print the probe beside the pieces, both
+# through ascii so the curved apostrophe shows as its code point. A probe
+# is cut when it gives more pieces than its number of space-separated runs.
+# Count the probes that were cut and the probes that came back whole, and
+# print both counts.`,
+              `from oop_ml import PennTreebankPreTokenizer
+
+probes = [
+    "didn't", "can't", "won't", "shan't", "the dogs' bowls", "cannot", "gonna",
+    "'twas the night", '"It\\'s fine,"',
+    "didn\\u2019t", "l'analyse", "dell'analisi", "gotcha", "y'all", "o'clock",
+]
+rules = PennTreebankPreTokenizer()
+
+cut = 0
+for probe in probes:
+    pieces = list(rules.split(probe).texts)
+    was_cut = len(pieces) > len(probe.split())
+    cut += was_cut
+    print(f"{ascii(probe):20s} -> {ascii(pieces)}")
+print(f"{cut} cut, {len(probes) - cut} returned whole")`,
+              `"didn't"             -> ['did', "n't"]
+"can't"              -> ['ca', "n't"]
+"won't"              -> ['wo', "n't"]
+"shan't"             -> ['sha', "n't"]
+"the dogs' bowls"    -> ['the', 'dogs', "'", 'bowls']
+'cannot'             -> ['can', 'not']
+'gonna'              -> ['gon', 'na']
+"'twas the night"    -> ["'t", 'was', 'the', 'night']
+'"It\\'s fine,"'      -> ['\`\`', 'It', "'s", 'fine', ',', "''"]
+'didn\\u2019t'        -> ['didn\\u2019t']
+"l'analyse"          -> ["l'analyse"]
+"dell'analisi"       -> ["dell'analisi"]
+'gotcha'             -> ['gotcha']
+"y'all"              -> ["y'all"]
+"o'clock"            -> ["o'clock"]
+9 cut, 6 returned whole`,
+              { hints: ["Splitting the probe on white space with Python’s own split gives its runs, and the rules cut it when they answer more pieces than that.", "ascii gives a string’s repr with every character outside ASCII written as an escape, so the curved apostrophe prints as its code point and the two spellings of one contraction cannot be confused.", "The curved apostrophe is written by its code point in the list for the same reason, and only the straight one is on the rules’ list of endings."], check: numberCheck("How many of the fifteen probes come back whole?", 6, 0.0, "The clause is ten named forms and eight endings reached through a single straight apostrophe, so the curved spelling, the two foreign articles, two spoken forms nobody added and o’clock all come back as one piece. A form that is not on the list and a form examined and left alone give the same answer, and nothing reports that the list was consulted and came up empty.") },
+            ),
+            exercise(
+              "Count the three rules over the six sentences",
+              ["Section 17 gives the three rules 72, 63 and 69 pieces on the six sentences, and section 19 says the treebank rules and the space rule both keep 318 of the 375 characters where the boundary rules keep 303. Count all of that from the library, and add a column the page does not print, how many distinct entries a table built over each rule’s pieces would need.", "The space rule and the boundary rules both come to 47 entries, which the earlier pages measured. The treebank rules should come to a different number, and the second part of the task is to say why."],
+              `from oop_ml import Corpus, PennTreebankPreTokenizer, UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+corpus = Corpus.of(notebook)
+rules = {
+    "the treebank rules": PennTreebankPreTokenizer(),
+    "every run of spaces": WhitespacePreTokenizer(),
+    "every boundary": UnicodeWordPreTokenizer(),
+}
+characters = sum(len(text) for text in notebook)
+
+# For each rule, count the corpus's words, and print the total pieces, the
+# number of distinct entries, and how many of the characters lie inside a
+# piece, summing end minus start over every piece of every sentence.`,
+              `from oop_ml import Corpus, PennTreebankPreTokenizer, UnicodeWordPreTokenizer, WhitespacePreTokenizer
+
+notebook = [
+    "Dr. Alvarez didn't expect the low-cost re-analysis.",
+    "The re-analysis used the low-cost sensors from the store room.",
+    "Alvarez had run the first analysis in 2019, before the sensors arrived.",
+    "Her notes say the low-cost readings drifted every afternoon.",
+    "The drift was small, though it was larger than the effect she expected.",
+    "She re-ran the analysis twice and the drift did not go away.",
+]
+corpus = Corpus.of(notebook)
+rules = {
+    "the treebank rules": PennTreebankPreTokenizer(),
+    "every run of spaces": WhitespacePreTokenizer(),
+    "every boundary": UnicodeWordPreTokenizer(),
+}
+characters = sum(len(text) for text in notebook)
+
+for name, rule in rules.items():
+    counts = list(corpus.word_counts(rule))
+    kept = sum(word.end - word.start for text in notebook for word in rule.split(text))
+    print(f"{name}: {sum(count.count for count in counts)} pieces, {len(counts)} entries, {kept} of {characters} characters kept")`,
+              `the treebank rules: 72 pieces, 48 entries, 318 of 375 characters kept
+every run of spaces: 63 pieces, 47 entries, 318 of 375 characters kept
+every boundary: 69 pieces, 47 entries, 303 of 375 characters kept`,
+              { hints: ["Corpus.of takes the list and word_counts takes any of the three rules, answering one count per distinct entry with word and count on each.", "The sum of the counts is the pieces and the number of counts is the entries. The characters kept need the spans, so they come from split rather than from the counts."], check: numberCheck("How many distinct entries do the treebank rules produce over the six sentences?", 48, 0.0, "The space rule’s 47 lose the nine entries that were a word wearing a mark or the contraction, and gain ten, the seven bare words those marks came off, n’t, and the comma and the full stop as entries of their own. re-analysis. collapses into the re-analysis the table already held and didn’t gives did, which was already there too, so the count rises by one rather than by two. Every rule here keeps every character that is not a space, which is why the 318 matches the space rule’s and the boundary rules, which drop the marks, keep 303.") },
+            ),
+          ],
         },
       ]}
     />

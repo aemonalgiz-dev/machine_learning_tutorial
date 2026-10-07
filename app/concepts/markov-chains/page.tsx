@@ -1,6 +1,9 @@
+import { lessonIntuitions } from "@/lib/intuition";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ConceptPage } from "@/components/concept/ConceptPage";
+import { choice, several, trueFalse } from "@/lib/quizzes";
+import { exercise, numberCheck } from "@/lib/exercises";
 import { Equation } from "@/components/concept/PrimerPage";
 import {
   DerivationTable,
@@ -25,7 +28,7 @@ import { MarkovTwoStep } from "@/components/widgets/MarkovTwoStep";
 export const metadata: Metadata = {
   title: "Markov Chains · oop_ml",
   description:
-    "A Markov chain lets the next state depend on the current one and nothing earlier, so fitting it is counting and dividing. Counted on Alice, one letter of memory saves a fifth of the bits a letter costs, and misses what the text does two letters on by a tenth.",
+    "Model the next state using the current one, then follow the consequences over several steps.",
 };
 
 const link =
@@ -34,8 +37,12 @@ const link =
 export default function MarkovChainsPage() {
   return (
     <ConceptPage
+      intuition={lessonIntuitions["markov-chains"]}
+      technicalStart="Part 2. Counting Is the Whole Fit"
+      openingTitle="How Much of the Past Do We Need?"
+      playgroundIntro="Read one row of the transition table as the possible next states from the current state. Compare one step with several repeated steps."
       title="Markov Chains"
-      tagline="A Markov chain counts which letter follows which and divides each row by its total, and that one table then says where a walk goes next, where it settles in the long run, and what it has no way to remember."
+      tagline="Model the next state using the current one, then follow the consequences over several steps."
       prerequisites={
         <>
           The same assumption applied to words rather than letters is the
@@ -54,79 +61,14 @@ export default function MarkovChainsPage() {
           numbers by a table.
         </>
       }
-      history={
-        <>
-          <p>
-            Every law of large numbers proved before the twentieth century was
-            proved for independent trials. Jacob Bernoulli&rsquo;s, published in
-            1713, concerned repeated draws that do not influence one another,
-            and Pafnuty Chebyshev&rsquo;s of 1867 still assumed independence, so
-            nobody had shown whether the average of a long run of dependent
-            events settles at all. Pavel Nekrasov, in Moscow, argued in 1902
-            that independence was necessary for the law to hold, and drew a
-            conclusion about free will from it. Andrei Markov, Chebyshev&rsquo;s
-            student at St Petersburg, set out to refute him, and his 1906 paper
-            extending the law of large numbers to quantities that depend on
-            each other did it with the simplest dependence he could write down,
-            a sequence in which each trial depends on the one immediately before
-            it and on nothing earlier. He showed that the averages of such a
-            sequence still settle, and the place they settle is what Part 4 of
-            this page calls the stationary distribution.
-          </p>
-          <p>
-            Markov&rsquo;s chains were an abstraction until 1913, when he wanted
-            an example nobody could call contrived and counted one out of
-            Pushkin. He took the first 20,000 letters of Eugene Onegin, removed
-            the spaces and the punctuation, marked each letter as a vowel or a
-            consonant, and counted how often each kind followed each kind, and
-            his paper to the Imperial Academy of Sciences, &ldquo;An example of
-            statistical investigation of the text Eugene Onegin concerning the
-            connection of samples in chains&rdquo;, reported that a vowel was far
-            less likely after a vowel than after a consonant, which is exactly
-            the dependence the independent law could not cover. This page
-            repeats his count on the first two chapters of Alice&rsquo;s
-            Adventures in Wonderland, and English gives the same shape. Shannon
-            took the counting in another direction in 1948. His &ldquo;A
-            Mathematical Theory of Communication&rdquo; builds text from letter
-            counts with no memory, then with one letter of it, then two, calls
-            the dependent ones discrete Markoff processes, and prints what each
-            writes, and Part 5 does the same with Alice.
-          </p>
-          <p>
-            What the method needed next was an account of when a chain has
-            exactly one place to settle. Oskar Perron proved in 1907 that a
-            matrix of positive entries has one eigenvector with every entry
-            positive, and Georg Frobenius extended the result to matrices with
-            zeros in 1912, which is where the conditions of Part 7 come from,
-            that every state be reachable from every other and that the walk
-            not cycle in lockstep. The best-known use of the answer is Sergey
-            Brin and Lawrence Page&rsquo;s 1998 paper on the search engine that
-            became Google, which ranks a web page by the share of time a random
-            walk along links spends on it, the stationary distribution of a very
-            large chain, and which adds a small probability of jumping to any
-            page at all so that the chain has only one. That repair is Part
-            7&rsquo;s smoothing under another name.
-          </p>
-          <p>
-            The page asks six questions in order. What goes wrong if letters are
-            treated as independent draws, and what did Markov assume instead?
-            What does fitting a chain count, and why is dividing the counts the
-            best answer the text allows? What does the chain predict several
-            steps ahead, and how quickly does it forget where it started? Where
-            does it settle, and do the letters of the text agree? What does one
-            letter of memory buy on a chapter the chain never counted, what does
-            it throw away, and what does a longer memory cost? And where does
-            the question of where a chain settles stop having an answer?
-          </p>
-        </>
-      }
+
       playground={<MarkovPlayground />}
       sections={[
         {
           title: "Part 1. Letters That Remember the Letter Before",
           defaultOpen: true,
-          content: (
-            <>
+          content: (<>
+<>
               <SubSection title="1. Letters are not independent draws">
                 <p>
                   Take the first two chapters of Alice&rsquo;s Adventures in
@@ -138,17 +80,14 @@ export default function MarkovChainsPage() {
                   chance of a vowel would be 38.14 percent after anything at all,
                   and knowing the letter before would tell us nothing.
                 </p>
-                <p>
-                  It tells us a great deal. After a vowel the next letter is a
-                  vowel 14.61 percent of the time, and after a consonant it is a
-                  vowel 52.70 percent of the time, so the kind of letter just
-                  read moves the chance of a vowel by a factor of more than
-                  three and a half. Two choices were made before any counting.
-                  Spaces are dropped, as Markov dropped them, and y is counted
-                  as a consonant, which is the usual convention and is wrong for
-                  a word like rhythm; a different choice would move every number
-                  on the page slightly.
+                <>
+<p>
+                  It tells us a great deal. After a vowel the next letter is a vowel 14.61 percent of the time, and after a consonant it is a vowel 52.70 percent of the time, so the kind of letter just read moves the chance of a vowel by a factor of more than three and a half.
                 </p>
+                <p>
+                  Two choices were made before any counting. Spaces are dropped, as Markov dropped them, and y is counted as a consonant, which is the usual convention and is wrong for a word like rhythm; a different choice would move every number on the page slightly.
+                </p>
+</>
                 <NumberTable
                   headings={[
                     "the letter before",
@@ -236,7 +175,7 @@ export default function MarkovChainsPage() {
                 </KeepInMind>
               </SubSection>
             </>
-          ),
+</>),
         },
         {
           title: "Part 2. Counting Is the Whole Fit",
@@ -278,14 +217,18 @@ export default function MarkovChainsPage() {
               </SubSection>
 
               <SubSection title="5. The same count on two chapters">
-                <p>
-                  Run the same tally over all 128 sentences of the first two
-                  chapters and the table in step 3 comes out. A vowel began
-                  6,384 steps and was followed by a vowel in 933 of them, and a
-                  consonant began 10,291 steps and was followed by a vowel in
-                  5,423, so the vowel row is 933 over 6,384 and the consonant
-                  row 5,423 over 10,291.
-                </p>
+                <>
+                  <p>
+                    Across all 128 sentences, vowels start 6,384 transitions and
+                    consonants start 10,291. Count where each kind of transition goes,
+                    then divide by its row total.
+                  </p>
+                  <Equation>{"P(vowel | vowel) = 933 / 6,384 ≈ 0.1461\nP(consonant | vowel) = 5,451 / 6,384 ≈ 0.8539\nP(vowel | consonant) = 5,423 / 10,291 ≈ 0.5270\nP(consonant | consonant) = 4,868 / 10,291 ≈ 0.4730"}</Equation>
+                  <p>
+                    Each row sums to one because it covers every observed destination
+                    from that starting state.
+                  </p>
+                </>
                 <Equation>
                   {"p_VV  =  933 ⁄ 6,384  =  0.1461          p_CV  =  5,423 ⁄ 10,291  =  0.5270"}
                 </Equation>
@@ -312,15 +255,19 @@ export default function MarkovChainsPage() {
                   {"log L(p_VV)  =  933 · ln p_VV  +  5,451 · ln(1 − p_VV)"}
                 </Equation>
                 <MarkovLikelihoodCurve />
-                <p>
-                  The curve peaks where its slope is zero, which is where 933
-                  over p_VV equals 5,451 over 1 − p_VV, and that is p_VV = 933 ⁄
-                  6,384. The same argument runs separately for every row, since
-                  each row&rsquo;s entries appear only in the steps that start
-                  from that row&rsquo;s state. Summed over both rows, the counted
-                  text has a log likelihood of −9,773.73 nats under its own
-                  table, and every other table gives it less.
-                </p>
+                <>
+                  <p>
+                    The likelihood is largest where its derivative is zero. Equate the
+                    two terms and solve for the vowel-to-vowel probability.
+                  </p>
+                  <Equation>{"933 / p_VV = 5,451 / (1 − p_VV)\n933(1 − p_VV) = 5,451p_VV\np_VV = 933 / (933 + 5,451) = 933 / 6,384"}</Equation>
+                  <p>
+                    The same argument applies to each row separately. A row’s entries
+                    appear only in transitions leaving that row’s state. The fitted
+                    table gives the observed text a log likelihood of −9,773.73 nats,
+                    the largest available under this model.
+                  </p>
+                </>
                 <WhyThisWorks title="Why the ratio maximises the likelihood, for any number of states">
                   <p>
                     Write nᵢⱼ for the count of steps from i to j. The log
@@ -399,6 +346,49 @@ export default function MarkovChainsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 1 and 2",
+          quiz: [
+            trueFalse(
+              "If letters really were drawn independently, the share of vowels following a vowel would match the share following a consonant.",
+              true,
+              "That is what independence would mean here, and it is exactly what the counts refuse. A vowel follows a vowel 14.61 percent of the time and follows a consonant 52.70 percent of the time, so the letter just read moves the chance of a vowel by a factor of more than three and a half.",
+            ),
+            trueFalse(
+              "Counting y as a vowel rather than a consonant would leave the table unchanged.",
+              false,
+              "Both choices made before any counting feed straight into the counts, dropping the spaces and treating y as a consonant, and a different choice would move every number on the page slightly. The convention is also wrong for a word like rhythm, which is why it is stated before any figure is quoted.",
+            ),
+            choice(
+              "Oh my dear Dinah is thirteen letters once the spaces are dropped. How many steps does it contribute?",
+              ["Eleven", "Twelve", "Thirteen", "Twenty-six"],
+              1,
+              "A step is one adjacent pair, so a run of thirteen letters holds twelve of them. The last letter ends a step without beginning one, which is the same fact that leaves a state with no row at all in Part 7.",
+            ),
+            choice(
+              "What does fitting this chain to a text involve?",
+              [
+                "Counting every adjacent pair, then dividing each row of counts by its own total",
+                "Choosing a learning rate and stepping until the table stops changing",
+                "Trying many candidate tables and keeping whichever scores best on held-out text",
+                "Starting from a guessed table and repeating passes until successive ones agree",
+              ],
+              0,
+              "Nothing is iterated, tuned or searched. One pass over the text produces the finished table, because each row is a count of steps divided by its own total. The other three describe fitting procedures that other models need and this one does not.",
+            ),
+            several(
+              "Which of these hold for the count on the first two chapters?",
+              [
+                "Dividing each row of counts by its own total gives the table under which the counted text is most probable",
+                "16,803 letters give 16,675 steps, because the join between two sentences is never counted as one",
+                "The first letter of each sentence is predicted by the chain like any other letter",
+                "A step the text never took is given a small probability so that nothing is impossible",
+              ],
+              [0, 1],
+              "The probability of the text is a product of one table entry per step, and for the vowel row that is p_VV 933 times and 1 − p_VV 5,451 times, which is largest at 933 over 6,384; the same argument holds row by row for any number of states, since no two rows share a parameter. Counting stops at the end of each sentence, so 128 sentences take 128 steps off 16,803 letters, and the first letter of each sentence begins a step without being predicted. A count of zero gives a probability of zero, which is where smoothing enters in Part 6.",
+            ),
+          ],
         },
         {
           title: "Part 3. Several Steps Ahead",
@@ -523,14 +513,18 @@ export default function MarkovChainsPage() {
                   {"π_V × p_VC  =  π_C × p_CV\n\nπ_V  =  p_CV ⁄ (p_CV + p_VC)  =  0.5270 ⁄ (0.5270 + 0.8539)  =  0.3816"}
                 </Equation>
                 <WorkedExample title="Oh my dear Dinah again">
-                  <p>
-                    The table from step 4 has p_VC = 4 ⁄ 5 and p_CV = 3 ⁄ 7, so
-                    the balance puts the chain at a vowel with probability 3 ⁄ 7
-                    divided by 3 ⁄ 7 plus 4 ⁄ 5, which is 15 ⁄ 43, or 0.3488. The
-                    sentence itself is five vowels in thirteen letters, 0.3846.
-                    The two disagree, and step 13 is about why they almost never
-                    do on a long text.
-                  </p>
+                  <>
+                    <p>
+                      The vowel-to-consonant probability is four fifths, and the
+                      consonant-to-vowel probability is three sevenths. Substituting
+                      them into the balance formula gives the long-run vowel share.
+                    </p>
+                    <Equation>{"stationary vowel share = (3/7) / (3/7 + 4/5)\n                       = 15/43 ≈ 0.3488\nobserved vowel share = 5/13 ≈ 0.3846"}</Equation>
+                    <p>
+                      They differ on this short sentence. Step 13 explains why the gap
+                      is usually much smaller on a long text.
+                    </p>
+                  </>
                 </WorkedExample>
                 <KeepInMind>
                   The stationary distribution is a fact about the table and says
@@ -541,31 +535,34 @@ export default function MarkovChainsPage() {
               </SubSection>
 
               <SubSection title="12. Solved rather than walked to">
-                <p>
-                  Walking a thousand steps and reading off where the walk ended
-                  finds the stationary distribution on a chain like this one, and
-                  slowly on a chain that forgets slowly. Solving finds it
-                  directly. The equation πP = π says π(P − I) = 0, a set of
-                  linear equations one of which is always implied by the others,
-                  since every row of P sums to one. Replacing that one with the
-                  requirement that π sums to one leaves a system with a single
-                  solution whenever the chain has exactly one stationary
-                  distribution.
-                </p>
+                <>
+                  <p>
+                    Repeatedly updating the probability distribution approaches
+                    stationarity on a finite irreducible, aperiodic chain. A single
+                    sampled endpoint is only one observation, not a distribution.
+                    Solving the balance equations finds the stationary probabilities
+                    directly.
+                  </p>
+                  <Equation>{"πP = π\nπ(P − I) = 0\nΣᵢ πᵢ = 1"}</Equation>
+                  <p>
+                    One balance equation is redundant because every row of the
+                    transition matrix sums to one. Replace that equation with the
+                    requirement that the probabilities sum to one. When the chain has a
+                    unique stationary distribution, the resulting system has one
+                    solution.
+                  </p>
+                </>
                 <Equation>
                   {"π (P − I)  =  0,   with one of its equations replaced by   Σⱼ πⱼ  =  1"}
                 </Equation>
-                <p>
-                  Whether it has exactly one is decided by which states can reach
-                  which, and none of the magnitudes matter. If every state can
-                  eventually reach every other, the chain has exactly one
-                  stationary distribution, which is the theorem of Perron and
-                  Frobenius applied to a table of probabilities, and more
-                  generally it has exactly one whenever there is a single group
-                  of states that a walk can enter and never leave. A table with
-                  every entry above zero satisfies both, which is one of the
-                  things smoothing does, and Part 7 is about the tables that fail.
+                <>
+<p>
+                  Whether it has exactly one is decided by which states can reach which, and none of the magnitudes matter. If every state can eventually reach every other, the chain has exactly one stationary distribution, which is the theorem of Perron and Frobenius applied to a table of probabilities, and more generally it has exactly one whenever there is a single group of states that a walk can enter and never leave.
                 </p>
+                <p>
+                  A table with every entry above zero satisfies both, which is one of the things smoothing does, and Part 7 is about the tables that fail.
+                </p>
+</>
                 <KeepInMind>
                   Solving and walking give the same answer on a chain like this
                   one. On a chain whose walk cycles, only solving has an answer,
@@ -583,18 +580,14 @@ export default function MarkovChainsPage() {
                   the text.
                 </p>
                 <MarkovShares />
-                <p>
-                  That agreement is almost guaranteed, and it is worth seeing why
-                  before being impressed by it. Take the share of steps that
-                  start at each letter and multiply it by the table. What comes
-                  out is the share of steps that end at each letter, and the two
-                  shares differ only by the first and last letter of each
-                  sentence, so the text&rsquo;s own letter shares nearly solve
-                  πP = π by construction. On oh my dear Dinah, a single sentence
-                  where the two ends are two of its thirteen letters, the gap is
-                  0.3846 against 0.3488. On 128 sentences it is 0.3814 against
-                  0.3816.
+                <>
+<p>
+                  That agreement is almost guaranteed, and it is worth seeing why before being impressed by it. Take the share of steps that start at each letter and multiply it by the table. What comes out is the share of steps that end at each letter, and the two shares differ only by the first and last letter of each sentence, so the text&rsquo;s own letter shares nearly solve πP = π by construction.
                 </p>
+                <p>
+                  On oh my dear Dinah, a single sentence where the two ends are two of its thirteen letters, the gap is 0.3846 against 0.3488. On 128 sentences it is 0.3814 against 0.3816.
+                </p>
+</>
                 <Equation>
                   {"Σᵢ (share of steps starting at i) × pᵢⱼ  =  share of steps ending at j"}
                 </Equation>
@@ -749,17 +742,14 @@ export default function MarkovChainsPage() {
                   to within a few thousandths. That is structure spanning three
                   letters, which no table of pairs can hold.
                 </p>
-                <p>
-                  Part of the gap is not English at all. Grouping twenty-six
-                  letters into two classes throws away which vowel and which
-                  consonant, and a sequence of classes read off a letter chain is
-                  not in general a Markov chain itself. The second view of the
-                  widget runs the same check on 20,000 symbols the letter chain
-                  wrote, where one letter of memory is true by construction, and
-                  the vowel-and-consonant chain still misses two letters on,
-                  0.4560 against 0.4084. So of the 0.1052 miss on Alice, about
-                  half is the grouping and the rest is the text.
+                <>
+<p>
+                  Part of the gap is not English at all. Grouping twenty-six letters into two classes throws away which vowel and which consonant, and a sequence of classes read off a letter chain is not in general a Markov chain itself. The second view of the widget runs the same check on 20,000 symbols the letter chain wrote, where one letter of memory is true by construction, and the vowel-and-consonant chain still misses two letters on, 0.4560 against 0.4084.
                 </p>
+                <p>
+                  So of the 0.1052 miss on Alice, about half is the grouping and the rest is the text.
+                </p>
+</>
                 <KeepInMind>
                   A chain&rsquo;s prediction two steps ahead is its table
                   squared, and the text&rsquo;s own count two steps apart is a
@@ -808,6 +798,48 @@ export default function MarkovChainsPage() {
           ),
         },
         {
+          title: "Questions on Parts 3 to 5",
+          quiz: [
+            trueFalse(
+              "Started from a vowel and from a consonant, the two walks’ chances of a vowel cross over before settling, because the table’s second eigenvalue is negative.",
+              true,
+              "After one step they are far apart, 0.1461 against 0.5270; after two they have crossed, 0.4713 against 0.3263, and after three crossed back, 0.3475 against 0.4027. For two states the gap to the settled share is multiplied at every step by the second eigenvalue, p_VV less p_CV, which is 0.1461 less 0.5270, or −0.3808. The sign is the alternation and the size is the speed, each step leaving 0.3808 of the remaining distance, so by the fifth step both walks are within half a hundredth of 0.3816.",
+            ),
+            choice(
+              "The chain settles at a vowel with probability 0.3816 and the text it was counted on is 38.14 percent vowels. Why is that agreement no evidence for the chain?",
+              [
+                "Multiplying the share of steps that start at each letter by the table gives the share that end at each letter, and the two differ only by the first and last letter of every sentence, so the text’s own shares nearly solve the balance by construction",
+                "Because maximum likelihood guarantees that the settled shares equal the text’s shares exactly",
+                "Because the third chapter was used to choose the table",
+                "Because the agreement is a coincidence of this particular text",
+              ],
+              0,
+              "On oh my dear Dinah, a single sentence where the two ends are two of its thirteen letters, the gap is 0.3846 against 0.3488; on 128 sentences it is 0.3814 against 0.3816, close but not equal. The checks that count are the ones the construction does not force. The third chapter, never counted, is 39.16 percent vowels, 0.0100 above where the chain settles, and over the letters its largest gap is 0.0097, for d. That agreement is evidence, and it holds to within a hundredth.",
+            ),
+            trueFalse(
+              "The stationary distribution is where every walk ends up, so a chain whose walk never settles has none.",
+              false,
+              "It is the distribution a single step leaves unchanged, π P = π with the entries summing to one, which is a fact about the table and says nothing about any particular walk. For two states the balance solves by hand, the flow from vowels to consonants, π_V times 0.8539, equal to the flow back, π_C times 0.5270, which puts the chance of a vowel at 0.3816. Whether a walk arrives there is a separate question, and banana’s chain in Part 7 has exactly one stationary distribution, half and half, that no walk reaches, since the walk is certainly at a consonant after every even step.",
+            ),
+            choice(
+              "Scored on the third chapter, which no chain counted, what did one letter of memory buy over the letter shares alone?",
+              [
+                "0.8234 bits on every letter, 3.2436 against 4.0670, a fifth of what the frequencies alone cost",
+                "Nothing, since the chain was counted on different chapters",
+                "4.7549 bits, the cost of a uniform guess over twenty-seven symbols",
+                "0.0992 bits, the same saving as on the two classes",
+              ],
+              0,
+              "Bits per letter on text the model never counted is the fair score, since a model scored on its own text is scored partly on what it memorised. A uniform guess would cost 4.7549 bits, the letter shares alone 4.0670 and the letter chain 3.2436, all on the same 8,357 positions. On Markov’s two classes the saving is 0.0992 bits out of a possible one, a tenth, because grouping twenty-six letters into two classes leaves far less to predict.",
+            ),
+            trueFalse(
+              "The chain’s prediction that a vowel follows two letters after a vowel 47.13 percent of the time agrees with what the first two chapters actually do two letters on.",
+              false,
+              "Counting every pair of letters two apart in the first two chapters gives 0.3661, and in the third chapter 0.3727, so the chain is wrong about its own text by more than a tenth on a question built entirely from the table that text produced. Three letters on the error changes sign, 0.3475 against 0.4036, and by five letters the two agree to within a few thousandths. About half of the 0.1052 miss is the grouping into two classes, since on 20,000 symbols the letter chain itself wrote, where one letter of memory is true by construction, the vowel-and-consonant chain still misses two letters on, 0.4560 against 0.4084.",
+            ),
+          ],
+        },
+        {
           title: "Part 6. Longer Memory, and What It Costs",
           content: (
             <>
@@ -826,17 +858,14 @@ export default function MarkovChainsPage() {
                   {"P(xₜ₊₁ | xₜ, xₜ₋₁)  =  P( (xₜ, xₜ₊₁) | (xₜ₋₁, xₜ) )"}
                 </Equation>
                 <MarkovMemorySweep />
-                <p>
-                  On Markov&rsquo;s two classes this is cheap, since six classes
-                  of memory is only 64 possible states, and the widget scores the
-                  third chapter at every length of memory from none to six. Each
-                  class remembered helps less than the one before, 0.9651 bits
-                  with none, 0.8659 with one, 0.8402 with two, 0.8336 with
-                  three, 0.8309 with four and 0.8284 with five. At six, one step
-                  of the third chapter is a run of seven classes the first two
-                  chapters never produced, so the chain as counted calls it
-                  impossible and gives the whole chapter a probability of zero.
+                <>
+<p>
+                  On Markov&rsquo;s two classes this is cheap, since six classes of memory is only 64 possible states, and the widget scores the third chapter at every length of memory from none to six. Each class remembered helps less than the one before, 0.9651 bits with none, 0.8659 with one, 0.8402 with two, 0.8336 with three, 0.8309 with four and 0.8284 with five.
                 </p>
+                <p>
+                  At six, one step of the third chapter is a run of seven classes the first two chapters never produced, so the chain as counted calls it impossible and gives the whole chapter a probability of zero.
+                </p>
+</>
                 <p>
                   With a smoothing of a half, so that nothing is impossible, the
                   curve turns at three classes, reading 0.8359 there and then
@@ -878,18 +907,21 @@ export default function MarkovChainsPage() {
                   ]}
                   caption="Counted on the first two chapters. At three letters, 99.87 percent of the table was never counted, and an average state began about ten steps."
                 />
-                <p>
-                  Two costs follow. The count of steps stays at about twenty
-                  thousand whatever the memory, so each state&rsquo;s row is
-                  estimated from fewer and fewer of them, 774.7 per state at one
-                  letter and 10.4 at three. And the arithmetic on the table grows
-                  with its size. Finding where a chain settles is a linear solve,
-                  whose work grows roughly as the cube of the number of states,
-                  and 1,982 cubed is about 160 times 363 cubed, so going from two
-                  letters of memory to three multiplies that work by about a
-                  hundred and sixty while the text it is counted on stays exactly
-                  as long.
-                </p>
+                <>
+                  <p>
+                    Longer memory spreads roughly the same number of observed
+                    transitions across more states. The average falls from about 774.7
+                    transitions per state with one letter of memory to 10.4 with three.
+                    A dense stationary-distribution solve also grows roughly cubically
+                    with the number of states.
+                  </p>
+                  <Equation>{"relative solve work ≈ (1,982 / 363)³ ≈ 163"}</Equation>
+                  <p>
+                    Moving from two letters of memory to three can therefore multiply
+                    the dense solve work by about 160 without providing any additional
+                    training text.
+                  </p>
+                </>
                 <KeepInMind>
                   Each extra letter of memory multiplies the possible states by
                   27 while the text stays the same length. The table fills with
@@ -917,19 +949,14 @@ export default function MarkovChainsPage() {
                   letter chain, over the same range, moves only from 3.2436 to
                   3.2645.
                 </p>
-                <p>
-                  The reason is in the shape of the pair table. Additive
-                  smoothing adds the same count to every cell of a row, and a row
-                  of the pair chain has 363 cells, one for every pair seen
-                  anywhere. After th the next state has to begin with h, and in
-                  the first two chapters h was followed by only nine different
-                  symbols, so at most nine of those 363 cells can ever be right.
-                  At a smoothing of a half each row is given 181.5 invented
-                  steps, against an average of 57.3 real ones, and almost all of
-                  the invented ones go to pairs that cannot follow. Drawn at that
-                  setting the pair chain writes thaqogsedke umuoumts, and the
-                  last sample in step 15 shows the rest of it.
+                <>
+<p>
+                  The reason is in the shape of the pair table. Additive smoothing adds the same count to every cell of a row, and a row of the pair chain has 363 cells, one for every pair seen anywhere. After th the next state has to begin with h, and in the first two chapters h was followed by only nine different symbols, so at most nine of those 363 cells can ever be right.
                 </p>
+                <p>
+                  At a smoothing of a half each row is given 181.5 invented steps, against an average of 57.3 real ones, and almost all of the invented ones go to pairs that cannot follow. Drawn at that setting the pair chain writes thaqogsedke umuoumts, and the last sample in step 15 shows the rest of it.
+                </p>
+</>
                 <InAModel title="What a working model does instead">
                   <p>
                     The smoothings that work here know which cells are
@@ -980,20 +1007,14 @@ export default function MarkovChainsPage() {
                   sentence, one ending she said aloud and the other let s try
                   geography, and nowhere else in 128 sentences.
                 </p>
-                <p>
-                  There are four things anyone can do, and each costs something.
-                  Give the stranded state an even row, which invents an
-                  observation that it is followed by everything equally. Send it
-                  to itself with certainty, which invents a different
-                  observation and changes the chain&rsquo;s structure, since the
-                  state becomes a trap that every long walk eventually falls into
-                  and that then holds the whole stationary distribution. Refuse
-                  to build the table until text arrives that leaves the state.
-                  Or add the same small count to every cell of every row, which
-                  gives the stranded row an even spread as a side effect of a
-                  choice made for every row at once, and carries the cost Part 6
-                  measured.
+                <>
+<p>
+                  There are four things anyone can do, and each costs something. Give the stranded state an even row, which invents an observation that it is followed by everything equally. Send it to itself with certainty, which invents a different observation and changes the chain&rsquo;s structure, since the state becomes a trap that every long walk eventually falls into and that then holds the whole stationary distribution.
                 </p>
+                <p>
+                  Refuse to build the table until text arrives that leaves the state. Or add the same small count to every cell of every row, which gives the stranded row an even spread as a side effect of a choice made for every row at once, and carries the cost Part 6 measured.
+                </p>
+</>
                 <KeepInMind>
                   A state that is only ever a last state has no row, and
                   whatever row it is given is an assumption rather than a count.
@@ -1009,16 +1030,20 @@ export default function MarkovChainsPage() {
                   zeros on it.
                 </p>
                 <MarkovEdges initial={0} />
-                <p>
-                  The stationary distribution exists and is unique, half and
-                  half, since a step turns a half-and-half distribution into
-                  itself. No walk ever arrives at it. A walk from a consonant is
-                  certainly at a consonant after every even number of steps and
-                  certainly at a vowel after every odd one, forever, which makes
-                  it a chain of period two, and its second eigenvalue is 0 − 1 =
-                  −1, so the distance from settled is multiplied by one at every
-                  step and never shrinks.
-                </p>
+                <>
+                  <p>
+                    The alternating chain has a unique stationary distribution: half
+                    vowel, half consonant. Starting from a known consonant never
+                    approaches that distribution. The state is certainly a consonant
+                    after every even step and certainly a vowel after every odd step.
+                  </p>
+                  <Equation>{"second eigenvalue = 0 − 1 = −1\nmagnitude of the remaining-error factor = |−1| = 1"}</Equation>
+                  <p>
+                    The distribution alternates instead of settling. Starting at the
+                    stationary distribution would preserve it, but a known starting
+                    state does not converge to it. This chain has period two.
+                  </p>
+                </>
                 <p>
                   What survives is a weaker statement. Averaged over a long walk,
                   the walk spends half its time at each state, and the
@@ -1056,18 +1081,14 @@ export default function MarkovChainsPage() {
                   of step 12 has a whole line of solutions, and the chain&rsquo;s
                   long run depends entirely on where it starts.
                 </p>
-                <p>
-                  What breaks uniqueness is two closed groups, and the word asks
-                  shows that reducibility alone does not. Its classes are V C C
-                  C, so the vowel is left once for a consonant and never returned
-                  to, and it cannot be reached from the consonant, which makes the
-                  chain reducible. It still has exactly one stationary
-                  distribution, all of it on the consonant, because only one
-                  group of states is closed, and the vowel the word started from
-                  holds no share at all. Smoothing joins the two words&rsquo;
-                  classes into one group again, and the smoothed chain settles at
-                  0.4545 for a vowel.
+                <>
+<p>
+                  What breaks uniqueness is two closed groups, and the word asks shows that reducibility alone does not. Its classes are V C C C, so the vowel is left once for a consonant and never returned to, and it cannot be reached from the consonant, which makes the chain reducible. It still has exactly one stationary distribution, all of it on the consonant, because only one group of states is closed, and the vowel the word started from holds no share at all.
                 </p>
+                <p>
+                  Smoothing joins the two words&rsquo; classes into one group again, and the smoothed chain settles at 0.4545 for a vowel.
+                </p>
+</>
                 <KeepInMind>
                   One closed group gives one stationary distribution, with every
                   state outside that group given a share of zero. Two closed
@@ -1165,6 +1186,204 @@ export default function MarkovChainsPage() {
               </SubSection>
             </>
           ),
+        },
+        {
+          title: "Questions on Parts 6 and 7",
+          quiz: [
+            trueFalse(
+              "At a smoothing of one the pair chain scores worse on the third chapter than the letter shares alone, which remember nothing.",
+              true,
+              "It scores 4.4876 bits against 4.0677 for the shares alone, where at a smoothing of a hundredth it scored 2.8355, 0.41 bits better than the letter chain. Additive smoothing adds the same count to every one of a row’s 363 cells, and after th the next state has to begin with h, which was followed by only nine different symbols, so at most nine of those cells can ever be right. At a half each row is given 181.5 invented steps against an average of 57.3 real ones, and the letter chain over the same range moves only from 3.2436 to 3.2645.",
+            ),
+            choice(
+              "As counted, with no smoothing, what does the vowel-and-consonant chain that remembers six classes say about the third chapter?",
+              [
+                "That it has probability zero, because one step of the chapter is a run of seven classes the first two chapters never produced",
+                "That it is the best of the seven lengths of memory, at 0.8284 bits",
+                "That it costs exactly one bit per class, the price of a uniform guess",
+                "Nothing, since 64 states are too many to count on two chapters",
+              ],
+              0,
+              "A chain remembering six classes is a chain on runs of six, only 64 possible states, so the counting is cheap. The trouble is that a step the text never took has probability zero, and one step of the third chapter is a run the first two chapters never produced, so the whole chapter is impossible. Each class remembered helped less than the one before, 0.9651 bits with none down to 0.8284 with five, and with a smoothing of a half the curve turns at three classes, reading 0.8359 there and 0.9589 at six, nearly as bad as none.",
+            ),
+            several(
+              "Which of these hold for the chain that remembers three letters?",
+              [
+                "Two of its states, oud and phy, appear only at the ends of sentences",
+                "Those states begin no steps, so their rows would divide zero by zero",
+                "The difficulty is an artefact of toy inputs such as the word spa",
+                "Additive smoothing gives those rows an even spread as a side effect of a choice made for every row at once",
+              ],
+              [0, 1, 3],
+              "A state that only ever ends a sentence starts no step, so its row has no total to divide by, and zero over zero is not a probability. The same gap appears on the real chapters, one state ending she said aloud and the other let s try geography, rather than only on a toy word, and the row is missing rather than zero, so the table does not exist until something is decided. Smoothing decides it for every row at once, and carries the cost Part 6 measured.",
+            ),
+            several(
+              "Which of these chains have exactly one stationary distribution?",
+              [
+                "banana’s, where a consonant is always followed by a vowel and a vowel by a consonant",
+                "asks’, whose vowel is left once for a consonant and never returned to",
+                "rhythm and aeiou counted together, whose table is the identity",
+                "spa’s, as counted with no smoothing",
+              ],
+              [0, 1],
+              "Having exactly one needs a single closed group of states, and none of the magnitudes matter. banana’s chain cycles in lockstep, so its one stationary distribution, half and half, is the share of time over a long walk and no walk ever settles there, which the widget reads as 0.5 and 0.5 over the first thousand steps. asks is reducible, since the vowel cannot be reached from the consonant, and still has exactly one, all of it on the consonant. rhythm and aeiou give two closed groups, so every mixture is stationary and where the walk starts decides, and spa’s vowel is never left, so its table does not exist until something is decided.",
+            ),
+          ],
+        },
+        {
+          title: "Practice. Counting Chains With the Library",
+          practice: [
+            exercise(
+              "Count Oh my dear Dinah with the library",
+              ["Part 2 counted the thirteen letters of Oh my dear Dinah by hand into twelve steps, a vowel row of 1 and 4 giving 0.2000 and 0.8000, and a consonant row of 3 and 4 giving 0.4286 and 0.5714. Part 4 then solved the balance for a stationary vowel share of 15 over 43. Fit the chain with the library on the same classes and read every one of those numbers off it.", "The y of my is a consonant by the page’s convention, which the class mapping in the starter already makes. The observed share of vowels is 5 of 13, and the page says why it differs from the stationary share on so short a sentence."],
+              `from oop_ml import MarkovChain
+
+sentence = "oh my dear dinah"
+dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
+
+# Fit a chain on the one sequence. Print how many steps it counted, then for
+# each state its row of counts and its row of probabilities, then the
+# stationary vowel share and the sentence's own share of vowels.`,
+              `from oop_ml import MarkovChain
+
+sentence = "oh my dear dinah"
+dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
+
+chain = MarkovChain().fit([dinah])
+counts = chain.transition_counts
+print(f"classes {''.join(dinah)}, {len(dinah)} letters, {counts.n_transitions} steps")
+for source in ("V", "C"):
+    row = [counts.count_of(source, target) for target in ("V", "C")]
+    table = [round(chain.probability_of(source, target), 4) for target in ("V", "C")]
+    print(f"after {source}: counts {row}, probabilities {table}")
+
+settled = chain.stationary_distribution()
+print(f"stationary vowel share {settled['V']:.4f}")
+print(f"observed vowel share {dinah.count('V') / len(dinah):.4f}")`,
+              `classes VCCCCVVCCVCVC, 13 letters, 12 steps
+after V: counts [1, 4], probabilities [0.2, 0.8]
+after C: counts [3, 4], probabilities [0.4286, 0.5714]
+stationary vowel share 0.3488
+observed vowel share 0.3846`,
+              { hints: ["fit takes a list of sequences, and each sequence is a list of state names, so the one sentence goes in as a list holding one list. A bare string is refused, since it would be read as its letters.", "transition_counts has count_of(source, target) and n_transitions, and probability_of(source, target) on the chain reads the table. All of them take the state names.", "stationary_distribution answers a distribution indexed by state name, so indexing it with V reads the vowel share."], check: numberCheck("What stationary vowel share does the chain on Oh my dear Dinah report?", 0.3488, 0.0005, "The flow from vowels to consonants has to equal the flow back, so the vowel share is p_CV over p_CV plus p_VC, which is 3/7 over 3/7 plus 4/5, 15 over 43. The sentence itself is 5 of 13 vowels, 0.3846, and the two differ because the first and last letters of a thirteen-letter sentence are a sizeable part of it; on 128 sentences the same gap is 0.3814 against 0.3816.") },
+            ),
+            exercise(
+              "Walk the Dinah chain forward and watch it forget",
+              ["Part 3 carried the two-chapter chain several steps ahead and found the walks from a vowel and from a consonant crossing before settling, with the gap to the settled share shrinking by the table’s second eigenvalue at every step. Do the same on the Dinah chain, whose table is 0.2 and 0.8 after a vowel and 3/7 and 4/7 after a consonant.", "Two steps on from a vowel is a number the page never prints for this chain. The two-chapter chain gave 0.4713 there, and Part 3 says how to get it from the table by hand, the two routes through the letter in between added together."],
+              `from oop_ml import MarkovChain
+
+sentence = "oh my dear dinah"
+dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
+
+chain = MarkovChain().fit([dinah])
+# For one to six steps, print the chance of a vowel that many steps after a
+# vowel and after a consonant. Then print the table's second eigenvalue,
+# p_VV less p_CV, and the stationary vowel share the walks settle at.`,
+              `from oop_ml import MarkovChain
+
+sentence = "oh my dear dinah"
+dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
+
+chain = MarkovChain().fit([dinah])
+for steps in range(1, 7):
+    from_vowel = chain.distribution_after("V", steps)["V"]
+    from_consonant = chain.distribution_after("C", steps)["V"]
+    print(f"{steps} steps on: vowel with chance {from_vowel:.4f} from a vowel, {from_consonant:.4f} from a consonant")
+
+second_eigenvalue = chain.probability_of("V", "V") - chain.probability_of("C", "V")
+print(f"second eigenvalue {second_eigenvalue:.4f}")
+print(f"settles at {chain.stationary_distribution()['V']:.4f}")`,
+              `1 steps on: vowel with chance 0.2000 from a vowel, 0.4286 from a consonant
+2 steps on: vowel with chance 0.3829 from a vowel, 0.3306 from a consonant
+3 steps on: vowel with chance 0.3411 from a vowel, 0.3530 from a consonant
+4 steps on: vowel with chance 0.3506 from a vowel, 0.3479 from a consonant
+5 steps on: vowel with chance 0.3484 from a vowel, 0.3491 from a consonant
+6 steps on: vowel with chance 0.3489 from a vowel, 0.3488 from a consonant
+second eigenvalue -0.2286
+settles at 0.3488`,
+              { hints: ["distribution_after takes a starting state name and a number of steps, and answers a distribution over the chain’s states indexed by name, so indexing it with V reads the chance of a vowel.", "For two states the second eigenvalue is p_VV less p_CV, read off probability_of. Its sign says whether the walks cross and its size says how much of the remaining distance each step leaves."], check: numberCheck("What chance of a vowel does the Dinah chain give two steps after a vowel?", 0.3829, 0.0005, "The walk passes through a vowel with chance 0.2 and then reaches a vowel with chance 0.2, or passes through a consonant with chance 0.8 and then reaches a vowel with chance 3/7, so 0.04 plus 0.3429, which is the table squared read at the vowel row. The second eigenvalue is 0.2 less 0.4286, so each step leaves 0.2286 of the remaining distance and the sign makes the two walks cross, 0.3829 against 0.3306 after two steps, before both settle at 0.3488.") },
+            ),
+            exercise(
+              "Score the sentence under its own chain",
+              ["Part 2 says the counted table is the one under which the counted text is most probable, and that the probability of a text is a product of one table entry per step, given its first letter. Ask the chain for the log probability of Oh my dear Dinah, confirm it by adding the twelve logarithms yourself, and then score a sentence the chain never counted, the classes of banana.", "The two-chapter chain gives its text a log likelihood of −9,773.73 nats. The number for the thirteen-letter sentence is one the page does not print, and the first letter is never scored, which is why thirteen letters give twelve terms."],
+              `import math
+from oop_ml import MarkovChain
+
+sentence = "oh my dear dinah"
+dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
+
+chain = MarkovChain().fit([dinah])
+# Print the log probability the chain gives its own sentence, and the
+# probability that is. Add the twelve logarithms by hand from the counts,
+# one of 1/5, four of 4/5, three of 3/7 and four of 4/7, and print the sum.
+# Then score the classes of the word banana under the same chain.`,
+              `import math
+from oop_ml import MarkovChain
+
+sentence = "oh my dear dinah"
+dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
+
+chain = MarkovChain().fit([dinah])
+
+log_probability = chain.log_probability_of(dinah)
+print(f"log probability of the sentence under its own chain {log_probability:.4f} nats")
+print(f"probability {math.exp(log_probability):.6f}")
+
+by_hand = math.log(1 / 5) + 4 * math.log(4 / 5) + 3 * math.log(3 / 7) + 4 * math.log(4 / 7)
+print(f"the twelve logarithms added by hand {by_hand:.4f} nats")
+
+banana = [("V" if letter in "aeiou" else "C") for letter in "banana"]
+print(f"log probability of banana's classes {chain.log_probability_of(banana):.4f} nats")`,
+              `log probability of the sentence under its own chain -7.2824 nats
+probability 0.000688
+the twelve logarithms added by hand -7.2824 nats
+log probability of banana's classes -2.9882 nats`,
+              { hints: ["log_probability_of takes one sequence of state names and answers the sum of the natural logarithms of each step’s probability, given the first state, so the exponential of it is the probability of the twelve steps together.", "The steps in the sentence are one vowel to vowel, four vowel to consonant, three consonant to vowel and four consonant to consonant, so the sum by hand has those four terms with those four counts.", "banana’s classes are C V C V C V, five steps, every one a step the Dinah chain counted, so nothing in it has probability zero."], check: numberCheck("What log probability does the chain give Oh my dear Dinah, in nats?", -7.2824, 0.0005, "Twelve steps, one table entry each, and the logarithm of the product is the sum of the logarithms, one of 1/5, four of 4/5, three of 3/7 and four of 4/7. Part 2 says no other table can give the sentence a larger value, since each row is its counts over its own total, and the same calculation on the two chapters gives −9,773.73 nats. The first letter is taken as given and never scored.") },
+            ),
+            exercise(
+              "Count the three chains where the method stops being defined",
+              ["Part 7 counts chains on spa, whose vowel is never left, on banana, whose classes alternate in lockstep, and on rhythm and aeiou together, whose table is the identity. Count all three with the library, as counted and smoothed by a half, and see which question each refuses to answer.", "The page says the first is refused at the fit, the second has exactly one stationary distribution that no walk reaches, and the third has a whole line of them. Smoothed by a half, banana settles at 0.5122 for a vowel and the two words at 0.4545."],
+              `from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
+
+groups = {"spa": ["spa"], "banana": ["banana"], "rhythm and aeiou": ["rhythm", "aeiou"]}
+for label, words in groups.items():
+    sequences = [[("V" if letter in "aeiou" else "C") for letter in word] for word in words]
+    # Fit a chain smoothed by a half and print where it settles for a vowel.
+    # Then fit the chain as counted, with no smoothing: print the refusal if
+    # there is one, otherwise print its table, the chance of a vowel over
+    # the first six steps from the first state, and its stationary vowel
+    # share, or the refusal if it has no single one.
+    pass`,
+              `from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
+
+groups = {"spa": ["spa"], "banana": ["banana"], "rhythm and aeiou": ["rhythm", "aeiou"]}
+for label, words in groups.items():
+    sequences = [[("V" if letter in "aeiou" else "C") for letter in word] for word in words]
+    smoothed = MarkovChain(smoothing=0.5).fit(sequences)
+    print(f"{label}: smoothed to a half, settles at {smoothed.stationary_distribution()['V']:.4f} for a vowel")
+    try:
+        chain = MarkovChain().fit(sequences)
+    except TooFewValuesError as refusal:
+        print(f"{label}: as counted, refused. {refusal}")
+        continue
+    table = [[round(chain.probability_of(source, target), 2) for target in ("V", "C")] for source in ("V", "C")]
+    walk = [round(chain.distribution_after(sequences[0][0], steps)["V"], 2) for steps in range(6)]
+    print(f"{label}: as counted, table {table}, chance of a vowel over six steps {walk}")
+    try:
+        print(f"{label}: as counted, stationary vowel share {chain.stationary_distribution()['V']:.4f}")
+    except NonUniqueStationaryDistributionError as refusal:
+        print(f"{label}: as counted, no single answer. {refusal}")`,
+              `spa: smoothed to a half, settles at 0.5000 for a vowel
+spa: as counted, refused. ['V'] never began a counted step, so each has a row of transitions that is zero over zero. Give a smoothing above zero, or count sequences that leave them
+banana: smoothed to a half, settles at 0.5122 for a vowel
+banana: as counted, table [[0.0, 1.0], [1.0, 0.0]], chance of a vowel over six steps [0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
+banana: as counted, stationary vowel share 0.5000
+rhythm and aeiou: smoothed to a half, settles at 0.4545 for a vowel
+rhythm and aeiou: as counted, table [[1.0, 0.0], [0.0, 1.0]], chance of a vowel over six steps [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+rhythm and aeiou: as counted, no single answer. this chain has 2 closed groups of states, ('C',), ('V',). A walk that enters one never leaves it, so each has its own stationary distribution and every mixture of them is stationary too; there is no single one to give. A smoothing above zero joins them`,
+              { hints: ["A state that never begins a step is refused by fit with TooFewValuesError when the smoothing is zero, and the message names the state. Catching it and continuing is what lets the loop reach the other two.", "stationary_distribution raises NonUniqueStationaryDistributionError when there is more than one closed group of states, and the message names the groups. It still answers on banana, where there is one closed group, even though no walk arrives there.", "distribution_after from the first state of the first word shows the lockstep on banana, certainly a consonant after every even step and certainly a vowel after every odd one."], check: numberCheck("Where does banana’s chain settle for a vowel once smoothed by a half?", 0.5122, 0.0005, "A smoothing of a half adds half a step to every cell, so each state can now repeat and the lockstep is broken. The consonant row becomes 3.5 of 4 to a vowel and the vowel row 2.5 of 3 to a consonant, and the balance gives 0.875 over 0.875 plus 0.8333, which is 0.5122, where every walk now arrives. As counted the table is the flip, with exactly one stationary distribution, half and half, that no walk reaches.") },
+            ),
+          ],
         },
       ]}
     />
