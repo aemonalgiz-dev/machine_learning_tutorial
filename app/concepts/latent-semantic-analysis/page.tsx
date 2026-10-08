@@ -26,7 +26,7 @@ import { TwoSensesOneRow } from "@/components/widgets/TwoSensesOneRow";
 export const metadata: Metadata = {
   title: "Latent Semantic Analysis · oop_ml",
   description:
-    "Weight a term-document table and compress it into a shared space for words and documents.",
+    "Documents about related subjects may use some of the same words in different amounts. Latent semantic analysis starts with a table of word use and keeps a smaller set of shared patterns for representing words and documents.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function LatentSemanticAnalysisPage() {
       openingTitle="A Large Word Table May Have a Smaller Pattern Inside It"
       playgroundIntro="Compare the original table with its weighted and reduced representations. Inspect neighbouring words and documents as you change the number of retained directions."
       title="Latent Semantic Analysis"
-      tagline="Weight a term-document table and compress it into a shared space for words and documents."
+      tagline={"Documents about related subjects may use some of the same words in different amounts. Latent semantic analysis starts with a table of word use and keeps a smaller set of shared patterns for representing words and documents."}
       prerequisites={
         <>
           Everything here ends as a handful of coordinates, and two of them are

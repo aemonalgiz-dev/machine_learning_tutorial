@@ -26,6 +26,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { QuizQuestion, answersOf, arranged, isCorrect } from "@/lib/quizzes";
+import { BotieSays } from "@/components/site/Botie";
 
 interface Attempt {
   // Indices as written, not as shown.
@@ -112,14 +113,18 @@ export function QuizDeck({
   if (finished) {
     return (
       <Shell step={`${questions.length} of ${questions.length}`}>
-        <p className="text-lg font-semibold text-foreground">
-          You answered {scored} of {questions.length}.
-        </p>
-        <p className="mt-2 text-sm text-muted">
-          {scored === questions.length
-            ? "Every one. The section behind these is the one to move on from."
-            : "Going back through the ones you missed is worth more than the score."}
-        </p>
+        <div role="status" aria-label="Botie's quiz summary">
+          <BotieSays mood={scored === questions.length ? "happy" : "curious"} className="flex-col !items-start sm:flex-row">
+            <p className="text-lg font-semibold text-foreground">
+              You answered {scored} of {questions.length} correctly.
+            </p>
+            <p className="mt-2 text-sm text-muted">
+              {scored === questions.length
+                ? "Those answers are all correct. You can move on, or revisit any explanation."
+                : "Let’s go back through the answers you missed and work out why."}
+            </p>
+          </BotieSays>
+        </div>
         <div className="mt-4 flex flex-wrap gap-3">
           <Quiet onClick={() => setCard(questions.length - 1)}>Back to the last question</Quiet>
           <Quiet onClick={restart}>Start these again</Quiet>
@@ -198,33 +203,35 @@ export function QuizDeck({
       </div>
 
       {given.answered && (
-        <div className="mt-4 text-sm">
-          <p
-            className={
-              "font-semibold " +
-              (right ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300")
-            }
-          >
-            {right ? "That is right." : "Not quite."}
-          </p>
-          <p className="mt-1 text-foreground">{current.because}</p>
-          {!right && revisit.length > 0 && (
-            <p className="mt-2 text-muted">
-              Worth another look:{" "}
-              {revisit.map((link, index) => (
-                <span key={link.title}>
-                  {index > 0 && ", "}
-                  <button
-                    type="button"
-                    onClick={link.go}
-                    className="font-medium text-accent underline underline-offset-4 hover:brightness-110"
-                  >
-                    {link.title}
-                  </button>
-                </span>
-              ))}
+        <div className="mt-4 text-sm" role="status" aria-label="Botie's feedback">
+          <BotieSays mood={right ? "happy" : "curious"} className="flex-col !items-start sm:flex-row">
+            <p
+              className={
+                "font-semibold " +
+                (right ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300")
+              }
+            >
+              {right ? "That is right." : "Not quite. Let’s look at why."}
             </p>
-          )}
+            <p className="mt-1 text-foreground">{current.because}</p>
+            {!right && revisit.length > 0 && (
+              <p className="mt-2 text-muted">
+                Let’s revisit:{" "}
+                {revisit.map((link, index) => (
+                  <span key={link.title}>
+                    {index > 0 && ", "}
+                    <button
+                      type="button"
+                      onClick={link.go}
+                      className="font-medium text-accent underline underline-offset-4 hover:brightness-110"
+                    >
+                      {link.title}
+                    </button>
+                  </span>
+                ))}
+              </p>
+            )}
+          </BotieSays>
         </div>
       )}
 

@@ -31,7 +31,7 @@ import {
 export const metadata: Metadata = {
   title: "What Near Means · oop_ml",
   description:
-    "Compare distance rules and see how their definitions change a model's neighbours and groups.",
+    "Which of two examples is nearer depends on how we measure distance. We will compare those choices before using nearness to find neighbours or form groups.",
 };
 
 const linkClass =
@@ -46,7 +46,7 @@ export default function DistanceMetricsPage() {
       openingTitle="Near According to Which Rule?"
       playgroundIntro="Keep the points fixed and change the distance rule. Watch how the shape of an equal-distance boundary and the nearest neighbours change."
       title="What Near Means"
-      tagline="Compare distance rules and see how their definitions change a model's neighbours and groups."
+      tagline={"Which of two examples is nearer depends on how we measure distance. We will compare those choices before using nearness to find neighbours or form groups."}
       prerequisites={
         <>
           The vector, its length and the dot product come from the{" "}

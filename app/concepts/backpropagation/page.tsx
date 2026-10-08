@@ -30,7 +30,7 @@ import { UpdateThenReforward } from "@/components/widgets/UpdateThenReforward";
 export const metadata: Metadata = {
   title: "Backpropagation · oop_ml",
   description:
-    "Trace how each weight affects the loss, then use those gradients to improve the network.",
+    "A network can contain many weights between an input and its prediction. Backpropagation works backwards through those calculations to find how each weight contributed to a change in the loss.",
 };
 
 const linkClass =
@@ -45,7 +45,7 @@ export default function BackpropagationPage() {
       openingTitle="Which Weight Should Change?"
       playgroundIntro="Follow the prediction forward and the gradients backward. Compare a gradient with the loss change produced by a small numerical nudge to that weight."
       title="Backpropagation"
-      tagline="Trace how each weight affects the loss, then use those gradients to improve the network."
+      tagline={"A network can contain many weights between an input and its prediction. Backpropagation works backwards through those calculations to find how each weight contributed to a change in the loss."}
       prerequisites={
         <>
           The network is the{" "}

@@ -26,7 +26,7 @@ import { ShareLadder } from "@/components/widgets/ShareLadder";
 export const metadata: Metadata = {
   title: "Kernel Principal Components · oop_ml",
   description:
-    "Apply PCA through a kernel to describe variation in a transformed feature space.",
+    "The useful structure in a dataset may not lie along a straight direction in its original coordinates. Kernel PCA looks for variation after a transformation, using comparisons between examples to do the work.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -40,7 +40,7 @@ export default function KernelPcaPage() {
       openingTitle="When the Pattern Follows a Curve"
       playgroundIntro="Compare ordinary PCA with the kernel projection. Keep track of which plot uses the original coordinates and which uses the new components."
       title="Kernel Principal Components"
-      tagline="Apply PCA through a kernel to describe variation in a transformed feature space."
+      tagline={"The useful structure in a dataset may not lie along a straight direction in its original coordinates. Kernel PCA looks for variation after a transformation, using comparisons between examples to do the work."}
       prerequisites={
         <>
           This page is{" "}

@@ -27,7 +27,7 @@ import { SoftThresholdSlider } from "@/components/widgets/SoftThresholdSlider";
 export const metadata: Metadata = {
   title: "Ridge & Lasso · oop_ml",
   description:
-    "Limit the size of a model's coefficients and examine the trade between fitting and overfitting.",
+    "A flexible model can fit accidental details in the training data. Penalising large coefficients gives us a way to discourage that behaviour, with ridge and lasso making different kinds of adjustment.",
 };
 
 const linkClass =
@@ -42,7 +42,7 @@ export default function RidgeLassoPage() {
       openingTitle="A Better Fit Can Make a Worse Prediction"
       playgroundIntro="Increase the penalty and compare the curve and its coefficients. Notice what the model gives up in training fit as the coefficients shrink."
       title="Ridge & Lasso"
-      tagline="Limit the size of a model's coefficients and examine the trade between fitting and overfitting."
+      tagline={"A flexible model can fit accidental details in the training data. Penalising large coefficients gives us a way to discourage that behaviour, with ridge and lasso making different kinds of adjustment."}
       prerequisites={
         <>
           This page answers the problem{" "}

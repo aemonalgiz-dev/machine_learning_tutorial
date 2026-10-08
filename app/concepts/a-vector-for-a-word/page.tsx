@@ -28,7 +28,7 @@ import { WordSpaceScatter } from "@/components/widgets/WordSpaceScatter";
 export const metadata: Metadata = {
   title: "A Vector for a Word · oop_ml",
   description:
-    "Represent words with vectors so their relationships can be compared numerically.",
+    "A token's ID tells us which word it identifies, but not how that word relates to another. A vector gives us several numerical coordinates whose learned relationships can support useful comparisons.",
 };
 
 export default function WordVectorPage() {
@@ -40,7 +40,7 @@ export default function WordVectorPage() {
       openingTitle="A Word's ID Cannot Tell Us What It Resembles"
       playgroundIntro="Compare the nearest vectors for a selected word. Inspect both the similarity values and the source text that gave those relationships meaning."
       title="A Vector for a Word"
-      tagline="Represent words with vectors so their relationships can be compared numerically."
+      tagline={"A token's ID tells us which word it identifies, but not how that word relates to another. A vector gives us several numerical coordinates whose learned relationships can support useful comparisons."}
       prerequisites={
         <>
           The tokenizing pages end with a lookup table from a piece of text to a

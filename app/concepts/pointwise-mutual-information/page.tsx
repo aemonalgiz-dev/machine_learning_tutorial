@@ -24,7 +24,7 @@ import { SmoothingTracks } from "@/components/widgets/SmoothingTracks";
 export const metadata: Metadata = {
   title: "Pointwise Mutual Information · oop_ml",
   description:
-    "Compare an observed pair frequency with the frequency predicted by independence.",
+    "Two common words can appear together often simply because both appear everywhere. Pointwise mutual information compares their observed association with what we would expect if their occurrences were independent.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function PointwiseMutualInformationPage() {
       openingTitle="Together More Often Than We Would Expect"
       playgroundIntro="Compare a pair's observed frequency with its independence baseline. Check how a rare pair can receive a large score despite having little supporting evidence."
       title="Pointwise Mutual Information"
-      tagline="Compare an observed pair frequency with the frequency predicted by independence."
+      tagline={"Two common words can appear together often simply because both appear everywhere. Pointwise mutual information compares their observed association with what we would expect if their occurrences were independent."}
       prerequisites={
         <>
           Every word here ends up as a short list of numbers, and two words are

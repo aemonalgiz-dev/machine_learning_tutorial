@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample, WhyThisWorks } from "@/components/concept/Treatments";
 import { AttentionExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Attention · oop_ml", description: "Build attention from the need for context, then follow queries, keys, values, and learned comparisons." };
+export const metadata: Metadata = { title: "Attention · oop_ml", description: "A word's meaning in a sentence can depend on words some distance away. Attention gives each position a way to compare the available information and combine the parts most relevant to its current representation." };
 
 export default function AttentionPage() {
   return <ConceptPage
       lessonId="attention"
-      intuition={lessonIntuitions["attention"]} title="Attention" tagline="Let each token gather the information it needs from the surrounding tokens."
+      intuition={lessonIntuitions["attention"]} title="Attention" tagline={"A word's meaning in a sentence can depend on words some distance away. Attention gives each position a way to compare the available information and combine the parts most relevant to its current representation."}
     openingTitle="Which Words Help Us Understand This One?"
     technicalStart="Part 2. Calculating Attention"
     prerequisites={<>Start with <Link href="/concepts/embedding-layers">embedding layers</Link> for how a token gets a vector. <Link href="/concepts/dense-layers">Dense layers</Link> explain the weighted sums used to transform those vectors.</>}

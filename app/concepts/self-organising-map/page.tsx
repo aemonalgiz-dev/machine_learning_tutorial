@@ -27,7 +27,7 @@ import { WhatEachCellHolds } from "@/components/widgets/WhatEachCellHolds";
 export const metadata: Metadata = {
   title: "Self-Organising Maps · oop_ml",
   description:
-    "Arrange representative vectors on a grid and update nearby grid cells together.",
+    "A large collection of measurements is difficult to picture at once. A self-organising map arranges representative examples on a small grid, trying to keep similar observations near one another.",
 };
 
 const link =
@@ -42,7 +42,7 @@ export default function SelfOrganisingMapPage() {
       openingTitle="A Grouping Is Useful; a Map Can Show More"
       playgroundIntro="Follow one example's winning cell and the neighbouring cells it updates. Compare their grid positions with the feature values those cells represent."
       title="Self-Organising Maps"
-      tagline="Arrange representative vectors on a grid and update nearby grid cells together."
+      tagline={"A large collection of measurements is difficult to picture at once. A self-organising map arranges representative examples on a small grid, trying to keep similar observations near one another."}
       prerequisites={
         <>
           Which cell is nearest is the{" "}

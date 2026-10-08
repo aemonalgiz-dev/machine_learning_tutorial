@@ -30,7 +30,7 @@ import { ThresholdExplorer } from "@/components/widgets/ThresholdExplorer";
 export const metadata: Metadata = {
   title: "Logistic Regression · oop_ml",
   description:
-    "Turn measurements into a probability, then choose how that probability becomes a decision.",
+    "Suppose our answer needs to be yes or no. We can first estimate a probability from the measurements, then decide how large that probability needs to be before we choose yes.",
 };
 
 const linkClass =
@@ -45,7 +45,7 @@ export default function LogisticRegressionPage() {
       openingTitle="A Prediction Between Yes and No"
       playgroundIntro="Read the score, probability, and predicted class as three different quantities. Move the query point and watch where the class changes."
       title="Logistic Regression"
-      tagline="Turn measurements into a probability, then choose how that probability becomes a decision."
+      tagline={"Suppose our answer needs to be yes or no. We can first estimate a probability from the measurements, then decide how large that probability needs to be before we choose yes."}
       prerequisites={
         <>
           This page assumes{" "}

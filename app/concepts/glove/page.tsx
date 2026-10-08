@@ -26,7 +26,7 @@ import { GloveWindowSweep } from "@/components/widgets/GloveWindowSweep";
 export const metadata: Metadata = {
   title: "GloVe · oop_ml",
   description:
-    "Learn word vectors from a table of co-occurrence counts.",
+    "A table of word co-occurrences contains information about how words are used together. GloVe learns vectors whose comparisons account for patterns in those counts, rather than keeping the full table as the representation.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function GlovePage() {
       openingTitle="Count the Neighbours Once, Then Fit Their Relationships"
       playgroundIntro="Compare an observed pair count with the value reconstructed by the vectors and biases. Inspect how the weighting changes the contribution of rare and frequent pairs."
       title="GloVe"
-      tagline="Learn word vectors from a table of co-occurrence counts."
+      tagline={"A table of word co-occurrences contains information about how words are used together. GloVe learns vectors whose comparisons account for patterns in those counts, rather than keeping the full table as the representation."}
       prerequisites={
         <>
           Every word here ends up as a short list of numbers, and two words are

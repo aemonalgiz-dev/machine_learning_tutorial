@@ -24,7 +24,7 @@ import { NeuronPlayground } from "@/components/widgets/NeuronPlayground";
 export const metadata: Metadata = {
   title: "A Neuron · oop_ml",
   description:
-    "Build one artificial neuron from inputs, weights, a bias, and an activation function.",
+    "An artificial neuron starts with three fundamental components: weights, a bias, and an activation function. We will work through what each contributes before putting them together to calculate an output.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function NeuronsAndActivationsPage() {
       openingTitle="What Is Inside an Artificial Neuron?"
       playgroundIntro="Change one weight, the bias, or the activation at a time. Compare the weighted score with the final output so you can see which operation changed it."
       title="A Neuron"
-      tagline="Build one artificial neuron from inputs, weights, a bias, and an activation function."
+      tagline={"An artificial neuron starts with three fundamental components: weights, a bias, and an activation function. We will work through what each contributes before putting them together to calculate an output."}
       prerequisites={
         <>
           The first example needs multiplication and addition. The connection to{" "}

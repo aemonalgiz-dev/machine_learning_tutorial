@@ -26,7 +26,7 @@ import { FasttextUnseenWord } from "@/components/widgets/FasttextUnseenWord";
 export const metadata: Metadata = {
   title: "FastText · oop_ml",
   description:
-    "Share information through character substrings so word vectors can use spelling as well as context.",
+    "A rare word may share useful parts with words we have seen many times. FastText includes character fragments in its word representations, allowing those related spellings to share information during learning.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function FasttextPage() {
       openingTitle="An Unfamiliar Word May Have Familiar Parts"
       playgroundIntro="Compare a familiar word's whole-word contribution with its substring contributions. Try an unseen spelling and inspect which learned pieces support its vector."
       title="FastText"
-      tagline="Share information through character substrings so word vectors can use spelling as well as context."
+      tagline={"A rare word may share useful parts with words we have seen many times. FastText includes character fragments in its word representations, allowing those related spellings to share information during learning."}
       prerequisites={
         <>
           This page changes one part of{" "}

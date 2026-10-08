@@ -1,0 +1,19 @@
+.machine {
+  background-image: radial-gradient(ellipse at 50% 50%, var(--accent-soft), transparent 65%), linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: auto, 24px 24px, 24px 24px;
+}
+.part { transform: translate(var(--inspect-x, 440px), var(--belt-y, 166px)); }
+.travelling { animation: delivery 550ms ease-in-out both; }
+@keyframes delivery {
+  0% { transform: translate(var(--start-x, 65px), var(--belt-y, 166px)); opacity: 0; }
+  15% { opacity: 1; }
+  55% { transform: translate(var(--gate-x, 480px), var(--belt-y, 166px)); }
+  100% { transform: translate(var(--destination-x, 718px), var(--destination-y)); }
+}
+.knob {
+  background: conic-gradient(from 225deg, var(--accent-fill), var(--raised) 75%);
+  box-shadow: inset 0 0 0 5px var(--surface), 0 0 0 1px var(--line);
+}
+@media (prefers-reduced-motion: reduce) {
+  .travelling { animation: none; transform: translate(var(--destination-x, 718px), var(--destination-y)); }
+}

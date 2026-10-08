@@ -27,7 +27,7 @@ import { TwoReadings } from "@/components/widgets/TwoReadings";
 export const metadata: Metadata = {
   title: "Judging a Classifier · oop_ml",
   description:
-    "Count different kinds of classification mistakes and connect them to the decision you need to make.",
+    "A model can make different kinds of mistake, and they may have very different consequences. Counting correct answers alone can hide the errors that matter most for the task.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -41,7 +41,7 @@ export default function JudgingAClassifierPage() {
       openingTitle="Two Models Can Be Equally Accurate and Fail Differently"
       playgroundIntro="Look at the false positives and false negatives separately. Move the threshold and watch which kind of mistake becomes more common."
       title="Judging a Classifier"
-      tagline="Count different kinds of classification mistakes and connect them to the decision you need to make."
+      tagline={"A model can make different kinds of mistake, and they may have very different consequences. Counting correct answers alone can hide the errors that matter most for the task."}
       prerequisites={
         <>
           The model being judged is the{" "}

@@ -25,7 +25,7 @@ import { WindowPositions } from "@/components/widgets/WindowPositions";
 export const metadata: Metadata = {
   title: "The Shape Guarantee · oop_ml",
   description:
-    "Track how each layer arranges its inputs and outputs, and make reshaping explicit.",
+    "A layer needs to know which numbers belong to which example and how they are arranged. We will follow those dimensions through a network and see what changes when an image is flattened.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function ShapesAndFlatteningPage() {
       openingTitle="The Right Number of Values Can Still Be the Wrong Shape"
       playgroundIntro="Compare each layer's output shape with the next layer's expected input. Look for cases with equal value counts but different arrangements."
       title="The Shape Guarantee"
-      tagline="Track how each layer arranges its inputs and outputs, and make reshaping explicit."
+      tagline={"A layer needs to know which numbers belong to which example and how they are arranged. We will follow those dimensions through a network and see what changes when an image is flattened."}
       prerequisites={
         <>
           The layers joined here are the{" "}

@@ -25,7 +25,7 @@ import { TwoLossCurves } from "@/components/widgets/TwoLossCurves";
 export const metadata: Metadata = {
   title: "Training a Network · oop_ml",
   description:
-    "Repeat prediction, gradient calculation, and updates while checking what the model learns.",
+    "We now have a prediction, a way to measure its error, and gradients that describe possible adjustments. Training brings those steps together and repeats them over examples so the network can improve.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function TrainingANetworkPage() {
       openingTitle="One Better Guess Is Only the Beginning"
       playgroundIntro="Compare training and validation curves as the run progresses. Change one training setting at a time and distinguish the number of updates from the number of epochs."
       title="Training a Network"
-      tagline="Repeat prediction, gradient calculation, and updates while checking what the model learns."
+      tagline={"We now have a prediction, a way to measure its error, and gradients that describe possible adjustments. Training brings those steps together and repeats them over examples so the network can improve."}
       prerequisites={
         <>
           The chain being trained here is built from the{" "}

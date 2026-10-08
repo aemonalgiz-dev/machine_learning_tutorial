@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Botie } from "@/components/site/Botie";
 import { LegacyCourseLinks } from "@/components/course/LegacyCourseLinks";
 import { CURRICULUM } from "@/lib/curriculum";
 import { COFFEE_URL } from "@/lib/site";
@@ -111,6 +112,11 @@ export default function Home() {
           )}
         </p>
       </header>
+
+      <section className="mb-12 flex flex-wrap items-center gap-5 rounded-2xl border border-line bg-surface p-5 sm:flex-nowrap sm:p-6" aria-labelledby="meet-botie">
+        <Botie size={116} />
+        <div className="min-w-0"><p className="mb-2 font-mono text-xs uppercase tracking-wider text-accent">Learn and build with Botie</p><h2 id="meet-botie" className="text-2xl font-semibold">Meet Botie. He could use a hand.</h2><p className="mt-3 text-sm leading-7 text-muted">Botie starts with the problems people were trying to solve and the ideas they developed along the way. We will work through the pieces before you use them to build a solution of your own. As the problems grow, you will keep using the tools you already understand.</p><div className="mt-4 flex flex-wrap gap-3"><Link href="/lab/workshop-guide" className="rounded-lg bg-accent-fill px-4 py-3 text-sm font-semibold text-accent-ink">Start the journey with Botie →</Link><Link href="/lab" className="rounded-lg border border-line px-4 py-3 text-sm font-semibold hover:bg-raised">Browse the workshops</Link></div></div>
+      </section>
 
       <section aria-labelledby="shape" className="mb-16">
         <h2 id="shape" className="mb-5 text-xl font-semibold text-foreground">

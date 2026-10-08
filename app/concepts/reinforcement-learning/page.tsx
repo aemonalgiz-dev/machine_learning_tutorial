@@ -10,7 +10,7 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Reinforcement Learning · oop_ml",
-  description: "Learn why an agent needs rewards, follow one policy update, and connect the feedback loop to language models and LoRA.",
+  description: "We cannot always provide the correct answer before an action is taken. Reinforcement learning uses the rewards that follow actions to improve a policy, including decisions whose consequences appear several steps later.",
 };
 
 export default function Page() {
@@ -18,7 +18,7 @@ export default function Page() {
     <ConceptPage
       lessonId="reinforcement-learning"
       title="Reinforcement Learning"
-      tagline="Let an agent try an action, observe its consequences, and use that experience to improve its next decision."
+      tagline={"We cannot always provide the correct answer before an action is taken. Reinforcement learning uses the rewards that follow actions to improve a policy, including decisions whose consequences appear several steps later."}
       openingTitle="How Can a Model Learn When We Can Judge the Result?"
       intuition={lessonIntuitions["reinforcement-learning"]}
       technicalStart="Part 3. Calculate One Policy Update"

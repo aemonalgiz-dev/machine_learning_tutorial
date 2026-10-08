@@ -26,7 +26,7 @@ import { GradientDescentPlayground } from "@/components/widgets/GradientDescentP
 export const metadata: Metadata = {
   title: "Calculus Primer · oop_ml",
   description:
-    "Build derivatives from changes you can measure, then use them to guide small improvements.",
+    "If we change a model's setting a little, does its error improve or get worse? Calculus gives us a way to describe that change and use it to decide what to adjust next.",
 };
 
 export default function CalculusPrimerPage() {
@@ -35,7 +35,7 @@ export default function CalculusPrimerPage() {
       lessonId="calculus"
       technicalStart="7. Deriving the Slope Function"
       title="Calculus Primer"
-      tagline="Build derivatives from changes you can measure, then use them to guide small improvements."
+      tagline={"If we change a model's setting a little, does its error improve or get worse? Calculus gives us a way to describe that change and use it to decide what to adjust next."}
       prerequisites={
         <>
           You only need to know what a function and its graph are, a rule that

@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WorkedExample, WhyThisWorks } from "@/components/concept/Treatments";
 import { RecurrentExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Recurrent Layers · oop_ml", description: "Build a running state for a sequence, then introduce the memory and gates used by LSTMs and GRUs." };
+export const metadata: Metadata = { title: "Recurrent Layers · oop_ml", description: "A measurement in a sequence may only make sense in light of what came before it. Recurrent layers carry a state between steps, and gates give us more control over what information is kept." };
 
 export default function RecurrentLayersPage() {
   return <ConceptPage
       lessonId="recurrent-layers"
-      intuition={lessonIntuitions["recurrent-layers"]} title="Recurrent Layers" tagline="Read a sequence one step at a time and carry information forward."
+      intuition={lessonIntuitions["recurrent-layers"]} title="Recurrent Layers" tagline={"A measurement in a sequence may only make sense in light of what came before it. Recurrent layers carry a state between steps, and gates give us more control over what information is kept."}
     openingTitle="How Do We Remember What Came Before?"
     technicalStart="Part 2. Controlling What the State Retains"
     prerequisites={<>The <Link href="/concepts/neurons-and-activations">neuron</Link> lesson introduces weights, biases, and activation functions. <Link href="/concepts/backpropagation">Backpropagation</Link> explains the gradients used later in this lesson.</>}

@@ -22,7 +22,7 @@ import { ScrambleLadder } from "@/components/widgets/ScrambleLadder";
 export const metadata: Metadata = {
   title: "Which Feature Mattered · oop_ml",
   description:
-    "Compare split-based and permutation importance, and learn what each can say about a fitted model.",
+    "A prediction alone does not tell us which measurements the model relied on. Feature importance methods give us ways to investigate that question, although their scores need careful interpretation.",
 };
 
 const link =
@@ -37,7 +37,7 @@ export default function FeatureImportancePage() {
       openingTitle="What Did the Model Actually Use?"
       playgroundIntro="Compare the two importance rankings, especially for the noise feature. Read each ranking alongside the model's predictive score."
       title="Which Feature Mattered"
-      tagline="Compare split-based and permutation importance, and learn what each can say about a fitted model."
+      tagline={"A prediction alone does not tell us which measurements the model relied on. Feature importance methods give us ways to investigate that question, although their scores need careful interpretation."}
       prerequisites={
         <>
           The first measure reads the splits of a{" "}

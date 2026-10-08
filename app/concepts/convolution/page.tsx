@@ -27,7 +27,7 @@ import { SweepGeometryTable } from "@/components/widgets/SweepGeometryTable";
 export const metadata: Metadata = {
   title: "Convolution · oop_ml",
   description:
-    "Slide a small set of shared weights across a picture to produce a map of responses.",
+    "A useful image pattern can appear anywhere in a picture. Convolution applies the same small set of weights at different positions, producing a map of where that pattern receives a response.",
 };
 
 const link =
@@ -42,7 +42,7 @@ export default function ConvolutionPage() {
       openingTitle="Look for the Same Pattern in More Than One Place"
       playgroundIntro="Inspect one input window and the output value it produces. Move to the next position and check that the same weights are reused."
       title="Convolution"
-      tagline="Slide a small set of shared weights across a picture to produce a map of responses."
+      tagline={"A useful image pattern can appear anywhere in a picture. Convolution applies the same small set of weights at different positions, producing a map of where that pattern receives a response."}
       prerequisites={
         <>
           A convolution is a layer, so the{" "}

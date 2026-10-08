@@ -29,7 +29,7 @@ import { WidthAgainstDepth } from "@/components/widgets/WidthAgainstDepth";
 export const metadata: Metadata = {
   title: "A Dense Layer and the Forward Pass · oop_ml",
   description:
-    "Group neurons into a layer and pass their outputs to the next layer.",
+    "One neuron can only do so much with an input. Connecting several neurons lets us calculate different combinations of the same measurements, then pass those outputs to another layer.",
 };
 
 const link =
@@ -44,7 +44,7 @@ export default function DenseLayersPage() {
       openingTitle="Several Neurons Read the Same Example"
       playgroundIntro="Follow one example through the neurons. Compare each neuron's inputs, score, and activated output before following the next layer."
       title="A Dense Layer and the Forward Pass"
-      tagline="Group neurons into a layer and pass their outputs to the next layer."
+      tagline={"One neuron can only do so much with an input. Connecting several neurons lets us calculate different combinations of the same measurements, then pass those outputs to another layer."}
       prerequisites={
         <>
           One neuron, its weighted sum and the activation function applied to it, is the{" "}

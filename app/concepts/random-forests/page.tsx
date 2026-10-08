@@ -29,7 +29,7 @@ import { VarianceFloorChart } from "@/components/widgets/VarianceFloorChart";
 export const metadata: Metadata = {
   title: "Random Forests · oop_ml",
   description:
-    "Give each tree different feature choices so their combined prediction depends less on the same few splits.",
+    "A collection of trees is less useful if they all make the same mistakes. Giving them different samples and different feature choices encourages the variety that can make their combined prediction more reliable.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -43,7 +43,7 @@ export default function RandomForestsPage() {
       openingTitle="A Crowd That Keeps Making the Same Mistake"
       playgroundIntro="Compare the questions and predictions of individual trees. Change how many features each split may consider and watch what happens to their agreement."
       title="Random Forests"
-      tagline="Give each tree different feature choices so their combined prediction depends less on the same few splits."
+      tagline={"A collection of trees is less useful if they all make the same mistakes. Giving them different samples and different feature choices encourages the variety that can make their combined prediction more reliable."}
       prerequisites={
         <>
           This page changes one rule of{" "}

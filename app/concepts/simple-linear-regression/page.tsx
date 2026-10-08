@@ -21,7 +21,7 @@ import { SquaresChart } from "@/components/widgets/SquaresChart";
 export const metadata: Metadata = {
   title: "Simple Linear Regression · oop_ml",
   description:
-    "Use height to predict weight, then work out what makes one line fit better than another.",
+    "Taller people tend to weigh more, but height does not determine weight exactly. We will use that relationship to build a prediction rule and work out what makes one line fit the observations better than another.",
 };
 
 export default function SimpleLinearRegressionPage() {
@@ -33,7 +33,7 @@ export default function SimpleLinearRegressionPage() {
       openingTitle="One Line, Five Different Answers"
       playgroundIntro="Choose The measured five to load the worked example, then drag a point. Watch the automatically fitted line and the gaps between observations and predictions change."
       title="Simple linear regression"
-      tagline="Use height to predict weight, then work out what makes one line fit better than another."
+      tagline={"Taller people tend to weigh more, but height does not determine weight exactly. We will use that relationship to build a prediction rule and work out what makes one line fit the observations better than another."}
       prerequisites={
         <>
           You only need to know what a straight line is. It has a slope that

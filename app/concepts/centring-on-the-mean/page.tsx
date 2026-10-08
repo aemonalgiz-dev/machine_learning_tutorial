@@ -23,7 +23,7 @@ import { WalkFromTheMean } from "@/components/widgets/WalkFromTheMean";
 export const metadata: Metadata = {
   title: "Centring on the Mean · oop_ml",
   description:
-    "Subtract each feature's mean and measure values relative to the average observation.",
+    "Sometimes it is more useful to know how far a measurement is from the average than how far it is from zero. Subtracting the mean gives us that new reference point.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function CentringOnTheMeanPage() {
       openingTitle="Move Zero to Somewhere Useful"
       playgroundIntro="Compare the original coordinates with the centred ones. Watch which distances stay fixed when the origin moves to the mean."
       title="Centring on the Mean"
-      tagline="Subtract each feature's mean and measure values relative to the average observation."
+      tagline={"Sometimes it is more useful to know how far a measurement is from the average than how far it is from zero. Subtracting the mean gives us that new reference point."}
       prerequisites={
         <>
           The mean comes from the{" "}

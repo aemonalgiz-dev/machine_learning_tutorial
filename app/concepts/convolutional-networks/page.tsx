@@ -25,7 +25,7 @@ import { CnnUnseenKind } from "@/components/widgets/CnnUnseenKind";
 export const metadata: Metadata = {
   title: "Convolutional Networks · oop_ml",
   description:
-    "Combine convolution, activation, pooling, and a classifier into a trainable image model.",
+    "Recognising an object usually takes more than finding one edge. A convolutional network combines learned local patterns through layers, using the resulting features to make a prediction about the image.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function ConvolutionalNetworksPage() {
       openingTitle="From Local Patterns to a Name for the Picture"
       playgroundIntro="Follow a picture through its feature maps to its class scores. Compare the trained model with the alternatives before drawing conclusions about any one layer."
       title="Convolutional Networks"
-      tagline="Combine convolution, activation, pooling, and a classifier into a trainable image model."
+      tagline={"Recognising an object usually takes more than finding one edge. A convolutional network combines learned local patterns through layers, using the resulting features to make a prediction about the image."}
       prerequisites={
         <>
           The individual layers have their own worked examples. The{" "}

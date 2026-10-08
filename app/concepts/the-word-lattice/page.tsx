@@ -23,7 +23,7 @@ import { ReadingsAgainstSteps } from "@/components/widgets/ReadingsAgainstSteps"
 
 export const metadata: Metadata = {
   title: "The Word Lattice · oop_ml",
-  description: "Keep alternative word segmentations and score complete paths through the sentence.",
+  description: "Choosing a word early can change which words remain available later in a sentence. A word lattice keeps the alternatives so we can compare complete segmentations before committing to one.",
 };
 
 export default function TheWordLatticePage() {
@@ -35,7 +35,7 @@ export default function TheWordLatticePage() {
       openingTitle="A Good First Word Can Leave a Bad Ending"
       playgroundIntro="Trace two complete paths through the same text. Compare their total scores, rather than judging a path only by the length of its first word."
       title="The Word Lattice"
-      tagline="Keep alternative word segmentations and score complete paths through the sentence."
+      tagline={"Choosing a word early can change which words remain available later in a sentence. A word lattice keeps the alternatives so we can compare complete segmentations before committing to one."}
       prerequisites={
         <>
           The greedy scan of the previous page, since this one is the repair for

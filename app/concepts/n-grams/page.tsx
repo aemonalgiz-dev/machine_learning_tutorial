@@ -25,7 +25,7 @@ import { NGramWindows } from "@/components/widgets/NGramWindows";
 export const metadata: Metadata = {
   title: "N-Grams · oop_ml",
   description:
-    "Predict the next token by counting short sequences and reserving probability for unseen ones.",
+    "The words immediately before a position give us clues about what might come next. An n-gram model uses counts of short sequences to make that prediction, with adjustments for sequences missing from its training data.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function NGramsPage() {
       openingTitle="One Previous Word May Not Be Enough"
       playgroundIntro="Compare predictions with shorter and longer contexts. Inspect an unseen continuation and observe how smoothing changes its probability."
       title="N-Grams"
-      tagline="Predict the next token by counting short sequences and reserving probability for unseen ones."
+      tagline={"The words immediately before a position give us clues about what might come next. An n-gram model uses counts of short sequences to make that prediction, with adjustments for sequences missing from its training data."}
       prerequisites={
         <>
           The words counted here are whatever a splitting rule handed over, so{" "}

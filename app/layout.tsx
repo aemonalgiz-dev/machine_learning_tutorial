@@ -6,6 +6,7 @@ import { LessonFooter } from "@/components/course/LessonFooter";
 import { ProgressPill } from "@/components/site/ProgressPill";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { SupportMessage } from "@/components/site/SupportMessage";
+import { Botie } from "@/components/site/Botie";
 import { lessonLocations, lessonOrder } from "@/lib/course-navigation";
 import { REPOSITORY } from "@/lib/site";
 import "./globals.css";
@@ -23,7 +24,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "oop_ml: machine learning, one concept at a time",
   description:
-    "Every concept starts with the problem it was invented to solve, gets an intuitive explanation and a technical one, and comes with an interactive example computed live.",
+    "Machine learning explained through the problems each method was developed to solve, with interactive examples and Python challenges to work through the ideas yourself.",
 };
 
 // Restores a reader's choice of the light theme before the page paints. The
@@ -33,24 +34,6 @@ export const metadata: Metadata = {
 // which no bundled script can promise.
 const restoreTheme =
   'try{if(localStorage.getItem("oop_ml.theme")==="light")document.documentElement.dataset.theme="light"}catch(e){}';
-
-function LogoMark() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 text-accent">
-      <circle cx="5" cy="12" r="2.4" fill="currentColor" />
-      <circle cx="15" cy="5" r="2.4" fill="currentColor" />
-      <circle cx="15" cy="19" r="2.4" fill="currentColor" />
-      <circle cx="21" cy="12" r="1.8" fill="currentColor" opacity="0.6" />
-      <path
-        d="M7 11l6-5M7 13l6 5M17 6.5l3 4M17 17.5l3-4"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        fill="none"
-      />
-    </svg>
-  );
-}
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
@@ -69,9 +52,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               href="/"
               className="flex items-center gap-2 font-mono text-base font-bold tracking-tight text-foreground"
             >
-              <LogoMark />
+              <Botie size={32} decorative />
               oop_ml
             </Link>
+            <Link href="/lab" className="text-sm font-semibold text-accent hover:underline">Workshops</Link>
             <div className="hidden items-center gap-5 text-sm text-muted sm:flex">
               <Link href="/#course" className="transition hover:text-foreground">
                 Course

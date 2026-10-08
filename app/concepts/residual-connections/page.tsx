@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { ResidualExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Residual Connections · oop_ml", description: "Preserve a representation while learning an adjustment, and follow both routes through the backward pass." };
+export const metadata: Metadata = { title: "Residual Connections · oop_ml", description: "A new layer may only need to improve a representation we already have. A residual connection carries the input forward so the layer can learn a correction rather than having to recreate the entire representation." };
 
 export default function ResidualConnectionsPage() {
   return <ConceptPage
       lessonId="residual-connections"
-      intuition={lessonIntuitions["residual-connections"]} title="Residual Connections" tagline="Carry an input forward while a layer learns what to add to it."
+      intuition={lessonIntuitions["residual-connections"]} title="Residual Connections" tagline={"A new layer may only need to improve a representation we already have. A residual connection carries the input forward so the layer can learn a correction rather than having to recreate the entire representation."}
     openingTitle="Do We Need to Rebuild a Useful Representation?"
     technicalStart="Part 2. The Two Routes Through the Calculation"
     prerequisites={<>Read <Link href="/concepts/dense-layers">dense layers</Link> for forward transformations and <Link href="/concepts/backpropagation">backpropagation</Link> for derivatives through a network.</>}

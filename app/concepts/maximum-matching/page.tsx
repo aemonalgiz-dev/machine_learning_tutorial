@@ -22,7 +22,7 @@ import { SpacelessSentence } from "@/components/widgets/SpacelessSentence";
 export const metadata: Metadata = {
   title: "Maximum Matching · oop_ml",
   description:
-    "Use a dictionary to take the longest available word at each position.",
+    "When spaces do not tell us where words end, a dictionary gives us one possible guide. Maximum matching takes the longest word it recognises at each position, leaving us to examine when that local choice fails.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -36,7 +36,7 @@ export default function MaximumMatchingPage() {
       openingTitle="Where Do the Words End When There Are No Spaces?"
       playgroundIntro="Follow the chosen dictionary entry at each position. Compare forward and backward scans and identify the first choice where their segmentations diverge."
       title="Maximum Matching"
-      tagline="Use a dictionary to take the longest available word at each position."
+      tagline={"When spaces do not tell us where words end, a dictionary gives us one possible guide. Maximum matching takes the longest word it recognises at each position, leaving us to examine when that local choice fails."}
       prerequisites={
         <>
           Everything earlier in this section assumed that something in the

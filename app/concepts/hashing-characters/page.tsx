@@ -23,7 +23,7 @@ import { WidthTradeChart } from "@/components/widgets/WidthTradeChart";
 export const metadata: Metadata = {
   title: "Hashing Characters · oop_ml",
   description:
-    "Map characters to a fixed number of buckets and examine collisions.",
+    "A separate entry for every possible character can make a table large. Hashing maps characters into a fixed number of buckets, at the cost of sometimes giving different characters the same destination.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function HashingCharactersPage() {
       openingTitle="Choose the Table Size Before Seeing the Alphabet"
       playgroundIntro="Inspect which characters share buckets. Compare one hash with several and keep the number of stored entries in view."
       title="Hashing Characters"
-      tagline="Map characters to a fixed number of buckets and examine collisions."
+      tagline={"A separate entry for every possible character can make a table large. Hashing maps characters into a fixed number of buckets, at the cost of sometimes giving different characters the same destination."}
       prerequisites={
         <>
           One page from earlier in this section. The page on{" "}

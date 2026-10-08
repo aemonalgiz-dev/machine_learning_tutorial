@@ -25,7 +25,7 @@ import { UnitRivals } from "@/components/widgets/UnitRivals";
 export const metadata: Metadata = {
   title: "Greedy Coverage · oop_ml",
   description:
-    "Build a vocabulary by repeatedly choosing the candidate with the largest remaining coverage gain.",
+    "There is only so much room in a vocabulary. Instead of choosing the most frequent pair to merge, we can ask which new piece covers the most text that our earlier choices have not already covered.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -39,7 +39,7 @@ export default function GreedyCoveragePage() {
       openingTitle="Which New Piece Covers the Most Text?"
       playgroundIntro="Inspect each candidate's additional coverage after the earlier choices. Compare what changes when coverage is measured using a different unit."
       title="Greedy Coverage"
-      tagline="Build a vocabulary by repeatedly choosing the candidate with the largest remaining coverage gain."
+      tagline={"There is only so much room in a vocabulary. Instead of choosing the most frequent pair to merge, we can ask which new piece covers the most text that our earlier choices have not already covered."}
       prerequisites={
         <>
           Two things from earlier in this section. Something has already decided

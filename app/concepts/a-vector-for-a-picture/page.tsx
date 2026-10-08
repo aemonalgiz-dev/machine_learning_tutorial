@@ -22,7 +22,7 @@ import { PictureVectorWalk } from "@/components/widgets/PictureVectorWalk";
 export const metadata: Metadata = {
   title: "A Vector for a Picture · oop_ml",
   description:
-    "Use a trained network's internal features to compare pictures with a compact vector.",
+    "Two photographs of the same object may look very different pixel by pixel. A trained network can provide a compact vector of features that gives us a more useful way to compare them.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function PictureVectorPage() {
       openingTitle="Pictures Can Look Alike Without Matching Pixel for Pixel"
       playgroundIntro="Compare the nearest pictures under pixel distance and embedding similarity. Inspect the actual pictures, including mistakes, rather than judging the representation only by its plotted clusters."
       title="A Vector for a Picture"
-      tagline="Use a trained network's internal features to compare pictures with a compact vector."
+      tagline={"Two photographs of the same object may look very different pixel by pixel. A trained network can provide a compact vector of features that gives us a more useful way to compare them."}
       prerequisites={
         <>
           The network on this page is the one assembled on{" "}

@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Supervised Fine-Tuning · oop_ml",
-  description: "Use prompt-response examples to adapt the behavior of an already trained model.",
+  description: "A model that can continue text may not respond in the way a task requires. Fine-tuning on examples of prompts and desired responses gives it demonstrations of the behaviour we want.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="supervised-fine-tuning"
     title="Supervised Fine-Tuning"
-    tagline="Use prompt-response examples to adapt the behavior of an already trained model."
+    tagline={"A model that can continue text may not respond in the way a task requires. Fine-tuning on examples of prompts and desired responses gives it demonstrations of the behaviour we want."}
     openingTitle="How Do We Teach a Text Predictor to Respond the Way We Need?"
     intuition={lessonIntuitions["supervised-fine-tuning"]}
     technicalStart="Part 2. Calculate Response-Only Loss"

@@ -25,7 +25,7 @@ import { WindowReach } from "@/components/widgets/WindowReach";
 
 export const metadata: Metadata = {
   title: "Learning Boundaries From Examples · oop_ml",
-  description: "Learn boundary decisions from local character features in labelled examples.",
+  description: "If people have already marked word boundaries in example text, we can use those labels to teach a model. The surrounding characters provide clues it can use when deciding where to split new text.",
 };
 
 export default function LearningBoundariesFromExamplesPage() {
@@ -37,7 +37,7 @@ export default function LearningBoundariesFromExamplesPage() {
       openingTitle="Ask Each Gap Whether a Word Ends Here"
       playgroundIntro="Select a gap and examine the neighbouring characters used to classify it. Compare individual boundary decisions with the resulting complete segmentation."
       title="Learning Boundaries From Examples"
-      tagline="Learn boundary decisions from local character features in labelled examples."
+      tagline={"If people have already marked word boundaries in example text, we can use those labels to teach a model. The surrounding characters provide clues it can use when deciding where to split new text."}
       prerequisites={
         <>
           The page on segmenting with a hidden model, since this one is the

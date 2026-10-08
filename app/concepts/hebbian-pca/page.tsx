@@ -23,7 +23,7 @@ import { WalkTrace } from "@/components/widgets/WalkTrace";
 export const metadata: Metadata = {
   title: "Hebbian Principal Components · oop_ml",
   description:
-    "Use Oja's learning rule to approach the leading principal component through repeated local updates.",
+    "Can a neuron learn a useful direction from examples arriving one at a time? Oja's rule adjusts its weights using the input and output, while adding a correction that prevents simple Hebbian growth from continuing unchecked.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -37,7 +37,7 @@ export default function HebbianPcaPage() {
       openingTitle="Find a Principal Direction One Observation at a Time"
       playgroundIntro="Watch both the weight direction and its length. Compare the learned direction with the PCA reference rather than judging progress by the output alone."
       title="Hebbian Principal Components"
-      tagline="Use Oja's learning rule to approach the leading principal component through repeated local updates."
+      tagline={"Can a neuron learn a useful direction from examples arriving one at a time? Oja's rule adjusts its weights using the input and output, while adding a correction that prevents simple Hebbian growth from continuing unchecked."}
       prerequisites={
         <>
           The answer being reached is the{" "}

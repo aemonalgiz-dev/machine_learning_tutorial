@@ -10,7 +10,7 @@ import { KnnPlayground } from "@/components/widgets/KnnPlayground";
 export const metadata: Metadata = {
   title: "k-Nearest Neighbours · oop_ml",
   description:
-    "Store labelled examples, find the nearest ones, and use their answers to predict a new case.",
+    "If similar examples tend to have similar answers, nearby labelled examples may help us predict a new one. We still need to decide how to measure distance and how many neighbours to ask.",
 };
 
 export default function KNearestNeighboursPage() {
@@ -22,7 +22,7 @@ export default function KNearestNeighboursPage() {
       openingTitle="Ask the Examples That Look Most Alike"
       playgroundIntro="Move the ringed query point, then change k. Watch which stored points are selected and how their votes produce the label."
       title="k-Nearest Neighbours"
-      tagline="Store labelled examples, find the nearest ones, and use their answers to predict a new case."
+      tagline={"If similar examples tend to have similar answers, nearby labelled examples may help us predict a new one. We still need to decide how to measure distance and how many neighbours to ask."}
       prerequisites={
         <>
           The distance between two points, the length of their difference, is

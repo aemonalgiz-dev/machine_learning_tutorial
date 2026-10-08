@@ -1,0 +1,14 @@
+.botie { overflow: visible; }
+.body { transform-origin: 70px 110px; animation: hover 4s ease-in-out infinite; }
+.eyes { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+.rightArm { transform-origin: 104px 96px; }
+.happy .rightArm { animation: wave .75s ease-in-out 3; }
+.happy .body { animation: hop .7s ease-in-out 2; }
+.curious .body { transform: rotate(-5deg); animation: none; }
+.thinking .antenna { animation: pulse 1s ease-in-out infinite; }
+@keyframes hover { 50% { transform: translateY(-3px); } }
+@keyframes blink { 0%, 44%, 48%, 100% { transform: scaleY(1); } 46% { transform: scaleY(.08); } }
+@keyframes wave { 50% { transform: rotate(-65deg); } }
+@keyframes hop { 50% { transform: translateY(-8px) rotate(3deg); } }
+@keyframes pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .botie * { animation: none !important; } }

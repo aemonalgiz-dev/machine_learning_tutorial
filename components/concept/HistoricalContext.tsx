@@ -1,11 +1,12 @@
 import type { LessonHistory } from "@/lib/history/types";
+import { BotieSays } from "@/components/site/Botie";
 
 export function HistoricalContext({ lesson }: { lesson: LessonHistory }) {
   return (
     <div data-lesson-history className="space-y-5">
       {lesson.blocks.map((block, index) =>
         typeof block === "string" ? (
-          <p key={index}>{block}</p>
+          index === 0 ? <BotieSays key={index}>{block}</BotieSays> : <p key={index}>{block}</p>
         ) : (
           <ol key={index} className="list-decimal space-y-4 pl-6">
             {block.items.map(({ name, explanation }) => (

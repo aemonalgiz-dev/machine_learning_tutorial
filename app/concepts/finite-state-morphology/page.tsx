@@ -24,7 +24,7 @@ import { WrittenAgainstLearned } from "@/components/widgets/WrittenAgainstLearne
 export const metadata: Metadata = {
   title: "Finite-State Morphology · oop_ml",
   description:
-    "Use explicit stems, endings, and spelling rules to analyse a word's structure.",
+    "A word's spelling can reflect a stem, an ending, and a rule that changes how they join. Finite-state morphology describes those relationships explicitly so we can analyse forms and generate them from their components.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -38,7 +38,7 @@ export default function FiniteStateMorphologyPage() {
       openingTitle="Write Down How the Word Is Built"
       playgroundIntro="Trace a word through the allowed stems and endings. Compare a recognised form, an unfamiliar form, and a form with more than one possible analysis."
       title="Finite-State Morphology"
-      tagline="Use explicit stems, endings, and spelling rules to analyse a word's structure."
+      tagline={"A word's spelling can reflect a stem, an ending, and a rule that changes how they join. Finite-state morphology describes those relationships explicitly so we can analyse forms and generate them from their components."}
       prerequisites={
         <>
           It helps to have met one method that learns its pieces from a corpus,

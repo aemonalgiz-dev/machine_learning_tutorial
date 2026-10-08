@@ -28,7 +28,7 @@ import { TreeStability } from "@/components/widgets/TreeStability";
 export const metadata: Metadata = {
   title: "Bagging · oop_ml",
   description:
-    "Fit models to different resamples of the same data, then combine their predictions.",
+    "Small changes in the training data can produce very different fitted models. Fitting several models to resampled data and combining their answers can make the result less dependent on one particular fit.",
 };
 
 const linkClass =
@@ -43,7 +43,7 @@ export default function BaggingPage() {
       openingTitle="When One Tree Changes Its Mind"
       playgroundIntro="Compare one tree's answer with the combined answer. As more trees join, watch whether their disagreements cancel or persist."
       title="Bagging"
-      tagline="Fit models to different resamples of the same data, then combine their predictions."
+      tagline={"Small changes in the training data can produce very different fitted models. Fitting several models to resampled data and combining their answers can make the result less dependent on one particular fit."}
       prerequisites={
         <>
           This page picks up where{" "}

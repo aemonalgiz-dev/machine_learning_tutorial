@@ -22,7 +22,7 @@ import { UncertaintyProfile } from "@/components/widgets/UncertaintyProfile";
 export const metadata: Metadata = {
   title: "Patching Without a Vocabulary · oop_ml",
   description:
-    "Group byte sequences into patches using fixed sizes or predictability-based boundaries.",
+    "Bytes let us represent text without a learned word vocabulary, but they can produce long sequences. Grouping nearby bytes into patches gives later parts of a model fewer positions to process.",
 };
 
 const link =
@@ -37,7 +37,7 @@ export default function PatchingWithoutAVocabularyPage() {
       openingTitle="Bytes Solve Coverage and Create a Length Problem"
       playgroundIntro="Compare the byte count with the patch count. Inspect fixed and adaptive boundaries, especially around stretches whose next bytes are difficult to predict."
       title="Patching Without a Vocabulary"
-      tagline="Group byte sequences into patches using fixed sizes or predictability-based boundaries."
+      tagline={"Bytes let us represent text without a learned word vocabulary, but they can produce long sequences. Grouping nearby bytes into patches gives later parts of a model fewer positions to process."}
       prerequisites={
         <>
           Two pages from earlier in this section, and this one finishes the

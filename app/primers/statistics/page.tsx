@@ -25,7 +25,7 @@ import { StatisticsPlayground } from "@/components/widgets/StatisticsPlayground"
 export const metadata: Metadata = {
   title: "Statistics Primer · oop_ml",
   description:
-    "Describe a sample, compare variables, and separate the observed pattern from uncertainty about new data.",
+    "A collection of measurements does not explain itself. We need ways to describe what is typical, how much the values differ, and how much confidence we should place in the patterns we observe.",
 };
 
 export default function StatisticsPrimerPage() {
@@ -34,7 +34,7 @@ export default function StatisticsPrimerPage() {
       lessonId="statistics"
       technicalStart="10. Covariance"
       title="Statistics and Probability Primer"
-      tagline="Describe a sample, compare variables, and separate the observed pattern from uncertainty about new data."
+      tagline={"A collection of measurements does not explain itself. We need ways to describe what is typical, how much the values differ, and how much confidence we should place in the patterns we observe."}
       prerequisites={
         <>
           Arithmetic, and a willingness to add five numbers by hand. The same

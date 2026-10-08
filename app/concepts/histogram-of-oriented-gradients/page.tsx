@@ -27,7 +27,7 @@ import { VoteSharingSlide } from "@/components/widgets/VoteSharingSlide";
 export const metadata: Metadata = {
   title: "Histogram of Oriented Gradients · oop_ml",
   description:
-    "Build an image descriptor from local edge directions and normalise neighbouring regions.",
+    "An object's outline can remain recognisable when the lighting changes. Histograms of oriented gradients describe local edge directions, giving a detector information about shape without relying on exact pixel values.",
 };
 
 export default function OrientedGradientsPage() {
@@ -39,7 +39,7 @@ export default function OrientedGradientsPage() {
       openingTitle="Describe Which Way the Edges Point"
       playgroundIntro="Follow an edge direction into its histogram bins. Compare the counts before and after block normalisation as the picture's contrast changes."
       title="Histogram of Oriented Gradients"
-      tagline="Build an image descriptor from local edge directions and normalise neighbouring regions."
+      tagline={"An object's outline can remain recognisable when the lighting changes. Histograms of oriented gradients describe local edge directions, giving a detector information about shape without relying on exact pixel values."}
       prerequisites={
         <>
           Start with{" "}

@@ -19,6 +19,7 @@ import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
 import { lessonHistories, type HistoryLessonId } from "@/lib/history";
 import { HistoricalContext } from "./HistoricalContext";
+import { journeyFor } from "@/lib/builds/journey";
 
 export interface ConceptSection {
   title: string;
@@ -142,6 +143,8 @@ export function ConceptPage({
       practice: section.practice,
     })),
   ];
+  const practiceAt = all.findIndex(section => section.practice?.length);
+  all.splice(practiceAt < 0 ? all.length : practiceAt, 0, { title: "Build with Botie", id: "workshop", game: lessonId, journey: journeyFor(lessonId) });
   const { questions, problems } = lessonSummary(sections);
 
   return (

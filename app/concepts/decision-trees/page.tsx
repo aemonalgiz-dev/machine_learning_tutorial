@@ -28,7 +28,7 @@ import { UnitConversion } from "@/components/widgets/UnitConversion";
 export const metadata: Metadata = {
   title: "Decision Trees · oop_ml",
   description:
-    "Build a prediction from a sequence of yes-or-no questions chosen from the data.",
+    "A series of simple questions can narrow down a decision. A decision tree learns which questions to ask from the examples and places a prediction at the end of each route.",
 };
 
 const linkClass =
@@ -56,7 +56,7 @@ export default function DecisionTreesPage() {
       openingTitle="Which Question Should Come First?"
       playgroundIntro="Follow one point from the first question to its final leaf. Then compare how changing the tree's depth changes its prediction regions."
       title="Decision Trees"
-      tagline="Build a prediction from a sequence of yes-or-no questions chosen from the data."
+      tagline={"A series of simple questions can narrow down a decision. A decision tree learns which questions to ask from the examples and places a prediction at the end of each route."}
       prerequisites={
         <>
           Only the idea of classifying, predicting which of two groups someone

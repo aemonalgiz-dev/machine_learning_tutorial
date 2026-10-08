@@ -26,7 +26,7 @@ import { TemplateLedger } from "@/components/widgets/TemplateLedger";
 export const metadata: Metadata = {
   title: "Pipelines · oop_ml",
   description:
-    "Keep preprocessing and prediction together so each training split learns its own transformations.",
+    "Preparing data is part of fitting a model. If a scaler learns from our test examples, the test has already influenced the result. A pipeline helps us keep those fitting steps together and inside the training procedure.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function PipelinesPage() {
       openingTitle="The Test Answers Can Leak in Before the Fit"
       playgroundIntro="Follow the data through each transformation and into the model. Check which rows supply the fitted statistics and which rows only use them."
       title="Pipelines"
-      tagline="Keep preprocessing and prediction together so each training split learns its own transformations."
+      tagline={"Preparing data is part of fitting a model. If a scaler learns from our test examples, the test has already influenced the result. A pipeline helps us keep those fitting steps together and inside the training procedure."}
       prerequisites={
         <>
           The folds come from the{" "}

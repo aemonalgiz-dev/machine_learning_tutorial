@@ -28,7 +28,7 @@ import { MarkovTwoStep } from "@/components/widgets/MarkovTwoStep";
 export const metadata: Metadata = {
   title: "Markov Chains · oop_ml",
   description:
-    "Model the next state using the current one, then follow the consequences over several steps.",
+    "The next event may depend on what is happening now. A Markov chain describes that dependence using probabilities of moving from one state to another, while leaving earlier history out of the prediction.",
 };
 
 const link =
@@ -43,7 +43,7 @@ export default function MarkovChainsPage() {
       openingTitle="How Much of the Past Do We Need?"
       playgroundIntro="Read one row of the transition table as the possible next states from the current state. Compare one step with several repeated steps."
       title="Markov Chains"
-      tagline="Model the next state using the current one, then follow the consequences over several steps."
+      tagline={"The next event may depend on what is happening now. A Markov chain describes that dependence using probabilities of moving from one state to another, while leaving earlier history out of the prediction."}
       prerequisites={
         <>
           The same assumption applied to words rather than letters is the

@@ -27,7 +27,7 @@ import { ValidationCurveChart } from "@/components/widgets/ValidationCurveChart"
 export const metadata: Metadata = {
   title: "Held-Out Evaluation · oop_ml",
   description:
-    "Judge predictions on examples excluded from fitting, then examine how much that score can tell us.",
+    "A rule can fit the examples it has already seen without being useful on new ones. We need to put some examples aside and use them to check the predictions after fitting.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -41,7 +41,7 @@ export default function HeldOutEvaluationPage() {
       openingTitle="The Model Has Already Seen the Answers"
       playgroundIntro="Compare the training score with the held-out score. Change the split and notice that the evaluation itself varies with the examples chosen."
       title="Held-Out Evaluation"
-      tagline="Judge predictions on examples excluded from fitting, then examine how much that score can tell us."
+      tagline={"A rule can fit the examples it has already seen without being useful on new ones. We need to put some examples aside and use them to check the predictions after fitting."}
       prerequisites={
         <>
           This page settles a debt. Page after page here has ended by saying

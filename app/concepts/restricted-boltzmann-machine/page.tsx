@@ -26,7 +26,7 @@ import { WidthSweep } from "@/components/widgets/WidthSweep";
 export const metadata: Metadata = {
   title: "Restricted Boltzmann Machines · oop_ml",
   description:
-    "Use visible and hidden units to model patterns and reconstruct incomplete inputs.",
+    "An observation may reflect several underlying patterns we cannot see directly. A restricted Boltzmann machine uses hidden units to represent those patterns and learn a probability model of the visible data.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function RestrictedBoltzmannMachinePage() {
       openingTitle="Learn What the Patterns Have in Common"
       playgroundIntro="Compare the visible input, hidden responses, and reconstruction. Repeat the reconstruction to see the role of sampling rather than treating one result as guaranteed."
       title="Restricted Boltzmann Machines"
-      tagline="Use visible and hidden units to model patterns and reconstruct incomplete inputs."
+      tagline={"An observation may reflect several underlying patterns we cannot see directly. A restricted Boltzmann machine uses hidden units to represent those patterns and learn a probability model of the visible data."}
       prerequisites={
         <>
           The score a state is given is the{" "}

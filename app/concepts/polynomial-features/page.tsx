@@ -26,7 +26,7 @@ import { TermAssembler } from "@/components/widgets/TermAssembler";
 export const metadata: Metadata = {
   title: "Polynomial Features · oop_ml",
   description:
-    "Build powers and products of inputs so a linear model can represent curved relationships.",
+    "A straight line cannot describe every relationship between our measurements and the answer. Adding features such as an input squared gives the model more to work with while keeping its coefficients straightforward to fit.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function PolynomialFeaturesPage() {
       openingTitle="Give a Straight-Line Model Something Curved to Read"
       playgroundIntro="Compare the generated columns at different degrees. Relate each new power or product to the extra flexibility in the fitted curve."
       title="Polynomial Features"
-      tagline="Build powers and products of inputs so a linear model can represent curved relationships."
+      tagline={"A straight line cannot describe every relationship between our measurements and the answer. Adding features such as an input squared gives the model more to work with while keeping its coefficients straightforward to fit."}
       prerequisites={
         <>
           The fit this page hands its new columns to is the one from{" "}

@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Sampling and Temperature · oop_ml",
-  description: "Control how predictions become choices while keeping the model's learned weights fixed.",
+  description: "The highest-scoring token is not the only token a model could produce. Sampling and temperature control how we choose from its predictions, changing the output without changing the learned weights.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="sampling-and-temperature"
     title="Sampling and Temperature"
-    tagline="Control how predictions become choices while keeping the model's learned weights fixed."
+    tagline={"The highest-scoring token is not the only token a model could produce. Sampling and temperature control how we choose from its predictions, changing the output without changing the learned weights."}
     openingTitle="Must a Model Always Choose Its Favorite Word?"
     intuition={lessonIntuitions["sampling-and-temperature"]}
     technicalStart="Part 2. Calculate Temperature and Nucleus Filtering"

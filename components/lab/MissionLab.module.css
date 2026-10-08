@@ -1,0 +1,7 @@
+.scene { background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 28px 28px; }
+.bar { transition: width .25s ease, left .25s ease; }
+.parcel { transition: transform .2s ease; }
+.active { animation: inspect .55s ease-in-out infinite alternate; }
+.still *, .still *::before, .still *::after { animation: none !important; transition: none !important; }
+@keyframes inspect { to { transform: translateY(-3px); filter: brightness(1.15); } }
+@media (prefers-reduced-motion: reduce) { .lab *, .lab *::before, .lab *::after { animation: none !important; transition: none !important; } }

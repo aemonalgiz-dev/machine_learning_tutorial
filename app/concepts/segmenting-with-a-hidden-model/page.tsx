@@ -25,7 +25,7 @@ import { TwinLanguages } from "@/components/widgets/TwinLanguages";
 
 export const metadata: Metadata = {
   title: "Segmenting With a Hidden Model · oop_ml",
-  description: "Infer word boundaries from a sequence of hidden character-position labels.",
+  description: "We can see the characters in a sentence without knowing which ones begin or end a word. A hidden-state model uses learned probabilities to infer a sequence of labels for those positions.",
 };
 
 export default function SegmentingWithAHiddenModelPage() {
@@ -37,7 +37,7 @@ export default function SegmentingWithAHiddenModelPage() {
       openingTitle="A Word the Dictionary Has Never Seen"
       playgroundIntro="Compare the character observations with their proposed position labels. Follow the complete label sequence and check how it determines the word boundaries."
       title="Segmenting With a Hidden Model"
-      tagline="Infer word boundaries from a sequence of hidden character-position labels."
+      tagline={"We can see the characters in a sentence without knowing which ones begin or end a word. A hidden-state model uses learned probabilities to infer a sequence of labels for those positions."}
       prerequisites={
         <>
           The two dictionary pages of this section, since this one is the repair

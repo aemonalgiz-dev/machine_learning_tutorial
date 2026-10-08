@@ -23,7 +23,7 @@ import { ThreeLossesOneBadRow } from "@/components/widgets/ThreeLossesOneBadRow"
 export const metadata: Metadata = {
   title: "Loss Functions · oop_ml",
   description:
-    "Choose a numerical cost for prediction errors and see how the choice changes learning.",
+    "Before a network can improve, we need to tell it what counts as an error. A loss function assigns a numerical cost to a prediction, and that choice affects which mistakes the model tries hardest to reduce.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function LossFunctionsPage() {
       openingTitle="How Wrong Was That Prediction?"
       playgroundIntro="Move a prediction away from its target and compare the loss curves. Read the loss value and its slope separately, especially for large errors."
       title="Loss Functions"
-      tagline="Choose a numerical cost for prediction errors and see how the choice changes learning."
+      tagline={"Before a network can improve, we need to tell it what counts as an error. A loss function assigns a numerical cost to a prediction, and that choice affects which mistakes the model tries hardest to reduce."}
       prerequisites={
         <>
           Squared error is the{" "}

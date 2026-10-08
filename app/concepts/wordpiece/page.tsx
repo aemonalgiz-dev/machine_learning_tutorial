@@ -24,7 +24,7 @@ import { WordPiecePlayground } from "@/components/widgets/WordPiecePlayground";
 export const metadata: Metadata = {
   title: "WordPiece · oop_ml",
   description:
-    "Compare a pair's frequency with the frequencies of its parts, then encode using longest matching pieces.",
+    "A tokenizer needs reusable word parts and a consistent way to find them in new text. We will look at the pair-scoring rule used here to build a WordPiece vocabulary, then its longest-match encoding rule.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -38,7 +38,7 @@ export default function WordPiecePage() {
       openingTitle="A Common Pair May Only Have Common Halves"
       playgroundIntro="Compare candidate pairs under raw counts and the relative-frequency score. Then inspect how continuation markers affect the longest-match encoding."
       title="WordPiece"
-      tagline="Compare a pair's frequency with the frequencies of its parts, then encode using longest matching pieces."
+      tagline={"A tokenizer needs reusable word parts and a consistent way to find them in new text. We will look at the pair-scoring rule used here to build a WordPiece vocabulary, then its longest-match encoding rule."}
       prerequisites={
         <>
           You need the merging loop from the previous page, which is the whole

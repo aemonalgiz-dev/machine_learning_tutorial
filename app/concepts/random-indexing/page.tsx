@@ -26,7 +26,7 @@ import { WidthAgainstTheTable } from "@/components/widgets/WidthAgainstTheTable"
 export const metadata: Metadata = {
   title: "Random Indexing · oop_ml",
   description:
-    "Accumulate sparse random context vectors to build fixed-width word representations.",
+    "Counting every possible word-context pair can require a very large table. Random indexing gives contexts small random vectors and accumulates them, keeping the representation a fixed size as new examples arrive.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function RandomIndexingPage() {
       openingTitle="Keep a Sketch Instead of the Whole Count Table"
       playgroundIntro="Follow which context vectors are added for one word. Compare the resulting neighbours at different widths and random seeds."
       title="Random Indexing"
-      tagline="Accumulate sparse random context vectors to build fixed-width word representations."
+      tagline={"Counting every possible word-context pair can require a very large table. Random indexing gives contexts small random vectors and accumulates them, keeping the representation a fixed size as new examples arrive."}
       prerequisites={
         <>
           Every answer on this page is an angle between two lists of numbers,

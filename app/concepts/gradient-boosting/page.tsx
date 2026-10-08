@@ -28,7 +28,7 @@ import {
 export const metadata: Metadata = {
   title: "Gradient Boosting · oop_ml",
   description:
-    "Build a prediction in stages, with each small tree correcting the errors that remain.",
+    "A model's mistakes tell us what it has not yet explained. Boosting adds models in stages, with each new model learning a correction to the predictions already made.",
 };
 
 const link =
@@ -43,7 +43,7 @@ export default function GradientBoostingPage() {
       openingTitle="Let the Next Tree Work on What Is Still Wrong"
       playgroundIntro="Step through the boosting rounds. Compare the current prediction, the remaining errors, and the correction supplied by the next tree."
       title="Gradient Boosting"
-      tagline="Build a prediction in stages, with each small tree correcting the errors that remain."
+      tagline={"A model's mistakes tell us what it has not yet explained. Boosting adds models in stages, with each new model learning a correction to the predictions already made."}
       prerequisites={
         <>
           This page assumes{" "}

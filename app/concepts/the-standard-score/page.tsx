@@ -24,7 +24,7 @@ import { WhoNoticed } from "@/components/widgets/WhoNoticed";
 export const metadata: Metadata = {
   title: "The Standard Score · oop_ml",
   description:
-    "Express a value as a number of standard deviations above or below the training mean.",
+    "How unusual is a measurement that is ten units above average? That depends on how much the measurements usually vary. A standard score expresses the difference in units of standard deviation.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function TheStandardScorePage() {
       openingTitle="How Unusual Is That Number?"
       playgroundIntro="Compare each original value with its standard score. Identify the mean at zero and check what one unit on the new scale represents."
       title="The Standard Score"
-      tagline="Express a value as a number of standard deviations above or below the training mean."
+      tagline={"How unusual is a measurement that is ten units above average? That depends on how much the measurements usually vary. A standard score expresses the difference in units of standard deviation."}
       prerequisites={
         <>
           The average and the standard deviation come from the{" "}

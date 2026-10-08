@@ -25,7 +25,7 @@ import { SharedDirectionProbe } from "@/components/widgets/SharedDirectionProbe"
 export const metadata: Metadata = {
   title: "Pooling a Text · oop_ml",
   description:
-    "Combine word representations into a fixed-size text representation and inspect what the combination loses.",
+    "Comparing whole sentences often requires one vector per sentence. Pooling combines their token vectors into a fixed-size representation, but the choice of combination determines which details we can still recover.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function PoolingATextPage() {
       openingTitle="One Vector for a Sentence Full of Words"
       playgroundIntro="Compare sentence vectors under different weighting rules. Try sentences with the same words in a different order and inspect what each representation can distinguish."
       title="Pooling a Text"
-      tagline="Combine word representations into a fixed-size text representation and inspect what the combination loses."
+      tagline={"Comparing whole sentences often requires one vector per sentence. Pooling combines their token vectors into a fixed-size representation, but the choice of combination determines which details we can still recover."}
       prerequisites={
         <>
           Everything here starts from a table that has already given every word a

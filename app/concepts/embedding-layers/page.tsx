@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { EmbeddingExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Embedding Layers · oop_ml", description: "Turn token IDs into trainable vectors, then follow how repeated tokens update one shared table." };
+export const metadata: Metadata = { title: "Embedding Layers · oop_ml", description: "A token ID needs to lead to the vector associated with that token. An embedding layer provides the lookup table, and training adjusts its rows so the retrieved vectors become useful for the task." };
 
 export default function EmbeddingLayersPage() {
   return <ConceptPage
       lessonId="embedding-layers"
-      intuition={lessonIntuitions["embedding-layers"]} title="Embedding Layers" tagline="Give each token a vector that the training process can change."
+      intuition={lessonIntuitions["embedding-layers"]} title="Embedding Layers" tagline={"A token ID needs to lead to the vector associated with that token. An embedding layer provides the lookup table, and training adjusts its rows so the retrieved vectors become useful for the task."}
     openingTitle="An ID Tells Us Which Word, but What Can We Do with It?"
     technicalStart="Part 2. Training the Table"
     prerequisites={<>Begin with <Link href="/concepts/what-a-token-is">what a token is</Link>. An ID identifies a piece of text; it does not measure its meaning.</>}

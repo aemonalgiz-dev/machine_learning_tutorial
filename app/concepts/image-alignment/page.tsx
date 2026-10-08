@@ -24,7 +24,7 @@ import { TurnCostLedger } from "@/components/widgets/TurnCostLedger";
 export const metadata: Metadata = {
   title: "Image Alignment · oop_ml",
   description:
-    "Give each keypoint a direction so its description survives a turn, match the descriptions, and recover the camera's move from the matches.",
+    "A camera can move or turn between photographs. Matching points gives us evidence of that movement, which we can use to work out how to bring the images into alignment.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function ImageAlignmentPage() {
       openingTitle="Two Photographs Of One Scene"
       playgroundIntro="Plant a move, turning, scaling and shifting the scene, and watch the method find it again. Compare what it kept with what was actually right, then carry the second picture back and read the difference."
       title="Image Alignment"
-      tagline="Give each keypoint a direction so its description survives a turn, match the descriptions, and recover the camera's move from the matches."
+      tagline={"A camera can move or turn between photographs. Matching points gives us evidence of that movement, which we can use to work out how to bring the images into alignment."}
       prerequisites={
         <>
           This lesson picks up exactly where the{" "}

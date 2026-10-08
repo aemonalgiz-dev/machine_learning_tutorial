@@ -27,7 +27,7 @@ import { WhereNearnessIsUndefined } from "@/components/widgets/WhereNearnessIsUn
 export const metadata: Metadata = {
   title: "Distance and Similarity · oop_ml",
   description:
-    "Compare distances and similarity scores on the same word representations.",
+    "Once words have vectors, we still need to decide what makes two vectors similar. Their distance, direction, and length can give us different answers, depending on the comparison we choose.",
 };
 
 export default function DistanceAndSimilarityPage() {
@@ -39,7 +39,7 @@ export default function DistanceAndSimilarityPage() {
       openingTitle="The Vectors Are Fixed; the Nearest Word Can Still Change"
       playgroundIntro="Choose the same pair under different comparison rules. Check whether a high or low score means a close match and whether vector length affects it."
       title="Distance and Similarity"
-      tagline="Compare distances and similarity scores on the same word representations."
+      tagline={"Once words have vectors, we still need to decide what makes two vectors similar. Their distance, direction, and length can give us different answers, depending on the comparison we choose."}
       prerequisites={
         <>
           A model that arranges things so that near means alike has to be asked

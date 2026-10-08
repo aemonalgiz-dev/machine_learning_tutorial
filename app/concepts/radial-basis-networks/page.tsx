@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, NumberTable, SubSection, WhyThisWorks, WorkedExample } from "@/components/concept/Treatments";
 import { RadialExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Radial Basis Networks · oop_ml", description: "Build local responses from distance to a centre, then learn the centres and widths." };
+export const metadata: Metadata = { title: "Radial Basis Networks · oop_ml", description: "Some patterns are useful only near particular examples. A radial basis network measures how close an input is to several reference points, then combines those local responses into a prediction." };
 
 export default function RadialBasisNetworksPage() {
   return <ConceptPage
       lessonId="radial-basis-networks"
-      intuition={lessonIntuitions["radial-basis-networks"]} title="Radial Basis Networks" tagline="Represent an input by how strongly it matches several local regions."
+      intuition={lessonIntuitions["radial-basis-networks"]} title="Radial Basis Networks" tagline={"Some patterns are useful only near particular examples. A radial basis network measures how close an input is to several reference points, then combines those local responses into a prediction."}
     openingTitle="What If a Pattern Matters Only Nearby?"
     technicalStart="Part 2. Calculating and Learning the Response"
     prerequisites={<>The <Link href="/concepts/distance-metrics">distance metrics</Link> lesson explains how coordinates determine closeness. <Link href="/concepts/neurons-and-activations">A neuron</Link> provides another way to build a response from inputs.</>}

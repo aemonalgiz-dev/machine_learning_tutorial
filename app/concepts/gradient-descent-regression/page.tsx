@@ -27,7 +27,7 @@ import { TrajectoryDashboard } from "@/components/widgets/TrajectoryDashboard";
 export const metadata: Metadata = {
   title: "Fitting by Walking · oop_ml",
   description:
-    "Improve a fitted line one small adjustment at a time, using the slope of its error.",
+    "Rather than solving for a fitted line all at once, we can improve an initial guess through small adjustments. The gradient tells us which direction increases the error, so we can try moving the other way.",
 };
 
 const linkClass =
@@ -42,7 +42,7 @@ export default function GradientDescentRegressionPage() {
       openingTitle="Finding the Line Without Knowing the Answer"
       playgroundIntro="Follow the current line and its error together. Compare a small learning rate with a larger one, and watch whether the error falls or grows."
       title="Fitting by Walking"
-      tagline="Improve a fitted line one small adjustment at a time, using the slope of its error."
+      tagline={"Rather than solving for a fitted line all at once, we can improve an initial guess through small adjustments. The gradient tells us which direction increases the error, so we can try moving the other way."}
       prerequisites={
         <>
           The line being fitted and the loss being lowered are both from the{" "}

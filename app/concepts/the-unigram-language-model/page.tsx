@@ -25,7 +25,7 @@ import { WordLattice } from "@/components/widgets/WordLattice";
 export const metadata: Metadata = {
   title: "The Unigram Language Model · oop_ml",
   description:
-    "Assign probabilities to candidate pieces and prune a large vocabulary while considering alternative segmentations.",
+    "A word can have several valid divisions into smaller pieces. A unigram tokenizer assigns probabilities to those pieces so it can compare complete segmentations while learning which vocabulary entries to keep.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -39,7 +39,7 @@ export default function UnigramLanguageModelPage() {
       openingTitle="Keep the Pieces Whose Removal Would Hurt Most"
       playgroundIntro="Compare alternative segmentations of the same word. Distinguish the best segmentation's probability from the total over all possible segmentations."
       title="The Unigram Language Model"
-      tagline="Assign probabilities to candidate pieces and prune a large vocabulary while considering alternative segmentations."
+      tagline={"A word can have several valid divisions into smaller pieces. A unigram tokenizer assigns probabilities to those pieces so it can compare complete segmentations while learning which vocabulary entries to keep."}
       prerequisites={
         <>
           Two things from earlier in this section. Something has already decided

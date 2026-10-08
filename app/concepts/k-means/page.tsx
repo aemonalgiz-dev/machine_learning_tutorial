@@ -26,7 +26,7 @@ import { UnitSensitivity } from "@/components/widgets/UnitSensitivity";
 export const metadata: Metadata = {
   title: "k-Means Clustering · oop_ml",
   description:
-    "Alternate between assigning points to nearby centres and moving each centre to its group's mean.",
+    "We may want to group similar observations without having labels for those groups. K-means uses nearby centres to assign the observations, then moves the centres to better represent their assigned points.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -40,7 +40,7 @@ export default function KMeansPage() {
       openingTitle="Find the Groups Before Anyone Names Them"
       playgroundIntro="Step through assignment and centre updates separately. Compare the final groups after changing the starting centres or the requested number of groups."
       title="k-Means Clustering"
-      tagline="Alternate between assigning points to nearby centres and moving each centre to its group's mean."
+      tagline={"We may want to group similar observations without having labels for those groups. K-means uses nearby centres to assign the observations, then moves the centres to better represent their assigned points."}
       prerequisites={
         <>
           Distance between two people comes from the{" "}

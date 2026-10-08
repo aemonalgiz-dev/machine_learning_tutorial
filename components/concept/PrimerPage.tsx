@@ -19,6 +19,7 @@ import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
 import { lessonHistories, type HistoryLessonId } from "@/lib/history";
 import { HistoricalContext } from "./HistoricalContext";
+import { journeyFor } from "@/lib/builds/journey";
 export { Equation } from "./Equation";
 
 interface PrimerSectionProps {
@@ -103,6 +104,9 @@ export function PrimerPage({
     id: "history",
     content: <HistoricalContext lesson={lessonHistories[lessonId]} />,
   });
+  // Construction follows the explanations it needs and leads into Python.
+  const practiceAt = sections.findIndex(section => section.practice?.length);
+  sections.splice(practiceAt < 0 ? sections.length : practiceAt, 0, { title: "Build with Botie", id: "workshop", game: lessonId, journey: journeyFor(lessonId) });
   const { questions, problems } = lessonSummary(sections);
 
   return (

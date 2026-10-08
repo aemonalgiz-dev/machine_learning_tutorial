@@ -44,6 +44,8 @@ import { PracticeDeck } from "./PracticeDeck";
 import { declareRequired, markFinished } from "@/lib/progress";
 import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
+import { LessonGame } from "@/components/lab/LessonGame";
+import type { JourneyData } from "@/lib/builds/journey";
 
 export interface NavigableSection {
   title: string;
@@ -51,11 +53,14 @@ export interface NavigableSection {
   content?: ReactNode;
   quiz?: QuizQuestion[];
   practice?: Exercise[];
+  game?: string;
+  journey?: JourneyData;
 }
 
-export type SectionKind = "prose" | "quiz" | "practice";
+export type SectionKind = "prose" | "quiz" | "practice" | "game";
 
 export function kindOf(section: NavigableSection): SectionKind {
+  if (section.game) return "game";
   if (section.practice && section.practice.length > 0) return "practice";
   if (section.quiz && section.quiz.length > 0) return "quiz";
   return "prose";
@@ -131,7 +136,7 @@ export function SectionNavigator({
 
   // A fragment naming a section selects it. Anything else, including the empty
   // fragment of the bare lesson URL, falls back to the section it starts on.
-  const named = sections.findIndex((section) => section.id === hash);
+  const named = hash === "practice" ? sections.findIndex(section => kindOf(section) === "practice") : sections.findIndex((section) => section.id === hash);
   const current = named >= 0 ? named : Math.min(Math.max(initial, 0), sections.length - 1);
 
   const goTo = useCallback(
@@ -188,7 +193,7 @@ export function SectionNavigator({
   // How much of this lesson there is to finish, told to the record once the
   // page is open. A store write rather than React state, which is why it can
   // live in an effect.
-  const finishable = sections.filter((section) => kindOf(section) !== "prose").length;
+  const finishable = sections.filter((section) => kindOf(section) === "quiz" || kindOf(section) === "practice").length;
   useEffect(() => {
     if (lesson) declareRequired(lesson, finishable);
   }, [lesson, finishable]);
@@ -223,13 +228,13 @@ export function SectionNavigator({
           <section
             key={entry.id}
             id={entry.id}
-            className={"mx-auto min-w-0 py-6" + (kind === "practice" ? " w-full" : " max-w-[45rem]")}
+            className={"mx-auto min-w-0 py-6" + (kind === "practice" || kind === "game" ? " w-full" : " max-w-[45rem]")}
             style={index === current ? undefined : { display: "none" }}
             aria-hidden={index === current ? undefined : true}
           >
             {kind !== "prose" && (
               <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-0.5 font-mono text-xs text-accent">
-                {kind === "quiz" ? "Check yourself" : "Write and run Python"}
+                {kind === "quiz" ? "Check yourself" : kind === "game" ? "Try it with Botie" : "Write and run Python"}
               </p>
             )}
             <h2
@@ -244,6 +249,7 @@ export function SectionNavigator({
                 {entry.content}
               </div>
             )}
+            {kind === "game" && entry.journey && <LessonGame data={entry.journey} active={index === current} />}
             {kind === "quiz" && (
               <QuizDeck
                 questions={entry.quiz as QuizQuestion[]}
@@ -278,6 +284,7 @@ function Controls({
   const first = current === 0;
   const last = current === sections.length - 1;
   const coding = sections.findIndex((entry) => kindOf(entry) === "practice");
+  const workshop = sections.findIndex((entry) => kindOf(entry) === "game");
 
   return (
     <div className="mx-auto max-w-[45rem] border-t border-line py-4">
@@ -346,6 +353,7 @@ function Controls({
       </ol>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
         <p className="hidden font-mono sm:block">The arrow keys move between sections too.</p>
+        {workshop >= 0 && workshop !== current && <button type="button" onClick={() => onGo(workshop)} className="font-semibold text-accent underline underline-offset-4">Try Botie&apos;s workshop →</button>}
         {coding >= 0 && coding !== current && <button type="button" onClick={() => onGo(coding)} className="font-semibold text-accent underline underline-offset-4">Go to the coding challenges →</button>}
         {coding === current && <button type="button" onClick={() => onGo(0)} className="font-semibold text-accent underline underline-offset-4">Revisit the explanation</button>}
       </div>

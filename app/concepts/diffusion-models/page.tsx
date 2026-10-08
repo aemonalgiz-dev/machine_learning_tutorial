@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Diffusion Models · oop_ml",
-  description: "Create a learning task from controlled corruption, then use a trained reverse process to generate.",
+  description: "Adding noise to an example is easy to control. Learning to remove it gives us a useful training problem, and a trained reverse process can then turn a noisy starting point into a generated example.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="diffusion-models"
     title="Diffusion Models"
-    tagline="Create a learning task from controlled corruption, then use a trained reverse process to generate."
+    tagline={"Adding noise to an example is easy to control. Learning to remove it gives us a useful training problem, and a trained reverse process can then turn a noisy starting point into a generated example."}
     openingTitle="Can Learning to Remove Noise Teach a Model to Create?"
     intuition={lessonIntuitions["diffusion-models"]}
     technicalStart="Part 2. Calculate a Noisy Training Pair"

@@ -25,7 +25,7 @@ import { WorkedPairBoard } from "@/components/widgets/WorkedPairBoard";
 export const metadata: Metadata = {
   title: "Learning the Metric Itself · oop_ml",
   description:
-    "Train on picture pairs so useful matches receive nearby representations.",
+    "What makes two pictures similar depends on the task. By training on examples of useful matches, we can learn a representation in which the differences we care about affect the distance.",
 };
 
 const link =
@@ -42,7 +42,7 @@ export default function LearningTheMetricPage() {
       openingTitle="Teach the Model What Should Count as Similar"
       playgroundIntro="Compare the distances of matching and nonmatching pairs. Change the margin and inspect both groups, since pulling everything together would make matching distances small too."
       title="Learning the Metric Itself"
-      tagline="Train on picture pairs so useful matches receive nearby representations."
+      tagline={"What makes two pictures similar depends on the task. By training on examples of useful matches, we can learn a representation in which the differences we care about affect the distance."}
       prerequisites={
         <>
           The borrowed vector this page is measured against is the one read off a

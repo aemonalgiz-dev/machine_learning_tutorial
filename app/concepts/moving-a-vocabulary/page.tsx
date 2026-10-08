@@ -22,7 +22,7 @@ import { VocabularyMovePlayground } from "@/components/widgets/VocabularyMovePla
 export const metadata: Metadata = {
   title: "Moving a Vocabulary · oop_ml",
   description:
-    "Translate vocabulary entries between tokenisation schemes and inspect what the transfer preserves.",
+    "A vocabulary learned under one tokenization scheme may need to be used under another. We will follow what happens to its pieces, including boundaries that disappear and entries that become indistinguishable after the move.",
 };
 
 export default function MovingAVocabularyPage() {
@@ -34,7 +34,7 @@ export default function MovingAVocabularyPage() {
       openingTitle="The Same Token ID Can Mean Something Else"
       playgroundIntro="Follow each source entry through decoding and re-encoding. Check for entries that collapse together or acquire a different segmentation."
       title="Moving a Vocabulary"
-      tagline="Translate vocabulary entries between tokenisation schemes and inspect what the transfer preserves."
+      tagline={"A vocabulary learned under one tokenization scheme may need to be used under another. We will follow what happens to its pieces, including boundaries that disappear and entries that become indistinguishable after the move."}
       prerequisites={
         <>
           You need two things from earlier in this section. The first is what a

@@ -24,7 +24,7 @@ import { ParagraphVectorWorkbench } from "@/components/widgets/ParagraphVectorWo
 export const metadata: Metadata = {
   title: "Paragraph Vectors · oop_ml",
   description:
-    "Train a document vector through word prediction and infer vectors for new text.",
+    "A document may have useful characteristics beyond an average of its word vectors. Paragraph vectors learn a document representation by asking it to help predict the words in that document.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function ParagraphVectorsPage() {
       openingTitle="Give the Whole Document Something to Learn"
       playgroundIntro="Compare the word and document contributions to a prediction. Inspect how a new document's vector changes during inference while the trained word representations remain fixed."
       title="Paragraph Vectors"
-      tagline="Train a document vector through word prediction and infer vectors for new text."
+      tagline={"A document may have useful characteristics beyond an average of its word vectors. Paragraph vectors learn a document representation by asking it to help predict the words in that document."}
       prerequisites={
         <>
           The training loop here is the one{" "}

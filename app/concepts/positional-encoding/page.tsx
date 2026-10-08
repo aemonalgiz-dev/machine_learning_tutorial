@@ -8,12 +8,12 @@ import { Equation } from "@/components/concept/Equation";
 import { KeepInMind, SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { PositionExplorer } from "@/components/widgets/NetworkBuildingBlocks";
 
-export const metadata: Metadata = { title: "Positional Encoding · oop_ml", description: "Explain why token order needs a representation, then construct a sinusoidal position vector." };
+export const metadata: Metadata = { title: "Positional Encoding · oop_ml", description: "The same words in a different order can mean something different. A model that receives token vectors needs a way to know where those tokens occur, which positional information provides." };
 
 export default function PositionalEncodingPage() {
   return <ConceptPage
       lessonId="positional-encoding"
-      intuition={lessonIntuitions["positional-encoding"]} title="Positional Encoding" tagline="Tell a sequence model where each token occurs."
+      intuition={lessonIntuitions["positional-encoding"]} title="Positional Encoding" tagline={"The same words in a different order can mean something different. A model that receives token vectors needs a way to know where those tokens occur, which positional information provides."}
     openingTitle="The Same Words Can Say Something Different"
     technicalStart="Part 2. Building a Position Vector"
     prerequisites={<>Read <Link href="/concepts/embedding-layers">embedding layers</Link> for token vectors and <Link href="/concepts/attention">attention</Link> for how tokens gather information from one another.</>}

@@ -22,7 +22,7 @@ import { RungLadder } from "@/components/widgets/RungLadder";
 export const metadata: Metadata = {
   title: "Finite Scalar Quantisation · oop_ml",
   description:
-    "Map each coordinate to a few fixed levels and combine the level choices into a code.",
+    "Instead of choosing a whole vector from a learned codebook, we can give each coordinate a few allowed levels. Combining those choices produces a discrete code with a different way of controlling the available representations.",
 };
 
 const link =
@@ -37,7 +37,7 @@ export default function FiniteScalarQuantisationPage() {
       openingTitle="Round Each Coordinate Instead of Learning a Table"
       playgroundIntro="Follow a vector through bounding, rounding, and code construction. Compare the selected coordinate levels with the original values."
       title="Finite Scalar Quantisation"
-      tagline="Map each coordinate to a few fixed levels and combine the level choices into a code."
+      tagline={"Instead of choosing a whole vector from a learned codebook, we can give each coordinate a few allowed levels. Combining those choices produces a discrete code with a different way of controlling the available representations."}
       prerequisites={
         <>
           Two pages sit under this one. The page on{" "}

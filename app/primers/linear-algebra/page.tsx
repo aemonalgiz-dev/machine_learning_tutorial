@@ -26,7 +26,7 @@ import { VectorPlayground } from "@/components/widgets/VectorPlayground";
 export const metadata: Metadata = {
   title: "Linear Algebra Primer · oop_ml",
   description:
-    "Build vectors and matrices from small examples, then use them to describe model calculations.",
+    "A model often needs to work with many measurements at once. Vectors and matrices let us organise those numbers and repeat useful calculations without writing a separate rule for every example.",
 };
 
 export default function LinearAlgebraPrimerPage() {
@@ -35,7 +35,7 @@ export default function LinearAlgebraPrimerPage() {
       lessonId="linear-algebra"
       technicalStart="12. Matrix-Vector Multiplication"
       title="Linear Algebra Primer"
-      tagline="Build vectors and matrices from small examples, then use them to describe model calculations."
+      tagline={"A model often needs to work with many measurements at once. Vectors and matrices let us organise those numbers and repeat useful calculations without writing a separate rule for every example."}
       prerequisites={
         <>
           Arithmetic and a pair of coordinate axes. Everything else, including

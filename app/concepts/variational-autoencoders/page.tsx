@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Variational Autoencoders · oop_ml",
-  description: "Train reconstruction together with a distribution from which new latent codes can be drawn.",
+  description: "A model that reconstructs known examples does not necessarily give us a good way to generate new ones. A variational autoencoder also shapes a distribution of compressed representations from which we can draw new codes.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="variational-autoencoders"
     title="Variational Autoencoders"
-    tagline="Train reconstruction together with a distribution from which new latent codes can be drawn."
+    tagline={"A model that reconstructs known examples does not necessarily give us a good way to generate new ones. A variational autoencoder also shapes a distribution of compressed representations from which we can draw new codes."}
     openingTitle="Which Hidden Codes Should We Use to Create Something New?"
     intuition={lessonIntuitions["variational-autoencoders"]}
     technicalStart="Part 2. Sampling and the Variational Objective"

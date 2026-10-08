@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Autoregressive Generation · oop_ml",
-  description: "Turn a next-token distribution into a response by extending the context one choice at a time.",
+  description: "A next-token model predicts one step ahead. To produce a response, we choose a token, append it to the existing text, and ask the model to predict again with that new context.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="autoregressive-generation"
     title="Autoregressive Generation"
-    tagline="Turn a next-token distribution into a response by extending the context one choice at a time."
+    tagline={"A next-token model predicts one step ahead. To produce a response, we choose a token, append it to the existing text, and ask the model to predict again with that new context."}
     openingTitle="How Does One Predicted Token Become a Paragraph?"
     intuition={lessonIntuitions["autoregressive-generation"]}
     technicalStart="Part 2. The Probability of a Sequence"

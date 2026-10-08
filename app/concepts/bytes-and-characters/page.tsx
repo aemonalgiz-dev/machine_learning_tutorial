@@ -24,7 +24,7 @@ import { ScriptCostChart } from "@/components/widgets/ScriptCostChart";
 export const metadata: Metadata = {
   title: "Bytes and Characters · oop_ml",
   description:
-    "Compare character and byte representations, including their coverage and sequence lengths.",
+    "A visible character and the bytes used to store it are not always the same unit. That distinction affects how much text a model receives and whether its representation can handle unfamiliar writing.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function BytesAndCharactersPage() {
       openingTitle="A Tiny Alphabet Can Spell a Very Long Sentence"
       playgroundIntro="Compare the number of characters with the number of bytes. Inspect a character represented by multiple bytes and check the decoded result."
       title="Bytes and Characters"
-      tagline="Compare character and byte representations, including their coverage and sequence lengths."
+      tagline={"A visible character and the bytes used to store it are not always the same unit. That distinction affects how much text a model receives and whether its representation can handle unfamiliar writing."}
       prerequisites={
         <>
           Two things from earlier in this section. The page on{" "}

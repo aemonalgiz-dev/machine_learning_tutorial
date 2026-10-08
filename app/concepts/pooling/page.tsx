@@ -25,7 +25,7 @@ import { WindowSummaries } from "@/components/widgets/WindowSummaries";
 export const metadata: Metadata = {
   title: "Pooling · oop_ml",
   description:
-    "Replace each small window with a maximum or an average and inspect the information lost.",
+    "After detecting local patterns, we may not need every response at its original resolution. Pooling summarises nearby values, reducing the amount of data while giving up some information about exact positions.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function PoolingPage() {
       openingTitle="Keep a Summary of the Neighbourhood"
       playgroundIntro="Compare maximum and average summaries for the same window. Then look at which input values receive a gradient on the backward pass."
       title="Pooling"
-      tagline="Replace each small window with a maximum or an average and inspect the information lost."
+      tagline={"After detecting local patterns, we may not need every response at its original resolution. Pooling summarises nearby values, reducing the amount of data while giving up some information about exact positions."}
       prerequisites={
         <>
           The picture being pooled is the bank of maps a convolution answers

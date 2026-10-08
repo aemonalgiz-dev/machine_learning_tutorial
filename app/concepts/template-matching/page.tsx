@@ -23,7 +23,7 @@ import { WhereEachRuleLands } from "@/components/widgets/WhereEachRuleLands";
 export const metadata: Metadata = {
   title: "Template Matching · oop_ml",
   description:
-    "Slide a known template over an image and compare the match score at each position.",
+    "If we already know what a pattern looks like, we can search for it in a larger picture. Template matching compares that known pattern with each possible location in the image.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function TemplateMatchingPage() {
       openingTitle="Find This Small Picture Inside That Larger One"
       playgroundIntro="Inspect the best position and its score, then compare it with competing positions. Try changes in lighting or appearance and check whether the reported match remains convincing."
       title="Template Matching"
-      tagline="Slide a known template over an image and compare the match score at each position."
+      tagline={"If we already know what a pattern looks like, we can search for it in a larger picture. Template matching compares that known pattern with each possible location in the image."}
       prerequisites={
         <>
           Nothing is fitted on this page and nothing is learned, so none of the

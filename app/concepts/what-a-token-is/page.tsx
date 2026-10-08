@@ -22,7 +22,7 @@ import { VocabularyGrowthChart } from "@/components/widgets/VocabularyGrowthChar
 export const metadata: Metadata = {
   title: "What a Token Is · oop_ml",
   description:
-    "Turn text into pieces with numeric IDs, and examine what those IDs preserve.",
+    "We can read the word cat, but a numerical model needs a representation it can process. A tokenizer divides text into pieces and maps those pieces to IDs, giving us a starting point for working with language.",
 };
 
 const link =
@@ -37,7 +37,7 @@ export default function WhatATokenIsPage() {
       openingTitle="How Can Our Models Read Language?"
       playgroundIntro="Compare the text pieces with their IDs, then inspect the decoded text. An exact round trip depends on which information the scheme retained."
       title="What a Token Is"
-      tagline="Turn text into pieces with numeric IDs, and examine what those IDs preserve."
+      tagline={"We can read the word cat, but a numerical model needs a representation it can process. A tokenizer divides text into pieces and maps those pieces to IDs, giving us a starting point for working with language."}
       prerequisites={
         <>
           Nothing before this, beyond the one fact every page in the rest of

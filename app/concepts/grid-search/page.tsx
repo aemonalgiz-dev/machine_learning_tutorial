@@ -25,7 +25,7 @@ import { SpaceBuilder } from "@/components/widgets/SpaceBuilder";
 export const metadata: Metadata = {
   title: "Searching for a Setting · oop_ml",
   description:
-    "Compare candidate settings with cross-validation, then evaluate the selected model on a separate test set.",
+    "Many model settings must be chosen before fitting. We need a fair way to compare those choices using training and validation data, while keeping the final test separate from the decision.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function GridSearchPage() {
       openingTitle="The Fit Cannot Choose Every Setting"
       playgroundIntro="Compare the candidates on the same folds. Read the winning validation score alongside the separate test result, since they answer different questions."
       title="Searching for a Setting"
-      tagline="Compare candidate settings with cross-validation, then evaluate the selected model on a separate test set."
+      tagline={"Many model settings must be chosen before fitting. We need a fair way to compare those choices using training and validation data, while keeping the final test separate from the decision."}
       prerequisites={
         <>
           The folding this page searches inside comes from the{" "}

@@ -28,7 +28,7 @@ import { SweepCostComparison } from "@/components/widgets/SweepCostComparison";
 export const metadata: Metadata = {
   title: "Haar Cascades · oop_ml",
   description:
-    "Use cheap rectangular features and staged decisions to search an image efficiently.",
+    "Searching every part of a picture can be expensive, especially when most regions contain nothing relevant. A cascade uses inexpensive checks to reject unlikely regions before applying more demanding tests.",
 };
 
 const link =
@@ -43,7 +43,7 @@ export default function HaarCascadesPage() {
       openingTitle="Discard the Easy Negatives First"
       playgroundIntro="Follow which windows survive each stage. Compare the total feature calculations with the detections retained, rather than looking at speed alone."
       title="Haar Cascades"
-      tagline="Use cheap rectangular features and staged decisions to search an image efficiently."
+      tagline={"Searching every part of a picture can be expensive, especially when most regions contain nothing relevant. A cascade uses inexpensive checks to reject unlikely regions before applying more demanding tests."}
       prerequisites={
         <>
           You should have met the idea of sliding a small window across a larger

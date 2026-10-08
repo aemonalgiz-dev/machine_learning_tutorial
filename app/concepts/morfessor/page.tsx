@@ -24,7 +24,7 @@ import { WeightDial } from "@/components/widgets/WeightDial";
 export const metadata: Metadata = {
   title: "Morfessor · oop_ml",
   description:
-    "Learn recurring word parts by balancing the cost of a piece inventory against the cost of the text.",
+    "Words often share stems and endings, such as walk in walked and walking. Morfessor looks for reusable parts by balancing the cost of storing a vocabulary against the cost of describing the observed words.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -38,7 +38,7 @@ export default function MorfessorPage() {
       openingTitle="Where Would the Language Put the Cut?"
       playgroundIntro="Compare the inventory cost and corpus cost for alternative cuts. Check which familiar word parts emerge and which cuts follow frequency instead."
       title="Morfessor"
-      tagline="Learn recurring word parts by balancing the cost of a piece inventory against the cost of the text."
+      tagline={"Words often share stems and endings, such as walk in walked and walking. Morfessor looks for reusable parts by balancing the cost of storing a vocabulary against the cost of describing the observed words."}
       prerequisites={
         <>
           You need two things from earlier in this section. Something has

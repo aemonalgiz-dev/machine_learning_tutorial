@@ -25,7 +25,7 @@ import { UnitDistortion } from "@/components/widgets/UnitDistortion";
 export const metadata: Metadata = {
   title: "Feature Scaling · oop_ml",
   description:
-    "Put feature values on suitable scales and see which models notice the change.",
+    "A distance calculation can be dominated by a feature simply because its numbers are larger. We will look at how scaling changes that calculation and why some models are affected more than others.",
 };
 
 const link =
@@ -40,7 +40,7 @@ export default function FeatureScalingPage() {
       openingTitle="The Same Person, a Different Unit, a Different Answer"
       playgroundIntro="Compare the raw and transformed values. Pay attention to how one large observation changes the scale and how the model's answer responds."
       title="Feature Scaling"
-      tagline="Put feature values on suitable scales and see which models notice the change."
+      tagline={"A distance calculation can be dominated by a feature simply because its numbers are larger. We will look at how scaling changes that calculation and why some models are affected more than others."}
       prerequisites={
         <>
           The mean and the standard deviation come from the{" "}

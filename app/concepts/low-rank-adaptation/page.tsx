@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Low-Rank Adaptation · oop_ml",
-  description: "Express a trainable correction through a narrow pair of matrices while freezing the base projection.",
+  description: "Adapting every weight in a large model can be expensive. LoRA keeps the original weights fixed and learns a smaller correction through two narrow matrices, reducing the number of parameters that need updating.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="low-rank-adaptation"
     title="Low-Rank Adaptation"
-    tagline="Express a trainable correction through a narrow pair of matrices while freezing the base projection."
+    tagline={"Adapting every weight in a large model can be expensive. LoRA keeps the original weights fixed and learns a smaller correction through two narrow matrices, reducing the number of parameters that need updating."}
     openingTitle="Do We Need to Change Every Weight to Teach a New Task?"
     intuition={lessonIntuitions["low-rank-adaptation"]}
     technicalStart="Part 2. Calculate the Factored Update"

@@ -28,7 +28,7 @@ import { TwoClassCollapse } from "@/components/widgets/TwoClassCollapse";
 export const metadata: Metadata = {
   title: "More Than Two Classes · oop_ml",
   description:
-    "Compare ways to assign one of several categories, and see how their scores become predictions.",
+    "Some problems have more than two possible answers. We need a way to compare the evidence for each category and decide how the resulting scores become a prediction.",
 };
 
 const linkClass =
@@ -43,7 +43,7 @@ export default function MulticlassClassificationPage() {
       openingTitle="More Than Two Possible Answers"
       playgroundIntro="Choose a point and compare the scores for every class. Check which class wins and whether the displayed probabilities are constrained to add to one."
       title="More Than Two Classes"
-      tagline="Compare ways to assign one of several categories, and see how their scores become predictions."
+      tagline={"Some problems have more than two possible answers. We need a way to compare the evidence for each category and decide how the resulting scores become a prediction."}
       prerequisites={
         <>
           Both routes are built out of the{" "}

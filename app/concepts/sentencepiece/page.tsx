@@ -27,7 +27,7 @@ import { WithoutSpaces } from "@/components/widgets/WithoutSpaces";
 export const metadata: Metadata = {
   title: "SentencePiece · oop_ml",
   description:
-    "Treat whitespace as part of the text representation and learn subword pieces from that stream.",
+    "Requiring text to be split into words first makes tokenization depend on another set of boundary rules. SentencePiece can learn pieces from a text stream that explicitly represents whitespace, reducing that dependence on predefined words.",
 };
 
 const SENTENCE = "Dr. Alvarez didn't expect the low-cost re-analysis.";
@@ -42,7 +42,7 @@ export default function SentencePiecePage() {
       openingTitle="Learn the Pieces Before Deciding Where the Words Are"
       playgroundIntro="Follow the space markers through encoding and decoding. Compare the reconstructed text with the input and check which normalisation rules were applied."
       title="SentencePiece"
-      tagline="Treat whitespace as part of the text representation and learn subword pieces from that stream."
+      tagline={"Requiring text to be split into words first makes tokenization depend on another set of boundary rules. SentencePiece can learn pieces from a text stream that explicitly represents whitespace, reducing that dependence on predefined words."}
       prerequisites={
         <>
           One thing from earlier in this section is assumed, which is a scheme

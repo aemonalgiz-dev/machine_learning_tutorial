@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Autoencoders · oop_ml",
-  description: "Learn a compact representation by checking whether it can reconstruct its input.",
+  description: "If we ask a model to compress an input and then reconstruct it, the reconstruction tells us what the compressed representation kept. An autoencoder learns that representation by trying to reduce what is lost.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="autoencoders"
     title="Autoencoders"
-    tagline="Learn a compact representation by checking whether it can reconstruct its input."
+    tagline={"If we ask a model to compress an input and then reconstruct it, the reconstruction tells us what the compressed representation kept. An autoencoder learns that representation by trying to reduce what is lost."}
     openingTitle="What Can We Keep When We Cannot Keep Everything?"
     intuition={lessonIntuitions["autoencoders"]}
     technicalStart="Part 2. Calculate a Bottleneck We Can See"

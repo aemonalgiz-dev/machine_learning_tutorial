@@ -23,7 +23,7 @@ import { TreebankPlayground } from "@/components/widgets/TreebankPlayground";
 export const metadata: Metadata = {
   title: "Penn Treebank Rules · oop_ml",
   description:
-    "Separate contractions and punctuation using rules designed for annotated English text.",
+    "Should can't remain one piece, or should the negation be separated? Penn Treebank tokenization gives English contractions and punctuation consistent treatment so annotated text can be processed using the same conventions.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function PennTreebankRulesPage() {
       openingTitle="A Written Word Can Contain More Than One Grammatical Piece"
       playgroundIntro="Compare contractions and punctuation before and after tokenisation. Check both the output spelling and the span pointing back into the source."
       title="Penn Treebank Rules"
-      tagline="Separate contractions and punctuation using rules designed for annotated English text."
+      tagline={"Should can't remain one piece, or should the negation be separated? Penn Treebank tokenization gives English contractions and punctuation consistent treatment so annotated text can be processed using the same conventions."}
       prerequisites={
         <>
           The{" "}

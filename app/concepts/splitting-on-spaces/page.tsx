@@ -23,7 +23,7 @@ import { WhitespaceKindsTable } from "@/components/widgets/WhitespaceKindsTable"
 export const metadata: Metadata = {
   title: "Splitting on Spaces · oop_ml",
   description:
-    "Split text at whitespace and inspect which words, punctuation, and positions the rule preserves.",
+    "Spaces give us an obvious first place to divide a sentence. We will try that rule, then look at what it does with punctuation, repeated whitespace, and writing that does not separate words with spaces.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function SplittingOnSpacesPage() {
       openingTitle="The Simplest Word Rule Already Makes a Choice"
       playgroundIntro="Inspect the extracted pieces and their source spans. Try punctuation beside a word and repeated whitespace, then compare the pieces with the original text."
       title="Splitting on Spaces"
-      tagline="Split text at whitespace and inspect which words, punctuation, and positions the rule preserves."
+      tagline={"Spaces give us an obvious first place to divide a sentence. We will try that rule, then look at what it does with punctuation, repeated whitespace, and writing that does not separate words with spaces."}
       prerequisites={
         <>
           The{" "}

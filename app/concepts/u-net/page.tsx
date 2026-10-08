@@ -23,7 +23,7 @@ import { UNetTrainingCurves } from "@/components/widgets/UNetTrainingCurves";
 export const metadata: Metadata = {
   title: "U-Net · oop_ml",
   description:
-    "Learn from images paired with labeled masks to predict a label for every pixel.",
+    "Sometimes we need to know which pixels belong to an object, not just whether the object is present. U-Net learns from images paired with labelled masks and carries spatial detail forward to help reconstruct those boundaries.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function UNetPage() {
       openingTitle="Knowing What Is There Does Not Tell Us Where"
       playgroundIntro="Compare the predicted mask with the target pixel by pixel. Pay particular attention to boundaries and thin shapes when the skip connections are removed."
       title="U-Net"
-      tagline="Learn from images paired with labeled masks to predict a label for every pixel."
+      tagline={"Sometimes we need to know which pixels belong to an object, not just whether the object is present. U-Net learns from images paired with labelled masks and carries spatial detail forward to help reconstruct those boundaries."}
       prerequisites={
         <>
           The way down is the network on the{" "}

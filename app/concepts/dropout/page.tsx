@@ -24,7 +24,7 @@ import { UnitLeaningChart } from "@/components/widgets/UnitLeaningChart";
 export const metadata: Metadata = {
   title: "Dropout · oop_ml",
   description:
-    "Randomly mask activations during training and measure whether the network generalises better.",
+    "A network can become too dependent on particular activations during training. Randomly removing some of them makes it work with different combinations, which can help it cope better with new examples.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function DropoutPage() {
       openingTitle="What if a Useful Neuron Is Missing?"
       playgroundIntro="Compare the original activations with one masked draw, then draw again. Notice the difference between a training pass and a prediction pass."
       title="Dropout"
-      tagline="Randomly mask activations during training and measure whether the network generalises better."
+      tagline={"A network can become too dependent on particular activations during training. Randomly removing some of them makes it work with different combinations, which can help it cope better with new examples."}
       prerequisites={
         <>
           The row of units this page silences is a{" "}

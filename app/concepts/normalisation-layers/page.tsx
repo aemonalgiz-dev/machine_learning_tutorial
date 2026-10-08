@@ -27,7 +27,7 @@ import { ScaleShiftUndo } from "@/components/widgets/ScaleShiftUndo";
 export const metadata: Metadata = {
   title: "Normalisation Layers · oop_ml",
   description:
-    "Compare ways to control scales inside a network, including batch, layer, RMS, and weight normalisation.",
+    "The values passed between layers can change in scale as a network trains. Normalisation methods control aspects of those scales, but they differ in which values they compare and what they preserve.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -41,7 +41,7 @@ export default function NormalisationLayersPage() {
       openingTitle="The Inputs Keep Changing While the Layer Learns"
       playgroundIntro="Check which axis supplies the statistics. Compare the values before and after normalisation, then distinguish learned scale and shift from the measured statistics."
       title="Normalisation Layers"
-      tagline="Compare ways to control scales inside a network, including batch, layer, RMS, and weight normalisation."
+      tagline={"The values passed between layers can change in scale as a network trains. Normalisation methods control aspects of those scales, but they differ in which values they compare and what they preserve."}
       prerequisites={
         <>
           The move itself is the first row of the{" "}

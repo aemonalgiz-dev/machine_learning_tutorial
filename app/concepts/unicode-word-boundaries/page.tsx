@@ -23,7 +23,7 @@ import { WordBreakPlayground } from "@/components/widgets/WordBreakPlayground";
 export const metadata: Metadata = {
   title: "Unicode Word Boundaries · oop_ml",
   description:
-    "Use character classes and boundary rules to segment a wider range of writing.",
+    "Rules written around English letters and spaces do not cover every writing system. Unicode character information gives us a broader basis for deciding where boundaries should fall, though it does not settle every linguistic question.",
 };
 
 const link =
@@ -38,7 +38,7 @@ export default function UnicodeWordBoundariesPage() {
       openingTitle="Spaces Are Only One Clue to a Word Boundary"
       playgroundIntro="Inspect the character classes on either side of a proposed break. Compare the resulting segments with a whitespace split of the same text."
       title="Unicode Word Boundaries"
-      tagline="Use character classes and boundary rules to segment a wider range of writing."
+      tagline={"Rules written around English letters and spaces do not cover every writing system. Unicode character information gives us a broader basis for deciding where boundaries should fall, though it does not settle every linguistic question."}
       prerequisites={
         <>
           The{" "}

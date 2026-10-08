@@ -24,7 +24,7 @@ import { UnusedEntriesTable } from "@/components/widgets/UnusedEntriesTable";
 export const metadata: Metadata = {
   title: "Codebook Quantisation · oop_ml",
   description:
-    "Assign each vector to a nearby codebook entry and measure the reconstruction error.",
+    "We may need to replace a continuous vector with a compact ID. A codebook provides a fixed set of representative vectors, letting us choose a nearby entry and measure how much the replacement changes the input.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function CodebookQuantisationPage() {
       openingTitle="Replace Many Possible Vectors with a Small Set of Representatives"
       playgroundIntro="Compare an input vector with its selected codebook entry and reconstruction. Increase the codebook size and inspect both the error and the number of entries used."
       title="Codebook Quantisation"
-      tagline="Assign each vector to a nearby codebook entry and measure the reconstruction error."
+      tagline={"We may need to replace a continuous vector with a compact ID. A codebook provides a fixed set of representative vectors, letting us choose a nearby entry and measure how much the replacement changes the input."}
       prerequisites={
         <>
           The contract a vocabulary has to keep is set out on the{" "}

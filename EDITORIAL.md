@@ -9,6 +9,12 @@ components of the proposed solution? How do we use them, one step at a time?
 What does the result tell us? Only then move into the full mathematical treatment.
 This applies to lesson bodies and widget explanations as well as introductions.
 
+Section introductions, topic summaries, and lesson descriptions need the same
+care. Establish the problem and why it matters before naming the method or its
+operations. Avoid reducing a description to a list of commands such as
+"Build..., compare..., inspect...". Use the space needed to connect the ideas,
+and keep lesson headers and metadata consistent with the course descriptions.
+
 The author's token example starts with "How Can Our Models Read Language?",
 explains why readable text needs another representation for numerical models,
 then maps a familiar word such as `cat` to an illustrative ID such as `103`.
@@ -63,6 +69,9 @@ Keep hand-built illustrations clearly distinct from trained model results.
   explanation names an option by its content, never by its position. Aim for
   roughly half of true-or-false claims to be true, and vary how many options
   of a `several` question hold.
+- Botie delivers quiz feedback and the closing summary. State whether the
+  answer is correct, explain why, and offer relevant lesson sections after a
+  mistake. Keep the tone helpful and preserve the question's full explanation.
 - A practice section comes last, titled `Practice. ...` in the register of
   the part titles, and holds two to four problems worked in Python with
   NumPy or oop_ml. It is the one place on a lesson that may name the library's
@@ -80,12 +89,40 @@ Keep hand-built illustrations clearly distinct from trained model results.
   Use oop_ml when applying an already explained model is the challenge and
   its internal operations are not the learning objective.
   A reader can jump directly to coding from the section controls.
+- Botie gives the programming challenge hints. Reveal the existing guidance
+  one hint at a time when asked, keeping earlier hints available to revisit.
 - Every coding challenge has runnable Python tests. State the required output
   clearly, expose expected and actual results, and allow rounding at the stated
   precision. Test the meaningful result, not one spelling of the solution.
   Report test results as feedback on the work. Do not add rewards, achievement
   language or locked steps. Viewing a solution does not mark tests as passed.
   Run reference solutions in browser Python before publishing.
+- Botie's journey introduces the historical problem, lets the reader try each
+  component, then opens a construction challenge. Embed the workshop after the
+  explanation it depends on and before Python practice. State the objective before the controls, calculate
+  feedback from the actual settings, and show both actual and required results.
+  Keep hints, worked setups, explanations and Python accessible without locks.
+  Botie responds to the experiment and helps the reader inspect a mistake.
+  Separate a manually controlled demonstration from an algorithm that trains.
+  Explain what the toy example leaves out. Preserve reduced-motion support.
+  Prefer manipulating the objects involved in the problem: placing a machine,
+  connecting an input, moving a part, or changing a route. Introduce one new
+  component at a time. The workshop guide teaches placing, configuring, wiring
+  and testing. Lesson challenges start with an empty floor: the learner chooses
+  components and their arrangement. Later lessons reuse earlier tools, with
+  links back to their introductions. Keep the whole journey freely accessible.
+  Make the effect visible where it happens, and let the reader pause and follow
+  an example through each operation. A factory or circuit should calculate
+  from the reader's construction and accept different working arrangements.
+  Keep the connection between the game objects and the lesson's actual method
+  explicit. A control panel followed by a score is not enough on its own.
+  Continue the problem introduced in the history through the workshop's inputs,
+  objective and explanation. City records should remain city records, light
+  sensors should remain light sensors, and text should remain text. Do not
+  replace a lesson's setting with unrelated boxes or deliveries to fit a game
+  metaphor. Before introducing tools, have Botie explain which part of that
+  problem the reader will build. Label invented historical examples as invented
+  and explain the limits of any simplified model.
 - Match instructions to actual controls, fixtures and defaults. Do not ask a
   reader to move a slider that is absent, or describe one dataset while the
   widget loads another without explaining how to select it.

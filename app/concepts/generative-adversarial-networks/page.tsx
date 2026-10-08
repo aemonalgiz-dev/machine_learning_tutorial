@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Generative Adversarial Networks · oop_ml",
-  description: "Learn a generator by training another model to distinguish its outputs from real examples.",
+  description: "A generator needs feedback about whether its examples resemble the training data. A GAN trains a second model to distinguish generated examples from real ones, giving the generator a changing source of feedback.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="generative-adversarial-networks"
     title="Generative Adversarial Networks"
-    tagline="Learn a generator by training another model to distinguish its outputs from real examples."
+    tagline={"A generator needs feedback about whether its examples resemble the training data. A GAN trains a second model to distinguish generated examples from real ones, giving the generator a changing source of feedback."}
     openingTitle="Who Can Tell a Generator What It Is Getting Wrong?"
     intuition={lessonIntuitions["generative-adversarial-networks"]}
     technicalStart="Part 2. Calculate the Adversarial Feedback"

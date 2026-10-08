@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Next-Token Prediction · oop_ml",
-  description: "Build the training task behind an autoregressive large language model.",
+  description: "Text already contains examples of what follows what, giving us a training task without asking someone to label every sentence. A next-token model learns to predict each continuation using only the text available before it.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="next-token-prediction"
     title="Next-Token Prediction"
-    tagline="Build the training task behind an autoregressive large language model."
+    tagline={"Text already contains examples of what follows what, giving us a training task without asking someone to label every sentence. A next-token model learns to predict each continuation using only the text available before it."}
     openingTitle="What Is a Language Model Actually Learning to Predict?"
     intuition={lessonIntuitions["next-token-prediction"]}
     technicalStart="Part 2. From Scores to a Training Signal"

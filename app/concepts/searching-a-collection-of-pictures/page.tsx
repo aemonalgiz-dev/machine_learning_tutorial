@@ -24,7 +24,7 @@ import { SearchSeedTable } from "@/components/widgets/SearchSeedTable";
 export const metadata: Metadata = {
   title: "Searching a Collection of Pictures · oop_ml",
   description:
-    "Compare exact neighbour search with indexes that inspect fewer candidate pictures.",
+    "Once pictures have numerical representations, we can search for nearby ones. Comparing every picture works for a small collection, but a larger collection gives us a reason to consider search indexes and their compromises.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function SearchingACollectionOfPicturesPage() {
       openingTitle="A Useful Similarity Measure Still Has to Search the Collection"
       playgroundIntro="Compare each indexed result with the exact neighbours. Read the number of comparisons together with recall, the share of exact neighbours recovered."
       title="Searching a Collection of Pictures"
-      tagline="Compare exact neighbour search with indexes that inspect fewer candidate pictures."
+      tagline={"Once pictures have numerical representations, we can search for nearby ones. Comparing every picture works for a small collection, but a larger collection gives us a reason to consider search indexes and their compromises."}
       prerequisites={
         <>
           The sixteen numbers every picture is searched by are the hidden layer

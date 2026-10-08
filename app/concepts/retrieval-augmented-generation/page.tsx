@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Retrieval-Augmented Generation · oop_ml",
-  description: "Find relevant source material, place it in context, and check the answer against that evidence.",
+  description: "A model may need information that was absent or out of date when it was trained. Retrieval supplies relevant source material as context, giving the model evidence it can use when answering a question.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="retrieval-augmented-generation"
     title="Retrieval-Augmented Generation"
-    tagline="Find relevant source material, place it in context, and check the answer against that evidence."
+    tagline={"A model may need information that was absent or out of date when it was trained. Retrieval supplies relevant source material as context, giving the model evidence it can use when answering a question."}
     openingTitle="What If the Answer Lives in a Document the Model Needs to Read?"
     intuition={lessonIntuitions["retrieval-augmented-generation"]}
     technicalStart="Part 2. Calculate a Small Retrieval Baseline"

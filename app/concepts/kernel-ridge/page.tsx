@@ -28,7 +28,7 @@ import { PenaltySweepChart } from "@/components/widgets/PenaltySweepChart";
 export const metadata: Metadata = {
   title: "Kernel Ridge Regression · oop_ml",
   description:
-    "Rewrite ridge regression around training examples, then replace dot products with a kernel.",
+    "Ridge regression gives us a way to control a fit, but its original features may not describe the relationship well. Kernel comparisons let us apply the same idea in a transformed feature space.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -42,7 +42,7 @@ export default function KernelRidgePage() {
       openingTitle="Build a Curve from Similarities to the Training Points"
       playgroundIntro="Compare the ordinary and kernel-based fits. Vary the penalty and watch how closely the prediction follows individual training points."
       title="Kernel Ridge Regression"
-      tagline="Rewrite ridge regression around training examples, then replace dot products with a kernel."
+      tagline={"Ridge regression gives us a way to control a fit, but its original features may not describe the relationship well. Kernel comparisons let us apply the same idea in a transformed feature space."}
       prerequisites={
         <>
           The model being rewritten is the one from the{" "}

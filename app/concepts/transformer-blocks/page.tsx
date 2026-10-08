@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Transformer Blocks · oop_ml",
-  description: "Combine attention, residual connections, and local processing into one reusable component.",
+  description: "Attention lets tokens exchange information, but that is only part of a transformer. We will put it together with per-token processing, normalisation, and residual connections, explaining the job of each component.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="transformer-blocks"
     title="Transformer Blocks"
-    tagline="Combine attention, residual connections, and local processing into one reusable component."
+    tagline={"Attention lets tokens exchange information, but that is only part of a transformer. We will put it together with per-token processing, normalisation, and residual connections, explaining the job of each component."}
     openingTitle="How Do We Build a Model Around Attention?"
     intuition={lessonIntuitions["transformer-blocks"]}
     technicalStart="Part 2. Calculating One Decoder Block"

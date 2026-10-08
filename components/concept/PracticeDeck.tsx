@@ -7,6 +7,7 @@ import { draftKey, readDraft, writeDraft, type PracticeDraft } from "@/lib/pract
 import { usePython } from "@/lib/use-python";
 import type { PythonResult } from "@/lib/python";
 import { ProgramOutput, PythonCode } from "./PythonCode";
+import { BotieSays } from "@/components/site/Botie";
 
 const PythonEditor = dynamic(() => import("./PythonEditor"), {
   ssr: false,
@@ -130,13 +131,22 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
 
           {current.hints && current.hints.length > 0 && (
             <div className="mt-5 space-y-3">
-              {current.hints.slice(0, attempt.hintsShown).map((hint, index) => (
-                <p key={hint} className="rounded-md border-l-2 border-accent-fill bg-accent-soft px-4 py-3 text-sm leading-6 text-foreground">
-                  <span className="mr-2 font-mono text-xs text-accent">Hint {index + 1}</span>{hint}
-                </p>
-              ))}
+              <div aria-live="polite" aria-relevant="additions text">
+                {attempt.hintsShown > 0 && (
+                  <BotieSays mood="thinking" className="flex-col !items-start sm:flex-row">
+                    <ol className="space-y-4" aria-label="Hints from Botie">
+                      {current.hints.slice(0, attempt.hintsShown).map((hint, index) => (
+                        <li key={hint}>
+                          <p className="mb-1 font-mono text-xs text-accent">Hint {index + 1}</p>
+                          <p>{hint}</p>
+                        </li>
+                      ))}
+                    </ol>
+                  </BotieSays>
+                )}
+              </div>
               {attempt.hintsShown < current.hints.length && <Quiet onClick={() => update(card, { hintsShown: attempt.hintsShown + 1 })}>
-                {attempt.hintsShown === 0 ? "I could use a hint" : "Show the next hint"}
+                {attempt.hintsShown === 0 ? "Ask Botie for a hint" : "Ask Botie for another hint"}
               </Quiet>}
             </div>
           )}

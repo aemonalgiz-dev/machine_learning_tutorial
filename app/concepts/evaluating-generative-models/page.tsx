@@ -10,14 +10,14 @@ import { lessonIntuitions } from "@/lib/intuition";
 
 export const metadata: Metadata = {
   title: "Evaluating Generative Models · oop_ml",
-  description: "Match the measurement to the task, preserve a held-out comparison, and inspect what averages conceal.",
+  description: "A fluent answer or convincing picture is not enough to show that a model does its job well. We need evaluation examples and criteria that reflect the task, including failures an overall average might conceal.",
 };
 
 export default function Page() {
   return <ConceptPage
       lessonId="evaluating-generative-models"
     title="Evaluating Generative Models"
-    tagline="Match the measurement to the task, preserve a held-out comparison, and inspect what averages conceal."
+    tagline={"A fluent answer or convincing picture is not enough to show that a model does its job well. We need evaluation examples and criteria that reflect the task, including failures an overall average might conceal."}
     openingTitle="A Response Looks Convincing. How Do We Know the Model Improved?"
     intuition={lessonIntuitions["evaluating-generative-models"]}
     technicalStart="Part 2. Calculate Loss and Perplexity"

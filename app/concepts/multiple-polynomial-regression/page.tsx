@@ -29,7 +29,7 @@ import { ResidualPatternChart } from "@/components/widgets/ResidualPatternChart"
 export const metadata: Metadata = {
   title: "Multiple & Polynomial Regression · oop_ml",
   description:
-    "Add more measurements or curved features while keeping the same idea of fitting coefficients.",
+    "One measurement may not be enough to explain the outcome. We can give a regression model several inputs, including transformed inputs, and work out how much each contributes to the prediction.",
 };
 
 const linkClass =
@@ -44,7 +44,7 @@ export default function MultiplePolynomialRegressionPage() {
       openingTitle="When One Input Cannot Explain Enough"
       playgroundIntro="Compare how the prediction changes when another input or a higher polynomial degree is available. A closer fit to the displayed points is only the first check."
       title="Multiple & Polynomial Regression"
-      tagline="Add more measurements or curved features while keeping the same idea of fitting coefficients."
+      tagline={"One measurement may not be enough to explain the outcome. We can give a regression model several inputs, including transformed inputs, and work out how much each contributes to the prediction."}
       prerequisites={
         <>
           This page builds directly on{" "}

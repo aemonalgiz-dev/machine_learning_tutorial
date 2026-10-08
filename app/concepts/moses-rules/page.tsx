@@ -24,7 +24,7 @@ import { StopProbePanel } from "@/components/widgets/StopProbePanel";
 export const metadata: Metadata = {
   title: "Moses Rules · oop_ml",
   description:
-    "Combine punctuation rules with language-specific exceptions for translation-oriented tokenisation.",
+    "A translation system needs a consistent way to handle punctuation without breaking abbreviations and other language-specific forms. Moses tokenization combines general splitting rules with exceptions for those cases.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function MosesRulesPage() {
       openingTitle="A Full Stop Does Not Always End a Sentence"
       playgroundIntro="Compare a sentence-ending period, an abbreviation, and a decimal. Inspect which rule applies and where an exception list changes the cut."
       title="Moses Rules"
-      tagline="Combine punctuation rules with language-specific exceptions for translation-oriented tokenisation."
+      tagline={"A translation system needs a consistent way to handle punctuation without breaking abbreviations and other language-specific forms. Moses tokenization combines general splitting rules with exceptions for those cases."}
       prerequisites={
         <>
           The{" "}

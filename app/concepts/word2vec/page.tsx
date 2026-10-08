@@ -29,7 +29,7 @@ import { Word2vecWindowPairs } from "@/components/widgets/Word2vecWindowPairs";
 export const metadata: Metadata = {
   title: "Word2vec · oop_ml",
   description:
-    "Train on nearby words, then keep the vectors that helped make those predictions.",
+    "Words used in similar contexts often have something in common. Word2vec uses a word-prediction task to learn vectors that capture useful regularities in those surrounding words.",
 };
 
 const link =
@@ -44,7 +44,7 @@ export default function Word2vecPage() {
       openingTitle="Learn a Word by Trying to Predict Its Neighbours"
       playgroundIntro="Inspect the centre-context training pairs before the learned neighbours. Compare the resulting similarities across training settings and random starts."
       title="Word2vec"
-      tagline="Train on nearby words, then keep the vectors that helped make those predictions."
+      tagline={"Words used in similar contexts often have something in common. Word2vec uses a word-prediction task to learn vectors that capture useful regularities in those surrounding words."}
       prerequisites={
         <>
           Every score on this page is a dot product turned into a probability by

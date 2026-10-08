@@ -26,7 +26,7 @@ import { UpdateRuleRace } from "@/components/widgets/UpdateRuleRace";
 export const metadata: Metadata = {
   title: "Hopfield Networks · oop_ml",
   description:
-    "Store patterns in a network and update its cells to retrieve a stable pattern.",
+    "We can often recognise a familiar pattern even when part of it is damaged. A Hopfield network stores patterns in its connections and uses repeated updates to try to recover a stable pattern from a noisy input.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -40,7 +40,7 @@ export default function HopfieldNetworkPage() {
       openingTitle="Can a Damaged Pattern Find Its Way Back?"
       playgroundIntro="Damage a stored pattern and follow recall one update at a time. Check the final pattern as well as the energy, since settling is not the same as recalling correctly."
       title="Hopfield Networks"
-      tagline="Store patterns in a network and update its cells to retrieve a stable pattern."
+      tagline={"We can often recognise a familiar pattern even when part of it is damaged. A Hopfield network stores patterns in its connections and uses repeated updates to try to recover a stable pattern from a noisy input."}
       prerequisites={
         <>
           The weights form a matrix and every cell reads a weighted sum of the others, which is the{" "}

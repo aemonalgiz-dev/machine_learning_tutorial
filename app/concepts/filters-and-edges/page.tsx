@@ -26,7 +26,7 @@ import { ThresholdSweep } from "@/components/widgets/ThresholdSweep";
 export const metadata: Metadata = {
   title: "Filters and Edges · oop_ml",
   description:
-    "Use small image filters to measure local changes in brightness.",
+    "The boundary of an object often appears as a change in brightness. Small image filters compare nearby pixels so we can measure those changes instead of treating each pixel in isolation.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function FiltersAndEdgesPage() {
       openingTitle="The Brightness Changed; the Edge Stayed Put"
       playgroundIntro="Compare the original picture with the filter response. Inspect one window's arithmetic, then change the filter and examine which changes in brightness it highlights."
       title="Filters and Edges"
-      tagline="Use small image filters to measure local changes in brightness."
+      tagline={"The boundary of an object often appears as a change in brightness. Small image filters compare nearby pixels so we can measure those changes instead of treating each pixel in isolation."}
       prerequisites={
         <>
           Nothing beyond arithmetic is needed to follow the sweep, since it is a

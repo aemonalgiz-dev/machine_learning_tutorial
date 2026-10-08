@@ -26,7 +26,7 @@ import { WithoutCorners } from "@/components/widgets/WithoutCorners";
 export const metadata: Metadata = {
   title: "Keypoints and Descriptors · oop_ml",
   description:
-    "Locate distinctive image points, describe their neighbourhoods, and match them between pictures.",
+    "Two photographs may show the same scene from different positions. We need distinctive points we can recognise in both pictures and a numerical description that lets us compare their surroundings.",
 };
 
 const link =
@@ -41,7 +41,7 @@ export default function KeypointsAndDescriptorsPage() {
       openingTitle="Find Places You Can Recognise Again"
       playgroundIntro="Compare the detected locations with their descriptors and proposed matches. Check whether a strong local match also makes sense in the two pictures."
       title="Keypoints and Descriptors"
-      tagline="Locate distinctive image points, describe their neighbourhoods, and match them between pictures."
+      tagline={"Two photographs may show the same scene from different positions. We need distinctive points we can recognise in both pictures and a numerical description that lets us compare their surroundings."}
       prerequisites={
         <>
           Start with{" "}

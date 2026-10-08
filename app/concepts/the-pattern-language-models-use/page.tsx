@@ -24,7 +24,7 @@ import { SpaceLedger } from "@/components/widgets/SpaceLedger";
 export const metadata: Metadata = {
   title: "The Pattern Language Models Use · oop_ml",
   description:
-    "Use a regular expression to make initial text pieces while retaining their spacing.",
+    "Before learning smaller pieces, a tokenizer may need to separate runs of letters, numbers, and punctuation. A regular expression can describe those initial groups while retaining information about the spaces around them.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function PatternWordsPage() {
       openingTitle="The Space Has to Belong Somewhere"
       playgroundIntro="Make the spaces visible and inspect which piece owns each one. Join the pieces and compare the result with the original text."
       title="The Pattern Language Models Use"
-      tagline="Use a regular expression to make initial text pieces while retaining their spacing."
+      tagline={"Before learning smaller pieces, a tokenizer may need to separate runs of letters, numbers, and punctuation. A regular expression can describe those initial groups while retaining information about the spaces around them."}
       prerequisites={
         <>
           The{" "}

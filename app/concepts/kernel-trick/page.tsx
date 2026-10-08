@@ -20,7 +20,7 @@ import { SupportVectorRefit } from "@/components/widgets/SupportVectorRefit";
 
 export const metadata: Metadata = {
   title: "The Kernel Trick · oop_ml",
-  description: "See how changing the representation of points makes a flat separating plane possible, then learn how a kernel avoids building all the transformed coordinates.",
+  description: "A pattern may be difficult to separate with a straight boundary until we change how it is represented. A kernel lets us compare examples in a transformed space without explicitly building every new feature.",
 };
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
 
@@ -34,7 +34,7 @@ export default function KernelTrickPage() {
     <ConceptPage
       lessonId="kernel-trick"
       title="The Kernel Trick"
-      tagline="Change how the points are represented, then look for a simple boundary."
+      tagline={"A pattern may be difficult to separate with a straight boundary until we change how it is represented. A kernel lets us compare examples in a transformed space without explicitly building every new feature."}
       openingTitle="What If the Middle Belongs to One Class?"
       technicalStart="Part 3. Calculate the Same Comparison Two Ways"
       history={<LessonMotivation lesson={lessonProgressions["kernel-trick"]} />}

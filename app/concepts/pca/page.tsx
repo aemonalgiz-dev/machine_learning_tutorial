@@ -32,7 +32,7 @@ import { UnitToggle } from "@/components/widgets/UnitToggle";
 export const metadata: Metadata = {
   title: "Principal Component Analysis · oop_ml",
   description:
-    "Find directions that preserve as much variation as possible when you use fewer coordinates.",
+    "Several measurements may vary together, so storing all of them can repeat much of the same information. Principal component analysis looks for directions that preserve the most variation with fewer coordinates.",
 };
 
 const link = "font-medium text-indigo-600 underline-offset-4 hover:underline dark:text-indigo-400";
@@ -46,7 +46,7 @@ export default function PcaPage() {
       openingTitle="Two Measurements, Much of the Same Information"
       playgroundIntro="Rotate the projection direction and compare the spread of the projected points. Then inspect the gap between each original point and its reconstruction."
       title="Principal Component Analysis"
-      tagline="Find directions that preserve as much variation as possible when you use fewer coordinates."
+      tagline={"Several measurements may vary together, so storing all of them can repeat much of the same information. Principal component analysis looks for directions that preserve the most variation with fewer coordinates."}
       prerequisites={
         <>
           This page is where two primers cash their promises, the{" "}

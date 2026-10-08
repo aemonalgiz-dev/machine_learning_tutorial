@@ -26,7 +26,7 @@ import { TieBranches } from "@/components/widgets/TieBranches";
 export const metadata: Metadata = {
   title: "Byte Pair Encoding · oop_ml",
   description:
-    "Grow a subword vocabulary by repeatedly merging frequent adjacent pairs.",
+    "Common letter combinations need not be stored one character at a time. Byte pair encoding repeatedly joins frequent neighbouring pieces, building a vocabulary that can reuse parts across different words.",
 };
 
 const MARKER = "</w>";
@@ -41,7 +41,7 @@ export default function BytePairEncodingPage() {
       openingTitle="A New Word Can Be Made from Familiar Pieces"
       playgroundIntro="Inspect the adjacent-pair counts and follow one merge at a time. Then encode a word absent from the training text using the pieces that were learned."
       title="Byte Pair Encoding"
-      tagline="Grow a subword vocabulary by repeatedly merging frequent adjacent pairs."
+      tagline={"Common letter combinations need not be stored one character at a time. Byte pair encoding repeatedly joins frequent neighbouring pieces, building a vocabulary that can reuse parts across different words."}
       prerequisites={
         <>
           You need only one thing from earlier in this section, which is that
