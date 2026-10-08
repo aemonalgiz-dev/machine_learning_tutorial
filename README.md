@@ -150,6 +150,30 @@ update them after a deliberate SDK/runtime change, run `npm run record:practice`
 review the generated output changes, and then run `npm run test:practice`.
 Never record a failing Python program as a reference output.
 
+## Amplify deployment size
+
+`npm run build` prints a production-size report after the build. Run
+`npm run size:build` to measure an existing build again. The report counts
+generated server pages, browser assets, public files, manifests and additional
+traced runtime dependencies once each. It excludes `.next/dev`, build caches
+and unused packages. Amplify's final packaged artifact remains the authoritative
+size; its Linux dependencies may differ from a local Windows build.
+
+The shared course navigation is imported by the client navigation components.
+Keep it out of root-layout props: passing the whole table there serializes it
+into every page's HTML, RSC response and prefetch files. The navigation data
+instead belongs in a shared browser bundle that can be cached across lessons.
+
+Production browser, server and prerender source maps are disabled to reduce
+deployment size. Production stack traces consequently have less source detail.
+Use `next build --debug-prerender` when investigating a prerender error, then
+rebuild normally for deployment. Keep the Python runtime and SDK assets: the
+browser exercises need them.
+
+See [AWS's build-size troubleshooting guide](https://docs.aws.amazon.com/amplify/latest/userguide/troubleshooting-SSR.html#build-output-too-large)
+for inspecting an Amplify artifact when its reported size differs from the
+local estimate.
+
 ## Validation
 
 ```bash

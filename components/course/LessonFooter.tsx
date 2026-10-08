@@ -9,11 +9,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LessonLocation } from "@/lib/course-navigation";
+import { lessonLocations } from "@/lib/course-navigation";
 
-export function LessonFooter({ locations }: { locations: Record<string, LessonLocation> }) {
+export function LessonFooter() {
   const pathname = usePathname();
-  const lesson = pathname ? locations[pathname.replace(/\/$/, "")] : undefined;
+  const lesson = pathname ? lessonLocations[pathname.replace(/\/$/, "")] : undefined;
   if (!lesson) return null;
 
   return (

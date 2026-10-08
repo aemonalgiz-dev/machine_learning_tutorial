@@ -14,6 +14,8 @@
     "prebuild": "npm run prepare:python -- --verify",
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node scripts/report-build-size.mjs",
+    "size:build": "node scripts/report-build-size.mjs",
     "start": "next start",
     "lint": "eslint"
   },

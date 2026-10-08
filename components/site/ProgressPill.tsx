@@ -4,8 +4,10 @@
 // page. The count is lessons, because that is the unit a reader plans in.
 
 import { finishedCount, useProgress } from "@/lib/progress";
+import { lessonOrder } from "@/lib/course-navigation";
 
-export function ProgressPill({ lessons }: { lessons: string[] }) {
+export function ProgressPill() {
+  const lessons = lessonOrder;
   const progress = useProgress();
   const done = finishedCount(progress, lessons);
   const share = lessons.length === 0 ? 0 : Math.round((100 * done) / lessons.length);

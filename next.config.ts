@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Production source maps are unnecessary for serving lessons and add about
+  // 30 MiB to the server output. Keep Amplify's deployment budget for content.
+  productionBrowserSourceMaps: false,
+  enablePrerenderSourceMaps: false,
   // Pin the workspace root to this repository. Without it Turbopack walks up
   // the tree looking for a lockfile and finds an unrelated one in the home
   // directory, then warns; this repo is self-contained, so its own directory
@@ -40,6 +44,7 @@ const nextConfig: NextConfig = {
   // deploy.
   experimental: {
     proxyTimeout: 120_000,
+    serverSourceMaps: false,
   },
 
   async rewrites() {

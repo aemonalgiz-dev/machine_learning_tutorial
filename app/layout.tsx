@@ -7,7 +7,6 @@ import { ProgressPill } from "@/components/site/ProgressPill";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { SupportMessage } from "@/components/site/SupportMessage";
 import { Botie } from "@/components/site/Botie";
-import { lessonLocations, lessonOrder } from "@/lib/course-navigation";
 import { REPOSITORY } from "@/lib/site";
 import "./globals.css";
 
@@ -73,7 +72,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               </a>
             </div>
             <div className="ml-auto flex items-center gap-3">
-              <ProgressPill lessons={lessonOrder} />
+              <ProgressPill />
               <ThemeToggle />
             </div>
             <SupportMessage />
@@ -81,9 +80,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </header>
 
         <main className="flex-1">
-          <CourseBreadcrumbs locations={lessonLocations} />
+          <CourseBreadcrumbs />
           {children}
-          <LessonFooter locations={lessonLocations} />
+          <LessonFooter />
         </main>
 
         <footer className="border-t border-line">

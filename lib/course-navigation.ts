@@ -42,7 +42,8 @@ export interface LessonLocation {
   next?: LessonLink;
 }
 
-// Pass only the navigation data into client components, not every lesson blurb.
+// Client navigation imports this shared table directly. Passing it through the
+// root layout serializes the entire course into every page's HTML and RSC files.
 export const lessonLocations: Record<string, LessonLocation> = (() => {
   const all: { href: string; title: string; part: Part; index: number }[] = CURRICULUM.flatMap((part, index) =>
     part.topics.flatMap(topic => topic.concepts.flatMap(concept =>
