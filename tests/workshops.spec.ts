@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { missions, labLessons, missionById } from "../lib/labs";
 import { passed } from "../lib/labs/types";
+import { expandedLessonIds } from "../lib/lessons/ids";
 
-test("every curriculum lesson has a challenge with a working, nontrivial solution", () => {
-  expect(labLessons).toHaveLength(108);
-  const expected = labLessons.map(l => l.id).filter(id => id !== "neurons-and-activations").sort();
+test("legacy simulation challenges retain their working, nontrivial solutions", () => {
+  const expanded = new Set<string>(expandedLessonIds);
+  const expected = labLessons.map(l => l.id).filter(id => id !== "neurons-and-activations" && !expanded.has(id)).sort();
   expect(missions.map(m => m.id).sort()).toEqual(expected);
   expect(new Set(missions.map(m => m.id)).size).toBe(missions.length);
   for (const m of missions) {

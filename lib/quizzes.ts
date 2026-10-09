@@ -18,10 +18,16 @@
 // separately, which is harder and is the right shape for properties that travel
 // in groups.
 
-export type QuizQuestion =
+export interface QuizGiven {
+  description: string;
+  code?: string;
+  data?: string;
+}
+
+export type QuizQuestion = { given?: QuizGiven } & (
   | { kind: "trueFalse"; prompt: string; answer: boolean; because: string }
   | { kind: "choice"; prompt: string; options: string[]; answer: number; because: string }
-  | { kind: "several"; prompt: string; options: string[]; answers: number[]; because: string };
+  | { kind: "several"; prompt: string; options: string[]; answers: number[]; because: string });
 
 /** A claim the reader marks true or false. */
 export const trueFalse = (prompt: string, answer: boolean, because: string): QuizQuestion => ({

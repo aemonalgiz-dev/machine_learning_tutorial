@@ -1,9 +1,9 @@
 export interface Point { x: number; y: number }
-export interface WireNode extends Point { id: string; height: number }
-export const NODE_WIDTH = 220;
-export const portY = (port: number) => 78 + port * 36;
-export const outputPoint = (node: Point): Point => ({ x: node.x + NODE_WIDTH, y: node.y + portY(0) });
-export const inputPoint = (node: Point, port: number): Point => ({ x: node.x, y: node.y + portY(port) });
+export interface NodeGeometry { width: number; height: number; inputs: Point[]; output?: Point }
+export interface WireNode extends Point { id: string; height: number; width?: number; inputs?: Point[]; output?: Point }
+export const NODE_WIDTH = 280;
+export const outputPoint = (node: WireNode): Point => ({ x: node.x + (node.output?.x ?? node.width ?? NODE_WIDTH), y: node.y + (node.output?.y ?? 100) });
+export const inputPoint = (node: WireNode, port: number): Point => ({ x: node.x + (node.inputs?.[port]?.x ?? 0), y: node.y + (node.inputs?.[port]?.y ?? 90 + port * 72) });
 
 export function looseWire(from: Point, to: Point): string {
   const reach = Math.max(24, Math.abs(to.x - from.x) / 2);
@@ -73,7 +73,7 @@ class Queue {
 
 export function wirePath(from: WireNode, to: WireNode, port: number, nodes: WireNode[]): string {
   const start = outputPoint(from), end = inputPoint(to, port);
-  const obstacles = nodes.map(n => ({ left: n.x - 12, right: n.x + NODE_WIDTH + 12, top: n.y - 12, bottom: n.y + n.height + 12 }));
+  const obstacles = nodes.map(n => ({ left: n.x - 12, right: n.x + (n.width ?? NODE_WIDTH) + 12, top: n.y - 12, bottom: n.y + n.height + 12 }));
 
   // Most connections can use one smooth, monotone curve between the sockets.
   if (end.x > start.x) {

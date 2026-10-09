@@ -6,8 +6,8 @@ import { labLessons } from "../lib/labs";
 import { journeyFor } from "../lib/builds/journey";
 
 test("every lesson has an executable construction, coherent tools and an empty starting task",()=>{
-  expect(BUILDS).toHaveLength(109);
-  expect(new Set(BUILDS.map(b=>b.id)).size).toBe(109);
+  expect(BUILDS).toHaveLength(labLessons.length + 1);
+  expect(new Set(BUILDS.map(b=>b.id)).size).toBe(BUILDS.length);
   for(const lesson of labLessons){
     const b=buildById[lesson.id],journey=journeyFor(lesson.id);expect(b,lesson.id).toBeDefined();
     expect(journey.history.blocks.length,lesson.id).toBeGreaterThan(1);
@@ -35,7 +35,7 @@ test("numeric operations agree with independent examples and reject invalid dime
   expect(()=>TOOLS.upsample.run([[[1]]],{factor:1000000})).toThrow(/scale from 1 to 20/);
   expect(()=>TOOLS.gather.run([[10,20],[2]],{})).toThrow(/does not exist/);
   expect(buildById.statistics.cases.map(c=>c.expected)).toEqual([40,32,36]);
-  expect(buildById["linear-algebra"].cases.map(c=>c.expected)).toEqual([8,9,4]);
+  expect(buildById["linear-algebra"].cases.map(c=>c.expected)).toEqual([[8,9,4],[9,7],[6,13,8]]);
   [5,4.5,4.1].forEach((speed,i)=>expect(buildById.calculus.cases[i].expected).toBeCloseTo(speed));
   [10,12.2,6].forEach((position,i)=>expect(buildById["simple-linear-regression"].cases[i].expected).toBeCloseTo(position));
   expect(buildById["multiple-polynomial-regression"].cases.map(c=>c.expected)).toEqual([8,6,8,16]);
@@ -157,7 +157,7 @@ test("learners configure, move and remove their pieces, and undo restores the co
 });
 
 test("every workshop's worked construction executes in the browser and still requires testing",async({page})=>{
-  test.setTimeout(300_000);
+  test.setTimeout(420_000);
   await page.emulateMedia({reducedMotion:"reduce"});
   const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
   for(const b of BUILDS){

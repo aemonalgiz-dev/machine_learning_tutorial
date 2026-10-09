@@ -1,0 +1,191 @@
+[
+  {
+    "id": "numpy-arrays",
+    "title": "Giving Measurements a Place",
+    "section": "Python and NumPy",
+    "topic": "From a measurement to a calculation",
+    "blurb": "Three thermometers give us three readings. Before we can calculate with them, we need to decide how those readings are stored, which position belongs to which thermometer, and what an operation should do to the collection."
+  },
+  {
+    "id": "numpy-axes",
+    "title": "Which Direction Are We Adding?",
+    "section": "Python and NumPy",
+    "topic": "From a measurement to a calculation",
+    "blurb": "A table can hold several greenhouses across several days. Adding across a row answers a different question from adding down a column. We need to keep that distinction when we ask an array to calculate."
+  },
+  {
+    "id": "numpy-creation",
+    "title": "Preparing the Arrays We Need",
+    "section": "Python and NumPy",
+    "topic": "From a measurement to a calculation",
+    "blurb": "Botie needs a place for tomorrow's readings and a set of times at which to collect them. We can describe those arrangements directly instead of typing every repeated value ourselves."
+  },
+  {
+    "id": "numpy-indexing",
+    "title": "Choose the Readings Without Losing Their Place",
+    "section": "Python and NumPy",
+    "topic": "Working with whole arrays",
+    "blurb": "Botie may need one morning, a run of mornings, or selected greenhouses. We need to express each request precisely and know whether editing the selection will change the original report."
+  },
+  {
+    "id": "numpy-reshaping",
+    "title": "Put the Same Readings Into the Right Arrangement",
+    "section": "Python and NumPy",
+    "topic": "Working with whole arrays",
+    "blurb": "A sensor may send one long sequence while a calculation expects rows. We need to change the arrangement without changing which measurements belong to each day and greenhouse."
+  },
+  {
+    "id": "numpy-broadcasting",
+    "title": "One Reference for Many Rows",
+    "section": "Python and NumPy",
+    "topic": "Working with whole arrays",
+    "blurb": "Each greenhouse has its own target temperature. We want to compare every day's readings with those three targets without copying the targets into a new table by hand."
+  },
+  {
+    "id": "numpy-masks",
+    "title": "Ask Each Row a Question",
+    "section": "Python and NumPy",
+    "topic": "Working with whole arrays",
+    "blurb": "Botie needs the greenhouse readings that reached a temperature limit. A yes-or-no decision for each reading lets us select the relevant observations without losing their order."
+  },
+  {
+    "id": "numpy-reductions",
+    "title": "Summarise a Report Without Losing the Question",
+    "section": "Python and NumPy",
+    "topic": "Calculations We Will Reuse",
+    "blurb": "Botie needs totals, typical readings, and the greenhouse that needs attention first. A value, a position, and an ordered report answer different questions, even when they come from the same array."
+  },
+  {
+    "id": "numpy-vectorisation",
+    "title": "One Calculation for a Whole Report",
+    "section": "Python and NumPy",
+    "topic": "Calculations We Will Reuse",
+    "blurb": "Botie applies the same rule to many readings. We will first write the repeated steps, then express them with array operations while keeping the intermediate values and memory costs understandable."
+  },
+  {
+    "id": "numpy-linear-algebra",
+    "title": "Turn Several Measurements Into Several Predictions",
+    "section": "Python and NumPy",
+    "topic": "Calculations We Will Reuse",
+    "blurb": "A prediction can combine temperature and humidity with separate coefficients. Matrix operations let us apply that same rule to every greenhouse, then check how a fitted rule relates to its observations."
+  },
+  {
+    "id": "numpy-numerical-checks",
+    "title": "When Two Calculations Almost Agree",
+    "section": "Python and NumPy",
+    "topic": "Keep the Calculation Trustworthy",
+    "blurb": "A tiny rounding difference, a missing observation, and a wrongly shaped result are different problems. We need checks that distinguish them before trusting a numerical answer."
+  },
+  {
+    "id": "reproducible-sampling",
+    "title": "Can We Repeat the Same Experiment?",
+    "section": "Python and NumPy",
+    "topic": "Keep the Calculation Trustworthy",
+    "blurb": "Changing both a model and its sampled observations makes it difficult to explain a changed result. We need to keep track of the random choices so we can repeat a comparison."
+  },
+  {
+    "id": "numpy-functions",
+    "title": "Give a Reusable Calculation a Clear Contract",
+    "section": "Python and NumPy",
+    "topic": "Keep the Calculation Trustworthy",
+    "blurb": "Copying a calculation into every exercise makes mistakes hard to repair. We will put the rule in a function, state what its inputs mean, and check it on more than one report."
+  },
+  {
+    "id": "numpy-saving-data",
+    "title": "Keep Enough of a Calculation to Run It Again",
+    "section": "Python and NumPy",
+    "topic": "Keep the Calculation Trustworthy",
+    "blurb": "A printed table is not a complete experiment record. We will save arrays with their shapes and types, keep related arrays together, and check what survives when a report moves through a text file."
+  },
+  {
+    "id": "record-quality",
+    "title": "What Does One Row Represent?",
+    "section": "Data Preparation",
+    "topic": "Can We Trust These Records?",
+    "blurb": "Two identical-looking rows might be a duplicated import or two genuine observations. We need to establish a record's identity before cleaning a dataset or trusting its counts."
+  },
+  {
+    "id": "missing-measurements",
+    "title": "When a Measurement Is Missing",
+    "section": "Data Preparation",
+    "topic": "Can We Trust These Records?",
+    "blurb": "An empty thermometer reading does not mean the greenhouse was at zero degrees. We need to distinguish what was measured from what we supplied to keep a calculation working."
+  },
+  {
+    "id": "categorical-encoding",
+    "title": "Categories Without an Invented Ranking",
+    "section": "Data Preparation",
+    "topic": "Representing What We Measured",
+    "blurb": "A roof can be glass, plastic, or mesh. Assigning those names arbitrary numbers can accidentally suggest a ranking. We need a representation that preserves category membership without inventing a numerical relationship."
+  },
+  {
+    "id": "cyclical-features",
+    "title": "When the End Is Beside the Beginning",
+    "section": "Data Preparation",
+    "topic": "Representing What We Measured",
+    "blurb": "The hour after 23 is zero, yet ordinary subtraction puts those hour numbers far apart. A repeating feature needs a representation that keeps its beginning beside its end."
+  },
+  {
+    "id": "data-leakage",
+    "title": "What Could We Know at Prediction Time?",
+    "section": "Data Preparation",
+    "topic": "Keep Future Answers Out of Training",
+    "blurb": "A model can appear remarkably accurate when a feature contains information that arrives after the decision. We need to reconstruct what was actually available when each prediction would have been made."
+  },
+  {
+    "id": "class-imbalance",
+    "title": "When the Important Class Is Rare",
+    "section": "Data Preparation",
+    "topic": "Keep Future Answers Out of Training",
+    "blurb": "If almost every sensor is healthy, predicting healthy every time can look accurate while missing every failure. We need to inspect what the score says about each class."
+  },
+  {
+    "id": "baseline-predictions",
+    "title": "What Must a Model Improve On?",
+    "section": "Choosing and Checking a Model",
+    "topic": "Establish a Fair Comparison",
+    "blurb": "A complicated predictor needs a simple comparison. Before fitting one, we can measure how well a rule that always predicts a training average performs on new observations."
+  },
+  {
+    "id": "learning-curves",
+    "title": "Would More Examples Help?",
+    "section": "Choosing and Checking a Model",
+    "topic": "Establish a Fair Comparison",
+    "blurb": "Before collecting more data or choosing a more flexible model, we can examine how training and validation errors change as the training set grows."
+  },
+  {
+    "id": "decision-thresholds",
+    "title": "When Should a Probability Become an Action?",
+    "section": "Choosing and Checking a Model",
+    "topic": "From a Score to a Decision",
+    "blurb": "A probability is evidence, not a complete instruction. We need to decide how likely a sensor failure must be before an inspection is worth its cost."
+  },
+  {
+    "id": "probability-calibration",
+    "title": "Does Eighty Percent Mean Eighty Percent?",
+    "section": "Choosing and Checking a Model",
+    "topic": "From a Score to a Decision",
+    "blurb": "A model can rank failures well and still overstate its probabilities. We need to compare its confidence with what actually happens across similar predictions."
+  },
+  {
+    "id": "grouped-validation",
+    "title": "Have We Really Held Out a New Example?",
+    "section": "Choosing and Checking a Model",
+    "topic": "Establish a Fair Comparison",
+    "blurb": "Several rows can belong to the same greenhouse, patient, or device. If we want to predict for a new entity, a random row split can put familiar entities on both sides of the evaluation."
+  },
+  {
+    "id": "distribution-shift",
+    "title": "What Changed After the Model Was Fitted?",
+    "section": "Choosing and Checking a Model",
+    "topic": "Know the Limits of the Result",
+    "blurb": "A model tested on one mix of conditions may later face another. Comparing the incoming data with the reference data helps us notice changes without pretending that every change proves an accuracy failure."
+  },
+  {
+    "id": "bootstrap-uncertainty",
+    "title": "How Much Does Our Estimate Depend on This Sample?",
+    "section": "Choosing and Checking a Model",
+    "topic": "Know the Limits of the Result",
+    "blurb": "One average hides how it might change if different observations had been collected. Resampling the observed data gives us a way to study that dependence under explicit assumptions."
+  }
+]

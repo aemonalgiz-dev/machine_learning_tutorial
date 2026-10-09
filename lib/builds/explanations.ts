@@ -2,7 +2,7 @@
 // different part of a method from the lesson's other demonstrations.
 export const constructionTitles:Record<string,string> = {
   "statistics":"What do the weekly records tell us?",
-  "linear-algebra":"Work out the cost of each purchase",
+  "linear-algebra":"One price list, a whole page of purchases",
   "calculus":"How fast was the traveller moving?",
   "simple-linear-regression":"Fit a line to the observations",
   "held-out-evaluation":"Check predictions against reserved observations",
@@ -36,7 +36,7 @@ export const constructionTitles:Record<string,string> = {
   "evaluating-generative-models":"Can a good average hide repetition?",
 };
 export const constructionExplanations:Record<string,string> = {
-  "linear-algebra": "Each quantity has its own price. Multiplying finds the cost of each kind of item, and adding gives the purchase total. A quantity vector and a price vector keep those entries in matching order; their dot product performs the same calculation.",
+  "linear-algebra": "Each row of the purchase matrix belongs to one customer. The columns keep bread and milk in the same order as the prices. Multiplying matching quantities and prices, then adding, gives one bill. That is a dot product. Matrix-vector multiplication repeats it for every row and keeps the bills in customer order. The same arrangement works for a shorter customer list or new prices. In a model, the rows can instead hold observations and the vector can hold the weights used to calculate a prediction for each one.",
   "judging-a-classifier": "The denominator includes every reported light, both true detections and false alarms. The numerator keeps only the true detections. This tells us how trustworthy a positive report was, but the missing-light count would be needed to measure recall.",
   "polynomial-features": "The squared reading grows differently from the original reading. A model can give each its own coefficient, so its prediction can change at different rates across the input range. We have constructed one feature, not fitted its coefficient.",
   "multiple-polynomial-regression": "The product term changes the contribution of temperature depending on pressure. At the low pressure in these examples, warming lowers the predicted yield. At the higher pressure, warming raises it. Separate temperature and pressure terms alone could not reverse that effect.",

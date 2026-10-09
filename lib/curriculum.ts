@@ -1,3 +1,5 @@
+import expandedNavigation from "./lessons/navigation.json";
+
 export interface Concept {
   title: string;
   blurb: string;
@@ -21,7 +23,7 @@ export interface Part {
 }
 
 // Shared by the section overview, section pages, and lesson breadcrumbs.
-export const CURRICULUM: Part[] = [
+const existingCurriculum: Part[] = [
   {
     "id": "mathematics-as-needed",
     "title": "Introductory Mathematics",
@@ -866,3 +868,43 @@ export const CURRICULUM: Part[] = [
     ]
   }
 ];
+
+const topicIntroductions: Record<string, string> = {
+  "From a measurement to a calculation": "Before asking a model to learn from numbers, we need to put those numbers in a form we can inspect. We will keep track of what each entry represents as we calculate with arrays.",
+  "Working with whole arrays": "A calculation often needs the same reference for many observations, or only the observations meeting a condition. We need to express those choices without losing which values belong together.",
+  "Calculations We Will Reuse": "Later models will combine feature columns, compare predictions with observations, and summarise their errors. We will calculate those pieces with NumPy and keep their intermediate results visible.",
+  "Keep the Calculation Trustworthy": "A useful result needs to survive new inputs and another run. We will check numerical agreement, repeat random choices, package calculations in functions, and save the information needed to reconstruct them.",
+  "Can We Trust These Records?": "A blank reading, a repeated import, and an unusual observation are different problems. We need to establish what each record represents before deciding how to prepare it.",
+  "Representing What We Measured": "A material name is not a quantity, and an hour of the day repeats. Our representation should preserve those meanings instead of inventing relationships between arbitrary numbers.",
+  "Keep Future Answers Out of Training": "Our fitting procedure must respect what was available at prediction time. We also need to keep rare outcomes visible so an apparently successful score does not hide the mistakes that matter.",
+  "Establish a Fair Comparison": "A score needs a reference and an evaluation population. We will establish a simple baseline, keep related observations together, and examine what changes as more training data become available.",
+  "From a Score to a Decision": "A model's confidence and the action we take are separate questions. We need to understand what the probabilities mean before connecting them to the consequences of a decision.",
+  "Know the Limits of the Result": "A result depends on the observations we collected and the population we tested. We will examine sampling variation and changes in incoming data before carrying a conclusion into a new setting.",
+};
+
+function addedTopics(section: string): Topic[] {
+  const topics: Topic[] = [];
+  for (const lesson of expandedNavigation.filter(lesson => lesson.section === section)) {
+    let topic = topics.find(topic => topic.heading === lesson.topic);
+    if (!topic) {
+      topic = { heading: lesson.topic, blurb: topicIntroductions[lesson.topic], concepts: [] };
+      topics.push(topic);
+    }
+    topic.concepts.push({ title: lesson.title, blurb: lesson.blurb, href: `/concepts/${lesson.id}` });
+  }
+  return topics;
+}
+
+export const CURRICULUM: Part[] = existingCurriculum.flatMap(part => {
+  const extra = addedTopics(part.title);
+  const before = extra.filter(topic => ["Can We Trust These Records?", "Establish a Fair Comparison"].includes(topic.heading));
+  const after = extra.filter(topic => !before.includes(topic));
+  const expanded = { ...part, topics: [...before, ...part.topics, ...after] };
+  if (part.title === "Data Preparation") expanded.intro = "A model only sees the records we give it. Before fitting, we need to know what a row represents, which measurements are missing, and how categories, units, and time should be represented. We also need to keep information from the future out of a prediction about the present.";
+  if (part.title !== "Introductory Mathematics") return [expanded];
+  return [expanded, {
+    id: "python-and-numpy", title: "Python and NumPy",
+    intro: "The courses use Python and NumPy to turn the ideas into calculations we can inspect. We will begin with a few greenhouse readings, learn how to store and select them, then work through array shapes, summaries, matrix calculations, and numerical checks. We will also make the code reusable and keep enough of each experiment to run it again. The examples and challenges run here in the browser.",
+    topics: addedTopics("Python and NumPy"),
+  }];
+});

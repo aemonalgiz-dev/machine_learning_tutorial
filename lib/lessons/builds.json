@@ -1,0 +1,2818 @@
+[
+  {
+    "id": "numpy-arrays",
+    "title": "Convert the greenhouse thermometers",
+    "problem": "Botie's greenhouses record Celsius, but the display expects Fahrenheit. We need to convert each reading while preserving its greenhouse position.",
+    "challenge": "Build a Celsius-to-Fahrenheit converter. Multiply each reading by 1.8, then add 32. It must work on every supplied list.",
+    "sources": {
+      "readings": "Greenhouse readings in Celsius"
+    },
+    "cases": [
+      {
+        "name": "Three greenhouses",
+        "data": {
+          "readings": [
+            12,
+            18,
+            24
+          ]
+        },
+        "expected": [
+          53.6,
+          64.4,
+          75.2
+        ]
+      },
+      {
+        "name": "Reference readings",
+        "data": {
+          "readings": [
+            0,
+            100
+          ]
+        },
+        "expected": [
+          32,
+          212
+        ]
+      },
+      {
+        "name": "A colder morning",
+        "data": {
+          "readings": [
+            -10,
+            5
+          ]
+        },
+        "expected": [
+          14,
+          41
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "readings"
+            },
+            {
+              "op": "constant",
+              "inputs": [],
+              "settings": {
+                "value": 1.8
+              }
+            }
+          ]
+        },
+        {
+          "op": "constant",
+          "inputs": [],
+          "settings": {
+            "value": 32
+          }
+        }
+      ]
+    },
+    "why": "Each wire still carries one entry per greenhouse. The multiplication changes the degree size; the addition changes the reference point.",
+    "limitation": "This is a unit conversion, not a fitted prediction rule.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-axes",
+    "title": "Keep each greenhouse's average",
+    "problem": "Botie wants to compare greenhouses over several days. Our rows are days, so a row average would answer a different question.",
+    "challenge": "Build one average per greenhouse. You can swap the table's rows and columns, then average within each resulting row.",
+    "sources": {
+      "temperatures": "Days by greenhouses"
+    },
+    "cases": [
+      {
+        "name": "Two days",
+        "data": {
+          "temperatures": [
+            [
+              10,
+              20,
+              30
+            ],
+            [
+              14,
+              22,
+              36
+            ]
+          ]
+        },
+        "expected": [
+          12,
+          21,
+          33
+        ]
+      },
+      {
+        "name": "Three days",
+        "data": {
+          "temperatures": [
+            [
+              8,
+              12
+            ],
+            [
+              10,
+              16
+            ],
+            [
+              12,
+              20
+            ]
+          ]
+        },
+        "expected": [
+          10,
+          16
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "rowmean",
+      "inputs": [
+        {
+          "op": "transpose",
+          "inputs": [
+            {
+              "source": "temperatures"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Swapping rows and columns puts one greenhouse's readings together. Each row average then keeps that greenhouse separate.",
+    "limitation": "All days receive equal weight, and every greenhouse has a reading on every day.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-creation",
+    "title": "Prepare the greenhouse target sheet",
+    "problem": "Botie needs a target for each day and greenhouse before recording comparisons.",
+    "challenge": "Choose a tool to create a rectangular sheet using the supplied day count, greenhouse count, and target. Then subtract the supplied readings from those targets to find how much warmer each position would need to become.",
+    "sources": {
+      "days": "Number of days",
+      "greenhouses": "Number of greenhouses",
+      "target": "Target temperature",
+      "readings": "Recorded temperatures"
+    },
+    "cases": [
+      {
+        "name": "Two mornings",
+        "data": {
+          "days": 2,
+          "greenhouses": 3,
+          "target": 20,
+          "readings": [
+            [
+              12,
+              18,
+              24
+            ],
+            [
+              14,
+              22,
+              36
+            ]
+          ]
+        },
+        "expected": [
+          [
+            8,
+            2,
+            -4
+          ],
+          [
+            6,
+            -2,
+            -16
+          ]
+        ]
+      },
+      {
+        "name": "Different layout",
+        "data": {
+          "days": 3,
+          "greenhouses": 2,
+          "target": 18.5,
+          "readings": [
+            [
+              10,
+              20
+            ],
+            [
+              18.5,
+              17
+            ],
+            [
+              21,
+              16
+            ]
+          ]
+        },
+        "expected": [
+          [
+            8.5,
+            -1.5
+          ],
+          [
+            0,
+            1.5
+          ],
+          [
+            -2.5,
+            2.5
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "fillGrid",
+          "inputs": [
+            {
+              "source": "days"
+            },
+            {
+              "source": "greenhouses"
+            },
+            {
+              "source": "target"
+            }
+          ]
+        },
+        {
+          "source": "readings"
+        }
+      ]
+    },
+    "why": "The shape comes from the requested report. The filled sheet supplies references, while subtraction compares them with actual observations.",
+    "limitation": "The workshop uses small positive dimensions. It does not expose uninitialised storage.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-indexing",
+    "title": "Retrieve the requested mornings",
+    "problem": "Botie saved the row numbers needed for a comparison. The output must preserve the requested order and repeated requests.",
+    "challenge": "Gather the requested day rows, then swap rows and columns so each output row follows one greenhouse through those requested days.",
+    "sources": {
+      "readings": "Days by greenhouse",
+      "days": "Requested day indices"
+    },
+    "cases": [
+      {
+        "name": "Last then first",
+        "data": {
+          "readings": [
+            [
+              10,
+              20,
+              30
+            ],
+            [
+              14,
+              22,
+              36
+            ],
+            [
+              16,
+              24,
+              38
+            ]
+          ],
+          "days": [
+            2,
+            0
+          ]
+        },
+        "expected": [
+          [
+            16,
+            10
+          ],
+          [
+            24,
+            20
+          ],
+          [
+            38,
+            30
+          ]
+        ]
+      },
+      {
+        "name": "Repeated request",
+        "data": {
+          "readings": [
+            [
+              8,
+              12
+            ],
+            [
+              10,
+              14
+            ]
+          ],
+          "days": [
+            1,
+            1,
+            0
+          ]
+        },
+        "expected": [
+          [
+            10,
+            10,
+            8
+          ],
+          [
+            14,
+            14,
+            12
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "transpose",
+      "inputs": [
+        {
+          "op": "gather",
+          "inputs": [
+            {
+              "source": "readings"
+            },
+            {
+              "source": "days"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Gather chooses the days; transpose changes which meaning occupies a row. Neither step averages or sorts the selected temperatures.",
+    "limitation": "These workshop wires carry values rather than shared NumPy storage. Copy and view behaviour is demonstrated and checked in Python.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-reshaping",
+    "title": "Recover the greenhouse columns from a logger stream",
+    "problem": "Botie's flat logger output contains complete days in sequence. We need one row per greenhouse for a comparison over time.",
+    "challenge": "Group the sequence into day rows using the supplied number of greenhouses, then swap axes to follow each greenhouse.",
+    "sources": {
+      "readings": "Flat logger sequence",
+      "width": "Greenhouses per day"
+    },
+    "cases": [
+      {
+        "name": "Three greenhouses",
+        "data": {
+          "readings": [
+            10,
+            20,
+            30,
+            14,
+            22,
+            36
+          ],
+          "width": 3
+        },
+        "expected": [
+          [
+            10,
+            14
+          ],
+          [
+            20,
+            22
+          ],
+          [
+            30,
+            36
+          ]
+        ]
+      },
+      {
+        "name": "Two greenhouses",
+        "data": {
+          "readings": [
+            8,
+            12,
+            10,
+            14,
+            11,
+            15
+          ],
+          "width": 2
+        },
+        "expected": [
+          [
+            8,
+            10,
+            11
+          ],
+          [
+            12,
+            14,
+            15
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "transpose",
+      "inputs": [
+        {
+          "op": "reshapeRows",
+          "inputs": [
+            {
+              "source": "readings"
+            },
+            {
+              "source": "width"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Grouping restores the day boundaries. Transpose then follows greenhouse identity across those days.",
+    "limitation": "The logger order and row width are supplied. The construction cannot infer missing labels or repair an incomplete day.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-broadcasting",
+    "title": "Compare greenhouse readings with their targets",
+    "problem": "Botie needs the difference from each greenhouse's target on every day. The target order matches the greenhouse columns.",
+    "challenge": "Subtract one target per greenhouse from every day's readings. Preserve both the day rows and greenhouse columns.",
+    "sources": {
+      "readings": "Days by greenhouses",
+      "targets": "Target for each greenhouse"
+    },
+    "cases": [
+      {
+        "name": "Two days",
+        "data": {
+          "readings": [
+            [
+              12,
+              18,
+              24
+            ],
+            [
+              14,
+              22,
+              36
+            ]
+          ],
+          "targets": [
+            10,
+            20,
+            30
+          ]
+        },
+        "expected": [
+          [
+            2,
+            -2,
+            -6
+          ],
+          [
+            4,
+            2,
+            6
+          ]
+        ]
+      },
+      {
+        "name": "Two greenhouses",
+        "data": {
+          "readings": [
+            [
+              7,
+              15
+            ],
+            [
+              9,
+              11
+            ],
+            [
+              8,
+              13
+            ]
+          ],
+          "targets": [
+            8,
+            12
+          ]
+        },
+        "expected": [
+          [
+            -1,
+            3
+          ],
+          [
+            1,
+            -1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "columnshift",
+      "inputs": [
+        {
+          "source": "readings"
+        },
+        {
+          "source": "targets"
+        }
+      ]
+    },
+    "why": "Each target stays attached to its column as the rows pass through the calculation.",
+    "limitation": "The workshop tool handles a reference vector across rows. It does not implement every possible NumPy broadcasting pattern.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-masks",
+    "title": "Find the greenhouse alerts",
+    "problem": "Botie needs the readings at or above the chosen limit. We should keep the measurements that satisfy the rule, not multiply them by the limit.",
+    "challenge": "Build a mask using the threshold, then use it to select the original readings. Preserve their order and allow an empty result.",
+    "sources": {
+      "readings": "Greenhouse temperatures",
+      "limit": "Alert temperature"
+    },
+    "cases": [
+      {
+        "name": "Boundary included",
+        "data": {
+          "readings": [
+            20,
+            27,
+            25,
+            18
+          ],
+          "limit": 25
+        },
+        "expected": [
+          27,
+          25
+        ]
+      },
+      {
+        "name": "No alerts",
+        "data": {
+          "readings": [
+            19,
+            21
+          ],
+          "limit": 25
+        },
+        "expected": []
+      },
+      {
+        "name": "New limit",
+        "data": {
+          "readings": [
+            23,
+            20,
+            24,
+            22
+          ],
+          "limit": 22
+        },
+        "expected": [
+          23,
+          24,
+          22
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "mask",
+      "inputs": [
+        {
+          "source": "readings"
+        },
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "readings"
+            },
+            {
+              "source": "limit"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The comparison makes the decisions; selection applies those decisions to the original temperatures.",
+    "limitation": "The limit is supplied by the task. It is not a learned or medically meaningful threshold.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-reductions",
+    "title": "Order the inspection report without losing its names",
+    "problem": "Botie wants the greenhouse names from coolest to warmest. Sorting names alphabetically would detach them from the temperatures.",
+    "challenge": "Find the ascending order of the readings, then use those indices to retrieve the names.",
+    "sources": {
+      "names": "Greenhouse names",
+      "readings": "Temperature in the same order"
+    },
+    "cases": [
+      {
+        "name": "Four greenhouses",
+        "data": {
+          "names": [
+            "north",
+            "middle",
+            "south",
+            "annex"
+          ],
+          "readings": [
+            20,
+            27,
+            25,
+            18
+          ]
+        },
+        "expected": [
+          "annex",
+          "north",
+          "south",
+          "middle"
+        ]
+      },
+      {
+        "name": "A tie preserves order",
+        "data": {
+          "names": [
+            "glass",
+            "mesh",
+            "foil"
+          ],
+          "readings": [
+            22,
+            18,
+            22
+          ]
+        },
+        "expected": [
+          "mesh",
+          "glass",
+          "foil"
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "gather",
+      "inputs": [
+        {
+          "source": "names"
+        },
+        {
+          "op": "rank",
+          "inputs": [
+            {
+              "source": "readings"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "One ordering is computed from measurements and applied to their labels. Stable ties keep the earlier report order.",
+    "limitation": "Ordering is not a measure of danger. These temperatures only illustrate preserving aligned records.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-vectorisation",
+    "title": "Inspect every error before summarising the report",
+    "problem": "Botie wants one average squared deviation from a supplied target. Opposite temperature deviations must not cancel.",
+    "challenge": "Subtract the target from each reading, square the individual differences, then average their contributions.",
+    "sources": {
+      "readings": "Greenhouse temperatures",
+      "target": "Reference temperature"
+    },
+    "cases": [
+      {
+        "name": "Three readings",
+        "data": {
+          "readings": [
+            18,
+            22,
+            26
+          ],
+          "target": 20
+        },
+        "expected": 14.666666666666666
+      },
+      {
+        "name": "Another report",
+        "data": {
+          "readings": [
+            16,
+            21,
+            25,
+            18
+          ],
+          "target": 20
+        },
+        "expected": 11.5
+      },
+      {
+        "name": "On target",
+        "data": {
+          "readings": [
+            20,
+            20
+          ],
+          "target": 20
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "square",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "source": "readings"
+                },
+                {
+                  "source": "target"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each reading contributes before the reduction. The construction exposes the intermediate array so a cancellation mistake is visible.",
+    "limitation": "The target is supplied. This example evaluates a fixed reference rather than learning a prediction rule.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-linear-algebra",
+    "title": "Apply a rule to the greenhouse feature table",
+    "problem": "Botie has one feature row per greenhouse and one coefficient per feature. We need a score for every row.",
+    "challenge": "Apply the coefficient vector to each row, adding its weighted contributions, then add the supplied offset.",
+    "sources": {
+      "features": "Observation rows",
+      "weights": "Feature coefficients",
+      "offset": "Shared offset"
+    },
+    "cases": [
+      {
+        "name": "Two observations",
+        "data": {
+          "features": [
+            [
+              10,
+              40
+            ],
+            [
+              20,
+              60
+            ]
+          ],
+          "weights": [
+            2,
+            0.1
+          ],
+          "offset": 3
+        },
+        "expected": [
+          27,
+          49
+        ]
+      },
+      {
+        "name": "Three observations",
+        "data": {
+          "features": [
+            [
+              2,
+              5
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              3,
+              2
+            ]
+          ],
+          "weights": [
+            3,
+            2
+          ],
+          "offset": 1
+        },
+        "expected": [
+          17,
+          15,
+          14
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "op": "matvec",
+          "inputs": [
+            {
+              "source": "features"
+            },
+            {
+              "source": "weights"
+            }
+          ]
+        },
+        {
+          "source": "offset"
+        }
+      ]
+    },
+    "why": "Matrix times vector collects each row's weighted contributions. The offset applies to every resulting score.",
+    "limitation": "The coefficients are supplied. Python separately introduces exact solving and least-squares fitting.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-numerical-checks",
+    "title": "Check the largest recovery error",
+    "problem": "Botie has original and recovered temperatures in matching order. Every recovered value must be within a supplied absolute tolerance.",
+    "challenge": "Find the absolute difference at each position, then its largest value. Return 1 if that largest error is no greater than the tolerance, otherwise 0.",
+    "sources": {
+      "actual": "Recovered readings",
+      "expected": "Reference readings",
+      "tolerance": "Allowed absolute difference"
+    },
+    "cases": [
+      {
+        "name": "Every entry close",
+        "data": {
+          "actual": [
+            20.0001,
+            18.0002
+          ],
+          "expected": [
+            20,
+            18
+          ],
+          "tolerance": 0.001
+        },
+        "expected": 1
+      },
+      {
+        "name": "One entry too far",
+        "data": {
+          "actual": [
+            20.0001,
+            18.01
+          ],
+          "expected": [
+            20,
+            18
+          ],
+          "tolerance": 0.001
+        },
+        "expected": 0
+      },
+      {
+        "name": "Exact boundary",
+        "data": {
+          "actual": [
+            2.25,
+            3
+          ],
+          "expected": [
+            2,
+            3
+          ],
+          "tolerance": 0.25
+        },
+        "expected": 1
+      }
+    ],
+    "recipe": {
+      "op": "gate",
+      "inputs": [
+        {
+          "source": "tolerance"
+        },
+        {
+          "op": "maximum",
+          "inputs": [
+            {
+              "op": "absolute",
+              "inputs": [
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "source": "actual"
+                    },
+                    {
+                      "source": "expected"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The largest error represents the worst entry. Putting tolerance first in the threshold comparison includes equality at the boundary.",
+    "limitation": "Workshop inputs are finite, equally sized vectors. Python adds shape, dtype, missing-value, and relative-tolerance checks.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "reproducible-sampling",
+    "title": "Replay a recorded greenhouse sample",
+    "problem": "Botie has saved the indices from a resample. We need to retrieve those readings, including repeats, and calculate their average.",
+    "challenge": "Gather the readings at the supplied zero-based indices, then return the mean of that selected list.",
+    "sources": {
+      "readings": "Original greenhouse readings",
+      "indices": "Recorded sample indices"
+    },
+    "cases": [
+      {
+        "name": "A repeated reading",
+        "data": {
+          "readings": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "indices": [
+            1,
+            1,
+            3
+          ]
+        },
+        "expected": 26.6666666667
+      },
+      {
+        "name": "A different draw",
+        "data": {
+          "readings": [
+            10,
+            20,
+            30,
+            40
+          ],
+          "indices": [
+            0,
+            2,
+            2
+          ]
+        },
+        "expected": 23.3333333333
+      },
+      {
+        "name": "One observation",
+        "data": {
+          "readings": [
+            5,
+            15,
+            25
+          ],
+          "indices": [
+            2
+          ]
+        },
+        "expected": 25
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "gather",
+          "inputs": [
+            {
+              "source": "readings"
+            },
+            {
+              "source": "indices"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Gather preserves the recorded choices. The mean describes that resample, so changing the indices can change the result even when the underlying report stays the same.",
+    "limitation": "The indices are supplied. This construction does not generate randomness or establish that a sample is representative.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-functions",
+    "title": "Reuse the training reference on another report",
+    "problem": "Botie wants a new report described relative to the training average. Replacing that average with the new report's average would change the comparison.",
+    "challenge": "Calculate the mean of the training readings, subtract it from the new report, and collect the reference and transformed report together in that order.",
+    "sources": {
+      "training": "Training readings",
+      "report": "New report"
+    },
+    "cases": [
+      {
+        "name": "First report",
+        "data": {
+          "training": [
+            10,
+            14
+          ],
+          "report": [
+            12,
+            18
+          ]
+        },
+        "expected": [
+          12,
+          [
+            0,
+            6
+          ]
+        ]
+      },
+      {
+        "name": "Different training",
+        "data": {
+          "training": [
+            8,
+            12,
+            16
+          ],
+          "report": [
+            11,
+            17
+          ]
+        },
+        "expected": [
+          12,
+          [
+            -1,
+            5
+          ]
+        ]
+      },
+      {
+        "name": "Changed reference",
+        "data": {
+          "training": [
+            20,
+            24
+          ],
+          "report": [
+            22,
+            25
+          ]
+        },
+        "expected": [
+          22,
+          [
+            0,
+            3
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pack",
+      "inputs": [
+        {
+          "op": "mean",
+          "inputs": [
+            {
+              "source": "training"
+            }
+          ]
+        },
+        {
+          "op": "subtract",
+          "inputs": [
+            {
+              "source": "report"
+            },
+            {
+              "op": "mean",
+              "inputs": [
+                {
+                  "source": "training"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The same fitted reference explains every output. Collecting both results mirrors a function returning its reference and transformed array.",
+    "limitation": "Workshop cases satisfy the finite, nonempty vector contract. Python is where we define functions and handle invalid inputs.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "numpy-saving-data",
+    "title": "Recompute scores from a restored report",
+    "problem": "Botie has already loaded the saved feature table, coefficient vector, and greenhouse names. We need to check that those pieces still work together.",
+    "challenge": "Compute one weighted score per restored feature row, then collect the scores and the names together, scores first.",
+    "sources": {
+      "features": "Restored feature table",
+      "weights": "Restored coefficients",
+      "names": "Restored names in row order"
+    },
+    "cases": [
+      {
+        "name": "Two restored rows",
+        "data": {
+          "features": [
+            [
+              10,
+              40
+            ],
+            [
+              20,
+              60
+            ]
+          ],
+          "weights": [
+            2,
+            0.1
+          ],
+          "names": [
+            "north",
+            "south"
+          ]
+        },
+        "expected": [
+          [
+            24,
+            46
+          ],
+          [
+            "north",
+            "south"
+          ]
+        ]
+      },
+      {
+        "name": "A different saved report",
+        "data": {
+          "features": [
+            [
+              2,
+              5
+            ],
+            [
+              4,
+              1
+            ]
+          ],
+          "weights": [
+            3,
+            2
+          ],
+          "names": [
+            "glass",
+            "mesh"
+          ]
+        },
+        "expected": [
+          [
+            16,
+            14
+          ],
+          [
+            "glass",
+            "mesh"
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pack",
+      "inputs": [
+        {
+          "op": "matvec",
+          "inputs": [
+            {
+              "source": "features"
+            },
+            {
+              "source": "weights"
+            }
+          ]
+        },
+        {
+          "source": "names"
+        }
+      ]
+    },
+    "why": "The restored coefficients produce one score per row, and the restored names retain the row identity.",
+    "limitation": "The workshop starts after loading and checks how the restored data is used. The Python examples and challenges perform the actual file-format round trips in memory.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "missing-measurements",
+    "title": "Fill a greenhouse report from its training reference",
+    "problem": "Botie's report has absent temperatures. Learn a replacement from observed training readings, then fill only the missing report entries.",
+    "challenge": "Select the observed training values, find their mean, and use that mean to replace blanks in the new report.",
+    "sources": {
+      "training": "Training temperatures",
+      "report": "New greenhouse report"
+    },
+    "cases": [
+      {
+        "name": "One absent reading",
+        "data": {
+          "training": [
+            10,
+            null,
+            14
+          ],
+          "report": [
+            null,
+            18
+          ]
+        },
+        "expected": [
+          12,
+          18
+        ]
+      },
+      {
+        "name": "Two absent readings",
+        "data": {
+          "training": [
+            6,
+            12,
+            null,
+            18
+          ],
+          "report": [
+            9,
+            null,
+            15,
+            null
+          ]
+        },
+        "expected": [
+          9,
+          12,
+          15,
+          12
+        ]
+      },
+      {
+        "name": "Nothing to replace",
+        "data": {
+          "training": [
+            2,
+            4
+          ],
+          "report": [
+            8,
+            10
+          ]
+        },
+        "expected": [
+          8,
+          10
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "fillMissing",
+      "inputs": [
+        {
+          "source": "report"
+        },
+        {
+          "op": "mean",
+          "inputs": [
+            {
+              "op": "observed",
+              "inputs": [
+                {
+                  "source": "training"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The training branch supplies one reference. The report branch retains its measurements and uses that reference only at absent entries.",
+    "limitation": "Mean replacement is a baseline. It cannot recover the true missing values or represent uncertainty about them.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "categorical-encoding",
+    "title": "Represent the greenhouse roof materials",
+    "problem": "Botie needs a stable numerical description of roof material without treating an arbitrary ID as a quantity. We will build the three indicator columns separately, then arrange them into rows.",
+    "challenge": "Read each of the three vocabulary entries by its zero-based index. Compare all materials with each entry to make a column of indicators. Collect the first two columns, append the third column, then swap rows and columns so each material has one row. Unknown materials receive all zeros.",
+    "sources": {
+      "materials": "Roof materials",
+      "vocabulary": "Three training categories in fixed order"
+    },
+    "cases": [
+      {
+        "name": "Known and unknown materials",
+        "data": {
+          "materials": [
+            "glass",
+            "mesh",
+            "foil"
+          ],
+          "vocabulary": [
+            "glass",
+            "plastic",
+            "mesh"
+          ]
+        },
+        "expected": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "A different vocabulary order",
+        "data": {
+          "materials": [
+            "mesh",
+            "glass",
+            "plastic"
+          ],
+          "vocabulary": [
+            "mesh",
+            "glass",
+            "plastic"
+          ]
+        },
+        "expected": [
+          [
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "transpose",
+      "inputs": [
+        {
+          "op": "append",
+          "inputs": [
+            {
+              "op": "pack",
+              "inputs": [
+                {
+                  "op": "matches",
+                  "inputs": [
+                    {
+                      "source": "materials"
+                    },
+                    {
+                      "op": "index",
+                      "inputs": [
+                        {
+                          "source": "vocabulary"
+                        },
+                        {
+                          "op": "constant",
+                          "inputs": [],
+                          "settings": {
+                            "value": 0
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "matches",
+                  "inputs": [
+                    {
+                      "source": "materials"
+                    },
+                    {
+                      "op": "index",
+                      "inputs": [
+                        {
+                          "source": "vocabulary"
+                        },
+                        {
+                          "op": "constant",
+                          "inputs": [],
+                          "settings": {
+                            "value": 1
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "matches",
+              "inputs": [
+                {
+                  "source": "materials"
+                },
+                {
+                  "op": "index",
+                  "inputs": [
+                    {
+                      "source": "vocabulary"
+                    },
+                    {
+                      "op": "constant",
+                      "inputs": [],
+                      "settings": {
+                        "value": 2
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each comparison builds a separate category column. Collecting and transposing those columns puts one material's answers together in each row.",
+    "limitation": "This construction uses exactly three vocabulary categories so the comparisons remain visible. It does not fit a model or remove redundant columns.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "cyclical-features",
+    "title": "Give the greenhouse clock two coordinates",
+    "problem": "Botie's hour feature should preserve that the day repeats. We will return the position around a circle, with cosine first and sine second.",
+    "challenge": "Divide the hour by the period, multiply by a full turn of 2π radians, then collect cosine and sine in that order. The Full turn source supplies 2π.",
+    "sources": {
+      "hour": "Hour or cycle position",
+      "period": "Length of one cycle",
+      "turn": "Full turn in radians"
+    },
+    "cases": [
+      {
+        "name": "Midnight",
+        "data": {
+          "hour": 0,
+          "period": 24,
+          "turn": 6.283185307179586
+        },
+        "expected": [
+          1,
+          0
+        ]
+      },
+      {
+        "name": "Six in the morning",
+        "data": {
+          "hour": 6,
+          "period": 24,
+          "turn": 6.283185307179586
+        },
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "name": "Noon",
+        "data": {
+          "hour": 12,
+          "period": 24,
+          "turn": 6.283185307179586
+        },
+        "expected": [
+          -1,
+          0
+        ]
+      },
+      {
+        "name": "End of the cycle",
+        "data": {
+          "hour": 24,
+          "period": 24,
+          "turn": 6.283185307179586
+        },
+        "expected": [
+          1,
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pack",
+      "inputs": [
+        {
+          "op": "cos",
+          "inputs": [
+            {
+              "op": "multiply",
+              "inputs": [
+                {
+                  "op": "divide",
+                  "inputs": [
+                    {
+                      "source": "hour"
+                    },
+                    {
+                      "source": "period"
+                    }
+                  ]
+                },
+                {
+                  "source": "turn"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "sin",
+          "inputs": [
+            {
+              "op": "multiply",
+              "inputs": [
+                {
+                  "op": "divide",
+                  "inputs": [
+                    {
+                      "source": "hour"
+                    },
+                    {
+                      "source": "period"
+                    }
+                  ]
+                },
+                {
+                  "source": "turn"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Dividing identifies the fraction of a cycle. Sine and cosine locate that fraction on a circle, so a full turn returns to the start.",
+    "limitation": "This encodes a fixed-period feature. It does not fit a temperature curve or handle calendar irregularities.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "record-quality",
+    "title": "Audit repeated greenhouse events",
+    "problem": "Botie combined sensor exports that may overlap. Each stable ID names one event, so extra copies should be counted before analysis.",
+    "challenge": "Return the number of imported rows beyond the number of distinct event IDs.",
+    "sources": {
+      "ids": "Imported sensor event IDs"
+    },
+    "cases": [
+      {
+        "name": "An overlapping export",
+        "data": {
+          "ids": [
+            101,
+            102,
+            102,
+            103
+          ]
+        },
+        "expected": 1
+      },
+      {
+        "name": "Several copies",
+        "data": {
+          "ids": [
+            8,
+            8,
+            8,
+            9,
+            10,
+            10
+          ]
+        },
+        "expected": 3
+      },
+      {
+        "name": "No repetition",
+        "data": {
+          "ids": [
+            4,
+            5,
+            6
+          ]
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "count",
+          "inputs": [
+            {
+              "source": "ids"
+            }
+          ]
+        },
+        {
+          "op": "count",
+          "inputs": [
+            {
+              "op": "unique",
+              "inputs": [
+                {
+                  "source": "ids"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The two branches count all records and distinct identities. Subtracting them measures extra copies rather than genuine repeated values.",
+    "limitation": "This audit assumes IDs identify events reliably. It does not decide which conflicting record should be kept.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "data-leakage",
+    "title": "Reconstruct the prediction-time report",
+    "problem": "Botie must predict repair need using only evidence available at the decision time. Later measurements remain in the export but cannot enter this prediction.",
+    "challenge": "Build an availability mask that includes times at or before the cutoff, then select the corresponding measurements.",
+    "sources": {
+      "available": "Availability hours",
+      "cutoff": "Prediction cutoff hour",
+      "values": "Corresponding measurements"
+    },
+    "cases": [
+      {
+        "name": "Noon prediction",
+        "data": {
+          "available": [
+            9,
+            12,
+            18
+          ],
+          "cutoff": 12,
+          "values": [
+            19,
+            22,
+            99
+          ]
+        },
+        "expected": [
+          19,
+          22
+        ]
+      },
+      {
+        "name": "Earlier prediction",
+        "data": {
+          "available": [
+            6,
+            8,
+            10,
+            14
+          ],
+          "cutoff": 8,
+          "values": [
+            11,
+            13,
+            17,
+            21
+          ]
+        },
+        "expected": [
+          11,
+          13
+        ]
+      },
+      {
+        "name": "Nothing available",
+        "data": {
+          "available": [
+            10,
+            12
+          ],
+          "cutoff": 8,
+          "values": [
+            5,
+            6
+          ]
+        },
+        "expected": []
+      }
+    ],
+    "recipe": {
+      "op": "mask",
+      "inputs": [
+        {
+          "source": "values"
+        },
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "cutoff"
+            },
+            {
+              "source": "available"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The gate compares the cutoff with each availability time. Selection keeps only the measurements whose evidence was available then.",
+    "limitation": "Times are simplified whole hours. A real system also needs dates, time zones, ingestion delays, and update history.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "class-imbalance",
+    "title": "Keep the rare sensor failures visible",
+    "problem": "Botie needs a score that gives each sensor class a place. Compute each class's recall before combining the results.",
+    "challenge": "Divide the correct count for each class by that class's total count, then return the mean of those recalls.",
+    "sources": {
+      "correct": "Correct predictions per class",
+      "counts": "Total observations per class"
+    },
+    "cases": [
+      {
+        "name": "Always healthy",
+        "data": {
+          "correct": [
+            95,
+            0
+          ],
+          "counts": [
+            95,
+            5
+          ]
+        },
+        "expected": 0.5
+      },
+      {
+        "name": "More failures detected",
+        "data": {
+          "correct": [
+            80,
+            4
+          ],
+          "counts": [
+            95,
+            5
+          ]
+        },
+        "expected": 0.8210526316
+      },
+      {
+        "name": "Equal class recalls",
+        "data": {
+          "correct": [
+            8,
+            2
+          ],
+          "counts": [
+            10,
+            2
+          ]
+        },
+        "expected": 0.9
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "divide",
+          "inputs": [
+            {
+              "source": "correct"
+            },
+            {
+              "source": "counts"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Division makes class-specific recall. Averaging those recalls gives each class equal weight in the summary.",
+    "limitation": "All supplied class counts are positive. Balanced accuracy does not encode application-specific mistake costs.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "baseline-predictions",
+    "title": "Measure the greenhouse baseline",
+    "problem": "Botie needs a reference score before adding a more complicated temperature model. Fit one constant on training data and evaluate it on the held-out temperatures.",
+    "challenge": "Compute the training mean, subtract the held-out answers, square the differences, and return their mean.",
+    "sources": {
+      "training": "Training temperatures",
+      "test": "Held-out temperatures"
+    },
+    "cases": [
+      {
+        "name": "First evaluation",
+        "data": {
+          "training": [
+            10,
+            14,
+            18
+          ],
+          "test": [
+            12,
+            20
+          ]
+        },
+        "expected": 20
+      },
+      {
+        "name": "Different held-out days",
+        "data": {
+          "training": [
+            10,
+            14,
+            18
+          ],
+          "test": [
+            11,
+            19
+          ]
+        },
+        "expected": 17
+      },
+      {
+        "name": "Different training reference",
+        "data": {
+          "training": [
+            2,
+            4,
+            6
+          ],
+          "test": [
+            3,
+            7
+          ]
+        },
+        "expected": 5
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "square",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "op": "mean",
+                  "inputs": [
+                    {
+                      "source": "training"
+                    }
+                  ]
+                },
+                {
+                  "source": "test"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The training branch supplies the prediction. Only the scoring branch reads the held-out answers.",
+    "limitation": "This baseline uses no input features. Its score is a comparison, not a guarantee of acceptable temperature prediction.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "learning-curves",
+    "title": "Compare the two greenhouse error curves",
+    "problem": "Botie has training and validation errors for matching training sizes. We need to see their differences without confusing a narrow gap with low error.",
+    "challenge": "Return validation error minus training error at every supplied training size, preserving the order.",
+    "sources": {
+      "training": "Illustrative training errors",
+      "validation": "Illustrative validation errors"
+    },
+    "cases": [
+      {
+        "name": "Narrowing gap",
+        "data": {
+          "training": [
+            1,
+            2,
+            3
+          ],
+          "validation": [
+            9,
+            6,
+            4
+          ]
+        },
+        "expected": [
+          8,
+          4,
+          1
+        ]
+      },
+      {
+        "name": "High errors, small gap",
+        "data": {
+          "training": [
+            12,
+            12.5,
+            13
+          ],
+          "validation": [
+            14,
+            13.8,
+            13.5
+          ]
+        },
+        "expected": [
+          2,
+          1.3,
+          0.5
+        ]
+      },
+      {
+        "name": "Equal errors",
+        "data": {
+          "training": [
+            20,
+            20
+          ],
+          "validation": [
+            20,
+            20
+          ]
+        },
+        "expected": [
+          0,
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "source": "validation"
+        },
+        {
+          "source": "training"
+        }
+      ]
+    },
+    "why": "Each subtraction compares the same training size. Read these gaps beside the error levels before deciding what to try next.",
+    "limitation": "These errors are supplied teaching illustrations. No model is fitted by this construction.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "decision-thresholds",
+    "title": "Turn failure probabilities into inspection decisions",
+    "problem": "Botie has failure probabilities and a simplified cost table. Correct decisions cost zero; false alarms and missed failures have the supplied costs.",
+    "challenge": "Derive the cutoff as false-alarm cost divided by the sum of both costs. Return one or zero for each probability, inspecting at equality.",
+    "sources": {
+      "probabilities": "Estimated failure probabilities",
+      "falseAlarm": "False-alarm cost",
+      "miss": "Missed-failure cost"
+    },
+    "cases": [
+      {
+        "name": "Misses cost more",
+        "data": {
+          "probabilities": [
+            0.1,
+            0.4,
+            0.8
+          ],
+          "falseAlarm": 1,
+          "miss": 4
+        },
+        "expected": [
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "name": "False alarms cost more",
+        "data": {
+          "probabilities": [
+            0.2,
+            0.5,
+            0.6,
+            0.9
+          ],
+          "falseAlarm": 3,
+          "miss": 2
+        },
+        "expected": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "name": "Equal costs",
+        "data": {
+          "probabilities": [
+            0.4,
+            0.5,
+            0.7
+          ],
+          "falseAlarm": 2,
+          "miss": 2
+        },
+        "expected": [
+          0,
+          1,
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "gate",
+      "inputs": [
+        {
+          "source": "probabilities"
+        },
+        {
+          "op": "divide",
+          "inputs": [
+            {
+              "source": "falseAlarm"
+            },
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "source": "falseAlarm"
+                },
+                {
+                  "source": "miss"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The costs determine a cutoff. The gate then turns each supplied probability into an action under that rule.",
+    "limitation": "This assumes credible probabilities, nonnegative costs with a positive sum, and zero cost for correct decisions. Different cost tables require a different derivation.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "probability-calibration",
+    "title": "Audit one group of failure probabilities",
+    "problem": "Botie needs to compare the group's confidence with its observed failure rate, while also reporting squared probability error.",
+    "challenge": "Return two entries: first a pair containing mean probability and observed failure frequency, then the Brier score. Outcomes are zero or one.",
+    "sources": {
+      "probabilities": "Failure probabilities in one group",
+      "outcomes": "Observed failures"
+    },
+    "cases": [
+      {
+        "name": "Confident group",
+        "data": {
+          "probabilities": [
+            0.8,
+            0.8,
+            0.8,
+            0.8
+          ],
+          "outcomes": [
+            1,
+            0,
+            1,
+            0
+          ]
+        },
+        "expected": [
+          [
+            0.8,
+            0.5
+          ],
+          0.34
+        ]
+      },
+      {
+        "name": "Lower-risk group",
+        "data": {
+          "probabilities": [
+            0.25,
+            0.25,
+            0.25,
+            0.25
+          ],
+          "outcomes": [
+            0,
+            1,
+            0,
+            0
+          ]
+        },
+        "expected": [
+          [
+            0.25,
+            0.25
+          ],
+          0.1875
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pack",
+      "inputs": [
+        {
+          "op": "pack",
+          "inputs": [
+            {
+              "op": "mean",
+              "inputs": [
+                {
+                  "source": "probabilities"
+                }
+              ]
+            },
+            {
+              "op": "mean",
+              "inputs": [
+                {
+                  "source": "outcomes"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "mean",
+          "inputs": [
+            {
+              "op": "square",
+              "inputs": [
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "source": "probabilities"
+                    },
+                    {
+                      "source": "outcomes"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The first pair compares probability with frequency. The separate score reports average squared error without pretending it measures calibration alone.",
+    "limitation": "These tiny groups illustrate the arithmetic. They do not estimate calibration precisely or fit a correction.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "grouped-validation",
+    "title": "Audit the held-out greenhouses",
+    "problem": "Botie needs to know whether any greenhouse appears on both sides of a proposed split. Repeated rows must not count the same overlapping greenhouse more than once.",
+    "challenge": "Keep distinct IDs on each side, compare their memberships, and count the shared identities. Return zero only when there is no overlap.",
+    "sources": {
+      "training": "Training greenhouse IDs",
+      "validation": "Validation greenhouse IDs"
+    },
+    "cases": [
+      {
+        "name": "A proper group holdout",
+        "data": {
+          "training": [
+            "A",
+            "A",
+            "B"
+          ],
+          "validation": [
+            "C",
+            "C"
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Two shared groups",
+        "data": {
+          "training": [
+            "A",
+            "A",
+            "B",
+            "D"
+          ],
+          "validation": [
+            "B",
+            "C",
+            "D",
+            "D"
+          ]
+        },
+        "expected": 2
+      },
+      {
+        "name": "Repeated overlap",
+        "data": {
+          "training": [
+            "A",
+            "A"
+          ],
+          "validation": [
+            "A",
+            "A",
+            "A"
+          ]
+        },
+        "expected": 1
+      }
+    ],
+    "recipe": {
+      "op": "total",
+      "inputs": [
+        {
+          "op": "flatten",
+          "inputs": [
+            {
+              "op": "membership",
+              "inputs": [
+                {
+                  "op": "unique",
+                  "inputs": [
+                    {
+                      "source": "training"
+                    }
+                  ]
+                },
+                {
+                  "op": "unique",
+                  "inputs": [
+                    {
+                      "source": "validation"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Distinct IDs remove repeated records from the audit. Each remaining match identifies one greenhouse shared by both sets.",
+    "limitation": "This checks the supplied group identity only. It cannot discover hidden relationships or incorrectly assigned IDs.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "distribution-shift",
+    "title": "Compare the greenhouse population mix",
+    "problem": "Botie needs to compare roof-category shares in a reference report and a new report. Both use the same category order.",
+    "challenge": "Normalise each count vector by its own total, take absolute differences, add them, and divide by two.",
+    "sources": {
+      "reference": "Reference category counts",
+      "current": "Current category counts"
+    },
+    "cases": [
+      {
+        "name": "Changed roof mix",
+        "data": {
+          "reference": [
+            80,
+            20,
+            0
+          ],
+          "current": [
+            40,
+            60,
+            0
+          ]
+        },
+        "expected": 0.4
+      },
+      {
+        "name": "Only volume changed",
+        "data": {
+          "reference": [
+            8,
+            2,
+            0
+          ],
+          "current": [
+            80,
+            20,
+            0
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "A growing third category",
+        "data": {
+          "reference": [
+            8,
+            2,
+            0
+          ],
+          "current": [
+            2,
+            3,
+            5
+          ]
+        },
+        "expected": 0.6
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "total",
+          "inputs": [
+            {
+              "op": "absolute",
+              "inputs": [
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "op": "divide",
+                      "inputs": [
+                        {
+                          "source": "current"
+                        },
+                        {
+                          "op": "total",
+                          "inputs": [
+                            {
+                              "source": "current"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "op": "divide",
+                      "inputs": [
+                        {
+                          "source": "reference"
+                        },
+                        {
+                          "op": "total",
+                          "inputs": [
+                            {
+                              "source": "reference"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "constant",
+          "inputs": [],
+          "settings": {
+            "value": 2
+          }
+        }
+      ]
+    },
+    "why": "Normalisation removes volume differences. The remaining distance measures how the supplied category shares differ.",
+    "limitation": "Both reports must have positive totals and aligned, nonnegative counts. This is a distribution audit, not a performance estimate or an automatic retraining rule.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "bootstrap-uncertainty",
+    "title": "Recalculate a resampled greenhouse mean",
+    "problem": "Botie has a recorded bootstrap draw. Retrieve its observations with replacement and calculate the estimate for that draw.",
+    "challenge": "Gather the supplied positions from the original readings, including repeats, then calculate their mean.",
+    "sources": {
+      "readings": "Original observations",
+      "indices": "Recorded bootstrap indices"
+    },
+    "cases": [
+      {
+        "name": "Repeated low reading",
+        "data": {
+          "readings": [
+            10,
+            20,
+            30
+          ],
+          "indices": [
+            0,
+            0,
+            2
+          ]
+        },
+        "expected": 16.6666666667
+      },
+      {
+        "name": "Repeated middle reading",
+        "data": {
+          "readings": [
+            10,
+            20,
+            30
+          ],
+          "indices": [
+            1,
+            1,
+            1
+          ]
+        },
+        "expected": 20
+      },
+      {
+        "name": "Repeated high reading",
+        "data": {
+          "readings": [
+            10,
+            20,
+            30
+          ],
+          "indices": [
+            0,
+            2,
+            2
+          ]
+        },
+        "expected": 23.3333333333
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "gather",
+          "inputs": [
+            {
+              "source": "readings"
+            },
+            {
+              "source": "indices"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The resample changes which observed values contribute and how often. Recalculating the mean turns that changed composition into one estimate.",
+    "limitation": "The construction receives a fixed draw and performs no random sampling. A few illustrative means are not a confidence interval.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  }
+]

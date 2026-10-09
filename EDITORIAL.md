@@ -64,18 +64,30 @@ Keep hand-built illustrations clearly distinct from trained model results.
   references when reordering.
 - Quiz sections sit beside the parts they draw on and are titled for them,
   `Questions on Parts 3 to 5`, which is also how the page finds the parts to
-  offer after a wrong answer. Every figure in a question or its explanation
-  comes from the lesson. Options are dealt in a fixed shuffled order, so an
+  offer after a wrong answer. Test concepts already explained. A fresh example
+  must include every value, label and assumption needed to answer it on its card.
+  Options are dealt in a fixed shuffled order, so an
   explanation names an option by its content, never by its position. Aim for
   roughly half of true-or-false claims to be true, and vary how many options
   of a `several` question hold.
+- A question must supply the data and assumptions needed to answer it on its
+  own card. If it refers to an array, table, graph, ordering or rule from an
+  earlier section, repeat that setup beside the question in a labelled block.
+  Do not make readers remember which observation occupied which position.
+  Show inputs and the operation being asked about without revealing its result.
 - Botie delivers quiz feedback and the closing summary. State whether the
   answer is correct, explain why, and offer relevant lesson sections after a
   mistake. Keep the tone helpful and preserve the question's full explanation.
 - A practice section comes last, titled `Practice. ...` in the register of
   the part titles, and holds two to four problems worked in Python with
-  NumPy or oop_ml. It is the one place on a lesson that may name the library's
-  classes and methods. Every output shown is what the solution printed when
+  NumPy or oop_ml. In mathematical and model lessons, this is where the library's
+  classes and methods belong. In Python and NumPy lessons, teach the relevant
+  data structures and syntax before practice: explain why the example needs
+  them, show a small complete program, show its output separately, and explain
+  what each result means. Introduce creation, access, shape and data type before
+  combining operations. Do not assume a list and an array behave alike. Run
+  these worked examples in browser Python as well as the challenge solutions.
+  Every output shown is what the solution printed when
   it was run, and every number a problem checks is one the solution prints.
   At least one problem per lesson asks for a number the lesson itself does
   not quote.

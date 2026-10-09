@@ -18,11 +18,12 @@ const run = python.globals.get("run_course_code");
 const report = [];
 const record = process.argv.includes("--record");
 const filter = process.argv.slice(2).find((argument) => !argument.startsWith("--"));
-if (record && filter) throw Error("Record the complete course so no old fixture survives by mistake.");
+if (record && (filter || process.argv.includes("--expanded"))) throw Error("Record the complete course so no old fixture survives by mistake.");
 const fixtures = JSON.parse(await readFile(path.join(websiteRoot, "lib/practice-fixtures.json"), "utf8"));
 const outputs = {};
 for (const lesson of await collectExercises()) {
   if (filter && !lesson.path.includes(filter)) continue;
+  if (process.argv.includes("--expanded") && !lesson.expanded) continue;
   for (const exercise of lesson.exercises) {
     const expected = record ? exercise.output : browserOutput(exercise, fixtures);
     const result = JSON.parse(run(exercise.solution, expected));

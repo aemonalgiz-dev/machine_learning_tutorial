@@ -27,6 +27,8 @@
 import { useEffect, useRef, useState } from "react";
 import { QuizQuestion, answersOf, arranged, isCorrect } from "@/lib/quizzes";
 import { BotieSays } from "@/components/site/Botie";
+import { PythonCode } from "./PythonCode";
+import { Equation } from "./Equation";
 
 interface Attempt {
   // Indices as written, not as shown.
@@ -161,6 +163,11 @@ export function QuizDeck({
   return (
     <Shell step={`${card + 1} of ${questions.length}`}>
       <p className="text-base font-medium text-foreground">{current.prompt}</p>
+      {current.given && <div className="mt-4 min-w-0 text-sm text-muted" role="group" aria-label="Data for this question">
+        <p>{current.given.description}</p>
+        {current.given.code && <PythonCode source={current.given.code} label="Given" copyable={false} />}
+        {current.given.data && <Equation>{current.given.data}</Equation>}
+      </div>}
       {several && !given.answered && (
         <p className="mt-1 text-xs text-muted">
           More than one of these may hold. Submit when you have them all.

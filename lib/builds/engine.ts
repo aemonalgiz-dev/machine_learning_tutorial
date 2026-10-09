@@ -1,3 +1,5 @@
+import { arrangeConstruction } from "./layout";
+
 export type Data = number | string | boolean | null | Data[] | { [key: string]: Data };
 export type Settings = Record<string, number | string>;
 export interface Tool {
@@ -18,6 +20,8 @@ export interface Build {
   recipe: Expression;
   extras?: string[];
   limitation?: string;
+  // Start a separate saved draft when a challenge's inputs or objective change.
+  draftVersion?: number;
 }
 export interface Piece { id: string; tool: string; x: number; y: number; settings: Settings }
 export interface Connection { from: string; to: string; port: number }
@@ -65,20 +69,17 @@ export function expressionTools(expression: Expression): string[] {
 }
 export function assemble(expression: Expression, tools: Record<string, Tool>): Construction {
   const pieces: Piece[] = [], connections: Connection[] = [], shared = new Map<string, string>();
-  const depths = new Map<string, number>(), rows = new Map<number, number>();
   function walk(e: Expression): string {
     const key = JSON.stringify(e); if (shared.has(key)) return shared.get(key)!;
     const parents = "source" in e ? [] : e.inputs.map(walk);
-    const depth = parents.length ? Math.max(...parents.map(p => depths.get(p)!)) + 1 : 0;
-    const row = rows.get(depth) ?? 0; rows.set(depth, row + 1);
     const id = `part-${pieces.length}`, tool = "source" in e ? `source:${e.source}` : e.op;
-    pieces.push({ id, tool, x: 36 + depth * 260, y: 70 + row * 260, settings: "source" in e ? {} : { ...Object.fromEntries((tools[e.op].settings ?? []).map(s => [s.key, s.initial])), ...e.settings } });
-    parents.forEach((from, port) => connections.push({ from, to: id, port })); shared.set(key, id); depths.set(id, depth); return id;
+    pieces.push({ id, tool, x: 0, y: 0, settings: "source" in e ? {} : { ...Object.fromEntries((tools[e.op].settings ?? []).map(s => [s.key, s.initial])), ...e.settings } });
+    parents.forEach((from, port) => connections.push({ from, to: id, port })); shared.set(key, id); return id;
   }
   const last = walk(expression);
-  pieces.push({ id: "output", tool: "output", x: 36 + (depths.get(last)! + 1) * 260, y: 70, settings: {} });
+  pieces.push({ id: "output", tool: "output", x: 0, y: 0, settings: {} });
   connections.push({ from: last, to: "output", port: 0 });
-  return { pieces, connections };
+  return arrangeConstruction({ pieces, connections }, tools);
 }
 export function plug(graph: Construction, wire: Connection): Construction {
   if (wire.from === wire.to || wire.from === "output") return graph;

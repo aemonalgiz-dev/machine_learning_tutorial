@@ -13,7 +13,7 @@ async function point(locator: Locator) {
 }
 async function drag(page: Page, output: string, input: string) {
   const start = await point(page.getByRole("button", { name: output, exact: true }));
-  const end = await point(page.getByRole("button", { name: input, exact: true }).locator("span"));
+  const end = await point(page.getByRole("button", { name: input, exact: true }).locator('[data-socket="input"]'));
   await page.mouse.move(start.x, start.y);
   await page.mouse.down();
   await page.mouse.move(end.x, end.y, { steps: 8 });
@@ -79,7 +79,7 @@ test("Delete removes selected pieces and wires, Undo restores them, and editing 
   await field.focus(); await field.press("ControlOrMeta+A"); await field.press("Delete");
   await expect(pieces).toHaveCount(4); await expect(wires).toHaveCount(3);
   await field.fill("2");
-  await page.getByRole("group", { name: "Set a constant machine", exact: true }).getByText("No signal yet", { exact: true }).click();
+  await page.getByRole("group", { name: "Set a constant machine", exact: true }).getByTestId("component-value").click();
   await page.keyboard.press("Delete");
   await expect(pieces).toHaveCount(3); await expect(wires).toHaveCount(2);
   await page.getByRole("button", { name: "Undo", exact: true }).click();

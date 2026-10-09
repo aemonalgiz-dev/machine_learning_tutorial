@@ -1,10 +1,11 @@
 import type { HistoryLessonId } from "../history";
+import type { ExpandedLessonId } from "../lessons/ids";
 
 // The workshop continues the problem in the history. These are small teaching
 // examples, not reproductions of the historical datasets or complete systems.
 export const workshopContexts = {
   statistics: "Let's return to the city's records. We have a count of deaths for each week, and we want to describe how many were recorded in an average week. Adding the counts tells us how many deaths were recorded altogether. We still need to account for how many weeks those records cover. These counts are invented for our example; they are not Graunt's records.",
-  "linear-algebra": "Let's use the purchases from our bookkeeping problem. A shop charges 2 coins for a loaf and 3 coins for a bottle of milk. Each customer's quantities change, but the prices stay the same. We need a calculation that works for every purchase without writing a separate rule for each customer.",
+  "linear-algebra": "Let's return to the purchases from our bookkeeping problem. Before trying to recover unknown prices, we will start with prices we know and work out the bills. One customer's bill is straightforward. Now suppose we have a whole page of purchases. We need to keep each customer's quantities together and apply the same prices to every customer. A table gives us a place for each quantity; we will build the calculation that uses it.",
   calculus: "Let's follow the traveller from the opening problem. We have their position at two times, measured in metres and seconds. The distance travelled between those readings tells us something about speed, but we must also consider how much time passed. The examples use progressively shorter intervals beginning at the same moment.",
   "simple-linear-regression": "Let's return to the astronomer's conflicting measurements. Our invented observations describe an object's position along one direction at several times. They do not lie exactly on a straight line. We want to use all of them to fit a line, then estimate where the object will be at another time. This is a small model of the measurement problem, not an orbit calculation.",
   "held-out-evaluation": "We fitted a line to some observations. How well does it predict positions we kept out of that fit? These examples contain predictions and recorded positions for those reserved observations. We need one measure of their disagreement, while keeping in mind that a small test cannot establish how well every future observation will go.",
@@ -111,11 +112,11 @@ export const workshopContexts = {
   "reinforcement-learning": "Let's return to the agent in the maze. It has taken an action, received a reward, and reached a place with several possible next actions. We want to revise the value of the action it just took using both the immediate reward and what may come later.",
   "retrieval-augmented-generation": "A question may need information in a reference document rather than in the model's stored parameters. We have vectors for the question and candidate documents. Let's retrieve the closest document's text and place it beside the question for a later generation step.",
   "evaluating-generative-models": "A generator can repeatedly produce one good answer and still receive an impressive average quality score. Let's report both average quality and the fraction of distinct outputs. That lets us see a weakness the average alone would conceal.",
-} satisfies Record<HistoryLessonId, string>;
+} satisfies Record<Exclude<HistoryLessonId, ExpandedLessonId>, string>;
 
 export const workshopCaseNames: Partial<Record<HistoryLessonId, string[]>> = {
   statistics: ["Five weekly records", "A shorter recording period", "A different month"],
-  "linear-algebra": ["One loaf and two bottles", "Three loaves and one bottle", "Two loaves and no milk"],
+  "linear-algebra": ["Three customers", "A shorter list of customers", "The same purchases at new prices"],
   calculus: ["One-second interval", "Half-second interval", "Tenth-second interval"],
   "simple-linear-regression": ["Predict the next position", "Predict farther ahead", "A different set of observations"],
   "the-standard-score": ["Height in centimetres", "Weight in kilograms"],

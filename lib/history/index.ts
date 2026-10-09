@@ -9,8 +9,10 @@ import { wordVectors } from "./word-vectors";
 import { representations } from "./representations";
 import { vision } from "./vision";
 import type { LessonHistory } from "./types";
+import expandedHistories from "../lessons/histories.json";
 
 export const lessonHistories = {
+  ...expandedHistories,
   ...foundations,
   ...models,
   ...networks,

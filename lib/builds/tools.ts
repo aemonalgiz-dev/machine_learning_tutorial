@@ -1,5 +1,6 @@
 import type { Data, Tool } from "./engine";
 import { EXTRA_TOOLS } from "./extra-tools";
+import { FOUNDATION_TOOLS } from "./foundation-tools";
 export function scalar(x: Data): number { if (typeof x !== "number") throw Error("This input needs one number. Inspect the connected machine to see what it produces."); return x; }
 export function vector(x: Data): number[] { if (!Array.isArray(x) || !x.every(v => typeof v === "number")) throw Error("This input needs a list of numbers."); return x as number[]; }
 export function matrix(x: Data): number[][] { if (!Array.isArray(x) || !x.length) throw Error("This input needs rows of numbers."); const rows = x.map(vector); if (rows.some(r => r.length !== rows[0].length)) throw Error("Each row must have the same number of values."); return rows; }
@@ -20,6 +21,7 @@ const define = (title: string, why: string, inputs: string[], run: Tool["run"], 
 const numeric = (key: string, label: string, initial = 0, min = -10, max = 10, step = .5) => ({ key, label, initial, min, max, step });
 export const TOOLS: Record<string, Tool> = {
   ...EXTRA_TOOLS,
+  ...FOUNDATION_TOOLS,
   constant: define("Set a constant", "Supplies a number that stays the same for every example. Use it when the rule needs a fixed rate, threshold or offset.", [], (_, s) => Number(s.value), [numeric("value", "Number", 0, -10000, 10000, .1)]),
   add: define("Add", "Combines contributions. Two equally sized lists are added position by position.", ["First contribution", "Second contribution"], ([a,b]) => zip(a,b,(x,y)=>x+y)),
   subtract: define("Subtract", "Finds what remains after removing a reference value. The order of the inputs matters.", ["Starting value", "Value to remove"], ([a,b]) => zip(a,b,(x,y)=>x-y)),

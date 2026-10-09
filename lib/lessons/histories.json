@@ -1,0 +1,441 @@
+{
+  "numpy-arrays": {
+    "title": "When One Calculation Needed to Work on Many Measurements",
+    "sources": [
+      {
+        "title": "Harris and colleagues: Array programming with NumPy (2020)",
+        "url": "https://doi.org/10.1038/s41586-020-2649-2"
+      },
+      {
+        "title": "Python: lists, tuples, sets and dictionaries",
+        "url": "https://docs.python.org/3/tutorial/datastructures.html"
+      },
+      {
+        "title": "NumPy's beginner guide",
+        "url": "https://numpy.org/doc/stable/user/absolute_beginners.html"
+      }
+    ],
+    "blocks": [
+      "Scientific programs often repeat the same operation on long collections of measurements. Writing a separate instruction for every reading makes the program harder to inspect, while writing a Python loop for every numerical operation can add overhead.",
+      "The NumPy authors' 2020 account describes an array model that combines compact expressions with compiled numerical operations. The useful idea for us is simple: organise the readings once, then express a calculation for the collection. Our greenhouse readings are invented, not measurements from that paper."
+    ]
+  },
+  "numpy-axes": {
+    "title": "Keeping the Meaning of a Scientific Table",
+    "sources": [
+      {
+        "title": "Python: lists, tuples, sets and dictionaries",
+        "url": "https://docs.python.org/3/tutorial/datastructures.html"
+      },
+      {
+        "title": "NumPy's array axes and reductions",
+        "url": "https://numpy.org/doc/stable/user/quickstart.html"
+      },
+      {
+        "title": "NumPy copies and views",
+        "url": "https://numpy.org/doc/stable/user/basics.copies.html"
+      }
+    ],
+    "blocks": [
+      "Scientific records commonly separate observations from the things measured about them. Array programming keeps those distinctions as axes, so a calculation can combine one direction while preserving the others.",
+      "NumPy's documented reduction operations make the chosen axis explicit. Our two-day greenhouse table is an invented example of why that choice matters. We are using an established array convention, not attributing the invention of tables or averages to NumPy."
+    ]
+  },
+  "numpy-creation": {
+    "title": "When the Layout Was Known Before the Measurements",
+    "sources": [
+      {
+        "title": "Creating arrays",
+        "url": "https://numpy.org/doc/stable/user/basics.creation.html"
+      },
+      {
+        "title": "Evenly spaced samples",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.linspace.html"
+      }
+    ],
+    "blocks": [
+      "Scientific programs often know the dimensions of a calculation before they have its results. They need storage for accumulators, trial settings, and numerical grids without writing each entry by hand.",
+      "NumPy's array-creation routines make those intentions explicit. A shape describes the arrangement; a fill value or spacing rule describes its initial contents. Our greenhouse schedule is an invented example of that distinction."
+    ]
+  },
+  "numpy-indexing": {
+    "title": "Working on Part of a Large Scientific Record",
+    "sources": [
+      {
+        "title": "Indexing arrays",
+        "url": "https://numpy.org/doc/stable/user/basics.indexing.html"
+      },
+      {
+        "title": "Copies and views",
+        "url": "https://numpy.org/doc/stable/user/basics.copies.html"
+      }
+    ],
+    "blocks": [
+      "Scientific arrays can be too large to copy every time a calculation needs a subset. Regular stretches of storage can often be described by a starting position, a length, and a step.",
+      "NumPy distinguishes basic slicing, which can share storage, from advanced indexing, which gathers values into a new array. Those documented rules explain both the convenience of selection and the need for care when editing it."
+    ]
+  },
+  "numpy-reshaping": {
+    "title": "Separating Stored Order From the Shape of a Calculation",
+    "sources": [
+      {
+        "title": "Changing array shapes",
+        "url": "https://numpy.org/doc/stable/reference/routines.array-manipulation.html"
+      },
+      {
+        "title": "Reshaping an array",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.reshape.html"
+      }
+    ],
+    "blocks": [
+      "Scientific instruments and file formats often deliver observations in a flat sequence. Numerical calculations need arrangements that identify time, location, and measurement channels.",
+      "NumPy's manipulation routines describe shape and axis changes explicitly. This makes array-oriented calculations possible without treating every change of layout as a new measurement. The documented distinction between reshape, transpose, and joining is the mechanism we use here."
+    ]
+  },
+  "numpy-broadcasting": {
+    "title": "Repeating a Calculation Without Repeating Its Data",
+    "sources": [
+      {
+        "title": "NumPy broadcasting rules",
+        "url": "https://numpy.org/doc/stable/user/basics.broadcasting.html"
+      }
+    ],
+    "blocks": [
+      "Array calculations often combine a large collection with a smaller reference: one scale for all entries, or one target for each feature column. Explicitly constructing a second large table adds work and obscures that the reference is shared.",
+      "NumPy's broadcasting rules specify when smaller shapes can be reused across larger ones. Our greenhouse example illustrates one such case. It is not a claim that NumPy understands the meaning of the columns; matching the references to the right columns remains our responsibility."
+    ]
+  },
+  "numpy-masks": {
+    "title": "Selecting Observations Without Rewriting the Table",
+    "sources": [
+      {
+        "title": "Python: lists, tuples, sets and dictionaries",
+        "url": "https://docs.python.org/3/tutorial/datastructures.html"
+      },
+      {
+        "title": "NumPy indexing and Boolean selection",
+        "url": "https://numpy.org/doc/stable/user/basics.indexing.html"
+      }
+    ],
+    "blocks": [
+      "Selecting observations is a recurring problem in scientific computing: a calculation might need only a certain period, a particular group, or measurements that satisfy a condition. Keeping a decision beside each observation separates the selection rule from the stored measurements.",
+      "NumPy documents Boolean indexing as a way to use those decisions. This lesson uses invented greenhouse readings to show the mechanism. It teaches selection, not a claim that all unusual observations should be discarded."
+    ]
+  },
+  "numpy-reductions": {
+    "title": "Turning a Large Report Into a Specific Answer",
+    "sources": [
+      {
+        "title": "Statistical routines",
+        "url": "https://numpy.org/doc/stable/reference/routines.statistics.html"
+      },
+      {
+        "title": "Sorting and searching",
+        "url": "https://numpy.org/doc/stable/reference/routines.sort.html"
+      }
+    ],
+    "blocks": [
+      "Scientists needed summaries long before NumPy: totals, central values, and measures of variation compress observations into answers to particular questions. Array libraries must make clear which observations each summary combines.",
+      "NumPy's statistical reductions accept axes, while functions such as argmax return positions instead of measurements. Keeping that distinction explicit lets a numerical summary remain connected to its original observation."
+    ]
+  },
+  "numpy-vectorisation": {
+    "title": "Moving Repeated Arithmetic Into Numerical Routines",
+    "sources": [
+      {
+        "title": "Universal functions",
+        "url": "https://numpy.org/doc/stable/user/basics.ufuncs.html"
+      },
+      {
+        "title": "The vectorize convenience wrapper",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.vectorize.html"
+      }
+    ],
+    "blocks": [
+      "Scientific Python programs often repeat a small arithmetic rule over many observations. Performing each iteration through Python has overhead, while compiled array routines can carry out many such operations directly.",
+      "NumPy exposes common elementwise operations as universal functions, often shortened to ufuncs. This lets us express the numerical rule at array scale. It does not eliminate the need to inspect temporary arrays or prove that the rule matches the intended calculation."
+    ]
+  },
+  "numpy-linear-algebra": {
+    "title": "Reusing Numerical Linear Algebra for Many Observations",
+    "sources": [
+      {
+        "title": "NumPy linear algebra",
+        "url": "https://numpy.org/doc/stable/reference/routines.linalg.html"
+      },
+      {
+        "title": "Least squares",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html"
+      }
+    ],
+    "blocks": [
+      "Solving systems of equations and fitting more equations than there are unknowns are longstanding numerical problems. Reliable implementations need algorithms that account for rounding and the structure of the system.",
+      "NumPy's linear algebra interface draws on established BLAS and LAPACK routines. We use that interface after making the small matrix calculation visible, and distinguish solving an exact square system from fitting an overdetermined one."
+    ]
+  },
+  "numpy-numerical-checks": {
+    "title": "Representing Real Quantities With Finite Storage",
+    "sources": [
+      {
+        "title": "Numerical data types",
+        "url": "https://numpy.org/doc/stable/user/basics.types.html"
+      },
+      {
+        "title": "Approximate comparisons",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.isclose.html"
+      },
+      {
+        "title": "Comparing complete arrays",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.allclose.html"
+      }
+    ],
+    "blocks": [
+      "A computer has a finite number of bits for each stored numerical value. Many decimal fractions therefore cannot be represented exactly in binary floating-point storage. Repeated arithmetic must round intermediate results.",
+      "NumPy exposes data types, finite-value checks, and approximate comparisons so a program can account for those limitations. The tolerance is part of our numerical contract, not a way to declare every discrepancy harmless."
+    ]
+  },
+  "reproducible-sampling": {
+    "title": "Giving Simulated Experiments a Repeatable Starting Point",
+    "sources": [
+      {
+        "title": "NumPy random sampling",
+        "url": "https://numpy.org/doc/stable/reference/random/index.html"
+      },
+      {
+        "title": "PCG64 and reproducible streams",
+        "url": "https://numpy.org/doc/stable/reference/random/bit_generators/pcg64.html"
+      }
+    ],
+    "blocks": [
+      "Numerical simulations need many values that behave like random draws, yet debugging also requires the ability to repeat an experiment. Pseudorandom generators address this by maintaining a state and updating it through a deterministic rule.",
+      "NumPy separates the bit generator from the interface that draws values. Its PCG64 documentation specifies how an initial seed establishes a stream. Our lesson uses this distinction to explain repeatability; the workshop receives already chosen indices and does not implement a random-number generator."
+    ]
+  },
+  "numpy-functions": {
+    "title": "Making Numerical Routines Reusable Without Losing Their Assumptions",
+    "sources": [
+      {
+        "title": "Converting array-like inputs",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.asarray.html"
+      },
+      {
+        "title": "Testing numerical arrays",
+        "url": "https://numpy.org/doc/stable/reference/routines.testing.html"
+      }
+    ],
+    "blocks": [
+      "Reusable numerical routines let programmers test one implementation and call it from many calculations. Their usefulness depends on the caller and the routine agreeing about dimensions, units, and valid inputs.",
+      "NumPy's array conversion and testing interfaces support those contracts. They let a Python function accept array-like input, validate its layout, and compare a result with a small independently checked example. The function remains responsible for its scientific assumptions."
+    ]
+  },
+  "numpy-saving-data": {
+    "title": "Keeping Numerical Results Usable by the Next Program",
+    "sources": [
+      {
+        "title": "NumPy binary format",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.lib.format.html"
+      },
+      {
+        "title": "Saving named arrays",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.savez.html"
+      },
+      {
+        "title": "Text array input",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html"
+      }
+    ],
+    "blocks": [
+      "Scientific programs need to exchange data and repeat earlier calculations. Plain text is inspectable, but it does not automatically preserve every array's type, shape, labels, or full numerical precision.",
+      "NumPy's NPY format records an array's dtype and shape with its values. NPZ archives collect named arrays, while text readers and writers serve simpler interchange needs. These formats preserve stored data, not the scientific meaning we forget to record."
+    ]
+  },
+  "missing-measurements": {
+    "title": "The Missing Observation Has a Story Too",
+    "sources": [
+      {
+        "title": "Rubin: Inference and Missing Data (1976)",
+        "url": "https://dash.harvard.edu/entities/publication/73120378-8764-6bd4-e053-0100007fdf3b"
+      },
+      {
+        "title": "Scikit-learn: Imputation of missing values",
+        "url": "https://scikit-learn.org/stable/modules/impute.html"
+      }
+    ],
+    "blocks": [
+      "Incomplete records posed a problem for statistical inference long before modern neural networks. Ignoring an absent observation can change the group we describe, especially when absence is related to the value we wanted to measure.",
+      "Rubin's 1976 paper established conditions under which the missingness process can be ignored for particular forms of inference. It did not say that replacing every blank with an average is universally valid. Our invented greenhouse example uses mean replacement as a transparent baseline so we can inspect exactly what it assumes."
+    ]
+  },
+  "categorical-encoding": {
+    "title": "Giving Each Category Its Own Question",
+    "sources": [
+      {
+        "title": "Scikit-learn: Encoding categorical features",
+        "url": "https://scikit-learn.org/stable/modules/preprocessing.html#encoding-categorical-features"
+      }
+    ],
+    "blocks": [
+      "Statistical models need representations for properties that are names rather than quantities. Indicator variables answer separate membership questions, allowing categories to contribute without forcing their arbitrary codes onto a numerical scale.",
+      "Modern preprocessing libraries document one-hot encoding as one way to create those indicators. Our roof materials are an invented example. The practical contribution we need is the representation: one fixed column per known category, with a clear policy for unfamiliar categories."
+    ]
+  },
+  "cyclical-features": {
+    "title": "Representing a Repeating Cycle as a Position",
+    "sources": [
+      {
+        "title": "Scikit-learn: Time-related feature engineering",
+        "url": "https://scikit-learn.org/stable/auto_examples/applications/plot_cyclical_feature_engineering.html"
+      }
+    ],
+    "blocks": [
+      "Time-related measurements create a practical modelling problem: day, week, and seasonal cycles have boundaries in their written numbering that are not boundaries in the phenomenon. A representation that ignores repetition can make neighbouring times look unrelated.",
+      "Sine and cosine coordinates use the familiar geometry of a circle to preserve a cycle's continuity. Scikit-learn's time-feature example documents this representation among several modelling choices. Our greenhouse clock is an invented teaching example, and we are not presenting the circle representation as a newly invented algorithm."
+    ]
+  },
+  "record-quality": {
+    "title": "Why a Dataset Needs Its Own Instructions",
+    "sources": [
+      {
+        "title": "Gebru and colleagues: Datasheets for Datasets",
+        "url": "https://www.microsoft.com/en-us/research/publication/datasheets-for-datasets/"
+      },
+      {
+        "title": "Microsoft Research: Data documentation",
+        "url": "https://www.microsoft.com/en-us/research/project/datasheets-for-datasets/"
+      }
+    ],
+    "blocks": [
+      "A dataset can outlive the people who remember how it was collected. When collection details disappear, later users may mistake a convenient table for a complete description of a population.",
+      "Gebru and colleagues introduced datasheets for datasets in 2018, with a later journal publication, to document matters such as motivation, composition, collection, and recommended uses. Our duplicate-log exercise handles one small part of that broader problem: recording what an observation means before deciding how to clean it."
+    ]
+  },
+  "data-leakage": {
+    "title": "When a Successful Evaluation Used Unavailable Information",
+    "sources": [
+      {
+        "title": "Kaufman and colleagues: Leakage in Data Mining (2012)",
+        "url": "https://doi.org/10.1145/2382577.2382579"
+      },
+      {
+        "title": "Scikit-learn: Common pitfalls and data leakage",
+        "url": "https://scikit-learn.org/stable/common_pitfalls.html#data-leakage"
+      }
+    ],
+    "blocks": [
+      "As data-mining systems combined many records and preprocessing steps, evaluation could accidentally give a model information unavailable in the real prediction setting. High scores then measured access to privileged evidence as well as predictive ability.",
+      "Kaufman and colleagues examined leakage as information about a target that is not legitimately available to the prediction process. Our invented repair records make the timing issue explicit. Other forms include fitting preprocessing on test data or placing copies of an observation on both sides of a split."
+    ]
+  },
+  "class-imbalance": {
+    "title": "Learning From a Class That Appears Only Occasionally",
+    "sources": [
+      {
+        "title": "Chawla and colleagues: SMOTE (2002)",
+        "url": "https://www.cs.cmu.edu/afs/cs/project/jair/pub/volume16/chawla02a-html/chawla2002.html"
+      }
+    ],
+    "blocks": [
+      "Classification datasets often contain many examples of one outcome and few of another. Researchers found that a method could favour the majority while performing poorly on the minority that mattered to the application.",
+      "Chawla and colleagues' 2002 SMOTE paper studied synthetic minority oversampling, creating additional minority examples between nearby observations. That is one response to imbalance, not a universal remedy. Our lesson first makes the evaluation problem visible; it does not generate synthetic sensor records."
+    ]
+  },
+  "baseline-predictions": {
+    "title": "A Prediction Needs a Reference for Comparison",
+    "sources": [
+      {
+        "title": "Scikit-learn: DummyRegressor baseline strategies",
+        "url": "https://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyRegressor.html"
+      }
+    ],
+    "blocks": [
+      "Predictive modelling needs control comparisons. Without them, a score cannot show whether a method gained anything from its inputs beyond a simple summary of previous outcomes.",
+      "Modern evaluation libraries preserve this practice through baseline estimators that ignore input features and predict a training summary. This is not an invention claim for one library. Our invented greenhouse example uses the training mean to make the comparison explicit before introducing more capable predictors."
+    ]
+  },
+  "learning-curves": {
+    "title": "Model Comparisons Depend on How Much Data We Have",
+    "sources": [
+      {
+        "title": "Perlich, Provost, and Simonoff: A Learning-Curve Analysis (2003)",
+        "url": "https://www.jmlr.org/papers/volume4/perlich03a/perlich03a.pdf"
+      },
+      {
+        "title": "Scikit-learn: Learning curves",
+        "url": "https://scikit-learn.org/stable/modules/learning_curve.html"
+      }
+    ],
+    "blocks": [
+      "A comparison at one dataset size can hide how two learning methods respond as more examples become available. A method that works well with few observations need not remain the best choice with many.",
+      "Perlich, Provost, and Simonoff's 2003 study compared tree induction and logistic regression through learning curves. Our supplied greenhouse errors are invented illustrations, not results from that study or a model trained in this widget. They let us inspect the interpretation before running larger fitting experiments."
+    ]
+  },
+  "decision-thresholds": {
+    "title": "Separating Statistical Evidence From a Decision",
+    "sources": [
+      {
+        "title": "Scikit-learn: Tuning a decision threshold",
+        "url": "https://scikit-learn.org/stable/modules/classification_threshold.html"
+      }
+    ],
+    "blocks": [
+      "Prediction systems have long needed a second step between estimating an outcome and choosing an action. The same estimated risk can justify different actions when their consequences differ.",
+      "Current threshold-tuning documentation makes that separation explicit: estimating scores and selecting a cutoff are distinct tasks. Our invented sensor costs show one simple expected-cost rule. They are teaching units, not an estimate of real maintenance costs or a recommendation for an operational safety system."
+    ]
+  },
+  "probability-calibration": {
+    "title": "A Correct Choice Can Still Come With Misleading Confidence",
+    "sources": [
+      {
+        "title": "Guo and colleagues: On Calibration of Modern Neural Networks (2017)",
+        "url": "https://proceedings.mlr.press/v70/guo17a.html"
+      },
+      {
+        "title": "Scikit-learn: Probability calibration",
+        "url": "https://scikit-learn.org/stable/modules/calibration.html"
+      }
+    ],
+    "blocks": [
+      "As classifiers improved, a separate question remained: did the number attached to a prediction accurately describe its uncertainty? A model could choose the right class often while being too confident about individual choices.",
+      "Guo and colleagues' 2017 study examined this issue in modern neural networks and evaluated calibration methods, including temperature scaling. Our invented sensor group teaches how to inspect reliability before attempting a correction. It does not reproduce their experiments or establish that one adjustment works for every model."
+    ]
+  },
+  "grouped-validation": {
+    "title": "Repeated Measurements Need a Different Evaluation Boundary",
+    "sources": [
+      {
+        "title": "Scikit-learn: Cross-validation for grouped data",
+        "url": "https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-iterators-for-grouped-data"
+      }
+    ],
+    "blocks": [
+      "Repeated observations are common in scientific datasets. Measurements from one person, device, or location can share properties that distinguish them from other groups. Treating all rows as independent can therefore overstate performance on new groups.",
+      "Grouped validation procedures address the evaluation boundary by keeping a group's observations together. Scikit-learn documents these splitters separately from ordinary random splits. Our invented greenhouses make the group identity visible without claiming that one split design is appropriate for every prediction task."
+    ]
+  },
+  "distribution-shift": {
+    "title": "When Training and Use No Longer Share the Same Distribution",
+    "sources": [
+      {
+        "title": "Lipton, Wang, and Smola: Detecting and Correcting for Label Shift (2018)",
+        "url": "https://proceedings.mlr.press/v80/lipton18a.html"
+      }
+    ],
+    "blocks": [
+      "A predictor's evaluation can stop describing its environment when the frequencies or relationships in incoming data change. Detecting that mismatch is a separate problem from fitting the original predictor.",
+      "Lipton, Wang, and Smola's 2018 work studies label shift, where class proportions change under specific assumptions, and methods for detecting and correcting it. Our roof-category comparison is a simpler input-distribution audit. It is not their correction algorithm and does not assume that every observed change is label shift."
+    ]
+  },
+  "bootstrap-uncertainty": {
+    "title": "Using Computation to Recreate the Act of Sampling",
+    "sources": [
+      {
+        "title": "Efron: Bootstrap Methods: Another Look at the Jackknife (1979)",
+        "url": "https://doi.org/10.1214/aos/1176344552"
+      }
+    ],
+    "blocks": [
+      "Statisticians often need the uncertainty of an estimate even when a convenient formula is unavailable. Repeating the entire real-world data collection may be impractical.",
+      "Efron's 1979 bootstrap paper developed a computational approach based on resampling the observed data. Our invented greenhouse readings show how replacement and repeated estimates work. Three displayed resamples make the mechanism inspectable; they are far too few to justify a useful confidence interval."
+    ]
+  }
+}

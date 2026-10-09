@@ -12,7 +12,7 @@ export async function collectExercises() {
   for (const area of ["concepts", "primers"]) {
     const directory = path.join(websiteRoot, "app", area);
     for (const entry of await readdir(directory, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
+      if (!entry.isDirectory() || entry.name.startsWith("[")) continue;
       const filename = path.join(directory, entry.name, "page.tsx");
       const source = await readFile(filename, "utf8");
       const syntax = ts.createSourceFile(filename, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -36,6 +36,8 @@ export async function collectExercises() {
       lessons.push({ path: `/${area}/${entry.name}`, exercises });
     }
   }
+  const expanded = JSON.parse(await readFile(path.join(websiteRoot, "lib/lessons/published.json"), "utf8"));
+  lessons.push(...expanded.map(lesson => ({ path: `/concepts/${lesson.id}`, exercises: lesson.practice, expanded: true })));
   return lessons;
 }
 
