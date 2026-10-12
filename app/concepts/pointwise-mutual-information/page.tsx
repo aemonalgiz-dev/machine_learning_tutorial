@@ -406,6 +406,7 @@ export default function PointwiseMutualInformationPage() {
               ],
               0,
               "The score divides the rate of the pair by the product of the two separate rates, which cancels the part of the count explained by either word being common. Flour with dough comes out at +1.0578 against flour with and at +0.5878, and nothing about the counts changed.",
+              {"description":"Use these values and conventions.","data":"Pair counts: flour with and = 3; flour with dough = 3\nContext-column totals: and = 40; dough = 25\nThe flour row and total number of pairs are the same in both comparisons."},
             ),
             trueFalse(
               "On the three sentences, 10 of the 25 cells hold a count and all five diagonal cells are empty.",

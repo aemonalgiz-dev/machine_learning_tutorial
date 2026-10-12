@@ -70,7 +70,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
     const index = card;
     const source = latest.current[index].code;
     update(index, { result: undefined });
-    const execution = await run(source, check ? exercises[index].output : undefined);
+    const execution = await run(source, check ? exercises[index].output : undefined, check ? exercises[index].tests : undefined, exercises[index].exports);
     if (!mounted.current) return;
     const passed = !execution.error && execution.tests.length > 0 && execution.tests.every((test) => test.status === "passed");
     const comparison = { passed, message: passed ? "Every test passed. Your program produced the requested results." : "The test results below show what to work on next." };
@@ -124,7 +124,8 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
           <details className="mt-3 rounded-lg border border-line bg-surface px-4 py-3" open={expectedShown || undefined}
             onToggle={(event) => setExpectedShown(event.currentTarget.open)}>
             <summary className="cursor-pointer text-sm font-medium text-foreground">Expected results and what the tests check</summary>
-            <p className="mt-3 text-sm leading-6 text-muted">The tests run in Python after your program. They check that it finishes, prints every requested line, and produces the values below in order with these labels. Spacing can differ, and numbers are checked to the precision shown. These tests verify your results, not how you wrote the program.</p>
+            <p className="mt-3 text-sm leading-6 text-muted">The tests check that your program finishes and prints the requested results in order. Spacing can differ, and numbers are checked to the precision shown. {current.tests?.length ? "They also call your functions on further inputs. Each check below describes the behaviour it expects; different implementations can pass." : "These checks verify the printed results."}</p>
+            {current.tests?.length ? <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">{current.tests.map(test=><li key={test.name}>{test.name}</li>)}</ul> : null}
             <ProgramOutput output={current.output} />
             {current.browserNote && <p className="text-sm leading-6 text-muted">{current.browserNote}</p>}
           </details>
@@ -189,6 +190,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
                 {stale && <p className="mt-3 text-sm text-muted">You have edited the code since this run. Run it again to see the new result.</p>}
                 <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-words font-mono text-[13px] leading-6 text-foreground">{result.execution.stdout || (result.execution.error ? "" : "Your program finished without printing anything.")}</pre>
                 {result.execution.stderr && <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted">{result.execution.stderr}</pre>}
+                {result.execution.artifacts?.map(file=><button key={file.filename} className="mt-3 block min-h-11 text-sm text-accent underline" onClick={()=>{const url=URL.createObjectURL(new Blob([file.content],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=file.filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}>Download {file.filename}</button>)}
                 {result.execution.error ? <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-6 text-rose-700 dark:text-rose-300">{result.execution.error}</pre> : result.checked && (
                   <div className="mt-3 border-t border-line pt-3 text-sm">
                     <p className={"font-semibold " + (result.passed ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300")}>{result.passed ? "All tests passed" : "Some tests need another look"}</p>

@@ -333,6 +333,7 @@ export default function CentringOnTheMeanPage() {
               ["About 3.5 percent", "About half", "About 96.5 percent", "About 99.5 percent"],
               0,
               "The mean of x² is the variance plus the square of the mean, which here splits 26,849.4 into 952.9 and 25,896.4. A column far from zero carries most of its squared length as location, so a search for the direction of largest squared length is mostly a search for where the crowd sits.",
+              { description: "For the height column, use the population variance, with divisor eleven. Compare that variance with the mean squared distance from zero.", data: "Mean squared height = 26,849.4 cm²\nPopulation variance = 952.9 cm²\nSquared mean height = 25,896.4 cm²" },
             ),
             trueFalse(
               "Recording every height as the distance above a mark on the wall turns the uncentred direction, while the centred component stays exactly where it was.",

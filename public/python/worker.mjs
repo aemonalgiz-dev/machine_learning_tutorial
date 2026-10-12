@@ -37,7 +37,7 @@ async function prepare(id, source) {
 }
 
 self.onmessage = async (event) => {
-  const { id, source, expected } = event.data;
+  const { id, source, expected, tests, exports } = event.data;
   if (occupied || typeof id !== "number" || typeof source !== "string") return;
   occupied = true;
   try {
@@ -45,7 +45,11 @@ self.onmessage = async (event) => {
     self.postMessage({ type: "running", id });
     const run = python.globals.get("run_course_code");
     try {
-      const result = JSON.parse(typeof expected === "string" ? run(source, expected) : run(source));
+      const result = JSON.parse(run.callKwargs(source, {
+        ...(typeof expected === "string" ? { expected_output: expected } : {}),
+        specifications: JSON.stringify(tests ?? []),
+        exports: JSON.stringify(exports ?? []),
+      }));
       self.postMessage({ type: "result", id, result });
     } finally { run.destroy(); }
   } catch (error) {

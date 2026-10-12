@@ -73,6 +73,33 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             runner.assert_output_line("answer nan", "answer 0.0")
 
+    def test_behavior_checks_reject_printed_answers_without_a_function(self):
+        checks = json.dumps([{"name": "Different input", "code": "assert double(7) == 14"}])
+        printed = json.loads(runner.run_course_code('print(4)', '4', checks))
+        self.assertEqual(printed["tests"][-1]["status"], "failed")
+        real = json.loads(runner.run_course_code('def double(x): return x + x\nprint(double(2))', '4', checks))
+        self.assertTrue(all(test["status"] == "passed" for test in real["tests"]))
+
+    def test_exports_are_declared_bounded_and_belong_to_the_current_run(self):
+        exports = json.dumps([{"variable": "report_json", "filename": "report.json"}])
+        source = "report_json = '{\"count\": 2}'"
+        result = json.loads(runner.run_course_code(source, None, "[]", exports))
+        self.assertEqual(result["tests"], [])
+        self.assertEqual(json.loads(result["artifacts"][0]["content"]), {"count": 2})
+        self.assertEqual(self.run_code(source)["artifacts"], [])
+        for code in ["pass", "report_json = 'x' * 100001", source + "\nraise ValueError()"]:
+            self.assertEqual(json.loads(runner.run_course_code(code, None, "[]", exports))["artifacts"], [])
+
+    def test_behavior_failures_are_independent_and_skip_after_program_error(self):
+        checks = json.dumps([
+            {"name": "Fail", "code": "assert False, 'Try another input'"},
+            {"name": "Pass", "code": "assert answer == 4"},
+        ])
+        result = json.loads(runner.run_course_code('answer = 4\nprint(answer)', '4', checks))
+        self.assertEqual([test["status"] for test in result["tests"][-2:]], ["failed", "passed"])
+        failed = json.loads(runner.run_course_code('raise ValueError()', '4', checks))
+        self.assertEqual([test["status"] for test in failed["tests"][-2:]], ["skipped", "skipped"])
+
 
 if __name__ == "__main__":
     unittest.main()

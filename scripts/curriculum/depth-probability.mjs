@@ -1,0 +1,55 @@
+import { section, appendParts, insertBefore, functionTask, question } from './depth-helpers.mjs';
+
+export function deepenProbability(lessons) {
+  const gp=lessons.find(l=>l.id==='gaussian-process-regression');
+  gp.opening=[
+    'Botie has a thermometer at one end of the greenhouse. It reads warmer than usual. Should we expect the next bed to be warmer too? What about the far end, where a door is open?',
+    'One reading leaves many possible temperature patterns. We need a way to describe which patterns we consider plausible, then change that description when readings arrive. Nearby positions can share information without pretending they have exactly the same temperature.',
+    'Start with the positions and readings in the experiment. Add a thermometer, change how quickly temperatures may vary, and watch both the predicted temperature and the uncertainty change. After that, we will build the table that makes those changes possible.'
+  ];
+  insertBefore(gp,0,[
+    section('Start With Several Possible Temperature Patterns','Imagine drawing several temperature curves through the greenhouse before looking at a reading. Some rise towards the sunny wall; some stay close to the usual temperature; others fall near the door. We are describing uncertainty about a whole pattern, not choosing one curve and declaring it correct.\n\nA mean function gives the temperature around which those possibilities are centred. Here we subtract a usual temperature of twenty degrees and work with residuals. A residual of two means two degrees above that baseline. We add the baseline back when presenting a temperature.', 'Usual temperature: 20 °C\nObserved temperature: 22 °C\nResidual: 22 - 20 = 2 °C','Using residuals keeps the baseline distinct from what the readings teach us.'),
+    section('Decide How Far One Reading Should Matter','If temperatures normally change slowly along the greenhouse, a warm reading should favour warm curves at nearby beds too. If a heater or doorway can cause a sharp local change, that influence should fade more quickly. This assumption about how locations vary together is what the covariance function, or kernel, describes.\n\nThe length scale is measured in the same distance units as position. Increasing it connects more distant locations strongly. It does not move a thermometer or supply another observation. In the experiment, first compare a nearby query with a distant one while keeping the reading fixed.',null,'The assumption is chosen before conditioning on the readings. A confident prediction can still be wrong when the assumed pattern is unsuitable.'),
+    section('Turn Distances Into a Covariance Table','Use an RBF kernel with prior variance one. Compare every training position with every other training position. Each table entry says how strongly those two unknown residual temperatures vary together under this model.\n\nThe diagonal compares a position with itself and therefore contains its prior variance. Off-diagonal entries become smaller as positions move apart. The table contains relationships between function values; it does not contain the measured temperatures.', 'k(a,b) = exp(-(a-b)² / (2 × length_scale²))\nPositions = [0, 2] metres; length_scale = 1 metre\nk(0,0) = 1\nk(0,2) = exp(-2) ≈ 0.1353\nK ≈ [[1, 0.1353],\n     [0.1353, 1]]','For n readings, K has shape (n,n). A query-to-training row has n entries, in the same order as the observed residual vector.')
+  ]);
+  gp.parts.find(p=>p.title.includes('Separate the Mean')).paragraphs=[
+    'A mean and covariance together describe the joint Gaussian distribution of function values at the positions we have chosen. We can ask about another set of positions using the same kernel. This consistency is what lets us describe a Gaussian process rather than one fixed table.',
+    'A valid covariance matrix is symmetric: the relationship between positions a and b cannot change when we reverse their names. It must also be positive semidefinite, meaning no weighted combination of its function values has a negative variance. Using a known valid kernel gives us this property; assigning arbitrary similarities does not.'
+  ];
+  appendParts(gp,[
+    section('A Close Fit and a Reliable Interval Are Different Questions','Place two thermometers close together and give them conflicting readings. A model with almost no observation noise tries to follow both. Allowing more noise tells the model that a reading need not equal the underlying temperature exactly.\n\nThe shaded band in the experiment describes uncertainty about that underlying function, using the model’s Gaussian marginal at each position. A future noisy thermometer reading has additional variance. Neither band is a guarantee that every point on the whole curve lies inside it.', 'Approximate pointwise 95% latent interval:\nmean ± 1.96 × sqrt(latent variance)\n\nObservation variance = latent variance + new reading noise variance','Compare the interval at measured positions and between them. Then move beyond the measurements: the mean returns towards the baseline and uncertainty approaches the prior under this kernel.'),
+    section('Use an Unseen Location to Challenge the Assumption','Suppose the greenhouse contains a local heater. A long length scale may smooth away its effect and still produce a narrow band near existing thermometers. Add a held-out reading at the heater and compare it with the prediction made before revealing it.\n\nRepeat this at several held-out positions. Inspect errors and interval coverage together. Choosing the length scale from these results uses those positions for validation; reserve another set if you want a final assessment. A single covered observation cannot establish calibrated uncertainty.\n\nFor a larger dataset, use a stable factorisation such as Cholesky when the noisy covariance is positive definite. Keep a numerical stabiliser separate from the measurement-noise assumption. The small NumPy challenge uses solve so the matrix calculation remains visible.',null,'The aim is to explain where the prediction came from and what could make it unreliable, not simply to draw a smooth curve.')
+  ]);
+  gp.practice.push(functionTask('Can you predict directly from thermometer positions?',[
+    'Write gp_predict(x, y, query, length, noise). The first two one-dimensional arrays hold training positions and residual temperatures. query holds positions to predict. length is a positive RBF length scale; noise is a strictly positive observation variance. Use prior variance one and mean zero.',
+    'Return two arrays, each with the same shape as query: posterior means and latent variances. Form the RBF tables from positions, add noise only to the training diagonal, and use linear solves. Reject mismatched or empty training arrays, non-finite values, nonpositive length and nonpositive noise with ValueError. Round only when printing.'
+  ],'import numpy as np','def gp_predict(x, y, query, length, noise):',
+`    x, y, query = [np.asarray(v, dtype=float) for v in (x, y, query)]
+    if any(v.ndim != 1 for v in (x,y,query)) or len(x)==0 or x.shape!=y.shape:
+        raise ValueError('Use paired nonempty training vectors and a query vector')
+    if not all(np.all(np.isfinite(v)) for v in (x,y,query)) or not np.isfinite(length) or not np.isfinite(noise) or length<=0 or noise<=0:
+        raise ValueError('Use finite values, positive length and positive noise')
+    K = np.exp(-0.5*((x[:,None]-x[None,:])/length)**2)
+    cross = np.exp(-0.5*((query[:,None]-x[None,:])/length)**2)
+    A = K + noise*np.eye(len(x))
+    mean = cross @ np.linalg.solve(A,y)
+    variance = 1 - np.sum(cross * np.linalg.solve(A,cross.T).T,axis=1)
+    return mean, np.maximum(variance,0)`,
+`mean, variance = gp_predict(np.array([0.]), np.array([2.]), np.array([0.,1.]), 1., .25)
+print(np.round(mean,4).tolist())
+print(np.round(variance,4).tolist())`,
+'[1.6, 0.9704]\n[0.2, 0.7057]',[
+    'Subtract a column of positions from a row to obtain every pairwise distance. The training covariance and query covariance have different shapes.',
+    'For each query row, subtract its covariance-weighted solve from prior variance one. Adding new measurement noise would produce observation variance instead.'
+  ],[
+    ['Two observations and three query positions','x=np.array([0.,2.]); y=np.array([1.,-1.]); q=np.array([0.,1.,2.])\nm,v=gp_predict(x,y,q,1.,.1)\nK=np.exp(-.5*(x[:,None]-x[None,:])**2)+.1*np.eye(2)\nC=np.exp(-.5*(q[:,None]-x[None,:])**2)\nassert m.shape==q.shape and v.shape==q.shape\nnp.testing.assert_allclose(m,C@np.linalg.solve(K,y),rtol=1e-7)\nnp.testing.assert_allclose(v,1-np.sum(C*np.linalg.solve(K,C.T).T,axis=1),rtol=1e-7)'],
+    ['A distant query retains the prior','m,v=gp_predict(np.array([0.]),np.array([8.]),np.array([100.]),1.,.5)\nnp.testing.assert_allclose(m,[0.],atol=1e-10)\nnp.testing.assert_allclose(v,[1.])'],
+    ['Reject mismatched readings and invalid kernel settings','for x,y,length,noise in [([0.,1.],[2.],1.,.1),([0.],[2.],0.,.1),([0.],[2.],1.,-1.)]:\n    try: gp_predict(np.array(x),np.array(y),np.array([0.]),length,noise)\n    except ValueError: pass\n    else: raise AssertionError("Invalid input should raise ValueError")']
+  ]));
+  gp.checkpoints=[{after:gp.parts[2].title,title:'Questions on Positions and Covariance',questions:[
+    question('Two thermometers are two metres apart. The length scale is one metre. Prior variance is one.','If we increase only the length scale, what happens to their RBF covariance?',['It increases','It decreases','Their measured temperatures become identical'],0,'A greater length scale makes a fixed distance smaller relative to the scale, so the relationship strengthens. The readings themselves do not change.'),
+    question('K has shape (3,3). There are five unmeasured query positions.','What is the shape of the query-to-training covariance table?',['(5,3)','(3,5)','(5,5)'],0,'Each query gets one row containing its covariance with each of the three training positions.')
+  ]}];
+  gp.reading.experimentTitle='Place thermometers and inspect what remains uncertain';
+  gp.reading.experimentIntro='Compare the unobserved greenhouse with the prediction after one and then two readings. Change the length scale or noise variance while keeping the readings fixed. The graph shows the temperature mean and a pointwise uncertainty band; the construction later isolates the matrix calculation.';
+}

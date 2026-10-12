@@ -37,6 +37,9 @@ export interface Exercise {
   solution: string;
   output: string;
   check?: NumberCheck;
+  // Additional behaviour checks run against the learner's functions.
+  tests?: { name: string; code: string }[];
+  exports?: { variable: string; filename: string }[];
 }
 
 export const exercise = (
@@ -45,7 +48,7 @@ export const exercise = (
   starter: string,
   solution: string,
   output: string,
-  extras: { hints?: string[]; check?: NumberCheck; question?: string } = {},
+  extras: { hints?: string[]; check?: NumberCheck; question?: string; tests?: Exercise["tests"]; exports?: Exercise["exports"] } = {},
 ): Exercise => {
   const problem = { title, task, starter, solution, output, ...extras };
   const measured = browserOutput(problem, fixtures);

@@ -7,18 +7,8 @@
 // come back to them. Inside the section only one question is on screen, because
 // a page of questions invites skimming for the ones that look easy.
 //
-// A question with one answer marks itself the moment it is answered and then
-// moves on by itself. There is nothing to confirm when choosing is the whole
-// act, and a button there only asks the reader to say twice what they already
-// said once. A question where several options may hold is different: the reader
-// is still composing their answer while they click, so it waits to be
-// submitted.
-//
-// Moving on by itself has one hazard, which is carrying the reader away from a
-// reason they are halfway through reading. So the pause before the flip is
-// scaled to how long the reason takes to read, a bar shows it running down, and
-// the reader can move on early or go back afterwards. Pressing the question
-// again stops it.
+// Mark a single answer immediately, then let the reader decide when to leave
+// Botie's explanation. Multiple selections are marked after submission.
 //
 // A wrong answer also offers the parts of the lesson the question came from,
 // because the reason under the answer is a summary and the part is the
@@ -41,20 +31,6 @@ export interface RevisitLink {
   go: () => void;
 }
 
-// Roughly how long the reason takes to read, bounded so a one-line reason still
-// lands and a long one does not strand the reader waiting.
-//
-// The first attempt allowed 180ms a word over a 2s base, which put almost every
-// card at the twelve-second ceiling and felt like being held there. These
-// figures are brisk on purpose: a reader who wants longer has the question in
-// front of them and can come back to it, and one who has already understood
-// should not be made to wait. Measured, a fifty-word reason now waits nine
-// seconds rather than twelve.
-function pauseFor(because: string): number {
-  const words = because.trim().split(/\s+/).length;
-  return Math.min(Math.max(1500 + words * 140, 3500), 9000);
-}
-
 export function QuizDeck({
   questions,
   revisit = [],
@@ -69,26 +45,11 @@ export function QuizDeck({
     questions.map(() => ({ picked: [], answered: false })),
   );
   const reported = useRef(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const finished = card >= questions.length;
   const question = finished ? null : questions[card];
   const attempt = finished ? null : attempts[card];
   const several = question?.kind === "several";
-  const waiting = Boolean(attempt?.answered) && !several && !finished;
-
-  // The pending flip. It is tied to the card and to whether that card has been
-  // answered, so pressing the question again clears it by changing the second.
-  // Nothing is set here; the bar is a keyframe restarted by its key, which keeps
-  // this effect to the one thing an effect is for.
-  useEffect(() => {
-    if (!waiting || question === null) return;
-    timer.current = setTimeout(() => setCard((shown) => shown + 1), pauseFor(question.because));
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-      timer.current = null;
-    };
-  }, [waiting, card, question]);
 
   // Reported once, after the render that first reaches the end. Finishing
   // means answering every card, whatever the score, because the reasons are
@@ -239,23 +200,6 @@ export function QuizDeck({
               </p>
             )}
           </BotieSays>
-        </div>
-      )}
-
-      {waiting && (
-        <div className="mt-4">
-          <div className="h-0.5 w-full overflow-hidden rounded bg-raised" aria-hidden="true">
-            <div
-              key={card}
-              className="quiz-sweep h-full bg-accent-fill"
-              style={{ animationDuration: `${pauseFor(current.because)}ms` }}
-            />
-          </div>
-          <p className="mt-1 text-xs text-muted">
-            {card === questions.length - 1
-              ? "Showing how you did in a moment."
-              : "Moving to the next question in a moment."}
-          </p>
         </div>
       )}
 

@@ -706,6 +706,7 @@ Cosine distance: approximately 0.000189`}</Equation>
               ],
               1,
               "A distance over several features is a sum, and a sum hands the answer to whichever term is largest. The height column's share of the squared-gap arithmetic falls from 0.512 to about one millionth. On this crowd the three consulted come back the same three and the vote is still child, which is the quiet version of the failure, a model that has stopped reading one of its columns with nothing in its output to say so.",
+              {"description":"Use these values and conventions.","data":"Height gap: 3 cm\nWeight gap: 4 kg\nOne kilogram is 1000 grams. Heights remain in centimetres.\nEuclidean distance: square each coordinate gap, add the squares, then take the square root."},
             ),
             trueFalse(
               "Cosine needs no scaling, since it divides out the length of each row.",

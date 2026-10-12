@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { EXECUTION_LIMIT_MS, LOADING_LIMIT_MS, type PythonMessage, type PythonResult } from "./python";
+import type { Exercise } from "./exercises";
 
 interface PendingRun {
   timer: ReturnType<typeof setTimeout>;
@@ -40,7 +41,7 @@ export function usePython(active: boolean) {
     return () => stop();
   }, [active, stop]);
 
-  const run = useCallback((source: string, expected?: string): Promise<PythonResult> => {
+  const run = useCallback((source: string, expected?: string, tests?: Exercise["tests"], exports?: Exercise["exports"]): Promise<PythonResult> => {
     if (pending.current) return Promise.resolve(failure("A program is already running."));
     if (source.length > 100_000) return Promise.resolve(failure("Keep this example below 100,000 characters."));
     return new Promise((resolve) => {
@@ -67,7 +68,7 @@ export function usePython(active: boolean) {
           event.preventDefault();
           if (worker.current === currentWorker) stop("The Python worker could not start or stopped unexpectedly. Try Run again to reload it.");
         };
-        currentWorker.postMessage({ id, source, expected });
+        currentWorker.postMessage({ id, source, expected, tests, exports });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         worker.current?.terminate();

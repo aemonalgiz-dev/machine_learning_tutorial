@@ -69,12 +69,14 @@ export default function EmbeddingLayersPage() {
           ["2.46", "4.92", "1.64", "1.7138"],
           0,
           "Each cat lookup misses its target by [−0.8, −1.0] and the dog lookup by [0.8, −1.0], so the six squared differences add to 4.92 and half of that is 2.46. One lookup on its own contributes 1.64 to the sum, and 1.7138 is the loss after the step. The targets are chosen for the exercise so that an update can be made visible without a second network, since a lookup alone has nothing to compare itself with.",
+              {"description":"Use these values and conventions.","data":"Starting rows: cat = [0.2,0.0]; dog = [-0.2,0.0]\nTarget rows: cat = [1,1]; dog = [-1,1]\nSequence: cat, dog, cat\nLoss rule: half the sum of squared coordinate errors across all occurrences."},
         ),
         choice(
           "With the target for cat a vector of ones, half the sum of squared errors, and a learning rate of 0.1, where does the cat row move from [0.2, 0.0]?",
           ["[0.28, 0.1]", "[0.36, 0.2]", "[0.12, −0.2]", "[1.0, 1.0]"],
           1,
           "The derivative at each looked-up coordinate is its current value minus its target, and both occurrences of cat contribute to the same row, so the contribution of [−0.8, −1.0] is added to itself before the step is taken. [0.28, 0.1] is where one occurrence alone would have left it. The mat row receives nothing in that sequence, because it was never read.",
+              {"description":"Use these values and conventions.","data":"Sequence: cat, dog, cat\nStarting cat row: [0.2,0.0]\nTarget at each cat occurrence: [1,1]\nLoss: half the sum of squared errors over occurrences\nLearning rate: 0.1"},
         ),
         choice(
           "Why does the implementation accumulate explicitly rather than index and add?",

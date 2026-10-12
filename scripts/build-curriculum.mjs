@@ -20,12 +20,20 @@ import deployment from "./curriculum/deployment-path.mjs";
 import projects from "./curriculum/projects-path.mjs";
 import { readingVoice } from "./curriculum/reading-voice.mjs";
 import { readingExtensions } from "./curriculum/reading-extensions.mjs";
+import { deepenProbability } from "./curriculum/depth-probability.mjs";
+import { deepenTraining } from "./curriculum/depth-training.mjs";
+import { deepenProjects } from "./curriculum/depth-projects.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const paths = [...forecasting, ...reinforcement, ...probabilistic, ...optimisation, ...recommendations, ...anomalies, ...graphs, ...causal, ...deployment, ...projects];
 const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths];
 const lessons = [...numpy, ...data, ...evaluation, ...gaps].map(lesson => ({ ...lesson, reading: readingVoice[lesson.id],
   intuition: [...lesson.intuition, ...(readingExtensions[lesson.id] ? [readingExtensions[lesson.id]] : [])] }));
+// Existing quiz bookmarks keep working as the preceding explanation grows.
+for (const lesson of lessons) lesson.quizId=`questions-on-parts-1-to-${lesson.parts.length}`;
+deepenProbability(lessons);
+deepenTraining(lessons);
+deepenProjects(lessons);
 const dataOrder = ["record-quality", "missing-measurements", "categorical-encoding", "cyclical-features", "data-leakage", "class-imbalance"];
 const navigation = [...numpy, ...[...data].sort((a,b) => dataOrder.indexOf(a.id) - dataOrder.indexOf(b.id)), ...evaluation, ...gaps];
 const ids = new Set();
@@ -34,7 +42,9 @@ for (const lesson of lessons) {
   ids.add(lesson.id);
   if (!lesson.reading || Object.values(lesson.reading).some(value => !value?.trim())) throw Error(`${lesson.id}: describe the lesson's experiment and reading transitions.`);
   if (JSON.stringify(lesson).includes("\u2014")) throw Error(`${lesson.id}: remove the em dash.`);
-  if (lesson.history.blocks.length < 2 || !lesson.history.sources.length || lesson.parts.length < 4 || lesson.practice.length < 2 || lesson.quiz.length < 3 || lesson.intuition.length < 2 || lesson.build.cases.length < 2) throw Error(`${lesson.id}: incomplete lesson.`);
+  if (lesson.history.blocks.length < 2 || !lesson.history.sources.length || !lesson.parts.length || !lesson.practice.length || !lesson.quiz.length || !lesson.intuition.length || lesson.build.cases.length < 2) throw Error(`${lesson.id}: incomplete lesson.`);
+  for (const part of lesson.parts) if (!part.title?.trim() || !part.paragraphs.some(text=>text.trim())) throw Error(`${lesson.id}: an explanation needs a title and authored content.`);
+  for (const checkpoint of lesson.checkpoints ?? []) if (!lesson.parts.some(part=>part.title===checkpoint.after) || !checkpoint.questions.length) throw Error(`${lesson.id}: put each checkpoint after an existing explanation.`);
   for (const entry of lesson.history.sources) if (new URL(entry.url).protocol !== "https:") throw Error(`${lesson.id}: use a primary HTTPS source.`);
   for (const exercise of lesson.practice) if (!exercise.solution || !exercise.output || !exercise.hints.length) throw Error(`${lesson.id}: incomplete programming challenge.`);
   for (const part of lesson.parts) for (const example of part.examples ?? []) {

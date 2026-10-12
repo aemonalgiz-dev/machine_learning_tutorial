@@ -476,15 +476,16 @@ export default function UnigramLanguageModelPage() {
               "A spelling in two rare pieces can score below a spelling in three common ones, since what is compared is a product of the pieces’ own probabilities rather than a count of them. Fewer pieces is the tie-break rule when two spellings reach exactly the same score, which is a different thing from a guarantee.",
             ),
             choice(
-              "The starting table gives lowest 28 spellings. Where in that list does the cut a merged vocabulary of 22 rows produces sit?",
+              "Which spelling of lowest receives the greatest probability under this illustrative unigram table?",
               [
-                "Fourth, holding 3.10 per cent of the word",
-                "First, holding 46.81 per cent of the word",
-                "Second, holding 20.06 per cent of the word",
-                "Twelfth of sixteen",
+                "lo | west",
+                "low | est",
+                "l | ow | est",
+                "All three have the same probability because they spell the same word",
               ],
               0,
-              "It is not wrong, it is one of the 28 and a perfectly ordinary member of the list. What merging cannot do is see the other 27, so it cannot notice that three of them are more probable and that the likeliest, lo followed by west with its mark, is fifteen times as probable.",
+              "The product for lo followed by west is greatest. Two spellings of the same word can have different probabilities because they use different pieces. A merge procedure's chosen spelling does not by itself tell us which product is greatest.",
+              { description: "Multiply the probabilities of the pieces in each candidate. These invented probabilities refer to one fixed vocabulary; its other entries carry the remaining probability.", data: "lo: 0.20    west: 0.10\nlow: 0.05   est: 0.30\nl: 0.10     ow: 0.05\nCandidates: lo | west; low | est; l | ow | est" },
             ),
             several(
               "What does putting a probability on every piece buy?",

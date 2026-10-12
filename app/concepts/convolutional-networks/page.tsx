@@ -446,6 +446,7 @@ export default function ConvolutionalNetworksPage() {
               ],
               1,
               "With eight directions to choose from, one of them is always fairly close, so a closeness means something only beside that baseline. Two of the four, at 0.814 and 0.794, come closer than nine random draws in ten, and the other two do not. Every filter was compared with all eight turned grids and scored against the nearest, which is exactly what gives a random grid its head start.",
+              {"description":"Use these values and conventions.","data":"Trained filters: best centred cosine to eight turned Sobel patterns = [0.675,0.543,0.814,0.794]\nRandom nine-number filters, tested against the same eight patterns: median best cosine = 0.466; 90th percentile = 0.724."},
             ),
             trueFalse(
               "Of the two edge-like filters at seed 0, one was learned and the other was already edge-like when its weights were drawn.",

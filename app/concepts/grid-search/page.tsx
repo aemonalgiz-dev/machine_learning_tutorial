@@ -935,22 +935,11 @@ export default function GridSearchPage() {
             <>
               <SubSection title="23. Candidate ranges, validation folds and the final refit" id="23-what-a-complete-implementation-specifies">
                 <p>
-                  A search states its deal and its rules in full. Which model
-                  and which of its dials are varied, and that the names are
-                  checked against the model before anything is fitted; the
-                  values in each range and that the candidates are their
-                  Cartesian product; that each candidate is built through the
-                  model&rsquo;s own constructor; the share held out before the
-                  search and the seed that cut it; the fold count, the seed
-                  that dealt the folds, and that one arrangement serves every
-                  candidate; the score read on a fold and how folds are
-                  combined, averaged for a regressor and pooled for a
-                  classifier; the comparison and the tie rule; that every
-                  candidate&rsquo;s score is kept; and which of the winner,
-                  the spread, the honest score and the nested score it
-                  reports, with the winner&rsquo;s own score labelled as a
-                  selection score.
+                  To reproduce a search, another person needs to know which
+                  candidates were compared and what information each was allowed
+                  to use. Record those choices before looking at the winning score.
                 </p>
+                <ul className="list-disc space-y-3 pl-5"><li>Record the model and parameter ranges. Check parameter names, then construct a fresh model for each combination.</li><li>Record the held-out split and validation folds, including their seeds. Every candidate uses the same folds so the comparison is matched.</li><li>State the score and how fold results are combined. This implementation averages regression scores and pools classification predictions.</li><li>State how ties are resolved and retain every candidate&apos;s score. Label the winning validation result as a selection score, then report the separate held-out result.</li></ul>
                 <KeepInMind>
                   On this page the deal is a quarter held out under one seed,
                   three folds under another, the neighbour count from one to

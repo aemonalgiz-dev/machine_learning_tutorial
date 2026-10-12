@@ -1135,6 +1135,7 @@ export default function WordPiecePage() {
               ],
               [0, 1, 2],
               "The total gain is the per-occurrence figure multiplied by how many occurrences there are, and the rule does not do the multiplication, so neither rule takes it. The score takes i followed by d, gaining 9.81, which is a deliberate lean away from frequency and towards association rather than an approximation somebody failed to finish.",
+              { description: "Compare the measured candidates from the four-word corpus. A score rank of one is best; equal counts are ordered alphabetically.", data: "Pair    Total likelihood gain    Score rank    Count rank\ns + t   19.55                    4             joint 1\ni + d    9.81                    1             below 1\ne + s   13.83                    below 1       joint 1" },
             ),
             trueFalse(
               "With every symbol of the corpus in the vocabulary in both forms, the greedy left-to-right cut succeeds exactly when some division of the word into vocabulary pieces exists.",

@@ -27,6 +27,7 @@ export interface ExpandedLesson {
   intuition: { title: string; explanation: string; rows: [string, string[]][]; scene?: Scene }[];
   parts: {
     title: string;
+    id?: string;
     paragraphs: string[];
     calculation?: string;
     interpretation: string[];
@@ -39,6 +40,8 @@ export interface ExpandedLesson {
     }[];
   }[];
   quiz: QuizQuestion[];
+  quizId?: string;
+  checkpoints?: { after: string; title: string; questions: QuizQuestion[] }[];
   practice: Exercise[];
   build: Omit<Build, "id">;
 }

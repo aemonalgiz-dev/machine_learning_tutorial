@@ -113,7 +113,7 @@ existing fragment IDs when changing section titles.
   answer is correct, explain why, and offer relevant lesson sections after a
   mistake. Keep the tone helpful and preserve the question's full explanation.
 - A practice section comes last, titled `Practice. ...` in the register of
-  the part titles, and holds two to four problems worked in Python with
+  the part titles, and holds the problems needed to apply and investigate the method, worked in Python with
   NumPy or oop_ml. In mathematical and model lessons, this is where the library's
   classes and methods belong. In Python and NumPy lessons, teach the relevant
   data structures and syntax before practice: explain why the example needs
@@ -143,6 +143,14 @@ existing fragment IDs when changing section titles.
   Report test results as feedback on the work. Do not add rewards, achievement
   language or locked steps. Viewing a solution does not mark tests as passed.
   Run reference solutions in browser Python before publishing.
+  When a challenge asks for a reusable procedure, declare the function's inputs,
+  outputs and failure behaviour, then test it on additional inputs. Do not use
+  printed example results alone to establish that a function generalises.
+- Do not target a fixed number of pages, intuition stages or challenges. Keep
+  the reading controls consistent while giving each idea the space it needs.
+  A topic is ready when the learner can explain its components, carry out a
+  complete procedure and investigate a case where its assumptions fail.
+  Quiz explanations remain visible until the reader chooses to continue.
 - Botie's journey introduces the historical problem, lets the reader try each
   component, then opens a construction challenge. Embed the workshop after the
   explanation it depends on and before Python practice. State the objective before the controls, calculate

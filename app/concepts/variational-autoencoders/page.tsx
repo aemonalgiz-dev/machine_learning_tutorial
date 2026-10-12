@@ -7,6 +7,7 @@ import { Equation } from "@/components/concept/Equation";
 import { SubSection, WorkedExample } from "@/components/concept/Treatments";
 import { ModernLearningExample } from "@/components/widgets/ModernLearningExample";
 import { lessonIntuitions } from "@/lib/intuition";
+import { TinyVaeExperiment } from "@/components/widgets/TinyVaeExperiment";
 
 export const metadata: Metadata = {
   title: "Variational Autoencoders · oop_ml",
@@ -149,7 +150,42 @@ export default function Page() {
         ],
         },
         {
-          title: "Practice. Draw From One Posterior and Score It With the Library",
+          title: "Part 4. Connect an Encoder to a Decoder",
+          content: <>
+            <p>The distribution operation gives us a code, but it does not yet teach a model to represent observations. Let&apos;s connect the missing pieces using four measurements and one latent coordinate. Keeping the model linear makes every part small enough to inspect.</p>
+            <Equation>{"Training observations x = [-2, -1, 1, 2]\nEncoder mean μ(x) = a × x + b\nEncoder variance v = exp(c)\nCode z = μ(x) + sqrt(v) × ε; ε ~ Normal(0,1)\nDecoder mean = w × z + d\nObservation model: x | z ~ Normal(w × z + d, 1)\nPrior: z ~ Normal(0,1)"}</Equation>
+            <p>There are five learned numbers. The encoder slope and bias decide where each observation is represented. Its log variance decides how widely codes vary around that location. The decoder slope and bias turn a code back into a predicted observation. The observation variance stays fixed at one in this example.</p>
+            <p>The encoder variance is shared across inputs here. Larger VAEs usually predict a variance for each input as well as its mean. We are using a small restricted model so we can complete training and generation without hiding a second network inside a library call.</p>
+          </>
+        },
+        {
+          title: "Part 5. Give All Five Parameters a Training Signal",
+          content: <>
+            <p>The reconstruction term asks whether codes can account for the observations. For this linear decoder and Gaussian code, we can calculate the expected squared reconstruction error exactly. The variance contributes too: even when the decoder at the mean is correct, sampled codes vary around it.</p>
+            <Equation>{"μ = a × x + b\nv = exp(c)\ne = x - (w × μ + d)\n\nExpected reconstruction term = ½(e² + w²v)\nKL term = ½(μ² + v - 1 - c)\nLoss = average of both terms over the observations"}</Equation>
+            <p>This is the negative evidence lower bound with a constant omitted. Ordinary nonlinear VAEs estimate the reconstruction expectation using sampled codes. Here the exact expectation lets us investigate the same two competing terms without sampling noise in the training curve.</p>
+            <p>Each parameter needs the derivative of this complete objective. First calculate the signal arriving at the encoder mean. Then apply the chain rule to the slope and bias that produced it. Average per-observation derivatives before updating.</p>
+            <Equation>{"Signal at μ: r = -w × e + μ\n\ndL/da = average(r × x)\ndL/db = average(r)\ndL/dw = average(-e × μ + w × v)\ndL/dd = average(-e)\ndL/dc = ½(w²v + v - 1)\n\nparameter_new = parameter - learning_rate × derivative"}</Equation>
+            <p>The final derivative uses the fact that the derivative of exp(c) is exp(c). A numerical gradient check can perturb each of the five parameters independently and compare the resulting loss change with these expressions.</p>
+            <TinyVaeExperiment/>
+          </>
+        },
+        {
+          title: "Part 6. Generate Without Reusing a Training Observation",
+          content: <>
+            <p>Training uses an observation to obtain an encoder distribution. Generation takes another route. Draw a code from the standard-normal prior and pass it directly to the trained decoder. For this probabilistic observation model, add an independent standard-normal observation-noise draw to obtain a sampled measurement.</p>
+            <Equation>{"z ~ Normal(0,1)\nη ~ Normal(0,1), independently\ngenerated measurement = w × z + d + η"}</Equation>
+            <p>A decoder mean is useful to inspect, but it is different from a sampled observation. Likewise, a reconstruction of an encoded training measurement is different from a new draw through the prior. Compare all three before judging what the model learned.</p>
+            <p>Our four values cannot establish the shape of a real population. The model can only describe a Gaussian marginal with this linear decoder, and its fixed observation variance limits how tightly it can reconstruct. Try data with two separated groups: a single broad distribution can place generated values in the gap. That failure motivates more expressive decoders rather than declaring a lower training loss sufficient.</p>
+          </>
+        },
+        {
+          title: "Questions on Parts 4 to 6",
+          quiz: [choice("Which route generates a new observation in the complete toy model?",["Draw a prior code, decode it, and add observation noise","Encode one training observation and report its reconstruction","Print the KL term"],0,"Generation starts from the prior. The encoder is needed to infer codes during training, but there is no observed input on this generation route."),trueFalse("A zero reconstruction error at the encoder mean makes the expected reconstruction term zero even when w and the code variance are nonzero.",false,"Sampled codes still vary around the encoder mean. Their decoder outputs vary too, which is why the expected squared error contains a variance contribution.")]
+        },
+        {
+          title: "Practice. From Posterior Calculations to a Trained Generator",
+          id: "practice-draw-from-one-posterior-and-score-it-with-the-library",
           practice: [
             exercise(
               "Reproduce the illustrative coordinate",
@@ -243,6 +279,58 @@ except MLLibError as refusal:
               `InvalidValuesError
 deviations must be strictly positive`,
               { hints: ["The refusal comes from the constructor, before any sample is drawn, because a posterior that cannot be scored should not exist at all."] },
+            ),
+            exercise(
+              "Can you train the complete one-coordinate model?",
+              ["Write loss_and_grad(p, x). The parameter vector p contains a, b, w, d and c in that order; x is a nonempty one-dimensional array of observations. Return the average objective and its five derivatives, using the exact expectation from Part 5. Do not change p or x in place.", "The supplied loop uses your derivatives to train all five parameters. Print the initial and final objectives to four places, then the decoder means for codes minus one, zero and one. Additional tests compare your derivatives with numerical differences and use another dataset."],
+              `import numpy as np
+
+def loss_and_grad(p, x):
+    # Return average loss and a gradient array of shape (5,).
+    raise NotImplementedError
+
+x = np.array([-2., -1., 1., 2.])
+p = np.array([.2, 0., .3, 0., 0.])
+initial, _ = loss_and_grad(p, x)
+for _ in range(1200):
+    _, gradient = loss_and_grad(p, x)
+    p = p - .03 * gradient
+final, _ = loss_and_grad(p, x)
+print(f'{initial:.4f}')
+print(f'{final:.4f}')
+print(np.round(p[2] * np.array([-1., 0., 1.]) + p[3], 4).tolist())`,
+              `import numpy as np
+
+def loss_and_grad(p, x):
+    a, b, w, d, c = p
+    mu = a*x + b
+    variance = np.exp(c)
+    error = x - w*mu - d
+    loss = np.mean(.5*(error**2 + w*w*variance)
+                   + .5*(mu**2 + variance - 1 - c))
+    signal = -w*error + mu
+    gradient = np.array([
+        np.mean(signal*x), np.mean(signal),
+        np.mean(-error*mu + w*variance), np.mean(-error),
+        .5*(w*w*variance + variance - 1),
+    ])
+    return float(loss), gradient
+
+x = np.array([-2., -1., 1., 2.])
+p = np.array([.2, 0., .3, 0., 0.])
+initial, _ = loss_and_grad(p, x)
+for _ in range(1200):
+    _, gradient = loss_and_grad(p, x)
+    p = p - .03 * gradient
+final, _ = loss_and_grad(p, x)
+print(f'{initial:.4f}')
+print(f'{final:.4f}')
+print(np.round(p[2] * np.array([-1., 0., 1.]) + p[3], 4).tolist())`,
+              "1.1995\n0.9581\n[-1.2241, 0.0, 1.2241]",
+              { hints: ["Calculate mu, variance and the residual before either loss term. The residual uses the decoder at the encoder mean; the variance contribution is a separate term.", "Each slope derivative needs its input as a multiplier. The log-variance parameter is shared, so its derivative is one scalar, not one entry per observation."], tests: [
+                {name:"Five derivatives agree with numerical loss changes",code:"x=np.array([-3.,.5,2.]); p=np.array([.4,.2,-.7,.3,-.4])\nloss,g=loss_and_grad(p,x)\nassert np.shape(g)==(5,) and np.isfinite(g).all()\na,b,w,d,c=p; mu=a*x+b; v=np.exp(c)\nexpected=np.mean(.5*((x-w*mu-d)**2+w*w*v)+.5*(mu*mu+v-1-c))\nnp.testing.assert_allclose(loss,expected)\nfor i in range(5):\n    delta=np.zeros(5); delta[i]=1e-5\n    numerical=(loss_and_grad(p+delta,x)[0]-loss_and_grad(p-delta,x)[0])/(2e-5)\n    np.testing.assert_allclose(g[i],numerical,rtol=1e-5,atol=1e-7)"},
+                {name:"Training improves another dataset without changing the inputs in place",code:"x=np.array([-1.,0.,2.,3.]); p=np.array([.2,0.,.3,0.,0.]); old=p.copy(); data=x.copy()\ninitial,_=loss_and_grad(p,x)\nnp.testing.assert_array_equal(p,old); np.testing.assert_array_equal(x,data)\nfor _ in range(600):\n    _,g=loss_and_grad(p,x); p=p-.02*g\nassert loss_and_grad(p,x)[0]<initial-.05, 'The full objective should fall on this dataset'"}
+              ] },
             ),
           ],
         },

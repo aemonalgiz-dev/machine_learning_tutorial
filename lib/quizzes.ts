@@ -43,7 +43,8 @@ export const choice = (
   options: string[],
   answer: number,
   because: string,
-): QuizQuestion => ({ kind: "choice", prompt, options, answer, because });
+  given?: QuizGiven,
+): QuizQuestion => ({ kind: "choice", prompt, options, answer, because, ...(given ? { given } : {}) });
 
 /** Every option is a separate decision. The answers are indices into options. */
 export const several = (
@@ -51,7 +52,8 @@ export const several = (
   options: string[],
   answers: number[],
   because: string,
-): QuizQuestion => ({ kind: "several", prompt, options, answers: [...answers].sort(), because });
+  given?: QuizGiven,
+): QuizQuestion => ({ kind: "several", prompt, options, answers: [...answers].sort(), because, ...(given ? { given } : {}) });
 
 export function isCorrect(question: QuizQuestion, given: number[]): boolean {
   switch (question.kind) {

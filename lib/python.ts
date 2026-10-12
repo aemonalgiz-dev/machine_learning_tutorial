@@ -4,6 +4,7 @@ export interface PythonResult {
   error: string | null;
   elapsed: number;
   tests: PythonTestResult[];
+  artifacts?: { filename: string; content: string }[];
 }
 
 export interface PythonTestResult {

@@ -1094,22 +1094,24 @@ export default function DecisionTreesPage() {
                 non-finite cases by name rather than growing a tree on nothing.
               </p>
               <p>
-                Each row is a place where two implementations that agree on
-                the tidy description can grow different trees, or grow one
-                silently on nothing, so the trees here decide every row once.
-                An empty column, a non-finite value and a target holding one
-                class are each refused by name before any growth, since a tree
-                has nothing to separate in any of them. A constant feature
-                offers no candidate thresholds, so the search never asks about
-                it. On the clean crowd with every height held at one value the
-                tree grows on weight alone, rooting at weight below 47 and
-                reaching four leaves at a training accuracy of 0.909, and
-                reports that height contributed nothing. A leaf minimum larger
-                than the crowd leaves the root as the only leaf, predicting the
-                majority, which on the eleven people is adult at an accuracy of
-                0.545. And a person standing exactly on a threshold goes right,
-                in growth and in prediction alike, because the question asks
-                for strictly less.
+                Before growing a tree, this SDK refuses an empty column,
+                non-finite measurements and a target containing only one class.
+                The last choice is an SDK convention: a general tree implementation
+                can instead return a single leaf for a single-class target.
+              </p>
+              <p>
+                A constant feature is different. It is valid data, but there is
+                no threshold that separates its values. Keep every height the
+                same and the tree must use weight if it is to separate anyone.
+                On this dataset its root asks whether weight is below 47, and
+                its four leaves give a training accuracy of 0.909.
+              </p>
+              <p>
+                A minimum leaf size larger than the dataset prevents every split.
+                The root becomes one leaf predicting the majority class, adult
+                here, with a training accuracy of 0.545. Finally, equality follows
+                the same rule during training and prediction: a value exactly
+                on the threshold goes right because the left test is strictly less.
               </p>
             </SubSection>
           ),

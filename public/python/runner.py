@@ -96,7 +96,22 @@ class LimitedOutput(io.StringIO):
         return super().write(text)
 
 
-def run_course_code(source: str, expected_output: str | None = None) -> str:
+def behavior_tests(namespace: dict, specifications: str, failure: str | None) -> list[dict]:
+    """Exercise public functions on further inputs without grading their spelling."""
+    results = []
+    for specification in json.loads(specifications):
+        result = {"name": specification["name"], "status": "skipped" if failure else "passed", "detail": ""}
+        if not failure:
+            try:
+                with contextlib.redirect_stdout(LimitedOutput()), contextlib.redirect_stderr(LimitedOutput()):
+                    exec(compile(specification["code"], "challenge_test.py", "exec"), dict(namespace))
+            except BaseException as error:
+                result.update(status="failed", detail=f"{type(error).__name__}: {error}")
+        results.append(result)
+    return results
+
+
+def run_course_code(source: str, expected_output: str | None = None, specifications: str = "[]", exports: str = "[]") -> str:
     output = LimitedOutput()
     errors = LimitedOutput()
     started = time.perf_counter()
@@ -121,8 +136,14 @@ def run_course_code(source: str, expected_output: str | None = None) -> str:
             "stderr": errors.getvalue(),
             "error": failure,
             "elapsed": round((time.perf_counter() - started) * 1000),
-            "tests": output_tests(output.getvalue(), expected_output, failure)
+            "tests": output_tests(output.getvalue(), expected_output, failure) + behavior_tests(namespace, specifications, failure)
             if expected_output is not None
             else [],
+            "artifacts": [
+                {"filename": item["filename"], "content": namespace[item["variable"]]}
+                for item in json.loads(exports)
+                if not failure and isinstance(namespace.get(item["variable"]), str)
+                and len(namespace[item["variable"]]) <= 100_000
+            ],
         }
     )

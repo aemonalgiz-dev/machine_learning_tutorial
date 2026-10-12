@@ -361,6 +361,7 @@ export default function BytePairEncodingPage() {
               ["Two", "Five", "Seven", "None, since the corpus does not contain the sentence"],
               0,
               "Only the and the abbreviation Dr. with its full stop are there. The other five arrive as one stand-in row, five times over, with nothing to tell them apart. A larger table would only move the boundary, since the words past any size are mostly words the corpus saw once, and no size of word table contains the names.",
+              {"description":"Use these values and conventions.","data":"Text: Dr. Alvarez didn't expect the low-cost re-analysis.\nOf these whole words, the training vocabulary contains Dr. and the. It contains none of the other whole words. Punctuation remains attached."},
             ),
             trueFalse(
               "Every character the sentence uses turns up somewhere in the corpus, so the character vocabulary can spell all of it.",
@@ -377,6 +378,7 @@ export default function BytePairEncodingPage() {
               ],
               0,
               "They are the two ends of one trade. The word table reads the sentence in 7 lookups and cannot spell 5 of them, the character table takes 45 and cannot spell 1. Length is not cosmetic, since whatever reads the pieces spends work per piece and has to carry information six times as far.",
+              {"description":"Use these values and conventions.","data":"Text: Dr. Alvarez didn't expect the low-cost re-analysis.\nThe word scheme emits one ID per space-separated word, including an unknown ID when needed.\nThe character scheme emits one ID per non-space character. Its end marker attaches to the last character and adds no extra piece."},
             ),
             choice(
               "Why is the end-of-word marker attached to the last character rather than given a symbol of its own?",

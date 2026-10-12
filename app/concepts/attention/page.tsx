@@ -98,6 +98,7 @@ export default function AttentionPage() {
           ],
           1,
           "Softmax turns the row of scores into positive numbers that total one, so a comparison of zero still receives a positive share. There is no rule saying the largest share must take everything, and the model is free to combine information from several tokens rather than selecting one.",
+          { description: "Use one attention head with four coordinates and identity projections. The first token is the query; all three positions are available.", data: "Token order: red, blue, red\nred = [1, 0, 0, 0]\nblue = [0, 1, 0, 0]\nHead width = 4\nScaled scores = (query @ keys.T) / sqrt(4)\nShares = softmax(scaled scores)" },
         ),
         choice(
           "Why are the dot products divided by the square root of the head width?",

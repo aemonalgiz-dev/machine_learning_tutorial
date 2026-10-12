@@ -26,7 +26,7 @@ for (const lesson of await collectExercises()) {
   if (process.argv.includes("--expanded") && !lesson.expanded) continue;
   for (const exercise of lesson.exercises) {
     const expected = record ? exercise.output : browserOutput(exercise, fixtures);
-    const result = JSON.parse(run(exercise.solution, expected));
+    const result = JSON.parse(run(exercise.solution, expected, JSON.stringify(exercise.tests ?? []), JSON.stringify(exercise.exports ?? [])));
     const comparison = { passed: result.tests.every((test) => test.status === "passed") };
     if (record && !result.error && result.stdout.trimEnd() !== exercise.output.trimEnd()) {
       outputs[exercise.title] = { signature: exerciseSignature(exercise), output: result.stdout.trimEnd() };

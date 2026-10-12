@@ -10,6 +10,7 @@ import styles from "./BuildWorkshop.module.css";
 import { WorkshopValue } from "./WorkshopValue";
 import { MatrixVectorCalculation } from "./MatrixVectorCalculation";
 import { WorkshopPiece } from "./WorkshopPiece";
+import { constructionHints, resultFeedback } from "@/lib/builds/coaching";
 
 const button="min-h-11 rounded-lg border border-line bg-raised px-3 py-2 text-sm font-semibold hover:border-accent-fill disabled:opacity-40";
 const primary="min-h-11 rounded-lg bg-accent-fill px-4 py-2 text-sm font-semibold text-accent-ink disabled:opacity-40";
@@ -34,6 +35,7 @@ export function BuildWorkshop({ build, guide=false }: {build:Build;guide?:boolea
   const [run,setRun]=useState<Run|null>(null);
   const [results,setResults]=useState<Record<number,boolean>>({});
   const [notice,setNotice]=useState("");
+  const [hintsShown,setHintsShown]=useState(0);
   const [example,setExample]=useState(false);
   const [animate,setAnimate]=useState(true);
   const [zoom,setZoom]=useState(1);
@@ -167,7 +169,7 @@ export function BuildWorkshop({ build, guide=false }: {build:Build;guide?:boolea
     if(!run||run.done)return;
     const current=run.traces[run.index];
     if(run.step+1<current.steps.length){setRun({...run,step:run.step+1});return;}
-    if(current.error){setNotice(current.error.message);setSelected(current.error.id);setRun({...run,playing:false,done:true});return;}
+    if(current.error){setResults(r=>({...r,[run.cases[run.index]]:false}));setCaseIndex(run.cases[run.index]);setNotice(current.error.message);setSelected(current.error.id);setRun({...run,playing:false,done:true});return;}
     const index=run.cases[run.index];setCaseIndex(index);setResults(r=>({...r,[index]:same(current.output,build.cases[index].expected)}));
     if(run.index+1<run.traces.length)setRun({...run,index:run.index+1,step:-1});
     else setRun({...run,done:true,playing:false});
@@ -196,7 +198,11 @@ export function BuildWorkshop({ build, guide=false }: {build:Build;guide?:boolea
     if(!connected(multiply.id,"output",0))return "Where should the answer go? Connect Multiply's output to the Result input. You can move a piece by dragging its name if you need more room.";
     return "Run this example and watch the values move. Step through lets you follow one operation at a time. Select a piece's name to inspect its inputs, then test all examples to check that the rule still works when the reading changes.";
   }
-  const coach=trace?.error?.message||(complete?"Your construction works for every example. Now look at the path the values took and explain why each piece was needed.":guide?tutorialTip():notice||(socket?"Which operation needs this value next? Choose its input socket.":"The floor is yours. Start by deciding which information the answer depends on, then choose the operations needed to turn it into that answer."));
+  const hints=constructionHints(build);
+  const failedRunIndex=run?.done?run.traces.findIndex((candidate,i)=>i<=run.index&&!candidate.error&&!same(candidate.output,build.cases[run.cases[i]].expected)):-1;
+  const feedback=run?.done&&failedRunIndex!==undefined&&failedRunIndex>=0?resultFeedback(build,graph,run.traces[failedRunIndex],run.cases[failedRunIndex]):undefined;
+  const mismatch=feedback&&run&&failedRunIndex!==undefined?`Example: ${build.cases[run.cases[failedRunIndex]].name}. ${feedback}`:undefined;
+  const coach=trace?.error?.message||(complete?"Your construction works for every example. Now look at the path the values took and explain why each piece was needed.":mismatch|| (guide?tutorialTip():notice||(socket?"Which operation needs this value next? Choose its input socket.":"The floor is yours. Start by deciding which information the answer depends on, then choose the operations needed to turn it into that answer.")));
 
   return <div data-testid="construction-workshop" className={styles.workshop} onKeyDown={e=>{
     if(e.key.startsWith("Arrow"))e.stopPropagation();
@@ -205,6 +211,10 @@ export function BuildWorkshop({ build, guide=false }: {build:Build;guide?:boolea
     if(e.key==="Escape"){e.preventDefault();e.stopPropagation();if(socket)cancelWire();else if(placing)setPlacing(null);else setExpanded(false);moving.current=null;setDragged(null);}
   }}>
     <div className="mb-5 grid gap-5 lg:grid-cols-2"><div><h3 className="text-xl font-semibold">Your construction challenge</h3><p className="mt-3 text-sm leading-7 text-muted" data-testid="construction-context">{build.problem}</p><p className="mt-3 text-sm leading-7 font-medium">{build.challenge}</p><p className="mt-3 text-xs leading-6 text-muted">Choose and place the tools yourself. There is more than one way to build a working machine.</p></div><BotieSays mood={busy?"thinking":complete?"happy":trace?.error||failed?"curious":"ready"}>{coach}</BotieSays></div>
+    {!guide&&<div className="mb-5 space-y-3">
+      {hintsShown>0&&<BotieSays mood="thinking"><ol aria-label="Workshop hints from Botie" className="list-decimal space-y-3 pl-5">{hints.slice(0,hintsShown).map(hint=><li key={hint}>{hint}</li>)}</ol></BotieSays>}
+      {hintsShown<hints.length&&<button className={button} onClick={()=>setHintsShown(n=>n+1)}>{hintsShown?"Ask Botie for another hint":"Ask Botie for a hint"}</button>}
+    </div>}
     <div className={`${styles.editor} ${expanded?styles.expanded:""}`}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-surface p-3"><div className="flex flex-wrap gap-2">
         <button className={primary} disabled={busy||invalid} onClick={()=>start(false,true)}>Run this example</button>

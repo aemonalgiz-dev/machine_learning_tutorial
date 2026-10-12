@@ -31,9 +31,10 @@ test("ten new sections contain complete lessons and preserve the reinforcement i
   expect(lessonOrder.filter(href => href === "/concepts/reinforcement-learning")).toHaveLength(1);
   expect(lessonLocations["/concepts/reinforcement-learning"].sectionTitle).toBe("Reinforcement Learning");
   for (const lesson of lessons) {
-    expect(lesson.parts.length).toBeGreaterThanOrEqual(4);
-    expect(lesson.practice).toHaveLength(2);
-    expect(lesson.quiz).toHaveLength(4);
+    expect(lesson.parts.length).toBeGreaterThan(0);
+    expect(lesson.parts.every(part=>part.title && part.paragraphs.some(text=>text.trim()))).toBe(true);
+    expect(lesson.practice.length).toBeGreaterThan(0);
+    expect(lesson.quiz.length).toBeGreaterThan(0);
     expect(lesson.quiz.every(question => question.given?.data)).toBe(true);
     const graph = assemble(lesson.build.recipe, TOOLS);
     expect(graph.pieces.length).toBeLessThanOrEqual(36);

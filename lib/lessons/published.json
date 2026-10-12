@@ -468,7 +468,8 @@
       "practiceTitle": "Practice. Convert a Fresh Temperature Report",
       "outputLabel": "Fahrenheit readings, in greenhouse order",
       "exampleNote": "The greenhouse temperatures are invented; their positions identify the same greenhouses throughout."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-axes",
@@ -919,7 +920,8 @@
       "practiceTitle": "Practice. Report Averages by Day and Greenhouse",
       "outputLabel": "Average temperature for each greenhouse",
       "exampleNote": "Rows are days and columns are greenhouses in this illustrative report."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-creation",
@@ -1320,7 +1322,8 @@
       "practiceTitle": "Practice. Prepare Targets and Candidate Settings",
       "outputLabel": "Differences from the prepared targets",
       "exampleNote": "These small check sheets stand in for a larger greenhouse report."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-indexing",
@@ -1720,7 +1723,8 @@
       "practiceTitle": "Practice. Retrieve Readings and Count Repeated Alerts",
       "outputLabel": "Selected readings, arranged by greenhouse",
       "exampleNote": "The row numbers refer to the invented temperature table shown here."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-reshaping",
@@ -2116,7 +2120,8 @@
       "practiceTitle": "Practice. Restore the Logger's Arrangement",
       "outputLabel": "Recovered greenhouse histories",
       "exampleNote": "The logger entries are illustrative and arrive in complete-day order."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-broadcasting",
@@ -2528,7 +2533,8 @@
       "practiceTitle": "Practice. Compare Readings With the Right References",
       "outputLabel": "Temperature differences from each column's target",
       "exampleNote": "The example targets and readings share the same greenhouse order."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-masks",
@@ -2898,7 +2904,8 @@
       "practiceTitle": "Practice. Select and Summarise Alert Readings",
       "outputLabel": "Readings that meet the alert rule",
       "exampleNote": "The invented readings let us check what happens exactly at the limit."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-reductions",
@@ -3268,7 +3275,8 @@
       "practiceTitle": "Practice. Keep Names Beside Their Measurements",
       "outputLabel": "Greenhouses ordered from coolest to warmest",
       "exampleNote": "The names and temperatures describe matching positions in a small example report."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-vectorisation",
@@ -3659,7 +3667,8 @@
       "practiceTitle": "Practice. Score Every Reading in a New Report",
       "outputLabel": "Mean squared deviation from the target",
       "exampleNote": "These temperature errors illustrate a calculation over a whole array."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "numpy-linear-algebra",
@@ -4057,7 +4066,8 @@
       "practiceTitle": "Practice. Apply and Check Matrix Calculations",
       "outputLabel": "Scores in observation order",
       "exampleNote": "The feature rows and scoring coefficients are supplied teaching values, not fitted parameters."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-numerical-checks",
@@ -4438,7 +4448,8 @@
       "practiceTitle": "Practice. Check Precision and Invalid Readings",
       "outputLabel": "Whether every reading meets the absolute tolerance",
       "exampleNote": "Original and recovered temperatures are paired illustrative values."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "reproducible-sampling",
@@ -4880,7 +4891,8 @@
       "practiceTitle": "Practice. Replay and Compare Recorded Samples",
       "outputLabel": "Mean of the selected readings",
       "exampleNote": "The draw indices are supplied so the sampling choices remain visible."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-functions",
@@ -5282,7 +5294,8 @@
       "practiceTitle": "Practice. Reuse a Conversion and a Fitted Reference",
       "outputLabel": "Stored reference and centred report",
       "exampleNote": "The training and incoming reports are separate invented samples."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "numpy-saving-data",
@@ -5685,7 +5698,8 @@
       "practiceTitle": "Practice. Save and Restore Named Arrays",
       "outputLabel": "Restored scores and their greenhouse names",
       "exampleNote": "This illustration begins after loading; the Python examples perform the save and load."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "missing-measurements",
@@ -5991,7 +6005,8 @@
       "practiceTitle": "Practice. Fill Missing Readings Without Borrowing Test Data",
       "outputLabel": "Report with missing entries filled",
       "exampleNote": "Missing entries and measured temperatures are kept distinct in this invented report."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "categorical-encoding",
@@ -6396,7 +6411,8 @@
       "practiceTitle": "Practice. Encode Known and Unfamiliar Materials",
       "outputLabel": "One indicator row per roof",
       "exampleNote": "The material names are illustrative categories with no numerical ranking."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "cyclical-features",
@@ -7289,7 +7305,8 @@
       "practiceTitle": "Practice. Represent Daily and Weekly Cycles",
       "outputLabel": "Cosine and sine coordinates",
       "exampleNote": "The hours locate positions in a repeating day, not measured greenhouse outcomes."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "record-quality",
@@ -7572,7 +7589,8 @@
       "practiceTitle": "Practice. Find Duplicate Event Records",
       "outputLabel": "Number of extra copies",
       "exampleNote": "The event IDs represent a small invented sensor export."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "data-leakage",
@@ -7872,7 +7890,8 @@
       "practiceTitle": "Practice. Reconstruct the Evidence Available at a Decision",
       "outputLabel": "Measurements available by the cutoff",
       "exampleNote": "These availability times are invented to expose the prediction-time boundary."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "class-imbalance",
@@ -8150,7 +8169,8 @@
       "practiceTitle": "Practice. Compare Accuracy With Class Recalls",
       "outputLabel": "Mean of the class recalls",
       "exampleNote": "The class counts describe an illustrative evaluation, not a deployed detector."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "baseline-predictions",
@@ -8446,7 +8466,8 @@
       "practiceTitle": "Practice. Score a Baseline Before Comparing Models",
       "outputLabel": "Held-out error of the fitted constant",
       "exampleNote": "The training readings and held-out temperatures are invented, separate samples."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "learning-curves",
@@ -8790,7 +8811,8 @@
       "practiceTitle": "Practice. Read What the Two Error Curves Are Saying",
       "outputLabel": "Validation error minus training error",
       "exampleNote": "These curves are illustrative measurements for reasoning about training behaviour."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "decision-thresholds",
@@ -9086,7 +9108,8 @@
       "practiceTitle": "Practice. Choose Actions Under Different Mistake Costs",
       "outputLabel": "Inspection decisions under the supplied costs",
       "exampleNote": "The probabilities and mistake costs are simplified teaching assumptions."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "probability-calibration",
@@ -9397,7 +9420,8 @@
       "practiceTitle": "Practice. Compare Confidence, Frequency and Probability Error",
       "outputLabel": "Mean confidence, observed frequency and squared error",
       "exampleNote": "The small evaluation group illustrates the calculation; it cannot establish calibration on its own."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "grouped-validation",
@@ -9701,7 +9725,8 @@
       "practiceTitle": "Practice. Keep Greenhouse Groups Separate",
       "outputLabel": "Number of greenhouse identities shared by both sets",
       "exampleNote": "The group IDs are an invented split whose overlap we can inspect directly."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "distribution-shift",
@@ -10041,7 +10066,8 @@
       "practiceTitle": "Practice. Measure a Change in Category Shares",
       "outputLabel": "Distance between the category distributions",
       "exampleNote": "Both illustrative reports use the same roof-category order."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "bootstrap-uncertainty",
@@ -10333,7 +10359,8 @@
       "practiceTitle": "Practice. Compare Estimates Across Resamples",
       "outputLabel": "Mean for the recorded bootstrap draw",
       "exampleNote": "The draws reuse an invented observed sample; they are not new measurements."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "conditional-probability",
@@ -10734,7 +10761,8 @@
       "practiceTitle": "Practice. Update a Fault Estimate From an Alarm",
       "outputLabel": "Faulty and working shares after the alarm",
       "exampleNote": "Fault prevalence and alarm rates are supplied illustrative probabilities."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "likelihood",
@@ -11084,7 +11112,8 @@
       "practiceTitle": "Practice. Compare Germination Probabilities",
       "outputLabel": "Germination probability of the best supplied candidate",
       "exampleNote": "The seed outcomes form an invented ordered batch."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "naive-bayes",
@@ -11480,7 +11509,8 @@
       "practiceTitle": "Practice. Estimate Sign Rates and Compare Sensor Classes",
       "outputLabel": "Posterior shares for faulty and working sensors",
       "exampleNote": "The class priors and sign probabilities are illustrative; conditional independence is assumed."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "support-vector-machines",
@@ -11998,7 +12028,8 @@
       "practiceTitle": "Practice. Calculate Margin Violations and Their Cost",
       "outputLabel": "Mean hinge loss for the proposed boundary",
       "exampleNote": "The labelled measurements and proposed boundary are supplied for inspection, not fitted here."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "hierarchical-clustering",
@@ -12341,7 +12372,8 @@
       "practiceTitle": "Practice. Choose Merges and Compare Linkage Rules",
       "outputLabel": "Single-linkage distance between the groups",
       "exampleNote": "The response-time groups are illustrative measurements."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "density-based-clustering",
@@ -12759,7 +12791,8 @@
       "practiceTitle": "Practice. Identify Core Points and Their Neighbours",
       "outputLabel": "Core-point decisions in location order",
       "exampleNote": "These invented sensor locations count the point itself in its neighbourhood."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "images-as-arrays",
@@ -13180,7 +13213,8 @@
       "practiceTitle": "Practice. Inspect Pixels and Convert Their Scale",
       "outputLabel": "Pixel intensities on the zero-to-one scale",
       "exampleNote": "These tiny grayscale images make every pixel available for inspection."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "image-thresholding",
@@ -13666,7 +13700,8 @@
       "practiceTitle": "Practice. Build and Compare Foreground Masks",
       "outputLabel": "Selected positions and their pixel count",
       "exampleNote": "The invented tray image is small enough to count by eye."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "morphology",
@@ -14259,7 +14294,8 @@
       "practiceTitle": "Practice. Clean Small Masks With Opening and Closing",
       "outputLabel": "Mask after opening",
       "exampleNote": "The small binary mask contains an illustrative seed region and isolated mark."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "connected-components",
@@ -14674,7 +14710,8 @@
       "practiceTitle": "Practice. Measure Regions and Follow Their Connections",
       "outputLabel": "Number of connected foreground regions",
       "exampleNote": "The example masks isolate the effect of the chosen neighbour rule."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "image-augmentation",
@@ -15177,7 +15214,8 @@
       "practiceTitle": "Practice. Transform Images and Labels Together",
       "outputLabel": "Reflected image and matching label mask",
       "exampleNote": "This labelled tray is invented to make image-mask alignment visible."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "transfer-learning",
@@ -15579,7 +15617,8 @@
       "practiceTitle": "Practice. Apply and Update a New Classification Head",
       "outputLabel": "Class decisions from the new head",
       "exampleNote": "The feature vectors are supplied teaching values, not outputs from a pretrained image model."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "bounding-boxes",
@@ -16062,7 +16101,8 @@
       "practiceTitle": "Practice. Calculate Overlap for New Rectangle Pairs",
       "outputLabel": "Intersection over union",
       "exampleNote": "The rectangles use continuous boundary coordinates on an illustrative image."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "non-maximum-suppression",
@@ -16598,7 +16638,8 @@
       "practiceTitle": "Practice. Keep Distinct Detections Without Crossing Class Labels",
       "outputLabel": "Coordinates of the retained boxes",
       "exampleNote": "The boxes and scores are supplied examples from one object class."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "forecasting-baselines",
@@ -16929,7 +16970,8 @@
       "practiceTitle": "Practice. Score Forecasts Made Before the Answers Arrived",
       "outputLabel": "Mean absolute forecast error",
       "exampleNote": "The daily water totals are invented and measured in litres."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "lagged-features",
@@ -17260,7 +17302,8 @@
       "practiceTitle": "Practice. Align Earlier Readings With Later Targets",
       "outputLabel": "Trailing-mean predictions in target-date order",
       "exampleNote": "The illustrative demand record is ordered from earliest to latest."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "seasonality-and-differencing",
@@ -17591,7 +17634,8 @@
       "practiceTitle": "Practice. Calculate Changes and Recover Demand Levels",
       "outputLabel": "Differences from the preceding seasonal cycle",
       "exampleNote": "The repeating demand values are invented to keep the seasonal comparison visible."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "exponential-smoothing",
@@ -17900,7 +17944,8 @@
       "practiceTitle": "Practice. Update a Forecast as Readings Arrive",
       "outputLabel": "Updated demand level",
       "exampleNote": "These illustrative water readings are used to show one update at a time."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "autoregressive-forecasting",
@@ -18247,7 +18292,8 @@
       "practiceTitle": "Practice. Fit a Lagged Rule and Forecast Beyond the Record",
       "outputLabel": "Next forecast from the supplied coefficients",
       "exampleNote": "The coefficients below are supplied; fitting them is covered in the Python calculation."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "rolling-forecast-validation",
@@ -18611,7 +18657,8 @@
       "practiceTitle": "Practice. Replay Forecast Origins and Compare Horizons",
       "outputLabel": "Mean absolute error for each method",
       "exampleNote": "The forecast comparison uses an invented sequence of daily water totals."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "exploration-and-bandits",
@@ -18949,7 +18996,8 @@
       "practiceTitle": "Practice. Update Action Estimates and Allocate Exploration",
       "outputLabel": "Updated reward estimate for the selected action",
       "exampleNote": "The action rewards are illustrative observations, not known long-run values."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "states-actions-and-transitions",
@@ -19305,7 +19353,8 @@
       "practiceTitle": "Practice. Compare Actions and Mixed Policies",
       "outputLabel": "Expected next-state value for each action",
       "exampleNote": "The transition probabilities define a small invented environment."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "discounted-returns",
@@ -19618,7 +19667,8 @@
       "practiceTitle": "Practice. Calculate Returns Along a Completed Journey",
       "outputLabel": "Discounted return from the start",
       "exampleNote": "The short reward sequence is an illustrative completed episode."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "bellman-value-iteration",
@@ -20000,7 +20050,8 @@
       "practiceTitle": "Practice. Calculate Action Values and Plan in a Small Environment",
       "outputLabel": "Index of the preferred action",
       "exampleNote": "The transition model and rewards describe a fully specified teaching environment."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "q-learning",
@@ -20185,6 +20236,51 @@
         "interpretation": [
           "Function approximation, deep Q networks, and safe real-world control introduce additional concerns beyond this tabular lesson."
         ]
+      },
+      {
+        "title": "5. Give the Environment and the Learner Different Jobs",
+        "paragraphs": [
+          "One table update is not yet a learner. We need something that supplies experience and something that changes its estimates from that experience. In the greenhouse example the environment keeps track of whether a bed is dry or moist. The learner keeps the Q table.",
+          "An environment step receives an action and returns a next state, a reward and a flag saying whether the task ended. It does not return the correct action value. The learner must estimate that value by repeating the task. Keep these roles separate in the code so a known environment rule does not accidentally become the answer."
+        ],
+        "calculation": "State rows: 0 = dry, 1 = moist\nAction columns: 0 = water, 1 = wait\nWater: next state moist, reward -1, not terminal\nWait while dry: next state dry, reward -2, not terminal\nWait while moist: reward 3, terminal",
+        "interpretation": [
+          "These are invented rewards for a tiny task. Reward measures the objective we wrote down, not a universal definition of good behaviour."
+        ]
+      },
+      {
+        "title": "6. Collect an Episode Instead of Replaying One Supplied Transition",
+        "paragraphs": [
+          "At the start of an episode, reset the environment to dry while retaining the learned Q table. Choose an action, receive a transition, update the visited entry and continue until the task ends. This order matters: the next state used in the target is the state returned by the action just taken.",
+          "Use a NumPy array of shape (2,2) for Q. Keep state and action as integer indices. A tuple returned by the environment keeps the next state, reward and terminal flag together. A list of episode returns can record how training changes over time without replacing the table.",
+          "An epsilon-greedy behaviour policy sometimes chooses an action uniformly at random and otherwise chooses the largest entry in the current row. Early mistakes supply information. The greedy action can change after an update, so choose again at every step."
+        ],
+        "calculation": "For each episode:\n    state = initial state\n    choose action from the current Q row\n    next_state, reward, terminal = environment(state, action)\n    update only Q[state, action]\n    continue from next_state unless terminal",
+        "interpretation": [
+          "A training step cap prevents an endless toy episode. Reaching that cap is a truncation, not evidence that the environment returned a terminal state."
+        ]
+      },
+      {
+        "title": "7. Ask Whether Experience Changes a Later Decision",
+        "paragraphs": [
+          "In the action widget, first water and then wait. The final reward changes the moist/wait entry. Begin another episode and water again. This time the target for the earlier action can use what was learned about the later opportunity. That is how delayed reward moves back through the table.",
+          "Run the same experiment in code over many episodes. Inspect the policy, which is the action selected in each state, as well as the numerical entries. A large value for one action is not enough if the competing action has never been tried."
+        ],
+        "calculation": "For the greedy two-step route, gamma = 0.9:\nReturn from moist/wait = 3\nReturn from dry/water = -1 + 0.9 × 3 = 1.7",
+        "interpretation": [
+          "The calculation provides an independent check for this deterministic environment. A learned table approaches these values through updates; the numbers are not assigned to it."
+        ]
+      },
+      {
+        "title": "8. Evaluate Without Quietly Continuing to Train",
+        "paragraphs": [
+          "Freeze the table and choose greedy actions for evaluation. Do not update Q from those evaluation transitions. Record whether the episode finishes, its reward and its length. For this tiny task, the useful policy waters a dry bed and waits at a moist one.",
+          "Repeat training with several seeds. In a stochastic environment, evaluate over multiple episodes too, because one lucky route can hide an unreliable policy. Compare with a simple policy such as always watering; a larger training return alone does not show that learning helped.",
+          "A larger state space would make a table impractical. That is the motivation for learning a function that predicts action values. Before introducing a deep Q network, retain the same distinction between experience collection, target calculation and independent evaluation."
+        ],
+        "interpretation": [
+          "The later model changes the representation of values. It does not remove the need to define the environment, explore and evaluate honestly."
+        ]
       }
     ],
     "quiz": [
@@ -20266,6 +20362,36 @@
         "hints": [
           "A true terminal target uses the reward alone.",
           "Move halfway from four toward negative two."
+        ]
+      },
+      {
+        "title": "Can Botie learn the two-action greenhouse policy?",
+        "question": "Can Botie learn the two-action greenhouse policy?",
+        "task": [
+          "Implement learn_q(episodes, seed), returning a finite NumPy array with shape (2,2). Start at zeros and follow the state/action rules above. Use an epsilon-greedy behaviour policy with epsilon 0.2, learning rate 0.5 and discount 0.9. Break ties with np.argmax, reset to dry each episode, and allow at most 100 transitions per episode.",
+          "Reject a nonpositive or non-integer episode count with ValueError. Use np.random.default_rng(seed) for every exploratory draw. Update only the visited entry; a true terminal transition has no continuation. Print the greedy actions after 600 episodes and the greedy action values to one decimal place.",
+          "The supplied evaluate_greedy function then tests the frozen table without exploration or updates. Its printed return is the undiscounted sum of rewards, followed by episode length and whether it reached the terminal state. This return and a discounted Q value answer different questions."
+        ],
+        "starter": "import numpy as np\n\ndef evaluate_greedy(Q):\n    state=0\n    total=0.\n    for step in range(100):\n        action=int(np.argmax(Q[state]))\n        terminal=state==1 and action==1\n        total+=3. if terminal else (-1. if action==0 else -2.)\n        state=1 if action==0 else state\n        if terminal: return [total,step+1,True]\n    return [total,100,False]\n\ndef learn_q(episodes, seed):\n    # Write the procedure here.\n    raise NotImplementedError\n\nQ=learn_q(600,7)\nprint(np.argmax(Q,axis=1).tolist())\nprint(np.round(Q.max(axis=1),1).tolist())\nprint(evaluate_greedy(Q))",
+        "solution": "import numpy as np\n\ndef evaluate_greedy(Q):\n    state=0\n    total=0.\n    for step in range(100):\n        action=int(np.argmax(Q[state]))\n        terminal=state==1 and action==1\n        total+=3. if terminal else (-1. if action==0 else -2.)\n        state=1 if action==0 else state\n        if terminal: return [total,step+1,True]\n    return [total,100,False]\n\ndef learn_q(episodes, seed):\n    if not isinstance(episodes, (int,np.integer)) or isinstance(episodes,(bool,np.bool_)) or episodes<=0:\n        raise ValueError('Use a positive integer episode count')\n    rng=np.random.default_rng(seed)\n    Q=np.zeros((2,2))\n    for _ in range(episodes):\n        state=0\n        for step in range(100):\n            action=int(rng.integers(2)) if rng.random()<.2 else int(np.argmax(Q[state]))\n            terminal=state==1 and action==1\n            next_state=1 if action==0 else state\n            reward=3. if terminal else (-1. if action==0 else -2.)\n            target=reward if terminal else reward+.9*Q[next_state].max()\n            Q[state,action]+=.5*(target-Q[state,action])\n            state=next_state\n            if terminal: break\n    return Q\n\nQ=learn_q(600,7)\nprint(np.argmax(Q,axis=1).tolist())\nprint(np.round(Q.max(axis=1),1).tolist())\nprint(evaluate_greedy(Q))",
+        "output": "[0, 1]\n[1.7, 3.0]\n[2.0, 2, True]",
+        "hints": [
+          "The next state belongs to the environment. Read the continuation from that row, but write the correction to the row and action that produced the transition.",
+          "Retain Q between episodes. Resetting Q would make every episode begin without the previous experience."
+        ],
+        "tests": [
+          {
+            "name": "Different seeds still learn a useful policy",
+            "code": "for seed in [2,19,42]:\n    table=learn_q(800,seed)\n    assert isinstance(table,np.ndarray) and table.shape==(2,2)\n    assert np.isfinite(table).all()\n    np.testing.assert_array_equal(table.argmax(axis=1),[0,1])\n    np.testing.assert_allclose(table.max(axis=1),[1.7,3.],atol=.05)"
+          },
+          {
+            "name": "The same seed reproduces the table",
+            "code": "np.testing.assert_array_equal(learn_q(80,11),learn_q(80,11))"
+          },
+          {
+            "name": "Invalid episode counts are rejected",
+            "code": "for n in [0,-1,2.5,True]:\n    try: learn_q(n,3)\n    except ValueError: pass\n    else: raise AssertionError(\"Expected ValueError for invalid episode count\")"
+          }
         ]
       }
     ],
@@ -20405,7 +20531,46 @@
       "practiceTitle": "Practice. Update an Action Value and Respect Episode Endings",
       "outputLabel": "Updated value of the visited state-action pair",
       "exampleNote": "The transition is supplied so we can inspect one Q-learning update."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4",
+    "checkpoints": [
+      {
+        "after": "6. Collect an Episode Instead of Replaying One Supplied Transition",
+        "title": "Questions on the Environment and the Episode",
+        "questions": [
+          {
+            "kind": "choice",
+            "given": {
+              "description": "Use this setup.",
+              "data": "The previous episode has ended. Q contains the estimates learned so far."
+            },
+            "prompt": "What should be reset at the start of the next episode?",
+            "options": [
+              "The environment state; keep Q",
+              "Both the state and every Q entry",
+              "Only the random generator"
+            ],
+            "answer": 0,
+            "because": "Resetting the environment starts another attempt. Keeping Q lets that attempt use earlier experience."
+          },
+          {
+            "kind": "choice",
+            "given": {
+              "description": "Use this setup.",
+              "data": "You are testing a policy on fresh episodes after training."
+            },
+            "prompt": "Which change would turn this into continued training?",
+            "options": [
+              "Updating Q after each evaluation transition",
+              "Recording episode returns",
+              "Choosing greedy actions"
+            ],
+            "answer": 0,
+            "because": "Evaluation measures the frozen procedure. Updating its estimates changes that procedure during the measurement."
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "distributions-and-expectations",
@@ -20716,7 +20881,8 @@
       "practiceTitle": "Practice. Calculate Expected Damage and Shortage",
       "outputLabel": "Expected damage count",
       "exampleNote": "The damage counts and their probabilities form an invented distribution."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "parameter-posteriors",
@@ -21044,7 +21210,8 @@
       "practiceTitle": "Practice. Update an Uncertain Failure Rate",
       "outputLabel": "Posterior mean failure probability",
       "exampleNote": "The binary sensor outcomes are an illustrative trial."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "gaussian-sensor-fusion",
@@ -21411,7 +21578,8 @@
       "practiceTitle": "Practice. Combine Measurements With Known Variances",
       "outputLabel": "Precision-weighted temperature estimate",
       "exampleNote": "The measurement variances are supplied and the instrument errors are assumed independent."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "hidden-state-filtering",
@@ -21792,7 +21960,8 @@
       "practiceTitle": "Practice. Track the Pump's Condition From Indirect Evidence",
       "outputLabel": "Updated probabilities of the hidden states",
       "exampleNote": "The pump states and alarm probabilities belong to an invented two-state model."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "gaussian-process-regression",
@@ -21801,8 +21970,9 @@
     "blurb": "Botie has measured temperature at only a few positions. A covariance rule connects nearby locations and describes how uncertain an unmeasured location remains.",
     "openingTitle": "What Happens Between the Thermometers?",
     "opening": [
-      "Botie cannot put a thermometer at every position in a greenhouse. He needs predictions between the measured locations, and some indication of where those predictions have little support.",
-      "A Gaussian process starts with a distribution over function values. A kernel describes which locations should vary together. Conditioning that distribution on readings produces both a prediction and a remaining variance."
+      "Botie has a thermometer at one end of the greenhouse. It reads warmer than usual. Should we expect the next bed to be warmer too? What about the far end, where a door is open?",
+      "One reading leaves many possible temperature patterns. We need a way to describe which patterns we consider plausible, then change that description when readings arrive. Nearby positions can share information without pretending they have exactly the same temperature.",
+      "Start with the positions and readings in the experiment. Add a thermometer, change how quickly temperatures may vary, and watch both the predicted temperature and the uncertainty change. After that, we will build the table that makes those changes possible."
     ],
     "prerequisites": [
       {
@@ -22052,27 +22222,61 @@
     ],
     "parts": [
       {
-        "title": "1. Separate the Mean From the Covariance",
+        "title": "1. Start With Several Possible Temperature Patterns",
         "paragraphs": [
-          "The mean function describes the baseline temperature. Work with residual readings after subtracting that baseline. The kernel then supplies covariances between latent function values.",
-          "A covariance matrix must be symmetric and positive semidefinite. An arbitrary similarity table is not necessarily a valid covariance. An RBF kernel gives a common smoothness assumption: covariance decreases with squared distance."
+          "Imagine drawing several temperature curves through the greenhouse before looking at a reading. Some rise towards the sunny wall; some stay close to the usual temperature; others fall near the door. We are describing uncertainty about a whole pattern, not choosing one curve and declaring it correct.",
+          "A mean function gives the temperature around which those possibilities are centred. Here we subtract a usual temperature of twenty degrees and work with residuals. A residual of two means two degrees above that baseline. We add the baseline back when presenting a temperature."
         ],
+        "calculation": "Usual temperature: 20 °C\nObserved temperature: 22 °C\nResidual: 22 - 20 = 2 °C",
         "interpretation": [
-          "The examples use a zero mean for small residuals, not a claim that greenhouse temperatures are near zero."
+          "Using residuals keeps the baseline distinct from what the readings teach us."
         ]
       },
       {
-        "title": "2. Add Observation Noise in the Right Place",
+        "title": "2. Decide How Far One Reading Should Matter",
+        "paragraphs": [
+          "If temperatures normally change slowly along the greenhouse, a warm reading should favour warm curves at nearby beds too. If a heater or doorway can cause a sharp local change, that influence should fade more quickly. This assumption about how locations vary together is what the covariance function, or kernel, describes.",
+          "The length scale is measured in the same distance units as position. Increasing it connects more distant locations strongly. It does not move a thermometer or supply another observation. In the experiment, first compare a nearby query with a distant one while keeping the reading fixed."
+        ],
+        "interpretation": [
+          "The assumption is chosen before conditioning on the readings. A confident prediction can still be wrong when the assumed pattern is unsuitable."
+        ]
+      },
+      {
+        "title": "3. Turn Distances Into a Covariance Table",
+        "paragraphs": [
+          "Use an RBF kernel with prior variance one. Compare every training position with every other training position. Each table entry says how strongly those two unknown residual temperatures vary together under this model.",
+          "The diagonal compares a position with itself and therefore contains its prior variance. Off-diagonal entries become smaller as positions move apart. The table contains relationships between function values; it does not contain the measured temperatures."
+        ],
+        "calculation": "k(a,b) = exp(-(a-b)² / (2 × length_scale²))\nPositions = [0, 2] metres; length_scale = 1 metre\nk(0,0) = 1\nk(0,2) = exp(-2) ≈ 0.1353\nK ≈ [[1, 0.1353],\n     [0.1353, 1]]",
+        "interpretation": [
+          "For n readings, K has shape (n,n). A query-to-training row has n entries, in the same order as the observed residual vector."
+        ]
+      },
+      {
+        "title": "4. Separate the Mean From the Covariance",
+        "paragraphs": [
+          "A mean and covariance together describe the joint Gaussian distribution of function values at the positions we have chosen. We can ask about another set of positions using the same kernel. This consistency is what lets us describe a Gaussian process rather than one fixed table.",
+          "A valid covariance matrix is symmetric: the relationship between positions a and b cannot change when we reverse their names. It must also be positive semidefinite, meaning no weighted combination of its function values has a negative variance. Using a known valid kernel gives us this property; assigning arbitrary similarities does not."
+        ],
+        "interpretation": [
+          "The examples use a zero mean for small residuals, not a claim that greenhouse temperatures are near zero."
+        ],
+        "id": "1-separate-the-mean-from-the-covariance"
+      },
+      {
+        "title": "5. Add Observation Noise in the Right Place",
         "paragraphs": [
           "Independent measurement noise adds variance to the diagonal of the training covariance. It does not add the same value to every entry. Solving this noisy covariance system tells us how observations contribute after accounting for their redundancy."
         ],
         "calculation": "A = K + noise_variance × I\nA = [[1.25]]\nSolve A × alpha = [2]\nalpha = [1.6]",
         "interpretation": [
           "Use a linear solve rather than explicitly calculating a matrix inverse."
-        ]
+        ],
+        "id": "2-add-observation-noise-in-the-right-place"
       },
       {
-        "title": "3. Calculate Mean and Remaining Variance",
+        "title": "6. Calculate Mean and Remaining Variance",
         "paragraphs": [
           "The query-to-training covariance vector weights the solved observations to produce the posterior mean. To obtain latent variance, subtract the covariance explained by training from the query’s prior variance.",
           "Prediction for a new noisy sensor reading adds its measurement noise to that latent variance. Keep these two types of uncertainty separate."
@@ -22093,16 +22297,40 @@
               "The observation shifts the query mean and reduces its prior variance. The covariance controls how much information is shared; proximity by itself is not a calculation."
             ]
           }
-        ]
+        ],
+        "id": "3-calculate-mean-and-remaining-variance"
       },
       {
-        "title": "4. Inspect the Assumptions Behind the Interval",
+        "title": "7. Inspect the Assumptions Behind the Interval",
         "paragraphs": [
           "A long length scale expects slowly changing temperatures; a short one allows faster local changes. Fit such settings on training data and check predictions on held-out locations. A narrow interval is not trustworthy if the kernel excludes important behaviour.",
           "Dense exact inference requires storing a covariance matrix and solving a system that grows with the training set. Large datasets need approximations or a different model. Numerical jitter can stabilise a solve, but does not replace justified measurement noise."
         ],
         "interpretation": [
           "The construction isolates posterior mean. The second coding task checks uncertainty at an unrelated location."
+        ],
+        "id": "4-inspect-the-assumptions-behind-the-interval"
+      },
+      {
+        "title": "8. A Close Fit and a Reliable Interval Are Different Questions",
+        "paragraphs": [
+          "Place two thermometers close together and give them conflicting readings. A model with almost no observation noise tries to follow both. Allowing more noise tells the model that a reading need not equal the underlying temperature exactly.",
+          "The shaded band in the experiment describes uncertainty about that underlying function, using the model’s Gaussian marginal at each position. A future noisy thermometer reading has additional variance. Neither band is a guarantee that every point on the whole curve lies inside it."
+        ],
+        "calculation": "Approximate pointwise 95% latent interval:\nmean ± 1.96 × sqrt(latent variance)\n\nObservation variance = latent variance + new reading noise variance",
+        "interpretation": [
+          "Compare the interval at measured positions and between them. Then move beyond the measurements: the mean returns towards the baseline and uncertainty approaches the prior under this kernel."
+        ]
+      },
+      {
+        "title": "9. Use an Unseen Location to Challenge the Assumption",
+        "paragraphs": [
+          "Suppose the greenhouse contains a local heater. A long length scale may smooth away its effect and still produce a narrow band near existing thermometers. Add a held-out reading at the heater and compare it with the prediction made before revealing it.",
+          "Repeat this at several held-out positions. Inspect errors and interval coverage together. Choosing the length scale from these results uses those positions for validation; reserve another set if you want a final assessment. A single covered observation cannot establish calibrated uncertainty.",
+          "For a larger dataset, use a stable factorisation such as Cholesky when the noisy covariance is positive definite. Keep a numerical stabiliser separate from the measurement-noise assumption. The small NumPy challenge uses solve so the matrix calculation remains visible."
+        ],
+        "interpretation": [
+          "The aim is to explain where the prediction came from and what could make it unreliable, not simply to draw a smooth curve."
         ]
       }
     ],
@@ -22134,16 +22362,84 @@
           "Zero cross-covariance removes every training contribution.",
           "Observation variance includes the new reading’s noise."
         ]
+      },
+      {
+        "title": "Can you predict directly from thermometer positions?",
+        "question": "Can you predict directly from thermometer positions?",
+        "task": [
+          "Write gp_predict(x, y, query, length, noise). The first two one-dimensional arrays hold training positions and residual temperatures. query holds positions to predict. length is a positive RBF length scale; noise is a strictly positive observation variance. Use prior variance one and mean zero.",
+          "Return two arrays, each with the same shape as query: posterior means and latent variances. Form the RBF tables from positions, add noise only to the training diagonal, and use linear solves. Reject mismatched or empty training arrays, non-finite values, nonpositive length and nonpositive noise with ValueError. Round only when printing."
+        ],
+        "starter": "import numpy as np\n\ndef gp_predict(x, y, query, length, noise):\n    # Write the procedure here.\n    raise NotImplementedError\n\nmean, variance = gp_predict(np.array([0.]), np.array([2.]), np.array([0.,1.]), 1., .25)\nprint(np.round(mean,4).tolist())\nprint(np.round(variance,4).tolist())",
+        "solution": "import numpy as np\n\ndef gp_predict(x, y, query, length, noise):\n    x, y, query = [np.asarray(v, dtype=float) for v in (x, y, query)]\n    if any(v.ndim != 1 for v in (x,y,query)) or len(x)==0 or x.shape!=y.shape:\n        raise ValueError('Use paired nonempty training vectors and a query vector')\n    if not all(np.all(np.isfinite(v)) for v in (x,y,query)) or not np.isfinite(length) or not np.isfinite(noise) or length<=0 or noise<=0:\n        raise ValueError('Use finite values, positive length and positive noise')\n    K = np.exp(-0.5*((x[:,None]-x[None,:])/length)**2)\n    cross = np.exp(-0.5*((query[:,None]-x[None,:])/length)**2)\n    A = K + noise*np.eye(len(x))\n    mean = cross @ np.linalg.solve(A,y)\n    variance = 1 - np.sum(cross * np.linalg.solve(A,cross.T).T,axis=1)\n    return mean, np.maximum(variance,0)\n\nmean, variance = gp_predict(np.array([0.]), np.array([2.]), np.array([0.,1.]), 1., .25)\nprint(np.round(mean,4).tolist())\nprint(np.round(variance,4).tolist())",
+        "output": "[1.6, 0.9704]\n[0.2, 0.7057]",
+        "hints": [
+          "Subtract a column of positions from a row to obtain every pairwise distance. The training covariance and query covariance have different shapes.",
+          "For each query row, subtract its covariance-weighted solve from prior variance one. Adding new measurement noise would produce observation variance instead."
+        ],
+        "tests": [
+          {
+            "name": "Two observations and three query positions",
+            "code": "x=np.array([0.,2.]); y=np.array([1.,-1.]); q=np.array([0.,1.,2.])\nm,v=gp_predict(x,y,q,1.,.1)\nK=np.exp(-.5*(x[:,None]-x[None,:])**2)+.1*np.eye(2)\nC=np.exp(-.5*(q[:,None]-x[None,:])**2)\nassert m.shape==q.shape and v.shape==q.shape\nnp.testing.assert_allclose(m,C@np.linalg.solve(K,y),rtol=1e-7)\nnp.testing.assert_allclose(v,1-np.sum(C*np.linalg.solve(K,C.T).T,axis=1),rtol=1e-7)"
+          },
+          {
+            "name": "A distant query retains the prior",
+            "code": "m,v=gp_predict(np.array([0.]),np.array([8.]),np.array([100.]),1.,.5)\nnp.testing.assert_allclose(m,[0.],atol=1e-10)\nnp.testing.assert_allclose(v,[1.])"
+          },
+          {
+            "name": "Reject mismatched readings and invalid kernel settings",
+            "code": "for x,y,length,noise in [([0.,1.],[2.],1.,.1),([0.],[2.],0.,.1),([0.],[2.],1.,-1.)]:\n    try: gp_predict(np.array(x),np.array(y),np.array([0.]),length,noise)\n    except ValueError: pass\n    else: raise AssertionError(\"Invalid input should raise ValueError\")"
+          }
+        ]
       }
     ],
     "reading": {
-      "experimentTitle": "How much do these observations tell us about the query?",
-      "experimentIntro": "The query covariance says how the new location relates to the observed ones. Compare a related query with an unrelated one while keeping the covariance assumptions valid.",
+      "experimentTitle": "Place thermometers and inspect what remains uncertain",
+      "experimentIntro": "Compare the unobserved greenhouse with the prediction after one and then two readings. Change the length scale or noise variance while keeping the readings fixed. The graph shows the temperature mean and a pointwise uncertainty band; the construction later isolates the matrix calculation.",
       "connectionTitle": "A prediction borrows information through covariance",
       "practiceTitle": "Practice. Calculate a Prediction and Its Remaining Uncertainty",
       "outputLabel": "Predicted mean at the query",
       "exampleNote": "Covariances are supplied here; valid covariance matrices are an assumption of the calculation."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4",
+    "checkpoints": [
+      {
+        "after": "3. Turn Distances Into a Covariance Table",
+        "title": "Questions on Positions and Covariance",
+        "questions": [
+          {
+            "kind": "choice",
+            "given": {
+              "description": "Use this setup.",
+              "data": "Two thermometers are two metres apart. The length scale is one metre. Prior variance is one."
+            },
+            "prompt": "If we increase only the length scale, what happens to their RBF covariance?",
+            "options": [
+              "It increases",
+              "It decreases",
+              "Their measured temperatures become identical"
+            ],
+            "answer": 0,
+            "because": "A greater length scale makes a fixed distance smaller relative to the scale, so the relationship strengthens. The readings themselves do not change."
+          },
+          {
+            "kind": "choice",
+            "given": {
+              "description": "Use this setup.",
+              "data": "K has shape (3,3). There are five unmeasured query positions."
+            },
+            "prompt": "What is the shape of the query-to-training covariance table?",
+            "options": [
+              "(5,3)",
+              "(3,5)",
+              "(5,5)"
+            ],
+            "answer": 0,
+            "because": "Each query gets one row containing its covariance with each of the three training positions."
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "minibatch-gradients",
@@ -22516,7 +22812,8 @@
       "practiceTitle": "Practice. Calculate and Apply Batch Gradients",
       "outputLabel": "Weight after the batch update",
       "exampleNote": "This small regression batch uses half mean squared error."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "momentum-updates",
@@ -22844,7 +23141,8 @@
       "practiceTitle": "Practice. Carry Velocity Through Several Updates",
       "outputLabel": "Parameter value after the momentum update",
       "exampleNote": "The supplied gradients isolate the momentum update from a full training run."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "adaptive-gradients",
@@ -23170,6 +23468,38 @@
         "interpretation": [
           "The workshop starts from corrected moments so learners can inspect the final scaling operation; the coding example calculates the full first update."
         ]
+      },
+      {
+        "title": "5. Watch a Gradient Change Direction",
+        "paragraphs": [
+          "The first update cannot show why Adam keeps a history. Give one weight a positive gradient, then a negative gradient. The first moment retains some of the old direction instead of changing instantly. The second moment retains squared magnitudes, so a sign change does not cancel it.",
+          "Write the two histories on separate rows. With beta1 equal to 0.5, a first gradient of two produces a first moment of one. A next gradient of minus two brings that moment below zero, but only partway towards the new gradient."
+        ],
+        "calculation": "m₀ = 0\nm₁ = 0.5 × 0 + 0.5 × 2 = 1\nm₂ = 0.5 × 1 + 0.5 × (-2) = -0.5\n\nThe second moment uses 2² and (-2)², both 4.",
+        "interpretation": [
+          "A retained direction can disagree with the newest gradient. Inspect that disagreement before assuming the optimizer has made an arithmetic error."
+        ]
+      },
+      {
+        "title": "6. Compare the Whole Training Path",
+        "paragraphs": [
+          "Choose a small quadratic loss with coordinates on different scales. Start each optimizer from the same weights and feed it the gradient at its own current position. Those gradients will diverge as the methods take different routes.",
+          "Record loss, parameter values and step size for every update. An adaptive method may make steadier progress on a badly scaled problem, but a badly chosen rate can still make it unstable. Compare several rates on training data and use separate validation behaviour when choosing a procedure for a prediction task."
+        ],
+        "calculation": "Example loss: L(w) = 0.5 × (w₀² + 10 × w₁²)\nGradient: [w₀, 10 × w₁]",
+        "interpretation": [
+          "This is a controlled optimization example with a known minimum. It lets us check state handling before blaming a dataset or architecture."
+        ]
+      },
+      {
+        "title": "7. Resume the Same Optimizer, Not Just the Same Weights",
+        "paragraphs": [
+          "Saving weights preserves the model’s current prediction rule. Continuing Adam also requires its first moment, second moment and update count. If any are reset, the next update follows a different history.",
+          "Store arrays as arrays of the original shape, and restore the counter as an integer. A checkpoint should also state the learning rate, retention factors and epsilon convention. Compare an uninterrupted run with a run stopped and resumed midway. Their next weights should agree within numerical tolerance."
+        ],
+        "interpretation": [
+          "A restart is a useful behavioural test because the final printed output alone can hide an accidental reset of the optimizer state."
+        ]
       }
     ],
     "practice": [
@@ -23200,6 +23530,35 @@
           "For a first step, corrected moments equal g and g squared.",
           "Epsilon avoids a zero divided by zero entry."
         ]
+      },
+      {
+        "title": "Can your Adam update resume without changing its path?",
+        "question": "Can your Adam update resume without changing its path?",
+        "task": [
+          "Write adam_step(w, g, m, v, t, rate=0.05). Here t is the number of completed updates. Return new weights, new first moments, new second moments and the incremented count. Use beta1=0.9, beta2=0.999 and epsilon=1e-8 outside the square root. Do not modify the input arrays.",
+          "Complete the two-step example below. The additional tests compare multiple updates against an independently computed recurrence and check that retaining the returned state reproduces an uninterrupted run."
+        ],
+        "starter": "import numpy as np\n\ndef adam_step(w, g, m, v, t, rate=0.05):\n    # Write the procedure here.\n    raise NotImplementedError\n\nw=np.array([1.,-1.]); m=np.zeros(2); v=np.zeros(2); t=0\nfor g in [np.array([2.,-4.]),np.array([-1.,2.])]:\n    w,m,v,t=adam_step(w,g,m,v,t)\nprint(t)\nprint(np.round(w,4).tolist())",
+        "solution": "import numpy as np\n\ndef adam_step(w, g, m, v, t, rate=0.05):\n    t=t+1\n    m=.9*m+.1*g\n    v=.999*v+.001*g*g\n    corrected_m=m/(1-.9**t)\n    corrected_v=v/(1-.999**t)\n    w=w-rate*corrected_m/(np.sqrt(corrected_v)+1e-8)\n    return w,m,v,t\n\nw=np.array([1.,-1.]); m=np.zeros(2); v=np.zeros(2); t=0\nfor g in [np.array([2.,-4.]),np.array([-1.,2.])]:\n    w,m,v,t=adam_step(w,g,m,v,t)\nprint(t)\nprint(np.round(w,4).tolist())",
+        "output": "2\n[0.9367, -0.9367]",
+        "hints": [
+          "The next count is used in both bias-correction denominators. The stored moments remain uncorrected between calls.",
+          "Return new arrays rather than changing w, m or v in place. A caller may keep the previous state for comparison."
+        ],
+        "tests": [
+          {
+            "name": "Changing gradients follow the full recurrence",
+            "code": "w=np.array([2.,-3.]); m=np.zeros(2); v=np.zeros(2); t=0\na=w.copy(); b=m.copy(); c=v.copy()\nfor n,g in enumerate([np.array([1.,4.]),np.array([-2.,0.]),np.array([3.,-1.])],1):\n    w,m,v,t=adam_step(w,g,m,v,t,.02)\n    b=.9*b+.1*g; c=.999*c+.001*g*g\n    a=a-.02*(b/(1-.9**n))/(np.sqrt(c/(1-.999**n))+1e-8)\n    assert t==n\n    np.testing.assert_allclose(w,a,rtol=1e-7)\n    np.testing.assert_allclose(m,b)\n    np.testing.assert_allclose(v,c)"
+          },
+          {
+            "name": "Input states stay available for inspection",
+            "code": "w=np.array([2.,3.]); g=np.array([1.,-1.]); m=np.zeros(2); v=np.zeros(2)\nsaved=[a.copy() for a in [w,g,m,v]]\nadam_step(w,g,m,v,0)\nfor actual,old in zip([w,g,m,v],saved): np.testing.assert_array_equal(actual,old)"
+          },
+          {
+            "name": "A saved state reproduces the next update",
+            "code": "state=(np.array([4.]),np.zeros(1),np.zeros(1),0)\nstate=adam_step(*state[:1],np.array([2.]),*state[1:])\nsaved=tuple(value.copy() if isinstance(value,np.ndarray) else value for value in state)\na=adam_step(state[0],np.array([-3.]),state[1],state[2],state[3])\nb=adam_step(saved[0],np.array([-3.]),saved[1],saved[2],saved[3])\nfor actual,expected in zip(a,b): np.testing.assert_allclose(actual,expected)"
+          }
+        ]
       }
     ],
     "reading": {
@@ -23209,7 +23568,8 @@
       "practiceTitle": "Practice. Calculate Adam Updates and Check Zero Gradients",
       "outputLabel": "Updated parameter values",
       "exampleNote": "The interactive calculation starts with already bias-corrected moments."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "initialisation-and-gradient-checks",
@@ -23530,7 +23890,8 @@
       "practiceTitle": "Practice. Check Derivatives With Small Perturbations",
       "outputLabel": "Slope estimated from the two loss evaluations",
       "exampleNote": "The paired loss values illustrate a central finite-difference check."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "training-diagnostics",
@@ -23859,7 +24220,8 @@
       "practiceTitle": "Practice. Select a Checkpoint and Implement Patience",
       "outputLabel": "Position of the best validation checkpoint",
       "exampleNote": "The validation history is illustrative; each position refers to a saved state."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "popularity-baselines",
@@ -24183,7 +24545,8 @@
       "practiceTitle": "Practice. Rank Guides and Exclude Already Seen Items",
       "outputLabel": "Guide indices ordered by popularity",
       "exampleNote": "The small reader-guide table contains invented interactions."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "content-based-ranking",
@@ -24526,7 +24889,8 @@
       "practiceTitle": "Practice. Rank Descriptions Against a Reader Profile",
       "outputLabel": "Cosine similarity between reader and guide",
       "exampleNote": "The profile and description coordinates are supplied illustrative features."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "collaborative-filtering",
@@ -24883,7 +25247,8 @@
       "practiceTitle": "Practice. Predict Ratings Without Treating Missing as Dislike",
       "outputLabel": "Rating predicted from centred neighbour preferences",
       "exampleNote": "Neighbour similarities and observed ratings are supplied teaching values."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "recommendation-factorisation",
@@ -25225,7 +25590,8 @@
       "practiceTitle": "Practice. Update Factors Using Observed Ratings",
       "outputLabel": "Predicted scores in guide order",
       "exampleNote": "The factors are supplied for inspection; missing ratings are not observed zeros."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "ranking-evaluation",
@@ -25564,7 +25930,8 @@
       "practiceTitle": "Practice. Compare Relevant Items and Their Positions",
       "outputLabel": "Precision of the displayed list",
       "exampleNote": "The relevance labels are invented judgements for the displayed guides."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "robust-anomaly-scores",
@@ -25942,7 +26309,8 @@
       "practiceTitle": "Practice. Fit a Robust Reference and Review New Readings",
       "outputLabel": "Robust deviations of the incoming readings",
       "exampleNote": "Reference and incoming readings are separate illustrative samples."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "local-density-anomalies",
@@ -26273,7 +26641,8 @@
       "practiceTitle": "Practice. Calculate and Interpret Local Outlier Factors",
       "outputLabel": "Density ratio relative to the neighbours",
       "exampleNote": "Reachability distances and neighbour densities are supplied to expose the final comparison."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "isolation-forests",
@@ -26600,7 +26969,8 @@
       "practiceTitle": "Practice. Follow Splits and Compare Isolation Scores",
       "outputLabel": "Isolation score from the recorded paths",
       "exampleNote": "The paths are supplied examples from trees; the positive normaliser is given."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "reconstruction-alerts",
@@ -26975,7 +27345,8 @@
       "practiceTitle": "Practice. Score Reconstruction Errors and Audit Alerts",
       "outputLabel": "Alert decisions for the reconstructed records",
       "exampleNote": "The reconstructions and fixed threshold are illustrative model outputs."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "graph-representations",
@@ -27350,7 +27721,8 @@
       "practiceTitle": "Practice. Read Degrees and Build an Adjacency Matrix",
       "outputLabel": "Degree of each pump",
       "exampleNote": "The binary network is an invented arrangement of pump connections."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "graph-random-walks",
@@ -27702,7 +28074,8 @@
       "practiceTitle": "Practice. Advance a Walk and Handle a Node With No Exit",
       "outputLabel": "Node probabilities after one step",
       "exampleNote": "The transition rows are supplied probability distributions on a small network."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "neighbour-aggregation",
@@ -28069,7 +28442,8 @@
       "practiceTitle": "Practice. Calculate Neighbour Means and Handle Isolation",
       "outputLabel": "Mean neighbour reading for each node",
       "exampleNote": "The network and scalar readings are illustrative and use matching node order."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "graph-convolution",
@@ -28482,7 +28856,8 @@
       "practiceTitle": "Practice. Calculate One Graph Layer Including Self-Loops",
       "outputLabel": "Transformed features for each node",
       "exampleNote": "The feature weights are supplied; this example calculates a layer without training it."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "link-prediction",
@@ -28791,7 +29166,8 @@
       "practiceTitle": "Practice. Score and Compare Candidate Links",
       "outputLabel": "Predicted link score",
       "exampleNote": "The node representations are supplied and the candidate edge is unobserved."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "confounding-and-comparisons",
@@ -29164,7 +29540,8 @@
       "practiceTitle": "Practice. Expose a Reversal and Compare a Shared Population",
       "outputLabel": "Pooled treatment mean minus pooled control mean",
       "exampleNote": "The garden outcomes are invented to demonstrate confounding by starting condition."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "randomised-experiments",
@@ -29492,7 +29869,8 @@
       "practiceTitle": "Practice. Estimate an Assigned Treatment's Effect and Uncertainty",
       "outputLabel": "Difference between assigned-group means",
       "exampleNote": "The trial outcomes are invented; the example assumes independent experimental units."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "causal-adjustment",
@@ -29832,7 +30210,8 @@
       "practiceTitle": "Practice. Standardise Outcomes to a Target Population",
       "outputLabel": "Adjusted contrast in the target population",
       "exampleNote": "The supplied means illustrate adjustment under the causal assumptions explained in the lesson."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "treatment-effects-and-overlap",
@@ -30234,7 +30613,8 @@
       "practiceTitle": "Practice. Calculate a Weighted Contrast and Inspect Large Weights",
       "outputLabel": "Inverse-probability weighted treatment contrast",
       "exampleNote": "The supplied propensities must lie strictly between zero and one."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "saving-fitted-pipelines",
@@ -30652,7 +31032,8 @@
       "practiceTitle": "Practice. Restore Predictions Without Refitting the Reference",
       "outputLabel": "Prediction from the restored procedure",
       "exampleNote": "The supplied state represents already fitted preprocessing and model parameters."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "prediction-input-contracts",
@@ -30980,7 +31361,8 @@
       "practiceTitle": "Practice. Validate Named Records and Numerical Batches",
       "outputLabel": "Column means after the batch passes validation",
       "exampleNote": "The candidate batches illustrate width and finiteness checks, not every possible data-quality rule."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "serving-predictions",
@@ -31321,7 +31703,8 @@
       "practiceTitle": "Practice. Serve Batches and Compare Individual Requests",
       "outputLabel": "Predictions in request-row order",
       "exampleNote": "This numerical example begins with validated inputs and fixed parameters."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "model-versioning",
@@ -31645,7 +32028,8 @@
       "practiceTitle": "Practice. Compare Model Versions and Their Manifests",
       "outputLabel": "Largest prediction difference across the fixtures",
       "exampleNote": "The supplied predictions illustrate a regression check on fixed test inputs."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "monitoring-and-rollback",
@@ -31973,7 +32357,8 @@
       "practiceTitle": "Practice. Measure Delayed Errors and Check Subgroups",
       "outputLabel": "Mean absolute error on the matched outcomes",
       "exampleNote": "The monitoring records are invented, with predictions and later outcomes already aligned."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-4"
   },
   {
     "id": "project-sensor-investigation",
@@ -32315,6 +32700,30 @@
         "interpretation": [
           "Your deliverable is a reproducible procedure and an evaluation record, not simply a fitted detector."
         ]
+      },
+      {
+        "title": "6. Keep a Record of the Decision, Then Add the Inspection",
+        "paragraphs": [
+          "A detector produces an alert before a person knows whether the sensor failed. Give every reading a stable identifier and store its value, score, threshold, rule version and decision. Add the inspection result later, rather than overwriting the original decision.",
+          "An uninspected reading does not mean a healthy sensor. If inspectors only examine alerts, measured precision may be available while missed failures remain unknown. Sample some non-alerts for inspection when the project needs a recall estimate. Keep these two sources of evidence separate in the report."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "7. Freeze the Reference While Scoring New Batches",
+        "paragraphs": [
+          "The reference median and median absolute deviation describe the period we chose as normal. A new extreme reading must not change those numbers while it is being scored. Otherwise, the reading can move its own threshold.",
+          "A changed production process may eventually justify a new reference period, but inspect the shift first. Store the new rule with a new version and compare its decisions with the previous one. A zero reference deviation needs an explicit policy; our function rejects it instead of dividing by zero or inventing a tolerance."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "8. Make an Inspection Report Reproducible",
+        "paragraphs": [
+          "Save the frozen rule with the values, scores and alert flags. A second program should be able to reproduce every decision using only that report. Include the strict comparison convention: a score equal to the threshold is not an alert here.",
+          "Try a fresh batch with one enormous reading. Scores for the unchanged readings should stay the same. Then try a genuinely different reference rule and explain which decisions change. The report is an inspectable record of a rule, not proof that every alert was a real fault."
+        ],
+        "interpretation": []
       }
     ],
     "practice": [
@@ -32345,6 +32754,41 @@
           "Do not adjust the threshold to fix these test mistakes.",
           "An observed error is useful evaluation evidence."
         ]
+      },
+      {
+        "title": "Can you score fresh readings without moving the reference?",
+        "question": "Can you score fresh readings without moving the reference?",
+        "task": [
+          "Implement score_alerts(values, rule), returning NumPy arrays (scores, alerts). The dictionary rule supplies centre, mad and threshold. Scores are absolute distances from centre divided by mad; alerts use a strict greater-than comparison.",
+          "Require a finite one-dimensional input, finite rule values, positive mad and nonnegative threshold. Raise ValueError otherwise. Do not refit the reference from values. Run the supplied report code and download the result."
+        ],
+        "starter": "import json\nimport numpy as np\n\ndef score_alerts(values, rule):\n    # Write the procedure here.\n    raise NotImplementedError\n\nvalues=[9,14,16,17]\nrule={'version':1,'centre':10,'mad':1,'threshold':4}\nscores,alerts=score_alerts(values,rule)\nreport_json=json.dumps({'rule':rule,'values':values,'scores':scores.tolist(),'alerts':alerts.tolist()},indent=2)\nprint(scores.tolist())\nprint(alerts.tolist())",
+        "solution": "import json\nimport numpy as np\n\ndef score_alerts(values, rule):\n    values=np.asarray(values,dtype=float)\n    centre,mad,threshold=[float(rule[k]) for k in ['centre','mad','threshold']]\n    if values.ndim!=1 or not np.isfinite(values).all() or not np.isfinite([centre,mad,threshold]).all() or mad<=0 or threshold<0:\n        raise ValueError('Invalid readings or reference rule')\n    scores=np.abs(values-centre)/mad\n    return scores,scores>threshold\n\nvalues=[9,14,16,17]\nrule={'version':1,'centre':10,'mad':1,'threshold':4}\nscores,alerts=score_alerts(values,rule)\nreport_json=json.dumps({'rule':rule,'values':values,'scores':scores.tolist(),'alerts':alerts.tolist()},indent=2)\nprint(scores.tolist())\nprint(alerts.tolist())",
+        "output": "[1.0, 4.0, 6.0, 7.0]\n[False, False, True, True]",
+        "hints": [
+          "Read centre and mad from the dictionary. Computing either from this batch would change the detector you are evaluating.",
+          "Compare the entire score array with the threshold. NumPy returns one Boolean for each reading."
+        ],
+        "tests": [
+          {
+            "name": "A different reference and boundary give the stated decisions",
+            "code": "scores,alerts=score_alerts([2,6,12],{'centre':6,'mad':2,'threshold':2})\nnp.testing.assert_allclose(scores,[2,0,3])\nnp.testing.assert_array_equal(alerts,[False,False,True])"
+          },
+          {
+            "name": "An extreme new reading cannot move earlier scores",
+            "code": "rule={'centre':10,'mad':2,'threshold':3}\na=score_alerts([8,12],rule)[0]; b=score_alerts([8,12,1000000],rule)[0]\nnp.testing.assert_array_equal(a,b[:2])"
+          },
+          {
+            "name": "Undefined reference scales are rejected",
+            "code": "for values,rule in [([1],{'centre':1,'mad':0,'threshold':4}),([float('nan')],{'centre':1,'mad':2,'threshold':4})]:\n    try: score_alerts(values,rule)\n    except ValueError: pass\n    else: raise AssertionError('Expected ValueError')"
+          }
+        ],
+        "exports": [
+          {
+            "variable": "report_json",
+            "filename": "sensor-inspection-report.json"
+          }
+        ]
       }
     ],
     "reading": {
@@ -32354,7 +32798,8 @@
       "practiceTitle": "Practice. Select an Alert Rule and Evaluate It Once",
       "outputLabel": "Alerts from the retained reference and threshold",
       "exampleNote": "The project uses invented sensor records so each fitting and evaluation boundary can be checked."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "project-demand-forecast",
@@ -32628,7 +33073,8 @@
         "title": "1. Specify Origin, Horizon, and Units",
         "paragraphs": [
           "The origin is the last moment whose readings are available. The horizon is one day in this project, and each value is demand in the same units. Decide when daily totals become available; a total published late cannot be used before publication.",
-          "Use earlier origins for method selection and reserve later origins for final comparison. Do not choose model settings from the final error table."
+          "Use earlier origins for method selection and reserve later origins for final comparison. Do not choose model settings from the final error table.",
+          "A row is not automatically a day. Keep a date beside every measurement, then check that the dates are unique, ordered and consecutive before making lag pairs. If Tuesday is missing, the row before Wednesday is Monday; treating it as yesterday changes the question without telling the model. The calendar challenge below deliberately refuses that sequence. Repairing or imputing a missing measurement requires a separate, stated rule using only information available at the forecast origin."
         ],
         "interpretation": [
           "Every fitting call below receives only the prefix ending before its target."
@@ -32688,6 +33134,45 @@
         "interpretation": [
           "Your final report should include the information boundary and failure cases, not just the better score."
         ]
+      },
+      {
+        "title": "6. Try a Record That Does Not Follow Our Rule Exactly",
+        "paragraphs": [
+          "A short, tidy record can make a fitted rule look more useful than it is. Now give Botie daily water measurements with both an upward trend and days that interrupt it. Keep the last five days for successive one-day forecasts. At each origin, train only on the prefix that would have existed then.",
+          "Compare the learned lag rule with persistence on exactly the same dates. Keep every error before taking an average. If the learned model loses, report that result. The purpose of this project is to discover whether fitting helped, not to arrange a victory for the fitted model."
+        ],
+        "calculation": "Litres by day: [8,10,9,13,12,16,14,19,13,18]\nFirst forecast: index 5, using indices 0 through 4\nNext forecast: index 6, using indices 0 through 5",
+        "interpretation": [
+          "These are invented measurements. A result on this sequence is an implementation check, not evidence of performance at a real greenhouse."
+        ]
+      },
+      {
+        "title": "7. Make the Information Boundary Part of the Function",
+        "paragraphs": [
+          "Write rolling_report so the function receives the complete sequence but slices a fresh training prefix inside each iteration. That makes the boundary visible in one place. Pair each previous reading with the following reading inside that prefix; never pair the final training reading with the hidden target while fitting.",
+          "Return a dictionary of named lists: origins, actual, predicted and baseline. Their matching positions describe the same forecast. Add the two mean absolute errors in the stated order. A dictionary is useful here because an unnamed tuple makes it easy to mistake actual values for predictions.",
+          "Change only the very last observation and run the function again. All predictions should stay unchanged, while the last actual value and measured error can change. This test checks the procedure rather than whether one printed answer looks plausible."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "8. Save Enough to Reproduce a Forecast",
+        "paragraphs": [
+          "For the final evaluation date, save the intercept, lag coefficient, previous-day reading and final training index. Record feature order, units and a format version alongside the parameters. These values let another program reproduce that particular forecast.",
+          "The downloadable JSON report also contains all forecast origins, predictions, targets and baseline errors. JSON represents a dictionary as named fields and NumPy arrays as ordinary lists. Convert values to Python numbers before serializing. Do not include a Python object that only the original process knows how to reconstruct."
+        ],
+        "calculation": "saved prediction = intercept + lag_coefficient × last_input",
+        "interpretation": [
+          "This saved model was fitted before the final evaluation target. A deployment model might later be refitted on more observations; give that model a new record rather than silently replacing the evaluated one."
+        ]
+      },
+      {
+        "title": "9. Decide What the Errors Tell Us to Try Next",
+        "paragraphs": [
+          "Inspect the largest date-level errors. Did both rules miss a sudden change, or did the fitted rule amplify a temporary increase? A weather measurement might explain a change, but only use a weather value that would have been available when the forecast was made.",
+          "Keep a later period untouched while choosing features and settings. Repeatedly choosing whichever rule wins on these five dates turns this small evaluation into training feedback. The final report should state the time boundary, the baseline comparison and a specific next experiment, including a disappointing result when that is what the measurements show."
+        ],
+        "interpretation": []
       }
     ],
     "practice": [
@@ -32718,6 +33203,75 @@
           "Separate the two error directions.",
           "Zero the direction that did not occur on each day."
         ]
+      },
+      {
+        "title": "Does the record really contain one measurement per day?",
+        "question": "Does the record really contain one measurement per day?",
+        "task": [
+          "Implement daily_values(dates, values). Return a copy of values as a one-dimensional float array only when both inputs are matching one-dimensional sequences with at least two entries, every value is finite, and the dates form a consecutive daily sequence in the supplied order.",
+          "Use NumPy datetime64[D] for the dates. Reject missing dates, repeated dates, reversed dates, missing measurements or mismatched lengths with ValueError. Do not sort, fill or remove records silently. The later forecast procedure assumes this check has already succeeded."
+        ],
+        "starter": "import numpy as np\n\ndef daily_values(dates, values):\n    # Write the procedure here.\n    raise NotImplementedError\n\nprint(daily_values(['2026-09-01','2026-09-02','2026-09-03'],[8,10,9]).tolist())\ntry:\n    daily_values(['2026-09-01','2026-09-03'],[8,9])\nexcept ValueError:\n    print('Missing or repeated calendar day')",
+        "solution": "import numpy as np\n\ndef daily_values(dates, values):\n    dates=np.asarray(dates,dtype='datetime64[D]')\n    values=np.asarray(values,dtype=float)\n    if dates.ndim!=1 or values.ndim!=1 or len(dates)!=len(values) or len(values)<2:\n        raise ValueError('Use matching daily records')\n    if np.isnat(dates).any() or not np.isfinite(values).all():\n        raise ValueError('Missing or invalid record')\n    if not np.all(np.diff(dates)==np.timedelta64(1,'D')):\n        raise ValueError('Missing or repeated calendar day')\n    return values.copy()\n\nprint(daily_values(['2026-09-01','2026-09-02','2026-09-03'],[8,10,9]).tolist())\ntry:\n    daily_values(['2026-09-01','2026-09-03'],[8,9])\nexcept ValueError:\n    print('Missing or repeated calendar day')",
+        "output": "[8.0, 10.0, 9.0]\nMissing or repeated calendar day",
+        "hints": [
+          "Subtract neighbouring dates with np.diff. Every difference must be exactly one day, including across a month boundary.",
+          "A NaT date and a non-finite measurement need rejection before fitting. An absent day cannot be recovered by compressing the array."
+        ],
+        "tests": [
+          {
+            "name": "A month boundary is still one day",
+            "code": "values=np.array([3.,4.,5.]); result=daily_values(['2026-09-30','2026-10-01','2026-10-02'],values)\nnp.testing.assert_array_equal(result,values)\nresult[0]=100\nassert values[0]==3"
+          },
+          {
+            "name": "Gaps, duplicates and reversed dates are rejected",
+            "code": "for dates in [['2026-09-01','2026-09-03'],['2026-09-01','2026-09-01'],['2026-09-02','2026-09-01']]:\n    try: daily_values(dates,[1,2])\n    except ValueError: pass\n    else: raise AssertionError('Expected ValueError')"
+          },
+          {
+            "name": "Missing values and mismatched records cannot reach the model",
+            "code": "for dates,values in [(['NaT','2026-09-02'],[1,2]),(['2026-09-01','2026-09-02'],[1,float('nan')]),(['2026-09-01','2026-09-02'],[1])]:\n    try: daily_values(dates,values)\n    except ValueError: pass\n    else: raise AssertionError('Expected ValueError')"
+          }
+        ]
+      },
+      {
+        "title": "Can you produce a forecast report that another program can verify?",
+        "question": "Can you produce a forecast report that another program can verify?",
+        "task": [
+          "Implement rolling_report(y, start). For each origin from start to the final index, fit an intercept and one lag coefficient with np.linalg.lstsq on y[:origin]. Return origins, actual, predicted, baseline and mae as Python lists. The mae list must contain persistence first and the fitted rule second.",
+          "Also return model with version=1, units=litres, feature_order=[previous_day_litres], intercept, lag_coefficient, last_input and training_end_index from the final fit. Require a finite one-dimensional sequence and an integer start from 3 through len(y)-1. Reject a training prefix whose lag inputs do not vary. Raise ValueError for these invalid inputs.",
+          "The supplied final lines create report_json. After running the program, download the report and check which method performed better."
+        ],
+        "starter": "import json\nimport numpy as np\n\ndef rolling_report(y, start):\n    # Write the procedure here.\n    raise NotImplementedError\n\nreport=rolling_report([8,10,9,13,12,16,14,19,13,18],5)\nreport['dataset']='Invented greenhouse water measurements'\nreport['horizon_days']=1\nreport_json=json.dumps(report,indent=2,allow_nan=False)\nprint(report['origins'])\nprint(np.round(report['mae'],3).tolist())",
+        "solution": "import json\nimport numpy as np\n\ndef rolling_report(y, start):\n    y=np.asarray(y,dtype=float)\n    if y.ndim!=1 or not np.isfinite(y).all():\n        raise ValueError('Use a finite one-dimensional sequence')\n    if not isinstance(start,(int,np.integer)) or isinstance(start,(bool,np.bool_)) or not 3<=start<len(y):\n        raise ValueError('Invalid first forecast index')\n    report={key:[] for key in ['origins','actual','predicted','baseline']}\n    for origin in range(start,len(y)):\n        history=y[:origin]\n        if np.ptp(history[:-1])==0:\n            raise ValueError('Lag inputs must vary')\n        X=np.column_stack([np.ones(origin-1),history[:-1]])\n        coefficients=np.linalg.lstsq(X,history[1:],rcond=None)[0]\n        report['origins'].append(int(origin))\n        report['actual'].append(float(y[origin]))\n        report['predicted'].append(float(coefficients[0]+coefficients[1]*history[-1]))\n        report['baseline'].append(float(history[-1]))\n    actual=np.array(report['actual'])\n    report['mae']=[float(np.mean(np.abs(actual-np.array(report[key])))) for key in ['baseline','predicted']]\n    report['model']={'version':1,'units':'litres','feature_order':['previous_day_litres'],\n        'intercept':float(coefficients[0]),'lag_coefficient':float(coefficients[1]),\n        'last_input':float(history[-1]),'training_end_index':int(origin-1)}\n    return report\n\nreport=rolling_report([8,10,9,13,12,16,14,19,13,18],5)\nreport['dataset']='Invented greenhouse water measurements'\nreport['horizon_days']=1\nreport_json=json.dumps(report,indent=2,allow_nan=False)\nprint(report['origins'])\nprint(np.round(report['mae'],3).tolist())",
+        "output": "[5, 6, 7, 8, 9]\n[4.4, 4.343]",
+        "hints": [
+          "The rows used for fitting are history[:-1] and history[1:]. The forecast input is history[-1], whose next value is still hidden.",
+          "The last saved training index is the last forecast origin minus one. The model fields must come from that last fit."
+        ],
+        "tests": [
+          {
+            "name": "A changed final target cannot change predictions",
+            "code": "a=np.array([3.,7.,4.,9.,8.,12.,6.]); b=a.copy(); b[-1]=1000\nx=rolling_report(a,3); y=rolling_report(b,3)\nnp.testing.assert_allclose(x['predicted'],y['predicted'])\nassert x['actual'][-1]!=y['actual'][-1]"
+          },
+          {
+            "name": "Every forecast uses its own training prefix",
+            "code": "y=np.array([2.,5.,4.,8.,6.,11.]); r=rolling_report(y,3)\nassert r['origins']==[3,4,5]\nfor i,origin in enumerate(r['origins']):\n    h=y[:origin]; slope=np.sum((h[:-1]-h[:-1].mean())*(h[1:]-h[1:].mean()))/np.sum((h[:-1]-h[:-1].mean())**2)\n    expected=h[1:].mean()+slope*(h[-1]-h[:-1].mean())\n    np.testing.assert_allclose(r['predicted'][i],expected)\nnp.testing.assert_allclose(r['mae'],[np.mean(np.abs(y[3:]-r[k])) for k in ['baseline','predicted']])"
+          },
+          {
+            "name": "The saved model reproduces the last reported forecast",
+            "code": "r=json.loads(json.dumps(rolling_report([4,7,5,10,8,12],3)))\nm=r['model']; assert m['training_end_index']==4\nassert m['feature_order']==['previous_day_litres'] and m['units']=='litres'\nnp.testing.assert_allclose(m['intercept']+m['lag_coefficient']*m['last_input'],r['predicted'][-1])"
+          },
+          {
+            "name": "Invalid information boundaries are rejected",
+            "code": "for y,start in [([1,2,3],3),([1,2,3,4],2.5),([1,2,float('nan'),4],3),([1,1,1,3],3)]:\n    try: rolling_report(y,start)\n    except ValueError: pass\n    else: raise AssertionError('Expected ValueError')"
+          }
+        ],
+        "exports": [
+          {
+            "variable": "report_json",
+            "filename": "greenhouse-forecast-report.json"
+          }
+        ]
       }
     ],
     "reading": {
@@ -32727,7 +33281,8 @@
       "practiceTitle": "Practice. Compare Rolling Forecasts and Decision Costs",
       "outputLabel": "Mean absolute error for each forecasting procedure",
       "exampleNote": "The water-demand project uses invented daily readings, in time order."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   },
   {
     "id": "project-seed-counting",
@@ -33086,6 +33641,30 @@
         "interpretation": [
           "The project is complete when its procedure and limits can be reproduced, including images where it fails."
         ]
+      },
+      {
+        "title": "6. Make a Test Collection That Can Disagree with Us",
+        "paragraphs": [
+          "Our small pixel example checks the arithmetic. A useful counting project also needs images where the assumption of separated bright seeds is wrong. Collect dim seeds, touching seeds, dust, shadows and seeds clipped by the image boundary. Record a human count for each image and describe the counting convention for partial seeds.",
+          "Separate development images, used to choose a threshold and minimum area, from untouched evaluation images. Several crops from the same photograph should stay together so almost identical regions do not appear on both sides. Report count errors by scene condition, not only one average."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "7. Keep the Mask and Regions Beside the Count",
+        "paragraphs": [
+          "When a count is wrong, the final integer rarely tells us why. Save the threshold mask, connected-region labels and each region’s area. A missing dim seed disappears in the mask. Two touching seeds can survive the mask but share one region. Dust can appear as tiny separate regions.",
+          "Our four-neighbour search joins pixels through shared edges. It deliberately leaves diagonal contact separate. The next challenge asks you to implement that search with a stack of pixel coordinates, a Boolean visited array and a list of region sizes. Those data structures each have a distinct job."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "8. Know When a Threshold Cannot Supply the Missing Information",
+        "paragraphs": [
+          "Lowering a threshold might recover a dim seed while admitting more background. Increasing a size cutoff can remove dust while discarding a small real seed. Neither adjustment can reliably separate two objects that form one bright region.",
+          "The next experiment might change lighting, use shape information to split a region, or train a segmentation model with labelled images. Preserve the failed examples when making that decision. They explain why a more complicated method is needed and give it a fair test."
+        ],
+        "interpretation": []
       }
     ],
     "practice": [
@@ -33116,6 +33695,45 @@
           "Signed errors preserve the direction of failure.",
           "A zero mean signed error could hide opposite mistakes."
         ]
+      },
+      {
+        "title": "Can you find the connected seeds in a new mask?",
+        "question": "Can you find the connected seeds in a new mask?",
+        "task": [
+          "Implement component_sizes(mask). Require a two-dimensional Boolean NumPy array, use four-neighbour connectivity and return a sorted Python list of foreground region sizes. An empty or entirely background image returns []. Reject other dimensions or non-Boolean data with ValueError, and do not modify the input.",
+          "The supplied example converts intensities into a mask, filters regions by area and writes a report. The extra tests include diagonal contact, a ring, and empty images so memorising this example cannot pass."
+        ],
+        "starter": "import json\nimport numpy as np\n\ndef component_sizes(mask):\n    # Write the procedure here.\n    raise NotImplementedError\n\nimage=np.array([[0,8,8,0],[0,8,0,9],[0,0,0,0],[7,7,0,6]])\nmask=image>5\nareas=component_sizes(mask)\ncount=sum(area>=2 for area in areas)\nreport_json=json.dumps({'threshold':5,'minimum_area':2,'connectivity':4,'image':image.tolist(),'mask':mask.tolist(),'areas':areas,'count':count},indent=2)\nprint(areas)\nprint(count)",
+        "solution": "import json\nimport numpy as np\n\ndef component_sizes(mask):\n    mask=np.asarray(mask)\n    if mask.ndim!=2 or mask.dtype!=np.bool_:\n        raise ValueError('Use a two-dimensional Boolean mask')\n    seen=np.zeros_like(mask)\n    rows,cols=mask.shape\n    sizes=[]\n    for r in range(rows):\n        for c in range(cols):\n            if not mask[r,c] or seen[r,c]: continue\n            stack=[(r,c)]; seen[r,c]=True; size=0\n            while stack:\n                y,x=stack.pop(); size+=1\n                for ny,nx in [(y-1,x),(y+1,x),(y,x-1),(y,x+1)]:\n                    if 0<=ny<rows and 0<=nx<cols and mask[ny,nx] and not seen[ny,nx]:\n                        seen[ny,nx]=True\n                        stack.append((ny,nx))\n            sizes.append(size)\n    return sorted(sizes)\n\nimage=np.array([[0,8,8,0],[0,8,0,9],[0,0,0,0],[7,7,0,6]])\nmask=image>5\nareas=component_sizes(mask)\ncount=sum(area>=2 for area in areas)\nreport_json=json.dumps({'threshold':5,'minimum_area':2,'connectivity':4,'image':image.tolist(),'mask':mask.tolist(),'areas':areas,'count':count},indent=2)\nprint(areas)\nprint(count)",
+        "output": "[1, 1, 2, 3]\n2",
+        "hints": [
+          "Mark a pixel visited when placing it on the stack, so two neighbours cannot add it twice.",
+          "Finish one stack before searching for the next unvisited foreground pixel. Each completed stack gives one region size."
+        ],
+        "tests": [
+          {
+            "name": "Diagonal contact does not join four-neighbour regions",
+            "code": "assert component_sizes(np.eye(4,dtype=bool))==[1,1,1,1]"
+          },
+          {
+            "name": "A ring is one region and input data stays unchanged",
+            "code": "mask=np.ones((3,3),dtype=bool); mask[1,1]=False; before=mask.copy()\nassert component_sizes(mask)==[8]\nnp.testing.assert_array_equal(mask,before)"
+          },
+          {
+            "name": "Empty and background masks have no regions",
+            "code": "assert component_sizes(np.zeros((0,4),dtype=bool))==[]\nassert component_sizes(np.zeros((3,4),dtype=bool))==[]"
+          },
+          {
+            "name": "Invalid masks are rejected",
+            "code": "for mask in [np.array([True,False]),np.array([[0,1]])]:\n    try: component_sizes(mask)\n    except ValueError: pass\n    else: raise AssertionError('Expected ValueError')"
+          }
+        ],
+        "exports": [
+          {
+            "variable": "report_json",
+            "filename": "seed-counting-report.json"
+          }
+        ]
       }
     ],
     "reading": {
@@ -33125,6 +33743,7 @@
       "practiceTitle": "Practice. Count Regions and Measure Counting Errors",
       "outputLabel": "Number of regions meeting the area rule",
       "exampleNote": "The tray image is invented; a connected bright region is only a seed under the stated assumptions."
-    }
+    },
+    "quizId": "questions-on-parts-1-to-5"
   }
 ]

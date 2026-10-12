@@ -20,6 +20,7 @@ export interface Build {
   recipe: Expression;
   extras?: string[];
   limitation?: string;
+  hints?: string[];
   // Start a separate saved draft when a challenge's inputs or objective change.
   draftVersion?: number;
   // Pixel previews accompany the numerical editor for image-based examples.
