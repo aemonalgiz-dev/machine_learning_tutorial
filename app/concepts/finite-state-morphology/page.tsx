@@ -36,6 +36,7 @@ export default function FiniteStateMorphologyPage() {
       intuition={lessonIntuitions["finite-state-morphology"]}
       technicalStart="Part 2. A Grammar Is a Machine"
       openingTitle="Write Down How the Word Is Built"
+      playgroundTitle="Which paths can read this word?"
       playgroundIntro="Trace a word through the allowed stems and endings. Compare a recognised form, an unfamiliar form, and a form with more than one possible analysis."
       title="Finite-State Morphology"
       tagline={"A word's spelling can reflect a stem, an ending, and a rule that changes how they join. Finite-state morphology describes those relationships explicitly so we can analyse forms and generate them from their components."}
@@ -216,7 +217,7 @@ export default function FiniteStateMorphologyPage() {
                     "a reading  =  steps s₁ … sₖ  with  spelling(s₁) + … + spelling(sₖ) = the word"
                   }
                 </Equation>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why consuming a character on every step makes the search finish">
                   <>
 <p>
                     The requirement that every step reads at least one character is the reason the search finishes. Each step moves strictly to the right in the word, so no run of steps can be longer than the word is, and a state that leads back to itself cannot be visited forever. Machines of this kind normally allow a step that reads nothing, and then a loop of such steps has to be detected and removed before anything can be walked.
@@ -373,7 +374,7 @@ export default function FiniteStateMorphologyPage() {
                   time with the end as its next state says the same thing and
                   cannot loop.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Two ways to let a word end after its stem">
                   <p>
                     The two are the same claim. A step reading nothing from the
                     verb ending state to the end says a word may finish after the
@@ -983,7 +984,7 @@ export default function FiniteStateMorphologyPage() {
         ],
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. Who Decides Which Analyses Belong in the Grammar?" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="21. There is no fact the grammar can be checked against">
@@ -1130,18 +1131,11 @@ export default function FiniteStateMorphologyPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs and questions on
-                  which the method stops being defined rather than becoming
-                  approximate, with what has to be decided in each case and what
-                  turns on the decision. The ones worth a reader&rsquo;s attention
-                  are the decisions, since those are what anybody writing a grammar
-                  has to make and nothing in the method makes them.
-                </p>
+              <SubSection title="25. Unknown stems, competing analyses and grammar choices" id="25-where-the-method-has-nothing-to-say">
+                <p>The search can only find analyses that the grammar describes. An unknown stem, several valid analyses and a grammar with no accepting path are different situations. We need to decide how each should be reported to the person using the analyser.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Word or grammar condition"
+                  reasonHeading="Which analyses remain possible"
                   rows={[
                     {
                       expression: "a word no path spells",

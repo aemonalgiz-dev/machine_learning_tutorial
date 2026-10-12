@@ -38,6 +38,7 @@ export default function FeatureScalingPage() {
       intuition={lessonIntuitions["feature-scaling"]}
       technicalStart="Part 2. One Map, Two Numbers"
       openingTitle="The Same Person, a Different Unit, a Different Answer"
+      playgroundTitle="Compare the same measurements under different scales"
       playgroundIntro="Compare the raw and transformed values. Pay attention to how one large observation changes the scale and how the model's answer responds."
       title="Feature Scaling"
       tagline={"A distance calculation can be dominated by a feature simply because its numbers are larger. We will look at how scaling changes that calculation and why some models are affected more than others."}
@@ -276,7 +277,7 @@ export default function FeatureScalingPage() {
                   through the map.
                 </p>
                 <Equation>{"zᵢ = (xᵢ − m) / s\nmean(z) = (1/n) Σ (xᵢ − m) / s = (1/s) · (m − m) = 0\nvar(z)  = (1/n) Σ (xᵢ − m)² / s² = s² / s² = 1"}</Equation>
-                <WhyThisWorks>
+                <WhyThisWorks title="Checking the mean and variance after standardisation">
                   <p>
                     The first line is the map. The second says the deviations
                     from a mean always cancel, the statistics primer&rsquo;s
@@ -887,23 +888,13 @@ export default function FeatureScalingPage() {
         ],
         },
         {
-          title: "Part 6. Implementation and Failure Contracts",
+          title: "Part 6. Reusing the Fitted Reference on Later Data" , id: "part-6-implementation-and-failure-contracts",
           content: (
             <>
               <SubSection title="23. What a scaler must specify">
-                <p>
-                  A complete implementation states how the centre and the
-                  spread are read, including the population or sample divisor
-                  for a standard deviation and the interpolation rule for a
-                  quartile; that the fit reads the training rows only and the
-                  transform reuses those numbers; how columns are matched,
-                  which is by name here, and whether a subset is accepted;
-                  what a zero spread does, which is refuse rather than
-                  substitute a one; that an inverse exists and what its round
-                  trip costs; and what happens to a value outside the fitted
-                  range, which is that it is scaled by the same map and lands
-                  wherever that puts it.
-                </p>
+                <p>A transformed value depends on how its reference was fitted. For a standard deviation, record the population or sample divisor. For a quartile, record the interpolation rule. Fit those references on the training rows, then reuse them for later data.</p>
+                <p>This implementation matches columns by name. Check whether a requested subset is accepted, and remember that a zero spread is refused rather than silently replaced by one. A value outside the fitted range still follows the same map, even when its scaled value lies beyond that range.</p>
+                <p>The inverse should recover the original units. Its round-trip error tells us what numerical precision was lost in applying and reversing the transformation.</p>
                 <KeepInMind>
                   Two of those are where implementations part company
                   silently. A sample divisor gives a standardized variance of
@@ -912,7 +903,7 @@ export default function FeatureScalingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. The edges, each one asked">
+              <SubSection title="24. Constant columns, new extremes and invalid readings" id="24-the-edges-each-one-asked">
                 <p>
                   Every row below was tried rather than reasoned about, and the
                   widget under the table tries the same list again on every
@@ -920,8 +911,8 @@ export default function FeatureScalingPage() {
                   so.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Feature column condition"
+                  reasonHeading="What the scaler can compute"
                   rows={[
                     { expression: "no features at all", reason: "refused before anything is read, since there is nothing to learn a centre from." },
                     { expression: "an empty column", reason: "refused, since a column is required to hold at least one value." },

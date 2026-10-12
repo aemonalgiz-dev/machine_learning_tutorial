@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["autoencoders"]}
     technicalStart="Part 2. Calculate a Bottleneck We Can See"
     prerequisites={<>Useful foundations: <Link href="/concepts/dense-layers">Dense layers</Link>{", "}<Link href="/concepts/loss-functions">loss functions</Link>{", "}<Link href="/concepts/pca">principal components</Link>.</>}
+    playgroundTitle="What can the model recover from a smaller code?"
     playgroundIntro="Start with equal readings, then move the offset slider. The average and compressed code stay fixed. Compare the input with the reconstruction to see which information the bottleneck discarded."
     playground={<ModernLearningExample topic="autoencoders" />}
     sections={[

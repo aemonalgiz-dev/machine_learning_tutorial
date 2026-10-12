@@ -43,6 +43,7 @@ export default function LogisticRegressionPage() {
       intuition={lessonIntuitions["logistic-regression"]}
       technicalStart="Part 2. Score, Probability, and Decision"
       openingTitle="A Prediction Between Yes and No"
+      playgroundTitle="Turn a height measurement into a probability"
       playgroundIntro="Read the score, probability, and predicted class as three different quantities. Move the query point and watch where the class changes."
       title="Logistic Regression"
       tagline={"Suppose our answer needs to be yes or no. We can first estimate a probability from the measurements, then decide how large that probability needs to be before we choose yes."}

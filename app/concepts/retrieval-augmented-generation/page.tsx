@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["retrieval-augmented-generation"]}
     technicalStart="Part 2. Calculate a Small Retrieval Baseline"
     prerequisites={<>Useful foundations: <Link href="/concepts/pooling-a-text">Text vector pooling</Link>{", "}<Link href="/concepts/distance-and-similarity">distance and similarity</Link>{", "}<Link href="/concepts/autoregressive-generation">autoregressive generation</Link>.</>}
+    playgroundTitle="Which passages could help answer this question?"
     playgroundIntro="Search for library Saturday, then try renew and elephant. Inspect the source identifiers and passage text beside each score. The example returns only positive word-overlap matches and stops before language-model generation."
     playground={<ModernLearningExample topic="retrieval-augmented-generation" />}
     sections={[

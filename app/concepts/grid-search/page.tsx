@@ -38,6 +38,7 @@ export default function GridSearchPage() {
       intuition={lessonIntuitions["grid-search"]}
       technicalStart="Part 2. The Grid"
       openingTitle="The Fit Cannot Choose Every Setting"
+      playgroundTitle="Compare settings on the same validation folds"
       playgroundIntro="Compare the candidates on the same folds. Read the winning validation score alongside the separate test result, since they answer different questions."
       title="Searching for a Setting"
       tagline={"Many model settings must be chosen before fitting. We need a fair way to compare those choices using training and validation data, while keeping the final test separate from the decision."}
@@ -929,10 +930,10 @@ export default function GridSearchPage() {
         ],
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Making Every Candidate Face the Same Test" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="23. What a complete implementation specifies">
+              <SubSection title="23. Candidate ranges, validation folds and the final refit" id="23-what-a-complete-implementation-specifies">
                 <p>
                   A search states its deal and its rules in full. Which model
                   and which of its dials are varied, and that the names are
@@ -960,7 +961,7 @@ export default function GridSearchPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. Where a search stops being defined">
+              <SubSection title="24. Candidates we cannot compare on the supplied folds" id="24-where-a-search-stops-being-defined">
                 <p>
                   A grid search is three things stacked, a deal of the folds, a
                   fit on each fold, and a score, and each of the three needs
@@ -971,8 +972,8 @@ export default function GridSearchPage() {
                   with what the mathematics says in each.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Candidate or evaluation data"
+                  reasonHeading="Whether the comparison is meaningful"
                   rows={[
                     { expression: "fewer than two people", reason: "there is nothing to deal. Cross-validation asks for a part to fit on and a part to judge on, and one person can be only one of the two." },
                     { expression: "a fold holding one person", reason: "the coefficient of determination compares the misses against the spread of the target, and one number has no spread, so the score is a zero over a zero. Four people over three folds reaches this on every fold at once." },
@@ -1251,7 +1252,7 @@ except MLLibError as refusal:
               `InvalidValuesError: KNearestNeighboursRegressor has no hyperparameter 'n_neighbors'; it has ['metric', 'n_neighbours']
 EmptyValuesError: the range for 'n_neighbours' holds no values, so the grid would be empty
 TooFewValuesError: 7 neighbours were asked for and only 6 rows were supplied`,
-              { hints: ["Every refusal the library makes derives from MLLibError, so one except clause serves all three attempts.", "The first two never reach a search. The space checks the dial’s name against the model’s declared fields, and its range for emptiness, as it is built.", "The third space builds without complaint, since seven is a legal neighbour count. It is the fit inside a fold that refuses, so the search call belongs inside the try as well."] },
+              { hints: ["The first two never reach a search. The space checks the dial’s name against the model’s declared fields, and its range for emptiness, as it is built.", "The third space builds without complaint, since seven is a legal neighbour count. It is the fit inside a fold that refuses, so the search call belongs inside the try as well."] },
             ),
             exercise(
               "Search two dials at once, and score that winner honestly",

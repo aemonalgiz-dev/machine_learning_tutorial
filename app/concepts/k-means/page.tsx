@@ -38,6 +38,7 @@ export default function KMeansPage() {
       intuition={lessonIntuitions["k-means"]}
       technicalStart="Part 2. The Two Steps and the Number They Lower"
       openingTitle="Find the Groups Before Anyone Names Them"
+      playgroundTitle="Watch observations choose their nearest centre"
       playgroundIntro="Step through assignment and centre updates separately. Compare the final groups after changing the starting centres or the requested number of groups."
       title="k-Means Clustering"
       tagline={"We may want to group similar observations without having labels for those groups. K-means uses nearby centres to assign the observations, then moves the centres to better represent their assigned points."}
@@ -622,7 +623,7 @@ export default function KMeansPage() {
         ],
         },
         {
-          title: "Part 5. Where the Method Fails",
+          title: "Part 5. When Nearest-Centre Groups Do Not Fit the Data" , id: "part-5-where-the-method-fails",
           content: (
             <>
               <SubSection title="17. The shape it can find is round">
@@ -822,23 +823,13 @@ export default function KMeansPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. Implementation and failure contracts">
-                <p>
-                  A complete implementation states the number of groups, the
-                  seeding rule, how many starts it runs and how it chooses
-                  among them, the pass limit and the tolerance that ends a
-                  walk, that the distance is squared Euclidean, what it does
-                  with an empty group, how a tie in assignment breaks, and
-                  which of the labels, centres, inertia, pass count and sizes
-                  it returns. Here the defaults are ten starts from a seeding
-                  by spread, at most three hundred passes each, stopping when
-                  no centre&rsquo;s squared movement exceeds one part in a
-                  hundred million, and the fit the playground shows is seeded
-                  so the page can quote it.
-                </p>
+              <SubSection title="25. Record initial centres, assignments and convergence rules" id="25-implementation-and-failure-contracts">
+                <p>The requested number of clusters does not fully identify a fit. Initial centres, the number of starts, the rule for choosing a winning start and the stopping conditions all affect the result. Here distance is squared Euclidean; empty groups and tied assignments still need explicit handling.</p>
+                <p>The defaults use ten starts with spread-based seeding and at most three hundred passes per start. A run stops when no centre has a squared movement greater than one part in a hundred million. The playground uses a fixed seed so its numbers can be reproduced.</p>
+                <p>Keep the labels, centres, inertia, pass count and group sizes available together. They tell us where the observations went, how much within-group variation remains and how the run ended.</p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Points or clustering setting"
+                  reasonHeading="Effect on centres and assignments"
                   rows={[
                     { expression: "no features at all", reason: "refused at the boundary, the same guard every model here shares." },
                     { expression: "a missing or non-finite value", reason: "refused before any centre is placed; a feature must contain only finite values." },

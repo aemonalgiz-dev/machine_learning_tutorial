@@ -35,6 +35,7 @@ export default function WhatATokenIsPage() {
       intuition={lessonIntuitions["what-a-token-is"]}
       technicalStart="Part 2. What a Vocabulary Promises"
       openingTitle="How Can Our Models Read Language?"
+      playgroundTitle="Turn a sentence into IDs and read it back"
       playgroundIntro="Compare the text pieces with their IDs, then inspect the decoded text. An exact round trip depends on which information the scheme retained."
       title="What a Token Is"
       tagline={"We can read the word cat, but a numerical model needs a representation it can process. A tokenizer divides text into pieces and maps those pieces to IDs, giving us a starting point for working with language."}
@@ -107,7 +108,7 @@ export default function WhatATokenIsPage() {
                     "encoding    =  the tokens one text became, in order"}
                 </Equation>
                 <p>
-                  Cutting the running sentence at every space gives seven
+                  Cutting the sentence about Dr. Alvarez at every space gives seven
                   pieces, and against the table Part 2 builds those seven pieces
                   carry the numbers 3, 2, 14, 19, 43, 28 and 32. A model sees
                   only that second list. Everything it will ever know about the
@@ -235,7 +236,7 @@ export default function WhatATokenIsPage() {
                   next, and every occurrence would be a fresh start.
                 </p>
                 <p>
-                  Encoding the running sentence and a second sentence from the
+                  Encoding the sentence about Dr. Alvarez and a second sentence from the
                   same six shows it. The word{" "}
                   <span className="font-mono">the</span> is the fifth piece of
                   the first and the tenth piece of the second, and it carries
@@ -288,7 +289,7 @@ export default function WhatATokenIsPage() {
                   What varies between schemes is only the glue, and for the
                   whole-word scheme here the glue is a single space, which turns
                   out in Part 5 to be the thing that stops the round trip being
-                  exact. Running both halves on the running sentence gives back
+                  exact. Running both halves on the sentence about Dr. Alvarez gives back
                   the sentence character for character, under both cutting
                   rules.
                 </p>
@@ -437,7 +438,7 @@ export default function WhatATokenIsPage() {
                 <p>
                   The other end of the trade is to make every run of
                   non-space characters an entry. The six sentences give 47 of
-                  those, and the running sentence becomes seven numbers. Each
+                  those, and the sentence about Dr. Alvarez becomes seven numbers. Each
                   number now carries a great deal, since{" "}
                   <span className="font-mono">low-cost</span> arrives as one
                   thing rather than as eight characters a model must reassemble.
@@ -468,7 +469,7 @@ export default function WhatATokenIsPage() {
 
               <SubSection title="10. Sequence length is what everything downstream pays in">
                 <p>
-                  The running sentence is 51 numbers one way and 7 the other, a
+                  The sentence about Dr. Alvarez is 51 numbers one way and 7 the other, a
                   little over seven times as many, on the same writing. That
                   ratio is the second of the two numbers a scheme is judged on,
                   and it is the one a model&rsquo;s running cost is measured
@@ -491,7 +492,7 @@ export default function WhatATokenIsPage() {
                     A model that lets every position read every other position
                     does a piece of work for each pair of positions, so its cost
                     grows with the square of the sequence length. Counting the
-                    pairs for the running sentence under each rule shows what
+                    pairs for the sentence about Dr. Alvarez under each rule shows what
                     that does to a ratio of seven.
                   </p>
                   <Equation>
@@ -577,7 +578,7 @@ export default function WhatATokenIsPage() {
               "The 375 characters of these six sentences are drawn from an alphabet that was nearly complete after four of them. Any list of words drawn from a finite corpus is missing the next sentence’s words, which is the growth Heaps described, rising as a power of the amount of text read and slowing without ever flattening.",
             ),
             choice(
-              "The running sentence is 51 numbers under the character rule and 7 under the whole-word rule. For a model that lets every position read every other position, what does that ratio cost?",
+              "The sentence about Dr. Alvarez is 51 numbers under the character rule and 7 under the whole-word rule. For a model that lets every position read every other position, what does that ratio cost?",
               [
                 "Roughly fifty times the work, since the work grows with the square of the sequence length",
                 "About seven times the work",
@@ -827,7 +828,7 @@ export default function WhatATokenIsPage() {
                 </p>
                 <RoundTripTable />
                 <p>
-                  The running sentence comes back exactly under both rules, and
+                  The sentence about Dr. Alvarez comes back exactly under both rules, and
                   it is the weakest of the three cases, since it has one space
                   between every pair of words and uses only pieces the six
                   sentences already held. The two texts below it are where the
@@ -842,7 +843,7 @@ export default function WhatATokenIsPage() {
 
               <SubSection title="18. The spacing the word scheme never held">
                 <p>
-                  The second text is the running sentence with one doubled space
+                  The second text is the sentence about Dr. Alvarez with one doubled space
                   and one line break in place of a space. Under the whole-word
                   rule it still becomes the same seven numbers, none of them
                   unseen, and it still decodes without complaint. What comes
@@ -925,7 +926,7 @@ export default function WhatATokenIsPage() {
           ),
         },
         {
-          title: "Part 6. Where the Idea Stops Being Defined",
+          title: "Part 6. Unknown Pieces, Invalid IDs and Text We Cannot Recover", id: "part-6-where-the-idea-stops-being-defined",
           content: (
             <>
               <SubSection title="21. The four things any scheme has to settle">
@@ -987,7 +988,7 @@ export default function WhatATokenIsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="22. What is undefined, and what has to be chosen">
+              <SubSection title="22. Vocabulary rules that an integer ID cannot decide" id="22-what-is-undefined-and-what-has-to-be-chosen">
                 <p>
                   Some of what a scheme has to settle is a genuine choice
                   between defensible answers, and some of it is a case where the
@@ -996,8 +997,8 @@ export default function WhatATokenIsPage() {
                   gathers both, with what the mathematics says in each.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Piece, ID or empty input"
+                  reasonHeading="What encoding and decoding can return"
                   rows={[
                     {
                       expression: "a piece the list does not hold",
@@ -1104,7 +1105,7 @@ export default function WhatATokenIsPage() {
           practice: [
             exercise(
               "Build the whole-word table and number two sentences",
-              ["Build the table Part 2 reads from. Count the pieces the six sentences give when they are cut at spaces, sort the distinct ones alphabetically, and put the stand-in in front so that it sits at number 0. Then print the numbers the running sentence and the fifth sentence go in as.", "The running sentence should come out as the seven numbers of section 2, and the fifth as the thirteen of section 5 with the at 43 in both. Then count how many of the entries the six sentences use exactly once, which the page does not print and which is what section 7 means by a row learned from very little text."],
+              ["Build the table Part 2 reads from. Count the pieces the six sentences give when they are cut at spaces, sort the distinct ones alphabetically, and put the stand-in in front so that it sits at number 0. Then print the numbers the sentence about Dr. Alvarez and the fifth sentence go in as.", "The sentence about Dr. Alvarez should come out as the seven numbers of section 2, and the fifth as the thirteen of section 5 with the at 43 in both. Then count how many of the entries the six sentences use exactly once, which the page does not print and which is what section 7 means by a row learned from very little text."],
               `from oop_ml import Corpus, Vocabulary, WhitespacePreTokenizer
 
 notebook = [
@@ -1260,7 +1261,7 @@ refused: token 'calibration' is not in this vocabulary of 47, which has no unkno
             ),
             exercise(
               "Put two awkward texts to the character table and the byte table",
-              ["Fit the character scheme on the six sentences and build the byte scheme, which is fitted on nothing. Encode the sentence with two accented letters and the running sentence with a doubled space and a line break under each, and print how many numbers each text became, how many of them are the stand-in, and whether decoding the numbers gives back the text exactly.", "The character table should substitute twice on the first text and once on the second, as sections 16 and 19 say, and the byte table should come back exact on both. Read off how many numbers the accented sentence costs under bytes."],
+              ["Fit the character scheme on the six sentences and build the byte scheme, which is fitted on nothing. Encode the sentence with two accented letters and the sentence about Dr. Alvarez with a doubled space and a line break under each, and print how many numbers each text became, how many of them are the stand-in, and whether decoding the numbers gives back the text exactly.", "The character table should substitute twice on the first text and once on the second, as sections 16 and 19 say, and the byte table should come back exact on both. Read off how many numbers the accented sentence costs under bytes."],
               `from oop_ml import ByteTokenizer, CharacterTokenizer
 
 notebook = [

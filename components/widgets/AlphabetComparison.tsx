@@ -50,7 +50,7 @@ export function AlphabetComparison() {
       <div className="mb-3 flex flex-wrap gap-2">
         {(
           [
-            ["sentence", "The running sentence"],
+            ["sentence", "The sentence about Dr. Alvarez"],
             ["foreign", "A sentence with an accent in it"],
             ["greek", "A sentence in another script"],
           ] as const

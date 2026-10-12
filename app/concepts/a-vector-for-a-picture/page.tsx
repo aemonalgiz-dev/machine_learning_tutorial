@@ -37,6 +37,7 @@ export default function PictureVectorPage() {
       intuition={lessonIntuitions["a-vector-for-a-picture"]}
       technicalStart="Part 2. Reading A Vector Off A Network That Names"
       openingTitle="Pictures Can Look Alike Without Matching Pixel for Pixel"
+      playgroundTitle="Compare pictures using their numerical descriptions"
       playgroundIntro="Compare the nearest pictures under pixel distance and embedding similarity. Inspect the actual pictures, including mistakes, rather than judging the representation only by its plotted clusters."
       title="A Vector for a Picture"
       tagline={"Two photographs of the same object may look very different pixel by pixel. A trained network can provide a compact vector of features that gives us a more useful way to compare them."}
@@ -281,7 +282,7 @@ export default function PictureVectorPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="7. One cosine worked by hand">
+              <SubSection title="7. Compare two image descriptors coordinate by coordinate" id="7-one-cosine-worked-by-hand">
                 <p>
                   The angle between two vectors is read from their dot product,
                   the sum of the products of matching numbers, divided by both
@@ -963,7 +964,7 @@ export default function PictureVectorPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. Where the method stops being defined">
+              <SubSection title="25. When the Image Cannot Supply a Useful Descriptor" id="25-where-the-method-stops-being-defined">
                 <p>
                   Reading a vector off a classifier asks three things of a
                   picture and a collection. The picture has to be something the
@@ -974,8 +975,8 @@ export default function PictureVectorPage() {
                   or defined and empty of meaning, and the table says which.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Image or vector condition"
+                  reasonHeading="Effect on the image comparison"
                   rows={[
                     {
                       expression: "a vector of length zero",

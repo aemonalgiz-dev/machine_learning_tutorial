@@ -34,6 +34,7 @@ export default function MaximumMatchingPage() {
       intuition={lessonIntuitions["maximum-matching"]}
       technicalStart="Part 2. Take the Longest Entry That Fits"
       openingTitle="Where Do the Words End When There Are No Spaces?"
+      playgroundTitle="What does the longest available word leave behind?"
       playgroundIntro="Follow the chosen dictionary entry at each position. Compare forward and backward scans and identify the first choice where their segmentations diverge."
       title="Maximum Matching"
       tagline={"When spaces do not tell us where words end, a dictionary gives us one possible guide. Maximum matching takes the longest word it recognises at each position, leaving us to examine when that local choice fails."}
@@ -226,7 +227,7 @@ export default function MaximumMatchingPage() {
                   the choice is made once and never revisited, whatever it turns
                   out to have cost further along.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why short words make longest matching a useful starting rule">
                   <p>
                     The reason a rule this crude is worth anything is a fact
                     about the language rather than about the rule. Chinese words
@@ -341,7 +342,7 @@ export default function MaximumMatchingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="8. What it costs to run">
+              <SubSection title="8. How many dictionary lookups does the scan require?" id="8-what-it-costs-to-run">
                 <p>
                   At each position the method offers at most as many candidates
                   as the longest entry in the list is long, and each candidate is
@@ -710,7 +711,7 @@ export default function MaximumMatchingPage() {
           ),
         },
         {
-          title: "Part 5. Where the Method Stops Being Defined",
+          title: "Part 5. When the Longest Match Is Not the Intended Word" , id: "part-5-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="16. Nothing in the problem picks an end to start from">
@@ -818,19 +819,11 @@ export default function MaximumMatchingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="19. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs and questions on
-                  which the method stops being defined rather than becoming
-                  approximate, with what has to be decided in each case and what
-                  turns on the decision. The ones worth a reader&rsquo;s
-                  attention are the decisions, since those are what anybody
-                  setting this up has to make and nothing in the method makes
-                  them.
-                </p>
+              <SubSection title="19. Direction, missing words and ambiguous readings" id="19-where-the-method-has-nothing-to-say">
+                <p>The longest-match rule still needs a direction, a dictionary and a way to handle unknown text. Each choice can change the resulting words even though every local step follows the rule correctly.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Scan or dictionary choice"
+                  reasonHeading="How the chosen words can change"
                   rows={[
                     {
                       expression: "which end the scan starts from",

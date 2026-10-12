@@ -39,6 +39,7 @@ export default function KernelTrickPage() {
       technicalStart="Part 3. Calculate the Same Comparison Two Ways"
       history={<LessonMotivation lesson={lessonProgressions["kernel-trick"]} />}
       prerequisites={<>The first walkthrough uses pictures and ordinary language. When you reach the calculations, the <Link href="/primers/linear-algebra" className={link}>linear algebra primer</Link> and <Link href="/concepts/polynomial-features" className={link}>polynomial features lesson</Link> provide extra background.</>}
+      playgroundTitle="Find a separating boundary through a different representation"
       playgroundIntro="Start with the points in their original positions and use Next step. Watch what stretching, compressing, and rotating can change. Then add a height and try placing a flat divider between the groups. We will explain the picture before introducing the kernel calculation."
       playground={<KernelTransformationStory />}
       sections={[
@@ -141,7 +142,7 @@ export default function KernelTrickPage() {
               <p>Change either vector below. Follow both calculation routes and compare their final values. The feature map stays fixed; only the input observations change.</p>
               <KernelIdentityCheck />
               <p>The agreement is an algebraic identity, not a coincidence in our chosen example. Expanding the square shows why the mixed feature needs its factor of √2.</p>
-              <WhyThisWorks>
+              <WhyThisWorks title="Expand both dot products to check that they agree">
                 <Equation>{"(a · b)² = (a₁b₁ + a₂b₂)²\n         = a₁²b₁² + 2a₁a₂b₁b₂ + a₂²b₂²\n\nφ(a) · φ(b) = a₁²b₁² + (√2a₁a₂)(√2b₁b₂) + a₂²b₂²\n            = a₁²b₁² + 2a₁a₂b₁b₂ + a₂²b₂²"}</Equation>
                 <p>Each expanded vector contributes one factor of √2 to the middle product. Together they supply the factor of two in the squared expression. Without that scaling, the two routes would calculate different comparisons.</p>
               </WhyThisWorks>
@@ -286,7 +287,7 @@ export default function KernelTrickPage() {
             </SubSection>
             <SubSection title="13. What features does the radial kernel imply?">
               <p>The Gaussian kernel is also an inner product in a feature space. For inputs over a continuous Euclidean domain, its exact representation generally needs infinitely many coordinates. We can still calculate the kernel value with a finite distance calculation.</p>
-              <WhyThisWorks>
+              <WhyThisWorks title="How the exponential represents an unlimited sequence of features">
                 <p>Separate the squared distance into terms involving each input and their dot product. Then expand the exponential containing that dot product.</p>
                 <Equation>{"exp(−γ‖a − b‖²) = exp(−γ‖a‖²) exp(−γ‖b‖²) exp(2γ a · b)\n\nexp(2γ a · b) = Σₘ₌₀∞ [(2γ)ᵐ / m!] (a · b)ᵐ"}</Equation>
                 <p>Every nonnegative integer power contributes a polynomial-feature inner product. Their nonnegative weights allow them to be combined into one larger inner product. The sequence of powers has no final term.</p>
@@ -612,7 +613,7 @@ negative eigenvalues 12 of 24
 InvalidValuesError
 the system K + penalty I is singular, which a valid kernel cannot produce -- a positive semi-definite Gram matrix plus a positive penalty is always invertible. This kernel (SigmoidKernel(tanh(1.0 a . b + 0.0))) failed Mercer's condition on this data; the sigmoid kernel with a negative constant is the usual way to get here
 classifier accuracy 0.7083, support vectors 19 of 24`,
-              { hints: ["A row block over the standardized columns, compared with itself through between, is the training Gram matrix, and its values are the square array whose eigenvalues numpy can read.", "Kernel ridge solves a system built from that matrix by a Cholesky route that fails exactly when the matrix is not positive definite, so its refusal is the library’s Mercer check. Every refusal the library makes derives from one base class, so catching that one catches this.", "The classifier runs projected gradient ascent on the same table and never checks it, which is why it returns a result whose concavity guarantee is gone."] },
+              { hints: ["A row block over the standardized columns, compared with itself through between, is the training Gram matrix, and its values are the square array whose eigenvalues numpy can read.", "Kernel ridge solves a system built from that matrix by a Cholesky route that fails exactly when the matrix is not positive definite, so its refusal is the library’s Mercer check. Catch MLLibError to inspect the failure on this Gram matrix.", "The classifier runs projected gradient ascent on the same table and never checks it, which is why it returns a result whose concavity guarantee is gone."] },
             ),
           ],
         },

@@ -35,6 +35,7 @@ export default function LearningBoundariesFromExamplesPage() {
       intuition={lessonIntuitions["learning-boundaries-from-examples"]}
       technicalStart="Part 2. What a Gap Is Asked"
       openingTitle="Ask Each Gap Whether a Word Ends Here"
+      playgroundTitle="Let labelled gaps teach the splitting rule"
       playgroundIntro="Select a gap and examine the neighbouring characters used to classify it. Compare individual boundary decisions with the resulting complete segmentation."
       title="Learning Boundaries From Examples"
       tagline={"If people have already marked word boundaries in example text, we can use those labels to teach a model. The surrounding characters provide clues it can use when deciding where to split new text."}
@@ -477,7 +478,7 @@ export default function LearningBoundariesFromExamplesPage() {
                     the single piece abc, with the second gap still wrong.
                   </p>
                 </WorkedExample>
-                <WhyThisWorks>
+                <WhyThisWorks title="Average the weights without storing every intermediate model">
                   <p>
                     Written that way it looks expensive, since it seems to need
                     every set of weights kept. It does not. A weight only changes
@@ -696,7 +697,7 @@ export default function LearningBoundariesFromExamplesPage() {
                     tells the apostrophe from the hyphen.
                   </p>
                 </WorkedExample>
-                <WhyThisWorks>
+                <WhyThisWorks title="What a score contribution can and cannot explain">
                   <p>
                     It is worth being exact about what this is and is not. This is
                     a decomposition of the score, so it says what the arithmetic
@@ -926,7 +927,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="17. What it costs">
+              <SubSection title="17. How the context window changes training and prediction work" id="17-what-it-costs">
                 <p>
                   Two costs, and the honest one is not the time. Reading a text is
                   8w minus 1 additions per gap at a reach of w, so twenty-three
@@ -984,7 +985,7 @@ export default function LearningBoundariesFromExamplesPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. Evidence Beyond the Window and Decisions Beyond the Labels" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="18. A dependency wider than the window">
@@ -1149,18 +1150,11 @@ export default function LearningBoundariesFromExamplesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="21. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs and questions on
-                  which the method stops being defined rather than becoming
-                  approximate, with what has to be decided in each case and what
-                  turns on the decision. The decisions are the ones worth a
-                  reader&rsquo;s attention, since nothing in the method makes them
-                  and each of them changes what comes back.
-                </p>
+              <SubSection title="21. Limits of local features and the annotation standard" id="21-where-the-method-has-nothing-to-say">
+                <p>A gap classifier cannot use a character outside its feature window or learn a boundary convention that the labels do not express. Separate those restrictions from choices about the training order, features and interpretation of the final score.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Gap or training example"
+                  reasonHeading="What the boundary classifier can decide"
                   rows={[
                     {
                       expression: "a gap scoring exactly zero",
@@ -1249,7 +1243,7 @@ export default function LearningBoundariesFromExamplesPage() {
             choice(
               "What does answering every gap independently cost, as the page measures it?",
               [
-                "The answer is the maximum of nothing, and on the running sentence it scores 4.7503 below the best whole sequence by that method’s own tables",
+                "The answer is the maximum of nothing, and on the sentence about Dr. Alvarez it scores 4.7503 below the best whole sequence by that method’s own tables",
                 "It returns segmentations the whole-sequence method is incapable of returning",
                 "It answers with a piece of a length its corpus never showed more often than the whole-sequence method does",
                 "Its cost of reading a text grows with the amount of marked-up text behind the weights",
@@ -1275,7 +1269,7 @@ export default function LearningBoundariesFromExamplesPage() {
           practice: [
             exercise(
               "Read our sentence gap by gap",
-              ["Fit the library’s gap segmenter on the eight marked-up sentences of Part 4, with a reach of three, twenty passes and the seed 0, which is the order the page’s widgets use. Segment the running sentence with its spaces taken out, then ask for the score at every gap and compare each sign with the reading a person gives.", "Section 11 arrived at forty-four gaps with three of them wrong, all inside the surname. Print each wrong gap with the two characters either side of it and its score to four places. The page names the three and does not print their scores, so read off how close each one was."],
+              ["Fit the library’s gap segmenter on the eight marked-up sentences of Part 4, with a reach of three, twenty passes and the seed 0, which is the order the page’s widgets use. Segment the sentence about Dr. Alvarez with its spaces taken out, then ask for the score at every gap and compare each sign with the reading a person gives.", "Section 11 arrived at forty-four gaps with three of them wrong, all inside the surname. Print each wrong gap with the two characters either side of it and its score to four places. The page names the three and does not print their scores, so read off how close each one was."],
               `from oop_ml import PointwiseSegmenter
 
 corpus = [
@@ -1405,7 +1399,7 @@ the score the segmenter reports +7.1283`,
             ),
             exercise(
               "Run the same eight sentences in eight orders",
-              ["Section 10 says the order the marked gaps are visited in changes the answer. The seed decides that order, so fit the segmenter eight times on the same eight sentences with the seeds 0 to 7 and segment the running sentence with each. Print how many corrections each run made in all, how many pieces it cut the sentence into, and whether its reading is the one a person gives.", "Every run should stop correcting well before its twenty passes are up, so all eight are right about every marked gap, and still they should not agree. Count the different readings among the eight."],
+              ["Section 10 says the order the marked gaps are visited in changes the answer. The seed decides that order, so fit the segmenter eight times on the same eight sentences with the seeds 0 to 7 and segment the sentence about Dr. Alvarez with each. Print how many corrections each run made in all, how many pieces it cut the sentence into, and whether its reading is the one a person gives.", "Every run should stop correcting well before its twenty passes are up, so all eight are right about every marked gap, and still they should not agree. Count the different readings among the eight."],
               `from oop_ml import PointwiseSegmenter
 
 corpus = [

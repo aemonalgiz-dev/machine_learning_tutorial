@@ -20,6 +20,7 @@ export default function KNearestNeighboursPage() {
       intuition={lessonIntuitions["k-nearest-neighbours"]}
       technicalStart="The Mechanism"
       openingTitle="Ask the Examples That Look Most Alike"
+      playgroundTitle="Let nearby people vote on a new observation"
       playgroundIntro="Move the ringed query point, then change k. Watch which stored points are selected and how their votes produce the label."
       title="k-Nearest Neighbours"
       tagline={"If similar examples tend to have similar answers, nearby labelled examples may help us predict a new one. We still need to decide how to measure distance and how many neighbours to ask."}
@@ -110,7 +111,7 @@ export default function KNearestNeighboursPage() {
           ),
         },
         {
-          title: "A Worked Example",
+          title: "Which neighbours vote for this new person?" , id: "a-worked-example",
           content: (
             <>
               <p>
@@ -555,7 +556,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `TooFewValuesError
 15 neighbours were asked for and only 11 rows were supplied`,
-              { hints: ["Every refusal the library makes derives from one base class, so catching that one catches whichever specific refusal this turns out to be.", "The refusal happens at fit rather than at construction, because fitting is the first moment the model knows how many rows there are."] },
+              { hints: ["The refusal happens at fit rather than at construction, because fitting is the first moment the model knows how many rows there are."] },
             ),
           ],
         },

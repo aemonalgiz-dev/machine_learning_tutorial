@@ -41,6 +41,7 @@ export default function RandomForestsPage() {
       intuition={lessonIntuitions["random-forests"]}
       technicalStart="Part 2. The One Rule Random Forests Change"
       openingTitle="A Crowd That Keeps Making the Same Mistake"
+      playgroundTitle="What do differently grown trees agree on?"
       playgroundIntro="Compare the questions and predictions of individual trees. Change how many features each split may consider and watch what happens to their agreement."
       title="Random Forests"
       tagline={"A collection of trees is less useful if they all make the same mistakes. Giving them different samples and different feature choices encourages the variety that can make their combined prediction more reliable."}
@@ -1042,24 +1043,15 @@ export default function RandomForestsPage() {
           ),
         },
         {
-          title: "Part 12. Implementation and Failure Contracts",
+          title: "Part 12. Recording How the Trees and Feature Samples Were Grown" , id: "part-12-implementation-and-failure-contracts",
           content: (
             <>
               <SubSection title="32. What a forest must specify and refuse">
-                <p>
-                  A complete implementation states its configuration in
-                  full. The number of trees, whether bootstrapping is on and
-                  how large a sample is, the number or fraction of features
-                  per split and how they are drawn, the base tree&rsquo;s
-                  depth and minimum split and leaf sizes, the split
-                  criterion, whether the vote is hard or averages
-                  probabilities, how ties break, any class weighting, how the
-                  seed is shared among members, whether members fit in
-                  parallel, and whether out-of-bag evaluation is offered.
-                </p>
+                <p>A forest is described by how its trees were grown and how their predictions are combined. Record the tree count, whether rows are bootstrapped and the sample size, and how many features are drawn at each split. Each base tree also needs its depth limit, minimum split and leaf sizes, and split criterion.</p>
+                <p>For classification, distinguish a hard vote from averaged probabilities, and state the tie rule and any class weighting. Reproducibility depends on how seeds are shared among trees and whether they fit in parallel. Finally, say whether the fit supplies an out-of-bag evaluation.</p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Data or forest setting"
+                  reasonHeading="Effect on fitting and voting"
                   rows={[
                     { expression: "empty data", reason: "refused before any member is grown, by the same guard every model here shares." },
                     { expression: "one row, or one class only", reason: "refused by name, since there is nothing to discriminate between; one row is one class." },

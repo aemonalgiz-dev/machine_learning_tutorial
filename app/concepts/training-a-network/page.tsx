@@ -38,6 +38,7 @@ export default function TrainingANetworkPage() {
       intuition={lessonIntuitions["training-a-network"]}
       technicalStart="Part 2. The Size of the Step"
       openingTitle="One Better Guess Is Only the Beginning"
+      playgroundTitle="Watch the loss as the network adjusts its parameters"
       playgroundIntro="Compare training and validation curves as the run progresses. Change one training setting at a time and distinguish the number of updates from the number of epochs."
       title="Training a Network"
       tagline={"We now have a prediction, a way to measure its error, and gradients that describe possible adjustments. Training brings those steps together and repeats them over examples so the network can improve."}
@@ -246,7 +247,7 @@ export default function TrainingANetworkPage() {
                   that neighbourhood.
                 </p>
                 <Equation>{"predicted drop  =  rate × ‖slope‖²\n\n0.5 × 0.139819²  =  0.009775\nactual drop      =  0.009155"}</Equation>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why a sufficiently small negative-gradient step lowers the loss">
                   <p>
                     Moving each number by &minus;rate times its own slope
                     changes the loss, to first order, by the sum over numbers
@@ -1256,7 +1257,7 @@ export default function TrainingANetworkPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="29. Where the loop stops being defined">
+              <SubSection title="29. Training settings that produce no useful update" id="29-where-the-loop-stops-being-defined">
                 <p>
                   A loop can be handed settings that are not wrong so much as
                   empty, and it is worth going through them once, because
@@ -1265,8 +1266,8 @@ export default function TrainingANetworkPage() {
                   what the mathematics says in each.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Training setting"
+                  reasonHeading="What changes in the training run"
                   rows={[
                     {
                       expression: "a step size of zero",

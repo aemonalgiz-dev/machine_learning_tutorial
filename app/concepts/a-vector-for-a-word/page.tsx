@@ -38,6 +38,7 @@ export default function WordVectorPage() {
       intuition={lessonIntuitions["a-vector-for-a-word"]}
       technicalStart="Part 2. Nearness Measured As An Angle"
       openingTitle="A Word's ID Cannot Tell Us What It Resembles"
+      playgroundTitle="What makes two word vectors close?"
       playgroundIntro="Compare the nearest vectors for a selected word. Inspect both the similarity values and the source text that gave those relationships meaning."
       title="A Vector for a Word"
       tagline={"A token's ID tells us which word it identifies, but not how that word relates to another. A vector gives us several numerical coordinates whose learned relationships can support useful comparisons."}
@@ -284,7 +285,7 @@ export default function WordVectorPage() {
                   zero, which would falsely report the word as being at right
                   angles to everything.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Deriving cosine similarity from the dot product">
                   The dot product of two arrows equals the product of their
                   lengths times the cosine of the angle between them, which is
                   the law of cosines rearranged. Dividing the dot product by the
@@ -320,7 +321,7 @@ export default function WordVectorPage() {
                   ]}
                   caption="Five words placed by hand. Nothing was fitted here; the positions were chosen so the answers are obvious."
                 />
-                <WorkedExample title="Three cosines, worked">
+                <WorkedExample title="Same, perpendicular and opposite word directions">
                   <>
                     <p>
                       Take king and queen first. Their vectors have lengths one and two.
@@ -796,7 +797,7 @@ export default function WordVectorPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="17. The sketch worked all the way through">
+              <SubSection title="17. Follow the king, man and woman analogy in the drawing" id="17-the-sketch-worked-all-the-way-through">
                 <p>
                   The five-word drawing is small enough to follow every step, so
                   let us put the famous question to it. What is to{" "}
@@ -997,7 +998,7 @@ export default function WordVectorPage() {
                   bottom row. The two panels at the bottom hold the neighbour
                   lists before and after, and they do not change.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why rotating every vector preserves their comparisons">
                   A rotation preserves every dot product, so it preserves every
                   length, which is a dot product of a vector with itself, and
                   every cosine, which is built from three dot products. Since the
@@ -1177,8 +1178,8 @@ export default function WordVectorPage() {
                   It is distributed across every coordinate of every affected word, so there is no entry to correct, and Part 5 has already shown why editing coordinates directly is not a coherent operation.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Word or vector condition"
+                  reasonHeading="What can be compared"
                   rows={[
                     {
                       expression: "a word the texts never contained",

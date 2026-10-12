@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["low-rank-adaptation"]}
     technicalStart="Part 2. Calculate the Factored Update"
     prerequisites={<>Useful foundations: <Link href="/concepts/dense-layers">Dense layers</Link>{", "}<Link href="/concepts/supervised-fine-tuning">supervised fine-tuning</Link>.</>}
+    playgroundTitle="How much can a small weight update change?"
     playgroundIntro="Start with rank one and inspect the assembled update and parameter counts. Raise the rank before changing alpha. The four-by-four example is intentionally small enough to show when an adapter stops saving parameters."
     playground={<ModernLearningExample topic="low-rank-adaptation" />}
     sections={[
@@ -323,7 +324,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `ShapeMismatchError
 adapter factors must join the base projection`,
-              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one class catches whichever specific refusal this turns out to be.", "The refusal comes from the constructor, before any input has been supplied, so the try block only needs to build the adapter."] },
+              { hints: ["The refusal comes from the constructor, before any input has been supplied, so the try block only needs to build the adapter."] },
             ),
           ],
         },

@@ -37,6 +37,7 @@ export default function DropoutPage() {
       intuition={lessonIntuitions["dropout"]}
       technicalStart="Part 2. One Draw"
       openingTitle="What if a Useful Neuron Is Missing?"
+      playgroundTitle="Remove some neuron outputs for one training pass"
       playgroundIntro="Compare the original activations with one masked draw, then draw again. Notice the difference between a training pass and a prediction pass."
       title="Dropout"
       tagline={"A network can become too dependent on particular activations during training. Randomly removing some of them makes it work with different combinations, which can help it cope better with new examples."}
@@ -191,8 +192,8 @@ export default function DropoutPage() {
                   </>
                   <Equation>{"1 · 2 = 2,   2 · 0 = 0,   3 · 2 = 6,   4 · 0 = 0\ntraining reads    2, 0, 6, 0\npredicting reads  1, 2, 3, 4"}</Equation>
                   <p>
-                    Press the worked example button above and the bars show
-                    exactly that. Press draw again and the left side changes,
+                    Select Reset the neuron outputs and dropout rate to reproduce
+                    these bars. Press draw again and the training outputs change;
                     under seed 3 the draw keeps the third and fourth instead
                     and the row reads 0, 0, 6, 8, while the right side never
                     changes at all.
@@ -281,7 +282,7 @@ export default function DropoutPage() {
                   equal, because the claim is about the average over many
                   draws and not about this one.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why dividing surviving outputs by their survival probability preserves the mean">
                   <p>
                     On any pass a unit sends 0 with probability p and its value
                     over 1 − p with probability 1 − p, so the mean of what it
@@ -330,11 +331,11 @@ export default function DropoutPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  The worked example is the derivation&rsquo;s cancellation
-                  with a count in place of a probability, 192 of 400 in place
-                  of one half, which is why the means land near the targets
-                  rather than on them. The survival share of any finite run
-                  is close to 1 − p and not equal to it.
+                  The second unit survived 192 of the 400 draws. Its average
+                  therefore lands near the prediction-time value without matching
+                  it exactly. The scaling rule uses the probability of survival;
+                  a finite run has an observed survival share that can differ from
+                  that probability.
                 </p>
                 <KeepInMind>
                   The average is a promise about many passes, not about any
@@ -354,7 +355,7 @@ export default function DropoutPage() {
                   average, roughly as one over the square root of the number
                   of draws.
                 </p>
-                <WhyThisWorks title="How wide the spread is, worked for one unit">
+                <WhyThisWorks title="Derive the variance introduced by masking one unit">
                   <>
                     <p>
                       The spread can be worked from the same two outcomes the
@@ -923,34 +924,24 @@ export default function DropoutPage() {
           ),
         },
         {
-          title: "Part 8. Implementation and Failure Contracts",
+          title: "Part 8. Keeping Training Masks Out of Prediction" , id: "part-8-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="25. What a complete implementation states">
-                <p>
-                  A complete implementation states the drop probability and
-                  its legal range, whether the scaling happens at training or
-                  at prediction time, that the draw is independent per entry
-                  and per row, what the layer does under each purpose and
-                  which purpose is the default, that the mask is carried on
-                  the response and what the backward step does when it is
-                  missing, what the backward step passes down and that it
-                  reports no parameter gradient, how the generator is seeded
-                  and what stepping the layer does to it, and that the layer
-                  reads and answers the same arrangement so it can be placed
-                  anywhere in a sound stack.
-                </p>
+              <SubSection title="25. Probability, scaling and the lifetime of a mask" id="25-what-a-complete-implementation-states">
+                <p>A dropout layer needs to make its two modes unambiguous. State the drop probability and its legal range, whether scaling happens during training or prediction, and which mode a call uses by default. Prediction should not accidentally inherit a training mask.</p>
+                <p>During training, each entry in each row receives an independent draw. The response carries the resulting mask so the backward pass can follow the same choices. Check what happens when that mask is missing, what gradient passes to the preceding layer, and that there is no parameter gradient to update.</p>
+                <p>Reproducing a run also requires the generator seed and the effect of stepping the layer on that generator. The input and output arrangements stay the same, which is what allows dropout to fit between compatible layers.</p>
               </SubSection>
 
-              <SubSection title="26. The edges, probed">
+              <SubSection title="26. Zero dropout, complete dropout and invalid masks" id="26-the-edges-probed">
                 <p>
                   Every row below was run rather than reasoned about. A refusal is a
                   typed error with a message written to be read; an acceptance
                   is what the layer did instead.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Dropout setting or input"
+                  reasonHeading="What happens to the activations"
                   rows={[
                     { expression: "a drop probability of 1, or above, or below 0", reason: "refused at construction, in the layer's own words, since 1 silences the whole layer and leaves nothing to scale." },
                     { expression: "a drop probability that is not a finite number", reason: "refused at construction; a nan is not a probability and a word is not a number." },

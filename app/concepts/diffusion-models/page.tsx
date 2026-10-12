@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["diffusion-models"]}
     technicalStart="Part 2. Calculate a Noisy Training Pair"
     prerequisites={<>Useful foundations: <Link href="/concepts/loss-functions">Loss functions</Link>{", "}<Link href="/concepts/convolutional-networks">convolutional networks</Link>{", "}<Link href="/concepts/u-net">U-Net</Link>.</>}
+    playgroundTitle="How much of the signal survives the noise?"
     playgroundIntro="Increase the forward noise step while the oracle fraction stays at zero. Then supply more of the true noise and compare the estimated clean signal. At fraction one the exact noise is available, so recovery is an algebra check, not a learned denoising result."
     playground={<ModernLearningExample topic="diffusion-models" />}
     sections={[

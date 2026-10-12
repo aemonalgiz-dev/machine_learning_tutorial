@@ -44,6 +44,7 @@ export default function DistanceMetricsPage() {
       intuition={lessonIntuitions["distance-metrics"]}
       technicalStart="Part 2. One Formula, One Dial"
       openingTitle="Near According to Which Rule?"
+      playgroundTitle="Does changing the distance rule change the neighbour?"
       playgroundIntro="Keep the points fixed and change the distance rule. Watch how the shape of an equal-distance boundary and the nearest neighbours change."
       title="What Near Means"
       tagline={"Which of two examples is nearer depends on how we measure distance. We will compare those choices before using nearness to find neighbours or form groups."}
@@ -309,7 +310,7 @@ Cosine distance: approximately 0.000189`}</Equation>
                   circle, which sits inside the square, for every centre and
                   every radius, and the argument is short.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Deriving the bounds between Manhattan, Euclidean and maximum distance">
                   <>
 <p>
                     Take a gap vector and scale it so that its Manhattan length is one, which means the absolute gaps sum to one and each is therefore at most one. A number at most one raised to a higher power gets smaller, so the sum of the gaps raised to any p above one is at most the sum of the gaps themselves, which is one, and the p-th root of a number at most one is at most one.
@@ -1069,25 +1070,16 @@ Cosine distance: approximately 0.000189`}</Equation>
           ),
         },
         {
-          title: "Part 8. Implementation and Failure Contracts",
+          title: "Part 8. Deciding What Each Distance Accepts and Returns" , id: "part-8-implementation-and-failure-contracts",
           content: (
             <>
               <SubSection title="28. What an implementation must specify and refuse">
-                <p>
-                  A complete implementation states which metrics it names
-                  and whether an unnamed one can be supplied, what order the
-                  p-norm family accepts, how Hamming compares floating-point
-                  values, what Canberra does with a zero over zero, what
-                  cosine does with a row of zeros and with rounding either
-                  side of one, whether Euclidean is computed by definition or
-                  by expansion and, if by expansion, what it centres on,
-                  how a pairing array is bounded, how ties in a ranking are
-                  broken, and which models may take the metric and which
-                  refuse it. Every row below was probed.
-                </p>
+                <p>Two functions called Euclidean distance can disagree numerically if one subtracts coordinates directly and the other expands the squares. Record which route is used and, for an expanded calculation, where the coordinates are centred.</p>
+                <p>Other distances need their own decisions. Which orders does the p-norm accept? Does Hamming compare floating-point entries exactly? What does Canberra do with zero over zero, and what does cosine do with a zero vector or rounding beyond its usual range?</p>
+                <p>For a search, also check the permitted pair indices, the rule for tied neighbours and which models accept the chosen metric. The table records these behaviours, including whether a caller can supply a distance beyond the named options.</p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Neighbour-search input"
+                  reasonHeading="How the search responds"
                   rows={[
                     { expression: "no people at all", reason: "refused at the site's boundary before any distance is measured; a request must carry at least one person." },
                     { expression: "one person", reason: "refused by the classifier as a single class, since there is nothing to discriminate between; a lone row is a valid stored set for the distance itself." },

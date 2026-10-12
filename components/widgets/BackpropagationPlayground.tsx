@@ -381,7 +381,7 @@ export function BackpropagationPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button onClick={resetWorkedExample} className={BUTTON_CLASS}>
-          The worked example
+          Reset the two-layer network
         </button>
         <button onClick={randomise} className={BUTTON_CLASS}>
           Random whole numbers

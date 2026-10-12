@@ -38,6 +38,7 @@ export default function HashingCharactersPage() {
       intuition={lessonIntuitions["hashing-characters"]}
       technicalStart="Part 2. One Character, Eight Numbers"
       openingTitle="Choose the Table Size Before Seeing the Alphabet"
+      playgroundTitle="Which character runs share a bucket?"
       playgroundIntro="Inspect which characters share buckets. Compare one hash with several and keep the number of stored entries in view."
       title="Hashing Characters"
       tagline={"A separate entry for every possible character can make a table large. Hashing maps characters into a fixed number of buckets, at the cost of sometimes giving different characters the same destination."}
@@ -173,7 +174,7 @@ export default function HashingCharactersPage() {
           title: "Part 2. One Character, Eight Numbers",
           content: (
             <>
-              <SubSection title="4. The rule, worked on one letter">
+              <SubSection title="4. Follow one letter from its codepoint to its bucket" id="4-the-rule-worked-on-one-letter">
                 <p>
                   Take the letter a. Unicode calls it 97, the rule adds one to
                   give 98, and then 98 is multiplied by each of eight fixed odd
@@ -216,7 +217,7 @@ export default function HashingCharactersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="5. The running sentence, taken all the way through">
+              <SubSection title="5. Hash the character runs in the Alvarez sentence" id="5-the-running-sentence-taken-all-the-way-through">
                 <p>
                   Our sentence is 51 characters long. Every one of them goes
                   through the same short piece of arithmetic, and here are the
@@ -323,7 +324,7 @@ export default function HashingCharactersPage() {
                     "unspellable by a fitted character table",
                   ]}
                   rows={[
-                    ["the running sentence", "51", "408", "51", "0"],
+                    ["the sentence about Dr. Alvarez", "51", "408", "51", "0"],
                     ["one sentence of English", "24", "192", "24", "0"],
                     ["one sentence of Greek", "21", "168", "38", "17"],
                     ["one sentence of Russian", "20", "160", "37", "17"],
@@ -331,7 +332,7 @@ export default function HashingCharactersPage() {
                     ["one sentence of Japanese", "11", "88", "33", "11"],
                     ["one sentence of Chinese", "6", "48", "18", "6"],
                   ]}
-                  caption="The same short sentence in six languages, with the running sentence at the top. The last column is what the table fitted to eighteen English sentences could not spell, which is a fact about those sentences."
+                  caption="The same short sentence in six languages, with the sentence about Dr. Alvarez at the top. The last column is what the table fitted to eighteen English sentences could not spell, which is a fact about those sentences."
                 />
                 <p>
                   The Chinese sentence is where the difference is widest. It costs
@@ -511,7 +512,7 @@ export default function HashingCharactersPage() {
               <SubSection title="11. Where a collision would show up in our sentence">
                 <p>
                   It is fair to ask whether any of this touches ordinary writing,
-                  and on the running sentence at the published height it does not.
+                  and on the sentence about Dr. Alvarez at the published height it does not.
                   The sentence uses 24 distinct characters, they produce 24
                   distinct sets of buckets, and every one of the 68 characters
                   sharing any of those sets is somewhere else in the space
@@ -539,7 +540,7 @@ export default function HashingCharactersPage() {
                     ["64", "24", "23", "the full stop with n"],
                     ["32", "24", "21", "D with d, the full stop with n, A with a"],
                   ]}
-                  caption="Measured on the running sentence at three heights, with eight hashes throughout."
+                  caption="Measured on the sentence about Dr. Alvarez at three heights, with eight hashes throughout."
                 />
                 <KeepInMind>
                   Losing the difference between A and a is the kind of damage that
@@ -879,7 +880,7 @@ export default function HashingCharactersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="18. cat and cats, worked">
+              <SubSection title="18. Which buckets do cat and cats share?" id="18-cat-and-cats-worked">
                 <p>
                   At 8,192 buckets and one hash, cat lights three buckets and cats
                   lights four, and two of them are the same two. The shared ones
@@ -915,7 +916,7 @@ export default function HashingCharactersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="19. What it costs, and where the pieces pile up">
+              <SubSection title="19. Storage saved and collisions introduced by hashing" id="19-what-it-costs-and-where-the-pieces-pile-up">
                 <p>
                   In positions this is the cheapest reading on either of these two
                   pages. Our sentence becomes 7 positions, one per whitespace
@@ -1002,7 +1003,7 @@ export default function HashingCharactersPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. What a Bucket Can No Longer Tell Us" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="21. Reading a bucket back is undefined, and by exactly how much">
@@ -1102,17 +1103,10 @@ export default function HashingCharactersPage() {
               </SubSection>
 
               <SubSection title="24. The cases where the arithmetic decides nothing">
-                <p>
-                  Gathered in one place, these are the inputs and the settings on
-                  which the method stops being defined rather than becoming
-                  approximate, together with what has to be decided in each case
-                  and what turns on the decision. The ones with a genuine choice
-                  attached are the ones worth attention, since nothing in the
-                  arithmetic makes them and somebody has to.
-                </p>
+                <p>A bucket value tells us how much was added, but it cannot identify which colliding character runs supplied it. The table distinguishes that unavoidable loss of identity from settings we still control, such as the number of buckets.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Bucket or hashing choice"
+                  reasonHeading="What information survives"
                   rows={[
                     {
                       expression: "which character a bucket stands for",
@@ -1231,8 +1225,8 @@ export default function HashingCharactersPage() {
           title: "Practice. Counting Collisions With the Library",
           practice: [
             exercise(
-              "Hash the running sentence, then narrow the table",
-              ["Build a HashedCharacterTokenizer at its defaults, which are the published 16,384 buckets and eight hashes, and encode the running sentence. Print how many positions and how many numbers it became, the eight buckets of the letter a, and whether the text comes back exactly. Then encode the same sentence at 16,384, 64, 32 and 16 buckets, and print for each how many distinct sets of buckets its characters produce and which characters share one.", "The first three lines should be the figures of sections 4 and 5, and the rows for 64 and 32 buckets should be section 11, with the full stop and n merging first and then D with d and A with a. The page stops at 32, so the row for 16 buckets is yours to read."],
+              "Hash the sentence about Dr. Alvarez, then narrow the table",
+              ["Build a HashedCharacterTokenizer at its defaults, which are the published 16,384 buckets and eight hashes, and encode the sentence about Dr. Alvarez. Print how many positions and how many numbers it became, the eight buckets of the letter a, and whether the text comes back exactly. Then encode the same sentence at 16,384, 64, 32 and 16 buckets, and print for each how many distinct sets of buckets its characters produce and which characters share one.", "The first three lines should be the figures of sections 4 and 5, and the rows for 64 and 32 buckets should be section 11, with the full stop and n merging first and then D with d and A with a. The page stops at 32, so the row for 16 buckets is yours to read."],
               `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
     HashedCharacterTokenizer,
 )
@@ -1347,7 +1341,7 @@ for n_buckets in (93, 62, 16384):
             ),
             exercise(
               "Fingerprint words by their runs of three",
-              ["Build a TrigramHashTokenizer at 8,192 buckets, which is the width Part 5 uses, with its one hash. For each pair of words below, take the activations of both and print how many buckets each lights, how many they share, which the overlap function counts, and whether the two sets of buckets are identical. Finish by printing the runs of three that expected is cut into.", "cat with cats, cat with dog and analysis with reanalysis should be section 18, and the two pairs of repeated letters should be section 20, one identical and one not. The running sentence says expect where the eighteen sentences say expected, and the page never compares the two."],
+              ["Build a TrigramHashTokenizer at 8,192 buckets, which is the width Part 5 uses, with its one hash. For each pair of words below, take the activations of both and print how many buckets each lights, how many they share, which the overlap function counts, and whether the two sets of buckets are identical. Finish by printing the runs of three that expected is cut into.", "cat with cats, cat with dog and analysis with reanalysis should be section 18, and the two pairs of repeated letters should be section 20, one identical and one not. The sentence about Dr. Alvarez says expect where the eighteen sentences say expected, and the page never compares the two."],
               `from oop_ml.core.natural_language_processing.tokenization.hashing.trigram_hashing import (
     TrigramHashTokenizer,
     overlap,

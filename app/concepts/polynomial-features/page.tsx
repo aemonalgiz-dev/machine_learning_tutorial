@@ -39,6 +39,7 @@ export default function PolynomialFeaturesPage() {
       intuition={lessonIntuitions["polynomial-features"]}
       technicalStart="Part 3. Powers and Products"
       openingTitle="Give a Straight-Line Model Something Curved to Read"
+      playgroundTitle="Give a straight model powers and products to combine"
       playgroundIntro="Compare the generated columns at different degrees. Relate each new power or product to the extra flexibility in the fitted curve."
       title="Polynomial Features"
       tagline={"A straight line cannot describe every relationship between our measurements and the answer. Adding features such as an input squared gives the model more to work with while keeping its coefficients straightforward to fit."}
@@ -700,7 +701,7 @@ export default function PolynomialFeaturesPage() {
           ),
         },
         {
-          title: "Part 6. Where the Expansion Stops Being Defined",
+          title: "Part 6. When More Columns Add No New Information", id: "part-6-where-the-expansion-stops-being-defined",
           content: (
             <>
               <SubSection title="16. The degree is a free choice, and nothing in the data makes it">
@@ -763,8 +764,8 @@ export default function PolynomialFeaturesPage() {
                   opposite ways, one loudly and one without a sound.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Original column"
+                  reasonHeading="What its powers and interactions add"
                   rows={[
                     {
                       expression: "a column recorded as 0 or 1",
@@ -847,7 +848,7 @@ export default function PolynomialFeaturesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="19. Where the method runs out">
+              <SubSection title="19. Powers That Grow Too Large and Tables That Grow Too Wide" id="19-where-the-method-runs-out">
                 <p>
                   The limits are worth gathering in one place. Each is a fact
                   about what the expansion and the fit behind it can mean rather
@@ -856,8 +857,8 @@ export default function PolynomialFeaturesPage() {
                   cannot supply.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Degree or data condition"
+                  reasonHeading="What must be checked before fitting"
                   rows={[
                     {
                       expression: "the degree itself",

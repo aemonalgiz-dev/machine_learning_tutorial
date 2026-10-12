@@ -22,7 +22,7 @@ export const representations: Record<string, LessonIntuition> = {
     step("Update the representation through prediction errors", "Training adjusts the document vector and the other learned parameters. Repeated examples encourage a document vector to carry information useful across that document's predictions.", strips("Many examples shape the same document record.", [["Examples from document A", ["Prediction", "Error", "Update vector A"]], ["Examples from document B", ["Prediction", "Error", "Update vector B"]]])),
     step("Infer a vector for an unseen document", "A new document has no previously trained row to retrieve. Hold the learned model parameters fixed and optimize a new document vector using its words. The resulting vector can then be compared with existing document vectors.", strips("Inference for new text requires its own fitting step.", [["Keep fixed", ["Trained word and prediction parameters"]], ["Adjust", ["New document vector"]], ["Then", ["Compare document representations"]]], true))
   ], "A document vector learns through its contribution to a task", [
-    "The worked example separates training-document vectors from inference for new text, then compares the resulting positions.",
+    "Fit positions for the training documents first. For a new document, hold the learned word parameters fixed and adjust only its position. We can then compare the new position with the stored documents.",
     "This is different from simply averaging existing word vectors. Both approaches produce a fixed-size representation, but they obtain it through different operations."
   ]),
   "pooling-a-text": story([
@@ -34,7 +34,7 @@ export const representations: Record<string, LessonIntuition> = {
     step("Decide whether every word should contribute equally", "Common words can dominate an unweighted summary without distinguishing documents well. A weighting rule can reduce their influence, but it introduces its own assumptions and needs frequencies from a defined source.", strips("Weighting changes each word's contribution to the summary.", [["Equal weighting", ["Every included word has equal influence"]], ["Frequency-based weighting", ["Some common words contribute less"]]])),
     step("Notice what ordinary averaging cannot preserve", "With fixed word vectors and the same weights, changing word order leaves the average unchanged. Dog bites man and man bites dog then receive the same pooled representation even though their meanings differ.", strips("The same word collection can express different events.", [["Sentence A", ["dog", "bites", "man"]], ["Sentence B", ["man", "bites", "dog"]], ["Ordinary average", ["The same pooled vector"]]]))
   ], "A fixed-size summary keeps some information and loses some", [
-    "The full example calculates pooling choices and compares their results on actual text.",
+    "Apply the different pooling rules to the same word vectors. We can then inspect which distinctions between the texts survive and which disappear in the summary.",
     "Weighting and removing a common direction can improve some comparisons. They do not by themselves restore word order or every distinction discarded by the pooling operation."
   ]),
   "n-grams": story([
@@ -62,7 +62,7 @@ export const representations: Record<string, LessonIntuition> = {
     step("Replace each input with its nearest entry", "A distance rule selects the representative. Several nearby inputs can receive the same code, so the code identifies a region of the input space rather than preserving each original input.", strips("Several distinct inputs can share one representative.", [["Inputs near A", ["First input", "Second input", "Third input"]], ["Stored codes", ["A", "A", "A"]]], true)),
     step("Decode and inspect the lost detail", "Decoding retrieves the codebook vector. It cannot distinguish inputs assigned to the same entry, so reconstruction is usually approximate. Compare the reconstruction error and code usage before deciding the compression is useful.", strips("The codebook supplies the reconstructed value.", [["Stored code", ["A"]], ["Decoded value", ["Representative vector A"]], ["Check", ["Difference from the original input"]]], true))
   ], "A discrete code names a representative, not the exact input", [
-    "The full example learns or inspects the codebook, assigns inputs, and reconstructs them so the approximation is visible.",
+    "Assign each input to a codebook entry, then reconstruct it from that entry alone. Comparing the reconstruction with the original makes the information lost by quantisation visible.",
     "These codes are different from arbitrary text vocabulary IDs: assignment here depends on distance to numerical representatives."
   ]),
   "finite-scalar-quantisation": story([

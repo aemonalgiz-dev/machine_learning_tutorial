@@ -70,7 +70,7 @@ export const PEOPLE: Record<PeopleKey, Point[]> = {
 };
 
 export const PEOPLE_LABEL: Record<PeopleKey, string> = {
-  four: "the measured four",
+  four: "the four height and weight measurements",
   crowd: "the crowd",
   ideal: "an ideal case",
   circle: "the circle",

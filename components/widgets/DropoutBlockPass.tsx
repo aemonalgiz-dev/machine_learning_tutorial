@@ -73,7 +73,7 @@ export function DropoutBlockPass({
           }}
           className={preset === "worked" ? ACCENT_BUTTON_CLASS : BUTTON_CLASS}
         >
-          The worked row, three times
+          Repeat one output row across three masks
         </button>
         <button
           onClick={() => {

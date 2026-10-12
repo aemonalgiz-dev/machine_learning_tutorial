@@ -15,6 +15,7 @@ import { SectionNavigator, NavigableSection } from "./SectionNavigator";
 import { sectionId } from "./sectionId";
 import { GuidedIntuition, IntuitionConnection } from "./GuidedIntuition";
 import type { LessonIntuition } from "@/lib/intuition/types";
+import { presentIntuition } from "@/lib/intuition/presentation";
 import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
 import { lessonHistories, type HistoryLessonId } from "@/lib/history";
@@ -23,6 +24,7 @@ import { journeyFor } from "@/lib/builds/journey";
 
 export interface ConceptSection {
   title: string;
+  id?: string;
   // A section holds prose, or a quiz, or a set of problems. A quiz section
   // supplies questions and no content and sits in the section list beside the
   // parts it draws on; a practice section supplies problems to work through
@@ -43,6 +45,7 @@ interface ConceptPageProps {
   history?: ReactNode;
   intuition?: LessonIntuition;
   playgroundIntro: string;
+  playgroundTitle: string;
   playground: ReactNode;
   sections: ConceptSection[];
   prerequisites?: ReactNode;
@@ -80,6 +83,7 @@ export function ConceptPage({
   history,
   intuition,
   playgroundIntro,
+  playgroundTitle,
   playground,
   sections,
   prerequisites,
@@ -96,7 +100,7 @@ export function ConceptPage({
         {intuition && (
           <>
             <div className="my-8" aria-label="Guided visual introduction">
-              <GuidedIntuition lesson={intuition} />
+              <GuidedIntuition lesson={presentIntuition(lessonId, intuition)} />
             </div>
             <IntuitionConnection lesson={intuition} />
           </>
@@ -115,7 +119,7 @@ export function ConceptPage({
   // The worked example keeps the id it had as a details element, so links
   // written against "full-example" still reach it.
   const workedExample: NavigableSection = {
-    title: intuition ? "Explore the full example" : "Try it with the example",
+    title: playgroundTitle,
     id: "full-example",
     content: (
       <>
@@ -137,7 +141,7 @@ export function ConceptPage({
     workedExample,
     ...sections.map((section) => ({
       title: section.title,
-      id: sectionId(section.title),
+      id: section.id ?? sectionId(section.title),
       content: section.content,
       quiz: section.quiz,
       practice: section.practice,

@@ -18,6 +18,8 @@ export default function PositionalEncodingPage() {
     technicalStart="Part 2. Building a Position Vector"
     prerequisites={<>Read <Link href="/concepts/embedding-layers">embedding layers</Link> for token vectors and <Link href="/concepts/attention">attention</Link> for how tokens gather information from one another.</>}
 
+    playgroundTitle="Give identical tokens different positions"
+
     playgroundIntro="Every row begins with the same token vector. Compare the added pattern at positions zero and one. Then change the frequency base and see which columns change more quickly across positions."
     playground={<PositionExplorer />}
     sections={[

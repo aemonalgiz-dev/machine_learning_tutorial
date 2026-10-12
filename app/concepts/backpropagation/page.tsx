@@ -43,6 +43,7 @@ export default function BackpropagationPage() {
       intuition={lessonIntuitions["backpropagation"]}
       technicalStart="Part 2. Backward Through the Output Neuron"
       openingTitle="Which Weight Should Change?"
+      playgroundTitle="Trace an output error back to the weights"
       playgroundIntro="Follow the prediction forward and the gradients backward. Compare a gradient with the loss change produced by a small numerical nudge to that weight."
       title="Backpropagation"
       tagline={"A network can contain many weights between an input and its prediction. Backpropagation works backwards through those calculations to find how each weight contributed to a change in the loss."}
@@ -173,7 +174,7 @@ export default function BackpropagationPage() {
                   that wrongness changes when the prediction moves.
                 </p>
                 <LossStart />
-                <WorkedExample title="At the worked row">
+                <WorkedExample title="Start with the error at the output neuron">
                   <>
                     <p>
                       The prediction is 5 and the target is 1. This example uses half

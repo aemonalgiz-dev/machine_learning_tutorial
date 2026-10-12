@@ -9,13 +9,15 @@ import { buildById } from "@/lib/builds/catalog";
 
 export function ExpandedLessonPage({ id }: { id: string }) {
   const lesson = expandedLessonById[id];
-  const intuition = story(lesson.opening, lesson.intuition.map(item => step(item.title, item.explanation,
-    item.scene ?? strips("An invented example for this lesson.", item.rows))), "What we can now calculate", [lesson.build.why]);
+  const intuition = { ...story(lesson.opening, lesson.intuition.map(item => step(item.title, item.explanation,
+    item.scene ?? strips("An invented example for this lesson.", item.rows))), lesson.reading.connectionTitle, [lesson.build.why]),
+    exampleNote: lesson.reading.exampleNote };
   return <ConceptPage lessonId={lesson.id} title={lesson.title} tagline={lesson.blurb}
     openingTitle={lesson.openingTitle} intuition={intuition} technicalStart={lesson.parts[1].title}
     prerequisites={<>{lesson.prerequisites.map((item, i) => <span key={item.href}>{i > 0 && ", "}<Link href={item.href}>{item.title}</Link></span>)}.</>}
-    playgroundIntro="Choose an example, then change a value. Follow the calculation below to see which result changes and why. These are small teaching examples; the construction later asks you to choose the operations yourself."
-    playground={<LessonExperiment build={buildById[id]} />}
+    playgroundTitle={lesson.reading.experimentTitle}
+    playgroundIntro={lesson.reading.experimentIntro}
+    playground={<LessonExperiment build={buildById[id]} outputLabel={lesson.reading.outputLabel} />}
     sections={[
       ...lesson.parts.map((part, index) => ({ title: part.title, content: <>
         {part.paragraphs.map(text => <p key={text}>{text}</p>)}
@@ -29,11 +31,10 @@ export function ExpandedLessonPage({ id }: { id: string }) {
           {example.interpretation.map(text => <p key={text}>{text}</p>)}
         </div>)}
         {index === lesson.parts.length - 1 && lesson.appliedIn?.length && <aside className="mt-8 rounded-lg border border-line bg-surface p-4 text-sm">
-          <p className="font-semibold text-foreground">Where you will use this</p>
-          <p className="mt-2">These operations return in {lesson.appliedIn.map((item, i) => <span key={item.href}>{i > 0 && ", "}<Link className="text-accent underline underline-offset-4" href={item.href}>{item.title}</Link></span>)}.</p>
+          <p className="font-semibold text-foreground">Continue with {lesson.appliedIn.map((item, i) => <span key={item.href}>{i > 0 && ", "}<Link className="text-accent underline underline-offset-4" href={item.href}>{item.title}</Link></span>)}</p>
         </aside>}
       </> })),
       { title: `Questions on Parts 1 to ${lesson.parts.length}`, quiz: lesson.quiz },
-      { title: "Practice. Work Through the Problem With NumPy", practice: lesson.practice },
+      { title: lesson.reading.practiceTitle, id: "practice-work-through-the-problem-with-numpy", practice: lesson.practice },
     ]} />;
 }

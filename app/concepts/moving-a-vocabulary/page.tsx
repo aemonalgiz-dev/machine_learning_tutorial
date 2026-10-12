@@ -32,6 +32,7 @@ export default function MovingAVocabularyPage() {
       intuition={lessonIntuitions["moving-a-vocabulary"]}
       technicalStart="Part 2. What a Move Has to Decide"
       openingTitle="The Same Token ID Can Mean Something Else"
+      playgroundTitle="What happens when a vocabulary meets different writing?"
       playgroundIntro="Follow each source entry through decoding and re-encoding. Check for entries that collapse together or acquire a different segmentation."
       title="Moving a Vocabulary"
       tagline={"A vocabulary learned under one tokenization scheme may need to be used under another. We will follow what happens to its pieces, including boundaries that disappear and entries that become indistinguishable after the move."}
@@ -836,7 +837,7 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
                   move it is not read well at all. Under the old vocabulary the
                   eighteen report sentences cost 263 pieces; under the new one
                   they cost 505, which is worse than the penalty the pastry
-                  corpus was paying in the other direction. The running sentence
+                  corpus was paying in the other direction. The sentence about Dr. Alvarez
                   of this section goes from 25 pieces to 37.
                 </p>
                 <p>
@@ -936,7 +937,7 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. What Is Lost When IDs Travel Through Text" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="23. Spelling is preserved and position is not">
@@ -1034,20 +1035,11 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="26. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs on which the
-                  method stops being defined rather than becoming approximate,
-                  together with what has to be decided in each case and what
-                  turns on the decision. Several of them are genuinely open,
-                  with defensible answers on either side, and those are the ones
-                  worth a reader&rsquo;s attention, since they are the decisions
-                  anybody moving a vocabulary has to make and nothing in the
-                  method makes for them.
-                </p>
+              <SubSection title="26. Unknown pieces and boundaries that cannot survive the transfer" id="26-where-the-method-has-nothing-to-say">
+                <p>Moving between vocabularies can lose information at more than one point. Check whether the old IDs can be decoded, whether the resulting text retains its boundaries, and whether the new vocabulary can represent that text.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Token or boundary information"
+                  reasonHeading="What survives the vocabulary change"
                   rows={[
                     {
                       expression: "a token whose text has no words in it",
@@ -1127,7 +1119,7 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
                 "It costs it about the same, since the two corpora share an alphabet",
               ],
               2,
-              "The running sentence of the section goes from 25 pieces to 37, and the pieces coming back as the stand-in go from one to five. Over the two corpora together the old vocabulary costs 691 pieces and the new one 781, so a vocabulary can only be well fitted to one distribution of text at a time and which number matters is a fact about what the model will be asked to read.",
+              "The sentence about Dr. Alvarez of the section goes from 25 pieces to 37, and the pieces coming back as the stand-in go from one to five. Over the two corpora together the old vocabulary costs 691 pieces and the new one 781, so a vocabulary can only be well fitted to one distribution of text at a time and which number matters is a fact about what the model will be asked to read.",
             ),
             several(
               "Which of these hold of the move between the two eighteen-sentence corpora?",

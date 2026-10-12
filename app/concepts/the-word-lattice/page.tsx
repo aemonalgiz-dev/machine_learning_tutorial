@@ -33,6 +33,7 @@ export default function TheWordLatticePage() {
       intuition={lessonIntuitions["the-word-lattice"]}
       technicalStart="Part 2. What a Whole Reading Is Worth"
       openingTitle="A Good First Word Can Leave a Bad Ending"
+      playgroundTitle="Compare complete paths through a sentence"
       playgroundIntro="Trace two complete paths through the same text. Compare their total scores, rather than judging a path only by the length of its first word."
       title="The Word Lattice"
       tagline={"Choosing a word early can change which words remain available later in a sentence. A word lattice keeps the alternatives so we can compare complete segmentations before committing to one."}
@@ -332,7 +333,7 @@ export default function TheWordLatticePage() {
                   other, which is a more useful thing to hold than a ratio of two
                   very small numbers.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why adding log probabilities lets us reuse the best remaining path">
                   <>
 <p>
                     There is a second reason to prefer the sum, and it is structural rather than numerical. A sum over the words of a reading is a sum over the arcs of a path, so the score of a path is the total of the weights on the arcs it walks. That is the shape every shortest-path argument needs, and it is what lets the fourteenth section split a path into a head and a tail and reason about the two separately.
@@ -513,7 +514,7 @@ export default function TheWordLatticePage() {
                   likely, that being 810 twice over for the two extra words it
                   had to spend.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="How an early word choice changes the cost of the remaining text">
                   <p>
                     The mechanism is worth stating carefully because it is the
                     whole of the repair. Taking theta buys one word where under
@@ -772,7 +773,7 @@ export default function TheWordLatticePage() {
                   Without that, keeping one number per position throws away a tail
                   that some other head would have wanted.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why a better tail would imply a better complete path">
                   <p>
                     Suppose it failed. Then the best whole path reaches position
                     i by some head and finishes with some tail, and there is a
@@ -809,7 +810,7 @@ export default function TheWordLatticePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="15. What it costs, measured against the greedy scan">
+              <SubSection title="15. The extra search needed to compare complete readings" id="15-what-it-costs-measured-against-the-greedy-scan">
                 <p>
                   Each position offers at most as many candidates as the longest
                   entry is long, so a run of n characters against a list whose
@@ -955,7 +956,7 @@ export default function TheWordLatticePage() {
                   the fallback never eats a word, and no arrangement of the
                   counts lets it.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why a stored word beats its unknown characters under this scoring rule">
                   <>
 <p>
                     An entry covering k characters scores the logarithm of its count over the total. The k unknown characters underneath it score the logarithm of one over the total, k times over, which is the logarithm of one over the total raised to the k. Since an entry is counted at least once, its numerator is at least one; since the total is above one, dividing by it k times is worse than dividing by it once.
@@ -1024,7 +1025,7 @@ export default function TheWordLatticePage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. Tied Paths and Words Missing From the Dictionary" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="19. Two readings can score exactly the same">
@@ -1137,18 +1138,11 @@ export default function TheWordLatticePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="22. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs and questions on
-                  which the method stops being defined rather than becoming
-                  approximate, with what has to be decided in each case and what
-                  turns on the decision. The decisions are the ones worth a
-                  reader&rsquo;s attention, since nothing in the method makes them
-                  and every one of them changes what comes back.
-                </p>
+              <SubSection title="22. What the path score leaves undecided" id="22-where-the-method-has-nothing-to-say">
+                <p>A best-scoring path can still be tied with another path, and a missing dictionary entry can change every available reading. Before trusting the selected words, check what the search was allowed to consider and how it settled a tie.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Dictionary, counts or competing path"
+                  reasonHeading="Effect on the selected reading"
                   rows={[
                     {
                       expression: "two readings with the same score",

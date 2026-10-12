@@ -18,6 +18,8 @@ export default function RadialBasisNetworksPage() {
     technicalStart="Part 2. Calculating and Learning the Response"
     prerequisites={<>The <Link href="/concepts/distance-metrics">distance metrics</Link> lesson explains how coordinates determine closeness. <Link href="/concepts/neurons-and-activations">A neuron</Link> provides another way to build a response from inputs.</>}
 
+    playgroundTitle="Combine responses from nearby centres"
+
     playgroundIntro="Move the input through the three centres. Then increase the width and compare how far each unit responds. The table reports the exact sample used by the plotted curves."
     playground={<RadialExplorer />}
     sections={[

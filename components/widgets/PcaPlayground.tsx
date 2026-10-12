@@ -201,7 +201,7 @@ export function PcaPlayground() {
           onClick={() => setPoints(WORKED_PEOPLE)}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          The measured four
+          Four height and weight pairs
         </button>
         <button
           onClick={() => setPoints(randomPeople())}

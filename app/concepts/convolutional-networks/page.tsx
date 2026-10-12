@@ -38,6 +38,7 @@ export default function ConvolutionalNetworksPage() {
       intuition={lessonIntuitions["convolutional-networks"]}
       technicalStart="Part 2. Training It End to End"
       openingTitle="From Local Patterns to a Name for the Picture"
+      playgroundTitle="Follow an image from pixels to class scores"
       playgroundIntro="Follow a picture through its feature maps to its class scores. Compare the trained model with the alternatives before drawing conclusions about any one layer."
       title="Convolutional Networks"
       tagline={"Recognising an object usually takes more than finding one edge. A convolutional network combines learned local patterns through layers, using the resulting features to make a prediction about the image."}
@@ -897,7 +898,7 @@ export default function ConvolutionalNetworksPage() {
           ),
         },
         {
-          title: "Part 7. Where the Method Stops Being Defined",
+          title: "Part 7. When a New Image Does Not Fit the Network" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="24. A picture of another size">
@@ -967,8 +968,8 @@ export default function ConvolutionalNetworksPage() {
                   network faces, whatever builds it.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Image or window shape"
+                  reasonHeading="Effect on the network output"
                   rows={[
                     { expression: "a window wider than what it reads, padding included", reason: "the output extent is the input extent minus the window, plus twice the padding, divided by the stride, plus one, and when that comes out below one there is no position to place the window. The arrangement is undefined before any picture arrives, which is why it can be checked when the network is built." },
                     { expression: "an odd side under a two by two pooling", reason: "the windows cover the side in whole pairs, so one row and one column are never read. Defined, and lossy, and the only choices are to accept the loss, pad to an even side first, or use windows that overlap." },

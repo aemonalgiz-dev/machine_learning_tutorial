@@ -41,6 +41,7 @@ export default function MarkovChainsPage() {
       intuition={lessonIntuitions["markov-chains"]}
       technicalStart="Part 2. Counting Is the Whole Fit"
       openingTitle="How Much of the Past Do We Need?"
+      playgroundTitle="Where can the next step take us?"
       playgroundIntro="Read one row of the transition table as the possible next states from the current state. Compare one step with several repeated steps."
       title="Markov Chains"
       tagline={"The next event may depend on what is happening now. A Markov chain describes that dependence using probabilities of moving from one state to another, while leaving earlier history out of the prediction."}
@@ -987,7 +988,7 @@ export default function MarkovChainsPage() {
           ),
         },
         {
-          title: "Part 7. Where the Method Stops Being Defined",
+          title: "Part 7. States With No Observed Next Step" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="22. A state that is never left">
@@ -1098,7 +1099,7 @@ export default function MarkovChainsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. The edges gathered">
+              <SubSection title="25. Empty transitions, unseen states and tied decisions" id="25-the-edges-gathered">
                 <p>
                   Beside the three cases above there are other places where the
                   definition has nothing to say, or says something that has to be
@@ -1107,8 +1108,8 @@ export default function MarkovChainsPage() {
                   somebody has to make.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Sequence or transition evidence"
+                  reasonHeading="What the chain can estimate"
                   rows={[
                     {
                       expression: "no sequences, or an empty one",

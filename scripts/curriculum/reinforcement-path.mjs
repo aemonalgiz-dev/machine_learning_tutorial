@@ -1,6 +1,6 @@
 import { source, history, view, s, op, c, sample, before, construction } from "./authoring.mjs";
 import { question, claim } from "./gap-authoring.mjs";
-import { lesson, chapter as p, task, worked } from "./paths-authoring.mjs";
+import { lesson, chapter as p, task } from "./paths-authoring.mjs";
 const section = "Reinforcement Learning";
 const bellman = source("Bellman: The Theory of Dynamic Programming (1954)", "https://www.rand.org/pubs/papers/P550.html");
 const rl = source("Stanford CS234: Tabular Decision Processes and Learning", "https://web.stanford.edu/class/cs234/modules.html");
@@ -71,5 +71,4 @@ lesson({
  build:construction("Correct a visited action's value","Botie observed a reward and a next state after taking one action. The supplied terminal flag says whether that transition really ended the episode.","Find the largest next-state action value. Zero its contribution for a terminal transition, discount the remaining continuation, add the reward, then move the old value toward that target by alpha.",{old:"Visited entry's old Q value",reward:"Observed reward",next:"Next-state action values",terminal:"True terminal flag: 0 or 1",gamma:"Discount",alpha:"Learning rate"},[sample("Continuing transition",{old:2,reward:1,next:[4,6],terminal:0,gamma:.5,alpha:.25},2.5),sample("True terminal",{old:4,reward:-2,next:[100,200],terminal:1,gamma:.9,alpha:.5},1),sample("No update",{old:3,reward:5,next:[9],terminal:0,gamma:.9,alpha:0},3)],op("add",s("old"),op("multiply",s("alpha"),op("subtract",op("add",s("reward"),op("multiply",s("gamma"),op("terminalContinuation",op("maximum",s("next")),s("terminal")))),s("old")))),"The target combines observed reward with a permitted continuation. The learning rate scales the correction to the one visited estimate.","The terminal flag must be zero or one, and alpha and gamma must lie in [0,1]. This is one tabular update, not a convergence demonstration."),
 }),
 ];
-for (const item of lessons) { const x=item.practice[0]; item.parts[2].examples=[worked("Inspect one complete update", "Run this small numerical example before building the corresponding operation sequence.", "", x.solution, x.output, "Keep each state, action, and time position associated with its own values. The second challenge tests a different case.")]; }
 export default lessons;

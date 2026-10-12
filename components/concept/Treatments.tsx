@@ -32,13 +32,15 @@ function Label({ children }: { children: ReactNode }) {
 // reader opening fifteen drawers to find it.
 export function SubSection({
   title,
+  id,
   children,
 }: {
   title: string;
+  id?: string;
   children: ReactNode;
 }) {
   return (
-    <section id={sectionId(title)} tabIndex={-1} className="mt-8 scroll-mt-6 first:mt-0">
+    <section id={id ?? sectionId(title)} tabIndex={-1} className="mt-8 scroll-mt-6 first:mt-0">
       <h3 className="mb-3 text-lg font-semibold text-slate-900 dark:text-slate-100">
         {title}
       </h3>
@@ -52,7 +54,7 @@ export function SubSection({
 // Arithmetic small enough to check by hand. Set apart so a reader who wants the
 // numbers can find them and a reader who does not can step over them.
 export function WorkedExample({
-  title = "Worked example",
+  title,
   children,
 }: {
   title?: string;
@@ -60,7 +62,7 @@ export function WorkedExample({
 }) {
   return (
     <div className="my-5 rounded-lg border border-slate-200 bg-slate-50/70 px-5 py-4 dark:border-slate-800 dark:bg-slate-900/40">
-      <Label>{title}</Label>
+      {title && <Label>{title}</Label>}
       <div className="space-y-3 text-slate-700 dark:text-slate-300">
         {children}
       </div>
@@ -71,10 +73,10 @@ export function WorkedExample({
 // The derivation, closed by default. Nobody needs it to follow the page, and
 // leaving it open would make the page look like it demanded more than it does.
 export function WhyThisWorks({
-  title = "Why this works",
+  title,
   children,
 }: {
-  title?: string;
+  title: string;
   children: ReactNode;
 }) {
   return (
@@ -92,15 +94,16 @@ export function WhyThisWorks({
   );
 }
 
-// The caveat that stops the idea being read as more than it is. Marked, because
-// a qualification buried in a paragraph reads as a footnote and gets skipped.
+// Routine qualifications belong in the explanation. An explicitly titled
+// callout gives a substantial pitfall the extra emphasis it needs.
 export function KeepInMind({
-  title = "Keep in mind",
+  title,
   children,
 }: {
   title?: string;
   children: ReactNode;
 }) {
+  if (!title) return <div className="my-4 space-y-3 text-slate-700 dark:text-slate-300">{children}</div>;
   return (
     <div className="my-5 rounded-lg border-l-4 border-amber-400 bg-amber-50/60 px-5 py-4 dark:border-amber-500/70 dark:bg-amber-950/20">
       <Label>{title}</Label>
@@ -114,12 +117,13 @@ export function KeepInMind({
 // What the small example becomes at the scale a real model works at. Kept
 // separate so the example stays small and the leap is visible as a leap.
 export function InAModel({
-  title = "In a model",
+  title,
   children,
 }: {
   title?: string;
   children: ReactNode;
 }) {
+  if (!title) return <div className="my-4 space-y-3 text-slate-700 dark:text-slate-300">{children}</div>;
   return (
     <div className="my-5 rounded-lg border-l-4 border-sky-400 bg-sky-50/60 px-5 py-4 dark:border-sky-500/70 dark:bg-sky-950/20">
       <Label>{title}</Label>

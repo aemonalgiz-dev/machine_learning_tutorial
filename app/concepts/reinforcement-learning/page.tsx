@@ -23,6 +23,7 @@ export default function Page() {
       intuition={lessonIntuitions["reinforcement-learning"]}
       technicalStart="Part 3. Calculate One Policy Update"
       prerequisites={<>Begin with the robot example. For the calculations, revisit <Link href="/concepts/sampling-and-temperature">how scores become probabilities</Link>. The language-model connection builds on <Link href="/concepts/supervised-fine-tuning">supervised fine-tuning</Link> and <Link href="/concepts/low-rank-adaptation">LoRA</Link>.</>}
+      playgroundTitle="Change the action probabilities using the rewards"
       playgroundIntro="Set training episodes to zero to inspect the equal starting policy. Raise it to one to see a single sampled action and its feedback, then increase it to collect more experience. Change the sampling seed to try a different sequence. Each change starts a fresh run."
       playground={<ModernLearningExample topic="reinforcement-learning" />}
       sections={[
@@ -388,7 +389,7 @@ print("probabilities after both refusals", np.round(policy.probabilities, 4))`,
               `ShapeMismatchError supply one reward per action
 InvalidValuesError action is outside the policy
 probabilities after both refusals [0.3333 0.3333 0.3333]`,
-              { hints: ["Every refusal the library makes derives from one base class, so catching that one catches whichever specific refusal each call turns out to be.", "The reward table is checked against the number of logits before any episode is sampled, and the action index before any logit is touched, so neither refusal leaves a half-applied update behind."] },
+              { hints: ["The reward table is checked against the number of logits before any episode is sampled, and the action index before any logit is touched, so neither refusal leaves a half-applied update behind."] },
             ),
           ],
         },

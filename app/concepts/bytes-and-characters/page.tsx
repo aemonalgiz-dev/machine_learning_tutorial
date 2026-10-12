@@ -39,6 +39,7 @@ export default function BytesAndCharactersPage() {
       intuition={lessonIntuitions["bytes-and-characters"]}
       technicalStart="Part 2. Reading the Units the Text Is Already Made Of"
       openingTitle="A Tiny Alphabet Can Spell a Very Long Sentence"
+      playgroundTitle="How many bytes does one character need?"
       playgroundIntro="Compare the number of characters with the number of bytes. Inspect a character represented by multiple bytes and check the decoded result."
       title="Bytes and Characters"
       tagline={"A visible character and the bytes used to store it are not always the same unit. That distinction affects how much text a model receives and whether its representation can handle unfamiliar writing."}
@@ -263,7 +264,7 @@ export default function BytesAndCharactersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="7. The running sentence, taken all the way through">
+              <SubSection title="7. The Alvarez sentence as characters and bytes" id="7-the-running-sentence-taken-all-the-way-through">
                 <p>
                   Here is the whole of it on our sentence, which is 51 characters
                   long and happens to be 51 bytes long as well. The first four
@@ -532,7 +533,7 @@ export default function BytesAndCharactersPage() {
                   caption="Measured on one character at a time, so the count is the character’s own cost with nothing else in the text."
                 />
                 <p>
-                  That is why the running sentence came to 51 either way. It is
+                  That is why the sentence about Dr. Alvarez came to 51 either way. It is
                   written entirely in characters that take one byte each, so the
                   two readings cut it in exactly the same places and differ only
                   in which number each piece goes in as. An English sentence
@@ -549,7 +550,7 @@ export default function BytesAndCharactersPage() {
 
               <SubSection title="13. Where the two readings stop agreeing about length">
                 <p>
-                  Put two more texts beside the running sentence, the sentence
+                  Put two more texts beside the sentence about Dr. Alvarez, the sentence
                   itself with a unit of length written into it that carries two
                   Scandinavian letters, and one short sentence of Greek, and the
                   disagreement appears immediately. The accented text is 69
@@ -565,7 +566,7 @@ export default function BytesAndCharactersPage() {
                     "what the character reading could not spell",
                   ]}
                   rows={[
-                    ["the running sentence", "51", "51", "0"],
+                    ["the sentence about Dr. Alvarez", "51", "51", "0"],
                     ["with two Scandinavian letters", "69", "71", "2"],
                     ["one sentence of Greek", "21", "38", "17"],
                   ]}
@@ -676,7 +677,7 @@ export default function BytesAndCharactersPage() {
               "Representable and learnable are separate questions and only the first is settled by the guarantee. What changes is where the failure happens. Under a learned vocabulary an unfamiliar text fails at the tokenizer, before the model is reached, and under a byte reading it arrives intact and fails inside the model, where more training data can still change the answer.",
             ),
             choice(
-              "Why did the running sentence come to 51 numbers under both readings?",
+              "Why did the sentence about Dr. Alvarez come to 51 numbers under both readings?",
               [
                 "The two tables were fitted to the same corpus",
                 "It is written entirely in characters that take one byte each, so the two readings cut it in the same places",
@@ -689,7 +690,7 @@ export default function BytesAndCharactersPage() {
             trueFalse(
               "The character reading gives an exact round trip only on text spelled in characters its corpus met, where the byte reading gives one on any text.",
               true,
-              "The character reading’s promise is conditional and the byte reading’s has no condition attached. On the three texts of Part 4 the character reading is exact on the running sentence, loses two characters on the accented one and seventeen on the Greek, handing back the stand-in’s own spelling in their place. The byte reading is exact on all three.",
+              "The character reading’s promise is conditional and the byte reading’s has no condition attached. On the three texts of Part 4 the character reading is exact on the sentence about Dr. Alvarez, loses two characters on the accented one and seventeen on the Greek, handing back the stand-in’s own spelling in their place. The byte reading is exact on all three.",
             ),
             several(
               "A run of byte numbers can stop part way through a character. Which of these hold of such a run?",
@@ -882,7 +883,7 @@ export default function BytesAndCharactersPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. What Counts as One Character?" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="20. What counts as one character has to be decided">
@@ -957,18 +958,11 @@ export default function BytesAndCharactersPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="22. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs on which the method
-                  stops being defined rather than becoming approximate, together
-                  with what has to be decided in each case and what turns on the
-                  decision. The ones with a genuine choice attached are the ones
-                  worth a reader&rsquo;s attention, since nothing in the
-                  mathematics makes them and somebody has to.
-                </p>
+              <SubSection title="22. Encoding choices and text that cannot be recovered" id="22-where-the-method-has-nothing-to-say">
+                <p>We have to choose what a character means before assigning IDs. We also need a policy for malformed input and text the chosen representation cannot recover. The byte and codepoint routes make different promises in these cases.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Text or encoding condition"
+                  reasonHeading="What the representation must decide"
                   rows={[
                     {
                       expression: "a character the corpus never used",
@@ -1076,7 +1070,7 @@ export default function BytesAndCharactersPage() {
           practice: [
             exercise(
               "Read three texts as characters and as bytes",
-              ["Fit the character reading on the eighteen sentences and build the byte reading, which is fitted on nothing. Put the running sentence, the sentence with two Scandinavian letters and the Greek sentence to both, and print for each how many numbers it became, how many of them are the stand-in, and whether decoding the numbers gives the text back exactly.", "The rows should be the table of section 13 with the round trip of section 14 beside it. The two readings agree on the first text and on nothing else, and the byte reading should be exact three times out of three."],
+              ["Fit the character reading on the eighteen sentences and build the byte reading, which is fitted on nothing. Put the sentence about Dr. Alvarez, the sentence with two Scandinavian letters and the Greek sentence to both, and print for each how many numbers it became, how many of them are the stand-in, and whether decoding the numbers gives the text back exactly.", "The rows should be the table of section 13 with the round trip of section 14 beside it. The two readings agree on the first text and on nothing else, and the byte reading should be exact three times out of three."],
               `from oop_ml import ByteTokenizer, CharacterTokenizer
 
 corpus = [
@@ -1266,7 +1260,7 @@ Chinese: 12 of 18 stopping points are not text`,
             ),
             exercise(
               "Price the byte reading against a vocabulary that was learned",
-              ["Fit the library’s byte pair encoder on the eighteen sentences the way Part 1 does, with no byte fallback and a vocabulary size of 300, which is more than this corpus can fill, so the merging runs until no pair occurs twice. Print the entries and merges it finished with, read the running sentence with it and decode the numbers, then count what the whole corpus costs under it and under the byte reading.", "The table should come to 137 entries after 85 merges, the sentence to 25 numbers that do not decode to the sentence, and the corpus to 263 numbers against 763. The ratio of the last two, to two places, is the price Part 5 puts on refusing to learn a vocabulary."],
+              ["Fit the library’s byte pair encoder on the eighteen sentences the way Part 1 does, with no byte fallback and a vocabulary size of 300, which is more than this corpus can fill, so the merging runs until no pair occurs twice. Print the entries and merges it finished with, read the sentence about Dr. Alvarez with it and decode the numbers, then count what the whole corpus costs under it and under the byte reading.", "The table should come to 137 entries after 85 merges, the sentence to 25 numbers that do not decode to the sentence, and the corpus to 263 numbers against 763. The ratio of the last two, to two places, is the price Part 5 puts on refusing to learn a vocabulary."],
               `from oop_ml import BytePairEncoding, ByteTokenizer
 
 corpus = [

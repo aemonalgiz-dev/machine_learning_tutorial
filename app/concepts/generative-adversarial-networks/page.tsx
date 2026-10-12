@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["generative-adversarial-networks"]}
     technicalStart="Part 2. Calculate the Adversarial Feedback"
     prerequisites={<>Useful foundations: <Link href="/concepts/neurons-and-activations">Neurons and activations</Link>{", "}<Link href="/concepts/backpropagation">backpropagation</Link>{", "}<Link href="/concepts/loss-functions">loss functions</Link>.</>}
+    playgroundTitle="Can the discriminator tell the samples apart?"
     playgroundIntro="Set training steps to zero to inspect the starting game. Increase the steps and follow the generator’s shift and the discriminator’s two scores. Then compare learning rates. Either loss can rise as the opponent changes."
     playground={<ModernLearningExample topic="generative-adversarial-networks" />}
     sections={[

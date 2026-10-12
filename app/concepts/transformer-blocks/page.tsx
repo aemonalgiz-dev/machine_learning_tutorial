@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["transformer-blocks"]}
     technicalStart="Part 2. Calculating One Decoder Block"
     prerequisites={<>Useful foundations: <Link href="/concepts/attention">Attention</Link>{", "}<Link href="/concepts/positional-encoding">positional encoding</Link>{", "}<Link href="/concepts/residual-connections">residual connections</Link>{", "}<Link href="/concepts/normalisation-layers">normalization</Link>.</>}
+    playgroundTitle="Follow token information through one transformer block"
     playgroundIntro="Change the last token from cat to dog. Follow its row through the block, then check that the earlier rows remain unchanged. Read the attention tables by row: each row says which positions that position reads."
     playground={<ModernLearningExample topic="transformer-blocks" />}
     sections={[
@@ -299,7 +300,7 @@ except MLLibError as refusal:
 `,
               `ShapeMismatchError
 head count must divide model width`,
-              { hints: ["Every refusal the library makes derives from one base class, so catching that one catches whichever specific refusal this turns out to be.", "The check is in the constructor, so there is no respond_to to call. The error names the rule it applied rather than the arithmetic that would have failed later."] },
+              { hints: ["The check is in the constructor, so there is no respond_to to call. The error names the rule it applied rather than the arithmetic that would have failed later."] },
             ),
           ],
         },

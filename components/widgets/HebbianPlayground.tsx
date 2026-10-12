@@ -242,7 +242,7 @@ export function HebbianPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button onClick={() => setPoints(WORKED_PEOPLE)} className={BUTTON_CLASS}>
-          The measured four
+          Four height and weight pairs
         </button>
         <button onClick={() => setPoints(IDEAL_CASE)} className={BUTTON_CLASS}>
           An Ideal Case

@@ -39,6 +39,7 @@ export default function GlovePage() {
       intuition={lessonIntuitions["glove"]}
       technicalStart="Part 3. What The Vectors Are Asked To Reproduce"
       openingTitle="Count the Neighbours Once, Then Fit Their Relationships"
+      playgroundTitle="What do repeated word pairs tell the model?"
       playgroundIntro="Compare an observed pair count with the value reconstructed by the vectors and biases. Inspect how the weighting changes the contribution of rare and frequent pairs."
       title="GloVe"
       tagline={"A table of word co-occurrences contains information about how words are used together. GloVe learns vectors whose comparisons account for patterns in those counts, rather than keeping the full table as the representation."}
@@ -879,7 +880,7 @@ export default function GlovePage() {
           ),
         },
         {
-          title: "Part 7. Where GloVe Stops Being Defined",
+          title: "Part 7. Missing Co-occurrences and Unreliable Neighbours", id: "part-7-where-glove-stops-being-defined",
           content: (
             <>
               <SubSection title="21. A pair that never co-occurred has no logarithm">
@@ -961,16 +962,11 @@ export default function GlovePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. Where the method stops being defined">
-                <p>
-                  Several inputs leave the method with nothing to compute rather than
-                  something approximate to compute, and a few more leave it with a
-                  real choice whose cost is worth knowing. The table gathers both,
-                  with what the mathematics says in each case.
-                </p>
+              <SubSection title="24. Pairs With No Counts and Vectors With No Direction" id="24-where-the-method-stops-being-defined">
+                <p>No co-occurrence count means there is no positive pair observation for this objective to fit. Separately, a zero vector cannot take part in a cosine comparison. The table keeps missing evidence apart from an undefined comparison.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Count or vocabulary condition"
+                  reasonHeading="Effect on fitting and comparing vectors"
                   rows={[
                     {
                       expression: "a pair that never co-occurred",

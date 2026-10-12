@@ -1,4 +1,5 @@
 import { lessonIntuitions } from "@/lib/intuition";
+import { presentIntuition } from "@/lib/intuition/presentation";
 import { GuidedIntuition, IntuitionConnection } from "@/components/concept/GuidedIntuition";
 import type { Metadata } from "next";
 import {
@@ -46,7 +47,7 @@ export default function CalculusPrimerPage() {
     >
       <PrimerSection title="Which Way Makes the Error Smaller?">
 {lessonIntuitions["calculus"].opening.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
-<GuidedIntuition lesson={lessonIntuitions["calculus"]} />
+<GuidedIntuition lesson={presentIntuition("calculus", lessonIntuitions["calculus"])} />
 <IntuitionConnection lesson={lessonIntuitions["calculus"]} />
 </PrimerSection>
 
@@ -173,7 +174,7 @@ export default function CalculusPrimerPage() {
           is taken across a shorter piece of curve, so each is a better stand-in
           for the steepness right at the base.
         </p>
-        <WorkedExample title="Worked example, one smaller gap">
+        <WorkedExample title="Move the second point closer and compare the average slope">
           <p>Move the second point from x = 5 in to x = 4, a gap of 1.</p>
           <Equation>{"f(4) = 0.5·16 − 4 + 2.5 = 6.5\naverage slope = (6.5 − 4) / (4 − 3) = 2.5 / 1 = 2.5"}</Equation>
           <p>
@@ -427,7 +428,7 @@ export default function CalculusPrimerPage() {
           much the height will change over a short run from the point it was
           read at.
         </p>
-        <WorkedExample title="Worked example, predicting a small change">
+        <WorkedExample title="Use the local slope to predict a nearby height">
           <p>
             At x = 3 the derivative is 2. Step 0.02 to the right and the height
             should rise by about 2 times 0.02.

@@ -13,6 +13,14 @@ export interface ExpandedLesson {
   blurb: string;
   openingTitle: string;
   opening: string[];
+  reading: {
+    experimentTitle: string;
+    experimentIntro: string;
+    connectionTitle: string;
+    practiceTitle: string;
+    outputLabel: string;
+    exampleNote: string;
+  };
   prerequisites: { title: string; href: string }[];
   appliedIn?: { title: string; href: string }[];
   history: LessonHistory;

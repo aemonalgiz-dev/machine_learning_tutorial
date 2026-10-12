@@ -95,6 +95,36 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "The container changes what multiplication means",
+        "explanation": "The same two readings can live in a Python list or a NumPy array. Multiplying the list repeats its entries; multiplying the array changes each value. We need to know which object we are using before trusting the result.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Two containers holding the same invented readings.",
+          "rowHeading": "Container",
+          "columns": [
+            "Starting values",
+            "After multiplying by 2"
+          ],
+          "records": [
+            {
+              "label": "Python list",
+              "cells": [
+                "[12, 18]",
+                "[12, 18, 12, 18]"
+              ]
+            },
+            {
+              "label": "NumPy array",
+              "cells": [
+                "[12, 18]",
+                "[24, 36]"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -430,7 +460,15 @@
         "title": "Direct statistics calculations",
         "href": "/primers/statistics"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Can we convert every reading without mixing up the greenhouses?",
+      "experimentIntro": "A conversion is only useful if we still know whose reading it is. Change a Celsius value below and follow that position through the multiplication and addition.",
+      "connectionTitle": "The array keeps the readings together and in order",
+      "practiceTitle": "Practice. Convert a Fresh Temperature Report",
+      "outputLabel": "Fahrenheit readings, in greenhouse order",
+      "exampleNote": "The greenhouse temperatures are invented; their positions identify the same greenhouses throughout."
+    }
   },
   {
     "id": "numpy-axes",
@@ -537,6 +575,36 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "One overall average can hide the greenhouse differences",
+        "explanation": "We can also average every reading together. That gives one report-wide number, but it loses the distinction between the cooler and warmer greenhouses. The right summary depends on what Botie needs to decide.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "The same two-day report, summarised in two ways.",
+          "rowHeading": "Summary",
+          "columns": [
+            "Result",
+            "What remains identifiable"
+          ],
+          "records": [
+            {
+              "label": "One average per greenhouse",
+              "cells": [
+                "12, 21, 33 degrees Celsius",
+                "The greenhouse"
+              ]
+            },
+            {
+              "label": "One average for the whole report",
+              "cells": [
+                "22 degrees Celsius",
+                "Only the report"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -843,7 +911,15 @@
         "title": "Pooling measurements",
         "href": "/concepts/pooling"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Are we averaging days or greenhouses?",
+      "experimentIntro": "Each greenhouse has several readings, and each day has several greenhouses. Before running the calculation, decide which observations must contribute to one greenhouse's average.",
+      "connectionTitle": "The axis decides which question the average answers",
+      "practiceTitle": "Practice. Report Averages by Day and Greenhouse",
+      "outputLabel": "Average temperature for each greenhouse",
+      "exampleNote": "Rows are days and columns are greenhouses in this illustrative report."
+    }
   },
   {
     "id": "numpy-creation",
@@ -1236,7 +1312,15 @@
         "title": "Initialising and training a network",
         "href": "/concepts/training-a-network"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Prepare the target sheet before comparing readings",
+      "experimentIntro": "Botie needs a reference at every position in the report. Change the requested arrangement or target and check whether the prepared array still matches the observations it will be compared with.",
+      "connectionTitle": "Shape is part of the data we are preparing",
+      "practiceTitle": "Practice. Prepare Targets and Candidate Settings",
+      "outputLabel": "Differences from the prepared targets",
+      "exampleNote": "These small check sheets stand in for a larger greenhouse report."
+    }
   },
   {
     "id": "numpy-indexing",
@@ -1628,7 +1712,15 @@
         "title": "Looking up embedding rows",
         "href": "/concepts/embedding-layers"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which days did Botie actually ask for?",
+      "experimentIntro": "The requested row numbers may repeat or arrive out of order. Follow one request to its original day, then check where that day's readings appear in the result.",
+      "connectionTitle": "Selecting a position does not change its identity",
+      "practiceTitle": "Practice. Retrieve Readings and Count Repeated Alerts",
+      "outputLabel": "Selected readings, arranged by greenhouse",
+      "exampleNote": "The row numbers refer to the invented temperature table shown here."
+    }
   },
   {
     "id": "numpy-reshaping",
@@ -2016,7 +2108,15 @@
         "title": "Dense layers",
         "href": "/concepts/dense-layers"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Recover the days hidden in the logger's flat list",
+      "experimentIntro": "The logger writes one complete day before starting another. Try a small list whose values you can recognise, then follow one greenhouse through the restored rows and columns.",
+      "connectionTitle": "Reshaping groups entries; transposing changes the axes",
+      "practiceTitle": "Practice. Restore the Logger's Arrangement",
+      "outputLabel": "Recovered greenhouse histories",
+      "exampleNote": "The logger entries are illustrative and arrive in complete-day order."
+    }
   },
   {
     "id": "numpy-broadcasting",
@@ -2420,7 +2520,15 @@
         "title": "Attention",
         "href": "/concepts/attention"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Does each greenhouse get its own target?",
+      "experimentIntro": "A target belongs to a greenhouse, so it must follow that column across every day. Change one target below. Which column of differences should change, and which should stay the same?",
+      "connectionTitle": "A singleton dimension tells NumPy where a reference repeats",
+      "practiceTitle": "Practice. Compare Readings With the Right References",
+      "outputLabel": "Temperature differences from each column's target",
+      "exampleNote": "The example targets and readings share the same greenhouse order."
+    }
   },
   {
     "id": "numpy-masks",
@@ -2782,7 +2890,15 @@
         "title": "Missing measurements",
         "href": "/concepts/missing-measurements"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which temperatures deserve an alert?",
+      "experimentIntro": "Move the limit past one of the readings. Watch that position enter or leave the selected array, and compare the selected values with the original report.",
+      "connectionTitle": "A Boolean mask records one decision per position",
+      "practiceTitle": "Practice. Select and Summarise Alert Readings",
+      "outputLabel": "Readings that meet the alert rule",
+      "exampleNote": "The invented readings let us check what happens exactly at the limit."
+    }
   },
   {
     "id": "numpy-reductions",
@@ -3144,7 +3260,15 @@
         "title": "Nearest-neighbour comparisons",
         "href": "/concepts/k-nearest-neighbours"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Can we sort temperatures without losing the names?",
+      "experimentIntro": "Botie wants to know which greenhouse is coolest. Change a reading enough to move it in the ranking, then check that the greenhouse name moves with it.",
+      "connectionTitle": "An ordering can be reused across related arrays",
+      "practiceTitle": "Practice. Keep Names Beside Their Measurements",
+      "outputLabel": "Greenhouses ordered from coolest to warmest",
+      "exampleNote": "The names and temperatures describe matching positions in a small example report."
+    }
   },
   {
     "id": "numpy-vectorisation",
@@ -3527,7 +3651,15 @@
         "title": "Gradient calculations",
         "href": "/concepts/gradient-descent-regression"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Do opposite temperature errors cancel?",
+      "experimentIntro": "Try one reading above the target and another equally far below it. Botie still made two errors. Follow the deviations through squaring and averaging to see how both contribute.",
+      "connectionTitle": "Elementwise work comes before the summary",
+      "practiceTitle": "Practice. Score Every Reading in a New Report",
+      "outputLabel": "Mean squared deviation from the target",
+      "exampleNote": "These temperature errors illustrate a calculation over a whole array."
+    }
   },
   {
     "id": "numpy-linear-algebra",
@@ -3917,7 +4049,15 @@
         "title": "Principal component analysis",
         "href": "/concepts/pca"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "How does each measurement contribute to the score?",
+      "experimentIntro": "Choose one greenhouse row and predict what will happen if one coefficient increases. The calculation below combines the contributions for every row using the same scoring rule.",
+      "connectionTitle": "Matrix multiplication repeats the weighted sum by row",
+      "practiceTitle": "Practice. Apply and Check Matrix Calculations",
+      "outputLabel": "Scores in observation order",
+      "exampleNote": "The feature rows and scoring coefficients are supplied teaching values, not fitted parameters."
+    }
   },
   {
     "id": "numpy-numerical-checks",
@@ -4290,7 +4430,15 @@
         "title": "Evaluating held-out predictions",
         "href": "/concepts/held-out-evaluation"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "How close is close enough?",
+      "experimentIntro": "Two routes through a calculation may differ slightly. Change one recovered reading or the permitted error and find the point where the comparison stops passing.",
+      "connectionTitle": "Tolerance is a stated requirement for a comparison",
+      "practiceTitle": "Practice. Check Precision and Invalid Readings",
+      "outputLabel": "Whether every reading meets the absolute tolerance",
+      "exampleNote": "Original and recovered temperatures are paired illustrative values."
+    }
   },
   {
     "id": "reproducible-sampling",
@@ -4724,7 +4872,15 @@
         "title": "Bagging",
         "href": "/concepts/bagging"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What did this particular draw include?",
+      "experimentIntro": "A saved list of positions tells us exactly which observations were drawn. Repeat a position and watch its reading contribute again to the average.",
+      "connectionTitle": "Saving the choices lets us replay the calculation",
+      "practiceTitle": "Practice. Replay and Compare Recorded Samples",
+      "outputLabel": "Mean of the selected readings",
+      "exampleNote": "The draw indices are supplied so the sampling choices remain visible."
+    }
   },
   {
     "id": "numpy-functions",
@@ -5118,7 +5274,15 @@
         "title": "Keeping evaluation data separate",
         "href": "/concepts/data-leakage"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Will the reference stay fixed for a new report?",
+      "experimentIntro": "The training average has already been learned. Change the incoming readings and check that they are still described relative to that same reference.",
+      "connectionTitle": "A reusable function must make its inputs and outputs clear",
+      "practiceTitle": "Practice. Reuse a Conversion and a Fitted Reference",
+      "outputLabel": "Stored reference and centred report",
+      "exampleNote": "The training and incoming reports are separate invented samples."
+    }
   },
   {
     "id": "numpy-saving-data",
@@ -5513,7 +5677,15 @@
         "title": "Repeating a fitted pipeline",
         "href": "/concepts/pipelines"
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Can the restored pieces still make the same prediction?",
+      "experimentIntro": "The feature table, coefficients and names have already been loaded. Follow one row through the calculation and check that its name still identifies the resulting score.",
+      "connectionTitle": "Restoring values includes restoring what their positions mean",
+      "practiceTitle": "Practice. Save and Restore Named Arrays",
+      "outputLabel": "Restored scores and their greenhouse names",
+      "exampleNote": "This illustration begins after loading; the Python examples perform the save and load."
+    }
   },
   {
     "id": "missing-measurements",
@@ -5811,6 +5983,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "What should fill a gap in the report?",
+      "experimentIntro": "A blank temperature is different from a measured zero. Change the observed training values and watch the learned replacement change, then check that real report readings remain untouched.",
+      "connectionTitle": "Learn the replacement before filling the later report",
+      "practiceTitle": "Practice. Fill Missing Readings Without Borrowing Test Data",
+      "outputLabel": "Report with missing entries filled",
+      "exampleNote": "Missing entries and measured temperatures are kept distinct in this invented report."
     }
   },
   {
@@ -5893,6 +6073,42 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "An unfamiliar roof still needs a policy",
+        "explanation": "A roof made of a material absent from the vocabulary matches none of the known-material columns. An all-zero row can record that result, but it should not silently be interpreted as a known material.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Illustrative roof materials with a fixed vocabulary.",
+          "rowHeading": "Material",
+          "columns": [
+            "Glass",
+            "Plastic",
+            "Mesh",
+            "Interpretation"
+          ],
+          "records": [
+            {
+              "label": "Glass",
+              "cells": [
+                "1",
+                "0",
+                "0",
+                "Known category"
+              ]
+            },
+            {
+              "label": "Stone",
+              "cells": [
+                "0",
+                "0",
+                "0",
+                "No known category matched"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -6172,6 +6388,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "How can a roof material become numerical input?",
+      "experimentIntro": "A larger category ID would not mean a better or thicker roof. Give each material a separate membership question and inspect the resulting row for each supplied roof.",
+      "connectionTitle": "Indicator columns describe membership without inventing an order",
+      "practiceTitle": "Practice. Encode Known and Unfamiliar Materials",
+      "outputLabel": "One indicator row per roof",
+      "exampleNote": "The material names are illustrative categories with no numerical ranking."
     }
   },
   {
@@ -7057,6 +7281,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Can midnight stay close to the hour before it?",
+      "experimentIntro": "An hour number jumps at midnight even though very little time has passed. Change the hour around that boundary and compare the two coordinates of its position on the cycle.",
+      "connectionTitle": "Two coordinates preserve a repeating position",
+      "practiceTitle": "Practice. Represent Daily and Weekly Cycles",
+      "outputLabel": "Cosine and sine coordinates",
+      "exampleNote": "The hours locate positions in a repeating day, not measured greenhouse outcomes."
     }
   },
   {
@@ -7332,6 +7564,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Did we import another event or another copy?",
+      "experimentIntro": "Repeated values can be real observations, but repeated event IDs can reveal duplicate imports. Change the IDs and count the extra copies without treating every equal measurement as a duplicate.",
+      "connectionTitle": "One row needs a clear identity before we count it",
+      "practiceTitle": "Practice. Find Duplicate Event Records",
+      "outputLabel": "Number of extra copies",
+      "exampleNote": "The event IDs represent a small invented sensor export."
     }
   },
   {
@@ -7624,6 +7864,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Which readings existed when the decision was made?",
+      "experimentIntro": "The export contains information that arrived at different times. Move the decision cutoff and check which measurements Botie could actually have used at that moment.",
+      "connectionTitle": "Availability time determines whether a feature is usable",
+      "practiceTitle": "Practice. Reconstruct the Evidence Available at a Decision",
+      "outputLabel": "Measurements available by the cutoff",
+      "exampleNote": "These availability times are invented to expose the prediction-time boundary."
     }
   },
   {
@@ -7894,6 +8142,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Did the model find the failures?",
+      "experimentIntro": "A model can look accurate by mostly recognising the common class. Change the results for one class and inspect its recall before averaging across classes.",
+      "connectionTitle": "Each class needs its own account of the mistakes",
+      "practiceTitle": "Practice. Compare Accuracy With Class Recalls",
+      "outputLabel": "Mean of the class recalls",
+      "exampleNote": "The class counts describe an illustrative evaluation, not a deployed detector."
     }
   },
   {
@@ -8182,6 +8438,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "What score does a constant prediction earn?",
+      "experimentIntro": "Fit one temperature from the training readings and use it for every held-out case. Changing a held-out answer should change the error, but it must not change that fitted prediction.",
+      "connectionTitle": "A baseline has to respect the same information boundary",
+      "practiceTitle": "Practice. Score a Baseline Before Comparing Models",
+      "outputLabel": "Held-out error of the fitted constant",
+      "exampleNote": "The training readings and held-out temperatures are invented, separate samples."
     }
   },
   {
@@ -8518,6 +8782,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Are the errors improving, or merely getting closer?",
+      "experimentIntro": "A small gap between training and validation can still mean both errors are poor. Compare the gap with the actual error levels as the supplied training size changes.",
+      "connectionTitle": "The gap and the error level answer different questions",
+      "practiceTitle": "Practice. Read What the Two Error Curves Are Saying",
+      "outputLabel": "Validation error minus training error",
+      "exampleNote": "These curves are illustrative measurements for reasoning about training behaviour."
     }
   },
   {
@@ -8806,6 +9078,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "When is an inspection worth the cost?",
+      "experimentIntro": "A missed failure and an unnecessary inspection need not cost the same. Change one cost and see which supplied failure probabilities now justify acting.",
+      "connectionTitle": "The decision needs consequences as well as probabilities",
+      "practiceTitle": "Practice. Choose Actions Under Different Mistake Costs",
+      "outputLabel": "Inspection decisions under the supplied costs",
+      "exampleNote": "The probabilities and mistake costs are simplified teaching assumptions."
     }
   },
   {
@@ -9109,6 +9389,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Do confident predictions match what happened?",
+      "experimentIntro": "Botie has a group of predicted probabilities and their later outcomes. Compare average confidence with the observed failure share, then inspect the separate squared-error score.",
+      "connectionTitle": "Confidence can be checked against observed frequency",
+      "practiceTitle": "Practice. Compare Confidence, Frequency and Probability Error",
+      "outputLabel": "Mean confidence, observed frequency and squared error",
+      "exampleNote": "The small evaluation group illustrates the calculation; it cannot establish calibration on its own."
     }
   },
   {
@@ -9405,6 +9693,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Did a greenhouse appear on both sides of the split?",
+      "experimentIntro": "Holding out a row is not necessarily holding out a greenhouse. Change the group IDs and check which identities cross from training into evaluation.",
+      "connectionTitle": "The split must hold out the kind of novelty we care about",
+      "practiceTitle": "Practice. Keep Greenhouse Groups Separate",
+      "outputLabel": "Number of greenhouse identities shared by both sets",
+      "exampleNote": "The group IDs are an invented split whose overlap we can inspect directly."
     }
   },
   {
@@ -9737,6 +10033,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Did the mix of roofs change, or just the report size?",
+      "experimentIntro": "Double all the counts in one report before changing a single category's share. Comparing proportions should ignore the first change and respond to the second.",
+      "connectionTitle": "Shares let us compare the composition of different-sized reports",
+      "practiceTitle": "Practice. Measure a Change in Category Shares",
+      "outputLabel": "Distance between the category distributions",
+      "exampleNote": "Both illustrative reports use the same roof-category order."
     }
   },
   {
@@ -10021,6 +10325,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "How much can the sample mean move?",
+      "experimentIntro": "Use the saved draw positions to select another sample from the observed readings. A repeated position contributes more than once; an omitted position contributes nothing to that draw.",
+      "connectionTitle": "Resampling changes which observations support the estimate",
+      "practiceTitle": "Practice. Compare Estimates Across Resamples",
+      "outputLabel": "Mean for the recorded bootstrap draw",
+      "exampleNote": "The draws reuse an invented observed sample; they are not new measurements."
     }
   },
   {
@@ -10117,6 +10429,42 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "The same alarm can mean more when faults are common",
+        "explanation": "Keep the detection and false-alarm rates fixed, but imagine a population with more faulty sensors. A larger share of the alarms now comes from real faults. The alarm's meaning depends on the starting population as well as the detector.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Invented populations of 1,000 sensors, with 90% detection and 10% false alarms.",
+          "rowHeading": "Population",
+          "columns": [
+            "Faults",
+            "Alarms from faults",
+            "Alarms from working sensors",
+            "Fault share among alarms"
+          ],
+          "records": [
+            {
+              "label": "Faults are rare",
+              "cells": [
+                "10",
+                "9",
+                "99",
+                "About 8.3%"
+              ]
+            },
+            {
+              "label": "Faults are more common",
+              "cells": [
+                "100",
+                "90",
+                "90",
+                "50%"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -10378,6 +10726,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Among the alarms, how many came from faults?",
+      "experimentIntro": "An alarm can come from a faulty sensor or a working one. Change how common faults are while keeping the alarm rates fixed and see how the explanation of an alarm changes.",
+      "connectionTitle": "The alarm changes the group whose proportions we need",
+      "practiceTitle": "Practice. Update a Fault Estimate From an Alarm",
+      "outputLabel": "Faulty and working shares after the alarm",
+      "exampleNote": "Fault prevalence and alarm rates are supplied illustrative probabilities."
     }
   },
   {
@@ -10720,6 +11076,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Which germination rule better explains this batch?",
+      "experimentIntro": "Keep the observed seed outcomes fixed and change a candidate success probability. Each candidate must explain the same successes and failures, not a different batch of its own.",
+      "connectionTitle": "Likelihood compares rules against the observations we already have",
+      "practiceTitle": "Practice. Compare Germination Probabilities",
+      "outputLabel": "Germination probability of the best supplied candidate",
+      "exampleNote": "The seed outcomes form an invented ordered batch."
     }
   },
   {
@@ -11108,6 +11472,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Which sensor condition could explain these signs?",
+      "experimentIntro": "Each row describes the same observed signs under a different possible cause. Change one likelihood and follow its effect through the class weight and the final normalisation.",
+      "connectionTitle": "Combining signs requires a stated independence assumption",
+      "practiceTitle": "Practice. Estimate Sign Rates and Compare Sensor Classes",
+      "outputLabel": "Posterior shares for faulty and working sensors",
+      "exampleNote": "The class priors and sign probabilities are illustrative; conditional independence is assumed."
     }
   },
   {
@@ -11296,6 +11668,39 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "Two correct predictions can satisfy the margin differently",
+        "explanation": "Both of these labelled points are on the correct side. One is still close to the boundary, so it contributes hinge loss; the other lies beyond the requested margin. Correct classification alone does not capture that distinction.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Supplied signed scores for two correctly classified observations.",
+          "rowHeading": "Observation",
+          "columns": [
+            "Label multiplied by score",
+            "Hinge loss",
+            "Margin satisfied?"
+          ],
+          "records": [
+            {
+              "label": "Near the boundary",
+              "cells": [
+                "0.25",
+                "0.75",
+                "No"
+              ]
+            },
+            {
+              "label": "Farther from the boundary",
+              "cells": [
+                "1.5",
+                "0",
+                "Yes"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -11585,6 +11990,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Which labelled parts sit too close to the boundary?",
+      "experimentIntro": "A point can be on the correct side and still lie inside the requested margin. Change a score or label and inspect the shortfall before averaging over the parts.",
+      "connectionTitle": "A margin asks for separation beyond a correct sign",
+      "practiceTitle": "Practice. Calculate Margin Violations and Their Cost",
+      "outputLabel": "Mean hinge loss for the proposed boundary",
+      "exampleNote": "The labelled measurements and proposed boundary are supplied for inspection, not fitted here."
     }
   },
   {
@@ -11920,6 +12333,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "How close are the nearest members of these two groups?",
+      "experimentIntro": "Single linkage only needs one short connection between groups. Move a response time in either group and follow the smallest cross-group distance.",
+      "connectionTitle": "A linkage rule defines what distance between groups means",
+      "practiceTitle": "Practice. Choose Merges and Compare Linkage Rules",
+      "outputLabel": "Single-linkage distance between the groups",
+      "exampleNote": "The response-time groups are illustrative measurements."
     }
   },
   {
@@ -12330,6 +12751,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Does each location have enough nearby support?",
+      "experimentIntro": "A location becomes a core point only when its neighbourhood meets the chosen count. Change the radius or required count and check which locations gain or lose that support.",
+      "connectionTitle": "Local support comes before joining dense regions",
+      "practiceTitle": "Practice. Identify Core Points and Their Neighbours",
+      "outputLabel": "Core-point decisions in location order",
+      "exampleNote": "These invented sensor locations count the point itself in its neighbourhood."
     }
   },
   {
@@ -12743,6 +13172,14 @@
         },
         "output": 1
       }
+    },
+    "reading": {
+      "experimentTitle": "Can we rescale brightness without rearranging the picture?",
+      "experimentIntro": "Each entry belongs to a pixel position. Change a brightness and follow that same position into the floating-point image, including values too small for integer division to preserve.",
+      "connectionTitle": "A pixel has a position, a channel and a numerical scale",
+      "practiceTitle": "Practice. Inspect Pixels and Convert Their Scale",
+      "outputLabel": "Pixel intensities on the zero-to-one scale",
+      "exampleNote": "These tiny grayscale images make every pixel available for inspection."
     }
   },
   {
@@ -12873,6 +13310,38 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "A pixel count is not yet a seed count",
+        "explanation": "The mask tells us which positions passed the brightness test. Several selected pixels may belong to one seed, and two touching seeds may appear as one region. We will need spatial grouping before calling the result a count of objects.",
+        "rows": [],
+        "scene": {
+          "kind": "tiles",
+          "caption": "An invented mask with three selected pixels joined into one region.",
+          "panels": [
+            {
+              "label": "Selected positions",
+              "cells": [
+                [
+                  0,
+                  1,
+                  1
+                ],
+                [
+                  0,
+                  1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  0
+                ]
+              ],
+              "maximum": 1
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -13189,6 +13658,14 @@
         "outputIndex": 0,
         "remainderLabel": "Selected pixel count"
       }
+    },
+    "reading": {
+      "experimentTitle": "Which bright pixels belong in the mask?",
+      "experimentIntro": "Raise the cutoff through the image's brightness values. Watch selected positions disappear, then compare the number of selected pixels with the number of objects you can see.",
+      "connectionTitle": "A mask records a decision at every pixel",
+      "practiceTitle": "Practice. Build and Compare Foreground Masks",
+      "outputLabel": "Selected positions and their pixel count",
+      "exampleNote": "The invented tray image is small enough to count by eye."
     }
   },
   {
@@ -13774,6 +14251,14 @@
         },
         "output": 1
       }
+    },
+    "reading": {
+      "experimentTitle": "Can we remove the speck without losing the seed region?",
+      "experimentIntro": "The footprint sets the shape that must fit inside the mask. Follow the erosion first, then see which surviving positions can grow back during dilation.",
+      "connectionTitle": "The footprint decides which structures survive",
+      "practiceTitle": "Practice. Clean Small Masks With Opening and Closing",
+      "outputLabel": "Mask after opening",
+      "exampleNote": "The small binary mask contains an illustrative seed region and isolated mark."
     }
   },
   {
@@ -14181,6 +14666,14 @@
           "mask": 1
         }
       }
+    },
+    "reading": {
+      "experimentTitle": "Are those pixels one region or two?",
+      "experimentIntro": "Two bright pixels touching at a corner may be connected under one neighbour rule and separate under another. Compare the supplied masks and inspect the labels before trusting the region count.",
+      "connectionTitle": "Connectivity defines which foreground pixels belong together",
+      "practiceTitle": "Practice. Measure Regions and Follow Their Connections",
+      "outputLabel": "Number of connected foreground regions",
+      "exampleNote": "The example masks isolate the effect of the chosen neighbour rule."
     }
   },
   {
@@ -14676,6 +15169,14 @@
         "outputIndex": 0,
         "pairedOutput": 1
       }
+    },
+    "reading": {
+      "experimentTitle": "Will the label still point to the seed after reflection?",
+      "experimentIntro": "The image and its mask describe the same scene. Follow one marked pixel as the columns reverse and check that the mask moves with the intensity values.",
+      "connectionTitle": "A geometric change must move the target along with the image",
+      "practiceTitle": "Practice. Transform Images and Labels Together",
+      "outputLabel": "Reflected image and matching label mask",
+      "exampleNote": "This labelled tray is invented to make image-mask alignment visible."
     }
   },
   {
@@ -15070,6 +15571,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "What can a new head do with fixed leaf features?",
+      "experimentIntro": "The feature rows have already been computed. Change the head's coefficients and compare its class decisions without changing what the feature extractor supplied.",
+      "connectionTitle": "A learned representation can support another prediction task",
+      "practiceTitle": "Practice. Apply and Update a New Classification Head",
+      "outputLabel": "Class decisions from the new head",
+      "exampleNote": "The feature vectors are supplied teaching values, not outputs from a pretrained image model."
     }
   },
   {
@@ -15545,6 +16054,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "How much do the two rectangles actually share?",
+      "experimentIntro": "Move an edge of the predicted box. Compare the shared area with the total area covered by either rectangle, including the point where the boxes stop overlapping.",
+      "connectionTitle": "Overlap needs a common denominator",
+      "practiceTitle": "Practice. Calculate Overlap for New Rectangle Pairs",
+      "outputLabel": "Intersection over union",
+      "exampleNote": "The rectangles use continuous boundary coordinates on an illustrative image."
     }
   },
   {
@@ -16073,6 +16590,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Which detections describe the same seed?",
+      "experimentIntro": "A high score does not tell us whether two boxes duplicate one object. Change scores or the overlap threshold and watch which candidate gets to remove the overlapping alternatives.",
+      "connectionTitle": "Ranking determines which overlapping candidate gets the first decision",
+      "practiceTitle": "Practice. Keep Distinct Detections Without Crossing Class Labels",
+      "outputLabel": "Coordinates of the retained boxes",
+      "exampleNote": "The boxes and scores are supplied examples from one object class."
     }
   },
   {
@@ -16202,14 +16727,14 @@
         ],
         "examples": [
           {
-            "title": "Follow the calculation in NumPy",
+            "title": "One forecast, recorded before the next reading",
             "paragraphs": [
-              "The arrays below are invented readings. Track which entries are available before each prediction."
+              "Suppose the last three daily totals are known. We copy the most recent one before revealing the next day's water use, then measure the size of the miss."
             ],
-            "code": "\nimport numpy as np\ny = np.array([8.,10.,9.,13.])\npred = y[:-1]\nprint(pred.tolist())\nprint(f'{np.mean(np.abs(y[1:] - pred)):.2f}')",
-            "output": "[8.0, 10.0, 9.0]\n2.33",
+            "code": "import numpy as np\nhistory = np.array([10., 12., 11.])\nforecast = history[-1]\nobserved_next_day = 14.0\nprint(float(forecast))\nprint(float(abs(observed_next_day - forecast)))",
+            "output": "11.0\n3.0",
             "interpretation": [
-              "The printed values follow the stated ordering and units. The second challenge changes the question or inputs."
+              "The forecast stays at eleven litres when the fourteen-litre observation arrives. The later value belongs in the error calculation, not in the earlier prediction."
             ]
           }
         ]
@@ -16396,6 +16921,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "How far did yesterday's demand leave us from today's?",
+      "experimentIntro": "A saved prediction must stay fixed when its target arrives. Change an observed total below and compare the error with the forecast that was already recorded for that day.",
+      "connectionTitle": "A simple forecast gives a model something to improve on",
+      "practiceTitle": "Practice. Score Forecasts Made Before the Answers Arrived",
+      "outputLabel": "Mean absolute forecast error",
+      "exampleNote": "The daily water totals are invented and measured in litres."
     }
   },
   {
@@ -16526,14 +17059,14 @@
         ],
         "examples": [
           {
-            "title": "Follow the calculation in NumPy",
+            "title": "Build the row for one target day",
             "paragraphs": [
-              "The arrays below are invented readings. Track which entries are available before each prediction."
+              "The first prediction with two lags needs two earlier readings. Separate those inputs from the next value before building a whole table."
             ],
-            "code": "\nimport numpy as np\ny = np.array([3,5,4,8,7])\nX = np.array([y[t-2:t] for t in range(2, len(y))])\nprint(X.tolist())\nprint(y[2:].tolist())",
-            "output": "[[3, 5], [5, 4], [4, 8]]\n[4, 8, 7]",
+            "code": "import numpy as np\nreadings = np.array([10, 12, 11, 15])\ntarget_position = 2\nfeatures = readings[target_position - 2:target_position]\ntarget = readings[target_position]\nprint(features.tolist())\nprint(int(target))",
+            "output": "[10, 12]\n11",
             "interpretation": [
-              "The printed values follow the stated ordering and units. The second challenge changes the question or inputs."
+              "The feature slice stops before the target position. Practice will repeat this alignment across every eligible target date."
             ]
           }
         ]
@@ -16719,6 +17252,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "What history belongs beside each target day?",
+      "experimentIntro": "Increase the history window and notice which early days no longer have enough preceding readings. Each surviving row must end before the day it predicts.",
+      "connectionTitle": "The feature row has to stop before its target",
+      "practiceTitle": "Practice. Align Earlier Readings With Later Targets",
+      "outputLabel": "Trailing-mean predictions in target-date order",
+      "exampleNote": "The illustrative demand record is ordered from earliest to latest."
     }
   },
   {
@@ -16839,14 +17380,14 @@
         ],
         "examples": [
           {
-            "title": "Follow the calculation in NumPy",
+            "title": "Compare two positions with their previous cycle",
             "paragraphs": [
-              "The arrays below are invented readings. Track which entries are available before each prediction."
+              "Here the illustrative pattern repeats every two readings. Put the earlier cycle beside the later one so each subtraction compares the same position."
             ],
-            "code": "\nimport numpy as np\ny = np.array([5,10,15,7,11,18])\nperiod = 3\nprint((y[period:] - y[:-period]).tolist())",
-            "output": "[2, 1, 3]",
+            "code": "import numpy as np\nearlier_cycle = np.array([8, 12])\nlater_cycle = np.array([11, 13])\nchange = later_cycle - earlier_cycle\nprint(change.tolist())\nprint((earlier_cycle + change).tolist())",
+            "output": "[3, 1]\n[11, 13]",
             "interpretation": [
-              "The printed values follow the stated ordering and units. The second challenge changes the question or inputs."
+              "The changes retain their cycle positions. Adding them to the correct earlier values recovers the later levels; differences alone do not preserve the original level."
             ]
           }
         ]
@@ -17042,6 +17583,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Did demand rise beyond its usual repeating pattern?",
+      "experimentIntro": "The reference is the same position in an earlier cycle. Change the period and check which observations now get compared before interpreting their differences.",
+      "connectionTitle": "A seasonal difference compares corresponding positions in successive cycles",
+      "practiceTitle": "Practice. Calculate Changes and Recover Demand Levels",
+      "outputLabel": "Differences from the preceding seasonal cycle",
+      "exampleNote": "The repeating demand values are invented to keep the seasonal comparison visible."
     }
   },
   {
@@ -17159,14 +17708,14 @@
         ],
         "examples": [
           {
-            "title": "Follow the calculation in NumPy",
+            "title": "Let one new day move the retained level",
             "paragraphs": [
-              "The arrays below are invented readings. Track which entries are available before each prediction."
+              "Botie predicted ten litres. The next day used fourteen, and we choose to absorb one quarter of that surprise into the level."
             ],
-            "code": "\nimport numpy as np\nreadings = np.array([14.,10.,18.])\nlevel = 10.0\nalpha = 0.5\nforecasts = []\nfor reading in readings:\n    forecasts.append(level)\n    level += alpha * (reading - level)\nprint([float(value) for value in forecasts])\nprint(f'{level:.2f}')",
-            "output": "[10.0, 12.0, 11.0]\n14.50",
+            "code": "import numpy as np\nlevel = 10.0\nreading = 14.0\nalpha = 0.25\nforecast_before_reading = level\nsurprise = reading - level\nlevel = level + alpha * surprise\nprint(f'{forecast_before_reading:.2f}')\nprint(f'{level:.2f}')",
+            "output": "10.00\n11.00",
             "interpretation": [
-              "The printed values follow the stated ordering and units. The second challenge changes the question or inputs."
+              "The saved forecast is still ten. Eleven is the updated state for a later prediction. Keeping those two moments separate is the main job of the loop in practice."
             ]
           }
         ]
@@ -17343,6 +17892,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "How much should one surprising day change the next forecast?",
+      "experimentIntro": "A new reading disagrees with the retained level. Try a small response rate and then a larger one, watching how much of that surprise enters the updated level.",
+      "connectionTitle": "The state retains part of the past and part of the new evidence",
+      "practiceTitle": "Practice. Update a Forecast as Readings Arrive",
+      "outputLabel": "Updated demand level",
+      "exampleNote": "These illustrative water readings are used to show one update at a time."
     }
   },
   {
@@ -17490,14 +18047,14 @@
         ],
         "examples": [
           {
-            "title": "Follow the calculation in NumPy",
+            "title": "Use one lag with already fitted coefficients",
             "paragraphs": [
-              "The arrays below are invented readings. Track which entries are available before each prediction."
+              "Before fitting a rule, check what its coefficients mean. This supplied rule combines an intercept with half of the latest reading."
             ],
-            "code": "\nimport numpy as np\ny = np.array([1.,3.,7.,15.,31.])\nX = np.column_stack([np.ones(len(y)-1), y[:-1]])\nw = np.linalg.lstsq(X, y[1:], rcond=None)[0]\nprint(np.round(w, 4).tolist())\nprint(f'{np.array([1.,y[-1]]) @ w:.2f}')",
-            "output": "[1.0, 2.0]\n63.00",
+            "code": "import numpy as np\ncoefficients = np.array([1.0, 0.5])\nlatest_reading = 8.0\nrow = np.array([1.0, latest_reading])\ncontributions = row * coefficients\nprint(contributions.tolist())\nprint(float(contributions.sum()))",
+            "output": "[1.0, 4.0]\n5.0",
             "interpretation": [
-              "The printed values follow the stated ordering and units. The second challenge changes the question or inputs."
+              "The constant column contributes the intercept; the other column contributes the lagged demand. Practice will estimate coefficients from a new sequence instead of receiving them."
             ]
           }
         ]
@@ -17682,6 +18239,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "What does each earlier day contribute to tomorrow's forecast?",
+      "experimentIntro": "The coefficients belong to particular lag positions. Change one past reading and check its contribution before combining it with the other lags and the intercept.",
+      "connectionTitle": "Earlier values can become inputs to a fitted prediction rule",
+      "practiceTitle": "Practice. Fit a Lagged Rule and Forecast Beyond the Record",
+      "outputLabel": "Next forecast from the supplied coefficients",
+      "exampleNote": "The coefficients below are supplied; fitting them is covered in the Python calculation."
     }
   },
   {
@@ -17822,14 +18387,14 @@
         ],
         "examples": [
           {
-            "title": "Follow the calculation in NumPy",
+            "title": "Score two rules at one prediction date",
             "paragraphs": [
-              "The arrays below are invented readings. Track which entries are available before each prediction."
+              "Only the three history values are available when the prediction is made. We save both rules' answers and reveal the target afterwards."
             ],
-            "code": "\nimport numpy as np\ny = np.array([5.,7.,6.,9.,8.,10.])\norigins = range(3,len(y))\nlast = np.array([y[t-1] for t in origins])\nrolling = np.array([y[t-2:t].mean() for t in origins])\nprint(last.tolist())\nprint(rolling.tolist())\nfor pred in [last,rolling]:\n    print(f'{np.abs(y[3:] - pred).mean():.3f}')",
-            "output": "[6.0, 9.0, 8.0]\n[6.5, 7.5, 8.5]\n2.000\n1.500",
+            "code": "import numpy as np\nhistory = np.array([4., 6., 8.])\npredictions = np.array([history[-1], history[-2:].mean()])\ntarget = 10.0\nprint(predictions.tolist())\nprint(np.abs(target - predictions).tolist())",
+            "output": "[8.0, 7.0]\n[2.0, 3.0]",
             "interpretation": [
-              "The printed values follow the stated ordering and units. The second challenge changes the question or inputs."
+              "Persistence does better at this one origin. That does not settle the comparison across a whole period; the challenge repeats the process at several dates."
             ]
           }
         ]
@@ -18038,6 +18603,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Which forecast would have helped on these dates?",
+      "experimentIntro": "Both methods made their predictions before the same target days. Compare their errors date by date before reducing each method to one average.",
+      "connectionTitle": "Evaluation has to replay the information available at each date",
+      "practiceTitle": "Practice. Replay Forecast Origins and Compare Horizons",
+      "outputLabel": "Mean absolute error for each method",
+      "exampleNote": "The forecast comparison uses an invented sequence of daily water totals."
     }
   },
   {
@@ -18172,14 +18745,14 @@
         ],
         "examples": [
           {
-            "title": "Inspect one complete update",
+            "title": "Update the estimate of one tried action",
             "paragraphs": [
-              "Run this small numerical example before building the corresponding operation sequence."
+              "One schedule has been tried three times and averaged four units of reward. Its next observed reward is eight. We revise that schedule's estimate without claiming to have learned anything new about the other schedule."
             ],
-            "code": "\nimport numpy as np\ncounts = np.array([3,1])\nvalues = np.array([5.,7.])\naction = 1\nreward = 3.0\ncounts[action] += 1\nvalues[action] += (reward-values[action]) / counts[action]\nprint(counts.tolist())\nprint(values.tolist())",
-            "output": "[3, 2]\n[5.0, 5.0]",
+            "code": "import numpy as np\nold_count = 3\nold_mean = 4.0\nreward = 8.0\nnew_count = old_count + 1\ncorrection = (reward - old_mean) / new_count\nprint(new_count)\nprint(old_mean + correction)",
+            "output": "4\n5.0",
             "interpretation": [
-              "Keep each state, action, and time position associated with its own values. The second challenge tests a different case."
+              "The new observation receives one quarter of the updated average. Practice adds the bookkeeping needed to select and update one entry in arrays of actions."
             ]
           }
         ]
@@ -18368,6 +18941,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "What did Botie learn from the action he actually tried?",
+      "experimentIntro": "The new reward belongs to one selected action. Change its previous count and see why the same surprise has a smaller effect after many observations.",
+      "connectionTitle": "An action estimate changes only when that action supplies evidence",
+      "practiceTitle": "Practice. Update Action Estimates and Allocate Exploration",
+      "outputLabel": "Updated reward estimate for the selected action",
+      "exampleNote": "The action rewards are illustrative observations, not known long-run values."
     }
   },
   {
@@ -18501,14 +19082,14 @@
         ],
         "examples": [
           {
-            "title": "Inspect one complete update",
+            "title": "Account for one action's possible next states",
             "paragraphs": [
-              "Run this small numerical example before building the corresponding operation sequence."
+              "Suppose waiting leaves the bed dry with probability three quarters and moist otherwise. The two state values describe what those consequences are worth."
             ],
-            "code": "\nimport numpy as np\nP = np.array([[0.1,0.9],[0.8,0.2]])\nV = np.array([0.,10.])\nprint((P @ V).tolist())",
-            "output": "[9.0, 2.0]",
+            "code": "import numpy as np\ntransition = np.array([0.75, 0.25])\nstate_values = np.array([0., 8.])\ncontributions = transition * state_values\nprint(contributions.tolist())\nprint(float(contributions.sum()))",
+            "output": "[0.0, 2.0]\n2.0",
             "interpretation": [
-              "Keep each state, action, and time position associated with its own values. The second challenge tests a different case."
+              "The expected value weights both possible outcomes. It is not a claim that the next state will have value two; this environment only has the two supplied states."
             ]
           }
         ]
@@ -18716,6 +19297,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Where might each action leave the greenhouse?",
+      "experimentIntro": "An action can have several possible consequences. Change its transition probabilities while keeping each row a valid distribution, then compare the expected values of the next states.",
+      "connectionTitle": "An action is described by its possible consequences",
+      "practiceTitle": "Practice. Compare Actions and Mixed Policies",
+      "outputLabel": "Expected next-state value for each action",
+      "exampleNote": "The transition probabilities define a small invented environment."
     }
   },
   {
@@ -18837,14 +19426,14 @@
         ],
         "examples": [
           {
-            "title": "Inspect one complete update",
+            "title": "See each reward's contribution before adding",
             "paragraphs": [
-              "Run this small numerical example before building the corresponding operation sequence."
+              "These rewards arrive now, one step later and two steps later. Give each delay its own power of the discount before forming the return from the start."
             ],
-            "code": "\nimport numpy as np\nrewards = np.array([1.,2.,4.])\ngamma = 0.5\nreturns = np.zeros_like(rewards)\ncontinuation = 0.0\nfor t in range(len(rewards)-1,-1,-1):\n    continuation = rewards[t] + gamma * continuation\n    returns[t] = continuation\nprint(returns.tolist())",
-            "output": "[3.0, 4.0, 4.0]",
+            "code": "import numpy as np\nrewards = np.array([2., 0., 8.])\ngamma = 0.5\nweights = gamma ** np.arange(len(rewards))\ncontributions = weights * rewards\nprint(weights.tolist())\nprint(contributions.tolist())\nprint(float(contributions.sum()))",
+            "output": "[1.0, 0.5, 0.25]\n[2.0, 0.0, 2.0]\n4.0",
             "interpretation": [
-              "Keep each state, action, and time position associated with its own values. The second challenge tests a different case."
+              "The distant reward contributes less because it is delayed twice. The challenge asks for the return starting at every position, which is easier to calculate backwards."
             ]
           }
         ]
@@ -19021,6 +19610,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "How much does waiting change the value of a reward?",
+      "experimentIntro": "Keep the reward sequence fixed and change the discount. Follow the contribution of a later reward and compare it with one available immediately.",
+      "connectionTitle": "A return combines rewards according to when they arrive",
+      "practiceTitle": "Practice. Calculate Returns Along a Completed Journey",
+      "outputLabel": "Discounted return from the start",
+      "exampleNote": "The short reward sequence is an illustrative completed episode."
     }
   },
   {
@@ -19152,14 +19749,14 @@
         ],
         "examples": [
           {
-            "title": "Inspect one complete update",
+            "title": "Combine a payment now with a continuation later",
             "paragraphs": [
-              "Run this small numerical example before building the corresponding operation sequence."
+              "Compare two actions whose next states are known here. One pays immediately but has little continuation value; the other pays nothing now and reaches a more useful state."
             ],
-            "code": "\nimport numpy as np\nP = np.array([[1.,0.],[0.,1.]])\nV = np.array([2.,6.])\nrewards = np.array([3.,0.])\ngamma = 0.5\nscores = rewards + gamma * (P @ V)\nprint(scores.tolist())\nprint(int(np.argmax(scores)))",
-            "output": "[4.0, 3.0]\n0",
+            "code": "import numpy as np\nimmediate = np.array([2., 0.])\ncontinuation = np.array([1., 8.])\ngamma = 0.5\nscores = immediate + gamma * continuation\nprint(scores.tolist())\nprint(int(np.argmax(scores)))",
+            "output": "[2.5, 4.0]\n1",
             "interpretation": [
-              "Keep each state, action, and time position associated with its own values. The second challenge tests a different case."
+              "The second action wins after including the continuation. Practice replaces these supplied next-state values with expectations under a transition model."
             ]
           }
         ]
@@ -19395,6 +19992,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Is the immediate reward worth the state it leads to?",
+      "experimentIntro": "One action can pay more now but leave less value for later. Change the supplied continuation values and check whether the preferred action changes.",
+      "connectionTitle": "Planning combines one decision with the value of continuing",
+      "practiceTitle": "Practice. Calculate Action Values and Plan in a Small Environment",
+      "outputLabel": "Index of the preferred action",
+      "exampleNote": "The transition model and rewards describe a fully specified teaching environment."
     }
   },
   {
@@ -19492,6 +20097,36 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "A stopped recording is not always a terminal state",
+        "explanation": "The terminal flag describes the environment, not just the end of the array we saved. Reaching a genuine end removes continuation value. Reaching a logging or time limit may still leave a next state with future rewards.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Two different reasons a recorded sequence might stop.",
+          "rowHeading": "Reason for stopping",
+          "columns": [
+            "Can the environment continue?",
+            "Continuation in the target"
+          ],
+          "records": [
+            {
+              "label": "A true terminal state",
+              "cells": [
+                "No",
+                "Zero"
+              ]
+            },
+            {
+              "label": "Recording stopped at a time limit",
+              "cells": [
+                "Possibly",
+                "Requires the task's truncation convention"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -19529,14 +20164,14 @@
         ],
         "examples": [
           {
-            "title": "Inspect one complete update",
+            "title": "Separate the target from the size of the update",
             "paragraphs": [
-              "Run this small numerical example before building the corresponding operation sequence."
+              "Botie receives a reward of two and reaches a nonterminal state. Its best current action estimate is eight, but the old estimate for the action just taken is only three."
             ],
-            "code": "\nimport numpy as np\nQ = np.array([[2.,0.],[4.,6.]])\nstate, action, next_state = 0,0,1\nreward, gamma, alpha = 1.0,0.5,0.25\ntarget = reward + gamma * Q[next_state].max()\nQ[state,action] += alpha * (target-Q[state,action])\nprint(Q.tolist())",
-            "output": "[[2.5, 0.0], [4.0, 6.0]]",
+            "code": "import numpy as np\nold_value = 3.0\nnext_values = np.array([4., 8.])\nreward, gamma, rate = 2.0, 0.5, 0.5\ntarget = reward + gamma * next_values.max()\ncorrection = rate * (target - old_value)\nprint(float(target))\nprint(float(old_value + correction))",
+            "output": "6.0\n4.5",
             "interpretation": [
-              "Keep each state, action, and time position associated with its own values. The second challenge tests a different case."
+              "The target is six, while the half-sized correction only moves the estimate to four and a half. The table update in practice must change the visited entry and leave all others alone."
             ]
           }
         ]
@@ -19762,6 +20397,14 @@
         "transpose"
       ],
       "draftVersion": 1
+    },
+    "reading": {
+      "experimentTitle": "Which one estimate should this experience change?",
+      "experimentIntro": "Botie took one action and observed what followed. Compare an ordinary transition with a terminal one, where there is no future action value to add.",
+      "connectionTitle": "Experience supplies a target for the visited action",
+      "practiceTitle": "Practice. Update an Action Value and Respect Episode Endings",
+      "outputLabel": "Updated value of the visited state-action pair",
+      "exampleNote": "The transition is supplied so we can inspect one Q-learning update."
     }
   },
   {
@@ -20013,14 +20656,14 @@
         ],
         "examples": [
           {
-            "title": "Can you calculate expected damage?",
+            "title": "Keep the probability beside the damage count",
             "paragraphs": [
-              "Print the probability sum and expected count to one decimal place."
+              "A delivery can damage zero, one or two items. Multiply each count by its probability before adding; neither the most likely outcome nor an unweighted average answers this question."
             ],
-            "code": "import numpy as np\ncounts = np.array([0,1,2])\np = np.array([.5,.3,.2])\nprint(f'{p.sum():.1f}')\nprint(f'{counts @ p:.1f}')",
-            "output": "1.0\n0.7",
+            "code": "import numpy as np\ncounts = np.array([0., 1., 2.])\nprobabilities = np.array([0.25, 0.5, 0.25])\ncontributions = counts * probabilities\nprint(contributions.tolist())\nprint(float(contributions.sum()))",
+            "output": "[0.0, 0.5, 0.5]\n1.0",
             "interpretation": [
-              "Match entries by their position. A dot product adds weighted contributions."
+              "One is the expected count under this distribution. Individual deliveries can still have any of the three listed outcomes."
             ]
           }
         ]
@@ -20065,7 +20708,15 @@
           "Weight shortages, not raw damage counts."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "How should Botie plan for several possible damage counts?",
+      "experimentIntro": "No single outcome describes every delivery. Change the probability shares, keeping their total at one, and compare the weighted count with the individual outcomes.",
+      "connectionTitle": "Expectation weights outcomes by how often they are expected to occur",
+      "practiceTitle": "Practice. Calculate Expected Damage and Shortage",
+      "outputLabel": "Expected damage count",
+      "exampleNote": "The damage counts and their probabilities form an invented distribution."
+    }
   },
   {
     "id": "parameter-posteriors",
@@ -20333,14 +20984,14 @@
         ],
         "examples": [
           {
-            "title": "Can you update the failure model?",
+            "title": "Put failures and successes into separate counts",
             "paragraphs": [
-              "One means failure. Print posterior alpha, beta, and predictive failure probability."
+              "Start with a Beta prior whose parameters are one and three. This small new trial contains two failures and no working sensors."
             ],
-            "code": "import numpy as np\ny = np.array([1,0,0])\na, b = 1., 1.\na += y.sum()\nb += (1-y).sum()\nprint([float(a), float(b)])\nprint(f'{a/(a+b):.2f}')",
-            "output": "[2.0, 3.0]\n0.40",
+            "code": "import numpy as np\nprior = np.array([1., 3.])\nnew_failures = 2\nnew_working = 0\nposterior = prior + np.array([new_failures, new_working])\nprint(posterior.tolist())\nprint(float(posterior[0] / posterior.sum()))",
+            "output": "[3.0, 3.0]\n0.5",
             "interpretation": [
-              "Count the two outcomes separately. The denominator includes both parameters."
+              "The two failures increase the first parameter. The posterior mean is now one half, but the distribution still expresses uncertainty about the underlying rate."
             ]
           }
         ]
@@ -20385,7 +21036,15 @@
           "Compare the result with the priors’ shared mean of one half."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What do a few new sensors tell us about the failure rate?",
+      "experimentIntro": "Record the new failures and working sensors separately. Compare the update from a weak prior with one based on much more prior evidence.",
+      "connectionTitle": "The posterior retains earlier evidence while incorporating new outcomes",
+      "practiceTitle": "Practice. Update an Uncertain Failure Rate",
+      "outputLabel": "Posterior mean failure probability",
+      "exampleNote": "The binary sensor outcomes are an illustrative trial."
+    }
   },
   {
     "id": "gaussian-sensor-fusion",
@@ -20630,6 +21289,33 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "Two readings can share the same error",
+        "explanation": "If both instruments respond to the same disturbance, their errors are related. Treating them as independent would count some evidence twice. We need that dependence before interpreting the reduced variance as a reliable uncertainty estimate.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "The independence assumption concerns errors, not the number of instruments.",
+          "rowHeading": "Measurement situation",
+          "columns": [
+            "What the second reading adds"
+          ],
+          "records": [
+            {
+              "label": "Independent instrument errors",
+              "cells": [
+                "Another independent piece of evidence"
+              ]
+            },
+            {
+              "label": "A shared disturbance",
+              "cells": [
+                "Some information already present in the first reading"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -20665,14 +21351,14 @@
         ],
         "examples": [
           {
-            "title": "Can you combine the two readings?",
+            "title": "Start with two equally reliable thermometers",
             "paragraphs": [
-              "Print the fused temperature and variance to two decimals."
+              "The instruments report different temperatures but have the same known variance. Calculate their precision weights before combining the readings."
             ],
-            "code": "import numpy as np\nx = np.array([20.,24.])\nvariance = np.array([1.,4.])\nprecision = 1/variance\nprint(f'{x @ precision / precision.sum():.2f}')\nprint(f'{1/precision.sum():.2f}')",
-            "output": "20.80\n0.80",
+            "code": "import numpy as np\nreadings = np.array([18., 22.])\nvariances = np.array([4., 4.])\nprecision = 1.0 / variances\nweights = precision / precision.sum()\nprint(weights.tolist())\nprint(float(weights @ readings))\nprint(float(1.0 / precision.sum()))",
+            "output": "[0.5, 0.5]\n20.0\n2.0",
             "interpretation": [
-              "Normalise precision before interpreting it as a weight. Combined variance uses total precision."
+              "Equal variances give equal influence. Under independent errors, the combined variance is smaller than either instrument's variance. The challenge then gives the instruments different reliabilities."
             ]
           }
         ]
@@ -20717,7 +21403,15 @@
           "Check that weights sum to one."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which thermometer should influence the estimate more?",
+      "experimentIntro": "Two thermometers disagree, but one may be much noisier. Change an instrument's variance and watch its influence on the combined temperature.",
+      "connectionTitle": "Precision expresses how much independent evidence a reading supplies",
+      "practiceTitle": "Practice. Combine Measurements With Known Variances",
+      "outputLabel": "Precision-weighted temperature estimate",
+      "exampleNote": "The measurement variances are supplied and the instrument errors are assumed independent."
+    }
   },
   {
     "id": "hidden-state-filtering",
@@ -21038,14 +21732,14 @@
         ],
         "examples": [
           {
-            "title": "Can you update the pump’s condition?",
+            "title": "Predict a state change before reading the alarm",
             "paragraphs": [
-              "Predict with the transition matrix, apply the alarm likelihood, and print the posterior rounded to three decimals."
+              "Yesterday the pump was believed to be working with certainty. First allow a transition, then use a reading more likely under the faulty state."
             ],
-            "code": "import numpy as np\nbelief = np.array([.8,.2])\nP = np.array([[.9,.1],[.2,.8]])\nlikelihood = np.array([.1,.9])\npredicted = belief @ P\nweights = predicted * likelihood\nprint(np.round(weights/weights.sum(), 3).tolist())",
-            "output": "[0.26, 0.74]",
+            "code": "import numpy as np\nbelief = np.array([1., 0.])\ntransition = np.array([[0.75, 0.25], [0.2, 0.8]])\nreading_likelihood = np.array([0.2, 0.8])\npredicted = belief @ transition\nsupported = predicted * reading_likelihood\nprint(predicted.tolist())\nprint(np.round(supported / supported.sum(), 3).tolist())",
+            "output": "[0.75, 0.25]\n[0.429, 0.571]",
             "interpretation": [
-              "Predict before applying the likelihood. Normalise after multiplying."
+              "The transition creates some probability of a fault before the reading. The alarm then favours that state; normalising restores a probability distribution."
             ]
           }
         ]
@@ -21090,7 +21784,15 @@
           "Transitions can still change the previous belief."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Does today's alarm change what we believe about the pump?",
+      "experimentIntro": "First allow the pump's condition to change according to the transition model. Then compare an informative alarm with a reading equally likely in both states.",
+      "connectionTitle": "Predict the hidden state before incorporating the new reading",
+      "practiceTitle": "Practice. Track the Pump's Condition From Indirect Evidence",
+      "outputLabel": "Updated probabilities of the hidden states",
+      "exampleNote": "The pump states and alarm probabilities belong to an invented two-state model."
+    }
   },
   {
     "id": "gaussian-process-regression",
@@ -21381,14 +22083,14 @@
         ],
         "examples": [
           {
-            "title": "Can you calculate the Gaussian prediction?",
+            "title": "Borrow information from one noisy observation",
             "paragraphs": [
-              "Print posterior mean and latent variance to two decimals using np.linalg.solve."
+              "Use one training residual and a covariance relating it to the query. Solve for the observation's contribution instead of explicitly inverting the covariance matrix."
             ],
-            "code": "import numpy as np\nK = np.array([[1.]])\ny = np.array([2.])\nk = np.array([.5])\nnoise = .25\nprior_variance = 1.\nA = K + noise*np.eye(len(y))\nmean = k @ np.linalg.solve(A,y)\nvariance = prior_variance-k @ np.linalg.solve(A,k)\nprint(f'{mean:.2f}')\nprint(f'{variance:.2f}')",
-            "output": "0.80\n0.80",
+            "code": "import numpy as np\nnoisy_covariance = np.array([[2.5]])\nobserved = np.array([5.0])\nquery_covariance = np.array([1.0])\ncoefficients = np.linalg.solve(noisy_covariance, observed)\nmean = query_covariance @ coefficients\nvariance = 2.0 - query_covariance @ np.linalg.solve(noisy_covariance, query_covariance)\nprint(coefficients.tolist())\nprint(f'{mean:.1f}')\nprint(f'{variance:.1f}')",
+            "output": "[2.0]\n2.0\n1.6",
             "interpretation": [
-              "Noise goes only on the diagonal. Use the same system for both solves."
+              "The observation shifts the query mean and reduces its prior variance. The covariance controls how much information is shared; proximity by itself is not a calculation."
             ]
           }
         ]
@@ -21433,7 +22135,15 @@
           "Observation variance includes the new reading’s noise."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "How much do these observations tell us about the query?",
+      "experimentIntro": "The query covariance says how the new location relates to the observed ones. Compare a related query with an unrelated one while keeping the covariance assumptions valid.",
+      "connectionTitle": "A prediction borrows information through covariance",
+      "practiceTitle": "Practice. Calculate a Prediction and Its Remaining Uncertainty",
+      "outputLabel": "Predicted mean at the query",
+      "exampleNote": "Covariances are supplied here; valid covariance matrices are an assumption of the calculation."
+    }
   },
   {
     "id": "minibatch-gradients",
@@ -21746,14 +22456,14 @@
         ],
         "examples": [
           {
-            "title": "Can you make one batch update?",
+            "title": "Find the contribution from one training record",
             "paragraphs": [
-              "Use half mean squared error. Print the gradient and updated weight to two decimals."
+              "For half squared error, one observation contributes its prediction error multiplied by its input. Inspect that contribution before averaging several of them in a batch."
             ],
-            "code": "import numpy as np\nx = np.array([1.,2.])\ny = np.array([2.,4.])\nw = 1.\nrate = .1\ng = np.mean((x*w-y)*x)\nprint(f'{g:.2f}')\nprint(f'{w-rate*g:.2f}')",
-            "output": "-2.50\n1.25",
+            "code": "import numpy as np\nx, target, weight = 2.0, 6.0, 2.0\nrate = 0.1\nerror = weight * x - target\ngradient = error * x\nprint(error)\nprint(gradient)\nprint(weight - rate * gradient)",
+            "output": "-2.0\n-4.0\n2.4",
             "interpretation": [
-              "Compute residuals before multiplying by inputs. Average before changing the weight."
+              "The prediction is too small and the input is positive, so increasing the weight helps locally. A minibatch combines such contributions using its actual number of observations."
             ]
           }
         ]
@@ -21798,7 +22508,15 @@
           "Do not reuse an earlier batch’s size."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What adjustment does this batch suggest?",
+      "experimentIntro": "Each observation contributes a prediction error and an input value. Follow their contributions into the average gradient, then check how a different batch changes the proposed direction.",
+      "connectionTitle": "A batch estimates a direction from the observations it contains",
+      "practiceTitle": "Practice. Calculate and Apply Batch Gradients",
+      "outputLabel": "Weight after the batch update",
+      "exampleNote": "This small regression batch uses half mean squared error."
+    }
   },
   {
     "id": "momentum-updates",
@@ -22066,14 +22784,14 @@
         ],
         "examples": [
           {
-            "title": "Can you keep velocity between steps?",
+            "title": "An agreeing gradient adds to the stored direction",
             "paragraphs": [
-              "Starting from zero velocity, apply both gradients. Print the weights after each update rounded to three decimals."
+              "The old velocity is positive and the new gradient agrees with it. Retain half the old velocity, add the current gradient, and only then scale the parameter movement."
             ],
-            "code": "import numpy as np\ngradients = np.array([2.,-1.])\nw, v = 4., 0.\nbeta, rate = .5, .1\nweights = []\nfor g in gradients:\n    v = beta*v+g\n    w -= rate*v\n    weights.append(w)\nprint(np.round(weights,3).tolist())",
-            "output": "[3.8, 3.8]",
+            "code": "import numpy as np\nweight = 4.0\nold_velocity = 2.0\ngradient = 1.0\nretention, rate = 0.5, 0.1\nvelocity = retention * old_velocity + gradient\nprint(velocity)\nprint(weight - rate * velocity)",
+            "output": "2.0\n3.8",
             "interpretation": [
-              "Do not reset velocity inside the loop. The second velocity cancels to zero."
+              "Velocity and learning rate have different jobs. The challenge carries the updated velocity into a second step where the gradient changes direction."
             ]
           }
         ]
@@ -22118,7 +22836,15 @@
           "Use the newly updated velocity for each weight update."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Does the next update remember the previous direction?",
+      "experimentIntro": "Try a gradient that agrees with the stored velocity, then one that opposes it. Compare the resulting parameter movement before discarding that history.",
+      "connectionTitle": "Velocity carries earlier gradients into the next update",
+      "practiceTitle": "Practice. Carry Velocity Through Several Updates",
+      "outputLabel": "Parameter value after the momentum update",
+      "exampleNote": "The supplied gradients isolate the momentum update from a full training run."
+    }
   },
   {
     "id": "adaptive-gradients",
@@ -22423,14 +23149,14 @@
         ],
         "examples": [
           {
-            "title": "Can you calculate Adam’s first update?",
+            "title": "Use the retained scales for two coordinates",
             "paragraphs": [
-              "Use beta1=0.9, beta2=0.999, epsilon=1e-8 and rate=0.1. Print updated weights rounded to three decimals."
+              "Start after moment estimation so the scale adjustment is easy to see. The directions have equal magnitudes, but the second coordinate has a larger second moment."
             ],
-            "code": "import numpy as np\nw = np.array([1.,1.])\ng = np.array([2.,-4.])\nm = np.zeros(2)\nv = np.zeros(2)\nb1, b2, rate, eps = .9, .999, .1, 1e-8\nt = 1\nm = b1*m+(1-b1)*g\nv = b2*v+(1-b2)*g*g\nmhat = m/(1-b1**t)\nvhat = v/(1-b2**t)\nw -= rate*mhat/(np.sqrt(vhat)+eps)\nprint(np.round(w,3).tolist())",
-            "output": "[0.9, 1.1]",
+            "code": "import numpy as np\nweight = np.array([1., 1.])\nmean_gradient = np.array([2., -2.])\nsecond_moment = np.array([4., 16.])\nstep = 0.1 * mean_gradient / (np.sqrt(second_moment) + 1e-8)\nprint(np.round(step, 3).tolist())\nprint(np.round(weight - step, 3).tolist())",
+            "output": "[0.1, -0.05]\n[0.9, 1.05]",
             "interpretation": [
-              "Correct both moments before forming the step. Epsilon is outside the square root."
+              "The second coordinate moves less despite an equally large direction. Practice also constructs the moments and applies the correction for their zero initialisation."
             ]
           }
         ]
@@ -22475,7 +23201,15 @@
           "Epsilon avoids a zero divided by zero entry."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Do equally large directions produce equally large steps?",
+      "experimentIntro": "The stored second moments measure different recent gradient magnitudes. Change one coordinate's scale and inspect its update while holding the direction fixed.",
+      "connectionTitle": "Adaptive updates retain a separate scale for each parameter",
+      "practiceTitle": "Practice. Calculate Adam Updates and Check Zero Gradients",
+      "outputLabel": "Updated parameter values",
+      "exampleNote": "The interactive calculation starts with already bias-corrected moments."
+    }
   },
   {
     "id": "initialisation-and-gradient-checks",
@@ -22736,14 +23470,14 @@
         ],
         "examples": [
           {
-            "title": "Can you check a derivative numerically?",
+            "title": "Estimate a slope from two nearby losses",
             "paragraphs": [
-              "Calculate a central difference and compare it to the analytical derivative. Print both to four decimals and an allclose result."
+              "The loss below is a simple bowl. Evaluate it on both sides of the chosen weight, using a symmetric perturbation so neither side gets special treatment."
             ],
-            "code": "import numpy as np\nw, h = 1., 1e-5\ndef loss(value):\n    return (value-3)**2\nnumerical = (loss(w+h)-loss(w-h))/(2*h)\nanalytical = 2*(w-3)\nprint(f'{numerical:.4f}')\nprint(f'{analytical:.4f}')\nprint(bool(np.allclose(numerical,analytical,rtol=1e-5,atol=1e-7)))",
-            "output": "-4.0000\n-4.0000\nTrue",
+            "code": "import numpy as np\ndef loss(weight):\n    return (weight - 2.0) ** 2\n\nweight, h = 4.0, 0.01\nabove = loss(weight + h)\nbelow = loss(weight - h)\nslope = (above - below) / (2 * h)\nprint(f'{slope:.4f}')",
+            "output": "4.0000",
             "interpretation": [
-              "Keep h positive. Both evaluations use the same loss and target."
+              "The positive slope says that a small increase in the weight raises this loss. In practice, compare a numerical estimate like this with the derivative produced by the implementation."
             ]
           }
         ]
@@ -22788,7 +23522,15 @@
           "Use copies so the original vector does not change."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Does a small perturbation agree with the claimed derivative?",
+      "experimentIntro": "The loss has been measured on either side of a parameter. Compare the numerical slope with the proposed gradient and consider how the perturbation size affects that comparison.",
+      "connectionTitle": "A numerical check can expose a mistake before a long run",
+      "practiceTitle": "Practice. Check Derivatives With Small Perturbations",
+      "outputLabel": "Slope estimated from the two loss evaluations",
+      "exampleNote": "The paired loss values illustrate a central finite-difference check."
+    }
   },
   {
     "id": "training-diagnostics",
@@ -22990,6 +23732,39 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "The validation winner still needs a final evaluation",
+        "explanation": "Choosing a checkpoint uses the validation results to make a modelling decision. Keep the final test data out of that choice so they can answer how the selected model behaves on data that did not select it.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Different records support different decisions.",
+          "rowHeading": "Data",
+          "columns": [
+            "Role"
+          ],
+          "records": [
+            {
+              "label": "Training",
+              "cells": [
+                "Adjust the parameters"
+              ]
+            },
+            {
+              "label": "Validation",
+              "cells": [
+                "Choose the checkpoint and stopping settings"
+              ]
+            },
+            {
+              "label": "Final test",
+              "cells": [
+                "Evaluate the selected procedure"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -23024,14 +23799,14 @@
         ],
         "examples": [
           {
-            "title": "Can you recover the best checkpoint?",
+            "title": "The most recent state need not be the best state",
             "paragraphs": [
-              "Print the zero-based epoch and its validation loss to two decimals."
+              "These three saved checkpoints were evaluated by the same validation loss. Choose the minimum and keep its position attached to the saved state."
             ],
-            "code": "import numpy as np\nvalidation = np.array([.8,.5,.55,.6])\nbest = int(np.argmin(validation))\nprint(best)\nprint(f'{validation[best]:.2f}')",
-            "output": "1\n0.50",
+            "code": "import numpy as np\nvalidation_loss = np.array([0.2, 0.4, 0.3])\nbest_position = int(np.argmin(validation_loss))\nprint(best_position)\nprint(f'{validation_loss[best_position]:.2f}')",
+            "output": "0\n0.20",
             "interpretation": [
-              "Use validation, not training loss. argmin returns the first minimum."
+              "The first checkpoint wins here. Stopping after the third check would not justify returning the third checkpoint instead."
             ]
           }
         ]
@@ -23076,7 +23851,15 @@
           "Do not inspect losses after stopping."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which saved state earned the best validation result?",
+      "experimentIntro": "The latest checkpoint is not automatically the best one. Change the validation sequence and check which saved state the declared criterion selects.",
+      "connectionTitle": "Stopping and restoring are two separate training decisions",
+      "practiceTitle": "Practice. Select a Checkpoint and Implement Patience",
+      "outputLabel": "Position of the best validation checkpoint",
+      "exampleNote": "The validation history is illustrative; each position refers to a saved state."
+    }
   },
   {
     "id": "popularity-baselines",
@@ -23340,14 +24123,14 @@
         ],
         "examples": [
           {
-            "title": "Can you rank the guides by opens?",
+            "title": "Count the opens of one guide first",
             "paragraphs": [
-              "Print column counts and a stable descending index order."
+              "One column records whether each reader opened this guide. Its total measures popularity across these readers, without yet deciding the order of the whole catalogue."
             ],
-            "code": "import numpy as np\nopened = np.array([[1,1,0],[1,0,0]])\ncounts = opened.sum(axis=0)\nprint(counts.tolist())\nprint(np.argsort(-counts,kind=\"stable\").tolist())",
-            "output": "[2, 1, 0]\n[0, 1, 2]",
+            "code": "import numpy as np\nopened_this_guide = np.array([1, 0, 1, 1])\nprint(int(opened_this_guide.sum()))",
+            "output": "3",
             "interpretation": [
-              "Rows are readers, so reduce axis zero. Negate counts before an ascending sort."
+              "Three readers opened it. Practice applies the reduction to every guide column, then uses the counts to obtain a stable ranking."
             ]
           }
         ]
@@ -23392,7 +24175,15 @@
           "argmax returns the first maximum among remaining entries."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which guide gets recommended before we know this reader?",
+      "experimentIntro": "A popularity rule adds opens across readers while keeping each guide separate. Change one reader's row and inspect which guide counts actually change.",
+      "connectionTitle": "Popularity supplies a useful but shared starting recommendation",
+      "practiceTitle": "Practice. Rank Guides and Exclude Already Seen Items",
+      "outputLabel": "Guide indices ordered by popularity",
+      "exampleNote": "The small reader-guide table contains invented interactions."
+    }
   },
   {
     "id": "content-based-ranking",
@@ -23675,14 +24466,14 @@
         ],
         "examples": [
           {
-            "title": "Can you score the guide descriptions?",
+            "title": "A longer description need not be a different direction",
             "paragraphs": [
-              "Compute cosine scores for each nonzero guide row and the reader. Print scores rounded to three decimals."
+              "The reader and guide use the same two content features. Compare the guide with a version whose coordinates are both ten times larger."
             ],
-            "code": "import numpy as np\nitems = np.array([[3.,0.],[0.,2.],[1.,1.]])\nreader = np.array([1.,0.])\nunit_items = items/np.linalg.norm(items,axis=1,keepdims=True)\nunit_reader = reader/np.linalg.norm(reader)\nprint(np.round(unit_items @ unit_reader,3).tolist())",
-            "output": "[1.0, 0.0, 0.707]",
+            "code": "import numpy as np\nreader = np.array([1., 1.])\nguide = np.array([2., 2.])\nfor description in [guide, 10 * guide]:\n    similarity = (reader @ description) / (np.linalg.norm(reader) * np.linalg.norm(description))\n    print(f'{similarity:.3f}')",
+            "output": "1.000\n1.000",
             "interpretation": [
-              "Keep the row dimension when dividing by norms. The output has one value per item."
+              "Both descriptions point in the reader's direction, so scaling alone does not improve the cosine match. Practice compares several genuinely different directions."
             ]
           }
         ]
@@ -23727,7 +24518,15 @@
           "The positive scale cancels in numerator and denominator."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Does the guide describe what this reader is interested in?",
+      "experimentIntro": "Compare the profile and guide by direction. Scale a description without changing its proportions and check whether that alone makes the guide a better match.",
+      "connectionTitle": "A shared feature description makes an interest comparison possible",
+      "practiceTitle": "Practice. Rank Descriptions Against a Reader Profile",
+      "outputLabel": "Cosine similarity between reader and guide",
+      "exampleNote": "The profile and description coordinates are supplied illustrative features."
+    }
   },
   {
     "id": "collaborative-filtering",
@@ -24024,14 +24823,14 @@
         ],
         "examples": [
           {
-            "title": "Can you predict from centred neighbour ratings?",
+            "title": "Interpret one neighbour relative to their usual rating",
             "paragraphs": [
-              "Print the target reader’s estimated rating to two decimals."
+              "This neighbour usually rates guides at two but gave this guide four. The target reader's own average is three."
             ],
-            "code": "import numpy as np\nratings = np.array([5.,3.])\nmeans = np.array([3.,4.])\nweights = np.array([.75,.25])\ntarget_mean = 3.\nprediction = target_mean + weights @ (ratings-means)/weights.sum()\nprint(f'{prediction:.2f}')",
-            "output": "4.25",
+            "code": "import numpy as np\nneighbour_rating = 4.0\nneighbour_mean = 2.0\ntarget_mean = 3.0\ndeviation = neighbour_rating - neighbour_mean\nprint(deviation)\nprint(target_mean + deviation)",
+            "output": "2.0\n5.0",
             "interpretation": [
-              "Calculate deviations before weighting. Add the target reader’s baseline last."
+              "The transferable evidence is the neighbour's positive deviation from their usual rating. Practice combines several such deviations with different similarity weights."
             ]
           }
         ]
@@ -24076,7 +24875,15 @@
           "These rows each contain at least one observed value."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What does a neighbour's rating mean on their own scale?",
+      "experimentIntro": "A generous reader and a strict reader can both like the same guide. Change their typical ratings and compare the centred preferences before weighting them by similarity.",
+      "connectionTitle": "Neighbour preferences are more useful when their baselines are visible",
+      "practiceTitle": "Practice. Predict Ratings Without Treating Missing as Dislike",
+      "outputLabel": "Rating predicted from centred neighbour preferences",
+      "exampleNote": "Neighbour similarities and observed ratings are supplied teaching values."
+    }
   },
   {
     "id": "recommendation-factorisation",
@@ -24358,14 +25165,14 @@
         ],
         "examples": [
           {
-            "title": "Can you update a pair of factors correctly?",
+            "title": "Find both gradients before changing either factor",
             "paragraphs": [
-              "Use half squared error without regularisation and rate 0.1. Print both updated vectors rounded to two decimals."
+              "One observed rating is four, while the supplied reader and guide factors predict a smaller value. Calculate each gradient from the original pair."
             ],
-            "code": "import numpy as np\nu = np.array([1.,2.])\nv = np.array([2.,1.])\nrating, rate = 5., .1\nold_u, old_v = u.copy(), v.copy()\nerror = old_u @ old_v-rating\nu -= rate*error*old_v\nv -= rate*error*old_u\nprint(np.round(u,2).tolist())\nprint(np.round(v,2).tolist())",
-            "output": "[1.2, 2.1]\n[2.1, 1.2]",
+            "code": "import numpy as np\nreader = np.array([1., 0.])\nguide = np.array([2., 1.])\nrating = 4.0\nerror = reader @ guide - rating\nprint(float(error))\nprint((error * guide).tolist())\nprint((error * reader).tolist())",
+            "output": "-2.0\n[-4.0, -2.0]\n[-2.0, -0.0]",
             "interpretation": [
-              "Compute the residual from old vectors. Copy arrays before changing them in place."
+              "Each factor's gradient uses the other factor as it was before the update. Practice turns those gradients into two parameter updates without letting the first change contaminate the second."
             ]
           }
         ]
@@ -24410,7 +25217,15 @@
           "The zeros are storage placeholders."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "How does one reader vector score several guides?",
+      "experimentIntro": "The reader and guide factors use the same coordinates. Change one factor and follow which candidate scores increase, decrease or remain unchanged.",
+      "connectionTitle": "Shared factors can describe preferences without filling every missing rating",
+      "practiceTitle": "Practice. Update Factors Using Observed Ratings",
+      "outputLabel": "Predicted scores in guide order",
+      "exampleNote": "The factors are supplied for inspection; missing ratings are not observed zeros."
+    }
   },
   {
     "id": "ranking-evaluation",
@@ -24620,6 +25435,39 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "The first useful result can matter even when precision is unchanged",
+        "explanation": "These lists contain the same number of relevant guides. Their precision is equal, but one makes the reader pass an irrelevant result before finding something useful. A position-sensitive measure can capture that difference.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Two illustrative recommendation orders.",
+          "rowHeading": "List",
+          "columns": [
+            "First result",
+            "Second result",
+            "Precision at two"
+          ],
+          "records": [
+            {
+              "label": "A",
+              "cells": [
+                "Irrelevant",
+                "Relevant",
+                "0.5"
+              ]
+            },
+            {
+              "label": "B",
+              "cells": [
+                "Relevant",
+                "Irrelevant",
+                "0.5"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -24656,14 +25504,14 @@
         ],
         "examples": [
           {
-            "title": "Can you distinguish precision from recall?",
+            "title": "Count relevance at the part of the list being shown",
             "paragraphs": [
-              "Print precision and recall at three to three decimals."
+              "There are three relevant guides in the catalogue. Only the first two recommendations are visible in this comparison, and one of those is relevant."
             ],
-            "code": "import numpy as np\nrelevant = np.array([1,0,1])\ntotal_relevant = 4\nprint(f'{relevant.mean():.3f}')\nprint(f'{relevant.sum()/total_relevant:.3f}')",
-            "output": "0.667\n0.500",
+            "code": "import numpy as np\nrelevance = np.array([0, 1, 1, 0])\nvisible = relevance[:2]\ntotal_relevant = 3\nprint(f'{visible.mean():.3f}')\nprint(f'{visible.sum() / total_relevant:.3f}')",
+            "output": "0.500\n0.333",
             "interpretation": [
-              "Use list length for precision. Use total relevant candidates for recall."
+              "Half of the visible list is useful, but it retrieves only one third of the relevant catalogue. The denominators answer different questions."
             ]
           }
         ]
@@ -24708,7 +25556,15 @@
           "Sort relevance descending for the ideal ordering."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "How useful was the list the reader actually saw?",
+      "experimentIntro": "Keep the displayed list separate from the full catalogue. Change which shown guides are relevant and compare the useful count with the number of recommendations delivered.",
+      "connectionTitle": "Ranking quality is judged at the list the reader receives",
+      "practiceTitle": "Practice. Compare Relevant Items and Their Positions",
+      "outputLabel": "Precision of the displayed list",
+      "exampleNote": "The relevance labels are invented judgements for the displayed guides."
+    }
   },
   {
     "id": "robust-anomaly-scores",
@@ -25026,14 +25882,14 @@
         ],
         "examples": [
           {
-            "title": "Can you fit a robust reference?",
+            "title": "Measure spread around the middle reading",
             "paragraphs": [
-              "Print median, MAD, and the raw score of the new reading, each to one decimal."
+              "Begin with an orderly reference sample. Find its middle value, measure every absolute departure from it, then take the middle departure."
             ],
-            "code": "import numpy as np\nreference = np.array([8.,9.,10.,11.,100.])\nreading = 13.\ncentre = np.median(reference)\nmad = np.median(np.abs(reference-centre))\nprint(f'{centre:.1f}')\nprint(f'{mad:.1f}')\nprint(f'{abs(reading-centre)/mad:.1f}')",
-            "output": "10.0\n1.0\n3.0",
+            "code": "import numpy as np\nreference = np.array([4., 5., 6., 7., 8.])\ncentre = np.median(reference)\ndepartures = np.abs(reference - centre)\nprint(float(centre))\nprint(departures.tolist())\nprint(float(np.median(departures)))",
+            "output": "6.0\n[2.0, 1.0, 0.0, 1.0, 2.0]\n1.0",
             "interpretation": [
-              "The second median applies to absolute deviations. Score the new reading against the retained reference."
+              "The MAD is one in the original measurement units. Practice adds an extreme reference value and then scores a separate incoming reading."
             ]
           }
         ]
@@ -25078,7 +25934,15 @@
           "Do not refit the reference on the new observations."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Can an unusual reading pull the reference towards itself?",
+      "experimentIntro": "Fit the centre and spread from the reference records before scoring incoming values. Introduce an extreme reference value and compare its influence on those summaries.",
+      "connectionTitle": "The reference should resist the extremes it is meant to reveal",
+      "practiceTitle": "Practice. Fit a Robust Reference and Review New Readings",
+      "outputLabel": "Robust deviations of the incoming readings",
+      "exampleNote": "Reference and incoming readings are separate illustrative samples."
+    }
   },
   {
     "id": "local-density-anomalies",
@@ -25349,14 +26213,14 @@
         ],
         "examples": [
           {
-            "title": "Can you calculate LOF for three points?",
+            "title": "Compare one local density with its neighbours",
             "paragraphs": [
-              "Use k=1 with no distance ties. Print local densities rounded to three decimals and LOF values to one decimal."
+              "Suppose the reachability distances for this point are both two. Its two neighbours have the supplied local densities. The question is how their average density compares with this point's density."
             ],
-            "code": "import numpy as np\nx = np.array([0.,1.,10.])\ndistance = np.abs(x[:,None]-x[None,:])\nnp.fill_diagonal(distance,np.inf)\nnearest = np.argmin(distance,axis=1)\nkdist = distance[np.arange(len(x)),nearest]\nreach = np.maximum(kdist,kdist[nearest])\ndensity = 1/reach\nlof = density[nearest]/density\nprint(np.round(density,3).tolist())\nprint(np.round(lof,1).tolist())",
-            "output": "[1.0, 1.0, 0.111]\n[1.0, 1.0, 9.0]",
+            "code": "import numpy as np\nreachability = np.array([2., 2.])\nneighbour_density = np.array([0.5, 1.0])\nown_density = 1.0 / reachability.mean()\nprint(float(own_density))\nprint(float(np.mean(neighbour_density / own_density)))",
+            "output": "0.5\n1.5",
             "interpretation": [
-              "Exclude each point’s diagonal before finding neighbours. Reachability uses the selected neighbour’s kth distance."
+              "The neighbours are denser on average. Practice starts earlier in the procedure, calculating neighbours and reachability from the point coordinates."
             ]
           }
         ]
@@ -25401,7 +26265,15 @@
           "Average neighbour-to-point density ratios."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Is this reading isolated relative to its own neighbours?",
+      "experimentIntro": "A sparse area can be normal for the points that live there. Compare the point's density with its neighbours' densities, then change that local comparison.",
+      "connectionTitle": "Local isolation depends on the neighbourhood's own density",
+      "practiceTitle": "Practice. Calculate and Interpret Local Outlier Factors",
+      "outputLabel": "Density ratio relative to the neighbours",
+      "exampleNote": "Reachability distances and neighbour densities are supplied to expose the final comparison."
+    }
   },
   {
     "id": "isolation-forests",
@@ -25668,14 +26540,14 @@
         ],
         "examples": [
           {
-            "title": "Can you follow every split in the tree?",
+            "title": "Combine the path lengths from two trees",
             "paragraphs": [
-              "Represent an internal node as (threshold,left,right) and a leaf as None. Print path lengths for the supplied readings."
+              "One tree isolated the observation after one split; another needed three. Average those path lengths before converting them to a score using the supplied sample-size normaliser."
             ],
-            "code": "import numpy as np\nx = np.array([0.,1.,2.,3.,20.])\ntree = (10., (1.5, (.5,None,None), (2.5,None,None)), None)\ndef depth(value,node):\n    if node is None:\n        return 0\n    threshold,left,right = node\n    return 1+depth(value,left if value<threshold else right)\nprint([depth(value,tree) for value in x])",
-            "output": "[3, 3, 3, 3, 1]",
+            "code": "import numpy as np\npaths = np.array([1., 3.])\nnormaliser = 4.0\nmean_path = paths.mean()\nscore = 2.0 ** (-mean_path / normaliser)\nprint(float(mean_path))\nprint(f'{score:.3f}')",
+            "output": "2.0\n0.707",
             "interpretation": [
-              "Each visited internal node contributes one. Choose left only when the value is strictly below the threshold."
+              "The average reduces reliance on one lucky partition. Practice asks you to obtain path lengths by actually following a tree's branches."
             ]
           }
         ]
@@ -25720,7 +26592,15 @@
           "A shorter path receives a larger exponential score."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "How many splits did it take to isolate this reading?",
+      "experimentIntro": "One tree can get lucky with a split. Compare several recorded path lengths, then see how a shorter average path affects the isolation score.",
+      "connectionTitle": "Easy separation can be evidence of an unusual observation",
+      "practiceTitle": "Practice. Follow Splits and Compare Isolation Scores",
+      "outputLabel": "Isolation score from the recorded paths",
+      "exampleNote": "The paths are supplied examples from trees; the positive normaliser is given."
+    }
   },
   {
     "id": "reconstruction-alerts",
@@ -26035,14 +26915,14 @@
         ],
         "examples": [
           {
-            "title": "Can you score each reconstructed record?",
+            "title": "Inspect the mismatched features before raising an alert",
             "paragraphs": [
-              "Print row mean squared errors and alerts strictly above 1.5."
+              "The reconstruction gets the first feature right and misses the second. Square the feature errors before averaging them into one record score."
             ],
-            "code": "import numpy as np\nx = np.array([[1.,3.],[2.,2.]])\nrebuilt = np.array([[1.,1.],[2.,2.]])\nscore = np.mean((x-rebuilt)**2,axis=1)\nprint(score.tolist())\nprint((score>1.5).tolist())",
-            "output": "[2.0, 0.0]\n[True, False]",
+            "code": "import numpy as np\nrecord = np.array([2., 4.])\nreconstructed = np.array([2., 2.])\nsquared_errors = (record - reconstructed) ** 2\nprint(squared_errors.tolist())\nprint(float(squared_errors.mean()))",
+            "output": "[0.0, 4.0]\n2.0",
             "interpretation": [
-              "Reduce feature columns, retaining a result per record. The threshold applies after reduction."
+              "The single score hides which feature caused the error, so inspecting the contributions remains useful. Practice scores several records and applies a fixed alert threshold."
             ]
           }
         ]
@@ -26087,7 +26967,15 @@
           "The score exactly at two does not alert."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which record is hardest for the model to reproduce?",
+      "experimentIntro": "Compare each prepared record with its reconstruction before looking at the alert threshold. A large error identifies a mismatch, which still needs an explanation.",
+      "connectionTitle": "Reconstruction error supplies evidence for review, not a diagnosis",
+      "practiceTitle": "Practice. Score Reconstruction Errors and Audit Alerts",
+      "outputLabel": "Alert decisions for the reconstructed records",
+      "exampleNote": "The reconstructions and fixed threshold are illustrative model outputs."
+    }
   },
   {
     "id": "graph-representations",
@@ -26333,6 +27221,41 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "A pump can exist without having a connection",
+        "explanation": "The isolated pump still needs a row and a column. Its degree is zero, but deleting its row would remove the pump itself and shift the identities of the remaining entries.",
+        "rows": [],
+        "scene": {
+          "kind": "network",
+          "caption": "An illustrative network with an isolated pump D.",
+          "nodes": [
+            {
+              "label": "Pump A"
+            },
+            {
+              "label": "Pump B"
+            },
+            {
+              "label": "Pump C"
+            },
+            {
+              "label": "Pump D",
+              "value": "Degree 0"
+            }
+          ],
+          "edges": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "directed": false
+        }
       }
     ],
     "parts": [
@@ -26367,14 +27290,14 @@
         ],
         "examples": [
           {
-            "title": "Can you read the network’s degrees?",
+            "title": "Read the neighbours of one pump from its row",
             "paragraphs": [
-              "Print degree per node and whether the adjacency matrix is symmetric."
+              "This pump has a position for every possible neighbour, including itself. A one means an edge is present and the zero on its own position means no self-loop."
             ],
-            "code": "import numpy as np\nA = np.array([[0,1,0],[1,0,1],[0,1,0]])\nprint(A.sum(axis=1).tolist())\nprint(bool(np.array_equal(A,A.T)))",
-            "output": "[1, 2, 1]\nTrue",
+            "code": "import numpy as np\npump_row = np.array([0, 1, 1, 1])\nprint(np.flatnonzero(pump_row).tolist())\nprint(int(pump_row.sum()))",
+            "output": "[1, 2, 3]\n3",
             "interpretation": [
-              "Each row describes one node’s neighbours. Symmetry compares both directions."
+              "The neighbour indices identify three connections. Practice counts degrees across a complete adjacency matrix and checks the undirected symmetry."
             ]
           }
         ]
@@ -26419,7 +27342,15 @@
           "Do not invent a connection for node three."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which pumps have the most direct connections?",
+      "experimentIntro": "Choose a pump row and count its neighbours. When changing an undirected connection, change the matching entry on the other side of the matrix as well.",
+      "connectionTitle": "Rows and columns keep node identities attached to connections",
+      "practiceTitle": "Practice. Read Degrees and Build an Adjacency Matrix",
+      "outputLabel": "Degree of each pump",
+      "exampleNote": "The binary network is an invented arrangement of pump connections."
+    }
   },
   {
     "id": "graph-random-walks",
@@ -26711,14 +27642,14 @@
         ],
         "examples": [
           {
-            "title": "Can you advance the walk twice?",
+            "title": "Collect arrivals from two possible starting nodes",
             "paragraphs": [
-              "Print the distribution after each step."
+              "Half the probability begins at each node. The first stays put; the second splits equally between staying and moving to the first."
             ],
-            "code": "import numpy as np\np = np.array([1.,0.,0.])\nP = np.array([[0.,1.,0.],[.5,0.,.5],[0.,1.,0.]])\nfor _ in range(2):\n    p = p @ P\n    print(p.tolist())",
-            "output": "[0.0, 1.0, 0.0]\n[0.5, 0.0, 0.5]",
+            "code": "import numpy as np\nprobability = np.array([0.5, 0.5])\ntransition = np.array([[1., 0.], [0.5, 0.5]])\ncontributions = probability[:, None] * transition\nprint(contributions.tolist())\nprint(contributions.sum(axis=0).tolist())",
+            "output": "[[0.5, 0.0], [0.25, 0.25]]\n[0.75, 0.25]",
             "interpretation": [
-              "Keep a row-vector convention. Use the result of one step as the input to the next."
+              "Each row records one source node's contribution. Adding down the columns collects the probability arriving at each destination."
             ]
           }
         ]
@@ -26763,7 +27694,15 @@
           "Check both rows sum to one."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Where can the probability move in one step?",
+      "experimentIntro": "Start with probability concentrated at one node. Follow that node's outgoing row, then try a mixture of starting nodes and see their contributions combine at each destination.",
+      "connectionTitle": "Every destination collects contributions from possible starting nodes",
+      "practiceTitle": "Practice. Advance a Walk and Handle a Node With No Exit",
+      "outputLabel": "Node probabilities after one step",
+      "exampleNote": "The transition rows are supplied probability distributions on a small network."
+    }
   },
   {
     "id": "neighbour-aggregation",
@@ -27070,14 +28009,14 @@
         ],
         "examples": [
           {
-            "title": "Can you collect neighbour means?",
+            "title": "Average the readings attached to one node's neighbours",
             "paragraphs": [
-              "For the three-node chain, print neighbour sums and means."
+              "The adjacency row selects two neighbours from the same ordered reading array. Keep their identities during selection before reducing their readings to one average."
             ],
-            "code": "import numpy as np\nA = np.array([[0.,1.,0.],[1.,0.,1.],[0.,1.,0.]])\nx = np.array([2.,8.,4.])\ntotal = A @ x\ndegree = A.sum(axis=1)\nprint(total.tolist())\nprint((total/degree).tolist())",
-            "output": "[8.0, 6.0, 8.0]\n[8.0, 3.0, 8.0]",
+            "code": "import numpy as np\nadjacency_row = np.array([0, 1, 1])\nreadings = np.array([20., 4., 10.])\nneighbour_readings = readings[adjacency_row.astype(bool)]\nprint(neighbour_readings.tolist())\nprint(float(neighbour_readings.mean()))",
+            "output": "[4.0, 10.0]\n7.0",
             "interpretation": [
-              "Matrix multiplication gathers each row’s connected values. Divide by degree after gathering."
+              "The node's own reading of twenty is excluded by this row. Practice computes all nodes' summaries and handles the case where no neighbour is selected."
             ]
           }
         ]
@@ -27122,7 +28061,15 @@
           "Zero is the chosen empty-neighbour convention."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What can a pump learn from the readings next door?",
+      "experimentIntro": "Change one node's reading and check which neighbouring outputs respond. The calculation must retain node identities even when it replaces individual readings with local averages.",
+      "connectionTitle": "Aggregation gives each node a summary of its neighbourhood",
+      "practiceTitle": "Practice. Calculate Neighbour Means and Handle Isolation",
+      "outputLabel": "Mean neighbour reading for each node",
+      "exampleNote": "The network and scalar readings are illustrative and use matching node order."
+    }
   },
   {
     "id": "graph-convolution",
@@ -27475,14 +28422,14 @@
         ],
         "examples": [
           {
-            "title": "Can you build one graph-convolution layer?",
+            "title": "Separate neighbourhood mixing from the learned feature change",
             "paragraphs": [
-              "Add self-loops, symmetrically normalise, apply the shared weight and ReLU. Print the output matrix."
+              "With two connected nodes and self-loops, each node receives equal contributions from both. A supplied negative feature weight then changes the mixed value before ReLU."
             ],
-            "code": "import numpy as np\nA = np.array([[0.,1.],[1.,0.]])\nX = np.array([[2.],[4.]])\nW = np.array([[2.]])\nAt = A+np.eye(len(A))\ndegree = At.sum(axis=1)\nS = At/np.sqrt(degree[:,None]*degree[None,:])\nH = np.maximum(S @ X @ W,0)\nprint(np.round(H,3).tolist())",
-            "output": "[[6.0], [6.0]]",
+            "code": "import numpy as np\nmixing = np.array([[0.5, 0.5], [0.5, 0.5]])\nfeatures = np.array([[1.], [5.]])\nweight = np.array([[-1.]])\nmixed = mixing @ features\nweighted = mixed @ weight\nprint(mixed.tolist())\nprint(weighted.tolist())\nprint(np.maximum(weighted, 0).tolist())",
+            "output": "[[3.0], [3.0]]\n[[-3.0], [-3.0]]\n[[0.0], [0.0]]",
             "interpretation": [
-              "Degrees include the self-loops. ReLU is applied after the shared feature transform."
+              "The graph first shares information, the weight changes its feature contribution, and the activation clips negative outputs. Practice constructs the normalised mixing matrix as well."
             ]
           }
         ]
@@ -27527,7 +28474,15 @@
           "ReLU removes negative coordinates."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which change comes from neighbours, and which from feature weights?",
+      "experimentIntro": "Graph mixing chooses whose information a node receives. Feature mixing chooses how that information is combined. Follow the two operations separately on the supplied network.",
+      "connectionTitle": "A graph layer mixes across nodes and across features",
+      "practiceTitle": "Practice. Calculate One Graph Layer Including Self-Loops",
+      "outputLabel": "Transformed features for each node",
+      "exampleNote": "The feature weights are supplied; this example calculates a layer without training it."
+    }
   },
   {
     "id": "link-prediction",
@@ -27776,14 +28731,14 @@
         ],
         "examples": [
           {
-            "title": "Can you decode a candidate link?",
+            "title": "What score does a zero dot product produce?",
             "paragraphs": [
-              "Print the logit and sigmoid score to three decimals."
+              "The two supplied node vectors are perpendicular. Calculate their compatibility score before applying the sigmoid decoder."
             ],
-            "code": "import numpy as np\nu = np.array([1.,0.])\nv = np.array([2.,1.])\nlogit = u @ v\nscore = 1/(1+np.exp(-logit))\nprint(f'{logit:.3f}')\nprint(f'{score:.3f}')",
-            "output": "2.000\n0.881",
+            "code": "import numpy as np\nfirst = np.array([1., 0.])\nsecond = np.array([0., 2.])\nlogit = first @ second\nprint(float(logit))\nprint(float(1 / (1 + np.exp(-logit))))",
+            "output": "0.0\n0.5",
             "interpretation": [
-              "The dot product gives an unbounded logit. Apply sigmoid once afterward."
+              "A zero logit maps to one half. That is a property of this decoder, not evidence that half of all unobserved links really exist."
             ]
           }
         ]
@@ -27828,7 +28783,15 @@
           "Sigmoid would preserve this order."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Do these node representations support a possible connection?",
+      "experimentIntro": "Change one candidate representation and inspect the pair score. A high score is a reason to investigate a connection, not evidence that an unrecorded edge is known to exist.",
+      "connectionTitle": "A decoder turns two node descriptions into a compatibility score",
+      "practiceTitle": "Practice. Score and Compare Candidate Links",
+      "outputLabel": "Predicted link score",
+      "exampleNote": "The node representations are supplied and the candidate edge is unobserved."
+    }
   },
   {
     "id": "confounding-and-comparisons",
@@ -28141,14 +29104,14 @@
         ],
         "examples": [
           {
-            "title": "Can you expose the pooled reversal?",
+            "title": "A benefit within each group can reverse after pooling",
             "paragraphs": [
-              "Print treatment mean, control mean and their difference to one decimal."
+              "The treatment outcome is higher within both starting conditions. However, the treatment group contains mostly the harder condition and the control group mostly the easier one."
             ],
-            "code": "import numpy as np\ntreated = np.array([4.,9.])\ncontrol = np.array([3.,8.])\npt = np.array([.9,.1])\npc = np.array([.1,.9])\nmt, mc = treated @ pt, control @ pc\nprint(f'{mt:.1f}')\nprint(f'{mc:.1f}')\nprint(f'{mt-mc:.1f}')",
-            "output": "4.5\n7.5\n-3.0",
+            "code": "import numpy as np\ntreatment = np.array([2., 8.])\ncontrol = np.array([0., 6.])\ntreatment_mix = np.array([0.8, 0.2])\ncontrol_mix = np.array([0.2, 0.8])\nprint((treatment - control).tolist())\nprint(f'{treatment @ treatment_mix:.1f}')\nprint(f'{control @ control_mix:.1f}')",
+            "output": "[2.0, 2.0]\n3.2\n4.8",
             "interpretation": [
-              "Each observed group has its own mixture. Do not average stratum means without weights."
+              "The pooled treatment average is lower despite both within-condition differences being positive. Group composition changes the comparison we are making."
             ]
           }
         ]
@@ -28193,7 +29156,15 @@
           "Interpretation depends on the adjustment assumptions."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Are we comparing schedules or different kinds of beds?",
+      "experimentIntro": "Inspect the outcome within each starting condition, then change the proportions of dry and moist beds in the two groups. The pooled comparison can move without any within-condition result changing.",
+      "connectionTitle": "Group composition can change the conclusion of a pooled comparison",
+      "practiceTitle": "Practice. Expose a Reversal and Compare a Shared Population",
+      "outputLabel": "Pooled treatment mean minus pooled control mean",
+      "exampleNote": "The garden outcomes are invented to demonstrate confounding by starting condition."
+    }
   },
   {
     "id": "randomised-experiments",
@@ -28461,14 +29432,14 @@
         ],
         "examples": [
           {
-            "title": "Can you estimate the assigned schedule’s effect?",
+            "title": "Calculate the outcome difference before its uncertainty",
             "paragraphs": [
-              "Print the difference in group means to two decimals."
+              "These are outcomes from an illustrative random assignment of independent units. Inspect each assigned group's mean before forming the difference."
             ],
-            "code": "import numpy as np\ntreated = np.array([6.,8.,7.])\ncontrol = np.array([4.,5.,6.])\nprint(f'{treated.mean()-control.mean():.2f}')",
-            "output": "2.00",
+            "code": "import numpy as np\nassigned_treatment = np.array([5., 7.])\nassigned_control = np.array([4., 4.])\nmeans = np.array([assigned_treatment.mean(), assigned_control.mean()])\nprint(means.tolist())\nprint(float(means[0] - means[1]))",
+            "output": "[6.0, 4.0]\n2.0",
             "interpretation": [
-              "Both groups use the same measurement units. Keep the subtraction direction explicit."
+              "The observed contrast is two outcome units. Its causal interpretation depends on the assignment design; its sampling uncertainty requires more than quoting this difference."
             ]
           }
         ]
@@ -28513,7 +29484,15 @@
           "Add variances before taking the square root."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What difference did the assigned schedules produce?",
+      "experimentIntro": "The comparison uses outcomes from the stated assignment design. Change one group's outcomes and inspect the difference, while keeping in mind which units were independently assigned.",
+      "connectionTitle": "Random assignment makes the comparison interpretable under its design",
+      "practiceTitle": "Practice. Estimate an Assigned Treatment's Effect and Uncertainty",
+      "outputLabel": "Difference between assigned-group means",
+      "exampleNote": "The trial outcomes are invented; the example assumes independent experimental units."
+    }
   },
   {
     "id": "causal-adjustment",
@@ -28793,14 +29772,14 @@
         ],
         "examples": [
           {
-            "title": "Can you standardise both schedules?",
+            "title": "Apply one target population to the condition-specific effects",
             "paragraphs": [
-              "Print standardised treatment mean, control mean and difference with one decimal."
+              "The schedule's difference is not the same in the two starting conditions. Give both schedules the same target mixture so the final comparison answers one population's question."
             ],
-            "code": "import numpy as np\nmt = np.array([4.,9.])\nmc = np.array([3.,8.])\ntarget = np.array([.6,.4])\nprint(f'{target @ mt:.1f}')\nprint(f'{target @ mc:.1f}')\nprint(f'{target @ (mt-mc):.1f}')",
-            "output": "6.0\n5.0\n1.0",
+            "code": "import numpy as np\ntreatment = np.array([3., 8.])\ncontrol = np.array([1., 7.])\ntarget_mix = np.array([0.5, 0.5])\neffects = treatment - control\nprint(effects.tolist())\nprint(float(target_mix @ effects))",
+            "output": "[2.0, 1.0]\n1.5",
             "interpretation": [
-              "Use the same target weights twice. Causal meaning still depends on the stated assumptions."
+              "The adjusted contrast lies between the two condition-specific differences. Changing the target mix changes whose average effect is being described, under the lesson's identification assumptions."
             ]
           }
         ]
@@ -28845,7 +29824,15 @@
           "Heterogeneous effects make composition relevant."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What if both schedules served the same mix of beds?",
+      "experimentIntro": "Use the same target proportions to combine both schedules' outcomes. Change that target mix and see how the average effect depends on the population we are asking about.",
+      "connectionTitle": "Adjustment compares both interventions in one specified population",
+      "practiceTitle": "Practice. Standardise Outcomes to a Target Population",
+      "outputLabel": "Adjusted contrast in the target population",
+      "exampleNote": "The supplied means illustrate adjustment under the causal assumptions explained in the lesson."
+    }
   },
   {
     "id": "treatment-effects-and-overlap",
@@ -29187,14 +30174,14 @@
         ],
         "examples": [
           {
-            "title": "Can you calculate the stated weighted contrast?",
+            "title": "Inspect the weighted contributions before averaging",
             "paragraphs": [
-              "Use the all-unit mean formula. Print the estimate to three decimals."
+              "One treated record had a treatment propensity of one quarter. One control record had a treatment propensity of one half. Use the probability of the treatment each actually received."
             ],
-            "code": "import numpy as np\nT = np.array([1.,0.,1.,0.])\ny = np.array([6.,4.,8.,5.])\ne = np.array([.5,.5,.5,.5])\ncontribution = T*y/e-(1-T)*y/(1-e)\nprint(f'{contribution.mean():.3f}')",
-            "output": "2.500",
+            "code": "import numpy as np\ntreatment = np.array([1., 0.])\noutcome = np.array([4., 2.])\npropensity = np.array([0.25, 0.5])\ncontributions = treatment * outcome / propensity - (1 - treatment) * outcome / (1 - propensity)\nprint(contributions.tolist())\nprint(float(contributions.mean()))",
+            "output": "[16.0, -4.0]\n6.0",
             "interpretation": [
-              "T selects the observed treatment branch. Average over all four records."
+              "The first record has much greater influence. This is why a final weighted contrast needs an overlap check as well as correct arithmetic."
             ]
           }
         ]
@@ -29239,7 +30226,15 @@
           "A very large weight signals weak support."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which records carry most of the weighted comparison?",
+      "experimentIntro": "A treatment received despite a very small propensity can receive a large weight. Change a valid propensity and inspect its influence before trusting the final contrast.",
+      "connectionTitle": "Weighting cannot replace evidence where overlap is missing",
+      "practiceTitle": "Practice. Calculate a Weighted Contrast and Inspect Large Weights",
+      "outputLabel": "Inverse-probability weighted treatment contrast",
+      "exampleNote": "The supplied propensities must lie strictly between zero and one."
+    }
   },
   {
     "id": "saving-fitted-pipelines",
@@ -29533,6 +30528,36 @@
             ]
           ]
         ]
+      },
+      {
+        "title": "Saved coefficients also need saved feature names",
+        "explanation": "A model can accept the right number of values while receiving them in the wrong order. Save the feature order with the numerical state, then assemble every later row by those names.",
+        "rows": [],
+        "scene": {
+          "kind": "table",
+          "caption": "Both arrays have two entries, but only one follows the saved order.",
+          "rowHeading": "Record",
+          "columns": [
+            "First model input: temperature",
+            "Second model input: humidity"
+          ],
+          "records": [
+            {
+              "label": "Correctly assembled",
+              "cells": [
+                "Temperature measurement",
+                "Humidity measurement"
+              ]
+            },
+            {
+              "label": "Accidentally reversed",
+              "cells": [
+                "Humidity measurement",
+                "Temperature measurement"
+              ]
+            }
+          ]
+        }
       }
     ],
     "parts": [
@@ -29567,14 +30592,14 @@
         ],
         "examples": [
           {
-            "title": "Can you reproduce a prediction after loading?",
+            "title": "A coefficient expects the scale it was trained on",
             "paragraphs": [
-              "Round-trip the state through JSON, prepare x with saved state, and print the prediction to two decimals."
+              "This one-feature rule was fitted after centring and scaling. Compare its prediction with the result of mistakenly applying the coefficient straight to the raw reading."
             ],
-            "code": "import json\nimport numpy as np\nstate = {\"features\":[\"temperature\",\"humidity\"],\"mean\":[10.,20.],\"scale\":[2.,5.],\"weights\":[3.,-1.],\"bias\":2.}\nx = np.array([12.,25.])\nloaded = json.loads(json.dumps(state))\nz = (x-np.array(loaded['mean']))/np.array(loaded['scale'])\nprediction = z @ np.array(loaded['weights'])+loaded['bias']\nprint(f'{prediction:.2f}')",
-            "output": "4.00",
+            "code": "import numpy as np\nraw = 12.0\nsaved_mean, saved_scale = 10.0, 2.0\nweight, bias = 3.0, 1.0\nprepared = (raw - saved_mean) / saved_scale\nprint(prepared)\nprint(prepared * weight + bias)\nprint(raw * weight + bias)",
+            "output": "1.0\n4.0\n37.0",
             "interpretation": [
-              "JSON lists become numerical arrays for arithmetic. Use loaded training state, not statistics of x."
+              "Saving the coefficient without its preprocessing would silently change the numerical procedure. Practice saves and restores the complete two-feature state."
             ]
           }
         ]
@@ -29619,7 +30644,15 @@
           "Do not fit anything during either prediction."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Can the saved procedure reproduce the prediction?",
+      "experimentIntro": "The training reference and model coefficients are both part of the fitted procedure. Change an incoming value and apply those retained quantities in the original order.",
+      "connectionTitle": "A saved model includes the transformation its inputs depend on",
+      "practiceTitle": "Practice. Restore Predictions Without Refitting the Reference",
+      "outputLabel": "Prediction from the restored procedure",
+      "exampleNote": "The supplied state represents already fitted preprocessing and model parameters."
+    }
   },
   {
     "id": "prediction-input-contracts",
@@ -29887,14 +30920,14 @@
         ],
         "examples": [
           {
-            "title": "Can you convert named records in the saved order?",
+            "title": "Use feature names to restore the expected order",
             "paragraphs": [
-              "Reject wrong field sets. Convert this valid record in feature order and print the row."
+              "The record arrived with keys in a different order from the model's saved feature list. Index by the saved names instead of relying on dictionary insertion order."
             ],
-            "code": "import numpy as np\nfeatures = [\"temperature\",\"humidity\"]\nrecord = {\"humidity\":25.,\"temperature\":12.}\nif set(record) != set(features):\n    raise ValueError(\"Fields do not match\")\nrow = np.array([record[name] for name in features],dtype=float)\nif not np.all(np.isfinite(row)):\n    raise ValueError(\"Values must be finite\")\nprint(row.tolist())",
-            "output": "[12.0, 25.0]",
+            "code": "import numpy as np\nfeatures = ['humidity', 'temperature', 'pressure']\nrecord = {'pressure': 1000., 'temperature': 18., 'humidity': 60.}\nrow = np.array([record[name] for name in features])\nprint(row.tolist())",
+            "output": "[60.0, 18.0, 1000.0]",
             "interpretation": [
-              "Dictionary insertion order must not choose feature order. Check finiteness after conversion."
+              "The model receives humidity first because that is its saved convention. Practice adds explicit checks for missing or unexpected fields and non-finite values."
             ]
           }
         ]
@@ -29939,7 +30972,15 @@
           "An empty batch is rejected by this contract."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Can this batch safely reach the model?",
+      "experimentIntro": "A row can have the wrong width or contain a value the model cannot calculate with. Try these cases separately and check the result before performing a prediction.",
+      "connectionTitle": "Input validation protects the meaning of the fitted columns",
+      "practiceTitle": "Practice. Validate Named Records and Numerical Batches",
+      "outputLabel": "Column means after the batch passes validation",
+      "exampleNote": "The candidate batches illustrate width and finiteness checks, not every possible data-quality rule."
+    }
   },
   {
     "id": "serving-predictions",
@@ -30220,14 +31261,14 @@
         ],
         "examples": [
           {
-            "title": "Can you serve a numerical batch?",
+            "title": "Keep the prediction rule separate from the request",
             "paragraphs": [
-              "Write predict(X) using saved weights and bias. Print its two predictions."
+              "A validated request supplies two features. The already fitted coefficients determine how to combine them; serving the request does not fit new coefficients."
             ],
-            "code": "import numpy as np\nw = np.array([2.,-1.])\nbias = 1.\nX = np.array([[1.,2.],[3.,4.]])\ndef predict(X):\n    return X @ w+bias\nprint(predict(X).tolist())",
-            "output": "[1.0, 3.0]",
+            "code": "import numpy as np\nfeatures = np.array([2., 4.])\nsaved_weights = np.array([1., 0.5])\nsaved_bias = 0.0\ncontributions = features * saved_weights\nprint(contributions.tolist())\nprint(float(contributions.sum() + saved_bias))",
+            "output": "[2.0, 2.0]\n4.0",
             "interpretation": [
-              "Matrix rows correspond to separate requests. Broadcast the same bias to each row."
+              "Both features contribute to one answer. Practice packages this rule for a batch and checks that the same row gets the same answer when served alone."
             ]
           }
         ]
@@ -30272,7 +31313,15 @@
           "No state should change between calls."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Will a row get the same answer beside different neighbours?",
+      "experimentIntro": "The fitted rule is fixed across requests. Compare individual inputs with the same rows in a batch and check that row order and prediction values remain consistent.",
+      "connectionTitle": "Request handling should preserve the fitted numerical procedure",
+      "practiceTitle": "Practice. Serve Batches and Compare Individual Requests",
+      "outputLabel": "Predictions in request-row order",
+      "exampleNote": "This numerical example begins with validated inputs and fixed parameters."
+    }
   },
   {
     "id": "model-versioning",
@@ -30536,14 +31585,14 @@
         ],
         "examples": [
           {
-            "title": "Can you compare two preserved versions?",
+            "title": "Compare the answers on preserved fixtures",
             "paragraphs": [
-              "Predict the same fixture with both states and print A, B, and B minus A."
+              "Both versions have already predicted the same three inputs in the same order. Retain the signed differences as well as their largest size."
             ],
-            "code": "import numpy as np\nx = np.array([3.,2.])\nversions = {\"A\":np.array([2.,-1.]),\"B\":np.array([1.,1.])}\na = x @ versions[\"A\"]\nb = x @ versions[\"B\"]\nprint([float(a),float(b),float(b-a)])",
-            "output": "[4.0, 5.0, 1.0]",
+            "code": "import numpy as np\nold_predictions = np.array([1., 2., 3.])\nnew_predictions = np.array([1., 2.5, 2.])\nchange = new_predictions - old_predictions\nprint(change.tolist())\nprint(float(np.abs(change).max()))",
+            "output": "[0.0, 0.5, -1.0]\n1.0",
             "interpretation": [
-              "Use the same fixture and preparation. Do not overwrite either version while comparing."
+              "The largest change is on the third fixture and it is a decrease. Practice starts with the preserved model states and computes the predictions for both versions."
             ]
           }
         ]
@@ -30588,7 +31637,15 @@
           "Changing a weight changes the serialised content."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which answers changed between the two saved versions?",
+      "experimentIntro": "Both versions saw the same ordered fixtures. Change a prediction and inspect the largest difference before deciding whether the behavioural change is acceptable.",
+      "connectionTitle": "A version comparison needs preserved state and shared inputs",
+      "practiceTitle": "Practice. Compare Model Versions and Their Manifests",
+      "outputLabel": "Largest prediction difference across the fixtures",
+      "exampleNote": "The supplied predictions illustrate a regression check on fixed test inputs."
+    }
   },
   {
     "id": "monitoring-and-rollback",
@@ -30856,14 +31913,14 @@
         ],
         "examples": [
           {
-            "title": "Can you calculate error after labels arrive?",
+            "title": "Join the later answers to the earlier predictions",
             "paragraphs": [
-              "For aligned predictions and outcomes, print absolute errors and their mean."
+              "These arrays have already been aligned by record identity. Inspect each absolute error before reporting their average."
             ],
-            "code": "import numpy as np\npredicted = np.array([10.,12.])\nactual = np.array([11.,15.])\nerror = np.abs(predicted-actual)\nprint(error.tolist())\nprint(float(error.mean()))",
-            "output": "[1.0, 3.0]\n2.0",
+            "code": "import numpy as np\npredicted = np.array([7., 8., 9.])\nobserved = np.array([6., 8., 11.])\nerrors = np.abs(predicted - observed)\nprint(errors.tolist())\nprint(float(errors.mean()))",
+            "output": "[1.0, 0.0, 2.0]\n1.0",
             "interpretation": [
-              "These rows are already matched by prediction identity. Compare predictions with outcomes, not with other predictions."
+              "The average describes these three matched outcomes. It does not reveal which subgroup is doing poorly, so the later challenge asks for that separation."
             ]
           }
         ]
@@ -30908,7 +31965,15 @@
           "An overall mean does not show the distribution of burden."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "What do the outcomes tell us after prediction?",
+      "experimentIntro": "Input changes alone do not reveal whether predictions became worse. Match the later outcomes to the saved predictions and measure their errors on the same records.",
+      "connectionTitle": "Monitoring becomes an error measurement when the answers arrive",
+      "practiceTitle": "Practice. Measure Delayed Errors and Check Subgroups",
+      "outputLabel": "Mean absolute error on the matched outcomes",
+      "exampleNote": "The monitoring records are invented, with predictions and later outcomes already aligned."
+    }
   },
   {
     "id": "project-sensor-investigation",
@@ -31218,14 +32283,14 @@
         ],
         "examples": [
           {
-            "title": "Can you choose an alert threshold using validation only?",
+            "title": "Apply a rule whose fitting decisions have already been made",
             "paragraphs": [
-              "Fit reference median and raw MAD. Evaluate thresholds [2,4] with cost FP+5*FN, strict comparison, first tie wins. Print validation costs and chosen threshold."
+              "For this illustration, the reference centre, raw MAD and alert threshold are already fixed. Score new readings without allowing them to move the reference."
             ],
-            "code": "import numpy as np\nreference = np.array([8.,9.,10.,11.,12.])\nvalidation = np.array([10.,13.,15.])\nfault = np.array([0,0,1],dtype=bool)\nthresholds = np.array([2.,4.])\ncentre = np.median(reference)\nmad = np.median(np.abs(reference-centre))\nscores = np.abs(validation-centre)/mad\ncosts = []\nfor threshold in thresholds:\n    alert = scores>threshold\n    costs.append(int(np.sum(alert & ~fault)+5*np.sum(~alert & fault)))\nprint(costs)\nprint(float(thresholds[np.argmin(costs)]))",
-            "output": "[1, 0]\n4.0",
+            "code": "import numpy as np\nreadings = np.array([8., 10., 16.])\nsaved_centre, saved_mad = 10.0, 2.0\nthreshold = 2.0\nscores = np.abs(readings - saved_centre) / saved_mad\nprint(scores.tolist())\nprint((scores > threshold).tolist())",
+            "output": "[1.0, 0.0, 3.0]\n[False, False, True]",
             "interpretation": [
-              "Fit centre and spread before looking at validation labels. Choose by cost, not by the number of alerts alone."
+              "Only the last reading exceeds the chosen threshold. The project challenge goes back a step: fit the reference and select a threshold using validation data, then freeze those decisions."
             ]
           }
         ]
@@ -31281,7 +32346,15 @@
           "An observed error is useful evaluation evidence."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Does the frozen alert rule still work on later readings?",
+      "experimentIntro": "The reference and threshold have already been selected. Apply them to the supplied readings without relearning either quantity from the test window.",
+      "connectionTitle": "Investigation joins data quality, fitting, selection and evaluation",
+      "practiceTitle": "Practice. Select an Alert Rule and Evaluate It Once",
+      "outputLabel": "Alerts from the retained reference and threshold",
+      "exampleNote": "The project uses invented sensor records so each fitting and evaluation boundary can be checked."
+    }
   },
   {
     "id": "project-demand-forecast",
@@ -31583,14 +32656,14 @@
         ],
         "examples": [
           {
-            "title": "Can you run a rolling-origin comparison?",
+            "title": "Make a baseline at one forecast origin",
             "paragraphs": [
-              "At origins 5 and 6, fit intercept-plus-one-lag least squares using only history before the origin. Predict that origin’s value. Print model predictions and MAEs for persistence then model, rounded to three decimals."
+              "The history stops before the unknown target day. Save the persistence prediction first, then compare it with the observation when it arrives."
             ],
-            "code": "import numpy as np\ny = np.array([2.,4.,6.,8.,10.,12.,14.])\norigins = [5,6]\nmodel, baseline, actual = [], [], []\nfor origin in origins:\n    history = y[:origin]\n    X = np.column_stack([np.ones(len(history)-1),history[:-1]])\n    weights = np.linalg.lstsq(X,history[1:],rcond=None)[0]\n    model.append(float(np.array([1.,history[-1]]) @ weights))\n    baseline.append(history[-1])\n    actual.append(y[origin])\nactual = np.array(actual)\nprint(np.round(model,3).tolist())\nprint(np.round([np.mean(np.abs(actual-baseline)),np.mean(np.abs(actual-model))],3).tolist())",
-            "output": "[12.0, 14.0]\n[2.0, 0.0]",
+            "code": "import numpy as np\nhistory = np.array([3., 6., 9., 12.])\nprediction = float(history[-1])\nlater_observation = 15.0\nprint(prediction)\nprint(abs(later_observation - prediction))",
+            "output": "12.0\n3.0",
             "interpretation": [
-              "Build pairs inside each prefix. Compare both forecasts with the same actual array."
+              "The increasing sequence leaves persistence behind here. A fitted alternative still needs an honest comparison across several origins, which is the work of the project challenge."
             ]
           }
         ]
@@ -31646,7 +32719,15 @@
           "Zero the direction that did not occur on each day."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Which forecasting procedure helped on the same future days?",
+      "experimentIntro": "Each row contains one method's previously recorded forecasts. Compare it with the matching later totals and decide whether its errors justify using that procedure.",
+      "connectionTitle": "A forecast project needs an honest baseline and a time-respecting comparison",
+      "practiceTitle": "Practice. Compare Rolling Forecasts and Decision Costs",
+      "outputLabel": "Mean absolute error for each forecasting procedure",
+      "exampleNote": "The water-demand project uses invented daily readings, in time order."
+    }
   },
   {
     "id": "project-seed-counting",
@@ -31973,14 +33054,14 @@
         ],
         "examples": [
           {
-            "title": "Can you count regions without counting pixels twice?",
+            "title": "Count qualifying regions after pixels have been labelled",
             "paragraphs": [
-              "Threshold above five. Traverse four-neighbour components with a stack and visited mask. Print sorted region sizes and the count of regions with at least two pixels."
+              "Suppose the connectivity step has already given each foreground region an ID, with zero reserved for background. Count the pixels belonging to each positive ID before applying a minimum area."
             ],
-            "code": "import numpy as np\nimage = np.array([[0,9,9,0,0],[0,9,9,0,8],[0,0,0,0,0],[7,7,0,8,8]])\nmask = image>5\nvisited = np.zeros_like(mask,dtype=bool)\nsizes = []\nfor r in range(mask.shape[0]):\n    for col in range(mask.shape[1]):\n        if not mask[r,col] or visited[r,col]:\n            continue\n        stack = [(r,col)]\n        visited[r,col] = True\n        size = 0\n        while stack:\n            a,b = stack.pop()\n            size += 1\n            for da,db in [(1,0),(-1,0),(0,1),(0,-1)]:\n                na,nb = a+da,b+db\n                if 0<=na<mask.shape[0] and 0<=nb<mask.shape[1] and mask[na,nb] and not visited[na,nb]:\n                    visited[na,nb] = True\n                    stack.append((na,nb))\n        sizes.append(size)\nprint(sorted(sizes))\nprint(sum(size>=2 for size in sizes))",
-            "output": "[1, 2, 2, 4]\n3",
+            "code": "import numpy as np\nlabels = np.array([[0, 1, 1], [0, 0, 2], [3, 3, 0]])\nregion_ids = np.unique(labels[labels > 0])\nareas = np.array([np.count_nonzero(labels == region) for region in region_ids])\nprint(areas.tolist())\nprint(int(np.count_nonzero(areas >= 2)))",
+            "output": "[2, 1, 2]\n2",
             "interpretation": [
-              "Mark a pixel visited when adding it to the stack. Check image bounds before reading a neighbour."
+              "There are three foreground regions, but only two meet the area rule. Practice starts from intensities and asks you to discover the connected regions yourself."
             ]
           }
         ]
@@ -32036,6 +33117,14 @@
           "A zero mean signed error could hide opposite mistakes."
         ]
       }
-    ]
+    ],
+    "reading": {
+      "experimentTitle": "Did we count seeds or merely bright regions?",
+      "experimentIntro": "Follow the image through thresholding, connectivity and the minimum-area rule. Change one setting and inspect which regions disappear before interpreting the final count as seeds.",
+      "connectionTitle": "The count depends on the image assumptions as well as the arithmetic",
+      "practiceTitle": "Practice. Count Regions and Measure Counting Errors",
+      "outputLabel": "Number of regions meeting the area rule",
+      "exampleNote": "The tray image is invented; a connected bright region is only a seed under the stated assumptions."
+    }
   }
 ]

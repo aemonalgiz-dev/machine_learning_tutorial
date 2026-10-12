@@ -36,6 +36,7 @@ export default function MorfessorPage() {
       intuition={lessonIntuitions["morfessor"]}
       technicalStart="Part 2. The Shortest Description"
       openingTitle="Where Would the Language Put the Cut?"
+      playgroundTitle="When is a word part worth storing?"
       playgroundIntro="Compare the inventory cost and corpus cost for alternative cuts. Check which familiar word parts emerge and which cuts follow frequency instead."
       title="Morfessor"
       tagline={"Words often share stems and endings, such as walk in walked and walking. Morfessor looks for reusable parts by balancing the cost of storing a vocabulary against the cost of describing the observed words."}
@@ -1041,7 +1042,7 @@ export default function MorfessorPage() {
           ),
         },
         {
-          title: "Part 7. Where the Method Stops Being Defined",
+          title: "Part 7. Local Search and the Cost Choices Behind the Segmentation" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="25. What the search finds is not what the method is named for">

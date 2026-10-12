@@ -40,6 +40,7 @@ export default function LearningTheMetricPage() {
       intuition={lessonIntuitions["learning-the-metric-itself"]}
       technicalStart="Part 2. The Contrastive Loss"
       openingTitle="Teach the Model What Should Count as Similar"
+      playgroundTitle="Move matching examples closer together"
       playgroundIntro="Compare the distances of matching and nonmatching pairs. Change the margin and inspect both groups, since pulling everything together would make matching distances small too."
       title="Learning the Metric Itself"
       tagline={"What makes two pictures similar depends on the task. By training on examples of useful matches, we can learn a representation in which the differences we care about affect the distance."}
@@ -1054,7 +1055,7 @@ export default function LearningTheMetricPage() {
           ),
         },
         {
-          title: "Part 8. Where The Method Stops Being Defined",
+          title: "Part 8. Equivalent Arrangements and Missing Pair Evidence" , id: "part-8-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="28. What the loss leaves undecided">
@@ -1093,8 +1094,8 @@ export default function LearningTheMetricPage() {
                   decided.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Pairs, labels or margin"
+                  reasonHeading="Effect on the learned distance"
                   rows={[
                     {
                       expression: "two kinds at distance zero",

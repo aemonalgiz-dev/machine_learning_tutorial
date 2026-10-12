@@ -37,6 +37,7 @@ export default function OrientedGradientsPage() {
       intuition={lessonIntuitions["histogram-of-oriented-gradients"]}
       technicalStart="Part 2. Counting Directions Inside A Cell"
       openingTitle="Describe Which Way the Edges Point"
+      playgroundTitle="Describe an image by the directions of its edges"
       playgroundIntro="Follow an edge direction into its histogram bins. Compare the counts before and after block normalisation as the picture's contrast changes."
       title="Histogram of Oriented Gradients"
       tagline={"An object's outline can remain recognisable when the lighting changes. Histograms of oriented gradients describe local edge directions, giving a detector information about shape without relying on exact pixel values."}
@@ -147,7 +148,7 @@ length = √( Σ over pixels of here² )`}</Equation>
                   made of directions is already untouched by the added constant
                   and off by one overall factor on account of the multiplier.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why a constant brightness offset vanishes under these filters">
                   <p>
                     The estimate of the rate of change at a pixel is a weighted
                     sum of the brightnesses around it, and every one of the
@@ -271,7 +272,7 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
                 </p>
               </SubSection>
 
-              <SubSection title="7. A patch with one edge, worked through">
+              <SubSection title="7. Follow one edge into the orientation histogram" id="7-a-patch-with-one-edge-worked-through">
                 <p>
                   Here is the smallest thing worth doing this to. Take a patch
                   6 pixels square whose left three columns are dark and whose
@@ -361,7 +362,7 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
                   So the same change in the brightnesses produces no change at all in one case and the largest change available in the other, and which of the two happens is decided by where the cell edges were drawn.
                 </p>
 </>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why these nonnegative unit descriptors cannot be farther apart">
                   <p>
                     Why 1.4142 is the ceiling needs one fact about the
                     description. Every entry in it is a sum of vote weights,
@@ -494,7 +495,7 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
                   ought to move.
                 </p>
                 <VoteSharingSlide />
-                <WhyThisWorks>
+                <WhyThisWorks title="How interpolation shares a vote between neighbouring directions">
                   <p>
                     The sharing is the linear interpolation you would use to
                     read a value between two entries of a table, applied to
@@ -744,7 +745,7 @@ answer = cut / ‖cut‖`}</Equation>
                     hundred such appearances.
                   </p>
                 </>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why overlapping blocks give a cell several local comparisons">
                   <p>
                     The repetition is the point rather than an accident of the
                     arrangement. A cell that sits beside a very strong edge is
@@ -915,7 +916,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
                 <BlockOverlapMap initialPreset={0} showStride={false} />
               </SubSection>
 
-              <SubSection title="22. What it costs">
+              <SubSection title="22. The work of voting, grouping and normalising cells" id="22-what-it-costs">
                 <p>
                   The pedestrian window holds 8192 brightnesses and its
                   description holds 3780 numbers, which is 0.46 numbers per
@@ -952,7 +953,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
           ),
         },
         {
-          title: "Part 6. Where The Method Stops Being Defined",
+          title: "Part 6. Rotated Patches, Lost Detail and Descriptor Choices" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="23. A patch that has been turned">
@@ -1403,7 +1404,7 @@ ShapeMismatchError
 two descriptions can only be compared position by position, and these are 900 and 144 long, so they were built under different settings
 ValidationError
 Value error, blocks 2 cells across stepping 3 cells at a time leave cells that no block covers, so those cells would not reach the answer at all; the stride is at most the block's own side`,
-              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal each of the first two turns out to be, and printing the exception prints its message.", "A blank picture describes without complaint, since a block with no weight comes back as noughts, so the second refusal is about the two lengths alone. The 48 by 48 picture describes in 900 numbers and the 24 by 24 one in 144.", "The model is a pydantic model, and a rule that spans two of its fields is checked when it is constructed. pydantic wraps that check in a ValidationError whose errors() lists each failure as a dictionary with the message under msg."] },
+              { hints: ["A blank picture describes without complaint, since a block with no weight comes back as noughts, so the second refusal is about the two lengths alone. The 48 by 48 picture describes in 900 numbers and the 24 by 24 one in 144.", "The model is a pydantic model, and a rule that spans two of its fields is checked when it is constructed. pydantic wraps that check in a ValidationError whose errors() lists each failure as a dictionary with the message under msg."] },
             ),
           ],
         },

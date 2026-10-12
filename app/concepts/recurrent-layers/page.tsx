@@ -18,6 +18,8 @@ export default function RecurrentLayersPage() {
     technicalStart="Part 2. Controlling What the State Retains"
     prerequisites={<>The <Link href="/concepts/neurons-and-activations">neuron</Link> lesson introduces weights, biases, and activation functions. <Link href="/concepts/backpropagation">Backpropagation</Link> explains the gradients used later in this lesson.</>}
 
+    playgroundTitle="Carry information from one position to the next"
+
     playgroundIntro="Start with the simple recurrent cell. Follow the first input through the later steps, which all receive zero. Then select LSTM and change the forget gate bias. Compare the cell memory with the visible hidden state."
     playground={<RecurrentExplorer />}
     sections={[

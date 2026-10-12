@@ -108,7 +108,7 @@ export function LossOnALine() {
 
   const scenarios: Scenario[] = [
     { label: "An Ideal Case", people: IDEAL_FIFTEEN, slope: 0.8, intercept: -68 },
-    { label: "The measured four", people: MEASURED_FOUR, slope: WORKED_SLOPE, intercept: WORKED_INTERCEPT },
+    { label: "Four height and weight pairs", people: MEASURED_FOUR, slope: WORKED_SLOPE, intercept: WORKED_INTERCEPT },
   ];
 
   const lineStart = { x: DOMAIN.xMin, y: slope * DOMAIN.xMin + intercept };

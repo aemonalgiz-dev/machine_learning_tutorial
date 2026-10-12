@@ -37,6 +37,7 @@ export default function UnigramLanguageModelPage() {
       intuition={lessonIntuitions["the-unigram-language-model"]}
       technicalStart="Part 3. Finding the Likeliest Cut"
       openingTitle="Keep the Pieces Whose Removal Would Hurt Most"
+      playgroundTitle="Which complete segmentation has the higher probability?"
       playgroundIntro="Compare alternative segmentations of the same word. Distinguish the best segmentation's probability from the total over all possible segmentations."
       title="The Unigram Language Model"
       tagline={"A word can have several valid divisions into smaller pieces. A unigram tokenizer assigns probabilities to those pieces so it can compare complete segmentations while learning which vocabulary entries to keep."}
@@ -885,7 +886,7 @@ export default function UnigramLanguageModelPage() {
                   a vocabulary of 137 and comes back exactly.
                 </p>
                 <p>
-                  The running sentence does not come back, at any size, and the
+                  The sentence about Dr. Alvarez does not come back, at any size, and the
                   reason is precise. The corpus contains the letter z, in the
                   word size, but no word in it ends in z, and a word-final letter
                   is a different symbol from the same letter inside a word.
@@ -954,7 +955,7 @@ export default function UnigramLanguageModelPage() {
         ],
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. Independent Pieces and a Vocabulary That May Prune the Wrong Candidate" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="22. Pieces drawn independently, which language is not">
@@ -1085,20 +1086,11 @@ export default function UnigramLanguageModelPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs on which the method
-                  does not become approximate but stops being defined, together
-                  with what has to be decided in each case and what turns on the
-                  decision. Several of them are genuine open choices with
-                  defensible answers on both sides, and those are the ones worth
-                  a reader&rsquo;s attention, since they are the decisions
-                  anybody implementing this has to make and nothing in the
-                  mathematics makes them.
-                </p>
+              <SubSection title="25. What piece probabilities and pruning cannot determine" id="25-where-the-method-has-nothing-to-say">
+                <p>Piece probabilities do not settle the treatment of an unknown symbol or choose a pruning schedule. These details determine which complete spellings remain available, so they belong beside the likelihood when we describe the tokenizer.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Vocabulary or competing spelling"
+                  reasonHeading="What the probability model can choose"
                   rows={[
                     {
                       expression: "a vocabulary that cannot spell some word",

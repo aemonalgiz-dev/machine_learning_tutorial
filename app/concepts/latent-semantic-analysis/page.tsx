@@ -39,6 +39,7 @@ export default function LatentSemanticAnalysisPage() {
       intuition={lessonIntuitions["latent-semantic-analysis"]}
       technicalStart="Part 3. Squeezing The Table"
       openingTitle="A Large Word Table May Have a Smaller Pattern Inside It"
+      playgroundTitle="What remains when we keep fewer directions?"
       playgroundIntro="Compare the original table with its weighted and reduced representations. Inspect neighbouring words and documents as you change the number of retained directions."
       title="Latent Semantic Analysis"
       tagline={"Documents about related subjects may use some of the same words in different amounts. Latent semantic analysis starts with a table of word use and keeps a smaller set of shared patterns for representing words and documents."}
@@ -862,7 +863,7 @@ one boat document against the other       3 − 2  =  1`}</Equation>
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="17. What it costs">
+              <SubSection title="17. The storage and computation behind the decomposition" id="17-what-it-costs">
                 <p>
                   The table on the twenty-four documents holds 552 numbers. A fit
                   keeping two directions holds 46 for the words, 48 for the
@@ -908,7 +909,7 @@ one boat document against the other       3 − 2  =  1`}</Equation>
           ),
         },
         {
-          title: "Part 6. Where Latent Semantic Analysis Stops Being Defined",
+          title: "Part 6. Checking What the Smaller Representation Has Lost", id: "part-6-where-latent-semantic-analysis-stops-being-defined",
           content: (
             <>
               <SubSection title="18. A zero is a silence, and the fit reads it as a number">
@@ -1018,16 +1019,11 @@ one boat document against the other       3 − 2  =  1`}</Equation>
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="21. The cases with nothing to compute">
-                <p>
-                  Several inputs leave the method with nothing to work out rather
-                  than something approximate to work out, and a few more leave it
-                  with a genuine choice whose cost is worth knowing. The table
-                  gathers both, with what the mathematics says in each case.
-                </p>
+              <SubSection title="21. Empty documents and directions with no variation" id="21-the-cases-with-nothing-to-compute">
+                <p>A zero row cannot provide a direction, and a requested component may have no variation to describe. Check those cases before interpreting a low-dimensional comparison.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Document, word or rank condition"
+                  reasonHeading="Effect on the reduced representation"
                   rows={[
                     {
                       expression: "a cell holding zero",

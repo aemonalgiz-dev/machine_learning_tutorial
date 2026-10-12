@@ -15,7 +15,7 @@ function ValueEditor({ value, label, change }: { value: Data; label: string; cha
   return <WorkshopValue value={value} />;
 }
 
-export function LessonExperiment({ build }: { build: Build }) {
+export function LessonExperiment({ build, outputLabel }: { build: Build; outputLabel: string }) {
   const [caseIndex, setCaseIndex] = useState(0);
   const [data, setData] = useState(build.cases[0].data);
   const graph = useMemo(() => assemble(build.recipe, TOOLS), [build.recipe]);
@@ -34,7 +34,7 @@ export function LessonExperiment({ build }: { build: Build }) {
       return <fieldset key={key} className="min-w-0 rounded-xl border border-line bg-surface p-4"><legend className="px-2 text-sm font-semibold">{build.sources[key]}</legend>{maximum !== undefined ? <PixelGrid value={value} maximum={maximum} label={build.sources[key]} change={change} /> : <ValueEditor value={value} label={build.sources[key]} change={change} />}</fieldset>;
     })}</div>
     <button type="button" className="min-h-11 rounded-lg border border-line px-4 text-sm font-semibold" onClick={() => setData(build.cases[caseIndex].data)}>Reset this example</button>
-    <div className="space-y-3 rounded-xl border border-line bg-surface p-4" aria-live="polite"><h3 className="mb-3 font-semibold">Result from these values</h3>{trace.error ? <p role="status">{trace.error.message}</p> : <>
+    <div className="space-y-3 rounded-xl border border-line bg-surface p-4" aria-live="polite"><h3 className="mb-3 font-semibold">{outputLabel}</h3>{trace.error ? <p role="status">{trace.error.message}</p> : <>
       {imageView?.output !== undefined && outputImage !== undefined && <PixelGrid value={outputImage} maximum={imageView.output} label="Output pixels" />}
       {imageView?.pairedOutput !== undefined && Array.isArray(trace.output) && <PixelGrid value={trace.output[imageView.pairedOutput]} maximum={1} label="Transformed label mask" />}
       {imageView?.output === undefined && <WorkshopValue value={trace.output!} />}
@@ -45,6 +45,6 @@ export function LessonExperiment({ build }: { build: Build }) {
       const name = piece.tool === "output" ? "Result" : piece.tool.startsWith("source:") ? build.sources[piece.tool.slice(7)] : TOOLS[piece.tool].title;
       return <li key={item.id} className="min-w-0 rounded-lg bg-raised p-3"><p className="mb-2 text-sm font-semibold">{i + 1}. {name}</p><WorkshopValue value={item.output} /></li>;
     })}</ol></details>
-    <p className="text-xs leading-6 text-muted">{build.limitation} Editing this example does not change the workshop tests.</p>
+    <p className="text-xs leading-6 text-muted">{build.limitation}</p>
   </section>;
 }

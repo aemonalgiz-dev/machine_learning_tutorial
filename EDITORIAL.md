@@ -31,6 +31,40 @@ to the topic: coordinate diagrams, text pieces, image grids, data rows, or
 information flowing between components. Do not force every idea into geometry.
 Keep hand-built illustrations clearly distinct from trained model results.
 
+Guided examples should read naturally from top to bottom. Keep an optional
+one-step view, with named steps, for readers who want to pause. Do not make a
+row of numbered buttons the only way to discover the explanation.
+
+Keep data beside what it describes. Pair words with their IDs, observations
+with their predictions, and matrix entries with named rows and columns. Show
+time passing on a timeline, including which measurements are still unavailable.
+Use a shared scale when comparing positions or spreads. Draw connected objects
+when teaching graphs, and show actual pixel arrangements when teaching images.
+Avoid disconnected number chips or separate lists that readers must mentally
+zip together. Equal list lengths alone do not imply a correspondence.
+
+The shared presentation rules live in `lib/intuition/presentation.ts` and apply
+to both the older lessons and generated curriculum. New content can supply an
+explicit `Scene` in its authoring module. Such a scene takes precedence over a
+legacy row presentation. Check named axes, observation alignment, information
+boundaries, and narrow-screen reading in `tests/intuition-reading.spec.ts` when
+changing a demonstration. Plain explanatory lists are appropriate for distinct
+roles or choices; they should not stand in for a calculation or diagram.
+
+Headings and experiment prompts should name the question, data or operation
+specific to the lesson. Avoid labels such as "the measured five", "the worked
+matrix", "Explore the full example" and "What we can now calculate". A preset
+should say what it loads or changes. Keep ordinary controls and mathematical
+terminology consistent; novelty is not a reason to rename a familiar operation.
+
+Routine qualifications belong in the explanation. Give a callout an explicit,
+informative title only when a particular pitfall needs emphasis. Optional
+derivations need titles that say what they derive. Let the number of visual
+steps follow the idea instead of filling a fixed outline. A complete teaching
+program must differ from the later challenge solution: demonstrate a component,
+use another case, or leave the learner a further operation to work out. Preserve
+existing fragment IDs when changing section titles.
+
 - Never use em dashes in authored content, including headings, captions,
   metadata, labels and documentation.
 - Open with a concrete problem and a heading specific to it. Do not reuse

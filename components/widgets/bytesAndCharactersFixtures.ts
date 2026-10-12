@@ -14,13 +14,13 @@ export const GREEK_SENTENCE = "Η έκθεση έφτασε αργά.";
 
 // The three texts the two comparison panels both read, in one order.
 export const THREE_TEXTS = [
-  { label: "the running sentence", text: RUNNING_SENTENCE },
+  { label: "the sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "two letters the corpus never used", text: ACCENTED_SENTENCE },
   { label: "a script the corpus never met", text: GREEK_SENTENCE },
 ];
 
 export const PRESETS: { label: string; text: string }[] = [
-  { label: "The running sentence", text: RUNNING_SENTENCE },
+  { label: "The sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "Two letters the corpus never used", text: ACCENTED_SENTENCE },
   { label: "A script the corpus never met", text: GREEK_SENTENCE },
   { label: "One sentence of Chinese", text: "报告迟到了。" },

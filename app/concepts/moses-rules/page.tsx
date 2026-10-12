@@ -37,6 +37,7 @@ export default function MosesRulesPage() {
       intuition={lessonIntuitions["moses-rules"]}
       technicalStart="Part 2. The Full Stop, and the List It Cannot Do Without"
       openingTitle="A Full Stop Does Not Always End a Sentence"
+      playgroundTitle="See how punctuation and language settings change the pieces"
       playgroundIntro="Compare a sentence-ending period, an abbreviation, and a decimal. Inspect which rule applies and where an exception list changes the cut."
       title="Moses Rules"
       tagline={"A translation system needs a consistent way to handle punctuation without breaking abbreviations and other language-specific forms. Moses tokenization combines general splitting rules with exceptions for those cases."}
@@ -113,7 +114,7 @@ export default function MosesRulesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="2. The running sentence, cut, with every span">
+              <SubSection title="2. Punctuation and contractions in the Alvarez sentence" id="2-the-running-sentence-cut-with-every-span">
                 <p>
                   Here is the whole method applied once. Nine pieces, each shown
                   with the half-open span of the sentence it stands for, so the
@@ -293,7 +294,7 @@ export default function MosesRulesPage() {
                   Where the annotation rules answer from the position of the
                   stop in the text, these answer from the identity of the word in
                   front of it, and that is the choice which forces a list. The
-                  two answers disagree far more often than the running sentence
+                  two answers disagree far more often than the sentence about Dr. Alvarez
                   suggests.
                 </KeepInMind>
               </SubSection>
@@ -528,7 +529,7 @@ export default function MosesRulesPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             choice(
-              "Both rule lists give nine pieces on the running sentence and part on the contraction, one cutting in front of the n and the other at the apostrophe. What decided it here?",
+              "Both rule lists give nine pieces on the sentence about Dr. Alvarez and part on the contraction, one cutting in front of the n and the other at the apostrophe. What decided it here?",
               [
                 "Only the cut at the apostrophe lets the pieces be joined back into the sentence",
                 "The cut at the apostrophe needs nothing known about English, and the same script had to run over eleven languages",
@@ -746,7 +747,7 @@ export default function MosesRulesPage() {
                   English, and the French and Italian settings in the playground
                   change only where the apostrophe cut falls.
                 </p>
-                <WorkedExample title="The running sentence under the French setting">
+                <WorkedExample title="The Alvarez sentence under the French punctuation rules">
                   <Equation>
                     {"English setting   Dr.  Alvarez  didn  't  expect  the  low-cost  re-analysis  .\n" +
                       "French setting    Dr.  Alvarez  didn'  t  expect  the  low-cost  re-analysis  ."}
@@ -882,7 +883,7 @@ export default function MosesRulesPage() {
                   source and three characters long as a piece, and it undoes to
                   the hyphen it stands for.
                 </p>
-                <WorkedExample title="The running sentence with every compound cut">
+                <WorkedExample title="Split the compounds in the Alvarez sentence">
                   <Equation>
                     {"Dr.  Alvarez  didn  't  expect  the\n" +
                       "low  @-@  cost  re  @-@  analysis  ."}
@@ -975,7 +976,7 @@ export default function MosesRulesPage() {
               "It gives back two of the eighteen, the ones that happen to end in an abbreviation so that every piece was already separated by a space in the writing. The other sixteen have a comma or a final stop standing alone, and a space in front of a comma is not English. The pieces plus their spans plus the source recover everything exactly, and the pieces alone recover every character in order with the spacing still to be decided.",
             ),
             choice(
-              "Under the French setting the contraction of the running sentence is cut behind its apostrophe instead of in front of it. What else in the sentence comes out differently?",
+              "Under the French setting the contraction of the sentence about Dr. Alvarez is cut behind its apostrophe instead of in front of it. What else in the sentence comes out differently?",
               [
                 "Nothing, since the setting moves the apostrophe cut and the list of abbreviations stays the English one",
                 "The title loses its stop, since the French list does not hold it",
@@ -1232,7 +1233,7 @@ export default function MosesRulesPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. When Language-Specific Rules Meet Different Writing" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="23. The correctness is a property of a data file">
@@ -1358,16 +1359,11 @@ export default function MosesRulesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="26. What is left undecided, gathered">
-                <p>
-                  The cases below are gathered from the whole page. The right
-                  column says what the method does not determine and why, and it
-                  quotes a number where the number is a fact about the method
-                  rather than about any particular text.
-                </p>
+              <SubSection title="26. Punctuation and language decisions the rules leave open" id="26-what-is-left-undecided-gathered">
+                <p>The selected language and punctuation conventions are part of this tokenizer. The cases below show where those choices change a split and where a downstream application still needs its own rule.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Text or language convention"
+                  reasonHeading="Which split requires a policy"
                   rows={[
                     {
                       expression: "an abbreviation ending a sentence",
@@ -1481,8 +1477,8 @@ export default function MosesRulesPage() {
           title: "Practice. Running the Rules and Putting the Pieces Back",
           practice: [
             exercise(
-              "Cut the running sentence under both rule lists",
-              ["Put the running sentence to the library’s Moses rules and print each piece beside the half-open span it came from. Then put the same sentence to the Penn Treebank rules, which are the annotation rules of this page, and count the pieces the two answers have in common.", "Part 1 arrived at nine pieces under each and seven shared, with the two that differ being the halves of the contraction. Print the pieces only one of the two rule lists produced, so that the disagreement can be read off."],
+              "Cut the sentence about Dr. Alvarez under both rule lists",
+              ["Put the sentence about Dr. Alvarez to the library’s Moses rules and print each piece beside the half-open span it came from. Then put the same sentence to the Penn Treebank rules, which are the annotation rules of this page, and count the pieces the two answers have in common.", "Part 1 arrived at nine pieces under each and seven shared, with the two that differ being the halves of the contraction. Print the pieces only one of the two rule lists produced, so that the disagreement can be read off."],
               `from oop_ml import MosesPreTokenizer, PennTreebankPreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -1516,7 +1512,7 @@ re-analysis  [39, 50)
 9 pieces here, 9 pieces there, 7 shared
 only here:  ["'t", 'didn']
 only there: ['did', "n't"]`,
-              { hints: ["Both rules are constructed with nothing, since the defaults are the English setting with both switches off, and the text goes to split.", "split answers a collection that can be iterated for words carrying text, start and end, and that knows n_words and the texts alone.", "Turning each answer’s texts into a set makes the shared pieces an intersection and the pieces only one side produced a difference."], check: numberCheck("How many pieces do the two rule lists share on the running sentence?", 7, 0.0, "Both give nine pieces and seven are the same. These rules cut the contraction at the apostrophe, into didn and a piece beginning with the mark, and the annotation rules cut it in front of the negation, into did and a piece beginning with n. The first needs nothing known about English to state, which is what decided it for a script that had to run over eleven languages.") },
+              { hints: ["Both rules are constructed with nothing, since the defaults are the English setting with both switches off, and the text goes to split.", "split answers a collection that can be iterated for words carrying text, start and end, and that knows n_words and the texts alone.", "Turning each answer’s texts into a set makes the shared pieces an intersection and the pieces only one side produced a difference."], check: numberCheck("How many pieces do the two rule lists share on the sentence about Dr. Alvarez?", 7, 0.0, "Both give nine pieces and seven are the same. These rules cut the contraction at the apostrophe, into didn and a piece beginning with the mark, and the annotation rules cut it in front of the negation, into did and a piece beginning with n. The first needs nothing known about English to state, which is what decided it for a script that had to run over eleven languages.") },
             ),
             exercise(
               "Give the same abbreviation two different followers",

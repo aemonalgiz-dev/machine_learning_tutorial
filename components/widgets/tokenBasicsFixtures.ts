@@ -16,7 +16,7 @@ export const ACCENTED_SENTENCE =
   "Dr. Alvarez didn't expect the low-cost re-analysis in Ångström units.";
 
 export const PRESETS: { label: string; text: string }[] = [
-  { label: "The running sentence", text: RUNNING_SENTENCE },
+  { label: "The sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "A sentence with a word the table never saw", text: UNSEEN_SENTENCE },
   { label: "The same sentence, spaced differently", text: AWKWARD_SENTENCE },
   {

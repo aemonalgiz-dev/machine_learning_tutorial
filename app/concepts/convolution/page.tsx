@@ -40,6 +40,7 @@ export default function ConvolutionPage() {
       intuition={lessonIntuitions["convolution"]}
       technicalStart="Part 2. One Kernel, Swept"
       openingTitle="Look for the Same Pattern in More Than One Place"
+      playgroundTitle="Move one filter across the image"
       playgroundIntro="Inspect one input window and the output value it produces. Move to the next position and check that the same weights are reused."
       title="Convolution"
       tagline={"A useful image pattern can appear anywhere in a picture. Convolution applies the same small set of weights at different positions, producing a map of where that pattern receives a response."}
@@ -274,7 +275,7 @@ export default function ConvolutionPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="6. One position, worked by hand">
+              <SubSection title="6. Multiply and add at one window position" id="6-one-position-worked-by-hand">
                 <p>
                   Take the answer cell at row 2, column 0, which is the one the
                   playground shows whenever nothing is hovered. Its window covers
@@ -995,7 +996,7 @@ export default function ConvolutionPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="21. The output extent, worked in integers">
+              <SubSection title="21. Count the positions where the window fits" id="21-the-output-extent-worked-in-integers">
                 <p>
                   A dense layer&rsquo;s output width is a number somebody chose.
                   A convolution&rsquo;s is arithmetic, and every term in it is
@@ -1329,10 +1330,10 @@ export default function ConvolutionPage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Keeping Window Geometry and Weight Sharing Consistent" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="29. What a complete implementation must specify">
+              <SubSection title="29. The conventions needed to reproduce a convolution" id="29-what-a-complete-implementation-must-specify">
                 <p>
                   Two convolutions can agree on every word of the description
                   above and still answer different numbers on the same picture. The
@@ -1410,7 +1411,7 @@ export default function ConvolutionPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="30. The edges, probed">
+              <SubSection title="30. Windows that do not fit and shapes that do not join" id="30-the-edges-probed">
                 <p>
                   Below is every edge asked of a convolution as this page loads,
                   with what came back rather than what ought to. Nineteen are
@@ -1714,7 +1715,7 @@ convolution 80 parameters, dense layer of equal width 4245280, ratio 53066
 ShapeMismatchError
 layer 0 answers with (8, 26, 26) and layer 1 reads (5408,); both hold 5408 numbers, so it is the arrangement that disagrees and not the width
 with a flattening between them the stack holds 3 layers, reads (1, 28, 28) and answers (10,)`,
-              { hints: ["A layer’s shape carries reads and answers as tuples of extents, and n_inputs and n_outputs as the products of those extents, so the dense count is n_outputs times n_inputs plus n_outputs.", "Every refusal the library makes derives from MLLibError, so catching that catches this one, and its message names both arrangements and says that the counts agree.", "Flatten takes the arrangement it will read, which is exactly what the convolution answers, so handing it the convolution’s own shape.answers builds the right bridge."], check: numberCheck("How many parameters does the dense layer of equal width hold?", 4245280, 0.5, "A dense layer reading 784 cells and answering 5,408 numbers holds one weight per input per output plus one bias per output, which is 5,408 times 784 plus 5,408. The convolution holds 80, eight filters of nine weights and a bias, so the dense layer holds 53,066 times as many for an answer of exactly the same size, and the ratio would go on growing with the picture while the 80 stayed as it is.") },
+              { hints: ["A layer’s shape carries reads and answers as tuples of extents, and n_inputs and n_outputs as the products of those extents, so the dense count is n_outputs times n_inputs plus n_outputs.", "Flatten takes the arrangement it will read, which is exactly what the convolution answers, so handing it the convolution’s own shape.answers builds the right bridge."], check: numberCheck("How many parameters does the dense layer of equal width hold?", 4245280, 0.5, "A dense layer reading 784 cells and answering 5,408 numbers holds one weight per input per output plus one bias per output, which is 5,408 times 784 plus 5,408. The convolution holds 80, eight filters of nine weights and a bias, so the dense layer holds 53,066 times as many for an answer of exactly the same size, and the ratio would go on growing with the picture while the 80 stayed as it is.") },
             ),
           ],
         },

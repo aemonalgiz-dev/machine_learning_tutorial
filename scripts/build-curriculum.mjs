@@ -18,23 +18,28 @@ import graphs from "./curriculum/graph-path.mjs";
 import causal from "./curriculum/causal-path.mjs";
 import deployment from "./curriculum/deployment-path.mjs";
 import projects from "./curriculum/projects-path.mjs";
+import { readingVoice } from "./curriculum/reading-voice.mjs";
+import { readingExtensions } from "./curriculum/reading-extensions.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const paths = [...forecasting, ...reinforcement, ...probabilistic, ...optimisation, ...recommendations, ...anomalies, ...graphs, ...causal, ...deployment, ...projects];
 const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths];
-const lessons = [...numpy, ...data, ...evaluation, ...gaps];
+const lessons = [...numpy, ...data, ...evaluation, ...gaps].map(lesson => ({ ...lesson, reading: readingVoice[lesson.id],
+  intuition: [...lesson.intuition, ...(readingExtensions[lesson.id] ? [readingExtensions[lesson.id]] : [])] }));
 const dataOrder = ["record-quality", "missing-measurements", "categorical-encoding", "cyclical-features", "data-leakage", "class-imbalance"];
 const navigation = [...numpy, ...[...data].sort((a,b) => dataOrder.indexOf(a.id) - dataOrder.indexOf(b.id)), ...evaluation, ...gaps];
 const ids = new Set();
 for (const lesson of lessons) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(lesson.id) || ids.has(lesson.id)) throw Error(`Invalid or repeated lesson ID: ${lesson.id}`);
   ids.add(lesson.id);
+  if (!lesson.reading || Object.values(lesson.reading).some(value => !value?.trim())) throw Error(`${lesson.id}: describe the lesson's experiment and reading transitions.`);
   if (JSON.stringify(lesson).includes("\u2014")) throw Error(`${lesson.id}: remove the em dash.`);
-  if (lesson.history.blocks.length < 2 || !lesson.history.sources.length || lesson.parts.length < 4 || lesson.practice.length < 2 || lesson.quiz.length < 3 || lesson.intuition.length < 3 || lesson.build.cases.length < 2) throw Error(`${lesson.id}: incomplete lesson.`);
+  if (lesson.history.blocks.length < 2 || !lesson.history.sources.length || lesson.parts.length < 4 || lesson.practice.length < 2 || lesson.quiz.length < 3 || lesson.intuition.length < 2 || lesson.build.cases.length < 2) throw Error(`${lesson.id}: incomplete lesson.`);
   for (const entry of lesson.history.sources) if (new URL(entry.url).protocol !== "https:") throw Error(`${lesson.id}: use a primary HTTPS source.`);
   for (const exercise of lesson.practice) if (!exercise.solution || !exercise.output || !exercise.hints.length) throw Error(`${lesson.id}: incomplete programming challenge.`);
   for (const part of lesson.parts) for (const example of part.examples ?? []) {
     if (!example.title || !example.code || !example.output || !example.paragraphs.length || !example.interpretation.length) throw Error(`${lesson.id}: incomplete worked example.`);
+    if (lesson.practice.some(exercise => exercise.solution.trim() === example.code.trim())) throw Error(`${lesson.id}: the explanation must not publish the practice program verbatim.`);
   }
   if (lesson.section === "Python and NumPy") for (const question of lesson.quiz) {
     if (!question.given?.description || (!question.given.code && !question.given.data)) throw Error(`${lesson.id}: supply the setup on every NumPy question card.`);

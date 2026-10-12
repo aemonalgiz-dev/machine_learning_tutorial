@@ -48,12 +48,12 @@ export function SplitCostPanel() {
       `${view.on_word_boundaries.n_pieces}`,
     ],
     [
-      "pieces the running sentence becomes",
+      "pieces the sentence about Dr. Alvarez becomes",
       `${view.on_spaces.running_pieces.length}`,
       `${view.on_word_boundaries.running_pieces.length}`,
     ],
     [
-      "characters of the running sentence inside a piece",
+      "characters of the sentence about Dr. Alvarez inside a piece",
       `${view.on_spaces.running_covered}`,
       `${view.on_word_boundaries.running_covered}`,
     ],

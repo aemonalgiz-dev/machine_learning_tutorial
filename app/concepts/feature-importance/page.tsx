@@ -35,6 +35,7 @@ export default function FeatureImportancePage() {
       intuition={lessonIntuitions["feature-importance"]}
       technicalStart="Part 4. Breaking a Column on Purpose"
       openingTitle="What Did the Model Actually Use?"
+      playgroundTitle="What happens when we disrupt one measurement?"
       playgroundIntro="Compare the two importance rankings, especially for the noise feature. Read each ranking alongside the model's predictive score."
       title="Which Feature Mattered"
       tagline={"A prediction alone does not tell us which measurements the model relied on. Feature importance methods give us ways to investigate that question, although their scores need careful interpretation."}
@@ -645,7 +646,7 @@ export default function FeatureImportancePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="18. What it costs">
+              <SubSection title="18. The extra predictions an importance estimate requires" id="18-what-it-costs">
                 <>
                   <p>
                     The split measure needs one walk through a fitted tree. Permutation
@@ -948,29 +949,27 @@ export default function FeatureImportancePage() {
         ],
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Recording How Feature Credit Was Measured" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="27. What a complete implementation states">
+              <SubSection title="27. Specify the scoring experiment before comparing importance" id="27-what-a-complete-implementation-states">
                 <>
-<p>
-                  A complete implementation of the split reading states which impurity the gains are measured in, that the credit is rows times gain and not gain alone, whether stand-in splits are counted as the 1984 book counted them, how a forest combines its members, by averaging shares or by summing credits, and that every fitted column appears in the report with a zero where it earned nothing.
-                </p>
-                <p>
-                  A complete implementation of the scramble states the score it uses, how many repeats and under what seed, that the column is permuted rather than replaced, that the clamp follows the average, which rows are scrambled and whether out-of-bag rows are used per member, and what happens when no column&rsquo;s scramble lowers the score. Both state that the shares are normalised to sum to one and that the raw quantities are available beside them.
-                </p>
+<p>To compare split-based importance reports, first check what earned the credit. Here a split contributes its gain multiplied by the number of rows that reached it. The impurity measure matters, as does whether stand-in splits receive credit as they did in the 1984 treatment.</p>
+                <p>A forest can average member shares or add the underlying credits before normalising. Those procedures need not agree. Every fitted feature should still appear in the report, including a feature that earned zero credit.</p>
+                <p>Permutation importance describes an experiment, so its report needs the score, rows, repeat count and random seed. The selected column is shuffled among those rows; it is not replaced with invented values. In this implementation, negative credit is clamped after averaging the repeated score changes.</p>
+                <p>Check whether each forest member uses its own out-of-bag rows, and what happens if shuffling no column lowers the score. Both importance reports expose their raw quantities beside shares normalised to sum to one, so the share can be traced back to what was measured.</p>
 </>
               </SubSection>
 
-              <SubSection title="28. The edges, tried rather than remembered">
+              <SubSection title="28. Unused features, invalid permutations and undefined scores" id="28-the-edges-tried-rather-than-remembered">
                 <p>
                   Every row below was run before it was written down, and the
                   words in the right column are the refusal&rsquo;s own where
                   the edge was refused.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Data or permutation condition"
+                  reasonHeading="Effect on the importance estimate"
                   rows={[
                     { expression: "a feature of no values", reason: "refused at the boundary, before any model sees it, since a feature must not be empty." },
                     { expression: "one row", reason: "refused by the classifier, because one row holds one class and there is nothing to discriminate between." },

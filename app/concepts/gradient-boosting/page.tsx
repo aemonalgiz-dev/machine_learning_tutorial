@@ -41,6 +41,7 @@ export default function GradientBoostingPage() {
       intuition={lessonIntuitions["gradient-boosting"]}
       technicalStart="Part 1. Fitting What Is Still Wrong"
       openingTitle="Let the Next Tree Work on What Is Still Wrong"
+      playgroundTitle="Watch each tree address the errors left behind"
       playgroundIntro="Step through the boosting rounds. Compare the current prediction, the remaining errors, and the correction supplied by the next tree."
       title="Gradient Boosting"
       tagline={"A model's mistakes tell us what it has not yet explained. Boosting adds models in stages, with each new model learning a correction to the predictions already made."}
@@ -967,30 +968,16 @@ export default function GradientBoostingPage() {
         ],
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Reproducing the Sequence of Residual Fits" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="25. What a complete implementation must specify">
-                <p>
-                  A complete implementation states the loss, since the
-                  residual is only the negative gradient of squared error
-                  and another loss changes both the start and what each
-                  round fits; the starting constant; the member and every
-                  setting it carries, its maximum depth and the fewest rows
-                  a split and a leaf may hold; the number of rounds; the
-                  learning rate and the range it is allowed; whether a
-                  per-leaf step length is searched after the tree is fitted
-                  or the leaf mean is taken as it is; whether any row
-                  subsampling happens per round, which is what would give
-                  an out-of-bag estimate; how a committee of fewer rounds
-                  relates to a longer one; and how a query at a time outside
-                  the readings is answered. Each of those is a place two
-                  implementations can quietly disagree while both report a
-                  fit.
-                </p>
+              <SubSection title="25. The loss, starting prediction and rules for each tree" id="25-what-a-complete-implementation-must-specify">
+                <p>Before comparing two boosting runs, check the loss and the starting prediction. Ordinary residuals give the negative gradient for squared error; a different loss can change both the initial constant and the quantities each tree must fit.</p>
+                <p>Then compare the trees and updates: maximum depth, minimum rows in a split and leaf, round count, learning rate and its permitted range. Some procedures search for a step length in each fitted leaf, while others keep the leaf mean. That choice changes the correction added to the model.</p>
+                <p>Row subsampling determines whether an out-of-bag estimate is available. Also check whether a shorter run reproduces the beginning of a longer run, and how the fitted trees answer queries outside the observed times. These details explain disagreements that the word boosting alone cannot.</p>
               </SubSection>
 
-              <SubSection title="26. The edges, probed">
+              <SubSection title="26. What happens when another boosting round cannot help?" id="26-the-edges-probed">
                 <p>
                   Every row below was tried on the model itself and, where
                   this page&rsquo;s door lets it through, through the page as
@@ -999,8 +986,8 @@ export default function GradientBoostingPage() {
                   than defended.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Training data or boosting setting"
+                  reasonHeading="What happens during fitting"
                   rows={[
                     { expression: "no features, or an empty column", reason: "refused by name before any round runs, by the guard every model here shares." },
                     { expression: "a single reading", reason: "accepted. The mean is the reading, every member is one leaf, the committee answers that height everywhere, and asking for R² is refused because a single height has no spread to explain. This page's door refuses it a layer earlier, at two readings." },

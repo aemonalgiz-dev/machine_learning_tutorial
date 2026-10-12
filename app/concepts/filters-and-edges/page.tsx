@@ -39,6 +39,7 @@ export default function FiltersAndEdgesPage() {
       intuition={lessonIntuitions["filters-and-edges"]}
       technicalStart="Part 2. Carrying a Grid of Weights Across a Picture"
       openingTitle="The Brightness Changed; the Edge Stayed Put"
+      playgroundTitle="Which changes in brightness does a filter notice?"
       playgroundIntro="Compare the original picture with the filter response. Inspect one window's arithmetic, then change the filter and examine which changes in brightness it highlights."
       title="Filters and Edges"
       tagline={"The boundary of an object often appears as a change in brightness. Small image filters compare nearby pixels so we can measure those changes instead of treating each pixel in isolation."}
@@ -245,7 +246,7 @@ export default function FiltersAndEdgesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="6. The whole sweep, worked on six by six">
+              <SubSection title="6. Read every response in a six-by-six image" id="6-the-whole-sweep-worked-on-six-by-six">
                 <p>
                   The forty eight by forty eight scene is too large to check by
                   hand, so there is a small picture beside it, six pixels on a
@@ -346,7 +347,7 @@ export default function FiltersAndEdgesPage() {
                   everywhere at once. The reversing switch on the widget above
                   does this.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why reversing the filter makes successive convolutions associative">
                   <p>
                     Signal processing prefers convolution because reversing is
                     what makes the operation associative, so that sweeping with
@@ -956,7 +957,7 @@ export default function FiltersAndEdgesPage() {
           ),
         },
         {
-          title: "Part 6. Where an Edge Operator Stops Being Defined",
+          title: "Part 6. Flat Regions, Narrow Images and Boundary Choices", id: "part-6-where-an-edge-operator-stops-being-defined",
           content: (
             <>
               <SubSection title="22. A derivative of something sampled at whole pixels">
@@ -979,8 +980,8 @@ export default function FiltersAndEdgesPage() {
                 </p>
 </>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the mathematics says"
+                  expressionHeading="Image or boundary condition"
+                  reasonHeading="Effect on the filter response"
                   rows={[
                     {
                       expression: "a picture one pixel wide",

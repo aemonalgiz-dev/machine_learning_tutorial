@@ -39,6 +39,7 @@ export default function NormalisationLayersPage() {
       intuition={lessonIntuitions["normalisation-layers"]}
       technicalStart="Part 2. Standardise Inside the Model"
       openingTitle="The Inputs Keep Changing While the Layer Learns"
+      playgroundTitle="Compare what each normalisation rule changes"
       playgroundIntro="Check which axis supplies the statistics. Compare the values before and after normalisation, then distinguish learned scale and shift from the measured statistics."
       title="Normalisation Layers"
       tagline={"The values passed between layers can change in scale as a network trains. Normalisation methods control aspects of those scales, but they differ in which values they compare and what they preserve."}
@@ -1042,25 +1043,16 @@ export default function NormalisationLayersPage() {
         ],
         },
         {
-          title: "Part 8. Implementation and Failure Contracts",
+          title: "Part 8. Using the Same Normalisation Conventions Throughout" , id: "part-8-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="25. What a complete implementation must specify">
-                <p>
-                  A complete implementation states which axis the statistics
-                  run along, whether the variance is biased, where the epsilon
-                  goes, that the scale and shift exist and what they start at,
-                  what the two purposes are and which is the default, how the
-                  running figures start and by what rule and at what moment
-                  they move, whether the running variance is biased or not,
-                  which three routes the backward pass collects, what the
-                  parameter slopes are, and, for weight normalisation, that
-                  the direction slope has its radial part projected out and
-                  what a zero direction means.
-                </p>
+              <SubSection title="25. Axes, running statistics and the backward pass" id="25-what-a-complete-implementation-must-specify">
+                <p>Start by identifying the axis over which the statistics are measured. The variance divisor and position of epsilon affect the result, as do the initial scale and shift parameters.</p>
+                <p>Training and prediction can use different statistics. Record which purpose is the default, how running values are initialised, when and how they update, and whether the running variance uses a bias correction. These are necessary to explain why the same row can receive different outputs in the two modes.</p>
+                <p>For the backward pass, account for all three gradient routes and the scale and shift gradients. Weight normalisation has a separate constraint: its direction gradient removes the radial component. A zero direction needs explicit treatment because it supplies no direction to normalise.</p>
               </SubSection>
 
-              <SubSection title="26. The edges, each one probed">
+              <SubSection title="26. A single row, constant features and other revealing inputs" id="26-the-edges-each-one-probed">
                 <p>
                   Every row below was run rather than reasoned about, and the
                   behaviours fall into three kinds, refused with a typed error,
@@ -1068,8 +1060,8 @@ export default function NormalisationLayersPage() {
                   accepted with an answer worth knowing about.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Batch or prediction condition"
+                  reasonHeading="Which statistics the layer uses"
                   rows={[
                     { expression: "an empty block", reason: "refused; a layer needs at least one row to respond to." },
                     { expression: "one row, batch layer, while training", reason: "accepted, and answers zeros for every feature, since the row is its own batch and has no spread." },

@@ -58,7 +58,7 @@ export function BoundaryCostPanel() {
       `${(view.on_spaces.share_covered * 100).toFixed(1)}%`,
     ],
     [
-      "words the running sentence becomes",
+      "words the sentence about Dr. Alvarez becomes",
       `${view.on_boundaries.running_pieces.length}`,
       `${view.on_spaces.running_pieces.length}`,
     ],

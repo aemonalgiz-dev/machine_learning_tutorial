@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["evaluating-generative-models"]}
     technicalStart="Part 2. Calculate Loss and Perplexity"
     prerequisites={<>Useful foundations: <Link href="/concepts/next-token-prediction">Next-token prediction</Link>{", "}<Link href="/concepts/retrieval-augmented-generation">retrieval-augmented generation</Link>{", "}<Link href="/concepts/generative-adversarial-networks">GANs</Link>.</>}
+    playgroundTitle="Can a good average score hide missing examples?"
     playgroundIntro="Raise the logit boost while it favors the observed target. Then enable Boost the wrong token and repeat. Compare both metrics. At zero boost, all three tokens are equally probable."
     playground={<ModernLearningExample topic="evaluating-generative-models" />}
     sections={[

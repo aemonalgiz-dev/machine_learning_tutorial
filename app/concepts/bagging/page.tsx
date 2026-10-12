@@ -41,6 +41,7 @@ export default function BaggingPage() {
       intuition={lessonIntuitions["bagging"]}
       technicalStart="Part 3. Building the Bagged Ensemble"
       openingTitle="When One Tree Changes Its Mind"
+      playgroundTitle="What changes when the models see different samples?"
       playgroundIntro="Compare one tree's answer with the combined answer. As more trees join, watch whether their disagreements cancel or persist."
       title="Bagging"
       tagline={"Small changes in the training data can produce very different fitted models. Fitting several models to resampled data and combining their answers can make the result less dependent on one particular fit."}
@@ -782,13 +783,10 @@ export default function BaggingPage() {
         ],
         },
         {
-          title: "Part 11. Implementation and Failure Contracts",
+          title: "Part 11. Keeping the Sampling and Voting Rules Reproducible" , id: "part-11-implementation-and-failure-contracts",
           content: (
-            <SubSection title="30. Implementation and failure contracts">
-              <p>
-                A complete implementation states its settings and its edge
-                cases, and the ones that matter here are these.
-              </p>
+            <SubSection title="30. Record the draws, base models and voting rule" id="30-implementation-and-failure-contracts">
+              <p>Suppose we fit the same training data twice and obtain different votes. To explain the difference, we need to know how each training sample was drawn, which model fitted it, and how the predictions were combined. The choices below make that comparison possible.</p>
               <NumberTable
                 headings={["setting or case", "what has to be decided"]}
                 rows={[

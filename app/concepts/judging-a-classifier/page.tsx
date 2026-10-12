@@ -39,6 +39,7 @@ export default function JudgingAClassifierPage() {
       intuition={lessonIntuitions["judging-a-classifier"]}
       technicalStart="Part 2. Two Questions Asked of One Table"
       openingTitle="Two Models Can Be Equally Accurate and Fail Differently"
+      playgroundTitle="See which mistakes a threshold allows"
       playgroundIntro="Look at the false positives and false negatives separately. Move the threshold and watch which kind of mistake becomes more common."
       title="Judging a Classifier"
       tagline={"A model can make different kinds of mistake, and they may have very different consequences. Counting correct answers alone can hide the errors that matter most for the task."}
@@ -1031,26 +1032,13 @@ export default function JudgingAClassifierPage() {
           ),
         },
         {
-          title: "Part 8. Implementation and Failure Contracts",
+          title: "Part 8. Keeping Class Labels and Score Conventions Consistent" , id: "part-8-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="25. What a complete implementation specifies">
-                <p>
-                  A complete implementation of these judgements states which
-                  class is positive and what labels it accepts, whether the
-                  threshold comparison is at or above, what it does with a
-                  denominator of zero for each rate, whether its curves are
-                  read at every distinct score or at a fixed grid, whether the
-                  area under the precision-recall curve is a step sum or a
-                  trapezoid and whether a conventional first point is added,
-                  how ties in the scores are counted in the ROC area, which
-                  beta an F-score uses, whether a multiclass average is macro
-                  or micro and what it does when a class&rsquo;s rate is
-                  undefined, whether the class width is stated or inferred,
-                  how many bins a reliability diagram uses and whether they
-                  are equal in width or in count, and whether folds are
-                  pooled or averaged.
-                </p>
+              <SubSection title="25. The positive class, threshold rule and undefined rates" id="25-what-a-complete-implementation-specifies">
+                <p>A score needs a defined question. Name the positive class and accepted labels, state whether a value equal to the threshold counts as positive, and give a policy for each rate whose denominator can be zero. An F-score also needs its beta value.</p>
+                <p>Curves add further choices. Are thresholds taken from every distinct score or a fixed grid? Is precision-recall area a step sum or a trapezoid, and is a conventional first point inserted? How do tied scores contribute to ROC area?</p>
+                <p>For several classes, distinguish macro from micro averaging and explain what happens to an undefined class rate. State whether the class count is supplied or inferred. Reliability diagrams need a bin count and a rule for equal-width or equal-count bins; cross-validation summaries need to say whether folds were pooled or their scores averaged.</p>
                 <p>
                   The choices on this page are these. Adult is positive and
                   the labels are 0 and 1; a person is called adult at or
@@ -1066,14 +1054,14 @@ export default function JudgingAClassifierPage() {
                 </p>
               </SubSection>
 
-              <SubSection title="26. The edges, each one run">
+              <SubSection title="26. No positive calls, missing classes and threshold ties" id="26-the-edges-each-one-run">
                 <p>
                   Every row below was run, through this page where it can
                   reach the case and directly on the model where it cannot.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Labels or evaluation split"
+                  reasonHeading="Which scores can be interpreted"
                   rows={[
                     { expression: "an empty crowd, or one person", reason: "refused before any fit, by the request’s bound of at least two people." },
                     { expression: "two people, one of each class", reason: "refused by the fit, which says that estimating three parameters needs at least three people." },
@@ -1279,7 +1267,7 @@ except MLLibError as refusal:
               `at 0.9: precision 1.0000, recall 0.5000, F1 0.6667
 at 0.99: accuracy 0.5000, recall 0.0000
 UndefinedMetricError: precision is undefined when nothing was predicted positive`,
-              { hints: ["f1_score is a property of the evaluation beside precision and recall, and it is the harmonic mean of the two.", "Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal this turns out to be.", "The accuracy and the recall at 0.99 are ordinary numbers, since there are twelve people to be right about and six adults to find; only the precision has nobody underneath it."], check: numberCheck("What F1 score do the calls at 0.9 earn?", 0.6667, 0.0005, "Only the three adults above 0.9 are called, so precision is a perfect 1.0 and recall is 0.5. The harmonic mean is pulled towards whichever rate is worse, and 2 times 1.0 times 0.5 over 1.5 is 0.6667 where the arithmetic mean would say 0.75. At 0.99 nobody is called, the precision is zero over zero, and the library refuses it by name rather than reporting a precision of zero for a model that made no wrong claim.") },
+              { hints: ["f1_score is a property of the evaluation beside precision and recall, and it is the harmonic mean of the two.", "The accuracy and the recall at 0.99 are ordinary numbers, since there are twelve people to be right about and six adults to find; only the precision has nobody underneath it."], check: numberCheck("What F1 score do the calls at 0.9 earn?", 0.6667, 0.0005, "Only the three adults above 0.9 are called, so precision is a perfect 1.0 and recall is 0.5. The harmonic mean is pulled towards whichever rate is worse, and 2 times 1.0 times 0.5 over 1.5 is 0.6667 where the arithmetic mean would say 0.75. At 0.99 nobody is called, the precision is zero over zero, and the library refuses it by name rather than reporting a precision of zero for a model that made no wrong claim.") },
             ),
             exercise(
               "Judge three classes with the width stated",

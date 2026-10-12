@@ -36,6 +36,7 @@ export default function WordPiecePage() {
       intuition={lessonIntuitions["wordpiece"]}
       technicalStart="Part 2. The Score That Replaces the Count"
       openingTitle="A Common Pair May Only Have Common Halves"
+      playgroundTitle="Which pair earns a place in the vocabulary?"
       playgroundIntro="Compare candidate pairs under raw counts and the relative-frequency score. Then inspect how continuation markers affect the longest-match encoding."
       title="WordPiece"
       tagline={"A tokenizer needs reusable word parts and a consistent way to find them in new text. We will look at the pair-scoring rule used here to build a WordPiece vocabulary, then its longest-match encoding rule."}
@@ -225,7 +226,7 @@ export default function WordPiecePage() {
                   and here they are with both figures, orderable either way.
                 </p>
                 <PairScoreBoard />
-                <WorkedExample title="Two pairs, worked">
+                <WorkedExample title="Why the less frequent pair receives the higher score">
                   <>
                     <p>
                       The pair e followed by s occurs nine times. Its two parts occur
@@ -490,9 +491,9 @@ export default function WordPiecePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="11. The running sentence, and where the marks fall">
+              <SubSection title="11. Where WordPiece splits the Alvarez sentence" id="11-the-running-sentence-and-where-the-marks-fall">
                 <p>
-                  Fitted on the eighteen sentences, here is the running sentence
+                  Fitted on the eighteen sentences, here is the sentence about Dr. Alvarez
                   cut at four vocabulary sizes. Watch the marks rather than the
                   pieces. Exactly one piece per word carries no mark, and it is
                   always the first, so a reader can find the word boundaries by
@@ -845,7 +846,7 @@ export default function WordPiecePage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. When Rare Pairs Win and Words Cannot Be Read" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="19. A ratio has a denominator, and a bound pair is not infinitely good">
@@ -1021,19 +1022,11 @@ export default function WordPiecePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="23. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs on which the method
-                  is not approximate but undefined, together with what has to be
-                  decided in each case and what turns on the decision. Some are
-                  genuinely open, with defensible answers on both sides, and those
-                  are the ones worth attention, since they are decisions anybody
-                  implementing this has to make and nothing in the mathematics
-                  makes them.
-                </p>
+              <SubSection title="23. Choices the pair score does not settle" id="23-where-the-method-has-nothing-to-say">
+                <p>The pair score ranks candidates, but it does not define every part of a tokenizer. Rare pairs, ties and words containing unavailable pieces still require explicit choices. Those choices affect both the learned vocabulary and what it can read.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Pair score or vocabulary condition"
+                  reasonHeading="What the merge rule leaves to us"
                   rows={[
                     {
                       expression: "two pairs with the same score",
@@ -1274,7 +1267,7 @@ for size in [100, 130]:
             ),
             exercise(
               "Fit to exhaustion and price three texts per word",
-              ["Part 6 fitted the eighteen sentences until nothing was left to merge and priced three texts in pieces per word. Fit with a size the corpus cannot reach, print the rows learned, and for the corpus, the sentence about the dial and the diode, and the running sentence print the pieces, the words and the pieces per word to two places.", "The lesson arrives at 1.91, 2.38 and 4.14. Then count how many of the corpus’s 72 distinct words are single rows of the vocabulary, which the lesson does not say."],
+              ["Part 6 fitted the eighteen sentences until nothing was left to merge and priced three texts in pieces per word. Fit with a size the corpus cannot reach, print the rows learned, and for the corpus, the sentence about the dial and the diode, and the sentence about Dr. Alvarez print the pieces, the words and the pieces per word to two places.", "The lesson arrives at 1.91, 2.38 and 4.14. Then count how many of the corpus’s 72 distinct words are single rows of the vocabulary, which the lesson does not say."],
               `from oop_ml import WordPiece
 
 sentences = [
@@ -1347,7 +1340,7 @@ corpus: 254 pieces over 133 words, 1.91 per word
 neighbour: 19 pieces over 8 words, 2.38 per word
 running: 29 pieces over 7 words, 4.14 per word
 24 of 72 distinct words are single rows`,
-              { hints: ["Asking for 600 is not refused. The fit stops when no pair is left that occurs twice and vocabulary.n_tokens says what it reached, which Part 4 put at 157.", "Words are found on spaces by the default rule, so joining the sentences with spaces and encoding once costs the same as encoding them one at a time.", "The vocabulary answers the in operator, so a word is a single row exactly when the word itself is in it. A word-initial piece carries no mark, which is what makes that test work."], check: numberCheck("How many of the 72 distinct words of the corpus are single rows of the vocabulary?", 24, 0, "Among them are analysis, expected and costing, and estimate with its full stop attached, which is why the corpus reads at under two pieces per word. The running sentence shares only two of its seven words with that list, Dr. and the, and costs 4.14 per word, which is what carrying one corpus looks like on text the corpus did not contain.") },
+              { hints: ["Asking for 600 is not refused. The fit stops when no pair is left that occurs twice and vocabulary.n_tokens says what it reached, which Part 4 put at 157.", "Words are found on spaces by the default rule, so joining the sentences with spaces and encoding once costs the same as encoding them one at a time.", "The vocabulary answers the in operator, so a word is a single row exactly when the word itself is in it. A word-initial piece carries no mark, which is what makes that test work."], check: numberCheck("How many of the 72 distinct words of the corpus are single rows of the vocabulary?", 24, 0, "Among them are analysis, expected and costing, and estimate with its full stop attached, which is why the corpus reads at under two pieces per word. The sentence about Dr. Alvarez shares only two of its seven words with that list, Dr. and the, and costs 4.14 per word, which is what carrying one corpus looks like on text the corpus did not contain.") },
             ),
             exercise(
               "Spell the words each marking cannot",

@@ -39,6 +39,7 @@ export default function KeypointsAndDescriptorsPage() {
       intuition={lessonIntuitions["keypoints-and-descriptors"]}
       technicalStart="Part 3. Scoring A Corner"
       openingTitle="Find Places You Can Recognise Again"
+      playgroundTitle="Find image locations we could recognise again"
       playgroundIntro="Compare the detected locations with their descriptors and proposed matches. Check whether a strong local match also makes sense in the two pictures."
       title="Keypoints and Descriptors"
       tagline={"Two photographs may show the same scene from different positions. We need distinctive points we can recognise in both pictures and a numerical description that lets us compare their surroundings."}
@@ -347,7 +348,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                   It is not a small number that rounding could have moved; it is
                   zero because of what the matrix is.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why gradients along one direction give a zero determinant">
                   <>
 <p>
                     Every gradient inside a window straddling a straight edge points the same way, as the arrows in step 4 show. So each of the nine outer products being averaged is a multiple of the same one, and the average is a multiple of it too, which makes the matrix exactly rank one. A rank one matrix has a zero eigenvalue, and the determinant is the product of the eigenvalues, so the determinant is exactly zero.
@@ -464,7 +465,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
                   that, at 0.24, the square&rsquo;s own corners read −1.825185
                   and nothing is found at all.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Deriving the Harris response from the two eigenvalues">
                   <p>
                     For the two eigenvalues, the trace is their sum and the
                     determinant their product, and the product of two numbers is
@@ -962,7 +963,7 @@ distance     =  length of ( one description − the other )`}
           ),
         },
         {
-          title: "Part 7. Where The Method Stops Being Defined",
+          title: "Part 7. When Corners and Patches Stop Being Distinctive" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="24. Six choices the method does not make for you">
@@ -1036,7 +1037,7 @@ distance     =  length of ( one description − the other )`}
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="26. Where it stops being defined">
+              <SubSection title="26. Flat patches, straight edges and missing corner evidence" id="26-where-it-stops-being-defined">
                 <p>
                   Beneath the choices there are inputs on which the method does
                   not become approximate. It becomes undefined, because some
@@ -1047,8 +1048,8 @@ distance     =  length of ( one description − the other )`}
                   turns on which.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Window or local image pattern"
+                  reasonHeading="Effect on detecting and describing a point"
                   rows={[
                     {
                       expression: "a window of a single pixel",
@@ -1397,7 +1398,7 @@ except MLLibError as refusal:
               `asking with 4, searching in 1
 TooFewValuesError
 the ratio test needs a runner-up to compare against, so it needs at least two descriptors to search in; got 1`,
-              { hints: ["peaks takes a limit, the most places it will hand back, and it hands them back strongest first.", "Every refusal the library makes derives from MLLibError, so catching that catches whichever specific one this is."] },
+              { hints: ["peaks takes a limit, the most places it will hand back, and it hands them back strongest first."] },
             ),
           ],
         },

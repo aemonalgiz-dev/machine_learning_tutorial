@@ -39,6 +39,7 @@ export default function PipelinesPage() {
       intuition={lessonIntuitions["pipelines"]}
       technicalStart="Part 2. One Chain, One Fit, One Predict"
       openingTitle="The Test Answers Can Leak in Before the Fit"
+      playgroundTitle="Keep preprocessing and prediction on the same path"
       playgroundIntro="Follow the data through each transformation and into the model. Check which rows supply the fitted statistics and which rows only use them."
       title="Pipelines"
       tagline={"Preparing data is part of fitting a model. If a scaler learns from our test examples, the test has already influenced the result. A pipeline helps us keep those fitting steps together and inside the training procedure."}
@@ -778,24 +779,13 @@ export default function PipelinesPage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Preserving the Order and Fitted State of Every Step" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="22. What a complete implementation specifies">
-                <p>
-                  A complete implementation states what a step is and how
-                  steps are named and ordered, that each step is fitted on the
-                  output of the step before it, that predict applies the
-                  fitted steps and fits nothing, that the configured steps and
-                  model are copied before every fit and never fitted
-                  themselves, that a fit commits nothing until every part has
-                  succeeded, how a search varies a setting inside a step and
-                  what a wrong name does, whether an empty step list is
-                  allowed, which kind of model a chain of each task will
-                  accept, and what it does when a row arrives with a column
-                  missing, a column it never saw, or its columns in another
-                  order.
-                </p>
+              <SubSection title="22. What is fitted, what is copied and what prediction reuses" id="22-what-a-complete-implementation-specifies">
+                <p>The order of a pipeline is part of the model. Each named step fits the output of the preceding step. Prediction reuses that fitted sequence and fits nothing, so the later rows cannot change their own reference.</p>
+                <p>Here every fit works on copies of the configured steps and model. The original configuration remains unfitted, and no new fit is committed unless every stage succeeds. That prevents a failed fit from leaving half a new pipeline in use.</p>
+                <p>Nested search settings must identify the correct step and parameter. Also check the treatment of a wrong name, an empty step list, an incompatible final model and incoming columns that are missing, extra or reordered.</p>
                 <KeepInMind>
                   Most of those are promises about what the chain does with
                   the objects it was given, which is why the last two steps
@@ -811,8 +801,8 @@ export default function PipelinesPage() {
                   drift apart.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Pipeline stage or input"
+                  reasonHeading="Where fitting or prediction can fail"
                   rows={[
                     { expression: "no steps at all", reason: "accepted; the chain is the bare model, to a largest prediction gap of exactly zero." },
                     { expression: "no features at all", reason: "refused at the first step, since there is nothing to expand." },
@@ -1084,7 +1074,7 @@ AllSameValuesError
 feature_values must not be constant (zero variance)
 still fitted: True
 predictions moved by 0.0`,
-              { hints: ["Every model and every transformer in the library answers is_fitted. The configuration is chain.model and chain.steps, and the results of the fit are chain.fitted_model and chain.fitted_steps.", "Looping over chain.steps gives each step in the order it runs, with a name and the transformer it wraps.", "Every refusal the library makes derives from MLLibError, so catching that catches whichever specific one a constant column meets."] },
+              { hints: ["Every model and every transformer in the library answers is_fitted. The configuration is chain.model and chain.steps, and the results of the fit are chain.fitted_model and chain.fitted_steps.", "Looping over chain.steps gives each step in the order it runs, with a name and the transformer it wraps."] },
             ),
             exercise(
               "Fold the chain, then let a search choose the degree",

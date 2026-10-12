@@ -40,6 +40,7 @@ export default function KernelRidgePage() {
       intuition={lessonIntuitions["kernel-ridge"]}
       technicalStart="Part 2. One Number Per Row"
       openingTitle="Build a Curve from Similarities to the Training Points"
+      playgroundTitle="Fit a prediction using comparisons with training points"
       playgroundIntro="Compare the ordinary and kernel-based fits. Vary the penalty and watch how closely the prediction follows individual training points."
       title="Kernel Ridge Regression"
       tagline={"Ridge regression gives us a way to control a fit, but its original features may not describe the relationship well. Kernel comparisons let us apply the same idea in a transformed feature space."}
@@ -949,22 +950,12 @@ export default function KernelRidgePage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Keeping Kernel Parameters and the Solver in Agreement" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="24. What a complete implementation must specify">
-                <p>
-                  A complete implementation states which kernel and which
-                  of its parameters, whether it centres the rows and the
-                  target and where the target mean is put back, that the
-                  penalty is added to every diagonal entry, which solver
-                  factorises the system and what it does when the
-                  factorisation fails, whether the dual weights are exposed
-                  and that they are not coefficients, that the training rows
-                  are kept and are part of the saved model, how the query
-                  features are matched to the fitted ones, and the smallest
-                  penalty it will accept.
-                </p>
+              <SubSection title="24. Centre, regularise and solve under one stated convention" id="24-what-a-complete-implementation-must-specify">
+                <p>To reproduce a kernel-ridge prediction, keep the kernel parameters and training rows as part of the fitted model. If the rows and target are centred, record those references and where the target mean is restored. Later query columns must match the fitted feature identities.</p>
+                <p>The regularisation penalty is added to every diagonal entry of the kernel system. State its minimum accepted value, which solver factorises the system and how factorisation failure is reported. Exposed dual weights describe contributions from training rows; they are not coefficients on the original features.</p>
                 <p>
                   The model here centres both, adds the penalty everywhere,
                   solves by Cholesky, keeps the rows, matches features by
@@ -975,10 +966,10 @@ export default function KernelRidgePage() {
                 </p>
               </SubSection>
 
-              <SubSection title="25. The edges, probed">
+              <SubSection title="25. Singular comparisons and parameter choices that break the solve" id="25-the-edges-probed">
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Data, kernel or regularisation"
+                  reasonHeading="Whether the system can be solved"
                   rows={[
                     { expression: "empty data, or a missing or non-finite value", reason: "refused at the boundary, in the same words every feature here is refused with; this page refuses fewer than two points a layer earlier." },
                     { expression: "one row", reason: "accepted by the model; the centred row is zero, its dual weight is zero, and every prediction is the one target value. The page refuses it a layer earlier, before the fit." },

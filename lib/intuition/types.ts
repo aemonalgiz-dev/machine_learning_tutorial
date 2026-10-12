@@ -1,10 +1,21 @@
 export type Point = [number, number, number?];
 export type Strip = { label: string; items: string[]; active?: number[] };
 export type Scene =
+  | ReadingScene
   | { kind: "strips"; caption: string; rows: Strip[]; connected?: boolean }
   | { kind: "plot"; caption: string; points: Point[]; xLabel: string; yLabel: string; paths?: number[][][]; guides?: number[][]; labels?: string[]; bounds?: [number, number, number, number]; equalScale?: boolean }
   | { kind: "tiles"; caption: string; showValues?: boolean; panels: { label: string; cells: number[][]; selected?: number[]; maximum?: number }[] }
   | { kind: "bars"; caption: string; items: { label: string; value: number; display?: string }[] };
+
+// These are relationships chosen by the author, not guesses based on array length.
+export type ReadingScene =
+  | { kind: "notes" | "flow"; caption: string; rows: Strip[] }
+  | { kind: "table"; caption: string; columns: string[]; records: { label: string; cells: string[]; active?: number[] }[]; rowHeading: string }
+  | { kind: "timeline"; caption: string; unit: string; days: { label: string; value?: number; role: "known" | "target" | "later" }[]; prediction?: { label: string; value: number }; calculation?: string }
+  | { kind: "numberline"; caption: string; rows: { label: string; values: number[] }[]; reference?: number; referenceLabel?: string }
+  | { kind: "network"; caption: string; nodes: { label: string; value?: string }[]; edges: [number, number][]; directed?: boolean }
+  | { kind: "sequence"; caption: string; rows: Strip[]; positionLabel: string }
+  | { kind: "calculation"; caption: string; lines: string[] };
 
 export interface IntuitionStep {
   title: string;
@@ -15,6 +26,7 @@ export interface IntuitionStep {
 
 export interface LessonIntuition {
   opening: string[];
+  exampleNote?: string;
   steps: IntuitionStep[];
   connectionTitle: string;
   connection: string[];

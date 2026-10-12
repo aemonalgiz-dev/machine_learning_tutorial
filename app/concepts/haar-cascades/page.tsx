@@ -41,6 +41,7 @@ export default function HaarCascadesPage() {
       intuition={lessonIntuitions["haar-cascades"]}
       technicalStart="Part 2. A Table Where Every Entry Is A Running Total"
       openingTitle="Discard the Easy Negatives First"
+      playgroundTitle="Find light and dark arrangements with rectangle sums"
       playgroundIntro="Follow which windows survive each stage. Compare the total feature calculations with the detections retained, rather than looking at speed alone."
       title="Haar Cascades"
       tagline={"Searching every part of a picture can be expensive, especially when most regions contain nothing relevant. A cascade uses inexpensive checks to reject unlikely regions before applying more demanding tests."}
@@ -403,7 +404,7 @@ export default function HaarCascadesPage() {
                 </p>
               </SubSection>
 
-              <SubSection title="9. Five layouts, worked on pictures small enough to count">
+              <SubSection title="9. Compare five rectangle features on small images" id="9-five-layouts-worked-on-pictures-small-enough-to-count">
                 <>
 <p>
                   The original paper uses five layouts, and it is worth seeing what each answers on a picture with four pixels on a side. Two cells side by side, or two stacked, answer the question of whether there is an edge running one way or the other. Three in a row, or three in a column, set the middle cell against both flanks and so answer whether there is a strip or a band.
@@ -451,7 +452,7 @@ export default function HaarCascadesPage() {
                   This is not a slip in the arrangement, it is what the original paper describes, and the original paper answers it by normalising each window&rsquo;s variance before any threshold is compared against anything. No such normalising happens here, so on this page the three-cell readings are the ones that would break first under a change in lighting, and Part 6 measures what that costs.
                 </p>
 </>
-                <WhyThisWorks>
+                <WhyThisWorks title="Which rectangle layouts cancel a constant brightness offset?">
                   <p>
                     Write the value of a layout as the sum over its cells of the
                     sign of that cell times the total inside it. On a picture of
@@ -1010,7 +1011,7 @@ export default function HaarCascadesPage() {
           ),
         },
         {
-          title: "Part 6. Where The Method Stops Being Defined",
+          title: "Part 6. What Rectangle Features and the Cascade Can Miss" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="23. A signed reading says nothing about its mirror">

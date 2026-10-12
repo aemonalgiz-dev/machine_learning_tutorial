@@ -209,7 +209,7 @@ export function KernelPcaPlayground() {
   const clouds: { key: Cloud; label: string }[] = [
     { key: "ring", label: "The ring" },
     { key: "arc", label: "The arc" },
-    { key: "four", label: "The measured four" },
+    { key: "four", label: "Four height and weight pairs" },
     { key: "ideal", label: "An Ideal Case" },
     { key: "random", label: "Random people" },
   ];
@@ -312,7 +312,7 @@ export function KernelPcaPlayground() {
       </div>
 
       <p className="mt-2 text-center text-xs text-slate-500 dark:text-slate-500">
-        Left, the people as measured, every one draggable. Right, the same people placed by their first two directions. Indigo is the inner group and amber the outer; the arc is shaded by height; the numbers are the measured four. A sign on either axis is the solver&rsquo;s choice, not the data&rsquo;s.
+        Left, the people as measured, every one draggable. Right, the same people placed by their first two directions. Indigo is the inner group and amber the outer; the arc is shaded by height; the numbers are the four height and weight measurements. A sign on either axis is the solver&rsquo;s choice, not the data&rsquo;s.
       </p>
 
       <div className="mt-3 overflow-x-auto rounded-lg bg-slate-100 px-3 py-2 dark:bg-slate-800">

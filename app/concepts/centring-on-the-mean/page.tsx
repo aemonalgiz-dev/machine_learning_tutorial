@@ -36,6 +36,7 @@ export default function CentringOnTheMeanPage() {
       intuition={lessonIntuitions["centring-on-the-mean"]}
       technicalStart="Part 1. Moving the Zero to the Average Person"
       openingTitle="Move Zero to Somewhere Useful"
+      playgroundTitle="Move the origin without moving people apart"
       playgroundIntro="Compare the original coordinates with the centred ones. Watch which distances stay fixed when the origin moves to the mean."
       title="Centring on the Mean"
       tagline={"Sometimes it is more useful to know how far a measurement is from the average than how far it is from zero. Subtracting the mean gives us that new reference point."}
@@ -216,7 +217,7 @@ export default function CentringOnTheMeanPage() {
                     The longest direction from zero runs at 20.09 degrees above the height axis. The arrow from zero to the average person runs at 19.37 degrees, and the cosine between those two is 0.99992, so the search found where the crowd is. The first principal component of the centred columns runs at 42.21 degrees, the direction in which taller people are also heavier, and its cosine with the uncentred answer is 0.926.
                   </p>
                   <p>
-                    On the measured four, whose average person is 170 cm and 68 kg, the uncentred direction is 21.85 degrees against an arrow to the mean at 21.80, while the centred component lies at exactly 45.
+                    On the four height and weight measurements, whose average person is 170 cm and 68 kg, the uncentred direction is 21.85 degrees against an arrow to the mean at 21.80, while the centred component lies at exactly 45.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -249,7 +250,7 @@ export default function CentringOnTheMeanPage() {
                     </p>
                     <Equation>{"mean squared distance from zero\n  = sum of column variances + squared length of column means\n  ≈ 952.9 + 25,896.4\n  ≈ 26,849.4  (figures rounded independently)"}</Equation>
                     <p>
-                      The measured four make the same split with whole numbers.
+                      Four height and weight pairs make the same split with whole numbers.
                     </p>
                     <Equation>{"squared length of the mean = 170² + 68² = 33,524\nmean squared distance from zero = 125 + 33,524 = 33,649"}</Equation>
                   </>
@@ -390,7 +391,7 @@ export default function CentringOnTheMeanPage() {
                     centred heights the intercept is 53.36 kg, the weight the line
                     gives the average person, which is the mean weight exactly. The
                     slope is 0.8901 in both, so the two are one line with the zero
-                    of its height axis in two places. On the measured four the
+                    of its height axis in two places. On the four height and weight measurements the
                     same pair is a slope of 0.6 with intercepts of −34 and 68.
                   </p>
                 </WorkedExample>
@@ -471,7 +472,7 @@ export default function CentringOnTheMeanPage() {
                   a condition number of 1,064,838, and 1 and 521.8 on centred
                   heights, a condition number of 521.8.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="How centring changes the curvature of squared error">
                   <p>
                     The curvature of the mean squared error is twice the mean of
                     the outer products of the design&rsquo;s rows. For a column of
@@ -775,7 +776,7 @@ export default function CentringOnTheMeanPage() {
           ),
         },
         {
-          title: "Part 7. Where Centring Stops Being Defined",
+          title: "Part 7. Empty Columns, Constant Values and Missing References", id: "part-7-where-centring-stops-being-defined",
           content: (
             <>
               <SubSection title="18. Nothing to average, and one value">

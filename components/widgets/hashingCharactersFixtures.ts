@@ -20,7 +20,7 @@ export interface TextPreset {
 }
 
 export const TEXT_PRESETS: TextPreset[] = [
-  { label: "the running sentence", text: RUNNING_SENTENCE },
+  { label: "the sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "a sentence of Greek", text: GREEK_TEXT },
   { label: "a sentence of Chinese", text: CHINESE_TEXT },
   { label: "a capital A and one ideograph", text: "A䁁" },

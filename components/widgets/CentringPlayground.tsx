@@ -76,7 +76,7 @@ export function CentringPlayground({
         {(
           [
             ["crowd", "the crowd"],
-            ["four", "the measured four"],
+            ["four", "the four height and weight measurements"],
             ["ideal", "An Ideal Case"],
             ["random", "a random crowd"],
           ] as [Choice, string][]

@@ -40,6 +40,7 @@ export default function GradientDescentRegressionPage() {
       intuition={lessonIntuitions["gradient-descent-regression"]}
       technicalStart="Part 3. The Gradient as a Local Direction"
       openingTitle="Finding the Line Without Knowing the Answer"
+      playgroundTitle="Can small adjustments find a better line?"
       playgroundIntro="Follow the current line and its error together. Compare a small learning rate with a larger one, and watch whether the error falls or grows."
       title="Fitting by Walking"
       tagline={"Rather than solving for a fitted line all at once, we can improve an initial guess through small adjustments. The gradient tells us which direction increases the error, so we can try moving the other way."}

@@ -38,6 +38,7 @@ export default function ShapesAndFlatteningPage() {
       intuition={lessonIntuitions["shapes-and-flattening"]}
       technicalStart="Part 3. One Seam, Settled in Integers"
       openingTitle="The Right Number of Values Can Still Be the Wrong Shape"
+      playgroundTitle="Which layer outputs can the next layer read?"
       playgroundIntro="Compare each layer's output shape with the next layer's expected input. Look for cases with equal value counts but different arrangements."
       title="The Shape Guarantee"
       tagline={"A layer needs to know which numbers belong to which example and how they are arranged. We will follow those dimensions through a network and see what changes when an image is flattened."}
@@ -502,7 +503,7 @@ export default function ShapesAndFlatteningPage() {
                   for. The message now names both arrangements, and adds the
                   clause about the counts only when they really do agree.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why matching element counts do not guarantee matching shapes">
                   <p>
                     The join was always checked correctly. It compared extents,
                     and the extents disagreed, so the answer was right. What
@@ -1000,7 +1001,7 @@ export default function ShapesAndFlatteningPage() {
                   anything checks is the first layer&rsquo;s, which that layer
                   checks for itself against the block it was handed.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why the editor can show a connection that execution rejects">
                   <p>
                     The builder at the top of this page can show you a red seam
                     and a chain carrying one cannot be made to run, and both
@@ -1084,23 +1085,13 @@ export default function ShapesAndFlatteningPage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Checking Arrangements Before Connecting Layers" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="27. What a complete implementation must specify">
-                <p>
-                  A complete implementation has to state how a side of a shape
-                  is written and what an extent may be, whether a seam is
-                  settled by arrangement or by count, how the output extents of
-                  a windowed layer are computed and what happens to the
-                  remainder, whether padding is available and where in the sum
-                  it enters, which ordering a flattening layer uses and whether
-                  the backward direction uses the same one, whether a
-                  flattening layer produces a gradient or nothing, what a chain
-                  reports as its own two ends, whether a chain of one layer is
-                  allowed, whether an empty chain is allowed, and what a step
-                  does to a layer that appears at more than one position.
-                </p>
+              <SubSection title="27. The dimensions and window conventions a shape must record" id="27-what-a-complete-implementation-must-specify">
+                <p>Two neighbouring layers need to agree on what their dimensions mean. Define the allowed extents and whether compatibility requires the same arrangement or only the same count. A windowed layer must also specify how it computes output extents, handles a remainder and applies padding.</p>
+                <p>Flattening needs a fixed ordering and a backward pass that reverses that ordering. State whether that layer returns a gradient or no gradient, and which input and output shapes a chain reports.</p>
+                <p>Finally, decide whether a chain may contain one layer or no layers. If the same layer appears at several positions, make clear how an update treats that shared object. These choices affect execution even when every displayed shape looks compatible.</p>
                 <p>
                   The last two on that list are where this implementation is
                   known to be weak, and the next two steps show each of them
@@ -1186,15 +1177,15 @@ export default function ShapesAndFlatteningPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="30. The edges, probed">
+              <SubSection title="30. Equal counts, different arrangements and invalid extents" id="30-the-edges-probed">
                 <p>
                   Each row below was asked rather than reasoned about, and
                   reports what came back, whether that was a refusal, an acceptance, or something
                   documented and left alone.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Shape or extent"
+                  reasonHeading="Whether the values can be rearranged"
                   rows={[
                     {
                       expression: "an extent of zero",

@@ -166,7 +166,7 @@ export function ImportanceBars() {
           }}
           className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
         >
-          The worked draw
+          Restore the initial permutation
         </button>
         <button
           onClick={() => setSeed((current) => (current + 1) % (MAX_SEED + 1))}

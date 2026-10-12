@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["sampling-and-temperature"]}
     technicalStart="Part 2. Calculate Temperature and Nucleus Filtering"
     prerequisites={<>Useful foundations: <Link href="/concepts/autoregressive-generation">Autoregressive generation</Link>{", "}<Link href="/concepts/loss-functions">softmax and cross-entropy</Link>.</>}
+    playgroundTitle="How much freedom should the next-token choice have?"
     playgroundIntro="First move temperature while top-p stays at one. Then lower top-p and inspect which candidates are retained. The final column is the distribution a sampler would use."
     playground={<ModernLearningExample topic="sampling-and-temperature" />}
     sections={[

@@ -35,6 +35,7 @@ export default function PatchingWithoutAVocabularyPage() {
       intuition={lessonIntuitions["patching-without-a-vocabulary"]}
       technicalStart="Part 2. Cutting at a Fixed Size"
       openingTitle="Bytes Solve Coverage and Create a Length Problem"
+      playgroundTitle="Group the byte stream without looking up words"
       playgroundIntro="Compare the byte count with the patch count. Inspect fixed and adaptive boundaries, especially around stretches whose next bytes are difficult to predict."
       title="Patching Without a Vocabulary"
       tagline={"Bytes let us represent text without a learned word vocabulary, but they can produce long sequences. Grouping nearby bytes into patches gives later parts of a model fewer positions to process."}
@@ -201,7 +202,7 @@ export default function PatchingWithoutAVocabularyPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="5. The running sentence, cut every four bytes">
+              <SubSection title="5. Cut the Alvarez sentence into four-byte patches" id="5-the-running-sentence-cut-every-four-bytes">
                 <p>
                   Here is the whole of it on our sentence, which is 51 bytes and
                   therefore comes to 13 blocks, twelve of four bytes and a last
@@ -440,7 +441,7 @@ export default function PatchingWithoutAVocabularyPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="10. Four bytes, worked by hand">
+              <SubSection title="10. Why four byte positions receive nearly the same uncertainty" id="10-four-bytes-worked-by-hand">
                 <p>
                   Before anything at scale, here is the smallest example that
                   contains the whole calculation. Count over the single text aab,
@@ -1010,7 +1011,7 @@ export default function PatchingWithoutAVocabularyPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. When the Model Chooses Different Patch Boundaries" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="22. The blocks belong to the guesser, not to the text">
@@ -1122,17 +1123,10 @@ export default function PatchingWithoutAVocabularyPage() {
               </SubSection>
 
               <SubSection title="25. Where the arithmetic decides nothing">
-                <p>
-                  Gathered in one place, these are the inputs on which the method
-                  stops being defined rather than becoming approximate, together
-                  with what has to be decided and what turns on it. The ones with
-                  a genuine choice attached are the ones worth a reader&rsquo;s
-                  attention, since nothing in the mathematics makes them and
-                  somebody has to.
-                </p>
+                <p>Patch boundaries may depend on a fixed width or on a model score. Decide which information must survive each patch and how the procedure handles an incomplete final group before comparing it with a vocabulary-based tokenizer.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Bytes or patch-boundary choice"
+                  reasonHeading="What the patcher needs to decide"
                   rows={[
                     {
                       expression: "a stretch of bytes nobody has seen",
@@ -1252,7 +1246,7 @@ export default function PatchingWithoutAVocabularyPage() {
           practice: [
             exercise(
               "Cut at a fixed size",
-              ["Cut the running sentence every four bytes with a FixedSizePatcher and print how many blocks it comes to and what they spell. Then cut the sentence with Ångström in it the same way, and print how many blocks it makes and the offsets at which a block, read on its own, is not text. Last, cut all eighteen sentences at block sizes of 4, 6, 8 and 12 and print the total number of blocks at each.", "The first line should be the thirteen blocks of section 5, the offsets should be the two either side of the split letter in section 7, and the totals for 4, 8 and 12 should be the table of section 6. The table has no row for a size of 6."],
+              ["Cut the sentence about Dr. Alvarez every four bytes with a FixedSizePatcher and print how many blocks it comes to and what they spell. Then cut the sentence with Ångström in it the same way, and print how many blocks it makes and the offsets at which a block, read on its own, is not text. Last, cut all eighteen sentences at block sizes of 4, 6, 8 and 12 and print the total number of blocks at each.", "The first line should be the thirteen blocks of section 5, the offsets should be the two either side of the split letter in section 7, and the totals for 4, 8 and 12 should be the table of section 6. The table has no row for a size of 6."],
               `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
     FixedSizePatcher,
 )
@@ -1336,7 +1330,7 @@ every 12 bytes: 72 blocks over the eighteen sentences`,
             ),
             exercise(
               "Cut where the next byte is hard to guess, under both rules",
-              ["Fit an EntropyPatcher on twenty copies of the eighteen sentences, looking back four bytes, with a threshold of one bit and a thousandth credited to every unseen byte, which are the settings behind Parts 3 and 5. Do it once for each of the two rules of section 11. For each, print the blocks of the first corpus sentence, the number of blocks the running sentence comes to, and the total over the corpus with the bytes per block to two places. Then print how many of the running sentence’s positions score 8 bits.", "Under the level rule you should get the six blocks of section 12, the 30 of section 20 and the 129 of section 19, and 26 positions at the ceiling. Under the rise rule the running sentence should come to the 7 of section 11. The page never puts the rise rule to the whole corpus."],
+              ["Fit an EntropyPatcher on twenty copies of the eighteen sentences, looking back four bytes, with a threshold of one bit and a thousandth credited to every unseen byte, which are the settings behind Parts 3 and 5. Do it once for each of the two rules of section 11. For each, print the blocks of the first corpus sentence, the number of blocks the sentence about Dr. Alvarez comes to, and the total over the corpus with the bytes per block to two places. Then print how many of the sentence about Dr. Alvarez’s positions score 8 bits.", "Under the level rule you should get the six blocks of section 12, the 30 of section 20 and the 129 of section 19, and 26 positions at the ceiling. Under the rise rule the sentence about Dr. Alvarez should come to the 7 of section 11. The page never puts the rise rule to the whole corpus."],
               `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
     EntropyPatcher,
     PatchingRule,
@@ -1424,7 +1418,7 @@ positions at 8 bits: 26 of 51`,
             ),
             exercise(
               "Look further back, on text the guesser has and has not read",
-              ["Section 18 lengthens the stretch the guess is conditioned on and watches the corpus come out in fewer blocks. Do the same from one byte back to six, and beside the corpus total print what the page does not, which is the number of blocks the running sentence comes to and how many of its 51 positions score 8 bits.", "The corpus column should be the table of section 18 with a sixth row added. Watch the other two columns move the opposite way, and find the context length at which the sentence the guesser never read is shortest."],
+              ["Section 18 lengthens the stretch the guess is conditioned on and watches the corpus come out in fewer blocks. Do the same from one byte back to six, and beside the corpus total print what the page does not, which is the number of blocks the sentence about Dr. Alvarez comes to and how many of its 51 positions score 8 bits.", "The corpus column should be the table of section 18 with a sixth row added. Watch the other two columns move the opposite way, and find the context length at which the sentence the guesser never read is shortest."],
               `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
     EntropyPatcher,
 )
@@ -1495,7 +1489,7 @@ for order in (1, 2, 3, 4, 5, 6):
 4 back: corpus 129 blocks, running sentence 30 blocks, 26 positions at 8 bits
 5 back: corpus 110 blocks, running sentence 34 blocks, 31 positions at 8 bits
 6 back: corpus  98 blocks, running sentence 38 blocks, 36 positions at 8 bits`,
-              { hints: ["order is the number of preceding bytes the guess is conditioned on. Everything else stays as it was in the problem before, with the rule left at its default, which is the level rule.", "entropies_of answers one uncertainty per byte of the text. Summing a comparison over them counts the positions for which it holds."], check: numberCheck("How many blocks does the running sentence come to when the guesser looks back two bytes?", 25, 0.0, "Two bytes back is the shortest the sentence gets. From there every byte of context added makes the corpus shorter and this sentence longer, 27, 30, 34 and 38 blocks, because a longer stretch occurs less often and more of an unread text is scored under stretches the corpus never held, 10 positions at 8 bits with two bytes back and 36 of the 51 with six. One byte back is worse again for the opposite reason, since nothing is at the ceiling and a single letter says too little, which is the first row of the table in section 18.") },
+              { hints: ["order is the number of preceding bytes the guess is conditioned on. Everything else stays as it was in the problem before, with the rule left at its default, which is the level rule.", "entropies_of answers one uncertainty per byte of the text. Summing a comparison over them counts the positions for which it holds."], check: numberCheck("How many blocks does the sentence about Dr. Alvarez come to when the guesser looks back two bytes?", 25, 0.0, "Two bytes back is the shortest the sentence gets. From there every byte of context added makes the corpus shorter and this sentence longer, 27, 30, 34 and 38 blocks, because a longer stretch occurs less often and more of an unread text is scored under stretches the corpus never held, 10 positions at 8 bits with two bytes back and 36 of the 51 with six. One byte back is worse again for the opposite reason, since nothing is at the ceiling and a single letter says too little, which is the first row of the table in section 18.") },
             ),
             exercise(
               "Find the edge between seven copies and eight",

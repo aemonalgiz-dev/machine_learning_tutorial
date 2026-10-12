@@ -18,6 +18,8 @@ export default function EmbeddingLayersPage() {
     technicalStart="Part 2. Training the Table"
     prerequisites={<>Begin with <Link href="/concepts/what-a-token-is">what a token is</Link>. An ID identifies a piece of text; it does not measure its meaning.</>}
 
+    playgroundTitle="Look up the row belonging to each token"
+
     playgroundIntro="Keep cat in both the first and third positions. Compare the two lookups, then examine how their gradients combine in the cat row. Replace one occurrence with mat to see which rows receive an update."
     playground={<EmbeddingExplorer />}
     sections={[

@@ -40,6 +40,7 @@ export default function RidgeLassoPage() {
       intuition={lessonIntuitions["ridge-lasso"]}
       technicalStart="Part 2. Two Goals in One Objective"
       openingTitle="A Better Fit Can Make a Worse Prediction"
+      playgroundTitle="What happens when large coefficients have a cost?"
       playgroundIntro="Increase the penalty and compare the curve and its coefficients. Notice what the model gives up in training fit as the coefficients shrink."
       title="Ridge & Lasso"
       tagline={"A flexible model can fit accidental details in the training data. Penalising large coefficients gives us a way to discourage that behaviour, with ridge and lasso making different kinds of adjustment."}

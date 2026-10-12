@@ -54,6 +54,7 @@ export default function DecisionTreesPage() {
       intuition={lessonIntuitions["decision-trees"]}
       technicalStart="Part 5. Scoring One Split"
       openingTitle="Which Question Should Come First?"
+      playgroundTitle="Follow a person through the tree's questions"
       playgroundIntro="Follow one point from the first question to its final leaf. Then compare how changing the tree's depth changes its prediction regions."
       title="Decision Trees"
       tagline={"A series of simple questions can narrow down a decision. A decision tree learns which questions to ask from the examples and places a prediction at the end of each route."}
@@ -1061,9 +1062,9 @@ export default function DecisionTreesPage() {
           ),
         },
         {
-          title: "Part 16. Implementation and Failure Contracts",
+          title: "Part 16. Making Thresholds, Ties and Stopping Rules Explicit" , id: "part-16-implementation-and-failure-contracts",
           content: (
-            <SubSection title="39. Implementation and failure contracts">
+            <SubSection title="39. Specify the split search, leaf predictions and stopping rules" id="39-implementation-and-failure-contracts">
               <p>
                 A complete tree implementation has to define what it does with
                 the cases the tidy description passes over.
@@ -1311,7 +1312,7 @@ except MLLibError as refusal:
 leaves 1, depth 0, training accuracy 0.500
 SingleClassError: feature_values holds only class [0.0], so there is nothing to discriminate between
 InvalidValuesError: feature_values must contain only finite values`,
-              { hints: ["A tree that admits no split is a single leaf predicting the majority, and with four of each the majority is a tie broken toward the lower class, so describe prints one line and depth is zero.", "Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal each case turns out to be.", "The non-finite value is refused by the feature before any model sees it, which is the coercion boundary doing its job once, so the second try block needs no fit in it at all."] },
+              { hints: ["A tree that admits no split is a single leaf predicting the majority, and with four of each the majority is a tie broken toward the lower class, so describe prints one line and depth is zero.", "The non-finite value is refused by the feature before any model sees it, which is the coercion boundary doing its job once, so the second try block needs no fit in it at all."] },
             ),
           ],
         },

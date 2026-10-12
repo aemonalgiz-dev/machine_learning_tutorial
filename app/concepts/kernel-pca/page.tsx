@@ -38,6 +38,7 @@ export default function KernelPcaPage() {
       intuition={lessonIntuitions["kernel-pca"]}
       technicalStart="Part 2. PCA Written With Inner Products"
       openingTitle="When the Pattern Follows a Curve"
+      playgroundTitle="Compare straight and curved representations of the points"
       playgroundIntro="Compare ordinary PCA with the kernel projection. Keep track of which plot uses the original coordinates and which uses the new components."
       title="Kernel Principal Components"
       tagline={"The useful structure in a dataset may not lie along a straight direction in its original coordinates. Kernel PCA looks for variation after a transformation, using comparisons between examples to do the work."}
@@ -51,7 +52,7 @@ export default function KernelPcaPage() {
           <Link href="/concepts/kernel-trick" className={link}>
             the kernel trick
           </Link>
-          . The first owns the eigenvector route and the measured four this
+          . The first owns the eigenvector route and the four height and weight measurements this
           page reuses; the second owns the trick itself, the lifted space and
           the radial kernel&rsquo;s reach. Read both first, since this page
           borrows the eigenvalue from one and the swap from the other and
@@ -171,7 +172,7 @@ export default function KernelPcaPage() {
                   never appear.
                 </p>
                 <Equation>{"score of person j = dⱼ · u = Σᵢ aᵢ (dⱼ · dᵢ)"}</Equation>
-                <WorkedExample title="Person 1 on the measured four">
+                <WorkedExample title="Person 1 on the four height and weight measurements">
                   <>
                     <p>
                       The new person’s centred dot products with the four training
@@ -201,7 +202,7 @@ export default function KernelPcaPage() {
                   n by n table with person i down the rows and person j
                   across the columns. That table is the Gram matrix, and
                   after this Part it is the only thing the fit reads. For
-                  the measured four, centred, it is two blocks and nothing
+                  the four height and weight measurements, centred, it is two blocks and nothing
                   else, because persons 1 and 2 lie along one diagonal and
                   persons 3 and 4 along the other, and the two diagonals are
                   perpendicular.
@@ -372,8 +373,7 @@ export default function KernelPcaPage() {
                     piece that belongs to the mean alone, m &middot; m, has
                     then been removed twice. The double average puts it back
                     once. It is the inclusion and exclusion of an expansion
-                    rather than a formula to memorise, and on the measured
-                    four it turns the table of 38,484s back into the two
+                    rather than a formula to memorise, and on the four height and weight measurements it turns the table of 38,484s back into the two
                     blocks of section 5 exactly.
                   </p>
                 </WhyThisWorks>
@@ -391,7 +391,7 @@ export default function KernelPcaPage() {
                   A person who was not in the fit gets a row of kernel values against the n training people, and that row has to be shifted by the mean the fit learned rather than by anything of its own, exactly as the PCA page subtracted the training mean from a new observation. The same identity does it, with the query row&rsquo;s own average and the training table&rsquo;s averages in the four terms, and it is exact rather than approximate.
                 </p>
                 <p>
-                  Send person 1 of the measured four back through as if new and their centred row comes out 200, &minus;200, 0, 0, the first row of section 5&rsquo;s table.
+                  Send person 1 of the four height and weight measurements back through as if new and their centred row comes out 200, &minus;200, 0, 0, the first row of section 5&rsquo;s table.
                 </p>
 </>
                 <Equation>{"centred query row = k − 1_q K − k 1ₙ + 1_q K 1ₙ"}</Equation>
@@ -440,7 +440,7 @@ export default function KernelPcaPage() {
               "The non-zero eigenvalues come out the same, 400 and 100, and the extra eigenvalues the larger matrix has are zero, because four people on a plane spread along two directions and no more. On the arc the twelve by twelve table gives 7055.88 and 3316.45 and then ten eigenvalues no larger than 4e−12, and the coordinates by the two routes agree to 1.35e−13.",
             ),
             choice(
-              "The raw Gram eigenvalue on the measured four is 400. Which number is the variance along the direction, and which normalises the eigenvector?",
+              "The raw Gram eigenvalue on the four height and weight measurements is 400. Which number is the variance along the direction, and which normalises the eigenvector?",
               [
                 "The variance is 400 over three, and the eigenvector is divided by the square root of 400",
                 "The variance is 400, and the eigenvector is divided by the square root of 400 over three",
@@ -453,13 +453,13 @@ export default function KernelPcaPage() {
             several(
               "Which of these hold about centring the table?",
               [
-                "Skipping it leaves a fit that runs to completion and reports a first direction pointing at the mean, with a share of 0.9989 on the measured four",
+                "Skipping it leaves a fit that runs to completion and reports a first direction pointing at the mean, with a share of 0.9989 on the four height and weight measurements",
                 "The centred table can be built from the uncentred one alone, since every term of the expansion is a kernel value or an average of kernel values",
                 "The double average is added back because subtracting the row average and the column average removed the mean’s own piece twice",
                 "The lifted people are shifted to their mean before the table is built",
               ],
               [0, 1, 2],
-              "The lifted people cannot be written down, so they cannot be shifted; their table is corrected on their behalf, and on the measured four the identity turns the table of 38,484s back into the two blocks of section 5 exactly. Skip it and nothing raises. The uncentred table’s largest eigenvalue is 134,449.5, its eigenvector is nearly the same weight on everyone, which is the direction from the origin to the mean and describes no spread among the four at all, and on the arc the same share is 0.9896.",
+              "The lifted people cannot be written down, so they cannot be shifted; their table is corrected on their behalf, and on the four height and weight measurements the identity turns the table of 38,484s back into the two blocks of section 5 exactly. Skip it and nothing raises. The uncentred table’s largest eigenvalue is 134,449.5, its eigenvector is nearly the same weight on everyone, which is the direction from the origin to the mean and describes no spread among the four at all, and on the arc the same share is 0.9896.",
             ),
         ],
         },
@@ -581,7 +581,7 @@ export default function KernelPcaPage() {
                 <p>
                   What they are not is unit length. The scaling of section 7
                   leaves each with squared length one over its raw
-                  eigenvalue, 0.0025 and 0.01 on the measured four, and the
+                  eigenvalue, 0.0025 and 0.01 on the four height and weight measurements, and the
                   thing that does come out as the identity is the coefficient
                   matrix with the centred table in the middle, to
                   7.8e&minus;16 on the ring. That second identity is the
@@ -905,26 +905,13 @@ export default function KernelPcaPage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Reusing the Training Centre in Kernel Space" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="23. What a complete implementation must specify">
-                <p>
-                  A complete implementation states the kernel and its
-                  parameters in full, that the table is centred by the
-                  identity of section 9 and new rows by section 10&rsquo;s,
-                  how many directions are kept and that the ceiling is the
-                  row count, that eigenvalues are reported over n &minus; 1
-                  as variances while the eigenvectors are normalised by the
-                  square root of the raw eigenvalue, that the total variance
-                  is summed before any truncation, the threshold below which
-                  an eigenvalue is treated as the zero that centring created
-                  rather than divided by, that a negative eigenvalue is
-                  clamped rather than refused, the order of the directions,
-                  that a sign is the solver&rsquo;s, that there is no inverse
-                  transform, and that the training rows and the training
-                  table are part of the fitted state.
-                </p>
+              <SubSection title="23. Which eigenvalues and training references does prediction need?" id="23-what-a-complete-implementation-must-specify">
+                <p>A saved projection needs more than its eigenvectors. Keep the kernel parameters, training rows and training kernel table. Centre the training table as in section 9 and later rows as in section 10, using the stored training reference.</p>
+                <p>The requested direction count cannot exceed the row count. Eigenvalues are divided by one less than that count when reported as variances, while eigenvectors are normalised using the square root of the raw eigenvalue. Total variance is calculated before truncating the directions.</p>
+                <p>Check the threshold that prevents division by a near-zero eigenvalue. This implementation clamps negative eigenvalues rather than refusing them, orders the directions, and keeps the signs returned by the solver. It offers no inverse transform, so the saved projection does not promise a route back to the original observations.</p>
                 <KeepInMind>
                   Two of those are the ones that go wrong quietly, the two
                   scales of one eigenvalue and the centring of a new row,
@@ -933,7 +920,7 @@ export default function KernelPcaPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. The edges, each one probed">
+              <SubSection title="24. Degenerate Gram matrices and unavailable components" id="24-the-edges-each-one-probed">
                 <p>
                   Every row below was run through this
                   page&rsquo;s own endpoints, and the behaviour recorded is
@@ -942,8 +929,8 @@ export default function KernelPcaPage() {
                   probe.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Data or kernel condition"
+                  reasonHeading="Which projection remains available"
                   rows={[
                     { expression: "no features, or an empty column", reason: "refused at the boundary, by the same guard every feature here passes through." },
                     { expression: "one person", reason: "refused; a decomposition needs at least two rows, and the endpoints refuse a single point a layer earlier." },
@@ -1022,8 +1009,8 @@ export default function KernelPcaPage() {
           title: "Practice. Decomposing the Ring and the Arc With the Library",
           practice: [
             exercise(
-              "Run PCA through the Gram matrix on the measured four",
-              ["Part 2 decomposed the four by four Gram matrix of the measured four and found the same eigenvalues as the scatter matrix, 400 and 100, with the recipe for the first direction scaled to 0.0354 on persons 1 and 2 and zero on the rest, and person 1 landing at 14.14. Fit the library’s kernel decomposition under the linear kernel and read those numbers off it, then fit ordinary PCA beside it as the control.", "The library reports each direction’s variance, which is the raw eigenvalue over n − 1, so multiplying back by three recovers 400 and 100. A sign on any direction is the solver’s choice, so the coefficients may come back negated and the coordinate is read with its sign dropped. Then ask for five directions from four people, which Part 7 says is refused with both counts named."],
+              "Run PCA through the Gram matrix on the four height and weight measurements",
+              ["Part 2 decomposed the four by four Gram matrix of the four height and weight measurements and found the same eigenvalues as the scatter matrix, 400 and 100, with the recipe for the first direction scaled to 0.0354 on persons 1 and 2 and zero on the rest, and person 1 landing at 14.14. Fit the library’s kernel decomposition under the linear kernel and read those numbers off it, then fit ordinary PCA beside it as the control.", "The library reports each direction’s variance, which is the raw eigenvalue over n − 1, so multiplying back by three recovers 400 and 100. A sign on any direction is the solver’s choice, so the coefficients may come back negated and the coordinate is read with its sign dropped. Then ask for five directions from four people, which Part 7 says is refused with both counts named."],
               `from oop_ml import Feature, KernelPrincipalComponentAnalysis, LinearKernel, MLLibError, PrincipalComponentAnalysis
 
 heights = [180, 160, 175, 165]
@@ -1062,7 +1049,7 @@ kernel_component_2: variance 33.33, raw eigenvalue 100.0, coefficients [0.0, 0.0
 person 1 along the first direction, sign dropped 14.1421
 ordinary PCA variances [133.33, 33.33]
 InvalidValuesError: cannot keep 5 components from 4 rows`,
-              { hints: ["KernelPrincipalComponentAnalysis takes a kernel and, optionally, n_components; left unset it keeps every direction with any spread. fit takes the list of Features and nothing else, since there is no target.", "The fitted components can be iterated, and each one has a name, a variance and row_coefficients, one weight per training person. PrincipalComponentAnalysis has components with a variance each in the same way.", "transform answers a list of Features, one per kept direction, named kernel_component_1 upward, and each holds one coordinate per person in the order given.", "Asking for more directions than there are rows is refused from fit with one of the library’s own errors, so catching MLLibError catches it."], check: numberCheck("What variance does the first kernel direction report on the measured four?", 133.33, 0.01, "The raw Gram eigenvalue is 400 and there are four people, so the sample variance is 400 over 3, which is the number ordinary PCA reports for the same direction. The coefficients are normalised by the square root of the raw 400 rather than of 133.33, which is why they come out at 0.0354 in size and why person 1 lands 14.14 from the centre, where ordinary PCA’s projection of (10, 10) onto (0.707, 0.707) also lands.") },
+              { hints: ["KernelPrincipalComponentAnalysis takes a kernel and, optionally, n_components; left unset it keeps every direction with any spread. fit takes the list of Features and nothing else, since there is no target.", "The fitted components can be iterated, and each one has a name, a variance and row_coefficients, one weight per training person. PrincipalComponentAnalysis has components with a variance each in the same way.", "transform answers a list of Features, one per kept direction, named kernel_component_1 upward, and each holds one coordinate per person in the order given.", "Asking for more directions than there are rows is refused from fit with one of the library’s own errors, so catching MLLibError catches it."], check: numberCheck("What variance does the first kernel direction report on the four height and weight measurements?", 133.33, 0.01, "The raw Gram eigenvalue is 400 and there are four people, so the sample variance is 400 over 3, which is the number ordinary PCA reports for the same direction. The coefficients are normalised by the square root of the raw 400 rather than of 133.33, which is why they come out at 0.0354 in size and why person 1 lands 14.14 from the centre, where ordinary PCA’s projection of (10, 10) onto (0.707, 0.707) also lands.") },
             ),
             exercise(
               "Take the ring apart along the first kernel direction",

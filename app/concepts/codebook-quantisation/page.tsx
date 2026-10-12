@@ -37,6 +37,7 @@ export default function CodebookQuantisationPage() {
       intuition={lessonIntuitions["codebook-quantisation"]}
       technicalStart="Part 2. A Table of Positions, and the Nearest One Wins"
       openingTitle="Replace Many Possible Vectors with a Small Set of Representatives"
+      playgroundTitle="Which stored vector should represent this point?"
       playgroundIntro="Compare an input vector with its selected codebook entry and reconstruction. Increase the codebook size and inspect both the error and the number of entries used."
       title="Codebook Quantisation"
       tagline={"We may need to replace a continuous vector with a compact ID. A codebook provides a fixed set of representative vectors, letting us choose a nearby entry and measure how much the replacement changes the input."}
@@ -912,7 +913,7 @@ export default function CodebookQuantisationPage() {
           ),
         },
         {
-          title: "Part 7. Where the Method Stops Being Defined",
+          title: "Part 7. Choosing the Codebook and Handling Ambiguous Matches" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="24. What any complete description has to settle">
@@ -971,8 +972,8 @@ export default function CodebookQuantisationPage() {
                   have. The table gathers them, with what the mathematics says.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Codebook or input condition"
+                  reasonHeading="Effect on assigning a code"
                   rows={[
                     {
                       expression: "a table with no entries",
@@ -1294,7 +1295,7 @@ for n_entries in (53, 54):
   rounding error 4.6e-33
 54 entries: the grouping fitted
   NonUniqueTokensError: codes 37 and 53 are the same vector, which would be two ids for one point`,
-              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal this turns out to be.", "Put the try around the codebook step on its own. If the grouping fits and the codebook refuses, that tells you which half of the method has the rule that 54 breaks.", "Two entries at the same point is the case section 25 calls undefined as a vocabulary, since one vector at two positions would be two numbers meaning one thing, and that is what the refusal says in its own words."] },
+              { hints: ["Put the try around the codebook step on its own. If the grouping fits and the codebook refuses, that tells you which half of the method has the rule that 54 breaks.", "Two entries at the same point is the case section 25 calls undefined as a vocabulary, since one vector at two positions would be two numbers meaning one thing, and that is what the refusal says in its own words."] },
             ),
           ],
         },

@@ -36,6 +36,7 @@ export default function UnicodeWordBoundariesPage() {
       intuition={lessonIntuitions["unicode-word-boundaries"]}
       technicalStart="Part 2. The Classes"
       openingTitle="Spaces Are Only One Clue to a Word Boundary"
+      playgroundTitle="Where should this text be split?"
       playgroundIntro="Inspect the character classes on either side of a proposed break. Compare the resulting segments with a whitespace split of the same text."
       title="Unicode Word Boundaries"
       tagline={"Rules written around English letters and spaces do not cover every writing system. Unicode character information gives us a broader basis for deciding where boundaries should fall, though it does not settle every linguistic question."}
@@ -89,7 +90,7 @@ export default function UnicodeWordBoundariesPage() {
                 <NumberTable
                   headings={["text", "characters", "pieces at every run of spaces"]}
                   rows={[
-                    ["the running sentence", "51", "7"],
+                    ["the sentence about Dr. Alvarez", "51", "7"],
                     ["eleven characters of Japanese", "11", "1"],
                     ["nine characters of Chinese", "9", "1"],
                     ["seven characters of Thai", "7", "1"],
@@ -145,7 +146,7 @@ export default function UnicodeWordBoundariesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="3. The running sentence, under both rules">
+              <SubSection title="3. Compare space cuts with Unicode boundaries in the Alvarez sentence" id="3-the-running-sentence-under-both-rules">
                 <p>
                   Putting the sentence to the boundary rules gives nine words
                   where the space rule gave seven, and the playground above is
@@ -306,7 +307,7 @@ export default function UnicodeWordBoundariesPage() {
               "If the catch-all joined, every pair of classes that should be separated would need a rule of its own, and the number of pairs grows with the square of the number of classes. Breaking also means a character from a script added later is separated from its neighbours rather than silently glued to them, which is the less damaging error when nothing is known.",
             ),
             several(
-              "The running sentence gives nine words to the boundary rules and seven pieces to the space rule. Which of these are true of the difference?",
+              "The sentence about Dr. Alvarez gives nine words to the boundary rules and seven pieces to the space rule. Which of these are true of the difference?",
               [
                 "The hyphens in low-cost and in re-analysis both ended a word",
                 "The apostrophe in didn’t did not end a word",
@@ -377,7 +378,7 @@ export default function UnicodeWordBoundariesPage() {
 
               <SubSection title="6. Every character of a short text, with its class">
                 <p>
-                  The first eighteen characters of the running sentence, each
+                  The first eighteen characters of the sentence about Dr. Alvarez, each
                   with the class it was given and a mark wherever a word ended.
                   This is the whole machinery, and there is nothing behind it.
                 </p>
@@ -552,7 +553,7 @@ export default function UnicodeWordBoundariesPage() {
               "The eleven are there for Hebrew and katakana, for combining marks and invisible formatting characters, for the halves of a flag and the ends of lines, and for three joining marks these sentences happen never to use. Covering what a corpus does not contain is what lets the same dozen rules run on writing nobody tested them on.",
             ),
             choice(
-              "In the first eighteen characters of the running sentence every boundary the rules found sits where the class changes, and the apostrophe at position 16 is a change of class where no word ended. Why did no word end there?",
+              "In the first eighteen characters of the sentence about Dr. Alvarez every boundary the rules found sits where the class changes, and the apostrophe at position 16 is a change of class where no word ended. Why did no word end there?",
               [
                 "A letter stands on each side of it, so the rule for a letter reaching across one mark to another letter applies before the catch-all is reached",
                 "An apostrophe is placed in the letter class, so the class does not change there",
@@ -705,7 +706,7 @@ export default function UnicodeWordBoundariesPage() {
                   The rules cut a text into segments that tile it, and then
                   somebody has to say which segments are words. That second step
                   is not the standard&rsquo;s and there is more than one defensible
-                  answer, so it is worth seeing both. On the running sentence the
+                  answer, so it is worth seeing both. On the sentence about Dr. Alvarez the
                   rules find 19 segments. Nine of them hold a letter or a digit
                   and are the nine words of section 3. The other ten are the six
                   spaces, the two hyphens and the two full stops.
@@ -713,7 +714,7 @@ export default function UnicodeWordBoundariesPage() {
                 <NumberTable
                   headings={[
                     "what is kept",
-                    "the running sentence",
+                    "the sentence about Dr. Alvarez",
                     "the six sentences",
                   ]}
                   rows={[
@@ -789,7 +790,7 @@ export default function UnicodeWordBoundariesPage() {
                     "cut at every run of spaces",
                   ]}
                   rows={[
-                    ["characters of the running sentence, of 51", "41", "45"],
+                    ["characters of the sentence about Dr. Alvarez, of 51", "41", "45"],
                     ["characters of the six sentences, of 375", "303", "318"],
                     ["share of the writing kept", "80.8%", "84.8%"],
                     ["the words glued back give the sentence", "no", "yes"],
@@ -935,7 +936,7 @@ export default function UnicodeWordBoundariesPage() {
                 <KeepInMind>
                   Reading only characters is what lets one rule run on every
                   script, and it is the same thing that puts the abbreviation out
-                  of reach. The running sentence loses the stop after{" "}
+                  of reach. The sentence about Dr. Alvarez loses the stop after{" "}
                   <span className="font-mono">Dr</span> for exactly the reason
                   the Chinese line was cut nine ways, which is that nothing in
                   the characters said otherwise.
@@ -1005,21 +1006,16 @@ export default function UnicodeWordBoundariesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="20. What is left undecided, gathered">
-                <p>
-                  The cases below are gathered from the whole page. The right
-                  column says what the method does not determine and why, and it
-                  quotes a number where the number is a fact about the method
-                  rather than about any particular text.
-                </p>
+              <SubSection title="20. What Unicode boundaries leave to the application" id="20-what-is-left-undecided-gathered">
+                <p>A Unicode boundary is not automatically the word boundary needed by every application. The remaining decisions concern what we count as a word, how we handle punctuation and whether language-specific knowledge is required.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Character or word convention"
+                  reasonHeading="Where boundary rules need interpretation"
                   rows={[
                     {
                       expression: "which segments are words",
                       reason:
-                        "decided outside the rules, which produce segments that tile the text and stop there. The running sentence gives 19 segments, and 9, 13 or 19 pieces depending on the test applied afterwards. Two tools implementing the same standard can differ here without either being wrong.",
+                        "decided outside the rules, which produce segments that tile the text and stop there. The sentence about Dr. Alvarez gives 19 segments, and 9, 13 or 19 pieces depending on the test applied afterwards. Two tools implementing the same standard can differ here without either being wrong.",
                     },
                     {
                       expression: "a hyphen joining two words",
@@ -1096,7 +1092,7 @@ export default function UnicodeWordBoundariesPage() {
                 "They keep 80.8 per cent of the writing inside a word, against 84.8",
                 "Keeping every mark as a piece of its own would cost 15 more pieces again, 84 against 69",
                 "They leave more distinct entries than the space rule does",
-                "The nine words of the running sentence glue back to it exactly, as the seven pieces do",
+                "The nine words of the sentence about Dr. Alvarez glue back to it exactly, as the seven pieces do",
               ],
               [0, 1, 2],
               "Both rules come to 47 entries on this corpus, so the table is no larger, and that equality is worth naming so it is not misread as a result. Separating the marks shrinks a table only where the same word turns up both inside a clause and at the end of one, which happens exactly once here. The glue fails too, since the nine words come back as a line with the abbreviation’s stop gone, both compounds pulled apart and the sentence’s own stop missing. The length and the lost characters are real bills, and the lost characters are recoverable only while the source is still in hand, since every word carries the offsets it came from.",
@@ -1134,8 +1130,8 @@ export default function UnicodeWordBoundariesPage() {
           title: "Practice. Reading the Running Sentence by Both Rules",
           practice: [
             exercise(
-              "Read the running sentence by both rules, then the six sentences",
-              ["Put the running sentence to the boundary rules and to the space rule, and for each print how many words came back, how many of the 51 characters they hold between them, and whether gluing them back with single spaces returns the sentence. Then do the same count over the six sentences the page measures.", "Section 3 arrived at nine words holding 41 characters against seven pieces holding 45, and section 14 at 303 of 375 characters against 318. The share kept, to one decimal place, should be the 80.8 and 84.8 per cent the page quotes."],
+              "Read the sentence about Dr. Alvarez by both rules, then the six sentences",
+              ["Put the sentence about Dr. Alvarez to the boundary rules and to the space rule, and for each print how many words came back, how many of the 51 characters they hold between them, and whether gluing them back with single spaces returns the sentence. Then do the same count over the six sentences the page measures.", "Section 3 arrived at nine words holding 41 characters against seven pieces holding 45, and section 14 at 303 of 375 characters against 318. The share kept, to one decimal place, should be the 80.8 and 84.8 per cent the page quotes."],
               `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -1265,7 +1261,7 @@ U+0020  space                         letters False  digits False
             ),
             exercise(
               "Count the segments, then the words, then the marks kept",
-              ["Section 12 says the rules cut a text into segments that tile it, and a separate decision says which segments are words. Ask the rules for the segments of the running sentence, confirm that joining them gives the sentence back, and then read the sentence three ways, as every segment, as everything that is not spacing, and as words alone. Repeat the three counts over the six sentences.", "The page gives 19, 13 and 9 for the sentence and 141, 84 and 69 for the corpus. It does not say how many distinct entries the six sentences produce once every mark is kept as a piece of its own, so print that beside the 47 the words alone give."],
+              ["Section 12 says the rules cut a text into segments that tile it, and a separate decision says which segments are words. Ask the rules for the segments of the sentence about Dr. Alvarez, confirm that joining them gives the sentence back, and then read the sentence three ways, as every segment, as everything that is not spacing, and as words alone. Repeat the three counts over the six sentences.", "The page gives 19, 13 and 9 for the sentence and 141, 84 and 69 for the corpus. It does not say how many distinct entries the six sentences produce once every mark is kept as a piece of its own, so print that beside the 47 the words alone give."],
               `from oop_ml import Corpus, UnicodeWordPreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."

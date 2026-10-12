@@ -1,4 +1,5 @@
 import { lessonIntuitions } from "@/lib/intuition";
+import { presentIntuition } from "@/lib/intuition/presentation";
 import { GuidedIntuition, IntuitionConnection } from "@/components/concept/GuidedIntuition";
 import type { Metadata } from "next";
 import {
@@ -45,7 +46,7 @@ export default function LinearAlgebraPrimerPage() {
     >
       <PrimerSection title="Several Measurements, One Calculation">
 {lessonIntuitions["linear-algebra"].opening.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
-<GuidedIntuition lesson={lessonIntuitions["linear-algebra"]} />
+<GuidedIntuition lesson={presentIntuition("linear-algebra", lessonIntuitions["linear-algebra"])} />
 <IntuitionConnection lesson={lessonIntuitions["linear-algebra"]} />
 </PrimerSection>
 
@@ -693,7 +694,7 @@ export default function LinearAlgebraPrimerPage() {
           enough to know where anything lands.
         </p>
         <Equation>{"A·(x, y) = x·(A·e₁) + y·(A·e₂)"}</Equation>
-        <WhyThisWorks>
+        <WhyThisWorks title="Why the two transformed basis vectors determine the result">
           <p>
             Check it against the worked example above. A sends e₁ to (2, 1) and
             e₂ to (1, 2), so for the input (3, 1) the rule says

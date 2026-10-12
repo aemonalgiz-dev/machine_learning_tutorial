@@ -37,6 +37,7 @@ export default function TheStandardScorePage() {
       intuition={lessonIntuitions["the-standard-score"]}
       technicalStart="Part 2. Subtract the Average, Divide by the Spread"
       openingTitle="How Unusual Is That Number?"
+      playgroundTitle="Compare each measurement with its usual variation"
       playgroundIntro="Compare each original value with its standard score. Identify the mean at zero and check what one unit on the new scale represents."
       title="The Standard Score"
       tagline={"How unusual is a measurement that is ten units above average? That depends on how much the measurements usually vary. A standard score expresses the difference in units of standard deviation."}
@@ -156,7 +157,7 @@ export default function TheStandardScorePage() {
                   therefore the ratio of their spreads, squared.
                 </p>
                 <Equation>{"girth spread / water spread = 113.652 / 0.172 = 659.21\nthe same ratio squared = 434,551"}</Equation>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why a column with a larger spread can dominate distance">
                   <p>
                     A typical gap in a column is about the size of that
                     column&rsquo;s spread, so a typical squared gap is about the
@@ -286,7 +287,7 @@ export default function TheStandardScorePage() {
                   worth doing because the second one is where a convention hides.
                 </p>
                 <Equation>{"zᵢ = (xᵢ − m) / s\naverage(z) = (1/n) Σ (xᵢ − m) / s = (1/s)(m − m) = 0\nvariance(z) = (1/n) Σ (xᵢ − m)² / s² = s² / s² = 1"}</Equation>
-                <WhyThisWorks>
+                <WhyThisWorks title="Checking that the transformed mean is zero and variance is one">
                   <p>
                     The first line is the transformation, with m for the average
                     and s for the spread. The second says that the distances
@@ -881,7 +882,7 @@ export default function TheStandardScorePage() {
           ),
         },
         {
-          title: "Part 6. Where the Standard Score Stops Being Defined",
+          title: "Part 6. When There Is No Spread to Measure Against", id: "part-6-where-the-standard-score-stops-being-defined",
           content: (
             <>
               <SubSection title="22. A column with no spread">
@@ -1278,7 +1279,7 @@ print("scores", [round(float(value), 4) for value in scaler.transform([almost_co
 feature_values must not be constant (zero variance)
 spread 2.582e-16
 scores [-1.5492, -1.1619, -0.7746, -0.3873, 0.0, 0.3873, 0.7746, 1.1619, 1.5492]`,
-              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal a constant column turns out to be.", "The refusal happens inside fit, not transform, because the spread is learned there and it is the spread that is zero.", "The second fit goes through without complaint. Nothing in the library judges whether a spread of 2.6 × 10⁻¹⁶ is real variation or lost bits, which is the choice Part 6 says an implementation has to make and state."] },
+              { hints: ["The refusal happens inside fit, not transform, because the spread is learned there and it is the spread that is zero.", "The second fit goes through without complaint. Nothing in the library judges whether a spread of 2.6 × 10⁻¹⁶ is real variation or lost bits, which is the choice Part 6 says an implementation has to make and state."] },
             ),
           ],
         },

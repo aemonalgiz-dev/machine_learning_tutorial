@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["variational-autoencoders"]}
     technicalStart="Part 2. Sampling and the Variational Objective"
     prerequisites={<>Useful foundations: <Link href="/concepts/autoencoders">Autoencoders</Link>{", "}<Link href="/concepts/loss-functions">loss functions</Link>.</>}
+    playgroundTitle="Sample a code instead of choosing one fixed point"
     playgroundIntro="Keep the mean at zero and deviation at one, then change the noise draw. The sample changes while KL remains zero. Next change the distribution parameters and inspect how both the sample and KL respond."
     playground={<ModernLearningExample topic="variational-autoencoders" />}
     sections={[
@@ -241,7 +242,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `InvalidValuesError
 deviations must be strictly positive`,
-              { hints: ["Every refusal the library makes derives from one base class, so catching that one catches whichever specific refusal this turns out to be.", "The refusal comes from the constructor, before any sample is drawn, because a posterior that cannot be scored should not exist at all."] },
+              { hints: ["The refusal comes from the constructor, before any sample is drawn, because a posterior that cannot be scored should not exist at all."] },
             ),
           ],
         },

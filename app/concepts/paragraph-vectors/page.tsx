@@ -37,6 +37,7 @@ export default function ParagraphVectorsPage() {
       intuition={lessonIntuitions["paragraph-vectors"]}
       technicalStart="Part 2. A Document As A Word That Is Always There"
       openingTitle="Give the Whole Document Something to Learn"
+      playgroundTitle="Learn a vector that helps predict a document's words"
       playgroundIntro="Compare the word and document contributions to a prediction. Inspect how a new document's vector changes during inference while the trained word representations remain fixed."
       title="Paragraph Vectors"
       tagline={"A document may have useful characteristics beyond an average of its word vectors. Paragraph vectors learn a document representation by asking it to help predict the words in that document."}
@@ -206,7 +207,7 @@ export default function ParagraphVectorsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="5. One position, worked all the way through">
+              <SubSection title="5. Predict a word using its document and one context word" id="5-one-position-worked-all-the-way-through">
                 <p>
                   Take one position of one document with three coordinates per
                   vector. There is one context word, so the prediction uses the
@@ -290,7 +291,7 @@ export default function ParagraphVectorsPage() {
                   That is the whole of why the fitted positions come out separated by subject, and it depends on the collection having a structure of that kind rather than on anything in the method.
                 </p>
 </>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why the first update moves the output table before the document vector">
                   <>
                     <p>
                       The output table starts at zero, so every score starts at zero and
@@ -1084,7 +1085,7 @@ export default function ParagraphVectorsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="23. The cases with nothing to descend on">
+              <SubSection title="23. Documents that supply no useful training signal" id="23-the-cases-with-nothing-to-descend-on">
                 <p>
                   Four inputs make the placement undefined rather than merely
                   awkward, and in each one it is worth knowing which quantity fails
@@ -1092,8 +1093,8 @@ export default function ParagraphVectorsPage() {
                   has to make.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the mathematics says"
+                  expressionHeading="Document or vocabulary evidence"
+                  reasonHeading="Whether a useful position can be inferred"
                   rows={[
                     {
                       expression:

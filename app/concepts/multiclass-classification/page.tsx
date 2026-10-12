@@ -41,6 +41,7 @@ export default function MulticlassClassificationPage() {
       intuition={lessonIntuitions["multiclass-classification"]}
       technicalStart="Part 3. Softmax"
       openingTitle="More Than Two Possible Answers"
+      playgroundTitle="Make the class scores compete for probability"
       playgroundIntro="Choose a point and compare the scores for every class. Check which class wins and whether the displayed probabilities are constrained to add to one."
       title="More Than Two Classes"
       tagline={"Some problems have more than two possible answers. We need a way to compare the evidence for each category and decide how the resulting scores become a prediction."}
@@ -140,7 +141,7 @@ export default function MulticlassClassificationPage() {
                   every class its own opinion of the same observation, and the
                   rest is deciding what to do with three opinions.
                 </p>
-                <WorkedExample title="The fitted softmax scores for the three worked people, standardised">
+                <WorkedExample title="Fitted softmax scores for three standardised input profiles">
                   <NumberTable
                     headings={["class", "intercept", "weight on height", "weight on weight"]}
                     rows={[
@@ -631,7 +632,7 @@ export default function MulticlassClassificationPage() {
                   loss is the mean of that.
                 </p>
                 <Equation>{"lossᵢ = −ln P(yᵢ | xᵢ)          loss = −(1/n) Σᵢ ln P(yᵢ | xᵢ)"}</Equation>
-                <WorkedExample title="On the three worked people">
+                <WorkedExample title="Compare cross-entropy for the same three people">
                   <NumberTable
                     headings={["route", "probability or output for each person's own class", "loss"]}
                     rows={[

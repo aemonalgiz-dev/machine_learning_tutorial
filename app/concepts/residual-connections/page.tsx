@@ -18,6 +18,8 @@ export default function ResidualConnectionsPage() {
     technicalStart="Part 2. The Two Routes Through the Calculation"
     prerequisites={<>Read <Link href="/concepts/dense-layers">dense layers</Link> for forward transformations and <Link href="/concepts/backpropagation">backpropagation</Link> for derivatives through a network.</>}
 
+    playgroundTitle="Compare a transformed signal with a signal that also has a shortcut"
+
     playgroundIntro="Set the branch weight to zero to see the shortcut preserve the input. Then change the weight and follow both the output calculation and its derivative. Try a negative weight to see why a shortcut is not a guarantee against gradient cancellation."
     playground={<ResidualExplorer />}
     sections={[

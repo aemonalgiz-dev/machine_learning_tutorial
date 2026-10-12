@@ -37,6 +37,7 @@ export default function ImageAlignmentPage() {
       intuition={lessonIntuitions["image-alignment"]}
       technicalStart="Part 2. A Direction That Belongs To The Corner"
       openingTitle="Two Photographs Of One Scene"
+      playgroundTitle="Which transformation brings these images together?"
       playgroundIntro="Plant a move, turning, scaling and shifting the scene, and watch the method find it again. Compare what it kept with what was actually right, then carry the second picture back and read the difference."
       title="Image Alignment"
       tagline={"A camera can move or turn between photographs. Matching points gives us evidence of that movement, which we can use to work out how to bring the images into alignment."}
@@ -676,7 +677,7 @@ export default function ImageAlignmentPage() {
           ),
         },
         {
-          title: "Part 9. Implementation And Failure Contracts",
+          title: "Part 9. Recording Coordinate and Resampling Conventions", id: "part-9-implementation-and-failure-contracts",
           content: (
             <>
               <p>
@@ -991,7 +992,7 @@ except MLLibError as refusal:
               `keypoints 20 and 40, matches 1
 TooFewValuesError
 two matches fix a similarity and one cannot; got 1`,
-              { hints: ["The resampled picture has jagged edges where the exact one had straight ones, and the corner detector finds far more candidates in it than in the original.", "Every refusal the library makes derives from one base class, so catching that one catches whichever specific refusal this turns out to be.", "The lesson's own scene survives a thirty-degree turn with fifteen matches because its shapes are more distinct within a patch than this one's; a scene with more texture inside each shape would too."] },
+              { hints: ["The resampled picture has jagged edges where the exact one had straight ones, and the corner detector finds far more candidates in it than in the original.", "The lesson's own scene survives a thirty-degree turn with fifteen matches because its shapes are more distinct within a patch than this one's; a scene with more texture inside each shape would too."] },
             ),
           ],
         },

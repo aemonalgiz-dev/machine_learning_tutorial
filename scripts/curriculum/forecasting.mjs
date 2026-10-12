@@ -1,6 +1,6 @@
 import { source, history, view, s, op, sample, before, construction } from "./authoring.mjs";
 import { question, claim } from "./gap-authoring.mjs";
-import { lesson, chapter as p, task, worked } from "./paths-authoring.mjs";
+import { lesson, chapter as p, task } from "./paths-authoring.mjs";
 const section = "Time Series and Forecasting";
 const toolbox = source("Hyndman and Athanasopoulos: The Forecaster's Toolbox", "https://otexts.com/fpp3/toolbox.html");
 const arima = source("Hyndman and Athanasopoulos: ARIMA Models", "https://otexts.com/fpp3/arima.html");
@@ -84,9 +84,4 @@ lesson({
  build:construction("Compare two forecasts on the same days","Botie has stored predictions from two methods before each target arrived. Report both mean absolute errors in the supplied method order.","Subtract each prediction row from the actual target vector, take absolute values, and average within each method's row.",{actual:"Shared target observations",predictions:"One row per forecasting method"},[sample("Two origins",{actual:[9,8],predictions:[[6,9],[6.5,7.5]]},[2,1.5]),sample("A reversed winner",{actual:[5,5],predictions:[[5,5],[4,7]]},[0,1.5]),sample("One origin",{actual:[10],predictions:[[8],[13]]},[2,3])],op("rowmean",op("absolute",op("subtractRows",s("predictions"),s("actual")))),"Comparing every method against the same target dates makes their error summaries comparable.","The provided forecasts must already respect their historical origins. This reducer cannot detect leakage in how they were created."),
 }),
 ];
-// A complete, executable demonstration is visible before each pair of tasks.
-for (const item of lessons) {
- const practice = item.practice[0];
- item.parts[2].examples = [worked("Follow the calculation in NumPy", "The arrays below are invented readings. Track which entries are available before each prediction.", "", practice.solution, practice.output, "The printed values follow the stated ordering and units. The second challenge changes the question or inputs.")];
-}
 export default lessons;

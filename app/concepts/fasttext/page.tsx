@@ -39,6 +39,7 @@ export default function FasttextPage() {
       intuition={lessonIntuitions["fasttext"]}
       technicalStart="Part 2. A Word Made of Its Spelling"
       openingTitle="An Unfamiliar Word May Have Familiar Parts"
+      playgroundTitle="What can word parts tell us about an unseen word?"
       playgroundIntro="Compare a familiar word's whole-word contribution with its substring contributions. Try an unseen spelling and inspect which learned pieces support its vector."
       title="FastText"
       tagline={"A rare word may share useful parts with words we have seen many times. FastText includes character fragments in its word representations, allowing those related spellings to share information during learning."}
@@ -786,7 +787,7 @@ export default function FasttextPage() {
           ),
         },
         {
-          title: "Part 6. Where FastText Stops Being Defined",
+          title: "Part 6. What Shared Spelling Can and Cannot Tell Us", id: "part-6-where-fasttext-stops-being-defined",
           content: (
             <>
               <SubSection title="19. A word reaching no written row has no direction">
@@ -870,16 +871,11 @@ export default function FasttextPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="22. Where the method stops being defined">
-                <p>
-                  Several inputs leave the method with nothing to compute rather
-                  than something approximate to compute, and a few more leave it with
-                  a genuine choice whose cost is worth knowing. The table gathers
-                  both, with what the mathematics says in each case.
-                </p>
+              <SubSection title="22. When Shared Spelling Does Not Supply Useful Context" id="22-where-the-method-stops-being-defined">
+                <p>Character parts can provide a representation for an unseen word, but they do not guarantee useful context evidence or a nonzero direction. Check what actually contributed to the vector.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Word or character-part evidence"
+                  reasonHeading="What can contribute to its vector"
                   rows={[
                     {
                       expression: "a word none of whose pieces\nreaches a written row",

@@ -36,6 +36,7 @@ export default function UNetPage() {
       intuition={lessonIntuitions["u-net"]}
       technicalStart="Part 2. The Shape of the U"
       openingTitle="Knowing What Is There Does Not Tell Us Where"
+      playgroundTitle="Follow image details down and back up the network"
       playgroundIntro="Compare the predicted mask with the target pixel by pixel. Pay particular attention to boundaries and thin shapes when the skip connections are removed."
       title="U-Net"
       tagline={"Sometimes we need to know which pixels belong to an object, not just whether the object is present. U-Net learns from images paired with labelled masks and carries spatial detail forward to help reconstruct those boundaries."}
@@ -914,7 +915,7 @@ export default function UNetPage() {
           ),
         },
         {
-          title: "Part 7. Where the Method Stops Being Defined",
+          title: "Part 7. Image Shapes, Skip Connections and the Limits of the Labels" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="22. Sides that do not halve evenly">
@@ -959,8 +960,8 @@ export default function UNetPage() {
                   implementation of it faces.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Mask, prediction or image shape"
+                  reasonHeading="Effect on segmentation and its score"
                   rows={[
                     { expression: "a picture with no shape in it", reason: "if the network also calls nothing, the overlap is zero pixels over zero pixels and is undefined. Counting it as one, leaving the picture out, or pooling the counts over all pictures before dividing are the three choices, and each gives a different average. The blank picture of section 21 is this case, and the U called nothing." },
                     { expression: "a picture with no shape, and a call of some", reason: "the overlap is zero whatever the size of the mistake, so one wrongly called pixel and a wrongly called half picture score the same." },

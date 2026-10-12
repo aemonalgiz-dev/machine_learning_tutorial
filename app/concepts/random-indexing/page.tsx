@@ -39,6 +39,7 @@ export default function RandomIndexingPage() {
       intuition={lessonIntuitions["random-indexing"]}
       technicalStart="Part 2. A Direction For Every Word"
       openingTitle="Keep a Sketch Instead of the Whole Count Table"
+      playgroundTitle="Build context vectors by adding sparse directions"
       playgroundIntro="Follow which context vectors are added for one word. Compare the resulting neighbours at different widths and random seeds."
       title="Random Indexing"
       tagline={"Counting every possible word-context pair can require a very large table. Random indexing gives contexts small random vectors and accumulates them, keeping the representation a fixed size as new examples arrive."}
@@ -527,7 +528,7 @@ export default function RandomIndexingPage() {
                   Every question anybody wanted to ask of the table would come back identical, and the narrowing would have cost nothing at all.
                 </p>
 </>
-                <WhyThisWorks>
+                <WhyThisWorks title="What exact orthogonality would preserve, and why we approximate it">
                   <>
 <p>
                     They are not exactly at right angles, and they cannot be, since a space of d numbers holds at most d directions mutually at right angles and there are usually more words than that. What Johnson and Lindenstrauss proved in 1984 is that this hardly matters. A random linear map into d dimensions keeps every distance among a set of points to within a factor of one plus or minus epsilon, provided d is roughly the logarithm of how many points there are divided by epsilon squared, and crucially that has nothing to do with how many dimensions the points started in.
@@ -767,7 +768,7 @@ export default function RandomIndexingPage() {
           ),
         },
         {
-          title: "Part 5. Where Random Indexing Stops Being Defined",
+          title: "Part 5. Missing Context and Colliding Directions", id: "part-5-where-random-indexing-stops-being-defined",
           content: (
             <>
               <SubSection title="18. Nearly perpendicular is not perpendicular, and more text does not help">
@@ -870,17 +871,11 @@ export default function RandomIndexingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="21. The cases with nothing to compute">
-                <p>
-                  Several inputs leave this method with nothing to work out
-                  rather than something approximate to work out, and a few more
-                  leave it with a genuine choice whose cost is worth knowing. The
-                  table gathers both, with what the mathematics says in each
-                  case.
-                </p>
+              <SubSection title="21. Words without neighbours and vectors with no direction" id="21-the-cases-with-nothing-to-compute">
+                <p>A word can receive a random index without ever receiving a useful accumulated context vector. Look for missing neighbours and a zero accumulated direction before asking for similarity.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Context or index-vector condition"
+                  reasonHeading="What the accumulated vector retains"
                   rows={[
                     {
                       expression: "a word with no company at all",
@@ -1246,7 +1241,7 @@ except MLLibError as refusal:
 direction drawn for lantern [0, 1, 0, -1, 1, -1, 0, 0]
 UndefinedMetricError cosine similarity is undefined for a zero vector, which has no direction
 UndefinedMetricError the zero vector has no direction, so nothing is similar to it`,
-              { hints: ["A sentence boundary stops the reach, so a word alone in its sentence has no neighbour at all, and nothing is ever added onto its total. It still gets a direction, because every word in the vocabulary is handed one before the reading starts.", "Every refusal the library makes derives from MLLibError, so catching that one catches whichever specific refusal each question turns out to be.", "The two questions are refused with different messages, because one of them asks for a cosine involving the origin and the other asks what is similar to it, and neither is a number."] },
+              { hints: ["A sentence boundary stops the reach, so a word alone in its sentence has no neighbour at all, and nothing is ever added onto its total. It still gets a direction, because every word in the vocabulary is handed one before the reading starts.", "The two questions are refused with different messages, because one of them asks for a cosine involving the origin and the other asks what is similar to it, and neither is a number."] },
             ),
           ],
         },

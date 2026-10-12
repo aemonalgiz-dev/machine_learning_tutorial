@@ -42,6 +42,7 @@ export default function DenseLayersPage() {
       intuition={lessonIntuitions["dense-layers"]}
       technicalStart="Part 2. The Matrix Form"
       openingTitle="Several Neurons Read the Same Example"
+      playgroundTitle="Follow the inputs through a layer of neurons"
       playgroundIntro="Follow one example through the neurons. Compare each neuron's inputs, score, and activated output before following the next layer."
       title="A Dense Layer and the Forward Pass"
       tagline={"One neuron can only do so much with an input. Connecting several neurons lets us calculate different combinations of the same measurements, then pass those outputs to another layer."}
@@ -969,10 +970,10 @@ export default function DenseLayersPage() {
           ),
         },
         {
-          title: "Part 6. Implementation and Failure Contracts",
+          title: "Part 6. Making the Layer Read the Intended Coordinates" , id: "part-6-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="23. What a complete implementation states">
+              <SubSection title="23. The shapes, weights and outputs a layer must declare" id="23-what-a-complete-implementation-states">
                 <p>A dense layer&apos;s implementation must make its arrangements explicit before a forward pass. The reader needs to know which coordinate every weight multiplies and where every result goes.</p>
 <ol className="list-decimal space-y-2 pl-6">
 <li>State the input and output shapes. Every neuron must have one weight per input coordinate.</li>
@@ -991,8 +992,8 @@ export default function DenseLayersPage() {
                   row says what the layer itself does when asked directly.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Layer configuration"
+                  reasonHeading="What the layer accepts and returns"
                   rows={[
                     { expression: "a layer with no neurons", reason: "refused, ‘a layer needs at least one neuron’; a layer answering nothing has no width for the next layer to agree with." },
                     { expression: "neurons of different widths in one layer", reason: "refused, ‘every neuron in a layer reads the same row, so they must agree on its width, got [2, 3]’." },

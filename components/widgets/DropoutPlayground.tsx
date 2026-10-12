@@ -167,7 +167,7 @@ export function DropoutPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <button onClick={resetToWorkedExample} className={BUTTON_CLASS}>
-          The worked example
+          Reset the neuron outputs and dropout rate
         </button>
         <button
           onClick={() => setSeed((current) => current + 1)}

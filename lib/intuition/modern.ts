@@ -34,7 +34,7 @@ export const modern: Record<string, LessonIntuition> = {
     step("Make the selected token part of the input", "Now the prefix includes sat. The next forward pass therefore answers a different question: what follows this longer prefix? The model does not need to update its weights to do this. The input changes while the parameters stay fixed.", strips("The new token becomes visible on the next pass.", [["Before selection", ["the", "cat"]], ["After appending", ["the", "cat", "sat"], [2]], ["Next position", ["?"]]])),
     step("Stop when the response reaches a boundary", "Repeat until an end token is selected or a length limit is reached. A different early choice can produce a different later context and continuation. The loop has no guarantee that a plausible sequence is factually correct.", strips("A loop needs a stopping rule.", [["Continue", ["Predict", "Select", "Append"]], ["Stop", ["End token", "Length limit"]]]))
   ], "Follow the changing prefix, not changing weights", [
-    "The full example runs this loop through the SDK's tiny untrained decoder and displays every prefix and selection probability.",
+    "The tiny SDK decoder is untrained, so its words should not be read as meaningful language. Its visible prefixes and selection probabilities let us inspect how the generation loop works.",
     "Its incoherent output is useful here: the loop alone cannot supply learned language. Architecture, training, and token selection play different roles."
   ]),
   "sampling-and-temperature": story([
@@ -106,7 +106,7 @@ export const modern: Record<string, LessonIntuition> = {
     step("Choose which target predictions contribute to loss", "In response-only training, we score the predictions for response tokens and leave prompt-token predictions out of the loss. This is a loss mask. It does not erase the prompt from the context or stop the response from attending to it.", strips("Mask target positions, not access to the prompt.", [["Targets", ["the", "cat", "sat", "<end>"], [2,3]], ["Scored", ["Response targets only"]]])),
     step("Update an existing model toward the demonstrated behavior", "Backpropagation carries the response loss through the model, and an optimizer adjusts the trainable parameters. The starting model already contains learned representations. The quality and coverage of the new examples determine what behavior this additional training encourages.", strips("Fine-tuning changes parameters using labeled prompt-response pairs.", [["Start", ["Pretrained parameters"]], ["Training", ["Prompt-response examples", "Response loss"]], ["Result", ["Adapted parameters"]]], true))
   ], "The loss mask and the attention mask solve different problems", [
-    "The worked example makes that distinction visible through per-token losses and derivatives. It isolates the objective rather than training a complete assistant.",
+    "Keep the prompt available as context while removing its target positions from the loss. Compare the per-token losses and derivatives before and after this change. This calculation isolates response-only training; it does not fit an assistant.",
     "After understanding full-parameter fine-tuning, we can ask how LoRA reduces the number of parameters that need updates."
   ]),
   "reinforcement-learning": story([
@@ -143,7 +143,7 @@ export const modern: Record<string, LessonIntuition> = {
     step("Put the question and evidence into the model's context", "The language model receives both the question and the selected passages. It can use those passages while composing the answer. Retrieving information changes the input context; it does not by itself update the model's weights.", strips("The retrieval result becomes part of the input.", [["Prompt", ["Instructions", "Question", "Source passages"]], ["Language model", ["Generate an answer"]]], true)),
     step("Check whether the answer is actually supported", "A fluent answer can still misread a passage, omit a qualification, or cite irrelevant evidence. Check that the sources support the answer. If retrieval found no useful passage, the system needs an explicit missing-evidence behavior rather than an invented fact.", strips("Two separate checks are needed.", [["Retrieval check", ["Did we find the needed evidence?"]], ["Answer check", ["Does the response agree with that evidence?"]]]))
   ], "Inspect retrieval before adding fluent generation", [
-    "The full example lets you search the small collection and see the exact passages a model would receive. It deliberately stops before text generation.",
+    "Search the small collection and read the passages selected for the model. This activity ends at retrieval, where we can check whether the supplied evidence would help answer the question.",
     "Try Saturday, renew, and a word absent from the collection. The results expose both the useful behavior and the limits of exact word overlap."
   ]),
   "evaluating-generative-models": story([

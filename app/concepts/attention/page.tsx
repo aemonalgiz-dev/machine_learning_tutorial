@@ -18,6 +18,8 @@ export default function AttentionPage() {
     technicalStart="Part 2. Calculating Attention"
     prerequisites={<>Start with <Link href="/concepts/embedding-layers">embedding layers</Link> for how a token gets a vector. <Link href="/concepts/dense-layers">Dense layers</Link> explain the weighted sums used to transform those vectors.</>}
 
+    playgroundTitle="Which values should this query listen to?"
+
     playgroundIntro="Start with one head and both checkboxes off. Compare the rows for the two red tokens, change one token, then block future tokens. Inspect the role vectors to see the numbers each head actually reads."
     playground={<AttentionExplorer />}
     sections={[

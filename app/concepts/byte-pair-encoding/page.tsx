@@ -39,6 +39,7 @@ export default function BytePairEncodingPage() {
       intuition={lessonIntuitions["byte-pair-encoding"]}
       technicalStart="Part 2. Growing a Vocabulary One Pair at a Time"
       openingTitle="A New Word Can Be Made from Familiar Pieces"
+      playgroundTitle="Watch repeated pairs become vocabulary entries"
       playgroundIntro="Inspect the adjacent-pair counts and follow one merge at a time. Then encode a word absent from the training text using the pieces that were learned."
       title="Byte Pair Encoding"
       tagline={"Common letter combinations need not be stored one character at a time. Byte pair encoding repeatedly joins frequent neighbouring pieces, building a vocabulary that can reuse parts across different words."}
@@ -433,7 +434,7 @@ export default function BytePairEncodingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="10. The running sentence, cut by a corpus that never saw it">
+              <SubSection title="10. Read the Alvarez sentence with a vocabulary learned elsewhere" id="10-the-running-sentence-cut-by-a-corpus-that-never-saw-it">
                 <p>
                   Back to the eighteen sentences and the sentence they do not
                   contain. Fitted to the point where the corpus has no adjacent
@@ -542,7 +543,7 @@ export default function BytePairEncodingPage() {
                 </p>
                 <ByteFallbackRepair />
                 <p>
-                  On the running sentence the repair costs exactly one piece, 26
+                  On the sentence about Dr. Alvarez the repair costs exactly one piece, 26
                   against 25, and the interesting part is that not one of the 26
                   is a byte row. The letter z has a row already; what it lacked
                   was a row for z at the end of a word. So the fit writes the
@@ -559,7 +560,7 @@ export default function BytePairEncodingPage() {
                 <NumberTable
                   headings={["text", "as published", "with byte fallback", "round trip"]}
                   rows={[
-                    ["the running sentence", "25 pieces", "26 pieces, 0 of them bytes", "was lossy, now exact"],
+                    ["the sentence about Dr. Alvarez", "25 pieces", "26 pieces, 0 of them bytes", "was lossy, now exact"],
                     ["a sentence with an accent", "14 pieces", "16 pieces, 3 of them bytes", "was lossy, now exact"],
                     ["a sentence in Greek", "22 pieces", "46 pieces, 42 of them bytes", "was lossy, now exact"],
                     ["the eighteen-sentence corpus", "263 pieces", "263 pieces", "exact either way"],
@@ -750,7 +751,7 @@ export default function BytePairEncodingPage() {
               "A merge joins two symbols that already exist, so every row the fit adds is built from rows that were already there, and those are the alphabet the corpus arrived in. Ask for a thousand and the alphabet is still whatever the corpus happened to hold, which is why a character outside it becomes a stand-in and the round trip silently returns different text.",
             ),
             choice(
-              "What did adding the 257 fallback rows cost on the running sentence?",
+              "What did adding the 257 fallback rows cost on the sentence about Dr. Alvarez?",
               [
                 "Nothing, since the sentence needed no byte row",
                 "One piece, 26 against 25, and none of the 26 is a byte row",
@@ -801,7 +802,7 @@ export default function BytePairEncodingPage() {
                 <p>
                   Both fits return all three texts exactly, so the widget is not
                   a comparison of what survives. It is a comparison of length,
-                  and the ordering changes with the text. On the running sentence
+                  and the ordering changes with the text. On the sentence about Dr. Alvarez
                   the byte fit is longer, 29 pieces against 26. On the accented
                   sentence it is longer by one, 17 against 16. On the Greek
                   sentence the two are exactly level at 46.
@@ -817,7 +818,7 @@ export default function BytePairEncodingPage() {
 
               <SubSection title="18. What the byte alphabet costs">
                 <p>
-                  It is not free, and this is the place on the page where a variant is worse than the thing beside it. Fitted to the same eighteen sentences with the same number of merges, the byte alphabet reads the running sentence as 29 pieces where the character alphabet reads it as 26, and reads the corpus as 282 pieces where the character alphabet reads it as 263.
+                  It is not free, and this is the place on the page where a variant is worse than the thing beside it. Fitted to the same eighteen sentences with the same number of merges, the byte alphabet reads the sentence about Dr. Alvarez as 29 pieces where the character alphabet reads it as 26, and reads the corpus as 282 pieces where the character alphabet reads it as 263.
                 </p>
                 <p>
                   It is paying for two things, the byte values this corpus never uses, which are 220 of the 256 and which no merge can ever be spent on, and the spaces, which it carries as real symbols attached to the word that follows rather than as a marker.
@@ -978,7 +979,7 @@ export default function BytePairEncodingPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. Tied Merges and Characters the Corpus Never Saw" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="23. The tie the counts cannot break">
@@ -1109,20 +1110,11 @@ export default function BytePairEncodingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="26. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs on which the
-                  method stops being defined rather than becoming approximate,
-                  together with what has to be decided in each case and what
-                  turns on the decision. Several of them are genuinely open
-                  questions with defensible answers on either side, and those are
-                  the ones worth a reader&rsquo;s attention, since they are the
-                  decisions anybody setting this up has to make and nothing in
-                  the mathematics makes for them.
-                </p>
+              <SubSection title="26. What merge counts cannot choose for us" id="26-where-the-method-has-nothing-to-say">
+                <p>The instruction to merge the most frequent pair leaves several decisions open. Tied counts need a repeatable rule, unavailable characters need a policy, and the requested vocabulary size may exceed what the corpus can provide.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Merge or vocabulary condition"
+                  reasonHeading="How it affects BPE"
                   rows={[
                     { expression: "two pairs with the same count", reason: "the objective is indifferent, so no answer is more correct. A choice must be made and any choice is arbitrary; taking the earliest in some fixed order at least makes the fit repeatable, where taking whichever was met first makes it depend on the order the texts arrived in. On the four-word corpus the first tie changes one row of ten and no piece count." },
                     { expression: "a vocabulary smaller than the alphabet", reason: "there is nothing to give. The floor is one row per symbol the corpus is spelled in, plus whatever stands in for the unspellable, since dropping a symbol leaves part of the training corpus itself unreadable. On the eighteen sentences that floor is 52." },
@@ -1157,7 +1149,7 @@ export default function BytePairEncodingPage() {
             several(
               "Which of these hold of the byte-alphabet fit against the character fit on the same eighteen sentences?",
               [
-                "It reads the running sentence as 29 pieces where the character fit reads 26",
+                "It reads the sentence about Dr. Alvarez as 29 pieces where the character fit reads 26",
                 "Its table is the smaller of the two, 341 rows against 394",
                 "Both fits return all three texts exactly",
                 "It reads the Greek sentence in fewer pieces",
@@ -1258,7 +1250,7 @@ decoded lowest`,
             ),
             exercise(
               "Turn the size dial on the eighteen sentences",
-              ["Part 4 fitted the eighteen sentences at fifteen sizes and drew the curve. Fit at 52, 54, 66, 80, 100, 137 and 300, and at each print how many rows the corpus taught, how many merges that took, what the corpus costs in pieces and what the running sentence costs.", "The byte rows sit underneath the budget, so the rows the corpus taught are the whole table less 257. Part 4 prints the sentence at 52 rows as 46 pieces and at 137 as 26, with the corpus falling from 648 to 263, and says that asking for 300 gives 137. The row at 54 is one the lesson never prints."],
+              ["Part 4 fitted the eighteen sentences at fifteen sizes and drew the curve. Fit at 52, 54, 66, 80, 100, 137 and 300, and at each print how many rows the corpus taught, how many merges that took, what the corpus costs in pieces and what the sentence about Dr. Alvarez costs.", "The byte rows sit underneath the budget, so the rows the corpus taught are the whole table less 257. Part 4 prints the sentence at 52 rows as 46 pieces and at 137 as 26, with the corpus falling from 648 to 263, and says that asking for 300 gives 137. The row at 54 is one the lesson never prints."],
               `from oop_ml import BytePairEncoding
 
 sentences = [
@@ -1330,7 +1322,7 @@ asked 300: taught 137 rows in 85 merges, corpus 263 pieces, sentence 26`,
             ),
             exercise(
               "Read the sentence as published, then with every character spellable",
-              ["Part 3 read the running sentence and the Greek sentence twice, once under the method exactly as published and once with a byte spelling under every character. Fit the eighteen sentences both ways at 137 rows, encode both texts with each fit, decode the ids, and print the piece count, how many pieces are byte rows, and either that the text came back exactly or what came back instead.", "Under the published method the sentence loses the space after Alvarez and comes back shorter, with nothing raised. With the repair it comes back exact at 26 pieces, and the Greek sentence costs 46, 42 of them byte rows. The script prints a decoding only when it differs from the text, which keeps the output in characters every console can show."],
+              ["Part 3 read the sentence about Dr. Alvarez and the Greek sentence twice, once under the method exactly as published and once with a byte spelling under every character. Fit the eighteen sentences both ways at 137 rows, encode both texts with each fit, decode the ids, and print the piece count, how many pieces are byte rows, and either that the text came back exactly or what came back instead.", "Under the published method the sentence loses the space after Alvarez and comes back shorter, with nothing raised. With the repair it comes back exact at 26 pieces, and the Greek sentence costs 46, 42 of them byte rows. The script prints a decoding only when it differs from the text, which keeps the output in characters every console can show."],
               `from oop_ml import BytePairEncoding
 
 sentences = [

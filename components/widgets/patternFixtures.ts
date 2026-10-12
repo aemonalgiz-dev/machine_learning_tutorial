@@ -15,7 +15,7 @@ export interface PatternFixture {
 
 export const PATTERN_FIXTURES: PatternFixture[] = [
   {
-    name: "The running sentence",
+    name: "The sentence about Dr. Alvarez",
     text: "Dr. Alvarez didn't expect the low-cost re-analysis.",
     note: "the sentence carried across this part of the site",
   },

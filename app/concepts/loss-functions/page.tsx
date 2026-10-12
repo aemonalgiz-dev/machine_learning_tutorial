@@ -36,6 +36,7 @@ export default function LossFunctionsPage() {
       intuition={lessonIntuitions["loss-functions"]}
       technicalStart="Part 2. Three Ways to Price a Miss in Kilograms"
       openingTitle="How Wrong Was That Prediction?"
+      playgroundTitle="Compare how losses respond to the same mistake"
       playgroundIntro="Move a prediction away from its target and compare the loss curves. Read the loss value and its slope separately, especially for large errors."
       title="Loss Functions"
       tagline={"Before a network can improve, we need to tell it what counts as an error. A loss function assigns a numerical cost to a prediction, and that choice affects which mistakes the model tries hardest to reduce."}
@@ -87,7 +88,7 @@ export default function LossFunctionsPage() {
                     ["175 cm", "71", "63", "8"],
                     ["165 cm", "65", "73", "−8"],
                   ]}
-                  caption="The measured four under the slope-0.6 line. Every batch number on this page is worked from these four misses."
+                  caption="Four height and weight pairs under the slope-0.6 line. Every batch number on this page is worked from these four misses."
                 />
                 <>
 <p>
@@ -99,7 +100,7 @@ export default function LossFunctionsPage() {
 </>
                 <KeepInMind>
                   A loss is a rule for pricing a miss, and the rule is a
-                  choice made before the fitting starts. The measured four are
+                  choice made before the fitting starts. Four height and weight pairs are
                   missed by the same four amounts under every rule on this page
                   and the prices come out 20, 6 and 17.75, and a fit that
                   lowers one of those numbers is not obliged to lower the
@@ -326,7 +327,7 @@ export default function LossFunctionsPage() {
                   The widget below draws a line of your choosing through the
                   people, scores every miss under all three losses, and shows
                   each person&rsquo;s own cost as a bar and their share of the
-                  batch&rsquo;s pull in the table. Start with the measured four
+                  batch&rsquo;s pull in the table. Start with the four height and weight measurements
                   and the slope-0.6 line, then tilt the line and watch which
                   bars grow fastest.
                 </p>
@@ -586,7 +587,7 @@ export default function LossFunctionsPage() {
               "The half is bookkeeping, there so the slope comes out as the miss itself rather than twice the miss. Leaving it out changes both the number reported and the step taken from it, and the learning rate then has to absorb the factor of two. That is one of the conventions a loss curve does not show.",
             ),
             several(
-              "The slope-0.6 line misses the measured four by four, four, eight and eight kilograms. Which of these hold of the pulls?",
+              "The slope-0.6 line misses the four height and weight measurements by four, four, eight and eight kilograms. Which of these hold of the pulls?",
               [
                 "Under squared error the eight-kilogram misses pull twice as hard as the four-kilogram ones",
                 "Under absolute error all four pull by a quarter, whatever their miss",
@@ -974,23 +975,13 @@ export default function LossFunctionsPage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Matching the Loss Inputs, Reduction and Gradient" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
               <SubSection title="23. What a loss must specify">
-                <p>
-                  A complete implementation states what it divides by, the
-                  rows or every entry or nothing; whether squared error carries
-                  the half; the units the Huber knee is measured in and what
-                  happens exactly at the knee; which branch absolute error
-                  takes at a tie; whether the classification losses apply
-                  their own squash, so that a caller knows to leave the last
-                  layer straight; how the probabilities are clipped before the
-                  logarithm and at what floor; what shape the truth takes, a
-                  column of zeros and ones or a one-hot block; and that the
-                  value and the gradient are produced by one call, so a caller
-                  cannot get one without the other.
-                </p>
+                <p>Before comparing two loss values, check their reduction. Dividing by the number of rows, dividing by every output entry and leaving a total unchanged produce different scales. Squared error may also include a factor of one half.</p>
+                <p>The derivative needs equally clear conventions. Specify the units and boundary treatment at the Huber knee, and the branch chosen by absolute error at a tie. For classification, check whether the loss applies its own sigmoid or softmax, which clipping floor protects the logarithm, and whether the target is a binary column or a one-hot block.</p>
+                <p>Here one call returns both the value and gradient. They therefore come from the same inputs and conventions, which avoids combining a reported loss with a derivative calculated under different assumptions.</p>
                 <KeepInMind>
                   Most of those decisions are invisible in a loss curve, and a
                   learning rate tuned under one convention is wrong under
@@ -998,15 +989,15 @@ export default function LossFunctionsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. The edges, probed">
+              <SubSection title="24. Ties, zero probabilities and invalid targets" id="24-the-edges-probed">
                 <p>
                   Each row below was tried rather than reasoned about, and the
                   page&rsquo;s own request refuses at the door the cases the
                   arithmetic lets through.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Predictions, targets or batch"
+                  reasonHeading="Whether the loss and derivative are defined"
                   rows={[
                     { expression: "an empty batch", reason: "the documented contract promises a refusal, and the arithmetic divides by zero rows and answers not-a-number with a warning; recorded rather than repaired, and the request refuses it at the door before the batch is ever measured." },
                     { expression: "one row", reason: "accepted; the division is by one and the batch value is the row's own price, 32 for a miss of eight under squared error." },
@@ -1091,8 +1082,8 @@ export default function LossFunctionsPage() {
           title: "Practice. Pricing Misses With the Library",
           practice: [
             exercise(
-              "Price the measured four three ways",
-              ["The line of slope 0.6 through the mean point is weight = 0.6 × height − 34, and it guesses 74, 62, 71 and 65 kilograms for the measured four. Score those guesses against the measured weights under SquaredError, AbsoluteError and HuberError with a threshold of 5, and print each loss’s value and its four gradients.", "Part 2 worked these by hand as 20, 6 and 17.75, with gradients (−1, 1, 2, −2), a quarter in size everywhere, and (−1, 1, 1.25, −1.25). Then score the same four under Huber at knees of 1, 6 and 50 kilograms. Section 6 gives 5.5 for the first and section 22 says the last would be squared error. The knee of 6 is not on the page."],
+              "Price the four height and weight measurements three ways",
+              ["The line of slope 0.6 through the mean point is weight = 0.6 × height − 34, and it guesses 74, 62, 71 and 65 kilograms for the four height and weight measurements. Score those guesses against the measured weights under SquaredError, AbsoluteError and HuberError with a threshold of 5, and print each loss’s value and its four gradients.", "Part 2 worked these by hand as 20, 6 and 17.75, with gradients (−1, 1, 2, −2), a quarter in size everywhere, and (−1, 1, 1.25, −1.25). Then score the same four under Huber at knees of 1, 6 and 50 kilograms. Section 6 gives 5.5 for the first and section 22 says the last would be squared error. The knee of 6 is not on the page."],
               `import numpy as np
 from oop_ml import AbsoluteError, HuberError, SquaredError
 
@@ -1126,7 +1117,7 @@ Huber, knee 5  value 17.7500, gradients [-1.0, 1.0, 1.25, -1.25]
 Huber, knee 1 value 5.5000
 Huber, knee 6 value 19.0000
 Huber, knee 50 value 20.0000`,
-              { hints: ["A loss is built with no arguments, apart from HuberError, which takes its threshold. Its measure takes the outputs and the truths as two blocks of the same shape, one row per person and one column here.", "measure answers one object carrying both the value and the gradient, which is section 3’s rule that a caller cannot get one without the other. The gradient has the outputs’ shape, and ravel flattens it to four numbers.", "The threshold is in the target’s own units, kilograms here, so HuberError(threshold=6.0) puts the two four-kilogram misses inside the knee and the two eight-kilogram ones outside it."], check: numberCheck("What does Huber charge the measured four at a knee of 6 kilograms?", 19.0, 0.0005, "The four-kilogram misses are inside the knee and cost 8 each, as under squared error. The eight-kilogram misses are outside it and cost 6 × (8 − 6 / 2) = 30 each, so the batch costs (8 + 8 + 30 + 30) / 4 = 19. Widen the knee to 50 and every miss is inside it, which gives squared error’s 20. Narrow it to 1 and none is, which gives 5.5.") },
+              { hints: ["A loss is built with no arguments, apart from HuberError, which takes its threshold. Its measure takes the outputs and the truths as two blocks of the same shape, one row per person and one column here.", "measure answers one object carrying both the value and the gradient, which is section 3’s rule that a caller cannot get one without the other. The gradient has the outputs’ shape, and ravel flattens it to four numbers.", "The threshold is in the target’s own units, kilograms here, so HuberError(threshold=6.0) puts the two four-kilogram misses inside the knee and the two eight-kilogram ones outside it."], check: numberCheck("What does Huber charge the four height and weight measurements at a knee of 6 kilograms?", 19.0, 0.0005, "The four-kilogram misses are inside the knee and cost 8 each, as under squared error. The eight-kilogram misses are outside it and cost 6 × (8 − 6 / 2) = 30 each, so the batch costs (8 + 8 + 30 + 30) / 4 = 19. Widen the knee to 50 and every miss is inside it, which gives squared error’s 20. Narrow it to 1 and none is, which gives 5.5.") },
             ),
             exercise(
               "Score one row of three class scores",

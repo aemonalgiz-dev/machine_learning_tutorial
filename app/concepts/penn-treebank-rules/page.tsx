@@ -36,6 +36,7 @@ export default function PennTreebankRulesPage() {
       intuition={lessonIntuitions["penn-treebank-rules"]}
       technicalStart="Part 2. The Contraction, Cut Where the Grammar Wants It"
       openingTitle="A Written Word Can Contain More Than One Grammatical Piece"
+      playgroundTitle="Separate contractions and punctuation with explicit rules"
       playgroundIntro="Compare contractions and punctuation before and after tokenisation. Check both the output spelling and the span pointing back into the source."
       title="Penn Treebank Rules"
       tagline={"Should can't remain one piece, or should the negation be separated? Penn Treebank tokenization gives English contractions and punctuation consistent treatment so annotated text can be processed using the same conventions."}
@@ -106,7 +107,7 @@ export default function PennTreebankRulesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="2. The running sentence, cut, with every span">
+              <SubSection title="2. Follow each contraction and punctuation cut in the Alvarez sentence" id="2-the-running-sentence-cut-with-every-span">
                 <p>
                   Here is the whole method applied once. Nine pieces, each shown
                   with the half-open span of the sentence it stands for, so the
@@ -513,7 +514,7 @@ export default function PennTreebankRulesPage() {
                 <p>
                   Read that as an assumption rather than as a rule, because it is
                   one. It says the text is exactly one sentence. Where that holds
-                  the answer is right on both stops of the running sentence at
+                  the answer is right on both stops of the sentence about Dr. Alvarez at
                   once, which no rule reading only the characters around each
                   stop could manage. Where it does not hold, nothing raises an
                   objection.
@@ -619,7 +620,7 @@ export default function PennTreebankRulesPage() {
                 "Because the verb did happens to be three characters long",
               ],
               0,
-              "An annotator has to write down two facts, a past tense auxiliary verb and a negation, so two tags need two rows. The negation is spelled n’t, so the cut goes in front of the n, and the same treatment covers eight endings in all. The apostrophe is not being treated as punctuation here at all. The boundary rules read the same apostrophe as glue and keep didn’t whole, while cutting both compounds these rules keep, which is why the two rules’ nine pieces on the running sentence share only three, Alvarez, expect and the.",
+              "An annotator has to write down two facts, a past tense auxiliary verb and a negation, so two tags need two rows. The negation is spelled n’t, so the cut goes in front of the n, and the same treatment covers eight endings in all. The apostrophe is not being treated as punctuation here at all. The boundary rules read the same apostrophe as glue and keep didn’t whole, while cutting both compounds these rules keep, which is why the two rules’ nine pieces on the sentence about Dr. Alvarez share only three, Alvarez, expect and the.",
             ),
             trueFalse(
               "The rules cut can’t into ca and n’t, and the piece ca was placed there deliberately rather than falling out of the pattern by accident.",
@@ -1119,16 +1120,11 @@ export default function PennTreebankRulesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. What is left undecided, gathered">
-                <p>
-                  The cases below are gathered from the whole page. The right
-                  column says what the method does not determine and why, and it
-                  quotes a number where the number is a fact about the method
-                  rather than about any particular text.
-                </p>
+              <SubSection title="25. Which punctuation decisions belong to the annotation convention?" id="25-what-is-left-undecided-gathered">
+                <p>These cuts reproduce an annotation convention. When another application wants contractions or punctuation grouped differently, the disagreement belongs to the convention rather than to a numerical fitting error.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Punctuation or annotation choice"
+                  reasonHeading="How the convention treats it"
                   rows={[
                     {
                       expression: "a full stop ending an abbreviation",
@@ -1247,8 +1243,8 @@ export default function PennTreebankRulesPage() {
           title: "Practice. Putting the Rules to the Running Sentence",
           practice: [
             exercise(
-              "Cut the running sentence, and check that every span is honest",
-              ["Put the running sentence to the treebank rules and print each piece beside its span and the slice of the sentence that span names. Section 2 says every span is honest, in that the slice gives back the piece character for character. Then do the same for the sentence inside quotation marks, which Part 4 says is where that stops being true.", "Nine pieces for the bare sentence, every one of them its own slice. For the quoted sentence, count the pieces and count how many are not the slice their span names. The two that differ should be two characters wide while pointing at a span one character wide."],
+              "Cut the sentence about Dr. Alvarez, and check that every span is honest",
+              ["Put the sentence about Dr. Alvarez to the treebank rules and print each piece beside its span and the slice of the sentence that span names. Section 2 says every span is honest, in that the slice gives back the piece character for character. Then do the same for the sentence inside quotation marks, which Part 4 says is where that stops being true.", "Nine pieces for the bare sentence, every one of them its own slice. For the quoted sentence, count the pieces and count how many are not the slice their span names. The two that differ should be two characters wide while pointing at a span one character wide."],
               `from oop_ml import PennTreebankPreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -1340,7 +1336,7 @@ joined: 67 pieces, 1 of them a lone full stop
             ),
             exercise(
               "Put the fifteen contraction probes to the rules",
-              ["Section 7 puts fifteen short texts to the rules, nine that a clause covers and six that none does. Split each, print what came back, and count how many were cut at all. A text is cut when it gives more pieces than it has runs of non-space characters.", "The first nine should come apart and the last six should come back whole, including the running sentence’s own contraction typed with a curved apostrophe. Nothing in the output of a whole piece says whether a clause looked at it, which is the point."],
+              ["Section 7 puts fifteen short texts to the rules, nine that a clause covers and six that none does. Split each, print what came back, and count how many were cut at all. A text is cut when it gives more pieces than it has runs of non-space characters.", "The first nine should come apart and the last six should come back whole, including the sentence about Dr. Alvarez’s own contraction typed with a curved apostrophe. Nothing in the output of a whole piece says whether a clause looked at it, which is the point."],
               `from oop_ml import PennTreebankPreTokenizer
 
 probes = [

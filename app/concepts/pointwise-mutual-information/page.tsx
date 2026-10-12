@@ -37,6 +37,7 @@ export default function PointwiseMutualInformationPage() {
       intuition={lessonIntuitions["pointwise-mutual-information"]}
       technicalStart="Part 2. The Score, On One Pair"
       openingTitle="Together More Often Than We Would Expect"
+      playgroundTitle="Which word pairs occur more often than chance suggests?"
       playgroundIntro="Compare a pair's observed frequency with its independence baseline. Check how a rare pair can receive a large score despite having little supporting evidence."
       title="Pointwise Mutual Information"
       tagline={"Two common words can appear together often simply because both appear everywhere. Pointwise mutual information compares their observed association with what we would expect if their occurrences were independent."}
@@ -218,7 +219,7 @@ export default function PointwiseMutualInformationPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="5. One pair, worked all the way through">
+              <SubSection title="5. Compare one observed word pair with its independence baseline" id="5-one-pair-worked-all-the-way-through">
                 <p>
                   Take the and cat. They were counted together twice out of twelve
                   counted neighbourings in all. The word the took three of those
@@ -973,7 +974,7 @@ export default function PointwiseMutualInformationPage() {
           ),
         },
         {
-          title: "Part 6. Where The Score Stops Being Defined",
+          title: "Part 6. Zero Counts and Scores Supported by Very Little Evidence", id: "part-6-where-the-score-stops-being-defined",
           content: (
             <>
               <SubSection title="23. A pair that never occurred has no logarithm">
@@ -1032,16 +1033,11 @@ export default function PointwiseMutualInformationPage() {
                 </p>
               </SubSection>
 
-              <SubSection title="25. Where the method stops being defined">
-                <p>
-                  Several inputs leave the score with nothing to compute rather
-                  than something approximate to compute, and several more leave a
-                  genuine choice whose cost is worth knowing before it is made. The
-                  table gathers both, with what the mathematics says in each case.
-                </p>
+              <SubSection title="25. Zero Counts and Associations Built on Very Little Evidence" id="25-where-the-method-stops-being-defined">
+                <p>The logarithmic comparison needs nonzero probabilities. An unseen pair and a word with no count therefore require a stated treatment before the score can be interpreted.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Pair count or clipped value"
+                  reasonHeading="What the association score means"
                   rows={[
                     {
                       expression: "a pair that never occurred together",

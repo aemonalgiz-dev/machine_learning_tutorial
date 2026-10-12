@@ -39,6 +39,7 @@ export default function HeldOutEvaluationPage() {
       intuition={lessonIntuitions["held-out-evaluation"]}
       technicalStart="Part 4. Every Row Takes a Turn"
       openingTitle="The Model Has Already Seen the Answers"
+      playgroundTitle="Does the fitted rule work on people it has not seen?"
       playgroundIntro="Compare the training score with the held-out score. Change the split and notice that the evaluation itself varies with the examples chosen."
       title="Held-Out Evaluation"
       tagline={"A rule can fit the examples it has already seen without being useful on new ones. We need to put some examples aside and use them to check the predictions after fitting."}
@@ -939,10 +940,10 @@ export default function HeldOutEvaluationPage() {
         ],
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Making the Split and Scoring Procedure Reproducible" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="24. What a complete implementation specifies">
+              <SubSection title="24. Which rows are held out, and what is refitted?" id="24-what-a-complete-implementation-specifies">
                 <>
 <p>
                   A held-out evaluation states its deal in full. The share held out and how it is rounded to a row count, whether the rows are shuffled and by what seed, which block of the shuffled order is held out, how many folds and how uneven sizes are handled, whether the folds are stratified and on what column, what is refitted inside every fold, which metric is read on a fold and what happens when that metric is undefined there, whether the folds are averaged or pooled, and what the spread beside the summary is a range of.
@@ -962,7 +963,7 @@ export default function HeldOutEvaluationPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. The edges, each one run">
+              <SubSection title="25. Too few rows, absent classes and unusable scores" id="25-the-edges-each-one-run">
                 <p>
                   What follows is what the code behind this page actually
                   does at every edge a reader might hand it, each row run
@@ -972,8 +973,8 @@ export default function HeldOutEvaluationPage() {
                   documented rather than defended.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Training or test split"
+                  reasonHeading="What the score can tell us"
                   rows={[
                     { expression: "empty data, or one row", reason: "refused at the door, since a split needs a row on each side; a split of fewer than two rows is refused by name underneath as well." },
                     { expression: "two rows, one held out", reason: "the deal succeeds and the fit is refused, because one training row cannot pin even a straight line, with both counts named." },

@@ -21,7 +21,7 @@ export const BRACKETED = "The U.S. Navy (est. 1775) bought 1,000 ships.";
 export const NOT_PROSE = "e-mail me at a@b.com #now";
 
 export const PRESETS: { label: string; text: string }[] = [
-  { label: "The running sentence", text: RUNNING_SENTENCE },
+  { label: "The sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "The same sentence, quoted", text: QUOTED_SENTENCE },
   { label: "Two sentences in one text", text: TWO_SENTENCES },
   { label: "Ending in an abbreviation", text: ENDS_IN_AN_ABBREVIATION },

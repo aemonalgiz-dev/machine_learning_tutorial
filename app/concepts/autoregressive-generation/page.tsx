@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["autoregressive-generation"]}
     technicalStart="Part 2. The Probability of a Sequence"
     prerequisites={<>Useful foundations: <Link href="/concepts/next-token-prediction">Next-token prediction</Link>.</>}
+    playgroundTitle="Watch each chosen token become the next input"
     playgroundIntro="Inspect the first prefix, then follow the token appended at each step. Change the sampling seed to repeat the loop with different draws, or enable greedy selection. The end token can stop the loop before the requested length."
     playground={<ModernLearningExample topic="autoregressive-generation" />}
     sections={[

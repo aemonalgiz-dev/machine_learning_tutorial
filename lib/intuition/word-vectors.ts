@@ -22,7 +22,7 @@ export const wordVectors: Record<string, LessonIntuition> = {
     step("Decide whether magnitude should contribute", "A dot product responds to both alignment and magnitude. It can give a larger score when an aligned vector grows longer. That can be useful when magnitude carries evidence, but misleading when magnitude is an irrelevant side effect.", strips("Choose the rule to match what the representation means.", [["If length carries useful evidence", ["Consider a magnitude-sensitive score"]], ["If length is irrelevant", ["Consider normalizing or comparing direction"]]])),
     step("Check the meaning of the returned number", "Some functions return a distance, where smaller means closer. Others return a similarity score, where larger means more alike. Their ranges and special cases differ, so a ranking or threshold must use the right interpretation.", strips("The direction of the ranking is part of the rule.", [["Distance", ["Smaller usually means closer"]], ["Similarity", ["Larger usually means more alike"]]]))
   ], "There is no comparison rule independent of the representation", [
-    "The worked examples now calculate the available comparisons on the same vectors so their different behaviour is visible.",
+    "Keep the word vectors fixed and change how we compare them. A nearby word under Euclidean distance need not have the closest direction under cosine similarity.",
     "We also check special cases, including zero-length vectors, before using a score in a search or classifier."
   ]),
   "word2vec": story([
@@ -34,7 +34,7 @@ export const wordVectors: Record<string, LessonIntuition> = {
     step("Adjust vectors when predictions are poor", "The model starts with vectors that have not learned these relationships. Training changes them to improve its context predictions. Words appearing in similar surroundings receive related learning signals, even when their spellings differ.", strips("The training task supplies a reason to move the vectors.", [["Current vectors", ["Make a context prediction"]], ["Prediction error", ["Adjust the vectors"]], ["Further examples", ["Repeat across the corpus"]]], true)),
     step("Use the learned input vectors as representations", "After training, we can compare word vectors instead of making the original context predictions. Similar contexts can produce useful neighbours, but a tiny or biased corpus can produce misleading ones too.", strips("Inspect what the prediction exercise taught the representation.", [["After training", ["Compare neighbours", "Check corpus coverage", "Evaluate the intended use"]]]))
   ], "Predicting context provides the learning signal", [
-    "The full example makes the window, training pairs, and update rule explicit. Its small corpus lets us inspect what the model actually saw.",
+    "The context window determines which word pairs reach training. We can list those pairs from the small corpus, then follow one update to see what evidence moves the vectors.",
     "The technical sections then explain efficient output objectives without requiring us to begin with their equations."
   ]),
   "fasttext": story([
@@ -70,7 +70,7 @@ export const wordVectors: Record<string, LessonIntuition> = {
     step("Replace many coordinates with a few directions", "Singular value decomposition finds orthogonal directions that capture the table's strongest variation. Keeping only some directions gives a lower-rank approximation. These directions can combine many words at once.", strips("Compression retains selected patterns of variation.", [["Original description", ["Many word coordinates"]], ["Reduced description", ["A few retained direction coordinates"]]], true)),
     step("Compare documents in the reduced space", "Documents can now be compared through their reduced coordinates. Some detail has been discarded, so inspect what the approximation retains and loses. A mathematical direction is not automatically a neatly named human topic.", strips("A smaller representation creates a tradeoff.", [["Retained", ["Broad patterns captured by selected directions"]], ["Discarded", ["Variation outside those directions"]]]))
   ], "A smaller table representation can reveal shared usage", [
-    "The worked example introduces weighting, decomposition, and reconstruction in that order so each operation has a purpose.",
+    "Weight the word counts, retain a few singular directions, and reconstruct the table from them. Comparing the reconstruction with the original shows which usage patterns survived the smaller representation.",
     "Choosing the retained rank controls the approximation. The document examples let us inspect whether that compression helps the comparisons we care about."
   ]),
   "pointwise-mutual-information": story([

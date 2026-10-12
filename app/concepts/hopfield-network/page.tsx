@@ -38,6 +38,7 @@ export default function HopfieldNetworkPage() {
       intuition={lessonIntuitions["hopfield-network"]}
       technicalStart="Part 2. Storing Patterns in One Shot"
       openingTitle="Can a Damaged Pattern Find Its Way Back?"
+      playgroundTitle="Can a damaged pattern settle back into memory?"
       playgroundIntro="Damage a stored pattern and follow recall one update at a time. Check the final pattern as well as the energy, since settling is not the same as recalling correctly."
       title="Hopfield Networks"
       tagline={"We can often recognise a familiar pattern even when part of it is damaged. A Hopfield network stores patterns in its connections and uses repeated updates to try to recover a stable pattern from a noisy input."}
@@ -138,7 +139,7 @@ export default function HopfieldNetworkPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="4. The four cells worked by hand">
+              <SubSection title="4. Calculate the connections among four memory cells" id="4-the-four-cells-worked-by-hand">
                 <p>
                   Four cells and two patterns are small enough to do entirely on paper, and the page carries them
                   alongside the T. Store A = (+1, +1, −1, −1) and B = (+1, +1, −1, +1), which agree everywhere except
@@ -775,21 +776,16 @@ export default function HopfieldNetworkPage() {
           ),
         },
         {
-          title: "Part 8. Implementation and Failure Contracts",
+          title: "Part 8. Choosing How Memories Are Stored and Cells Are Updated" , id: "part-8-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="26. Implementation and failure contracts">
-                <p>
-                  A complete implementation states the value convention, +1 and −1 rather than 1 and 0; the storage rule
-                  with its scaling and its cleared diagonal; the update rule, one cell at a time or all at once, and the
-                  visiting order and its seed under the first; what a weighted sum of exactly zero does; the stopping
-                  condition and the pass limit, and which of the two ended a given recall; the energy and its sign
-                  convention; and how new patterns are matched to the fitted cells, by name or by position. Every row
-                  below was run, and the table reports what came back.
-                </p>
+              <SubSection title="26. Specify the update order and stopping condition for recall" id="26-implementation-and-failure-contracts">
+                <p>A memory must use the same cell convention during storage and recall. Here cells hold +1 or −1. The storage rule also specifies its scaling and clears the diagonal so a cell does not vote for itself.</p>
+                <p>Recall depends on whether cells update together or one at a time. For sequential updates, the visiting order and its seed matter. Decide what a weighted sum of exactly zero does, and report whether recall stopped because it settled or because it reached the pass limit.</p>
+                <p>The energy sign convention and the way new patterns match fitted cells, by name or position, complete the comparison. The table records the library results for the boundary cases below.</p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Cells, patterns or recall setting"
+                  reasonHeading="Effect on storing and recalling a pattern"
                   rows={[
                     { expression: "no cells at all", reason: "refused at the boundary, by the same guard every feature on the site passes through." },
                     { expression: "one cell", reason: "refused; a network needs at least two cells to have a connection." },

@@ -39,6 +39,7 @@ export default function RestrictedBoltzmannMachinePage() {
       intuition={lessonIntuitions["restricted-boltzmann-machine"]}
       technicalStart="Part 2. What the Word Restricted Buys"
       openingTitle="Learn What the Patterns Have in Common"
+      playgroundTitle="Let visible and hidden units update one another"
       playgroundIntro="Compare the visible input, hidden responses, and reconstruction. Repeat the reconstruction to see the role of sampling rather than treating one result as guaranteed."
       title="Restricted Boltzmann Machines"
       tagline={"An observation may reflect several underlying patterns we cannot see directly. A restricted Boltzmann machine uses hidden units to represent those patterns and learn a probability model of the visible data."}
@@ -1193,10 +1194,10 @@ export default function RestrictedBoltzmannMachinePage() {
           ),
         },
         {
-          title: "Part 8. Implementation and Failure Contracts",
+          title: "Part 8. Recording the Sampling and Learning Choices" , id: "part-8-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="27. What a complete implementation must specify">
+              <SubSection title="27. The machine state needed to reproduce a training run" id="27-what-a-complete-implementation-must-specify">
                 <p>
                   Very little of this method is forced, so a description that
                   does not state its choices cannot be reproduced. The list below
@@ -1275,8 +1276,8 @@ export default function RestrictedBoltzmannMachinePage() {
                   be read against each other rather than taken on trust.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="what should happen"
+                  expressionHeading="Visible-cell or sampling condition"
+                  reasonHeading="What the binary model can accept"
                   rows={[
                     {
                       expression: "a cell holding 2, or −1",

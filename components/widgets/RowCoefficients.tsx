@@ -87,7 +87,7 @@ export function RowCoefficients() {
         <span className="flex gap-1 rounded-md border border-slate-300 p-0.5 dark:border-slate-700">
           {(["ring", "four"] as const).map((choice) => (
             <button key={choice} onClick={() => setCloud(choice)} className={"rounded px-2 py-0.5 text-xs font-medium transition " + (cloud === choice ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800")}>
-              {choice === "ring" ? "the ring, radial" : "the measured four, linear"}
+              {choice === "ring" ? "the ring, radial" : "the four height and weight measurements, linear"}
             </button>
           ))}
         </span>

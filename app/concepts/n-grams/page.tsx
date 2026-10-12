@@ -38,6 +38,7 @@ export default function NGramsPage() {
       intuition={lessonIntuitions["n-grams"]}
       technicalStart="Part 2. From Counts to a Prediction"
       openingTitle="One Previous Word May Not Be Enough"
+      playgroundTitle="Predict a word from the words just before it"
       playgroundIntro="Compare predictions with shorter and longer contexts. Inspect an unseen continuation and observe how smoothing changes its probability."
       title="N-Grams"
       tagline={"The words immediately before a position give us clues about what might come next. An n-gram model uses counts of short sequences to make that prediction, with adjustments for sequences missing from its training data."}
@@ -116,7 +117,7 @@ export default function NGramsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="2. The running sentence as runs of words">
+              <SubSection title="2. Read the Alvarez sentence as overlapping word sequences" id="2-the-running-sentence-as-runs-of-words">
                 <p>
                   Take the sentence this section of the site carries throughout,
                   Dr. Alvarez didn&rsquo;t expect the low-cost re-analysis. Split
@@ -173,7 +174,7 @@ export default function NGramsPage() {
                 </Equation>
                 <WorkedExample title="What the framing adds">
                   <p>
-                    The running sentence is seven words. Framed for a window of
+                    The sentence about Dr. Alvarez is seven words. Framed for a window of
                     two it becomes nine positions, one start marker and one end
                     marker, and produces eight windows. Framed for a window of
                     three it becomes ten positions, two start markers and one end
@@ -195,7 +196,7 @@ export default function NGramsPage() {
               <SubSection title="4. How many runs there could be, and how few there are">
                 <p>
                   Everything on this page from here on is fitted to forty-four
-                  short sentences from the world the running sentence belongs to,
+                  short sentences from the world the sentence about Dr. Alvarez belongs to,
                   reports and analyses and samples arriving late. They hold 326
                   word occurrences and 62 distinct words, so with the end marker
                   and one stand-in for anything unseen the model has 64 words it
@@ -344,7 +345,7 @@ export default function NGramsPage() {
               <SubSection title="7. The same rule on a larger text">
                 <p>
                   Fit the same rule to the forty-four sentences, ask it to read
-                  the running sentence, and every step is one division. Two of
+                  the sentence about Dr. Alvarez, and every step is one division. Two of
                   the sentence&rsquo;s words are not in the vocabulary at all,
                   since nothing in the training text contains didn&rsquo;t or
                   expect, and both are replaced by the one stand-in the model
@@ -367,7 +368,7 @@ export default function NGramsPage() {
                     ["low-cost", "re-analysis.", "2 of 4", "0.4641"],
                     ["re-analysis.", "end", "3 of 3", "0.9051"],
                   ]}
-                  caption="The running sentence read by a two-word model, with a little smoothing applied so that the zeroes of the next Part do not swallow the table. Three of the eight runs never occurred in training."
+                  caption="The sentence about Dr. Alvarez read by a two-word model, with a little smoothing applied so that the zeroes of the next Part do not swallow the table. Three of the eight runs never occurred in training."
                 />
                 <p>
                   Two rows are worth staring at. Dr. was followed by Alvarez
@@ -469,7 +470,7 @@ export default function NGramsPage() {
                 "The context was seen six times in the forty-four sentences",
               ],
               0,
-              "Two to the power of the bits is the number of equally likely words the answer is worth, and two to the sixth is 64, the whole vocabulary. That is the ceiling for this model, so any context it has seen comes in below it, 4.9775 bits at the start of a sentence and 5.6283 after the. The 0.0156 in two rows of the running sentence is the same fact as one probability, one divided by 64.",
+              "Two to the power of the bits is the number of equally likely words the answer is worth, and two to the sixth is 64, the whole vocabulary. That is the ceiling for this model, so any context it has seen comes in below it, 4.9775 bits at the start of a sentence and 5.6283 after the. The 0.0156 in two rows of the sentence about Dr. Alvarez is the same fact as one probability, one divided by 64.",
             ),
         ],
         },
@@ -571,7 +572,7 @@ export default function NGramsPage() {
                   not fitted to, the same models have no score at all, at every
                   width from one to five.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why relative counts maximise the training likelihood">
                   <p>
                     Write the probability of the training text as a product over
                     contexts, and for one context the terms are the counts of
@@ -1103,7 +1104,7 @@ export default function NGramsPage() {
           ),
         },
         {
-          title: "Part 7. Where the Method Stops Being Defined",
+          title: "Part 7. What Falls Outside the Context Window?" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="24. A dependency the window cannot reach">
@@ -1229,8 +1230,8 @@ export default function NGramsPage() {
                   that somebody has to make and that changes the answer.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Context or observed sequence"
+                  reasonHeading="Which probability can be assigned"
                   rows={[
                     {
                       expression: "a context that never occurred",
@@ -1255,7 +1256,7 @@ export default function NGramsPage() {
                     {
                       expression: "the stand-in itself never occurring in training",
                       reason:
-                        "then the model has never seen an unfamiliar word and has no opinion about what surrounds one, so both of the running sentence’s unfamiliar words are answered from the smoothing alone. Relabelling the rarest training words as the stand-in before counting is the repair, and it costs those words their own entries.",
+                        "then the model has never seen an unfamiliar word and has no opinion about what surrounds one, so both of the sentence about Dr. Alvarez’s unfamiliar words are answered from the smoothing alone. Relabelling the rarest training words as the stand-in before counting is the repair, and it costs those words their own entries.",
                     },
                     {
                       expression: "a smoothing constant of exactly zero",

@@ -185,7 +185,7 @@ export function StatisticsPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <Button onClick={() => setPoints(IDEAL_CASE)}>An Ideal Case</Button>
-        <Button onClick={() => setPoints(WORKED_PEOPLE)}>The measured five</Button>
+        <Button onClick={() => setPoints(WORKED_PEOPLE)}>Five height and weight pairs</Button>
         <Button onClick={() => setPoints(randomPeople())}>Random people</Button>
         <Button onClick={() => setPoints(shapelessPeople())}>No pattern</Button>
         <span className="ml-auto text-xs text-slate-500 dark:text-slate-500">

@@ -18,7 +18,7 @@ import {
 } from "./tokenBasicsFixtures";
 
 const TEXTS = [
-  { label: "the running sentence", text: RUNNING_SENTENCE },
+  { label: "the sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "spaced differently", text: AWKWARD_SENTENCE },
   { label: "two unseen letters", text: ACCENTED_SENTENCE },
 ];

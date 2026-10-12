@@ -1,4 +1,5 @@
 import { lessonIntuitions } from "@/lib/intuition";
+import { presentIntuition } from "@/lib/intuition/presentation";
 import { GuidedIntuition, IntuitionConnection } from "@/components/concept/GuidedIntuition";
 import type { Metadata } from "next";
 import {
@@ -45,7 +46,7 @@ export default function StatisticsPrimerPage() {
     >
       <PrimerSection title="What Can a Handful of Measurements Tell Us?">
 {lessonIntuitions["statistics"].opening.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
-<GuidedIntuition lesson={lessonIntuitions["statistics"]} />
+<GuidedIntuition lesson={presentIntuition("statistics", lessonIntuitions["statistics"])} />
 <IntuitionConnection lesson={lessonIntuitions["statistics"]} />
 </PrimerSection>
 
@@ -525,7 +526,7 @@ export default function StatisticsPrimerPage() {
             0.953 either way.
           </p>
         </WorkedExample>
-        <WhyThisWorks>
+        <WhyThisWorks title="Correlation as the average product of standard scores">
           <p>
             There is a second way to write the same quantity that makes what
             happened clearer. Divide each deviation by its own column&rsquo;s
@@ -574,9 +575,9 @@ export default function StatisticsPrimerPage() {
           <Equation>{"r = (2.384 + 0.238 + 0 + 0.715 + 1.430) / 5 = 4.767 / 5 ≈ 0.953"}</Equation>
           <p>
             The same 0.953 as the covariance over the two spreads, reached by a
-            route with no units anywhere in it. Pressing the button for the
-            measured five in the box above shows the same figure in its
-            correlation readout.
+            route with no units anywhere in it. Select Five height and weight
+            pairs in the statistics activity to check the correlation readout
+            against this calculation.
           </p>
         </WorkedExample>
         <p>

@@ -31,7 +31,8 @@ export default function SimpleLinearRegressionPage() {
       intuition={lessonIntuitions["simple-linear-regression"]}
       technicalStart="Part 3. What Best-Fitting Means"
       openingTitle="One Line, Five Different Answers"
-      playgroundIntro="Choose The measured five to load the worked example, then drag a point. Watch the automatically fitted line and the gaps between observations and predictions change."
+      playgroundTitle="How does moving one person change the fitted line?"
+      playgroundIntro="Choose Five height and weight pairs, then drag one person's point. Will the fitted line move closer to that person at the expense of the others? Compare their prediction errors as the line is fitted again."
       title="Simple linear regression"
       tagline={"Taller people tend to weigh more, but height does not determine weight exactly. We will use that relationship to build a prediction rule and work out what makes one line fit the observations better than another."}
       prerequisites={
@@ -314,8 +315,7 @@ export default function SimpleLinearRegressionPage() {
                 </>
                 <>
                   <p>
-                    The widget at the top fits the line automatically. Load The measured
-                    five to reproduce the example, then drag a point and watch the
+                    The widget at the top fits the line automatically. Select Five height and weight pairs to reproduce these values, then drag a point and watch the
                     fitted line and its residuals change. Each new dataset has its own
                     best-fitting coefficients.
                   </p>
@@ -999,7 +999,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `AllSameValuesError
 input_values must not be constant (zero variance)`,
-              { hints: ["Every refusal the library makes derives from one base class, so catching that one catches whichever specific refusal this turns out to be.", "The denominator of the slope in Part 6 is the sum of squared height deviations, and five equal heights make it zero. The refusal is that division declined by name rather than attempted."] },
+              { hints: ["The denominator of the slope in Part 6 is the sum of squared height deviations, and five equal heights make it zero. The refusal is that division declined by name rather than attempted."] },
             ),
           ],
         },

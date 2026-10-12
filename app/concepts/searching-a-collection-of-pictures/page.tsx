@@ -37,6 +37,7 @@ export default function SearchingACollectionOfPicturesPage() {
       intuition={lessonIntuitions["searching-a-collection-of-pictures"]}
       technicalStart="Part 2. What the Exact Answer Costs"
       openingTitle="A Useful Similarity Measure Still Has to Search the Collection"
+      playgroundTitle="Which pictures does this query retrieve?"
       playgroundIntro="Compare each indexed result with the exact neighbours. Read the number of comparisons together with recall, the share of exact neighbours recovered."
       title="Searching a Collection of Pictures"
       tagline={"Once pictures have numerical representations, we can search for nearby ones. Comparing every picture works for a small collection, but a larger collection gives us a reason to consider search indexes and their compromises."}
@@ -896,7 +897,7 @@ export default function SearchingACollectionOfPicturesPage() {
           ),
         },
         {
-          title: "Part 6. Where the Search Stops Being Defined",
+          title: "Part 6. Missing Candidates, Tied Distances and Empty Cells", id: "part-6-where-the-search-stops-being-defined",
           content: (
             <>
               <SubSection title="23. Where the exact answer stops being one answer">
@@ -908,8 +909,8 @@ export default function SearchingACollectionOfPicturesPage() {
                   says.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Collection or neighbour request"
+                  reasonHeading="What the retrieval can return"
                   rows={[
                     { expression: "an empty collection", reason: "the nearest of nothing does not exist. A minimum over an empty set is undefined, and any answer returned would be a convention rather than a nearest picture." },
                     { expression: "k of zero", reason: "the answer is the empty list, which is defined and useless, and precision at k and recall at k both divide by k, so each is a zero over a zero." },
@@ -929,7 +930,7 @@ export default function SearchingACollectionOfPicturesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="24. Where the index stops being defined">
+              <SubSection title="24. Which coarse cells will the index search?" id="24-where-the-index-stops-being-defined">
                 <p>
                   The inverted file adds two decisions to the exact search, which
                   cell a question belongs to and which cells to open, and the
@@ -938,8 +939,8 @@ export default function SearchingACollectionOfPicturesPage() {
                   stops saving anything.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Query or coarse-cell condition"
+                  reasonHeading="Effect on which pictures are searched"
                   rows={[
                     { expression: "a question equally near two cell centres", reason: "which cell is nearest is undefined. If the tie falls inside the cells opened nothing turns on it; if it falls at the last cell opened, which cell is searched is a choice, and the recall can differ between the two choices." },
                     { expression: "a question equally near every cell centre", reason: "the order of the cells is undefined from the first place on, so which cells a search of p cells opens is entirely the tie rule’s decision, and the index is no longer choosing by nearness at all." },

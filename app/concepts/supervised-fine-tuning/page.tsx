@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["supervised-fine-tuning"]}
     technicalStart="Part 2. Calculate Response-Only Loss"
     prerequisites={<>Useful foundations: <Link href="/concepts/next-token-prediction">Next-token prediction</Link>{", "}<Link href="/concepts/backpropagation">backpropagation</Link>.</>}
+    playgroundTitle="Which tokens should this example teach the model to produce?"
     playgroundIntro="Compare response-only scoring with scoring all targets. The prompt stays available in both cases. Inspect which target derivatives become zero when prompt predictions are excluded from the loss."
     playground={<ModernLearningExample topic="supervised-fine-tuning" />}
     sections={[
@@ -334,7 +335,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `InvalidValuesError
 at least one position must be scored`,
-              { hints: ["Every refusal the library makes derives from MLLibError, so catching that one class catches whichever specific refusal this turns out to be.", "type(refusal).__name__ gives the name of the class that was raised."] },
+              { hints: ["type(refusal).__name__ gives the name of the class that was raised."] },
             ),
           ],
         },

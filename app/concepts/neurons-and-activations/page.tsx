@@ -37,6 +37,7 @@ export default function NeuronsAndActivationsPage() {
       intuition={lessonIntuitions["neurons-and-activations"]}
       technicalStart="Part 3. The Four Activation Functions"
       openingTitle="What Is Inside an Artificial Neuron?"
+      playgroundTitle="How do weights, bias and activation change the output?"
       playgroundIntro="Change one weight, the bias, or the activation at a time. Compare the weighted score with the final output so you can see which operation changed it."
       title="A Neuron"
       tagline={"An artificial neuron starts with three fundamental components: weights, a bias, and an activation function. We will work through what each contributes before putting them together to calculate an output."}
@@ -79,13 +80,28 @@ export default function NeuronsAndActivationsPage() {
                     "x₁ = (height − 151.48) / 15.61\nx₂ = (weight − 51.48) / 14.45"
                   }
                 </Equation>
-                <WorkedExample title="Two people the page keeps coming back to">
+                <WorkedExample title="Two profiles with the same body-weight input">
                   <>
 <p>
-                    The first person in the crowd is a child of 147 centimetres and 41 kilograms, who standardises to (−0.287, −0.725), a little short and rather light. The page&rsquo;s worked person is one deviation above the mean in both measurements, at (1, 1), which is 167.1 centimetres and 65.9 kilograms, and the page calls them the tall heavy person.
+                    We want to see what the height input contributes, so we will
+                    compare two profiles with the same body-weight input. Both
+                    are one standard deviation above the mean body weight. One
+                    is taller than average and the other is shorter.
                   </p>
                   <p>
-                    A second worked person at (−1, 1) is a deviation short and a deviation heavy, and the page calls them the short heavy person. Both are cells of the lattice the box draws, so every number they produce can be read off it.
+                    We will call them the tall heavy person and the short heavy
+                    person in the later calculations. Their coordinates are shown
+                    separately below, so we can follow the same inputs through
+                    each activation function.
+                  </p>
+                  <NumberTable headings={["Profile", "Height input x₁", "Body-weight input x₂"]}
+                    rows={[["Tall heavy person", "1", "1"], ["Short heavy person", "−1", "1"]]} />
+                  <p>
+                    The taller profile corresponds to about 167.1 centimetres
+                    and 65.9 kilograms. For comparison, the first recorded child
+                    in the crowd measures 147 centimetres and 41 kilograms,
+                    giving standardised inputs of −0.287 and −0.725. Both input
+                    profiles in the table can also be selected on the activity&apos;s grid.
                   </p>
 </>
                 </WorkedExample>
@@ -111,10 +127,10 @@ export default function NeuronsAndActivationsPage() {
                   page keeps the two apart by calling the inputs x₁ and x₂.
                 </p>
                 <Equation>{"z = w₁·x₁ + w₂·x₂ + b"}</Equation>
-                <WorkedExample title="The worked neuron on the tall heavy person">
+                <WorkedExample title="Calculate the score for the taller, heavier profile">
                   <>
                     <p>
-                      The worked neuron has weights two and minus one, with bias one
+                      Set the neuron weights to two and minus one, with bias one
                       half. For the person at (1, 1), multiply each input by its own
                       weight and add the bias.
                     </p>
@@ -150,7 +166,7 @@ export default function NeuronsAndActivationsPage() {
                   changes. Drag the bias and the whole plane rises or falls
                   without tilting.
                 </p>
-                <InAModel title="The worked neuron at the four corners">
+                <InAModel title="Compare scores at the four input corners">
                   <p>
                     With weights 2 and −1 and a bias of 0.5, the corner
                     three deviations short and three light scores −2.5, the
@@ -574,7 +590,7 @@ export default function NeuronsAndActivationsPage() {
                     { expression: "tanh′(z) = 4·σ′(2z) = 1 − tanh²(z)", reason: "differentiate 2·σ(2z) − 1 and substitute the sigmoid’s slope back in" },
                   ]}
                 />
-                <WorkedExample title="The slopes at the two worked people">
+                <WorkedExample title="Compare activation slopes for the two input profiles">
                   <>
                     <p>
                       At score 1.5, sigmoid and hyperbolic tangent both have relatively
@@ -961,10 +977,10 @@ export default function NeuronsAndActivationsPage() {
           ),
         },
         {
-          title: "Part 7. Implementation And Failure Contracts",
+          title: "Part 7. Specifying the Inputs and Activation Before Using a Neuron", id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="23. What a complete implementation states">
+              <SubSection title="23. The neuron needs an input shape, an activation and a parameter state" id="23-what-a-complete-implementation-states">
                 <p>
                   A complete neuron states how many inputs it reads, which
                   is its number of weights and cannot be zero; the order its
@@ -989,8 +1005,8 @@ export default function NeuronsAndActivationsPage() {
                   row says what the neuron itself does when asked directly.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Inputs, weights or activation"
+                  reasonHeading="What the neuron can compute"
                   rows={[
                     { expression: "a neuron with no weights", reason: "refused; a neuron with no inputs is a constant wearing a neuron’s name, and the request asks for exactly two weights before any neuron is built." },
                     { expression: "a neuron with one weight", reason: "accepted, and it is the logistic page’s single-input model; the playground’s request asks for two because its plane has two axes." },
@@ -1071,7 +1087,7 @@ export default function NeuronsAndActivationsPage() {
           title: "Practice. Building the Neuron With the Library",
           practice: [
             exercise(
-              "Push the two worked people through the worked neuron",
+              "Apply the neuron to two height and weight profiles",
               ["Part 1 builds a neuron with weights 2 and −1 and a bias of one half, and reads the tall heavy person at (1, 1) and the short heavy person at (−1, 1) through it. Build that neuron with Neuron once for each of the four activations and ask it about both people with respond_to.", "The score should be 1.5 and −2.5 every time, whichever activation is chosen, and only the output should change from line to line. Part 3 gives the tall heavy person’s outputs as 1.5, 1.5, 0.8176 and 0.9051. Print both people’s score and output to four places."],
               `from oop_ml import HyperbolicTangent, Identity, Neuron, RectifiedLinear, Sigmoid
 

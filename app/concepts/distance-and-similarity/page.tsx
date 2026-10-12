@@ -37,6 +37,7 @@ export default function DistanceAndSimilarityPage() {
       intuition={lessonIntuitions["distance-and-similarity"]}
       technicalStart="Part 2. Six Rules, Asked of Two Words"
       openingTitle="The Vectors Are Fixed; the Nearest Word Can Still Change"
+      playgroundTitle="When do closeness and similarity disagree?"
       playgroundIntro="Choose the same pair under different comparison rules. Check whether a high or low score means a close match and whether vector length affects it."
       title="Distance and Similarity"
       tagline={"Once words have vectors, we still need to decide what makes two vectors similar. Their distance, direction, and length can give us different answers, depending on the comparison we choose."}
@@ -206,7 +207,7 @@ export default function DistanceAndSimilarityPage() {
                   it just as badly once it has been subtracted from a ceiling,
                   which is the failure Part 5 measures on this collection.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why subtracting similarity reverses its ordering">
                   <p>
                     Take two pairs with similarities s and t and suppose s is
                     greater than t. Then c &minus; s is less than c &minus; t
@@ -688,7 +689,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                   Neither of those orders is the one the straight line gives on
                   the table before scaling, which is what step 15 shows.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Deriving the distance between two unit vectors">
                   <p>
                     Expanding the square of the gap gives ‖a‖² &minus; 2(a
                     &middot; b) + ‖b‖², and both squared lengths are 1, so the
@@ -1064,7 +1065,7 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
           ),
         },
         {
-          title: "Part 6. Where Nearness Stops Being Defined",
+          title: "Part 6. Zero Directions and Comparisons Without Shared Coordinates", id: "part-6-where-nearness-stops-being-defined",
           content: (
             <>
               <SubSection title="22. Nothing in the data chooses the rule">

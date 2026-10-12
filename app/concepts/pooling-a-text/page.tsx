@@ -38,6 +38,7 @@ export default function PoolingATextPage() {
       intuition={lessonIntuitions["pooling-a-text"]}
       technicalStart="Part 3. Averaging The Positions Instead"
       openingTitle="One Vector for a Sentence Full of Words"
+      playgroundTitle="What survives when word vectors become one text vector?"
       playgroundIntro="Compare sentence vectors under different weighting rules. Try sentences with the same words in a different order and inspect what each representation can distinguish."
       title="Pooling a Text"
       tagline={"Comparing whole sentences often requires one vector per sentence. Pooling combines their token vectors into a fixed-size representation, but the choice of combination determines which details we can still recover."}
@@ -301,7 +302,7 @@ export default function PoolingATextPage() {
                   to be the same angle, and it comes out at three quarters for all
                   three pairs.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="How shared function words can dominate the average">
                   <>
                     <p>
                       Each text contains the and and twice, we once, and three content
@@ -461,7 +462,7 @@ export default function PoolingATextPage() {
                   that carry the most. On the hand-built collection that is
                   visible in one document.
                 </p>
-                <WorkedExample title="One document, worked all the way through">
+                <WorkedExample title="Why the repeated word dominates this document average">
                   <p>
                     The document is the cat the dog. The position of cat is (1, 0,
                     0, 0.1) and of dog is (1, 0, 0, &minus;0.1), and the position
@@ -1015,7 +1016,7 @@ export default function PoolingATextPage() {
         ],
         },
         {
-          title: "Part 6. Where Pooling Stops Being Defined",
+          title: "Part 6. Words and Directions the Document Vector Loses", id: "part-6-where-pooling-stops-being-defined",
           content: (
             <>
               <SubSection title="22. Every rule here is blind to order">
@@ -1133,7 +1134,7 @@ export default function PoolingATextPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. The cases with nothing to compute">
+              <SubSection title="25. Empty texts and averages with no direction" id="25-the-cases-with-nothing-to-compute">
                 <p>
                   Four inputs make one of these calculations undefined rather than
                   merely awkward, and it is worth knowing which quantity fails and
@@ -1141,8 +1142,8 @@ export default function PoolingATextPage() {
                   to make.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the mathematics says"
+                  expressionHeading="Text, vocabulary or shared direction"
+                  reasonHeading="What remains after pooling"
                   rows={[
                     {
                       expression: "a text none of whose words has a position",

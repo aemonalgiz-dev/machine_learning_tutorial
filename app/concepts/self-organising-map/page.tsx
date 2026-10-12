@@ -40,6 +40,7 @@ export default function SelfOrganisingMapPage() {
       intuition={lessonIntuitions["self-organising-map"]}
       technicalStart="Part 2. One Person, One Presentation"
       openingTitle="A Grouping Is Useful; a Map Can Show More"
+      playgroundTitle="Arrange nearby observations on a map"
       playgroundIntro="Follow one example's winning cell and the neighbouring cells it updates. Compare their grid positions with the feature values those cells represent."
       title="Self-Organising Maps"
       tagline={"A large collection of measurements is difficult to picture at once. A self-organising map arranges representative examples on a small grid, trying to keep similar observations near one another."}
@@ -922,10 +923,10 @@ export default function SelfOrganisingMapPage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Specifying the Grid and Its Learning Schedule" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="27. What a complete implementation must specify">
+              <SubSection title="27. Grid geometry, neighbourhood reach and the stopping rule" id="27-what-a-complete-implementation-must-specify">
                 <p>
                   A description of this method is incomplete until it states the
                   shape of the grid and how many cells it holds, how grid
@@ -957,7 +958,7 @@ export default function SelfOrganisingMapPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="28. The edges">
+              <SubSection title="28. Empty input, tied winners and a map with too few cells" id="28-the-edges">
                 <p>
                   Each row below is a request that was actually made while this
                   page was served, and the sentence beside it is either the

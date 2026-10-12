@@ -42,6 +42,7 @@ export default function Word2vecPage() {
       intuition={lessonIntuitions["word2vec"]}
       technicalStart="Part 3. Which Side Predicts Which"
       openingTitle="Learn a Word by Trying to Predict Its Neighbours"
+      playgroundTitle="Move word vectors by changing their neighbours"
       playgroundIntro="Inspect the centre-context training pairs before the learned neighbours. Compare the resulting similarities across training settings and random starts."
       title="Word2vec"
       tagline={"Words used in similar contexts often have something in common. Word2vec uses a word-prediction task to learn vectors that capture useful regularities in those surrounding words."}
@@ -986,7 +987,7 @@ export default function Word2vecPage() {
           ),
         },
         {
-          title: "Part 7. Where Word2vec Stops Being Defined",
+          title: "Part 7. When the Corpus Supplies Too Little Context", id: "part-7-where-word2vec-stops-being-defined",
           content: (
             <>
               <SubSection title="22. The objective is not what anyone wanted">
@@ -1083,16 +1084,11 @@ export default function Word2vecPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="25. Where the method stops being defined">
-                <p>
-                  Several inputs leave word2vec with nothing to compute rather
-                  than something approximate to compute, and a few more leave it
-                  with a genuine choice whose cost is worth knowing. The table
-                  gathers both, with what the mathematics says in each case.
-                </p>
+              <SubSection title="25. Words Without Context and Comparisons Without Evidence" id="25-where-the-method-stops-being-defined">
+                <p>A word with no usable context supplies no context-based training evidence. A zero vector also has no cosine direction. These failures need different explanations even if both prevent a useful neighbour list.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Word or context evidence"
+                  reasonHeading="What the training pairs can teach"
                   rows={[
                     { expression: "a vocabulary of one word", reason: "there is no pair to train on. A window round the only word contains only itself, and a wrong answer has to be drawn from the words that are not the right one, of which there are none." },
                     { expression: "a word that occurs once", reason: "defined, and determined mostly by where it started. Its vector accumulates the corrections of one window and nothing else, which is why a minimum count exists; the threshold is a judgement, not a fact about the data." },

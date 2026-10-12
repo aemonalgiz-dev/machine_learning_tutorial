@@ -37,6 +37,7 @@ export default function PatternWordsPage() {
       intuition={lessonIntuitions["the-pattern-language-models-use"]}
       technicalStart="Part 2. One Expression, Twelve Branches"
       openingTitle="The Space Has to Belong Somewhere"
+      playgroundTitle="Watch the pattern separate words, numbers and punctuation"
       playgroundIntro="Make the spaces visible and inspect which piece owns each one. Join the pieces and compare the result with the original text."
       title="The Pattern Language Models Use"
       tagline={"Before learning smaller pieces, a tokenizer may need to separate runs of letters, numbers, and punctuation. A regular expression can describe those initial groups while retaining information about the spaces around them."}
@@ -109,7 +110,7 @@ export default function PatternWordsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="2. The running sentence, cut, with the spaces visible">
+              <SubSection title="2. Separate the Alvarez sentence while keeping its spaces" id="2-the-running-sentence-cut-with-the-spaces-visible">
                 <p>
                   Here is the whole method applied once. Fourteen pieces, each
                   shown with the half-open span of the sentence it stands for,
@@ -539,7 +540,7 @@ export default function PatternWordsPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             choice(
-              "The running sentence is fifty-one characters, six of them spaces. How many of the fourteen pieces begin with a space?",
+              "The sentence about Dr. Alvarez is fifty-one characters, six of them spaces. How many of the fourteen pieces begin with a space?",
               ["Six", "None", "Eight", "Fourteen"],
               0,
               "Reading the spans down, they run from 0 to 51 with no gap anywhere, so every character of the sentence, spaces included, is inside some piece and inside exactly one. Six spaces therefore turn up at the front of six pieces rather than being thrown away.",
@@ -1200,7 +1201,7 @@ export default function PatternWordsPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. English Contractions and the Limits of a Fixed Pattern" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="23. Seven spellings are a statement about one language">
@@ -1321,16 +1322,11 @@ export default function PatternWordsPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="26. What is left undecided, gathered">
-                <p>
-                  The cases below are gathered from the whole page. The right
-                  column says what the method does not determine and why, and it
-                  quotes a number where the number is a fact about the method
-                  rather than about any particular text.
-                </p>
+              <SubSection title="26. Decisions hidden in the order of the pattern branches" id="26-what-is-left-undecided-gathered">
+                <p>Branch order decides which matching rule gets the text first. The English contraction list, character categories and handling of spaces are part of that choice, so changing the pattern can change the pieces without changing the sentence.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Spelling or pattern branch"
+                  reasonHeading="What the expression matches"
                   rows={[
                     {
                       expression: "a contraction the seven spellings do not hold",
@@ -1433,8 +1429,8 @@ export default function PatternWordsPage() {
           title: "Practice. Running the Pattern and Taking It Apart",
           practice: [
             exercise(
-              "Cut the running sentence and write the pieces back",
-              ["Build the library’s pattern rule around the published pattern and put the running sentence to it. Print each piece beside its half-open span, with the piece in quotation marks so that a space at the front of it can be seen. Then write the pieces one after another with nothing between them and compare with the sentence.", "Part 1 arrived at fourteen pieces whose spans run from 0 to 51 with no gap, and at the sentence coming back exactly. Count the pieces that begin with a space and compare that with the number of spaces in the sentence.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
+              "Cut the sentence about Dr. Alvarez and write the pieces back",
+              ["Build the library’s pattern rule around the published pattern and put the sentence about Dr. Alvarez to it. Print each piece beside its half-open span, with the piece in quotation marks so that a space at the front of it can be seen. Then write the pieces one after another with nothing between them and compare with the sentence.", "Part 1 arrived at fourteen pieces whose spans run from 0 to 51 with no gap, and at the sentence coming back exactly. Count the pieces that begin with a space and compare that with the number of spaces in the sentence.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
               `from oop_ml import PatternPreTokenizer
 from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
 
@@ -1547,7 +1543,7 @@ without it: 0`,
             ),
             exercise(
               "Delete one part of the pattern at a time",
-              ["Sections 7 and 10 each delete one part of the pattern and count what changes. The script starts with the pattern as the library writes it, with the seven contraction branches taken off the front, and with the optional space taken off the three runs. Build a rule around each, and print how many pieces the running sentence and the six sentences give, and how many of the six sentences still come back exactly.", "The running sentence should go from fourteen pieces to fifteen and to twenty, and the six sentences from 85 to the 142 of section 7. The page does not count the six sentences without the contraction branches, so work out what you expect from how many contractions they hold before you run it."],
+              ["Sections 7 and 10 each delete one part of the pattern and count what changes. The script starts with the pattern as the library writes it, with the seven contraction branches taken off the front, and with the optional space taken off the three runs. Build a rule around each, and print how many pieces the sentence about Dr. Alvarez and the six sentences give, and how many of the six sentences still come back exactly.", "The sentence about Dr. Alvarez should go from fourteen pieces to fifteen and to twenty, and the six sentences from 85 to the 142 of section 7. The page does not count the six sentences without the contraction branches, so work out what you expect from how many contractions they hold before you run it."],
               `from oop_ml import PatternPreTokenizer
 
 notebook = [
@@ -1592,7 +1588,7 @@ for name, source in patterns.items():
               `the pattern        sentence 14, notebook 85, 6 of 6 come back
 no contractions    sentence 15, notebook 86, 6 of 6 come back
 no optional space  sentence 20, notebook 142, 6 of 6 come back`,
-              { hints: ["Each pattern is an ordinary string handed to PatternPreTokenizer by the keyword pattern. The r in front of the quotation mark keeps Python from reading the backslashes itself.", "The pieces of the notebook are the sum over the six sentences of the n_words of each split.", "Deleting the contraction branches changes only a text that holds one of the seven endings, and it turns that one piece into two, the apostrophe and the letters after it."], check: numberCheck("How many pieces do the six sentences give with the seven contraction branches deleted?", 86, 0.0, "The six sentences hold exactly one contraction, the one in the running sentence, so deleting the seven branches adds exactly one piece, 86 where there were 85. That is section 9’s count seen from the other side, since only one of the seven branches claimed a piece over the whole notebook. All three patterns still give every sentence back, because each still covers every character, which is why 142 is the comparison section 15 calls the honest one.") },
+              { hints: ["Each pattern is an ordinary string handed to PatternPreTokenizer by the keyword pattern. The r in front of the quotation mark keeps Python from reading the backslashes itself.", "The pieces of the notebook are the sum over the six sentences of the n_words of each split.", "Deleting the contraction branches changes only a text that holds one of the seven endings, and it turns that one piece into two, the apostrophe and the letters after it."], check: numberCheck("How many pieces do the six sentences give with the seven contraction branches deleted?", 86, 0.0, "The six sentences hold exactly one contraction, the one in the sentence about Dr. Alvarez, so deleting the seven branches adds exactly one piece, 86 where there were 85. That is section 9’s count seen from the other side, since only one of the seven branches claimed a piece over the whole notebook. All three patterns still give every sentence back, because each still covers every character, which is why 142 is the comparison section 15 calls the honest one.") },
             ),
             exercise(
               "Put twelve spellings to the seven branches",

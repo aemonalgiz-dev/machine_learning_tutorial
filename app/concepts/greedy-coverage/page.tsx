@@ -37,6 +37,7 @@ export default function GreedyCoveragePage() {
       intuition={lessonIntuitions["greedy-coverage"]}
       technicalStart="Part 2. One Turn at a Time"
       openingTitle="Which New Piece Covers the Most Text?"
+      playgroundTitle="Which piece covers the most unread text?"
       playgroundIntro="Inspect each candidate's additional coverage after the earlier choices. Compare what changes when coverage is measured using a different unit."
       title="Greedy Coverage"
       tagline={"There is only so much room in a vocabulary. Instead of choosing the most frequent pair to merge, we can ask which new piece covers the most text that our earlier choices have not already covered."}
@@ -772,7 +773,7 @@ export default function GreedyCoveragePage() {
                   and ec and the marked t, all of which are rungs it climbed on the
                   way to expected and kept. The same happens to analysis, which
                   coverage reads as analys and the marked is where merging reads it
-                  whole. Counted across the running sentence, 24 of coverage&rsquo;s
+                  whole. Counted across the sentence about Dr. Alvarez, 24 of coverage&rsquo;s
                   32 pieces are bare single symbols against 17 of merging&rsquo;s
                   27.
                 </p>
@@ -804,7 +805,7 @@ export default function GreedyCoveragePage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. What Coverage Leaves Out of a Word" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="19. Coverage has no opinion about what a piece is for">
@@ -909,19 +910,11 @@ export default function GreedyCoveragePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="22. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs on which the method
-                  stops being defined rather than becoming approximate, together
-                  with what has to be decided in each case and what turns on the
-                  decision. Several are genuinely open questions with defensible
-                  answers on either side, and those are the ones worth attention,
-                  since they are the decisions anybody setting this up has to make
-                  and nothing in the mathematics makes them.
-                </p>
+              <SubSection title="22. Meaning, tied choices and the size of the vocabulary" id="22-where-the-method-has-nothing-to-say">
+                <p>Covering more character positions does not tell us whether a piece is a useful word part. The cases below separate the coverage objective from the decisions about ties, vocabulary size and which pieces we allow.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Coverage decision"
+                  reasonHeading="What the objective does and does not settle"
                   rows={[
                     { expression: "the unit a covering is counted in", reason: "undecided by the objective, which says to cover the most text and does not say what text is measured in. Counting positions and counting characters are both natural and differ by one per word-final position; on three endings against three openings the first is chosen by the second, at 30 against 27 one way and 36 against 30 the other." },
                     { expression: "two candidates covering the same amount", reason: "the objective is indifferent, so no answer is more correct. A choice must be made and any choice is arbitrary; taking the lexicographically smaller at least makes the fit repeatable, where taking whichever was met first makes it depend on the order the words arrived in. Ties are common rather than rare here, and on the eighteen sentences thirteen consecutive turns were each worth exactly two." },
@@ -965,7 +958,7 @@ export default function GreedyCoveragePage() {
                 "The sentence holds words the corpus does not, which coverage refuses to encode",
               ],
               0,
-              "The corpus uses expected and never the bare stem, so coverage buys expecte and merging keeps exp and ec as rungs it climbed. Across the running sentence 24 of coverage’s 32 pieces are bare single symbols against 17 of merging’s 27, and merging’s mean piece is the shorter of the two at 3.04 characters against 3.77.",
+              "The corpus uses expected and never the bare stem, so coverage buys expecte and merging keeps exp and ec as rungs it climbed. Across the sentence about Dr. Alvarez 24 of coverage’s 32 pieces are bare single symbols against 17 of merging’s 27, and merging’s mean piece is the shorter of the two at 3.04 characters against 3.77.",
             ),
             trueFalse(
               "The objective has no way to prefer a piece that is a stem or a syllable over one that is not.",

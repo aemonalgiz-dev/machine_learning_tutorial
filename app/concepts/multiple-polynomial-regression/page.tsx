@@ -42,6 +42,7 @@ export default function MultiplePolynomialRegressionPage() {
       intuition={lessonIntuitions["multiple-polynomial-regression"]}
       technicalStart="Part 3. Features Can Be Constructed"
       openingTitle="When One Input Cannot Explain Enough"
+      playgroundTitle="Give the prediction another useful input"
       playgroundIntro="Compare how the prediction changes when another input or a higher polynomial degree is available. A closer fit to the displayed points is only the first check."
       title="Multiple & Polynomial Regression"
       tagline={"One measurement may not be enough to explain the outcome. We can give a regression model several inputs, including transformed inputs, and work out how much each contributes to the prediction."}
@@ -883,7 +884,7 @@ export default function MultiplePolynomialRegressionPage() {
                   with itself, and the bowl&rsquo;s floor is where every
                   partial derivative is zero at once.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Recovering the one-input equations from the matrix form">
                   <DerivationTable
                     rows={[
                       { expression: "e = y − Xβ", reason: "the residuals, all of them, as one vector" },

@@ -35,6 +35,7 @@ export default function SegmentingWithAHiddenModelPage() {
       intuition={lessonIntuitions["segmenting-with-a-hidden-model"]}
       technicalStart="Part 2. Four Places, and Why Four Are Enough"
       openingTitle="A Word the Dictionary Has Never Seen"
+      playgroundTitle="Choose the most likely sequence of boundary states"
       playgroundIntro="Compare the character observations with their proposed position labels. Follow the complete label sequence and check how it determines the word boundaries."
       title="Segmenting With a Hidden Model"
       tagline={"We can see the characters in a sentence without knowing which ones begin or end a word. A hidden-state model uses learned probabilities to infer a sequence of labels for those positions."}
@@ -590,7 +591,7 @@ export default function SegmentingWithAHiddenModelPage() {
                   The filled cells are the winners at each character and the line joining them is the answer, which for those six characters is B E B E B E and therefore three two-character words.
                 </p>
 </>
-                <WhyThisWorks>
+                <WhyThisWorks title="The same path search, with states in place of dictionary words">
                   <>
 <p>
                     It is worth being exact about what is the same as the previous page and what is not. There, the thing being chosen at each position was a word from a list and the table had one entry per position; here, the thing being chosen is a place out of four and the table has four entries per character.
@@ -609,7 +610,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="12. What it costs, which is the same for every text">
+              <SubSection title="12. The number of state comparisons per character" id="12-what-it-costs-which-is-the-same-for-every-text">
                 <p>
                   Each character offers four places, each place is reached from at
                   most two, and the fifth section fixed those numbers before any
@@ -909,7 +910,7 @@ export default function SegmentingWithAHiddenModelPage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. Character Independence and the Boundaries We Chose to Label" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="18. One character at a time, so two languages can leave the same counts">
@@ -1006,7 +1007,7 @@ export default function SegmentingWithAHiddenModelPage() {
                   shrinks only as the counts grow, which on four sentences leaves
                   it deciding outright.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Separating the definition of a boundary from the data used to learn it">
                   <p>
                     It is worth separating the two, because they fail differently.
                     The annotation standard is a definitional question and no amount
@@ -1027,18 +1028,11 @@ export default function SegmentingWithAHiddenModelPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="21. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs and questions on
-                  which the method stops being defined rather than becoming
-                  approximate, with what has to be decided in each case and what
-                  turns on the decision. The decisions are the ones worth a
-                  reader&rsquo;s attention, since nothing in the method makes them
-                  and each of them changes what comes back.
-                </p>
+              <SubSection title="21. Unseen characters, illegal paths and annotation choices" id="21-where-the-method-has-nothing-to-say">
+                <p>The hidden-state model can only score legal paths built from its defined states and observations. Unknown characters, impossible transitions and competing boundary conventions need to be considered separately.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Character or state-transition evidence"
+                  reasonHeading="Which segmentation paths can be scored"
                   rows={[
                     {
                       expression: "a step that no cutting can contain",

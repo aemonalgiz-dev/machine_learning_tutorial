@@ -36,6 +36,7 @@ export default function TemplateMatchingPage() {
       intuition={lessonIntuitions["template-matching"]}
       technicalStart="Part 2. Three Ways To Score A Fit"
       openingTitle="Find This Small Picture Inside That Larger One"
+      playgroundTitle="Search an image for a familiar patch"
       playgroundIntro="Inspect the best position and its score, then compare it with competing positions. Try changes in lighting or appearance and check whether the reported match remains convincing."
       title="Template Matching"
       tagline={"If we already know what a pattern looks like, we can search for it in a larger picture. Template matching compares that known pattern with each possible location in the image."}
@@ -325,7 +326,7 @@ score = ────────────────────────
                   of patches rather than about one. This is normalised
                   cross-correlation.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why centring and normalising remove offset and positive gain">
                   <>
 <p>
                     Write the patch as g × template + s, for a positive gain g and an offset s. Its mean is g × mean(template) + s, so subtracting it leaves g × deviation(template), with the offset gone entirely. The numerator is then g times the template&rsquo;s deviation dotted with itself, which is g times the squared length.
@@ -591,7 +592,7 @@ score = ────────────────────────
                   in the denominator. A cosine whose numerator is unchanged and
                   whose denominator has grown is smaller.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="How a perpendicular brightness ramp changes the correlation">
                   <p>
                     Write the patch as template plus ramp, where ramp is
                     perpendicular to the centred template. The numerator is
@@ -1079,7 +1080,7 @@ pixels read = positions × h × w`}</Equation>
           ),
         },
         {
-          title: "Part 7. Where The Method Stops Being Defined",
+          title: "Part 7. Flat Patches, Changed Shapes and Ambiguous Matches" , id: "part-7-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="28. A template with one brightness has no direction to compare">

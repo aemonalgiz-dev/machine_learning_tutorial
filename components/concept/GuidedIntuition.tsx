@@ -1,22 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
-import type { LessonIntuition, Scene } from "@/lib/intuition/types";
+import { useId, useRef, useState } from "react";
+import type { IntuitionStep, LessonIntuition, Scene } from "@/lib/intuition/types";
+import { ReadingScene } from "./ReadingScene";
 
 const COLOURS = ["#6366f1", "#f59e0b", "#10b981", "#f43f5e"];
 
 function SceneView({ scene }: { scene: Scene }) {
-  if (scene.kind === "strips") return <div className="space-y-3">
-    {scene.rows.map((row, index) => <div key={index}>
-      {index > 0 && scene.connected && <div aria-hidden="true" className="mb-2 text-center text-xl text-indigo-500">↓</div>}
-      <p className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">{row.label}</p>
-      <ol className="flex flex-wrap gap-2" aria-label={row.label}>
-        {row.items.map((item, itemIndex) => <li key={itemIndex} className={`min-w-0 max-w-full break-words rounded-lg border px-3 py-2 text-sm ${row.active?.includes(itemIndex) ? "border-indigo-500 bg-indigo-100 font-semibold text-indigo-950 dark:bg-indigo-950 dark:text-indigo-100" : "border-slate-300 bg-white text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200"}`}>
-          {row.active?.includes(itemIndex) && <span className="sr-only">Highlighted: </span>}{item}
-        </li>)}
-      </ol>
-    </div>)}
-  </div>;
+  if (scene.kind === "strips") return <ReadingScene scene={{ ...scene, kind: scene.connected ? "flow" : "notes" }} />;
+  if (scene.kind !== "bars" && scene.kind !== "tiles" && scene.kind !== "plot") return <ReadingScene scene={scene} />;
 
   if (scene.kind === "bars") {
     const maximum = Math.max(1, ...scene.items.map(item => Math.abs(item.value)));
@@ -72,37 +64,57 @@ function SceneView({ scene }: { scene: Scene }) {
   </div>;
 }
 
+function WalkthroughStep({ step, index, total }: { step: IntuitionStep; index: number; total: number }) {
+  const titleId = useId();
+  const [alternative, setAlternative] = useState(false);
+  const selected = alternative && step.alternative ? step.alternative : step;
+  return <section aria-labelledby={titleId} data-walkthrough-step={index} className="min-w-0 border-t border-line pt-7 first:border-0 first:pt-0">
+    <p className="mb-2 font-mono text-xs text-accent">Step {index + 1} of {total}</p>
+    <h3 id={titleId} tabIndex={-1} className="mb-3 scroll-mt-6 text-lg font-semibold text-foreground">{step.title}</h3>
+    <p className="mb-5 max-w-prose leading-relaxed text-foreground">{selected.explanation}</p>
+    <figure data-demonstration={selected.scene.kind} className="min-w-0 rounded-lg border border-line bg-background p-4 sm:p-5">
+      <SceneView scene={selected.scene} />
+      {selected.scene.caption !== "An invented example for this lesson." && <figcaption className="mt-5 border-t border-line pt-3 text-sm leading-relaxed text-muted">{selected.scene.caption}</figcaption>}
+    </figure>
+    {step.alternative && <button type="button" aria-pressed={alternative} onClick={() => setAlternative(!alternative)} className="mt-4 rounded-md border border-accent px-3 py-2 text-sm font-medium text-accent">{alternative ? "Return to the first case" : step.alternative.label}</button>}
+  </section>;
+}
+
 export function GuidedIntuition({ lesson }: { lesson: LessonIntuition }) {
   const [index, setIndex] = useState(0);
-  const [alternative, setAlternative] = useState(false);
+  const [singleStep, setSingleStep] = useState(false);
   const stepContent = useRef<HTMLDivElement>(null);
-  const current = lesson.steps[index];
-  const selected = alternative && current.alternative ? current.alternative : current;
-  const revealExplanation = () => requestAnimationFrame(() => {
-    const content = stepContent.current;
-    if (!content) return;
-    const top = content.getBoundingClientRect().top;
-    if (top < 0 || top > window.innerHeight - 80) content.scrollIntoView({ block: "start" });
-  });
-  const go = (next: number) => { setIndex(next); setAlternative(false); revealExplanation(); };
-  return <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-    <div role="group" aria-label="Walkthrough steps" className="mb-5 flex flex-wrap gap-2">
-      {lesson.steps.map((item, i) => <button type="button" key={item.title} aria-label={`Step ${i + 1}: ${item.title}`} aria-pressed={index === i} onClick={() => go(i)} className={`h-9 w-9 rounded-full border text-sm ${index === i ? "border-indigo-600 bg-indigo-600 font-semibold text-white" : "border-slate-300 text-slate-600 dark:border-slate-600 dark:text-slate-300"}`}>{i + 1}</button>)}
+  const selectId = useId();
+  const go = (next: number) => {
+    setIndex(next);
+    requestAnimationFrame(() => {
+      const heading = stepContent.current?.querySelector("h3");
+      if (!heading) return;
+      heading.focus({ preventScroll: true });
+      const top = heading.getBoundingClientRect().top;
+      if (top < 0 || top > window.innerHeight - 120) heading.scrollIntoView({ block: "start" });
+    });
+  };
+  return <div data-guided-intuition className="min-w-0">
+    {lesson.exampleNote && <p className="mb-4 text-sm text-muted">{lesson.exampleNote}</p>}
+    <div className="mb-7 flex flex-wrap items-center gap-2 border-b border-line pb-4" role="group" aria-label="How to read this example">
+      <button type="button" aria-pressed={!singleStep} onClick={() => setSingleStep(false)} className={`rounded-md border px-3 py-2 text-sm ${!singleStep ? "border-accent bg-accent/10 font-semibold text-foreground" : "border-line text-muted"}`}>Read through</button>
+      <button type="button" aria-pressed={singleStep} onClick={() => setSingleStep(true)} className={`rounded-md border px-3 py-2 text-sm ${singleStep ? "border-accent bg-accent/10 font-semibold text-foreground" : "border-line text-muted"}`}>One step at a time</button>
     </div>
-    <div ref={stepContent} aria-live="polite" aria-atomic="true" className="scroll-mt-6">
-      <h3 className="mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">{current.title}</h3>
-      <p className="mb-5 leading-relaxed text-slate-700 dark:text-slate-300">{selected.explanation}</p>
-      <figure className="min-w-0 rounded-lg bg-slate-50 p-4 dark:bg-slate-950">
-        <SceneView scene={selected.scene} />
-        <figcaption className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{selected.scene.caption}</figcaption>
-      </figure>
+    {singleStep && <div className="mb-6">
+      <label htmlFor={selectId} className="mb-2 block text-sm font-medium text-muted">Follow the example</label>
+      <select id={selectId} value={index} onChange={event => go(Number(event.target.value))} className="w-full min-w-0 rounded-md border border-line bg-surface p-3 text-sm text-foreground">
+        {lesson.steps.map((item, i) => <option value={i} key={i}>{i + 1}. {item.title}</option>)}
+      </select>
+    </div>}
+    <div ref={stepContent} className="space-y-9">
+      {lesson.steps.map((item, i) => (!singleStep || i === index) && <WalkthroughStep key={i} step={item} index={i} total={lesson.steps.length} />)}
     </div>
-    {current.alternative && <button type="button" aria-pressed={alternative} onClick={() => { setAlternative(!alternative); revealExplanation(); }} className="mt-4 rounded-md border border-indigo-400 px-3 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300">{alternative ? "Return to the first case" : current.alternative.label}</button>}
-    <div className="mt-5 flex items-center justify-between gap-2">
-      <button type="button" disabled={index === 0} onClick={() => go(index - 1)} className="rounded-md border border-slate-300 px-3 py-2 text-sm disabled:opacity-40 dark:border-slate-700">Previous step</button>
-      <span className="text-xs text-slate-500">{index + 1} of {lesson.steps.length}</span>
-      <button type="button" disabled={index === lesson.steps.length - 1} onClick={() => go(index + 1)} className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white disabled:opacity-40">Next step</button>
-    </div>
+    {singleStep && <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+      <button type="button" disabled={index === 0} onClick={() => go(index - 1)} className="rounded-md border border-line px-3 py-2 text-sm disabled:opacity-40">Previous step</button>
+      <p className="sr-only" role="status">Step {index + 1} of {lesson.steps.length}: {lesson.steps[index].title}</p>
+      <button type="button" disabled={index === lesson.steps.length - 1} onClick={() => go(index + 1)} className="rounded-md bg-accent px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40">Next step</button>
+    </div>}
   </div>;
 }
 

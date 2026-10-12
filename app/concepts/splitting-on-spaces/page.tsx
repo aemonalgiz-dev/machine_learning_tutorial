@@ -36,6 +36,7 @@ export default function SplittingOnSpacesPage() {
       intuition={lessonIntuitions["splitting-on-spaces"]}
       technicalStart="Part 2. A Piece, and the Place It Came From"
       openingTitle="The Simplest Word Rule Already Makes a Choice"
+      playgroundTitle="What counts as a piece when spaces are the rule?"
       playgroundIntro="Inspect the extracted pieces and their source spans. Try punctuation beside a word and repeated whitespace, then compare the pieces with the original text."
       title="Splitting on Spaces"
       tagline={"Spaces give us an obvious first place to divide a sentence. We will try that rule, then look at what it does with punctuation, repeated whitespace, and writing that does not separate words with spaces."}
@@ -133,7 +134,7 @@ export default function SplittingOnSpacesPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="3. The running sentence, cut">
+              <SubSection title="3. Separate the Alvarez sentence wherever spaces occur" id="3-the-running-sentence-cut">
                 <p>
                   Put the sentence to the rule and seven pieces come out. The
                   playground above is doing exactly this, and it is worth reading
@@ -265,7 +266,7 @@ export default function SplittingOnSpacesPage() {
               <SubSection title="6. The pieces cover the writing and leave the spacing out">
                 <p>
                   Adding the spans up says how much of a text survived into the
-                  pieces. On the running sentence the answer is 45 characters of
+                  pieces. On the sentence about Dr. Alvarez the answer is 45 characters of
                   51, and the six that are missing are the six spaces. On writing
                   that contains no spaces the answer is everything, and on writing
                   that is nothing but spaces the answer is nothing.
@@ -278,12 +279,12 @@ export default function SplittingOnSpacesPage() {
                     "characters inside a piece",
                   ]}
                   rows={[
-                    ["the running sentence", "51", "7", "45"],
+                    ["the sentence about Dr. Alvarez", "51", "7", "45"],
                     ["the same sentence, spaced differently", "52", "7", "45"],
                     ["nine characters of Chinese", "9", "1", "9"],
                     ["three spaces", "3", "0", "0"],
                   ]}
-                  caption="The second row is the running sentence with one doubled space and one line break, which is section 7, and the third and fourth are section 16 and section 17 arriving early."
+                  caption="The second row is the sentence about Dr. Alvarez with one doubled space and one line break, which is section 7, and the third and fourth are section 16 and section 17 arriving early."
                 />
                 <>
 <p>
@@ -314,7 +315,7 @@ export default function SplittingOnSpacesPage() {
                 <SpanRepairPanel />
                 <>
 <p>
-                  On the running sentence a single space is right in all six places, so the sentence comes back exactly and the rule looks lossless. On the same sentence with one doubled space and one line break it is right in four places out of six, and the text that comes back is the first one, which is not the text that went in.
+                  On the sentence about Dr. Alvarez a single space is right in all six places, so the sentence comes back exactly and the rule looks lossless. On the same sentence with one doubled space and one line break it is right in four places out of six, and the text that comes back is the first one, which is not the text that went in.
                 </p>
                 <p>
                   Both texts give the identical seven pieces, so nothing a model reads could tell them apart, and no amount of training recovers the difference, since it was thrown away before the model was reached.
@@ -345,9 +346,9 @@ export default function SplittingOnSpacesPage() {
           title: "Questions on Parts 1 and 2",
           quiz: [
             trueFalse(
-              "A rule that cut at each space and kept whatever fell between two cuts would agree with this one on the running sentence and part company with it wherever two spaces meet.",
+              "A rule that cut at each space and kept whatever fell between two cuts would agree with this one on the sentence about Dr. Alvarez and part company with it wherever two spaces meet.",
               true,
-              "The running sentence is singly spaced, so the two rules give the same seven pieces there. Where two spaces meet, cutting at each one leaves an empty word between them, and an empty word is not a word of anything. Taking maximal runs instead skips the spacing rather than dividing at it, which is why the word maximal is carrying the weight, and why a single space, a double space and a line break all do the same thing to the answer.",
+              "The sentence about Dr. Alvarez is singly spaced, so the two rules give the same seven pieces there. Where two spaces meet, cutting at each one leaves an empty word between them, and an empty word is not a word of anything. Taking maximal runs instead skips the spacing rather than dividing at it, which is why the word maximal is carrying the weight, and why a single space, a double space and a line break all do the same thing to the answer.",
             ),
             choice(
               "The seven pieces hold 45 of the sentence’s 51 characters. What are the six characters that no piece holds?",
@@ -373,7 +374,7 @@ export default function SplittingOnSpacesPage() {
               "Seven of the ten end a word and three do not. The hyphen is expected there, since a hyphen is visibly a mark rather than a gap, and the other two are the surprise, because the rule asks whether a character is white space and never what it is called. The no-break space and the ideographic space are white space by that test, which is why recognising the whole family rather than the space alone is a real piece of correctness.",
             ),
             trueFalse(
-              "Cutting the running sentence and gluing the pieces straight back with a single space between each pair returns it exactly, so the rule is lossless.",
+              "Cutting the sentence about Dr. Alvarez and gluing the pieces straight back with a single space between each pair returns it exactly, so the rule is lossless.",
               false,
               "It does come back exactly, because a single space is right in all six places on that sentence. Put in one doubled space and one line break and the glue is right in four places of six, and the text that comes back is the first sentence rather than the second. Both texts give the identical seven pieces, so a rule of this kind discards the spacing even where a test on ordinary prose comes back exact.",
             ),
@@ -488,7 +489,7 @@ export default function SplittingOnSpacesPage() {
                   cut a contraction into the verb and the negation, so that the
                   negation is one unit wherever it appears, and the Unicode word
                   boundary rules break a hyphenated compound into its halves. Put
-                  the running sentence to that second rule and it comes back as
+                  the sentence about Dr. Alvarez to that second rule and it comes back as
                   nine pieces rather than seven, with{" "}
                   <span className="font-mono">low</span> and{" "}
                   <span className="font-mono">cost</span> separate and{" "}
@@ -630,7 +631,7 @@ export default function SplittingOnSpacesPage() {
                 </p>
                 <>
 <p>
-                  The sharper difference is what happens to the characters. On the running sentence the boundary rules keep 41 of the 51 characters, against 45 here. The ten they leave behind are the six spaces and, unlike this rule, both hyphens and both full stops, since a mark that is not part of a word is not returned as one.
+                  The sharper difference is what happens to the characters. On the sentence about Dr. Alvarez the boundary rules keep 41 of the 51 characters, against 45 here. The ten they leave behind are the six spaces and, unlike this rule, both hyphens and both full stops, since a mark that is not part of a word is not returned as one.
                 </p>
                 <p>
                   Gluing their nine pieces back with single spaces gives a line with the abbreviation&rsquo;s stop gone, the compound split in two and the sentence&rsquo;s own full stop missing, so the loss is not confined to the spacing the way it is here.
@@ -650,7 +651,7 @@ export default function SplittingOnSpacesPage() {
           ),
         },
         {
-          title: "Part 5. Where the Rule Stops Being Defined",
+          title: "Part 5. Text Whose Words Are Not Separated by Spaces", id: "part-5-where-the-rule-stops-being-defined",
           content: (
             <>
               <SubSection title="15. A word is a convention, and this rule commits to one of them">
@@ -741,8 +742,8 @@ export default function SplittingOnSpacesPage() {
                   actually determines in each.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what is undefined, or what must be decided"
+                  expressionHeading="Text or separator condition"
+                  reasonHeading="What a whitespace split preserves"
                   rows={[
                     {
                       expression: "a text of nothing but spaces",
@@ -762,7 +763,7 @@ export default function SplittingOnSpacesPage() {
                     {
                       expression: "a mark of punctuation touching a word",
                       reason:
-                        "decided by doing nothing, and the decision is not free. Keeping the mark makes a word and the same word with a mark two unrelated pieces, 9 of the 47 entries here carrying one. Every alternative is paid for elsewhere, and the rule measured against it here, which drops the marks rather than keeping them, leaves 10 of the running sentence’s 51 characters in no piece at all and takes the six sentences from 63 pieces to 69.",
+                        "decided by doing nothing, and the decision is not free. Keeping the mark makes a word and the same word with a mark two unrelated pieces, 9 of the 47 entries here carrying one. Every alternative is paid for elsewhere, and the rule measured against it here, which drops the marks rather than keeping them, leaves 10 of the sentence about Dr. Alvarez’s 51 characters in no piece at all and takes the six sentences from 63 pieces to 69.",
                     },
                     {
                       expression: "a full stop that ends an abbreviation",
@@ -850,7 +851,7 @@ export default function SplittingOnSpacesPage() {
           title: "Practice. Putting the Rule to the Running Sentence",
           practice: [
             exercise(
-              "Cut the running sentence and read the spans",
+              "Cut the sentence about Dr. Alvarez and read the spans",
               ["Put the sentence Part 1 carries to the library’s whitespace rule, print each piece beside the half-open span it came from, and then add the spans up to find how much of the sentence the pieces hold.", "Part 1 arrived at seven pieces and Part 2 at 45 of the 51 characters inside a piece. Both should come straight out of the spans, and the share kept, to one decimal place, should be the 88.2 per cent the page quotes."],
               `from oop_ml import WhitespacePreTokenizer
 
@@ -944,7 +945,7 @@ U+002D  hyphen-minus            1
             ),
             exercise(
               "Glue the pieces with spaces, then rebuild them from the spans",
-              ["Take the running sentence with one doubled space and one line break, which is the second text of section 7. Cut it, glue the pieces back with a single space between each pair, and compare the result with the text that went in. Then put each piece back at its own offsets, taking the source between one piece and the next, and compare again.", "The pieces should be the same seven as the singly spaced sentence gives, the glue should fail and the spans should succeed. Count how many of the six gaps between the pieces are a single space, which is the number of places where the guess happens to be right."],
+              ["Take the sentence about Dr. Alvarez with one doubled space and one line break, which is the second text of section 7. Cut it, glue the pieces back with a single space between each pair, and compare the result with the text that went in. Then put each piece back at its own offsets, taking the source between one piece and the next, and compare again.", "The pieces should be the same seven as the singly spaced sentence gives, the glue should fail and the spans should succeed. Count how many of the six gaps between the pieces are a single space, which is the number of places where the guess happens to be right."],
               `from oop_ml import WhitespacePreTokenizer
 
 text = "Dr.  Alvarez didn't expect\\nthe low-cost re-analysis."

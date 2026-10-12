@@ -44,6 +44,7 @@ export default function PcaPage() {
       intuition={lessonIntuitions["pca"]}
       technicalStart="Part 3. Viewing the Cloud Along One Direction"
       openingTitle="Two Measurements, Much of the Same Information"
+      playgroundTitle="Find the direction in which the observations vary most"
       playgroundIntro="Rotate the projection direction and compare the spread of the projected points. Then inspect the gap between each original point and its reconstruction."
       title="Principal Component Analysis"
       tagline={"Several measurements may vary together, so storing all of them can repeat much of the same information. Principal component analysis looks for directions that preserve the most variation with fewer coordinates."}
@@ -177,7 +178,7 @@ export default function PcaPage() {
                   spread into a measure of where the cloud is.
                 </p>
                 <ProjectionExplorer panels={["centre"]} initialAngle={45} people="worked" />
-                <InAModel title="On the measured four at 45 degrees">
+                <InAModel title="On the four height and weight measurements at 45 degrees">
                   <p>
                     Centred, the four scores have mean 0, the mean of their
                     squares is 100, and so is their variance. Uncentred, the
@@ -266,8 +267,7 @@ export default function PcaPage() {
                 <p>
                   That widest direction has a name. The first principal
                   component is the unit direction along which the centred
-                  observations have the greatest variance, and on the
-                  measured four it sits at 45 degrees, where the variance of
+                  observations have the greatest variance, and on the four height and weight measurements it sits at 45 degrees, where the variance of
                   the scores is 100 and every other angle gives less. On the
                   crowd it sits at 42.2 degrees. The playground at the top of
                   the page draws it in indigo, and it is not the height axis
@@ -303,7 +303,7 @@ export default function PcaPage() {
                   indigo, the weight part in amber, and their sum.
                 </p>
                 <ProjectionExplorer panels={["contribution"]} initialAngle={45} people="worked" />
-                <WorkedExample title="Person 1 on the measured four">
+                <WorkedExample title="Person 1 on the four height and weight measurements">
                   <>
                     <p>
                       The first person’s centred measurements are (10, 10). At
@@ -492,7 +492,7 @@ export default function PcaPage() {
                 </p>
                 <Equation>{"C u = λ u"}</Equation>
                 <ProjectionExplorer panels={["transform"]} initialAngle={0} people="worked" />
-                <InAModel title="On the measured four">
+                <InAModel title="On the four height and weight measurements">
                   <>
                     <p>
                       At zero degrees, the covariance transformation changes the
@@ -517,7 +517,7 @@ export default function PcaPage() {
               <SubSection title="15. Eigenvectors as principal directions">
                 <p>
                   Now the two halves meet. The direction the variance sweep
-                  found by rotating, 45 degrees on the measured four, is the
+                  found by rotating, 45 degrees on the four height and weight measurements, is the
                   direction the covariance matrix scales without turning, and
                   the variance it reached, 100, is the scaling factor. That
                   is not a coincidence, and section 29 proves it. The
@@ -539,7 +539,7 @@ export default function PcaPage() {
           title: "Part 7. Work the Four-Person Example",
           content: (
             <>
-              <SubSection title="16. The four-person worked example">
+              <SubSection title="16. Project four height and weight measurements" id="16-the-four-person-worked-example">
                 <p>
                   The mean is (170, 68) and the deviations are (10, 10),
                   (−10, −10), (5, −5) and (−5, 5), as the table in section 4
@@ -708,7 +708,7 @@ export default function PcaPage() {
                 </p>
 </>
                 <Equation>{"‖dᵢ‖² = (dᵢ · u)² + stubᵢ²"}</Equation>
-                <InAModel title="On the measured four">
+                <InAModel title="On the four height and weight measurements">
                   <p>
                     The total squared deviation is 500. At 45 degrees the
                     squared scores total 400 and the squared stubs 100, and
@@ -1119,21 +1119,12 @@ export default function PcaPage() {
           ),
         },
         {
-          title: "Part 16. Implementation and Failure Contracts",
+          title: "Part 16. Preserving Component Order, Scaling and Sign Conventions" , id: "part-16-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="32. Implementation and failure contracts">
-                <p>
-                  A complete implementation states the number of components,
-                  whether it centres, whether it scales, whether the
-                  covariance uses the population or sample divisor, whether
-                  it decomposes the covariance or the data matrix, how it
-                  orders components, what sign convention it applies if
-                  deterministic output is required, how it treats tied or
-                  nearly tied eigenvalues, its tolerances, and which of the
-                  scores, components, reconstructions and explained variances
-                  it returns.
-                </p>
+              <SubSection title="32. Save the centre, directions and projection convention" id="32-implementation-and-failure-contracts">
+                <p>If two PCA fits disagree, first compare their preparation of the data. Did they centre, scale or do both? Did the covariance use a population or sample divisor, and did the solver decompose that covariance or the data matrix itself?</p>
+                <p>Next compare the requested component count, ordering, tolerances and treatment of tied or nearly tied eigenvalues. A sign convention is needed if the output must be deterministic. Report scores, components, reconstructions and explained variances with these choices so a numerical difference can be interpreted.</p>
                 <p>
                   Most of those choices change a number without changing the
                   fit, which is what makes them worth stating. The divisor
@@ -1152,8 +1143,8 @@ export default function PcaPage() {
                   tells them.
                 </p>
                 <DerivationTable
-                  expressionHeading="the edge"
-                  reasonHeading="the behaviour"
+                  expressionHeading="Observations or feature condition"
+                  reasonHeading="Which directions can be identified"
                   rows={[
                     { expression: "empty data, or a missing or non-finite value", reason: "refused at the boundary, by the same guard every feature here passes through." },
                     { expression: "one observation", reason: "refused; a covariance needs at least two rows to have a spread to decompose." },

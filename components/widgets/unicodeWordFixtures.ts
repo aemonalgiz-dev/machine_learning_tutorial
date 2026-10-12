@@ -20,7 +20,7 @@ export const MARKED_UP = 'She wrote "low-cost" (twice) in her notes.';
 export const AN_ABBREVIATION = "The U.S. sensors arrived.";
 
 export const PRESETS: { label: string; text: string }[] = [
-  { label: "The running sentence", text: RUNNING_SENTENCE },
+  { label: "The sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "An abbreviation", text: AN_ABBREVIATION },
   { label: "Numbers and a time", text: A_NUMBER },
   { label: "Quotes and brackets", text: MARKED_UP },

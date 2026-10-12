@@ -40,6 +40,7 @@ export default function SentencePiecePage() {
       intuition={lessonIntuitions["sentencepiece"]}
       technicalStart="Part 2. The Space as a Symbol"
       openingTitle="Learn the Pieces Before Deciding Where the Words Are"
+      playgroundTitle="Make spaces part of the text the tokenizer learns"
       playgroundIntro="Follow the space markers through encoding and decoding. Compare the reconstructed text with the input and check which normalisation rules were applied."
       title="SentencePiece"
       tagline={"Requiring text to be split into words first makes tokenization depend on another set of boundary rules. SentencePiece can learn pieces from a text stream that explicitly represents whitespace, reducing that dependence on predefined words."}
@@ -278,7 +279,7 @@ export default function SentencePiecePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="7. The running sentence, marked">
+              <SubSection title="7. Make the spaces visible in the Alvarez sentence" id="7-the-running-sentence-marked">
                 <p>
                   Here is the whole transformation on our sentence, with nothing
                   learned and nothing fitted. The sentence is 51 characters of
@@ -728,7 +729,7 @@ export default function SentencePiecePage() {
                 "A full stop ending an abbreviation is separated from the word in front of it",
               ],
               [0, 1, 2],
-              "No rule looked at either full stop on the running sentence, which is why the question of whether an abbreviation keeps its stop never came up. The normalisation costs nothing there, where the only whitespace is six single spaces between words, and it would cost every level of indentation in a page of code.",
+              "No rule looked at either full stop on the sentence about Dr. Alvarez, which is why the question of whether an abbreviation keeps its stop never came up. The normalisation costs nothing there, where the only whitespace is six single spaces between words, and it would cost every level of indentation in a page of code.",
             ),
         ],
         },
@@ -861,7 +862,7 @@ export default function SentencePiecePage() {
           ),
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. When Merges Cross Spaces and Normalisation Changes the Text" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="20. Whether a piece may cross a space">
@@ -971,20 +972,11 @@ export default function SentencePiecePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="23. Where the method has nothing to say">
-                <p>
-                  Gathered in one place, these are the inputs and questions on
-                  which the method stops being defined rather than becoming
-                  approximate, with what has to be decided in each case and what
-                  turns on the decision. Several are genuinely open with
-                  defensible answers on either side, and those are the ones worth
-                  a reader&rsquo;s attention, since they are the decisions anybody
-                  setting this up has to make and nothing in the mathematics makes
-                  them.
-                </p>
+              <SubSection title="23. Boundaries, unknown symbols and reversible decoding" id="23-where-the-method-has-nothing-to-say">
+                <p>Treating spaces as symbols changes which merges are possible. Normalisation and unknown-symbol handling can also affect whether decoding recovers the original text. Check these promises separately from the vocabulary size.</p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Space marker or merge choice"
+                  reasonHeading="Effect on segmentation and recovery"
                   rows={[
                     {
                       expression: "which character stands for a space",
@@ -1004,7 +996,7 @@ export default function SentencePiecePage() {
                     {
                       expression: "what a run of whitespace meant",
                       reason:
-                        "decided, and decided by discarding it. Every run becomes one mark, so two spaces come back as one and so does a tab, and the round trip is exact only up to that. On the running sentence nothing is lost, since its only whitespace is six single spaces; for anything where whitespace carries meaning, indented code most obviously, the text cannot be recovered and the method offers no way to keep it.",
+                        "decided, and decided by discarding it. Every run becomes one mark, so two spaces come back as one and so does a tab, and the round trip is exact only up to that. On the sentence about Dr. Alvarez nothing is lost, since its only whitespace is six single spaces; for anything where whitespace carries meaning, indented code most obviously, the text cannot be recovered and the method offers no way to keep it.",
                     },
                     {
                       expression: "a text containing the mark itself",

@@ -27,7 +27,7 @@ export const NUMBERS =
 export const A_FRENCH_ARTICLE = "l'analyse des capteurs";
 
 export const PRESETS: { label: string; text: string }[] = [
-  { label: "The running sentence", text: RUNNING_SENTENCE },
+  { label: "The sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "The same sentence, quoted", text: QUOTED_SENTENCE },
   { label: "Ending in an abbreviation", text: ENDS_IN_AN_ABBREVIATION },
   { label: "An abbreviation nobody listed", text: UNLISTED_ABBREVIATION },

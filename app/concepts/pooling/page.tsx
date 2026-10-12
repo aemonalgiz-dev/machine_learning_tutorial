@@ -38,6 +38,7 @@ export default function PoolingPage() {
       intuition={lessonIntuitions["pooling"]}
       technicalStart="Part 2. What Each Kind Keeps"
       openingTitle="Keep a Summary of the Neighbourhood"
+      playgroundTitle="Keep a summary from each image neighbourhood"
       playgroundIntro="Compare maximum and average summaries for the same window. Then look at which input values receive a gradient on the backward pass."
       title="Pooling"
       tagline={"After detecting local patterns, we may not need every response at its original resolution. Pooling summarises nearby values, reducing the amount of data while giving up some information about exact positions."}
@@ -308,7 +309,7 @@ export default function PoolingPage() {
                   A window of one at a stride of one gives eight, which is the
                   picture back again.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Count the window positions that still fit inside the input">
                   <p>
                     Write the corner of window k at k times the stride. The
                     window covers up to that corner plus the window width, so it
@@ -936,10 +937,10 @@ export default function PoolingPage() {
           ),
         },
         {
-          title: "Part 7. Implementation and Failure Contracts",
+          title: "Part 7. Making Window Boundaries and Backward Routing Explicit" , id: "part-7-implementation-and-failure-contracts",
           content: (
             <>
-              <SubSection title="26. What a complete implementation must specify">
+              <SubSection title="26. Stride, padding and how the layer handles a tied maximum" id="26-what-a-complete-implementation-must-specify">
                 <p>
                   A pooling layer looks like the simplest thing in a network and
                   has a surprising number of decisions in it, most of which are
@@ -1007,7 +1008,7 @@ export default function PoolingPage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="27. The edges, probed">
+              <SubSection title="27. Partial windows, repeated maxima and incompatible shapes" id="27-the-edges-probed">
                 <p>
                   Below is every edge asked of a pooling layer as this page loads,
                   with what came back rather than what ought to. Thirteen of the

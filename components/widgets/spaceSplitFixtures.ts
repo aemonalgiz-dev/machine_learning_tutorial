@@ -18,7 +18,7 @@ export const WITHOUT_SPACES = "我来到北京清华大学";
 export const NOTHING_TO_CUT = "   ";
 
 export const PRESETS: { label: string; text: string }[] = [
-  { label: "The running sentence", text: RUNNING_SENTENCE },
+  { label: "The sentence about Dr. Alvarez", text: RUNNING_SENTENCE },
   { label: "The same sentence, spaced differently", text: ODD_SPACING },
   { label: "A sentence carrying quotes and brackets", text: MARKED_UP_SENTENCE },
   { label: "Writing with no spaces in it", text: WITHOUT_SPACES },

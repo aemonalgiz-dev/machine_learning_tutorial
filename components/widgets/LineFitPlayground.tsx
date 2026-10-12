@@ -209,7 +209,7 @@ export function LineFitPlayground() {
     <div>
       <div className="flex flex-wrap items-center gap-2 pb-3">
         <Button onClick={() => setPoints(IDEAL_CASE)}>An Ideal Case</Button>
-        <Button onClick={() => setPoints(MEASURED_FIVE)}>The measured five</Button>
+        <Button onClick={() => setPoints(MEASURED_FIVE)}>Five height and weight pairs</Button>
         <Button onClick={() => setPoints(randomScatter())}>Random scatter</Button>
         <Button onClick={() => setPoints(STARTING_POINTS)}>Reset</Button>
         <Button onClick={() => setPoints([])}>Clear</Button>

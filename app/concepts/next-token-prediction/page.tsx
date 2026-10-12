@@ -22,6 +22,7 @@ export default function Page() {
     intuition={lessonIntuitions["next-token-prediction"]}
     technicalStart="Part 2. From Scores to a Training Signal"
     prerequisites={<>Useful foundations: <Link href="/concepts/what-a-token-is">Tokens</Link>{", "}<Link href="/concepts/transformer-blocks">transformer blocks</Link>{", "}<Link href="/concepts/loss-functions">loss functions</Link>.</>}
+    playgroundTitle="Which next-token guesses earn the smaller loss?"
     playgroundIntro="Raise the assigned target logit while the other six vocabulary scores stay at zero. Compare the target probability, its negative log probability, and the derivative that would guide an update."
     playground={<ModernLearningExample topic="next-token-prediction" />}
     sections={[

@@ -35,6 +35,7 @@ export default function FiniteScalarQuantisationPage() {
       intuition={lessonIntuitions["finite-scalar-quantisation"]}
       technicalStart="Part 2. Squashing and Rounding, One Coordinate at a Time"
       openingTitle="Round Each Coordinate Instead of Learning a Table"
+      playgroundTitle="Round a vector onto a finite grid"
       playgroundIntro="Follow a vector through bounding, rounding, and code construction. Compare the selected coordinate levels with the original values."
       title="Finite Scalar Quantisation"
       tagline={"Instead of choosing a whole vector from a learned codebook, we can give each coordinate a few allowed levels. Combining those choices produces a discrete code with a different way of controlling the available representations."}
@@ -463,7 +464,7 @@ export default function FiniteScalarQuantisationPage() {
                   coordinate separately does not obviously answer with the
                   nearest point of the grid, and yet it does.
                 </p>
-                <WhyThisWorks>
+                <WhyThisWorks title="Why choosing the nearest level separately minimises the total squared distance">
                   <p>
                     The squared distance from a bounded vector to a grid point is
                     a sum over coordinates of the squared gap in that coordinate,
@@ -965,7 +966,7 @@ export default function FiniteScalarQuantisationPage() {
         ],
         },
         {
-          title: "Part 6. Where the Method Stops Being Defined",
+          title: "Part 6. What a Finite Coordinate Grid Cannot Preserve" , id: "part-6-where-the-method-stops-being-defined",
           content: (
             <>
               <SubSection title="22. The levels are evenly spaced in the squashed interval and nowhere else">
@@ -1103,8 +1104,8 @@ export default function FiniteScalarQuantisationPage() {
                   something and the decision shows up in the answers.
                 </p>
                 <DerivationTable
-                  expressionHeading="the case"
-                  reasonHeading="what the method says"
+                  expressionHeading="Coordinate or level choice"
+                  reasonHeading="What the quantiser can represent"
                   rows={[
                     {
                       expression: "one level for a coordinate",
