@@ -29,7 +29,7 @@ export function Botie({ mood = "ready", size = 112, decorative = false }: { mood
 }
 
 export function BotieSays({ children, mood = "ready", className = "" }: { children: React.ReactNode; mood?: BotieMood; className?: string }) {
-  return <div className={`flex items-center gap-3 rounded-2xl border border-line bg-surface p-3 sm:p-4 ${className}`}>
+  return <div className={`flex flex-col items-start gap-3 rounded-2xl border border-line bg-surface p-3 sm:flex-row sm:items-center sm:p-4 ${className}`}>
     <Botie mood={mood} size={78} decorative />
     <div className="min-w-0"><p className="mb-1 font-mono text-xs font-semibold text-accent">BOTIE</p><div className="text-sm leading-6 text-foreground">{children}</div></div>
   </div>;

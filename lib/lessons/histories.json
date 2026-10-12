@@ -437,5 +437,886 @@
       "Statisticians often need the uncertainty of an estimate even when a convenient formula is unavailable. Repeating the entire real-world data collection may be impractical.",
       "Efron's 1979 bootstrap paper developed a computational approach based on resampling the observed data. Our invented greenhouse readings show how replacement and repeated estimates work. Three displayed resamples make the mechanism inspectable; they are far too few to justify a useful confidence interval."
     ]
+  },
+  "conditional-probability": {
+    "title": "Working Back From What We Observed",
+    "sources": [
+      {
+        "title": "Bayes, communicated by Price: An Essay Towards Solving a Problem in the Doctrine of Chances (1763)",
+        "url": "https://www.gtfp.cs.rhul.ac.uk/pulskamp/Bayes/bayesessay-rjp.pdf"
+      }
+    ],
+    "blocks": [
+      "Calculating what might happen under a known rule is one problem. Inferring something about that rule after seeing outcomes is another. Bayes's essay, communicated by Richard Price in 1763 after Bayes's death, addressed this reverse direction: what repeated successes and failures could tell us about an unknown chance.",
+      "Our alarm example is invented and uses a simpler finite table. Its useful connection to that history is the direction of reasoning. We observe the alarm, then update how plausible each possible cause is. We must account for both how well a cause explains the alarm and how common that cause was to begin with."
+    ]
+  },
+  "likelihood": {
+    "title": "Choosing a Model From Its Observed Consequences",
+    "sources": [
+      {
+        "title": "Fisher: On the Mathematical Foundations of Theoretical Statistics (1922)",
+        "url": "https://digital.library.adelaide.edu.au/items/36b96da4-e256-4e94-9720-eef372935c3a"
+      }
+    ],
+    "blocks": [
+      "Statisticians needed ways to estimate a population's unknown settings from a finite sample. Fisher's 1922 treatment distinguished likelihood from probability when discussing that estimation problem. The observations are known; the proposed population settings vary.",
+      "The distinction matters because comparing how well settings explain data does not automatically assign probabilities to those settings. Our seed example makes the comparison visible with only one unknown parameter. It is a teaching model, not a reproduction of Fisher's data."
+    ]
+  },
+  "naive-bayes": {
+    "title": "Classifying Without a Table for Every Combination",
+    "sources": [
+      {
+        "title": "McCallum and Nigam: A Comparison of Event Models for Naive Bayes Text Classification (1998)",
+        "url": "https://aaai.org/papers/041-ws98-05-007/"
+      },
+      {
+        "title": "Scikit-learn: Naive Bayes",
+        "url": "https://scikit-learn.org/stable/modules/naive_bayes.html"
+      }
+    ],
+    "blocks": [
+      "Text classification made the combination problem particularly visible: a vocabulary can contain thousands of word features, and possible documents cannot be exhaustively tabulated. McCallum and Nigam's 1998 comparison examined different event models for naive Bayes, including binary word occurrence and word counts.",
+      "That paper did not invent Bayes' rule or every naive Bayes model. It demonstrated why the way we represent observations matters even within this apparently simple family. We will use invented binary sensor signs, then distinguish that model from counting repeated words."
+    ]
+  },
+  "support-vector-machines": {
+    "title": "Separating Examples That Do Not Cooperate",
+    "sources": [
+      {
+        "title": "Cortes and Vapnik: Support-Vector Networks (1995)",
+        "url": "https://homepages.math.uic.edu/~lreyzin/papers/cortes95.pdf"
+      },
+      {
+        "title": "Scikit-learn: Support Vector Machines",
+        "url": "https://scikit-learn.org/stable/modules/svm.html"
+      }
+    ],
+    "blocks": [
+      "A separator that makes no training mistakes may still sit unnecessarily close to observations. Maximum-margin methods made the distance from a boundary part of the fitting problem. Real datasets then posed another difficulty: measurement error and overlapping classes can make perfect separation impossible.",
+      "Cortes and Vapnik's 1995 support-vector networks paper extended the approach to non-separable data. The useful idea here is a tradeoff: prefer a wide margin, but allow violations at a cost. Our small geometric examples illustrate that objective; they do not claim to reproduce the paper's optical-character experiments."
+    ]
+  },
+  "hierarchical-clustering": {
+    "title": "Keeping the Smaller Groups Inside the Larger Ones",
+    "sources": [
+      {
+        "title": "Ward: Hierarchical Grouping to Optimize an Objective Function (1963)",
+        "url": "https://doi.org/10.1080/01621459.1963.10500845"
+      },
+      {
+        "title": "SciPy: Hierarchical clustering linkage definitions",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html"
+      }
+    ],
+    "blocks": [
+      "Grouping many observations poses a practical search problem: there are too many possible partitions to inspect exhaustively. Ward's 1963 procedure described forming a hierarchy through successive merges chosen by an objective. It made the sequence of grouping decisions part of the result.",
+      "Different merge criteria produce different hierarchies. Ward's criterion uses the increase in within-group squared variation. Our first construction uses single linkage, the nearest cross-group pair, so we can see exactly which distance caused a merge. We should not call these two criteria interchangeable."
+    ]
+  },
+  "density-based-clustering": {
+    "title": "Finding Shapes Without Supplying Their Centres",
+    "sources": [
+      {
+        "title": "Ester, Kriegel, Sander and Xu: DBSCAN (1996)",
+        "url": "https://cdn.aaai.org/KDD/1996/KDD96-037.pdf"
+      },
+      {
+        "title": "Scikit-learn: DBSCAN and density-based clustering",
+        "url": "https://scikit-learn.org/stable/modules/clustering.html#dbscan"
+      }
+    ],
+    "blocks": [
+      "Spatial databases contained clusters with shapes that centre-based partitions did not describe well, together with observations that should be treated as noise. Ester and colleagues introduced DBSCAN in 1996 to address arbitrary-shaped clusters through a density-based definition.",
+      "Its local question is whether a neighbourhood contains enough observations. Connected regions of sufficiently dense neighbourhoods form clusters. Our workshop rebuilds that neighbourhood test, then the lesson follows how those local decisions grow into groups. The plotted sensors are invented."
+    ]
+  },
+  "images-as-arrays": {
+    "title": "Making a Picture Available to a Numerical Machine",
+    "sources": [
+      {
+        "title": "NIST: The First Digital Image",
+        "url": "https://www.nist.gov/mathematics-statistics/first-digital-image"
+      },
+      {
+        "title": "OpenCV: Basic Operations on Images",
+        "url": "https://docs.opencv.org/4.x/d3/df2/tutorial_py_basic_ops.html"
+      }
+    ],
+    "blocks": [
+      "In 1957, Russell Kirsch and colleagues at the US National Bureau of Standards produced a digital scan of a photograph. A picture had to become a collection of numerical samples before their computer could process it. The problem was representation before recognition.",
+      "Our tiny tray image follows that same requirement, although it is invented and uses modern array conventions. Giving each measurement a row and column lets us select a region, compare neighbours, or apply the same operation across the picture."
+    ]
+  },
+  "image-thresholding": {
+    "title": "Finding a Cutoff Without Inspecting Every Pixel",
+    "sources": [
+      {
+        "title": "OpenCV: Image Thresholding, including Otsu's method",
+        "url": "https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html"
+      },
+      {
+        "title": "Otsu: A Threshold Selection Method from Gray-Level Histograms (1979)",
+        "url": "https://doi.org/10.1109/TSMC.1979.4310076"
+      }
+    ],
+    "blocks": [
+      "Thresholding already offered a way to separate image regions, but choosing the cutoff by hand was another problem. Otsu's 1979 method chose a threshold from the intensity histogram by comparing the variation within the resulting groups. It was a method for selecting a threshold, not the invention of thresholding itself.",
+      "The useful intuition is to seek two reasonably compact intensity groups. That works only when intensity is a suitable way to separate the objects we care about. Shadows or similar foreground and background intensities can defeat a single global cutoff."
+    ]
+  },
+  "morphology": {
+    "title": "Measuring Shapes in Mineral Images",
+    "sources": [
+      {
+        "title": "Matheron and Serra: The Birth of Mathematical Morphology",
+        "url": "https://www.cmm.minesparis.psl.eu/~serra/pdf/birth_of_mm.pdf"
+      },
+      {
+        "title": "OpenCV: Morphological Transformations",
+        "url": "https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html"
+      }
+    ],
+    "blocks": [
+      "Matheron and Serra's account traces mathematical morphology to their work in 1964 on the structure of mineral samples. Knowing the amount of a material was not enough; its spatial distribution and sizes mattered. They investigated how chosen shapes could probe the structures in an image.",
+      "The shape used to probe an image is a structuring element, also called a footprint. Its geometry determines what an operation considers small, connected, or wide enough. Our seed mask is an invented example of that idea, not a claim that one footprint can distinguish all noise from all objects."
+    ]
+  },
+  "connected-components": {
+    "title": "Following Regions Through a Digital Picture",
+    "sources": [
+      {
+        "title": "Rosenfeld and Pfaltz: Sequential Operations in Digital Picture Processing (1966), NASA record",
+        "url": "https://ntrs.nasa.gov/citations/19670034831"
+      },
+      {
+        "title": "OpenCV: Connected Components",
+        "url": "https://docs.opencv.org/4.x/d3/dc0/group__imgproc__shape.html"
+      }
+    ],
+    "blocks": [
+      "Rosenfeld and Pfaltz's 1966 work addressed sequential operations on digital pictures, including the organisation of picture regions. A computer needs explicit local relationships where a person might simply see a connected shape.",
+      "Modern connected-component routines expose the same essential choice: which neighbouring positions may connect? We will use a simple flood fill so every step is visible. It illustrates the task, rather than reproducing the historical paper's algorithm."
+    ]
+  },
+  "image-augmentation": {
+    "title": "Showing a Model Variations of Its Training Examples",
+    "sources": [
+      {
+        "title": "Krizhevsky, Sutskever and Hinton: ImageNet Classification with Deep Convolutional Neural Networks (2012)",
+        "url": "https://papers.nips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf"
+      }
+    ],
+    "blocks": [
+      "The 2012 AlexNet paper used transformations including crops and horizontal reflections to expand the appearances shown during training. The network had many parameters, and presenting only a fixed view of each training photograph made overfitting a serious concern. This was an influential use of augmentation, not its invention.",
+      "The reasoning is that some changes to a photograph should leave its target answer intact. We use that prior knowledge to create additional training views. Our small grid example makes the label-preservation requirement visible before any network is fitted."
+    ]
+  },
+  "transfer-learning": {
+    "title": "Testing Which Learned Features Transfer",
+    "sources": [
+      {
+        "title": "Yosinski et al.: How Transferable Are Features in Deep Neural Networks? (2014)",
+        "url": "https://arxiv.org/abs/1411.1792"
+      },
+      {
+        "title": "PyTorch: Transfer Learning for Computer Vision",
+        "url": "https://docs.pytorch.org/tutorials/beginner/transfer_learning_tutorial.html"
+      }
+    ],
+    "blocks": [
+      "Training a deep model for each new task can require more labelled examples than we have. Yosinski and colleagues studied transfer between image tasks in 2014, examining the difference between more general early features and more task-specific later features. Their results also showed that transfer depends on the relationship between tasks.",
+      "That work investigated transfer rather than inventing the general idea of reusing learned knowledge. For our purposes, it suggests a practical question: do the available features already separate our new classes, or does the representation itself need to change?"
+    ]
+  },
+  "bounding-boxes": {
+    "title": "Comparing Where Systems Said an Object Was",
+    "sources": [
+      {
+        "title": "PASCAL VOC 2005: Detection Task and Evaluation",
+        "url": "https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/voc2005/htmldoc/index.html"
+      },
+      {
+        "title": "Torchvision: Box Intersection Over Union",
+        "url": "https://docs.pytorch.org/vision/stable/generated/torchvision.ops.box_iou.html"
+      }
+    ],
+    "blocks": [
+      "The PASCAL VOC challenge, beginning in 2005, distinguished recognising an object's presence from predicting its location. The detection task supplied labelled bounding boxes and evaluated predicted boxes through their overlap with the annotations. Shared data and evaluation rules made systems easier to compare.",
+      "That challenge did not invent rectangles or overlap. It illustrates why detection needs a localisation criterion in addition to a class score. We will use continuous rectangle boundaries; always check a dataset's coordinate convention before applying the same arithmetic to its annotations."
+    ]
+  },
+  "non-maximum-suppression": {
+    "title": "Making Duplicate Detections Count as Errors",
+    "sources": [
+      {
+        "title": "PASCAL VOC 2005: Detection Task and Evaluation",
+        "url": "https://www.robots.ox.ac.uk/~vgg/projects/pascal/VOC/voc2005/htmldoc/index.html"
+      },
+      {
+        "title": "Torchvision: Non-Maximum Suppression",
+        "url": "https://docs.pytorch.org/vision/stable/generated/torchvision.ops.nms.html"
+      }
+    ],
+    "blocks": [
+      "The PASCAL VOC 2005 detection rules counted repeated detections of one object as false detections after the first match. Reporting many plausible rectangles was therefore different from finding many objects. Systems needed a way to resolve competing candidates.",
+      "Greedy non-maximum suppression is one commonly used procedure for that job. This example connects the method to a documented evaluation problem without claiming that the VOC challenge invented it. The procedure makes a local decision about overlaps; it does not establish the true number of objects."
+    ]
+  },
+  "forecasting-baselines": {
+    "title": "Giving a Forecast a Reference to Beat",
+    "sources": [
+      {
+        "title": "Hyndman and Athanasopoulos: The Forecaster's Toolbox",
+        "url": "https://otexts.com/fpp3/toolbox.html"
+      }
+    ],
+    "blocks": [
+      "Forecasting grew around decisions that had to be made before demand, production, or other measurements were known. A method needed to earn its complexity against forecasts available from the existing record. Hyndman and Athanasopoulos's forecasting text formalises simple rules as benchmarks in this workflow.",
+      "We will use an invented greenhouse record. Repeating the last observation is called a naive forecast. It is useful as a reference because it asks whether a learned model contributes anything beyond persistence."
+    ]
+  },
+  "lagged-features": {
+    "title": "Turning Delayed Effects Into Predictors",
+    "sources": [
+      {
+        "title": "Hyndman and Athanasopoulos: Lagged Predictors",
+        "url": "https://otexts.com/fpp3/dynamic-regression.html"
+      }
+    ],
+    "blocks": [
+      "Many processes respond after a delay: an earlier input can influence a later outcome. Dynamic regression includes lagged predictors to represent that timing. The important modelling choice is which past information was available and which delay it could plausibly have.",
+      "Our first example uses earlier demand to predict later demand. This constructs a supervised table from a time record; it does not establish that an earlier reading causes the next one."
+    ]
+  },
+  "seasonality-and-differencing": {
+    "title": "Describing Changes When Levels Would Not Sit Still",
+    "sources": [
+      {
+        "title": "Hyndman and Athanasopoulos: ARIMA Models",
+        "url": "https://otexts.com/fpp3/arima.html"
+      }
+    ],
+    "blocks": [
+      "Time-series modelling developed tools for records whose levels or recurring patterns changed over time. Differencing became a central part of the Box-Jenkins ARIMA approach: model changes when a more stable relationship can be expressed there.",
+      "Differencing does not magically make every record stationary. We will inspect a deliberately simple trend and cycle so the effect of each subtraction is visible, then state what that toy example leaves unresolved."
+    ]
+  },
+  "exponential-smoothing": {
+    "title": "Maintaining a Level Estimate as Observations Arrive",
+    "sources": [
+      {
+        "title": "Hyndman and Athanasopoulos: Exponential Smoothing",
+        "url": "https://otexts.com/fpp3/exponential-smoothing.html"
+      }
+    ],
+    "blocks": [
+      "Exponential smoothing emerged in forecasting work in the 1950s, including contributions associated with Brown and Holt. Forecasters needed practical updates for changing records, rather than repeatedly treating every old observation equally.",
+      "Simple exponential smoothing maintains a level. More elaborate versions add trend and seasonal states. We begin with the level-only update so its response to a new observation is visible before adding those components."
+    ]
+  },
+  "autoregressive-forecasting": {
+    "title": "Predicting a Record From Earlier Values of Itself",
+    "sources": [
+      {
+        "title": "Hyndman and Athanasopoulos: ARIMA Models",
+        "url": "https://otexts.com/fpp3/arima.html"
+      },
+      {
+        "title": "Yule: On a Method of Investigating Periodicities in Disturbed Series (1927)",
+        "url": "https://doi.org/10.1098/rsta.1927.0007"
+      }
+    ],
+    "blocks": [
+      "Yule's 1927 investigation of disturbed periodic series was an important early contribution to autoregressive modelling. The central idea relates a present value to earlier values of the same process, leaving a remainder for unexplained variation.",
+      "Later ARIMA methods combined autoregressive terms with other components, including differencing. Our exercise fits a small autoregression directly with least squares; it is not an automatic ARIMA-selection procedure."
+    ]
+  },
+  "rolling-forecast-validation": {
+    "title": "Replaying Earlier Forecast Origins",
+    "sources": [
+      {
+        "title": "Hyndman and Athanasopoulos: The Forecaster's Toolbox",
+        "url": "https://otexts.com/fpp3/toolbox.html"
+      },
+      {
+        "title": "Tashman: Out-of-Sample Tests of Forecasting Accuracy (2000)",
+        "url": "https://doi.org/10.1016/S0169-2070(00)00065-0"
+      }
+    ],
+    "blocks": [
+      "Forecasting researchers needed evaluations that respected the order in which observations became available. Tashman's 2000 review discussed out-of-sample testing choices, including rolling origins, rather than treating one fitted historical curve as evidence of future accuracy.",
+      "The practical idea is to repeat the forecasting decision under several historical information boundaries. Our small replay uses known arrays so we can inspect those boundaries without downloading a dataset."
+    ]
+  },
+  "exploration-and-bandits": {
+    "title": "Experiments Whose Choices Affect What We Learn",
+    "sources": [
+      {
+        "title": "Robbins: Some Aspects of the Sequential Design of Experiments (1952)",
+        "url": "https://doi.org/10.1090/S0002-9904-1952-09620-8"
+      }
+    ],
+    "blocks": [
+      "Robbins's 1952 work on sequential experimental design helped formalise problems in which the next experiment depends on what earlier experiments revealed. Sampling a treatment gathers information, but the chosen treatment also determines the outcome received during that trial.",
+      "A multi-armed bandit isolates this exploration problem. Our schedules and numerical rewards are invented. Real watering changes future soil conditions, so the independent-trial bandit is only an initial simplification."
+    ]
+  },
+  "states-actions-and-transitions": {
+    "title": "Planning With a State That Changes After Each Choice",
+    "sources": [
+      {
+        "title": "Bellman: The Theory of Dynamic Programming (1954)",
+        "url": "https://www.rand.org/pubs/papers/P550.html"
+      },
+      {
+        "title": "Stanford CS234: Tabular Decision Processes and Learning",
+        "url": "https://web.stanford.edu/class/cs234/modules.html"
+      }
+    ],
+    "blocks": [
+      "Dynamic programming developed a way to solve multistage decisions by describing the current situation and the remaining problem. Bellman's work in the 1950s made this recursive view central to sequential planning.",
+      "A Markov decision process supplies states, actions, transitions, and rewards. Our dry-or-moist greenhouse is a deliberately simplified model. Its value is that every transition can be inspected, not that two labels fully describe soil behaviour."
+    ]
+  },
+  "discounted-returns": {
+    "title": "Connecting Immediate Feedback to Later Outcomes",
+    "sources": [
+      {
+        "title": "Sutton: Learning to Predict by the Methods of Temporal Differences (1988)",
+        "url": "https://jmvidal.cse.sc.edu/library/sutton88a.pdf"
+      },
+      {
+        "title": "Stanford CS234: Tabular Decision Processes and Learning",
+        "url": "https://web.stanford.edu/class/cs234/modules.html"
+      }
+    ],
+    "blocks": [
+      "Sequential prediction needed to account for outcomes that arrive after several intermediate steps. Sutton's 1988 work developed temporal-difference learning, where later predictions help improve earlier predictions before a final outcome is available.",
+      "Before using that update, we need to define the quantity predicted. A discounted return combines future rewards with a stated time convention. Our short watering episode makes the accumulation explicit."
+    ]
+  },
+  "bellman-value-iteration": {
+    "title": "Reusing the Remaining Decision Problem",
+    "sources": [
+      {
+        "title": "Bellman: The Theory of Dynamic Programming (1954)",
+        "url": "https://www.rand.org/pubs/papers/P550.html"
+      },
+      {
+        "title": "Stanford CS234: Tabular Decision Processes and Learning",
+        "url": "https://web.stanford.edu/class/cs234/modules.html"
+      }
+    ],
+    "blocks": [
+      "Bellman's dynamic-programming approach expressed a multistage problem through an immediate choice and the problem remaining afterward. A state's value summarises that remaining problem, avoiding a separate calculation for every history that reaches it.",
+      "Value iteration repeatedly applies an optimality update under a known model. Our finite teaching environment separates this planning calculation from learning an unknown model through interaction."
+    ]
+  },
+  "q-learning": {
+    "title": "Replacing a Known Model With Sampled Transitions",
+    "sources": [
+      {
+        "title": "Watkins and Dayan: Q-Learning (1992)",
+        "url": "https://doi.org/10.1007/BF00992698"
+      },
+      {
+        "title": "Sutton: Temporal-Difference Prediction (1988)",
+        "url": "https://jmvidal.cse.sc.edu/library/sutton88a.pdf"
+      }
+    ],
+    "blocks": [
+      "Watkins and Dayan's 1992 paper analysed Q-learning, a method for learning action values from experience without requiring an explicit transition model. It combines an observed reward with a current estimate of the best available continuation.",
+      "This belongs to temporal-difference learning: an estimate is moved toward a target partly built from another estimate. Our tabular examples expose the update, including the important exception when a transition ends the episode."
+    ]
+  },
+  "distributions-and-expectations": {
+    "title": "From Games of Chance to Decisions Under Uncertainty",
+    "sources": [
+      {
+        "title": "Bayes: An Essay towards Solving a Problem in the Doctrine of Chances (1763)",
+        "url": "https://doi.org/10.1098/rstl.1763.0053"
+      }
+    ],
+    "blocks": [
+      "Early probability problems asked how to reason about uncertain outcomes in games and repeated trials. Bayes’s posthumously published 1763 essay addressed the related inverse problem of learning about an unknown chance from observed outcomes.",
+      "Before updating an unknown chance, we need a way to describe a known set of possibilities. Our damaged-sensor distribution is an invented discrete example, chosen so every outcome and probability can be inspected."
+    ]
+  },
+  "parameter-posteriors": {
+    "title": "Learning About a Chance From Its Outcomes",
+    "sources": [
+      {
+        "title": "Bayes: An Essay towards Solving a Problem in the Doctrine of Chances (1763)",
+        "url": "https://doi.org/10.1098/rstl.1763.0053"
+      }
+    ],
+    "blocks": [
+      "Bayes’s essay asked how observations could inform an unknown probability. That reverses the direction of a calculation that starts with a known chance and predicts possible outcomes.",
+      "For repeated binary trials, a Beta prior and Bernoulli likelihood give a convenient update: count failures and non-failures separately. This is a particular model with explicit assumptions, not a claim that every uncertain rate follows a Beta distribution."
+    ]
+  },
+  "gaussian-sensor-fusion": {
+    "title": "Following a Quantity Through Noisy Measurements",
+    "sources": [
+      {
+        "title": "Kalman: A New Approach to Linear Filtering and Prediction Problems (1960)",
+        "url": "https://doi.org/10.1115/1.3662552"
+      }
+    ],
+    "blocks": [
+      "Kalman’s 1960 paper recast linear filtering as a recursive estimation problem. An estimate and its uncertainty could be carried forward and corrected as new measurements arrived.",
+      "Our thermometers isolate the measurement-combination step. The full Kalman filter also predicts how the state and its uncertainty change over time; averaging simultaneous readings alone is not that complete algorithm."
+    ]
+  },
+  "hidden-state-filtering": {
+    "title": "Combining a State Model With a Measurement Model",
+    "sources": [
+      {
+        "title": "Rabiner: A Tutorial on Hidden Markov Models (1989)",
+        "url": "https://doi.org/10.1109/5.18626"
+      }
+    ],
+    "blocks": [
+      "Rabiner’s 1989 tutorial explained hidden Markov models and their use in speech recognition. A sound recording gives noisy observations of an underlying sequence, rather than a direct label for each state.",
+      "The forward calculation also gives a general recipe for tracking hidden conditions: predict state probabilities, weight them by observation likelihoods, and normalise. Our pump is a teaching example with supplied transition and alarm probabilities."
+    ]
+  },
+  "gaussian-process-regression": {
+    "title": "A Distribution Over Functions",
+    "sources": [
+      {
+        "title": "Rasmussen and Williams: Gaussian Processes for Machine Learning",
+        "url": "https://gaussianprocess.org/gpml/"
+      }
+    ],
+    "blocks": [
+      "Rasmussen and Williams’s 2006 book develops Gaussian processes as a practical framework for regression and classification. A central idea is to describe relationships between function values using a covariance function rather than choose one fixed finite set of coefficients.",
+      "For our greenhouse, nearby locations can share information through their covariance. The kernel and noise assumptions decide how far that influence extends and how strongly a reading should constrain a prediction."
+    ]
+  },
+  "minibatch-gradients": {
+    "title": "Trading an Exact Gradient for a Useful Estimate",
+    "sources": [
+      {
+        "title": "Dive into Deep Learning: Minibatch Stochastic Gradient Descent",
+        "url": "https://d2l.ai/chapter_optimization/minibatch-sgd.html"
+      }
+    ],
+    "blocks": [
+      "Stochastic optimisation addresses objectives built from many observations by using sampled contributions. Minibatches also make useful work for matrix-oriented hardware without requiring the whole dataset in memory.",
+      "This lesson isolates the gradient of a mean squared-error objective with a one-half factor. Our tiny batches make every contribution visible; the same averaging principle applies to gradients obtained through backpropagation."
+    ]
+  },
+  "momentum-updates": {
+    "title": "Keeping Useful Direction Across Steps",
+    "sources": [
+      {
+        "title": "Dive into Deep Learning: Momentum",
+        "url": "https://d2l.ai/chapter_optimization/momentum.html"
+      }
+    ],
+    "blocks": [
+      "Momentum methods retain information from earlier optimisation steps. This helps explain why a direction that persists can accumulate, while directions that repeatedly reverse can partly cancel.",
+      "There are several conventions for scaling the stored state. Here velocity equals beta times the old velocity plus the current gradient; the learning rate is applied when changing the parameter."
+    ]
+  },
+  "adaptive-gradients": {
+    "title": "Remembering Both Direction and Scale",
+    "sources": [
+      {
+        "title": "Kingma and Ba: Adam (2014 preprint; ICLR 2015)",
+        "url": "https://arxiv.org/abs/1412.6980"
+      },
+      {
+        "title": "Duchi, Hazan and Singer: Adaptive Subgradient Methods (2011)",
+        "url": "https://jmlr.org/papers/v12/duchi11a.html"
+      }
+    ],
+    "blocks": [
+      "Adaptive subgradient methods used gradient history to change parameter-specific scales. Kingma and Ba’s Adam combined running first and second moment estimates with a correction for their zero initialisation.",
+      "Adam is an update rule, not a substitute for choosing a loss or checking generalisation. Our examples calculate the state explicitly; they do not claim that Adam always outperforms other optimisers."
+    ]
+  },
+  "initialisation-and-gradient-checks": {
+    "title": "Keeping Signals Alive Through Layers",
+    "sources": [
+      {
+        "title": "Glorot and Bengio: Understanding the Difficulty of Training Deep Feedforward Neural Networks (2010)",
+        "url": "https://proceedings.mlr.press/v9/glorot10a.html"
+      }
+    ],
+    "blocks": [
+      "Glorot and Bengio examined why deep feedforward networks were difficult to train, including saturation and how activation and gradient scales changed across layers. Their analysis connected weight initialisation to the number of incoming and outgoing connections.",
+      "A finite-difference check addresses a different issue: whether an implemented derivative agrees with the loss. Good initialisation cannot repair a wrong derivative, so our lesson keeps these two checks separate."
+    ]
+  },
+  "training-diagnostics": {
+    "title": "Treating Training Time as a Choice",
+    "sources": [
+      {
+        "title": "Dive into Deep Learning: Learning Rate Scheduling",
+        "url": "https://d2l.ai/chapter_optimization/lr-scheduler.html"
+      }
+    ],
+    "blocks": [
+      "Learning-rate schedules change how far optimisation moves as training proceeds. They address a practical tension between making early progress and making smaller later adjustments.",
+      "Stopping based on validation is a separate model-selection decision. The examples here use fixed recorded curves so we can inspect the choice without confusing changing optimiser settings with an independently evaluated improvement."
+    ]
+  },
+  "popularity-baselines": {
+    "title": "Giving Recommendations a Reference Point",
+    "sources": [
+      {
+        "title": "Herlocker and colleagues: Evaluating Collaborative Filtering Recommender Systems (2004)",
+        "url": "https://grouplens.org/site-content/uploads/evaluating-TOIS-20041.pdf"
+      }
+    ],
+    "blocks": [
+      "Research on collaborative-filtering evaluation showed why recommendation quality needs an explicit task and comparison procedure. Predicting a rating and producing a useful short list are related but different goals.",
+      "A popularity list is a useful reference because it can operate without an individual history. Our library examples expose its main limitation: the system’s past display choices affect which interactions it gets to count."
+    ]
+  },
+  "content-based-ranking": {
+    "title": "Using the Description of an Item",
+    "sources": [
+      {
+        "title": "Salton, Wong and Yang: A Vector Space Model for Automatic Indexing (1975)",
+        "url": "https://doi.org/10.1145/361219.361220"
+      }
+    ],
+    "blocks": [
+      "Vector-space information retrieval represented documents using shared term coordinates, allowing a query and a document to be compared numerically. This provides a foundation for using item descriptions in retrieval and recommendation.",
+      "Our guides use two hand-labelled topic coordinates so the comparison is inspectable. Real systems may use terms or learned embeddings, but the coordinate meaning and similarity assumptions still matter."
+    ]
+  },
+  "collaborative-filtering": {
+    "title": "Sharing Judgements Across Readers",
+    "sources": [
+      {
+        "title": "GroupLens: An Open Architecture for Collaborative Filtering of Netnews (1994)",
+        "url": "https://doi.org/10.1145/192844.192905"
+      }
+    ],
+    "blocks": [
+      "GroupLens explored collaborative filtering for netnews, using readers’ ratings to help predict which articles others would find interesting. Shared judgements supplied information that the article text alone might not capture.",
+      "Our small rating table uses the same broad idea, but the workshop is a transparent neighbourhood calculation rather than a recreation of the original service."
+    ]
+  },
+  "recommendation-factorisation": {
+    "title": "Sharing Information Through Latent Factors",
+    "sources": [
+      {
+        "title": "Koren, Bell and Volinsky: Matrix Factorization Techniques for Recommender Systems (2009)",
+        "url": "https://doi.org/10.1109/MC.2009.263"
+      }
+    ],
+    "blocks": [
+      "Koren, Bell and Volinsky described matrix-factorisation methods that became prominent in recommender systems, including work associated with the Netflix Prize. Learned low-dimensional factors allowed user and item information to interact.",
+      "The coordinates are learned to fit the objective. They should not automatically be labelled with human interests such as humour or difficulty unless additional evidence supports that interpretation."
+    ]
+  },
+  "ranking-evaluation": {
+    "title": "Evaluating the Recommendation Task",
+    "sources": [
+      {
+        "title": "Herlocker and colleagues: Evaluating Collaborative Filtering Recommender Systems (2004)",
+        "url": "https://grouplens.org/site-content/uploads/evaluating-TOIS-20041.pdf"
+      }
+    ],
+    "blocks": [
+      "Herlocker and colleagues emphasised that evaluating a recommender involves the user task, data, metrics, and experimental design. A numerical comparison is meaningful only when these choices match the intended use.",
+      "Our exercise fixes the candidate set, relevance labels, and list length. That lets us calculate exactly what a metric rewards before drawing conclusions about a live recommendation system."
+    ]
+  },
+  "robust-anomaly-scores": {
+    "title": "Estimating a Reference Despite Contamination",
+    "sources": [
+      {
+        "title": "Huber: Robust Estimation of a Location Parameter (1964)",
+        "url": "https://doi.org/10.1214/aoms/1177703732"
+      }
+    ],
+    "blocks": [
+      "Huber’s work formalised robust estimation under departures from an assumed model. The practical concern is that a few contaminated observations should not determine an entire estimate.",
+      "Our median and median-absolute-deviation score is a simple robust teaching example, not Huber’s specific estimator. It lets us inspect how the reference changes when an extreme reading is present."
+    ]
+  },
+  "local-density-anomalies": {
+    "title": "Outliers Relative to Their Surroundings",
+    "sources": [
+      {
+        "title": "Breunig, Kriegel, Ng and Sander: LOF (2000)",
+        "url": "https://www.dbs.ifi.lmu.de/Publikationen/Papers/LOF.pdf"
+      }
+    ],
+    "blocks": [
+      "The LOF paper introduced a degree of outlierness based on local density rather than a single global distance threshold. Its comparison lets regions with different densities provide their own local reference.",
+      "Our one-dimensional example avoids distance ties to expose the mechanism. The original neighbourhood definition includes ties at the kth-neighbour distance, which can make a neighbourhood contain more than k points."
+    ]
+  },
+  "isolation-forests": {
+    "title": "Detecting by Isolation Rather Than Density",
+    "sources": [
+      {
+        "title": "Liu, Ting and Zhou: Isolation Forest",
+        "url": "https://www.lamda.nju.edu.cn/publication/tkdd11.pdf"
+      }
+    ],
+    "blocks": [
+      "Liu, Ting and Zhou developed isolation-based anomaly detection, using random partitions to separate observations. The method estimates how easily a point can be isolated without first fitting a full density.",
+      "Our first tree has supplied splits so every branch can be followed. The second exercise averages path lengths from several trees. A production forest fits many random trees on subsamples and handles depth limits and unresolved leaves."
+    ]
+  },
+  "reconstruction-alerts": {
+    "title": "Using Reconstruction as Evidence",
+    "sources": [
+      {
+        "title": "Hinton and Salakhutdinov: Reducing the Dimensionality of Data with Neural Networks (2006)",
+        "url": "https://www.cs.toronto.edu/~hinton/absps/science.pdf"
+      }
+    ],
+    "blocks": [
+      "Hinton and Salakhutdinov demonstrated learning compact representations with neural networks by reconstructing data. A reconstruction objective teaches what information must survive compression.",
+      "Using reconstruction error as an anomaly signal is an additional modelling choice. A network may reconstruct some anomalies well, and a normal condition absent from training may reconstruct poorly."
+    ]
+  },
+  "graph-representations": {
+    "title": "Using Relationships Alongside Measurements",
+    "sources": [
+      {
+        "title": "Kipf and Welling: Semi-Supervised Classification with Graph Convolutional Networks",
+        "url": "https://arxiv.org/abs/1609.02907"
+      }
+    ],
+    "blocks": [
+      "Graph-based learning uses both measurements and the relationships between the things measured. Kipf and Welling’s graph-convolution work provides one influential example of using an adjacency structure to share information between nodes.",
+      "Before reaching a learned graph model, we need an unambiguous representation. Our pipe network is an invented example, and an edge records a connection rather than proving a causal effect."
+    ]
+  },
+  "graph-random-walks": {
+    "title": "Ranking Through Linked Structure",
+    "sources": [
+      {
+        "title": "Page and colleagues: The PageRank Citation Ranking",
+        "url": "https://www.cis.upenn.edu/~mkearns/teaching/NetworkedLife/pagerank.pdf"
+      }
+    ],
+    "blocks": [
+      "PageRank used a random-surfer interpretation to relate the importance of web pages to incoming links from other pages. Teleportation provides a way to leave a local link structure and makes the process less dependent on traps.",
+      "Our pipe-network walk first studies ordinary transitions. It is a structural probability calculation, not a physical fluid simulation; actual flow depends on pressures and capacities as well as connectivity."
+    ]
+  },
+  "neighbour-aggregation": {
+    "title": "Learning How to Combine Local Neighbourhoods",
+    "sources": [
+      {
+        "title": "Hamilton, Ying and Leskovec: Inductive Representation Learning on Large Graphs",
+        "url": "https://arxiv.org/abs/1706.02216"
+      }
+    ],
+    "blocks": [
+      "GraphSAGE learned functions for sampling and aggregating local neighbourhood information, allowing representations to be constructed from node features and neighbourhoods. This differs from storing a separate learned vector for every node identity.",
+      "Our lesson isolates a full-neighbour mean. It does not reproduce GraphSAGE’s sampling and learned combination, but makes the message-gathering operation visible before adding trainable transformations."
+    ]
+  },
+  "graph-convolution": {
+    "title": "A Simple Shared Layer on a Graph",
+    "sources": [
+      {
+        "title": "Kipf and Welling: Semi-Supervised Classification with Graph Convolutional Networks",
+        "url": "https://arxiv.org/abs/1609.02907"
+      }
+    ],
+    "blocks": [
+      "Kipf and Welling proposed a computationally efficient graph-convolution approach for semi-supervised node classification. Their propagation rule combines self-loops, symmetric degree normalisation, learned feature transforms, and nonlinearities.",
+      "The construction here reproduces one forward layer with supplied weights. Training would require a loss on labelled nodes and an explicit split protocol; the forward calculation alone has not learned a classifier."
+    ]
+  },
+  "link-prediction": {
+    "title": "Learning Representations That Support Pairwise Questions",
+    "sources": [
+      {
+        "title": "Kipf and Welling: Variational Graph Auto-Encoders (2016)",
+        "url": "https://arxiv.org/abs/1611.07308"
+      }
+    ],
+    "blocks": [
+      "Variational graph auto-encoders combined graph-based representations with a decoder for reconstructing links. An inner-product decoder provides a simple way to turn two node representations into a link score.",
+      "Our exercise uses supplied vectors and the same basic dot-product decoder. It does not implement variational training, and its output should not be assumed calibrated merely because a sigmoid lies between zero and one."
+    ]
+  },
+  "confounding-and-comparisons": {
+    "title": "Making the Intervention Question Explicit",
+    "sources": [
+      {
+        "title": "Pearl: Causality, second edition",
+        "url": "https://bayes.cs.ucla.edu/BOOK-2K/"
+      }
+    ],
+    "blocks": [
+      "Causal modelling distinguishes observing a choice from intervening to set it. Pearl’s graphical framework makes assumptions about common causes and pathways explicit, allowing us to ask when observational comparisons identify an intervention effect.",
+      "Our plant example is invented. Its purpose is to expose why a common cause of treatment and outcome can distort a comparison, not to establish an agricultural recommendation."
+    ]
+  },
+  "randomised-experiments": {
+    "title": "Defining Effects Through Alternative Outcomes",
+    "sources": [
+      {
+        "title": "Rubin: Estimating Causal Effects of Treatments in Randomized and Nonrandomized Studies (1974)",
+        "url": "https://dash.harvard.edu/entities/publication/73120378-82c0-6bd4-e053-0100007fdf3b"
+      }
+    ],
+    "blocks": [
+      "Rubin’s 1974 paper described treatment effects using the outcomes a unit would have under different treatments, and considered both randomised and nonrandomised studies. Randomisation supplies a known assignment mechanism for comparing groups.",
+      "We observe only the outcome under the assignment actually received. The example therefore estimates an average difference; it cannot reveal both possible outcomes for an individual bed."
+    ]
+  },
+  "causal-adjustment": {
+    "title": "Choosing Variables by Their Causal Role",
+    "sources": [
+      {
+        "title": "Pearl: Causality, second edition",
+        "url": "https://bayes.cs.ucla.edu/BOOK-2K/"
+      }
+    ],
+    "blocks": [
+      "Causal diagrams provide a way to reason about which observed variables should be adjusted for. The back-door criterion addresses common-cause paths that can create association between treatment and outcome without representing the treatment’s effect.",
+      "The important step is deciding whether an adjustment set is justified. A numerical standardisation can always be computed from a complete table; a causal interpretation cannot be obtained from arithmetic alone."
+    ]
+  },
+  "treatment-effects-and-overlap": {
+    "title": "Making Observed Groups Represent a Shared Population",
+    "sources": [
+      {
+        "title": "Hernán and Robins: Causal Inference: What If",
+        "url": "https://miguelhernan.org/whatifbook"
+      },
+      {
+        "title": "Rubin: Estimating Causal Effects of Treatments in Randomized and Nonrandomized Studies (1974)",
+        "url": "https://dash.harvard.edu/entities/publication/73120378-82c0-6bd4-e053-0100007fdf3b"
+      }
+    ],
+    "blocks": [
+      "The potential-outcomes framework defines an average effect as a comparison of outcomes under two interventions. Hernán and Robins develop identification and estimation methods, including weighting, while making exchangeability, positivity, and consistency assumptions explicit.",
+      "Our supplied propensity scores are part of a teaching model. Estimating them from observations adds uncertainty and model dependence; weighting does not automatically remove unmeasured confounding."
+    ]
+  },
+  "saving-fitted-pipelines": {
+    "title": "The Model Is One Part of the System",
+    "sources": [
+      {
+        "title": "Sculley and colleagues: Hidden Technical Debt in Machine Learning Systems (2015)",
+        "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/"
+      },
+      {
+        "title": "scikit-learn: Model Persistence",
+        "url": "https://scikit-learn.org/stable/model_persistence.html"
+      }
+    ],
+    "blocks": [
+      "Sculley and colleagues described dependencies and maintenance costs around machine-learning models, including the surrounding data and configuration. Those dependencies explain why copying only fitted coefficients is often insufficient.",
+      "Persistence documentation also distinguishes numerical model state from its execution environment. Our small JSON example makes the state explicit; it does not promise that arbitrary model objects can be safely or portably loaded."
+    ]
+  },
+  "prediction-input-contracts": {
+    "title": "Treating Data Expectations as Testable Rules",
+    "sources": [
+      {
+        "title": "Zinkevich: Rules of Machine Learning",
+        "url": "https://developers.google.com/machine-learning/guides/rules-of-ml/"
+      },
+      {
+        "title": "TensorFlow TFX: StatisticsGen",
+        "url": "https://www.tensorflow.org/tfx/guide/statsgen"
+      }
+    ],
+    "blocks": [
+      "Production guidance draws attention to training-serving differences and data dependencies. Data-validation pipelines make expectations about incoming records explicit rather than waiting for a model failure to reveal a changed input.",
+      "The tiny contract here checks names, shape, and finite values. A real schema also needs units and domain-specific constraints that cannot be inferred from an array’s dtype."
+    ]
+  },
+  "serving-predictions": {
+    "title": "Reducing Differences Between Training and Serving",
+    "sources": [
+      {
+        "title": "Zinkevich: Rules of Machine Learning",
+        "url": "https://developers.google.com/machine-learning/guides/rules-of-ml/"
+      }
+    ],
+    "blocks": [
+      "Production experience collected in Rules of Machine Learning includes checking differences between training and serving features. A model can behave unexpectedly even when its parameter file is correct if the surrounding computation changes.",
+      "Our browser exercise does not deploy a server. It tests the core prediction procedure that an API could call, separating numerical correctness from network transport and operational concerns."
+    ]
+  },
+  "model-versioning": {
+    "title": "Preserving the Dependencies of a Prediction",
+    "sources": [
+      {
+        "title": "Sculley and colleagues: Hidden Technical Debt in Machine Learning Systems (2015)",
+        "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/"
+      }
+    ],
+    "blocks": [
+      "Work on technical debt in machine-learning systems describes how data and configuration dependencies complicate maintenance. A model’s behaviour depends on more than the source code of its prediction function.",
+      "Versioning is a software-engineering response to that practical problem. Our exercise uses immutable example manifests and comparison fixtures; it does not claim that a filename or checksum alone documents the whole experiment."
+    ]
+  },
+  "monitoring-and-rollback": {
+    "title": "Testing a System That Keeps Receiving New Data",
+    "sources": [
+      {
+        "title": "Breck and colleagues: The ML Test Score (2017)",
+        "url": "https://research.google.com/pubs/archive/aad9f93b86b7addfea4c419b9100c6cdd26cacea.pdf"
+      }
+    ],
+    "blocks": [
+      "The ML Test Score organised tests and monitoring for production machine-learning systems, including data, models, infrastructure, and changes between training and serving. This reflects a practical reality: model code can remain unchanged while its operating conditions move.",
+      "Our small monitoring examples distinguish a changed input distribution from an observed increase in prediction error. Neither should be mistaken for the other."
+    ]
+  },
+  "project-sensor-investigation": {
+    "title": "From Robust Estimates to an Investigation Procedure",
+    "sources": [
+      {
+        "title": "Huber: Robust Estimation of a Location Parameter",
+        "url": "https://doi.org/10.1214/aoms/1177703732"
+      },
+      {
+        "title": "Breck and colleagues: The ML Test Score",
+        "url": "https://research.google.com/pubs/archive/aad9f93b86b7addfea4c419b9100c6cdd26cacea.pdf"
+      }
+    ],
+    "blocks": [
+      "Robust estimation addresses how unusual observations affect a reference. Production testing adds another concern: what happens when that reference is used repeatedly on new records.",
+      "This project combines those concerns in a teaching workflow. An alert is a request to investigate, while a fault label comes from a separate inspection. Keeping those meanings distinct prevents the detector from becoming its own source of truth."
+    ]
+  },
+  "project-demand-forecast": {
+    "title": "Evaluating Predictions at the Time They Could Have Been Made",
+    "sources": [
+      {
+        "title": "Hyndman and Athanasopoulos: Forecasting Principles and Practice",
+        "url": "https://otexts.com/fpp3/toolbox.html"
+      }
+    ],
+    "blocks": [
+      "Forecast evaluation asks what information would have been available at each prediction time. Rolling-origin evaluation recreates that boundary repeatedly rather than randomly mixing earlier and later observations.",
+      "Our demand sequence is synthetic and intentionally simple. It provides a testable implementation of the boundary, not evidence that a one-lag linear model is sufficient for real water planning."
+    ]
+  },
+  "project-seed-counting": {
+    "title": "Turning Pixel Regions Into Measurable Objects",
+    "sources": [
+      {
+        "title": "Rosenfeld and Pfaltz: Sequential Operations in Digital Picture Processing (1966)",
+        "url": "https://doi.org/10.1145/321356.321357"
+      }
+    ],
+    "blocks": [
+      "Early digital picture-processing work described operations that inspect pixel neighbourhoods and identify connected structures. Connectivity turns a mask of individual foreground pixels into regions that can be measured.",
+      "Our tray uses invented grayscale pixels and a simple four-neighbour rule. A region is an image structure; interpreting it as one seed requires additional assumptions about separation, lighting, and noise."
+    ]
   }
 }

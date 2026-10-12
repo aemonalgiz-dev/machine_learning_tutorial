@@ -2814,5 +2814,7227 @@
       "transpose"
     ],
     "draftVersion": 1
+  },
+  {
+    "id": "conditional-probability",
+    "title": "Update the two possible causes of an alarm",
+    "problem": "Botie sees an alarm. Combine the faulty and working groups' starting shares with their alarm rates, then calculate the updated shares.",
+    "challenge": "Build the two joint contributions and divide each by their total. Keep faulty first and working second.",
+    "sources": {
+      "prior": "Faulty and working priors",
+      "rates": "Alarm rates given each cause"
+    },
+    "cases": [
+      {
+        "name": "Rare faults",
+        "data": {
+          "prior": [
+            0.01,
+            0.99
+          ],
+          "rates": [
+            0.9,
+            0.1
+          ]
+        },
+        "expected": [
+          0.08333333333333333,
+          0.9166666666666666
+        ]
+      },
+      {
+        "name": "More common faults",
+        "data": {
+          "prior": [
+            0.2,
+            0.8
+          ],
+          "rates": [
+            0.9,
+            0.1
+          ]
+        },
+        "expected": [
+          0.6923076923076923,
+          0.3076923076923077
+        ]
+      },
+      {
+        "name": "An uninformative alarm",
+        "data": {
+          "prior": [
+            0.3,
+            0.7
+          ],
+          "rates": [
+            0.4,
+            0.4
+          ]
+        },
+        "expected": [
+          0.3,
+          0.7
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "priorEvidence",
+          "inputs": [
+            {
+              "source": "prior"
+            },
+            {
+              "source": "rates"
+            }
+          ]
+        },
+        {
+          "op": "total",
+          "inputs": [
+            {
+              "op": "priorEvidence",
+              "inputs": [
+                {
+                  "source": "prior"
+                },
+                {
+                  "source": "rates"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Weighting accounts for how common each cause is and how likely it is to produce the alarm. Dividing by the total changes the reference group to alarms.",
+    "limitation": "These invented rates are known inputs. This calculation neither estimates their uncertainty nor decides whether an inspection is worth its cost.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "likelihood",
+    "title": "Compare possible germination rules",
+    "problem": "Botie has observed which seeds germinated. Each candidate rule gives a probability for one seed, but he needs the likelihood of the whole ordered batch.",
+    "challenge": "Calculate each candidate's sequence likelihood, find the largest likelihood's position, and retrieve the candidate at that position.",
+    "sources": {
+      "candidates": "Candidate germination probabilities",
+      "outcomes": "Observed germination outcomes"
+    },
+    "cases": [
+      {
+        "name": "Two successes",
+        "data": {
+          "candidates": [
+            0.25,
+            0.5,
+            0.75
+          ],
+          "outcomes": [
+            1,
+            1,
+            0
+          ]
+        },
+        "expected": 0.75
+      },
+      {
+        "name": "One success",
+        "data": {
+          "candidates": [
+            0.25,
+            0.5,
+            0.75
+          ],
+          "outcomes": [
+            0,
+            1,
+            0
+          ]
+        },
+        "expected": 0.25
+      },
+      {
+        "name": "All succeed",
+        "data": {
+          "candidates": [
+            0,
+            0.5,
+            1
+          ],
+          "outcomes": [
+            1,
+            1
+          ]
+        },
+        "expected": 1
+      }
+    ],
+    "recipe": {
+      "op": "index",
+      "inputs": [
+        {
+          "source": "candidates"
+        },
+        {
+          "op": "argmax",
+          "inputs": [
+            {
+              "op": "sequenceLikelihood",
+              "inputs": [
+                {
+                  "source": "candidates"
+                },
+                {
+                  "source": "outcomes"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each candidate is judged against the same observed sequence. The index of the largest likelihood selects the best supplied candidate.",
+    "limitation": "This finite candidate search is not a general estimator. Likelihood does not report uncertainty about the winning parameter.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "naive-bayes",
+    "title": "Combine the sensor's clues",
+    "problem": "Botie has several observed signs. Each table row gives their probabilities under one cause: faulty first, working second.",
+    "challenge": "Multiply probabilities within each row, weight the resulting likelihoods by their priors, and normalise the two contributions.",
+    "sources": {
+      "rates": "Probabilities of observed signs by cause",
+      "prior": "Faulty and working priors"
+    },
+    "cases": [
+      {
+        "name": "Warm and unstable",
+        "data": {
+          "rates": [
+            [
+              0.8,
+              0.7
+            ],
+            [
+              0.1,
+              0.2
+            ]
+          ],
+          "prior": [
+            0.2,
+            0.8
+          ]
+        },
+        "expected": [
+          0.875,
+          0.125
+        ]
+      },
+      {
+        "name": "Warm but stable",
+        "data": {
+          "rates": [
+            [
+              0.8,
+              0.3
+            ],
+            [
+              0.1,
+              0.8
+            ]
+          ],
+          "prior": [
+            0.2,
+            0.8
+          ]
+        },
+        "expected": [
+          0.42857142857142855,
+          0.5714285714285714
+        ]
+      },
+      {
+        "name": "Equally informative signs",
+        "data": {
+          "rates": [
+            [
+              0.5,
+              0.4
+            ],
+            [
+              0.5,
+              0.4
+            ]
+          ],
+          "prior": [
+            0.3,
+            0.7
+          ]
+        },
+        "expected": [
+          0.3,
+          0.7
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "priorEvidence",
+          "inputs": [
+            {
+              "source": "prior"
+            },
+            {
+              "op": "rowproduct",
+              "inputs": [
+                {
+                  "source": "rates"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "total",
+          "inputs": [
+            {
+              "op": "priorEvidence",
+              "inputs": [
+                {
+                  "source": "prior"
+                },
+                {
+                  "op": "rowproduct",
+                  "inputs": [
+                    {
+                      "source": "rates"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each row keeps one possible cause intact. Multiplication combines the observed signs under the conditional-independence assumption; the prior and total then turn those likelihoods into posterior shares.",
+    "limitation": "The table already describes observed outcomes. We are composing an inference calculation, not estimating rates or guaranteeing probability calibration.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "support-vector-machines",
+    "title": "Measure the boundary's margin violations",
+    "problem": "Botie's labelled parts have supplied measurements and a proposed linear boundary. Correct labels alone do not tell him which parts sit inside its margin.",
+    "challenge": "Form the scores, multiply by the labels, calculate the shortfall from one, keep positive shortfalls, and return their mean.",
+    "sources": {
+      "measurements": "Part measurements by row",
+      "weights": "Boundary weights",
+      "bias": "Boundary bias",
+      "labels": "Known labels: -1 or +1"
+    },
+    "cases": [
+      {
+        "name": "Narrow scores",
+        "data": {
+          "measurements": [
+            [
+              -2
+            ],
+            [
+              -1
+            ],
+            [
+              1
+            ],
+            [
+              2
+            ]
+          ],
+          "weights": [
+            0.5
+          ],
+          "bias": 0,
+          "labels": [
+            -1,
+            -1,
+            1,
+            1
+          ]
+        },
+        "expected": 0.25
+      },
+      {
+        "name": "Beyond the margin",
+        "data": {
+          "measurements": [
+            [
+              -2
+            ],
+            [
+              2
+            ]
+          ],
+          "weights": [
+            1
+          ],
+          "bias": 0,
+          "labels": [
+            -1,
+            1
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "A wrong-side part",
+        "data": {
+          "measurements": [
+            [
+              2
+            ],
+            [
+              1
+            ]
+          ],
+          "weights": [
+            1
+          ],
+          "bias": 0,
+          "labels": [
+            -1,
+            1
+          ]
+        },
+        "expected": 1.5
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "relu",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "op": "constant",
+                  "inputs": [],
+                  "settings": {
+                    "value": 1
+                  }
+                },
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "source": "labels"
+                    },
+                    {
+                      "op": "add",
+                      "inputs": [
+                        {
+                          "op": "matvec",
+                          "inputs": [
+                            {
+                              "source": "measurements"
+                            },
+                            {
+                              "source": "weights"
+                            }
+                          ]
+                        },
+                        {
+                          "source": "bias"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The label turns either correct side into a positive signed score. The remaining shortfall measures margin violation, and the mean summarises the proposed boundary's examples.",
+    "limitation": "The weights are supplied, not fitted. A full SVM objective also penalises their norm, and its score is not a calibrated probability.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "hierarchical-clustering",
+    "title": "Find the nearest bridge between groups",
+    "problem": "Botie has two groups of sensor response times. He wants the single-linkage distance that would be used to consider joining them.",
+    "challenge": "Calculate every cross-group distance, flatten that table, and choose the smallest distance.",
+    "sources": {
+      "a": "First group's response times",
+      "b": "Second group's response times"
+    },
+    "cases": [
+      {
+        "name": "Separated groups",
+        "data": {
+          "a": [
+            0,
+            1
+          ],
+          "b": [
+            4,
+            6
+          ]
+        },
+        "expected": 3
+      },
+      {
+        "name": "Touching through one pair",
+        "data": {
+          "a": [
+            0,
+            8
+          ],
+          "b": [
+            9,
+            20
+          ]
+        },
+        "expected": 1
+      },
+      {
+        "name": "An equal response",
+        "data": {
+          "a": [
+            2,
+            5
+          ],
+          "b": [
+            5,
+            9
+          ]
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "minimum",
+      "inputs": [
+        {
+          "op": "flatten",
+          "inputs": [
+            {
+              "op": "crossDistances",
+              "inputs": [
+                {
+                  "source": "a"
+                },
+                {
+                  "source": "b"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The smallest cross-group distance identifies the nearest bridge. Replacing the reducer with the maximum would ask a different question about the same two groups.",
+    "limitation": "This workshop calculates one linkage comparison in one dimension. A complete agglomerative algorithm repeatedly chooses and records merges.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "density-based-clustering",
+    "title": "Find the points that can grow a group",
+    "problem": "Botie's sensor locations need a local density test before he can connect dense regions. A point counts itself among its neighbours.",
+    "challenge": "Calculate pairwise Euclidean distances, include distances at or below the supplied radius, add each neighbourhood row, and mark counts at or above the minimum.",
+    "sources": {
+      "locations": "Sensor locations by row",
+      "radius": "Neighbourhood radius",
+      "minimum": "Minimum count including self"
+    },
+    "cases": [
+      {
+        "name": "A border point",
+        "data": {
+          "locations": [
+            [
+              0
+            ],
+            [
+              0.1
+            ],
+            [
+              0.2
+            ],
+            [
+              0.4
+            ]
+          ],
+          "radius": 0.21,
+          "minimum": 3
+        },
+        "expected": [
+          1,
+          1,
+          1,
+          0
+        ]
+      },
+      {
+        "name": "One core and one distant point",
+        "data": {
+          "locations": [
+            [
+              0
+            ],
+            [
+              0.2
+            ],
+            [
+              0.4
+            ],
+            [
+              1.5
+            ]
+          ],
+          "radius": 0.25,
+          "minimum": 3
+        },
+        "expected": [
+          0,
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "No dense region",
+        "data": {
+          "locations": [
+            [
+              0,
+              0
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "radius": 1,
+          "minimum": 2
+        },
+        "expected": [
+          0,
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "gate",
+      "inputs": [
+        {
+          "op": "rowtotal",
+          "inputs": [
+            {
+              "op": "withinRadius",
+              "inputs": [
+                {
+                  "op": "pairDistances",
+                  "inputs": [
+                    {
+                      "source": "locations"
+                    }
+                  ]
+                },
+                {
+                  "source": "radius"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "minimum"
+        }
+      ]
+    },
+    "why": "The distance table becomes a neighbourhood table. Row totals count support, and the final comparison identifies cores under the chosen convention.",
+    "limitation": "Core detection is one part of DBSCAN. This result does not assign cluster IDs or attach border points, and density settings need validation against the intended task.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "images-as-arrays",
+    "title": "Put the tray image on a known scale",
+    "problem": "Botie needs floating-point intensities between zero and one before comparing photographs stored on the same eight-bit scale.",
+    "challenge": "Divide every pixel by the supplied maximum. Preserve the image's two-dimensional arrangement.",
+    "sources": {
+      "image": "Grayscale tray image",
+      "maximum": "Maximum intensity of this format"
+    },
+    "cases": [
+      {
+        "name": "Seed on a dark tray",
+        "data": {
+          "image": [
+            [
+              10,
+              20,
+              10
+            ],
+            [
+              20,
+              220,
+              30
+            ],
+            [
+              10,
+              200,
+              20
+            ]
+          ],
+          "maximum": 255
+        },
+        "expected": [
+          [
+            0.0392156862745098,
+            0.0784313725490196,
+            0.0392156862745098
+          ],
+          [
+            0.0784313725490196,
+            0.8627450980392157,
+            0.11764705882352941
+          ],
+          [
+            0.0392156862745098,
+            0.7843137254901961,
+            0.0784313725490196
+          ]
+        ]
+      },
+      {
+        "name": "A smaller range",
+        "data": {
+          "image": [
+            [
+              0,
+              5
+            ],
+            [
+              10,
+              15
+            ]
+          ],
+          "maximum": 15
+        },
+        "expected": [
+          [
+            0,
+            0.3333333333333333
+          ],
+          [
+            0.6666666666666666,
+            1
+          ]
+        ]
+      },
+      {
+        "name": "A dark image",
+        "data": {
+          "image": [
+            [
+              0,
+              0
+            ]
+          ],
+          "maximum": 255
+        },
+        "expected": [
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "source": "image"
+        },
+        {
+          "source": "maximum"
+        }
+      ]
+    },
+    "why": "The same scale factor applies to each position. Dividing the whole array preserves its spatial structure.",
+    "limitation": "The format maximum must be positive. These examples rescale stored intensity values; they do not remove lighting differences.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "imageView": {
+      "inputs": {
+        "image": "maximum"
+      },
+      "output": 1
+    }
+  },
+  {
+    "id": "image-thresholding",
+    "title": "Select the bright seed pixels",
+    "problem": "Botie needs a mask of the tray positions that exceed the cutoff, then a count of how many positions were selected.",
+    "challenge": "Compare the image with the cutoff. Flatten the mask only for counting, add its entries, and pack the mask and count into the result in that order.",
+    "sources": {
+      "image": "Tray intensities",
+      "cutoff": "Foreground cutoff"
+    },
+    "cases": [
+      {
+        "name": "A bright seed",
+        "data": {
+          "image": [
+            [
+              10,
+              20,
+              10
+            ],
+            [
+              20,
+              220,
+              30
+            ],
+            [
+              10,
+              200,
+              20
+            ]
+          ],
+          "cutoff": 100
+        },
+        "expected": [
+          [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              0
+            ]
+          ],
+          2
+        ]
+      },
+      {
+        "name": "Equality stays background",
+        "data": {
+          "image": [
+            [
+              99,
+              100,
+              101
+            ]
+          ],
+          "cutoff": 100
+        },
+        "expected": [
+          [
+            [
+              0,
+              0,
+              1
+            ]
+          ],
+          1
+        ]
+      },
+      {
+        "name": "An empty tray",
+        "data": {
+          "image": [
+            [
+              5,
+              10
+            ],
+            [
+              15,
+              20
+            ]
+          ],
+          "cutoff": 100
+        },
+        "expected": [
+          [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pack",
+      "inputs": [
+        {
+          "op": "greater",
+          "inputs": [
+            {
+              "source": "image"
+            },
+            {
+              "source": "cutoff"
+            }
+          ]
+        },
+        {
+          "op": "total",
+          "inputs": [
+            {
+              "op": "flatten",
+              "inputs": [
+                {
+                  "op": "greater",
+                  "inputs": [
+                    {
+                      "source": "image"
+                    },
+                    {
+                      "source": "cutoff"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The comparison preserves positions. Adding the flattened mask counts selected pixels without pretending they are separate objects.",
+    "limitation": "The first result is a mask; the second is a pixel count. A global brightness cutoff can fail under shadows or similar foreground and background intensities.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "imageView": {
+      "inputs": {
+        "image": 255
+      },
+      "output": 1,
+      "outputIndex": 0,
+      "remainderLabel": "Selected pixel count"
+    }
+  },
+  {
+    "id": "morphology",
+    "title": "Remove the tray's isolated speck",
+    "problem": "Botie's threshold mask contains a broad seed region and an isolated mark. Use the supplied footprint to perform an opening.",
+    "challenge": "Connect erosion before dilation and supply the same footprint to both. Return the cleaned mask.",
+    "sources": {
+      "mask": "Threshold mask",
+      "footprint": "Symmetric footprint"
+    },
+    "cases": [
+      {
+        "name": "Broad seed and speck",
+        "data": {
+          "mask": [
+            [
+              1,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              1,
+              1,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "footprint": [
+            [
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1
+            ]
+          ]
+        },
+        "expected": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            1,
+            1,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "A thin region disappears",
+        "data": {
+          "mask": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              1
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ],
+          "footprint": [
+            [
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1
+            ],
+            [
+              1,
+              1,
+              1
+            ]
+          ]
+        },
+        "expected": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "No foreground",
+        "data": {
+          "mask": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "footprint": [
+            [
+              1
+            ]
+          ]
+        },
+        "expected": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "dilateMask",
+      "inputs": [
+        {
+          "op": "erodeMask",
+          "inputs": [
+            {
+              "source": "mask"
+            },
+            {
+              "source": "footprint"
+            }
+          ]
+        },
+        {
+          "source": "footprint"
+        }
+      ]
+    },
+    "why": "Only structures with surviving erosion positions can expand again. The broad square survives; the isolated speck does not.",
+    "limitation": "Both operations use zero outside the image and centrally symmetric odd-sized footprints. Opening can remove real thin objects too.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "imageView": {
+      "inputs": {
+        "mask": 1,
+        "footprint": 1
+      },
+      "output": 1
+    }
+  },
+  {
+    "id": "connected-components",
+    "title": "Count connected seed regions",
+    "problem": "Botie has a foreground mask. Group reachable foreground pixels under the supplied neighbour rule, then count the resulting regions.",
+    "challenge": "Label the regions, flatten that label image, and take its maximum. This labeller uses consecutive positive IDs and reserves zero for background.",
+    "sources": {
+      "mask": "Seed foreground mask",
+      "connectivity": "Neighbour rule: 4 or 8"
+    },
+    "cases": [
+      {
+        "name": "Diagonal pixels, shared edges only",
+        "data": {
+          "mask": [
+            [
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              1
+            ]
+          ],
+          "connectivity": 4
+        },
+        "expected": 3
+      },
+      {
+        "name": "Diagonal pixels, corners allowed",
+        "data": {
+          "mask": [
+            [
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              0,
+              0,
+              1
+            ]
+          ],
+          "connectivity": 8
+        },
+        "expected": 1
+      },
+      {
+        "name": "An empty tray",
+        "data": {
+          "mask": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "connectivity": 4
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "maximum",
+      "inputs": [
+        {
+          "op": "flatten",
+          "inputs": [
+            {
+              "op": "labelRegions",
+              "inputs": [
+                {
+                  "source": "mask"
+                },
+                {
+                  "source": "connectivity"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Labelling counts groups connected by the chosen neighbour rule. Consecutive positive IDs make the maximum equal the group count, including zero for an empty mask.",
+    "limitation": "Connected regions are not necessarily physical objects. Touching seeds can merge, and a fragmented seed can split.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "imageView": {
+      "inputs": {
+        "mask": 1
+      }
+    }
+  },
+  {
+    "id": "image-augmentation",
+    "title": "Reflect a labelled seed image",
+    "problem": "Botie is creating a reflected training view. The segmentation mask must continue to identify the same seed pixels.",
+    "challenge": "Reverse columns in both the image and the mask. Pack the transformed image first and the transformed mask second.",
+    "sources": {
+      "image": "Seed photograph",
+      "mask": "Aligned seed mask"
+    },
+    "cases": [
+      {
+        "name": "Seed on the left",
+        "data": {
+          "image": [
+            [
+              200,
+              20,
+              10
+            ],
+            [
+              180,
+              50,
+              20
+            ]
+          ],
+          "mask": [
+            [
+              1,
+              0,
+              0
+            ],
+            [
+              1,
+              1,
+              0
+            ]
+          ]
+        },
+        "expected": [
+          [
+            [
+              10,
+              20,
+              200
+            ],
+            [
+              20,
+              50,
+              180
+            ]
+          ],
+          [
+            [
+              0,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              1
+            ]
+          ]
+        ]
+      },
+      {
+        "name": "A wide view",
+        "data": {
+          "image": [
+            [
+              10,
+              20,
+              180,
+              200
+            ]
+          ],
+          "mask": [
+            [
+              0,
+              0,
+              1,
+              1
+            ]
+          ]
+        },
+        "expected": [
+          [
+            [
+              200,
+              180,
+              20,
+              10
+            ]
+          ],
+          [
+            [
+              1,
+              1,
+              0,
+              0
+            ]
+          ]
+        ]
+      },
+      {
+        "name": "One column",
+        "data": {
+          "image": [
+            [
+              200
+            ],
+            [
+              10
+            ]
+          ],
+          "mask": [
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        },
+        "expected": [
+          [
+            [
+              200
+            ],
+            [
+              10
+            ]
+          ],
+          [
+            [
+              1
+            ],
+            [
+              0
+            ]
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "pack",
+      "inputs": [
+        {
+          "op": "flipImage",
+          "inputs": [
+            {
+              "source": "image"
+            }
+          ]
+        },
+        {
+          "op": "flipImage",
+          "inputs": [
+            {
+              "source": "mask"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The same column reversal moves intensities and their labels to matching positions.",
+    "limitation": "This exercise illustrates one deterministic transformation. Real augmentation choices must respect the task and happen after splitting original observations.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "imageView": {
+      "inputs": {
+        "image": 255,
+        "mask": 1
+      },
+      "output": 255,
+      "outputIndex": 0,
+      "pairedOutput": 1
+    }
+  },
+  {
+    "id": "transfer-learning",
+    "title": "Apply a new head to fixed leaf features",
+    "problem": "Botie already has a feature vector for each leaf. Apply the supplied new head while leaving the feature rows unchanged.",
+    "challenge": "Multiply feature rows by the head's weight vector, add its bias, then output one for scores at least zero and zero otherwise.",
+    "sources": {
+      "features": "Fixed leaf features",
+      "weights": "New head weights",
+      "bias": "New head bias"
+    },
+    "cases": [
+      {
+        "name": "Three leaves",
+        "data": {
+          "features": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "weights": [
+            2,
+            -1
+          ],
+          "bias": -0.5
+        },
+        "expected": [
+          1,
+          0,
+          1
+        ]
+      },
+      {
+        "name": "A different head",
+        "data": {
+          "features": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "weights": [
+            -1,
+            2
+          ],
+          "bias": -0.5
+        },
+        "expected": [
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "name": "Exactly on the boundary",
+        "data": {
+          "features": [
+            [
+              1,
+              1
+            ]
+          ],
+          "weights": [
+            1,
+            -1
+          ],
+          "bias": 0
+        },
+        "expected": [
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "gate",
+      "inputs": [
+        {
+          "op": "add",
+          "inputs": [
+            {
+              "op": "matvec",
+              "inputs": [
+                {
+                  "source": "features"
+                },
+                {
+                  "source": "weights"
+                }
+              ]
+            },
+            {
+              "source": "bias"
+            }
+          ]
+        },
+        {
+          "op": "constant",
+          "inputs": [],
+          "settings": {
+            "value": 0
+          }
+        }
+      ]
+    },
+    "why": "The feature extractor's output is fixed. Only the head determines how those measurements become scores and class decisions.",
+    "limitation": "The feature vectors and head are invented. This construction demonstrates inference from a supplied head, not backbone training or a transfer-performance claim.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "bounding-boxes",
+    "title": "Measure the overlap of two seed rectangles",
+    "problem": "Botie has a predicted rectangle and a labelled rectangle. Calculate their intersection over union using continuous boundary coordinates.",
+    "challenge": "Find both box areas and their intersection. Add the areas, subtract the intersection to form the union, then divide intersection by union.",
+    "sources": {
+      "a": "Predicted rectangle",
+      "b": "Labelled rectangle"
+    },
+    "cases": [
+      {
+        "name": "Partial overlap",
+        "data": {
+          "a": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "b": [
+            2,
+            0,
+            6,
+            4
+          ]
+        },
+        "expected": 0.3333333333333333
+      },
+      {
+        "name": "Contained rectangle",
+        "data": {
+          "a": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "b": [
+            1,
+            1,
+            3,
+            3
+          ]
+        },
+        "expected": 0.25
+      },
+      {
+        "name": "Disjoint rectangles",
+        "data": {
+          "a": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "b": [
+            3,
+            3,
+            5,
+            5
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Identical rectangles",
+        "data": {
+          "a": [
+            1,
+            2,
+            4,
+            6
+          ],
+          "b": [
+            1,
+            2,
+            4,
+            6
+          ]
+        },
+        "expected": 1
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "boxIntersection",
+          "inputs": [
+            {
+              "source": "a"
+            },
+            {
+              "source": "b"
+            }
+          ]
+        },
+        {
+          "op": "subtract",
+          "inputs": [
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "op": "boxArea",
+                  "inputs": [
+                    {
+                      "source": "a"
+                    }
+                  ]
+                },
+                {
+                  "op": "boxArea",
+                  "inputs": [
+                    {
+                      "source": "b"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "boxIntersection",
+              "inputs": [
+                {
+                  "source": "a"
+                },
+                {
+                  "source": "b"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Subtracting the intersection prevents the union from counting shared area twice. The ratio compares shared coverage with all covered area.",
+    "limitation": "All rectangles must have positive width and height. This calculation is one pairwise localisation measure, not a complete detection evaluation.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "non-maximum-suppression",
+    "title": "Keep distinct seed detections",
+    "problem": "Botie has multiple scored rectangles for the same object class. Keep strong candidates while removing their sufficiently overlapping alternatives.",
+    "challenge": "Rank original indices by descending score, apply greedy suppression using that order and the supplied IoU threshold, then gather the kept box rows.",
+    "sources": {
+      "boxes": "Candidate seed rectangles",
+      "scores": "Candidate scores",
+      "threshold": "IoU suppression threshold"
+    },
+    "cases": [
+      {
+        "name": "One duplicate and one separate seed",
+        "data": {
+          "boxes": [
+            [
+              0,
+              0,
+              4,
+              4
+            ],
+            [
+              0.5,
+              0,
+              4.5,
+              4
+            ],
+            [
+              7,
+              0,
+              9,
+              2
+            ]
+          ],
+          "scores": [
+            0.9,
+            0.8,
+            0.7
+          ],
+          "threshold": 0.5
+        },
+        "expected": [
+          [
+            0,
+            0,
+            4,
+            4
+          ],
+          [
+            7,
+            0,
+            9,
+            2
+          ]
+        ]
+      },
+      {
+        "name": "Removed boxes cannot suppress",
+        "data": {
+          "boxes": [
+            [
+              0,
+              0,
+              3,
+              2
+            ],
+            [
+              1,
+              0,
+              4,
+              2
+            ],
+            [
+              2,
+              0,
+              5,
+              2
+            ]
+          ],
+          "scores": [
+            0.9,
+            0.8,
+            0.7
+          ],
+          "threshold": 0.4
+        },
+        "expected": [
+          [
+            0,
+            0,
+            3,
+            2
+          ],
+          [
+            2,
+            0,
+            5,
+            2
+          ]
+        ]
+      },
+      {
+        "name": "Equal scores use original order",
+        "data": {
+          "boxes": [
+            [
+              0,
+              0,
+              2,
+              2
+            ],
+            [
+              0,
+              0,
+              2,
+              2
+            ]
+          ],
+          "scores": [
+            0.7,
+            0.7
+          ],
+          "threshold": 0.5
+        },
+        "expected": [
+          [
+            0,
+            0,
+            2,
+            2
+          ]
+        ]
+      },
+      {
+        "name": "Equality stays available",
+        "data": {
+          "boxes": [
+            [
+              0,
+              0,
+              3,
+              2
+            ],
+            [
+              1,
+              0,
+              4,
+              2
+            ]
+          ],
+          "scores": [
+            0.9,
+            0.8
+          ],
+          "threshold": 0.5
+        },
+        "expected": [
+          [
+            0,
+            0,
+            3,
+            2
+          ],
+          [
+            1,
+            0,
+            4,
+            2
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "gather",
+      "inputs": [
+        {
+          "source": "boxes"
+        },
+        {
+          "op": "suppressBoxes",
+          "inputs": [
+            {
+              "source": "boxes"
+            },
+            {
+              "op": "descendingIndices",
+              "inputs": [
+                {
+                  "source": "scores"
+                }
+              ]
+            },
+            {
+              "source": "threshold"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Ranking determines which candidate gets the first decision. Each kept candidate removes only still-available boxes with overlap strictly above the threshold.",
+    "limitation": "All candidates here belong to one class. Ties use the original index; real library tie behaviour can differ. Suppression can mistakenly remove nearby real objects.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "forecasting-baselines",
+    "title": "Measure the persistence forecast's errors",
+    "problem": "Botie saved yesterday's demand before each target day. Compare those saved forecasts with the corresponding observed totals.",
+    "challenge": "Subtract predictions from observations, take absolute values, and average the errors.",
+    "sources": {
+      "predictions": "Previously recorded forecasts",
+      "actual": "Later observed litres"
+    },
+    "cases": [
+      {
+        "name": "Three days",
+        "data": {
+          "predictions": [
+            10,
+            12,
+            11
+          ],
+          "actual": [
+            12,
+            11,
+            14
+          ]
+        },
+        "expected": 2
+      },
+      {
+        "name": "A perfect repeat",
+        "data": {
+          "predictions": [
+            9,
+            9
+          ],
+          "actual": [
+            9,
+            9
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Errors in both directions",
+        "data": {
+          "predictions": [
+            10,
+            10
+          ],
+          "actual": [
+            7,
+            15
+          ]
+        },
+        "expected": 4
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "absolute",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "source": "actual"
+                },
+                {
+                  "source": "predictions"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Absolute values stop positive and negative errors from cancelling. Each pair must describe the same target date.",
+    "limitation": "These are supplied historical forecasts. This calculation does not fit a model or estimate uncertainty.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "lagged-features",
+    "title": "Build a trailing-mean forecast",
+    "problem": "Botie wants one prediction for each day that has enough preceding readings. The supplied lag count defines the history window.",
+    "challenge": "Create past-only lag rows, then average across each row.",
+    "sources": {
+      "history": "Demand in chronological order",
+      "lags": "Number of preceding readings"
+    },
+    "cases": [
+      {
+        "name": "Two-day window",
+        "data": {
+          "history": [
+            4,
+            6,
+            5,
+            9
+          ],
+          "lags": 2
+        },
+        "expected": [
+          5,
+          5.5
+        ]
+      },
+      {
+        "name": "Three-day window",
+        "data": {
+          "history": [
+            3,
+            6,
+            9,
+            8,
+            10
+          ],
+          "lags": 3
+        },
+        "expected": [
+          6,
+          7.666666666666667
+        ]
+      },
+      {
+        "name": "Persistence as one lag",
+        "data": {
+          "history": [
+            2,
+            5,
+            3
+          ],
+          "lags": 1
+        },
+        "expected": [
+          2,
+          5
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "rowmean",
+      "inputs": [
+        {
+          "op": "lagInputs",
+          "inputs": [
+            {
+              "source": "history"
+            },
+            {
+              "source": "lags"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each row ends before its target. Averaging keeps target dates separate while summarising their available history.",
+    "limitation": "Inputs must be evenly spaced and already audited for availability. This tool does not fill missing dates.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "seasonality-and-differencing",
+    "title": "Measure change across matching cycle positions",
+    "problem": "Botie wants to remove a supplied repeating period from the demand record before inspecting its changes.",
+    "challenge": "Extract aligned current and seasonal-reference lists, then subtract references from current values.",
+    "sources": {
+      "history": "Chronological demand",
+      "period": "Seasonal period in observations"
+    },
+    "cases": [
+      {
+        "name": "Two-position cycle",
+        "data": {
+          "history": [
+            10,
+            20,
+            12,
+            22
+          ],
+          "period": 2
+        },
+        "expected": [
+          2,
+          2
+        ]
+      },
+      {
+        "name": "Exact repetition",
+        "data": {
+          "history": [
+            5,
+            9,
+            5,
+            9
+          ],
+          "period": 2
+        },
+        "expected": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "Ordinary differences",
+        "data": {
+          "history": [
+            3,
+            7,
+            6
+          ],
+          "period": 1
+        },
+        "expected": [
+          4,
+          -1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "lagTargets",
+          "inputs": [
+            {
+              "source": "history"
+            },
+            {
+              "source": "period"
+            }
+          ]
+        },
+        {
+          "op": "lagReference",
+          "inputs": [
+            {
+              "source": "history"
+            },
+            {
+              "source": "period"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The aligned lists refer to matching positions in successive cycles. Their difference measures change beyond the repeated reference.",
+    "limitation": "The period is supplied rather than discovered. Differencing alone does not establish stationarity.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "exponential-smoothing",
+    "title": "Update Botie's demand estimate",
+    "problem": "A new daily total has arrived. Adjust the previous level by the supplied fraction of its error.",
+    "challenge": "Subtract the old level from the reading, multiply by alpha, and add the correction to the old level.",
+    "sources": {
+      "level": "Previous level estimate",
+      "reading": "New observed demand",
+      "alpha": "Update fraction"
+    },
+    "cases": [
+      {
+        "name": "A gradual update",
+        "data": {
+          "level": 10,
+          "reading": 14,
+          "alpha": 0.25
+        },
+        "expected": 11
+      },
+      {
+        "name": "Ignore the new observation",
+        "data": {
+          "level": 8,
+          "reading": 20,
+          "alpha": 0
+        },
+        "expected": 8
+      },
+      {
+        "name": "Use the latest observation",
+        "data": {
+          "level": 8,
+          "reading": 20,
+          "alpha": 1
+        },
+        "expected": 20
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "source": "level"
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "alpha"
+            },
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "source": "reading"
+                },
+                {
+                  "source": "level"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The difference describes the surprise. Alpha controls how much of that surprise enters the retained state.",
+    "limitation": "This is one level update with a supplied alpha in [0,1]. It does not fit alpha or model trend and seasonality.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "autoregressive-forecasting",
+    "title": "Apply fitted lag contributions",
+    "problem": "Botie has a past-demand window and supplied autoregressive coefficients. Calculate its next forecast.",
+    "challenge": "Take the dot product of the history window and lag weights, then add the intercept.",
+    "sources": {
+      "window": "Older-to-newer demand window",
+      "weights": "Lag coefficients in the same order",
+      "intercept": "Fitted intercept"
+    },
+    "cases": [
+      {
+        "name": "Recent day matters more",
+        "data": {
+          "window": [
+            8,
+            12
+          ],
+          "weights": [
+            0.25,
+            0.75
+          ],
+          "intercept": 1
+        },
+        "expected": 12
+      },
+      {
+        "name": "Equal contributions",
+        "data": {
+          "window": [
+            4,
+            8
+          ],
+          "weights": [
+            0.5,
+            0.5
+          ],
+          "intercept": 1
+        },
+        "expected": 7
+      },
+      {
+        "name": "One lag",
+        "data": {
+          "window": [
+            3
+          ],
+          "weights": [
+            2
+          ],
+          "intercept": 1
+        },
+        "expected": 7
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "op": "dot",
+          "inputs": [
+            {
+              "source": "window"
+            },
+            {
+              "source": "weights"
+            }
+          ]
+        },
+        {
+          "source": "intercept"
+        }
+      ]
+    },
+    "why": "The weights assign separate contributions to the same lag positions used during fitting.",
+    "limitation": "This applies supplied coefficients for one horizon. It does not fit them or provide forecast intervals.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "rolling-forecast-validation",
+    "title": "Compare two forecasts on the same days",
+    "problem": "Botie has stored predictions from two methods before each target arrived. Report both mean absolute errors in the supplied method order.",
+    "challenge": "Subtract each prediction row from the actual target vector, take absolute values, and average within each method's row.",
+    "sources": {
+      "actual": "Shared target observations",
+      "predictions": "One row per forecasting method"
+    },
+    "cases": [
+      {
+        "name": "Two origins",
+        "data": {
+          "actual": [
+            9,
+            8
+          ],
+          "predictions": [
+            [
+              6,
+              9
+            ],
+            [
+              6.5,
+              7.5
+            ]
+          ]
+        },
+        "expected": [
+          2,
+          1.5
+        ]
+      },
+      {
+        "name": "A reversed winner",
+        "data": {
+          "actual": [
+            5,
+            5
+          ],
+          "predictions": [
+            [
+              5,
+              5
+            ],
+            [
+              4,
+              7
+            ]
+          ]
+        },
+        "expected": [
+          0,
+          1.5
+        ]
+      },
+      {
+        "name": "One origin",
+        "data": {
+          "actual": [
+            10
+          ],
+          "predictions": [
+            [
+              8
+            ],
+            [
+              13
+            ]
+          ]
+        },
+        "expected": [
+          2,
+          3
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "rowmean",
+      "inputs": [
+        {
+          "op": "absolute",
+          "inputs": [
+            {
+              "op": "subtractRows",
+              "inputs": [
+                {
+                  "source": "predictions"
+                },
+                {
+                  "source": "actual"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Comparing every method against the same target dates makes their error summaries comparable.",
+    "limitation": "The provided forecasts must already respect their historical origins. This reducer cannot detect leakage in how they were created.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "exploration-and-bandits",
+    "title": "Update the tried schedule's estimated reward",
+    "problem": "Botie has the previous mean and count for the action he selected, plus its newly observed reward.",
+    "challenge": "Increase the count by one. Divide the difference between reward and old mean by that updated count, then add the correction to the old mean.",
+    "sources": {
+      "mean": "Selected action's previous mean",
+      "count": "Selected action's previous count",
+      "reward": "New observed reward"
+    },
+    "cases": [
+      {
+        "name": "Second trial",
+        "data": {
+          "mean": 7,
+          "count": 1,
+          "reward": 3
+        },
+        "expected": 5
+      },
+      {
+        "name": "First trial",
+        "data": {
+          "mean": 0,
+          "count": 0,
+          "reward": 4
+        },
+        "expected": 4
+      },
+      {
+        "name": "Fourth trial",
+        "data": {
+          "mean": 5,
+          "count": 3,
+          "reward": 9
+        },
+        "expected": 6
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "source": "mean"
+        },
+        {
+          "op": "divide",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "source": "reward"
+                },
+                {
+                  "source": "mean"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "source": "count"
+                },
+                {
+                  "op": "constant",
+                  "inputs": [],
+                  "settings": {
+                    "value": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The updated count assigns equal weight to each observation of this particular action.",
+    "limitation": "The count must be a non-negative whole number. This estimates a stationary action mean, not a policy for a changing state.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "states-actions-and-transitions",
+    "title": "Compare the states each action may lead to",
+    "problem": "Botie has a transition row for each action and a value for each possible next state.",
+    "challenge": "Validate the transition rows, then multiply the transition matrix by the state-value vector.",
+    "sources": {
+      "transitions": "Next-state probabilities per action",
+      "values": "Values in next-state order"
+    },
+    "cases": [
+      {
+        "name": "Water or wait",
+        "data": {
+          "transitions": [
+            [
+              0.1,
+              0.9
+            ],
+            [
+              0.8,
+              0.2
+            ]
+          ],
+          "values": [
+            0,
+            10
+          ]
+        },
+        "expected": [
+          9,
+          2
+        ]
+      },
+      {
+        "name": "State values change",
+        "data": {
+          "transitions": [
+            [
+              0.1,
+              0.9
+            ],
+            [
+              0.8,
+              0.2
+            ]
+          ],
+          "values": [
+            5,
+            1
+          ]
+        },
+        "expected": [
+          1.4,
+          4.2
+        ]
+      },
+      {
+        "name": "Certain outcomes",
+        "data": {
+          "transitions": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "values": [
+            3,
+            7
+          ]
+        },
+        "expected": [
+          3,
+          7
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "matvec",
+      "inputs": [
+        {
+          "op": "probabilityRows",
+          "inputs": [
+            {
+              "source": "transitions"
+            }
+          ]
+        },
+        {
+          "source": "values"
+        }
+      ]
+    },
+    "why": "Each row averages the same state values under a different action's possible consequences.",
+    "limitation": "Transitions and values are supplied. Immediate rewards and a discount are introduced separately before selecting an action.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "discounted-returns",
+    "title": "Combine the rewards from one episode",
+    "problem": "Botie has a completed sequence of rewards and a discount per step.",
+    "challenge": "Create one discount weight per reward, starting at one, then take the dot product of rewards and weights.",
+    "sources": {
+      "rewards": "Rewards after successive actions",
+      "gamma": "Discount per step"
+    },
+    "cases": [
+      {
+        "name": "Delayed benefit",
+        "data": {
+          "rewards": [
+            -1,
+            0,
+            4
+          ],
+          "gamma": 0.5
+        },
+        "expected": 0
+      },
+      {
+        "name": "No discount",
+        "data": {
+          "rewards": [
+            -1,
+            0,
+            4
+          ],
+          "gamma": 1
+        },
+        "expected": 3
+      },
+      {
+        "name": "Immediate reward only",
+        "data": {
+          "rewards": [
+            2,
+            3,
+            9
+          ],
+          "gamma": 0
+        },
+        "expected": 2
+      }
+    ],
+    "recipe": {
+      "op": "dot",
+      "inputs": [
+        {
+          "source": "rewards"
+        },
+        {
+          "op": "discountWeights",
+          "inputs": [
+            {
+              "source": "rewards"
+            },
+            {
+              "source": "gamma"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each extra delay introduces another factor of gamma. The dot product combines the weighted contributions.",
+    "limitation": "Rewards and episode termination are supplied. A return from one realised episode is not a policy's expected value.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "bellman-value-iteration",
+    "title": "Compare immediate rewards and future states",
+    "problem": "Botie knows the transition rows and immediate expected reward for each action in the current state.",
+    "challenge": "Validate the transition rows, calculate expected next-state values, discount them, add immediate rewards, then choose the largest score's index.",
+    "sources": {
+      "transitions": "Next-state probabilities per action",
+      "values": "Next-state value estimates",
+      "rewards": "Immediate expected rewards",
+      "gamma": "Discount"
+    },
+    "cases": [
+      {
+        "name": "Immediate reward wins",
+        "data": {
+          "transitions": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "values": [
+            2,
+            6
+          ],
+          "rewards": [
+            3,
+            0
+          ],
+          "gamma": 0.5
+        },
+        "expected": 0
+      },
+      {
+        "name": "Future benefit wins",
+        "data": {
+          "transitions": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "values": [
+            2,
+            6
+          ],
+          "rewards": [
+            3,
+            0
+          ],
+          "gamma": 0.9
+        },
+        "expected": 1
+      },
+      {
+        "name": "No future weight",
+        "data": {
+          "transitions": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "values": [
+            100,
+            0
+          ],
+          "rewards": [
+            0,
+            2
+          ],
+          "gamma": 0
+        },
+        "expected": 1
+      }
+    ],
+    "recipe": {
+      "op": "argmax",
+      "inputs": [
+        {
+          "op": "add",
+          "inputs": [
+            {
+              "source": "rewards"
+            },
+            {
+              "op": "multiply",
+              "inputs": [
+                {
+                  "source": "gamma"
+                },
+                {
+                  "op": "matvec",
+                  "inputs": [
+                    {
+                      "op": "probabilityRows",
+                      "inputs": [
+                        {
+                          "source": "transitions"
+                        }
+                      ]
+                    },
+                    {
+                      "source": "values"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "An action's immediate reward and discounted continuation jointly determine its score. The chosen index uses the same action ordering as the input rows.",
+    "limitation": "This is one state's greedy improvement step from supplied values. A full planner must update all relevant states and handle terminals.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "q-learning",
+    "title": "Correct a visited action's value",
+    "problem": "Botie observed a reward and a next state after taking one action. The supplied terminal flag says whether that transition really ended the episode.",
+    "challenge": "Find the largest next-state action value. Zero its contribution for a terminal transition, discount the remaining continuation, add the reward, then move the old value toward that target by alpha.",
+    "sources": {
+      "old": "Visited entry's old Q value",
+      "reward": "Observed reward",
+      "next": "Next-state action values",
+      "terminal": "True terminal flag: 0 or 1",
+      "gamma": "Discount",
+      "alpha": "Learning rate"
+    },
+    "cases": [
+      {
+        "name": "Continuing transition",
+        "data": {
+          "old": 2,
+          "reward": 1,
+          "next": [
+            4,
+            6
+          ],
+          "terminal": 0,
+          "gamma": 0.5,
+          "alpha": 0.25
+        },
+        "expected": 2.5
+      },
+      {
+        "name": "True terminal",
+        "data": {
+          "old": 4,
+          "reward": -2,
+          "next": [
+            100,
+            200
+          ],
+          "terminal": 1,
+          "gamma": 0.9,
+          "alpha": 0.5
+        },
+        "expected": 1
+      },
+      {
+        "name": "No update",
+        "data": {
+          "old": 3,
+          "reward": 5,
+          "next": [
+            9
+          ],
+          "terminal": 0,
+          "gamma": 0.9,
+          "alpha": 0
+        },
+        "expected": 3
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "source": "old"
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "alpha"
+            },
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "op": "add",
+                  "inputs": [
+                    {
+                      "source": "reward"
+                    },
+                    {
+                      "op": "multiply",
+                      "inputs": [
+                        {
+                          "source": "gamma"
+                        },
+                        {
+                          "op": "terminalContinuation",
+                          "inputs": [
+                            {
+                              "op": "maximum",
+                              "inputs": [
+                                {
+                                  "source": "next"
+                                }
+                              ]
+                            },
+                            {
+                              "source": "terminal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "source": "old"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The target combines observed reward with a permitted continuation. The learning rate scales the correction to the one visited estimate.",
+    "limitation": "The terminal flag must be zero or one, and alpha and gamma must lie in [0,1]. This is one tabular update, not a convergence demonstration.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "distributions-and-expectations",
+    "title": "Average over possible damage",
+    "problem": "Botie has the possible damage counts and a probability for each.",
+    "challenge": "Multiply matching outcomes and probabilities, then add the contributions.",
+    "sources": {
+      "outcomes": "Possible counts",
+      "p": "Probabilities"
+    },
+    "cases": [
+      {
+        "name": "Mixed deliveries",
+        "data": {
+          "outcomes": [
+            0,
+            1,
+            2
+          ],
+          "p": [
+            0.5,
+            0.3,
+            0.2
+          ]
+        },
+        "expected": 0.7
+      },
+      {
+        "name": "Certain damage",
+        "data": {
+          "outcomes": [
+            0,
+            2
+          ],
+          "p": [
+            0,
+            1
+          ]
+        },
+        "expected": 2
+      },
+      {
+        "name": "Equal chances",
+        "data": {
+          "outcomes": [
+            1,
+            3
+          ],
+          "p": [
+            0.5,
+            0.5
+          ]
+        },
+        "expected": 2
+      }
+    ],
+    "recipe": {
+      "op": "dot",
+      "inputs": [
+        {
+          "source": "outcomes"
+        },
+        {
+          "op": "probabilityVector",
+          "inputs": [
+            {
+              "source": "p"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Weighting preserves how frequently each outcome is expected to contribute.",
+    "limitation": "Probabilities must sum to one. This average is not the most likely outcome.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "parameter-posteriors",
+    "title": "Update a failure probability",
+    "problem": "Botie records new failures and working sensors.",
+    "challenge": "Update alpha and beta independently, then divide updated alpha by their updated total.",
+    "sources": {
+      "a": "Prior alpha",
+      "b": "Prior beta",
+      "fail": "New failures",
+      "pass": "New working sensors"
+    },
+    "cases": [
+      {
+        "name": "Small trial",
+        "data": {
+          "a": 1,
+          "b": 1,
+          "fail": 1,
+          "pass": 2
+        },
+        "expected": 0.4
+      },
+      {
+        "name": "No new data",
+        "data": {
+          "a": 2,
+          "b": 3,
+          "fail": 0,
+          "pass": 0
+        },
+        "expected": 0.4
+      },
+      {
+        "name": "All failures",
+        "data": {
+          "a": 1,
+          "b": 1,
+          "fail": 2,
+          "pass": 0
+        },
+        "expected": 0.75
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "add",
+          "inputs": [
+            {
+              "source": "a"
+            },
+            {
+              "source": "fail"
+            }
+          ]
+        },
+        {
+          "op": "add",
+          "inputs": [
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "source": "a"
+                },
+                {
+                  "source": "fail"
+                }
+              ]
+            },
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "source": "b"
+                },
+                {
+                  "source": "pass"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each outcome contributes to its own parameter before normalisation.",
+    "limitation": "Use positive prior parameters and non-negative integer counts. Trials assume one stable rate.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "gaussian-sensor-fusion",
+    "title": "Combine thermometer readings",
+    "problem": "Botie needs one estimate from independently noisy thermometers.",
+    "challenge": "Take reciprocal variances, form their weighted reading total, and divide by total precision.",
+    "sources": {
+      "readings": "Temperature readings",
+      "variance": "Positive error variances"
+    },
+    "cases": [
+      {
+        "name": "Unequal reliability",
+        "data": {
+          "readings": [
+            20,
+            24
+          ],
+          "variance": [
+            1,
+            4
+          ]
+        },
+        "expected": 20.8
+      },
+      {
+        "name": "Equal reliability",
+        "data": {
+          "readings": [
+            10,
+            14
+          ],
+          "variance": [
+            2,
+            2
+          ]
+        },
+        "expected": 12
+      },
+      {
+        "name": "Three readings",
+        "data": {
+          "readings": [
+            10,
+            14,
+            12
+          ],
+          "variance": [
+            4,
+            4,
+            2
+          ]
+        },
+        "expected": 12
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "dot",
+          "inputs": [
+            {
+              "source": "readings"
+            },
+            {
+              "op": "positiveReciprocal",
+              "inputs": [
+                {
+                  "source": "variance"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "total",
+          "inputs": [
+            {
+              "op": "positiveReciprocal",
+              "inputs": [
+                {
+                  "source": "variance"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Independent measurements contribute in proportion to their precision.",
+    "limitation": "Requires common units, positive known variances, unbiased readings, and independent errors.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "hidden-state-filtering",
+    "title": "Update the hidden pump condition",
+    "problem": "Botie has yesterday’s belief, a transition model, and likelihoods for today’s reading.",
+    "challenge": "Transpose the row-stochastic transition matrix, multiply by the belief, weight by evidence, and normalise the result.",
+    "sources": {
+      "belief": "Previous state probabilities",
+      "P": "Transition matrix",
+      "evidence": "Reading likelihoods"
+    },
+    "cases": [
+      {
+        "name": "Alarm",
+        "data": {
+          "belief": [
+            0.8,
+            0.2
+          ],
+          "P": [
+            [
+              0.9,
+              0.1
+            ],
+            [
+              0.2,
+              0.8
+            ]
+          ],
+          "evidence": [
+            0.1,
+            0.9
+          ]
+        },
+        "expected": [
+          0.2602739726027397,
+          0.7397260273972603
+        ]
+      },
+      {
+        "name": "No information",
+        "data": {
+          "belief": [
+            0.6,
+            0.4
+          ],
+          "P": [
+            [
+              0.8,
+              0.2
+            ],
+            [
+              0.1,
+              0.9
+            ]
+          ],
+          "evidence": [
+            0.3,
+            0.3
+          ]
+        },
+        "expected": [
+          0.52,
+          0.48
+        ]
+      },
+      {
+        "name": "Certain state",
+        "data": {
+          "belief": [
+            1,
+            0
+          ],
+          "P": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "evidence": [
+            0.5,
+            0.5
+          ]
+        },
+        "expected": [
+          1,
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "normaliseWeights",
+      "inputs": [
+        {
+          "op": "priorEvidence",
+          "inputs": [
+            {
+              "op": "matvec",
+              "inputs": [
+                {
+                  "op": "transpose",
+                  "inputs": [
+                    {
+                      "op": "probabilityRows",
+                      "inputs": [
+                        {
+                          "source": "P"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "op": "probabilityVector",
+                  "inputs": [
+                    {
+                      "source": "belief"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "source": "evidence"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Prediction accounts for state changes; evidence then changes the relative support for those states.",
+    "limitation": "This filters supplied models. It does not learn transitions or decode the most likely full path.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "gaussian-process-regression",
+    "title": "Predict a residual temperature",
+    "problem": "Botie is given a valid noisy training covariance, observed residuals, and query covariances.",
+    "challenge": "Solve the covariance system for observation weights, then take their dot product with query covariances.",
+    "sources": {
+      "A": "Noisy training covariance",
+      "y": "Observed residuals",
+      "k": "Query-to-training covariance"
+    },
+    "cases": [
+      {
+        "name": "One sensor",
+        "data": {
+          "A": [
+            [
+              1.25
+            ]
+          ],
+          "y": [
+            2
+          ],
+          "k": [
+            0.5
+          ]
+        },
+        "expected": 0.8
+      },
+      {
+        "name": "Unrelated query",
+        "data": {
+          "A": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "y": [
+            2,
+            -1
+          ],
+          "k": [
+            0,
+            0
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Two independent sensors",
+        "data": {
+          "A": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "y": [
+            2,
+            4
+          ],
+          "k": [
+            0.5,
+            0.5
+          ]
+        },
+        "expected": 1.5
+      }
+    ],
+    "recipe": {
+      "op": "dot",
+      "inputs": [
+        {
+          "source": "k"
+        },
+        {
+          "op": "solveLinear",
+          "inputs": [
+            {
+              "source": "A"
+            },
+            {
+              "source": "y"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Solving accounts for covariance between readings before the query combines their information.",
+    "limitation": "The supplied covariance must be valid and nonsingular. This construction returns a mean, not a full uncertainty interval.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "minibatch-gradients",
+    "title": "Update a weight from a batch",
+    "problem": "Botie has aligned inputs and targets for a small training batch.",
+    "challenge": "Predict, subtract targets, multiply residuals by inputs, average, then subtract the scaled gradient from the weight.",
+    "sources": {
+      "x": "Batch inputs",
+      "y": "Batch targets",
+      "w": "Current weight",
+      "rate": "Learning rate"
+    },
+    "cases": [
+      {
+        "name": "Two records",
+        "data": {
+          "x": [
+            1,
+            2
+          ],
+          "y": [
+            2,
+            4
+          ],
+          "w": 1,
+          "rate": 0.1
+        },
+        "expected": 1.25
+      },
+      {
+        "name": "Short batch",
+        "data": {
+          "x": [
+            3
+          ],
+          "y": [
+            9
+          ],
+          "w": 2,
+          "rate": 0.05
+        },
+        "expected": 2.45
+      },
+      {
+        "name": "Perfect fit",
+        "data": {
+          "x": [
+            1,
+            2
+          ],
+          "y": [
+            2,
+            4
+          ],
+          "w": 2,
+          "rate": 0.1
+        },
+        "expected": 2
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "source": "w"
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "rate"
+            },
+            {
+              "op": "mean",
+              "inputs": [
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "op": "subtract",
+                      "inputs": [
+                        {
+                          "op": "multiply",
+                          "inputs": [
+                            {
+                              "source": "x"
+                            },
+                            {
+                              "source": "w"
+                            }
+                          ]
+                        },
+                        {
+                          "source": "y"
+                        }
+                      ]
+                    },
+                    {
+                      "source": "x"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Averaging keeps the gradient consistent with a mean loss.",
+    "limitation": "This model has one weight, no intercept, and half mean squared error.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "momentum-updates",
+    "title": "Carry an update direction forward",
+    "problem": "Botie has a current gradient and stored velocity.",
+    "challenge": "Scale old velocity by beta, add the gradient, and subtract the learning-rate-scaled result from the weight.",
+    "sources": {
+      "v": "Old velocity",
+      "g": "Current gradient",
+      "beta": "Retention",
+      "rate": "Learning rate",
+      "w": "Weight"
+    },
+    "cases": [
+      {
+        "name": "Cancellation",
+        "data": {
+          "v": 2,
+          "g": -1,
+          "beta": 0.5,
+          "rate": 0.1,
+          "w": 4
+        },
+        "expected": 4
+      },
+      {
+        "name": "Persistent direction",
+        "data": {
+          "v": 1,
+          "g": 1,
+          "beta": 0.5,
+          "rate": 0.2,
+          "w": 2
+        },
+        "expected": 1.7
+      },
+      {
+        "name": "No memory",
+        "data": {
+          "v": 9,
+          "g": 2,
+          "beta": 0,
+          "rate": 0.1,
+          "w": 1
+        },
+        "expected": 0.8
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "source": "w"
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "rate"
+            },
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "source": "beta"
+                    },
+                    {
+                      "source": "v"
+                    }
+                  ]
+                },
+                {
+                  "source": "g"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Velocity combines old and new direction before scaling the parameter change.",
+    "limitation": "This uses v_new = beta*v + gradient, with beta in [0,1).",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "adaptive-gradients",
+    "title": "Scale a corrected Adam direction",
+    "problem": "Botie already calculated bias-corrected moments and now needs the parameter update.",
+    "challenge": "Take the square root of corrected second moments, add epsilon, divide corrected first moments by that denominator, scale, and subtract.",
+    "sources": {
+      "w": "Parameters",
+      "m": "Corrected first moments",
+      "v": "Corrected second moments",
+      "rate": "Learning rate",
+      "eps": "Positive epsilon"
+    },
+    "cases": [
+      {
+        "name": "Different scales",
+        "data": {
+          "w": [
+            1,
+            1
+          ],
+          "m": [
+            2,
+            -4
+          ],
+          "v": [
+            4,
+            16
+          ],
+          "rate": 0.1,
+          "eps": 1e-8
+        },
+        "expected": [
+          0.9,
+          1.1
+        ]
+      },
+      {
+        "name": "Zero direction",
+        "data": {
+          "w": [
+            3
+          ],
+          "m": [
+            0
+          ],
+          "v": [
+            0
+          ],
+          "rate": 0.1,
+          "eps": 1e-8
+        },
+        "expected": [
+          3
+        ]
+      },
+      {
+        "name": "Small rate",
+        "data": {
+          "w": [
+            2
+          ],
+          "m": [
+            1
+          ],
+          "v": [
+            4
+          ],
+          "rate": 0.2,
+          "eps": 1e-8
+        },
+        "expected": [
+          1.9
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "source": "w"
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "rate"
+            },
+            {
+              "op": "divide",
+              "inputs": [
+                {
+                  "source": "m"
+                },
+                {
+                  "op": "add",
+                  "inputs": [
+                    {
+                      "op": "root",
+                      "inputs": [
+                        {
+                          "source": "v"
+                        }
+                      ]
+                    },
+                    {
+                      "source": "eps"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Magnitude scales each direction separately.",
+    "limitation": "This final stage assumes valid corrected moments. The full optimiser also maintains state and counts updates.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "initialisation-and-gradient-checks",
+    "title": "Check a local derivative",
+    "problem": "Botie evaluated the same loss above and below a parameter.",
+    "challenge": "Subtract lower loss from upper loss and divide by twice the positive perturbation.",
+    "sources": {
+      "plus": "Loss at w+h",
+      "minus": "Loss at w-h",
+      "h": "Positive perturbation"
+    },
+    "cases": [
+      {
+        "name": "Decreasing loss",
+        "data": {
+          "plus": 3.61,
+          "minus": 4.41,
+          "h": 0.1
+        },
+        "expected": -4
+      },
+      {
+        "name": "Increasing loss",
+        "data": {
+          "plus": 4.41,
+          "minus": 3.61,
+          "h": 0.1
+        },
+        "expected": 4
+      },
+      {
+        "name": "Symmetric point",
+        "data": {
+          "plus": 0.01,
+          "minus": 0.01,
+          "h": 0.1
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "subtract",
+          "inputs": [
+            {
+              "source": "plus"
+            },
+            {
+              "source": "minus"
+            }
+          ]
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "op": "constant",
+              "inputs": [],
+              "settings": {
+                "value": 2
+              }
+            },
+            {
+              "source": "h"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Symmetric perturbations estimate the local slope while cancelling some approximation error.",
+    "limitation": "Use deterministic evaluations at a smooth point. Finite differences are approximate.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "training-diagnostics",
+    "title": "Select the saved checkpoint",
+    "problem": "Botie saved a model after each validation check.",
+    "challenge": "Find the position of the minimum validation loss. Return the first position on a tie.",
+    "sources": {
+      "loss": "Validation losses in checkpoint order"
+    },
+    "cases": [
+      {
+        "name": "Overfitting later",
+        "data": {
+          "loss": [
+            0.8,
+            0.5,
+            0.55,
+            0.6
+          ]
+        },
+        "expected": 1
+      },
+      {
+        "name": "Still improving",
+        "data": {
+          "loss": [
+            0.9,
+            0.7,
+            0.4
+          ]
+        },
+        "expected": 2
+      },
+      {
+        "name": "Tied best",
+        "data": {
+          "loss": [
+            0.4,
+            0.4,
+            0.5
+          ]
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "argmin",
+      "inputs": [
+        {
+          "source": "loss"
+        }
+      ]
+    },
+    "why": "The checkpoint position selects the state that performed best on the declared validation criterion.",
+    "limitation": "This does not evaluate the final test or prove that later unobserved epochs would be worse.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "popularity-baselines",
+    "title": "Rank the guide shelf",
+    "problem": "Botie has one row per reader and one column per guide.",
+    "challenge": "Add each column, then return guide indices in descending order.",
+    "sources": {
+      "opened": "Reader-by-guide interaction matrix"
+    },
+    "cases": [
+      {
+        "name": "Two readers",
+        "data": {
+          "opened": [
+            [
+              1,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              0
+            ]
+          ]
+        },
+        "expected": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "name": "Different favourite",
+        "data": {
+          "opened": [
+            [
+              0,
+              1,
+              1
+            ],
+            [
+              0,
+              1,
+              0
+            ]
+          ]
+        },
+        "expected": [
+          1,
+          2,
+          0
+        ]
+      },
+      {
+        "name": "Tie",
+        "data": {
+          "opened": [
+            [
+              1,
+              1
+            ]
+          ]
+        },
+        "expected": [
+          0,
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "descendingIndices",
+      "inputs": [
+        {
+          "op": "columntotal",
+          "inputs": [
+            {
+              "source": "opened"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The reduction preserves a separate popularity count for each guide.",
+    "limitation": "Zero is unobserved interaction, not proof of dislike. Ties use catalogue order.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "content-based-ranking",
+    "title": "Match topic directions",
+    "problem": "Botie has one reader profile and one candidate guide.",
+    "challenge": "Take their dot product and divide by the product of their lengths.",
+    "sources": {
+      "reader": "Reader topic vector",
+      "item": "Guide topic vector"
+    },
+    "cases": [
+      {
+        "name": "Aligned",
+        "data": {
+          "reader": [
+            1,
+            0
+          ],
+          "item": [
+            3,
+            0
+          ]
+        },
+        "expected": 1
+      },
+      {
+        "name": "Different topics",
+        "data": {
+          "reader": [
+            1,
+            0
+          ],
+          "item": [
+            0,
+            2
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Partial match",
+        "data": {
+          "reader": [
+            2,
+            1
+          ],
+          "item": [
+            1,
+            2
+          ]
+        },
+        "expected": 0.8
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "dot",
+          "inputs": [
+            {
+              "source": "reader"
+            },
+            {
+              "source": "item"
+            }
+          ]
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "op": "length",
+              "inputs": [
+                {
+                  "source": "reader"
+                }
+              ]
+            },
+            {
+              "op": "length",
+              "inputs": [
+                {
+                  "source": "item"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Normalising removes length so direction drives this comparison.",
+    "limitation": "Requires nonzero vectors with matching feature meanings. A score is not a calibrated probability.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "collaborative-filtering",
+    "title": "Predict a reader’s rating",
+    "problem": "Botie has positive neighbour similarities and their observed ratings for the candidate.",
+    "challenge": "Subtract neighbour means, compute a weighted average of deviations, then add the target reader’s mean.",
+    "sources": {
+      "ratings": "Neighbour ratings",
+      "means": "Neighbour means",
+      "weights": "Positive similarity weights",
+      "target": "Target reader mean"
+    },
+    "cases": [
+      {
+        "name": "Mixed opinions",
+        "data": {
+          "ratings": [
+            5,
+            3
+          ],
+          "means": [
+            3,
+            4
+          ],
+          "weights": [
+            0.75,
+            0.25
+          ],
+          "target": 3
+        },
+        "expected": 4.25
+      },
+      {
+        "name": "Both typical",
+        "data": {
+          "ratings": [
+            3,
+            4
+          ],
+          "means": [
+            3,
+            4
+          ],
+          "weights": [
+            1,
+            2
+          ],
+          "target": 2
+        },
+        "expected": 2
+      },
+      {
+        "name": "One neighbour",
+        "data": {
+          "ratings": [
+            4
+          ],
+          "means": [
+            3
+          ],
+          "weights": [
+            0.5
+          ],
+          "target": 3
+        },
+        "expected": 4
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "source": "target"
+        },
+        {
+          "op": "divide",
+          "inputs": [
+            {
+              "op": "dot",
+              "inputs": [
+                {
+                  "source": "weights"
+                },
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "source": "ratings"
+                    },
+                    {
+                      "source": "means"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "total",
+              "inputs": [
+                {
+                  "source": "weights"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Centred deviations preserve preference relative to each neighbour’s rating scale.",
+    "limitation": "Weights must be non-negative with positive total. Missing neighbours are excluded before this calculation.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "recommendation-factorisation",
+    "title": "Score all candidate guides",
+    "problem": "Botie has a reader factor vector and one factor row per guide.",
+    "challenge": "Multiply the guide matrix by the reader vector to obtain one score per guide.",
+    "sources": {
+      "items": "Guide factor rows",
+      "reader": "Reader factors"
+    },
+    "cases": [
+      {
+        "name": "Two candidates",
+        "data": {
+          "items": [
+            [
+              2,
+              1
+            ],
+            [
+              0,
+              3
+            ]
+          ],
+          "reader": [
+            1,
+            2
+          ]
+        },
+        "expected": [
+          4,
+          6
+        ]
+      },
+      {
+        "name": "Different reader",
+        "data": {
+          "items": [
+            [
+              2,
+              1
+            ],
+            [
+              0,
+              3
+            ]
+          ],
+          "reader": [
+            2,
+            0
+          ]
+        },
+        "expected": [
+          4,
+          0
+        ]
+      },
+      {
+        "name": "One coordinate",
+        "data": {
+          "items": [
+            [
+              2
+            ],
+            [
+              -1
+            ]
+          ],
+          "reader": [
+            3
+          ]
+        },
+        "expected": [
+          6,
+          -3
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "matvec",
+      "inputs": [
+        {
+          "source": "items"
+        },
+        {
+          "source": "reader"
+        }
+      ]
+    },
+    "why": "A shared coordinate system lets one reader vector score every candidate row.",
+    "limitation": "Factors must already be fitted from training observations. Scores are not probabilities.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "ranking-evaluation",
+    "title": "Measure usefulness in the visible list",
+    "problem": "Botie has binary relevance labels for the guides actually shown.",
+    "challenge": "Add relevant hits and divide by the number shown.",
+    "sources": {
+      "relevance": "Visible binary relevance labels"
+    },
+    "cases": [
+      {
+        "name": "Two useful guides",
+        "data": {
+          "relevance": [
+            1,
+            0,
+            1
+          ]
+        },
+        "expected": 0.6666666666666666
+      },
+      {
+        "name": "No useful guides",
+        "data": {
+          "relevance": [
+            0,
+            0
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "All useful",
+        "data": {
+          "relevance": [
+            1,
+            1
+          ]
+        },
+        "expected": 1
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "total",
+          "inputs": [
+            {
+              "source": "relevance"
+            }
+          ]
+        },
+        {
+          "op": "count",
+          "inputs": [
+            {
+              "source": "relevance"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The denominator matches the number of recommendations the reader received.",
+    "limitation": "Use a nonempty binary list at a fixed cutoff. This computes precision, not recall or NDCG.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "robust-anomaly-scores",
+    "title": "Score new pressure readings",
+    "problem": "Botie has reference records and separate incoming readings.",
+    "challenge": "Find the reference median, calculate its MAD, then divide incoming absolute deviations by that spread.",
+    "sources": {
+      "reference": "Reference readings",
+      "new": "Incoming readings"
+    },
+    "cases": [
+      {
+        "name": "Clear deviation",
+        "data": {
+          "reference": [
+            8,
+            9,
+            10,
+            11,
+            100
+          ],
+          "new": [
+            10,
+            13
+          ]
+        },
+        "expected": [
+          0,
+          3
+        ]
+      },
+      {
+        "name": "Both directions",
+        "data": {
+          "reference": [
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "new": [
+            3,
+            10
+          ]
+        },
+        "expected": [
+          3,
+          4
+        ]
+      },
+      {
+        "name": "Different scale",
+        "data": {
+          "reference": [
+            0,
+            2,
+            4
+          ],
+          "new": [
+            6
+          ]
+        },
+        "expected": [
+          2
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "divide",
+      "inputs": [
+        {
+          "op": "absolute",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "source": "new"
+                },
+                {
+                  "op": "medianValue",
+                  "inputs": [
+                    {
+                      "source": "reference"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "medianValue",
+          "inputs": [
+            {
+              "op": "absolute",
+              "inputs": [
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "source": "reference"
+                    },
+                    {
+                      "op": "medianValue",
+                      "inputs": [
+                        {
+                          "source": "reference"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The reference is fitted separately and the spread resists a small number of extreme values.",
+    "limitation": "Requires positive MAD. A large score indicates unusualness, not a diagnosed fault.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "local-density-anomalies",
+    "title": "Compare a point with its local surroundings",
+    "problem": "Botie has reachability distances and the neighbours’ own densities.",
+    "challenge": "Average reachability, take its reciprocal, divide neighbour densities by that density, then average the ratios.",
+    "sources": {
+      "reach": "Positive reachability distances",
+      "neighbours": "Neighbour local densities"
+    },
+    "cases": [
+      {
+        "name": "Sparse point",
+        "data": {
+          "reach": [
+            2,
+            4
+          ],
+          "neighbours": [
+            0.5,
+            1
+          ]
+        },
+        "expected": 2.25
+      },
+      {
+        "name": "Similar density",
+        "data": {
+          "reach": [
+            2,
+            2
+          ],
+          "neighbours": [
+            0.5,
+            0.5
+          ]
+        },
+        "expected": 1
+      },
+      {
+        "name": "Isolated reading",
+        "data": {
+          "reach": [
+            9
+          ],
+          "neighbours": [
+            1
+          ]
+        },
+        "expected": 9
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "divide",
+          "inputs": [
+            {
+              "source": "neighbours"
+            },
+            {
+              "op": "divide",
+              "inputs": [
+                {
+                  "op": "constant",
+                  "inputs": [],
+                  "settings": {
+                    "value": 1
+                  }
+                },
+                {
+                  "op": "mean",
+                  "inputs": [
+                    {
+                      "source": "reach"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The score compares density at the point with density nearby.",
+    "limitation": "Inputs must come from the same neighbourhood rule. This stage does not construct neighbour sets.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "isolation-forests",
+    "title": "Score isolation paths",
+    "problem": "Botie has this reading’s path length in each tree and the positive sample-size normaliser.",
+    "challenge": "Average paths, divide by the normaliser, negate, then raise two to that exponent.",
+    "sources": {
+      "paths": "Paths across trees",
+      "normaliser": "Positive c(n)"
+    },
+    "cases": [
+      {
+        "name": "Short paths",
+        "data": {
+          "paths": [
+            1,
+            1
+          ],
+          "normaliser": 2
+        },
+        "expected": 0.7071067811865476
+      },
+      {
+        "name": "Typical length",
+        "data": {
+          "paths": [
+            2,
+            2
+          ],
+          "normaliser": 2
+        },
+        "expected": 0.5
+      },
+      {
+        "name": "Longer paths",
+        "data": {
+          "paths": [
+            3,
+            5
+          ],
+          "normaliser": 2
+        },
+        "expected": 0.25
+      }
+    ],
+    "recipe": {
+      "op": "powerTwo",
+      "inputs": [
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "op": "constant",
+              "inputs": [],
+              "settings": {
+                "value": -1
+              }
+            },
+            {
+              "op": "divide",
+              "inputs": [
+                {
+                  "op": "mean",
+                  "inputs": [
+                    {
+                      "source": "paths"
+                    }
+                  ]
+                },
+                {
+                  "source": "normaliser"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Averaging reduces dependence on one partition, and shorter paths receive higher scores.",
+    "limitation": "Paths must come from fitted trees with a consistent subsample size and leaf correction policy.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "reconstruction-alerts",
+    "title": "Decide which reconstructed records need review",
+    "problem": "Botie has prepared readings, their reconstructions, and a fixed threshold.",
+    "challenge": "Calculate squared differences, average each row, then compare strictly above the threshold.",
+    "sources": {
+      "x": "Prepared records",
+      "rebuilt": "Reconstructed records",
+      "threshold": "Fixed error threshold"
+    },
+    "cases": [
+      {
+        "name": "One alert",
+        "data": {
+          "x": [
+            [
+              1,
+              3
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "rebuilt": [
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "threshold": 1.5
+        },
+        "expected": [
+          1,
+          0
+        ]
+      },
+      {
+        "name": "Boundary",
+        "data": {
+          "x": [
+            [
+              1,
+              3
+            ]
+          ],
+          "rebuilt": [
+            [
+              1,
+              1
+            ]
+          ],
+          "threshold": 2
+        },
+        "expected": [
+          0
+        ]
+      },
+      {
+        "name": "Two alerts",
+        "data": {
+          "x": [
+            [
+              0,
+              4
+            ],
+            [
+              3,
+              3
+            ]
+          ],
+          "rebuilt": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "threshold": 2
+        },
+        "expected": [
+          1,
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "greater",
+      "inputs": [
+        {
+          "op": "rowmean",
+          "inputs": [
+            {
+              "op": "square",
+              "inputs": [
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "source": "x"
+                    },
+                    {
+                      "source": "rebuilt"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "threshold"
+        }
+      ]
+    },
+    "why": "The score aggregates feature mismatch before the threshold turns it into an alert.",
+    "limitation": "Models and preprocessing must already be fitted. Alerts need investigation and are not fault diagnoses.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "graph-representations",
+    "title": "Count the network’s connections",
+    "problem": "Botie wants the degree of every pump in an undirected binary network.",
+    "challenge": "Add the entries in each adjacency row.",
+    "sources": {
+      "A": "Undirected binary adjacency matrix"
+    },
+    "cases": [
+      {
+        "name": "Chain",
+        "data": {
+          "A": [
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0
+            ]
+          ]
+        },
+        "expected": [
+          1,
+          2,
+          1
+        ]
+      },
+      {
+        "name": "Isolated node",
+        "data": {
+          "A": [
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "expected": [
+          1,
+          1,
+          0
+        ]
+      },
+      {
+        "name": "Pair",
+        "data": {
+          "A": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "expected": [
+          1,
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "rowtotal",
+      "inputs": [
+        {
+          "source": "A"
+        }
+      ]
+    },
+    "why": "Each row retains its node identity while its edge entries are counted.",
+    "limitation": "For weighted graphs, row sums measure total weight instead of neighbour count.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "graph-random-walks",
+    "title": "Advance a probability distribution",
+    "problem": "Botie has a row-stochastic transition matrix and current node probabilities.",
+    "challenge": "Transpose the transition matrix, then multiply it by the current probability vector.",
+    "sources": {
+      "P": "Transition matrix",
+      "p": "Current probabilities"
+    },
+    "cases": [
+      {
+        "name": "Switch nodes",
+        "data": {
+          "P": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "p": [
+            1,
+            0
+          ]
+        },
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "name": "Remain mixed",
+        "data": {
+          "P": [
+            [
+              0.5,
+              0.5
+            ],
+            [
+              0.5,
+              0.5
+            ]
+          ],
+          "p": [
+            0.2,
+            0.8
+          ]
+        },
+        "expected": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "name": "Absorbing destination",
+        "data": {
+          "P": [
+            [
+              0,
+              1
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "p": [
+            0.3,
+            0.7
+          ]
+        },
+        "expected": [
+          0,
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "matvec",
+      "inputs": [
+        {
+          "op": "transpose",
+          "inputs": [
+            {
+              "op": "probabilityRows",
+              "inputs": [
+                {
+                  "source": "P"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "probabilityVector",
+          "inputs": [
+            {
+              "source": "p"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each destination receives probability from all possible starting nodes.",
+    "limitation": "The supplied matrix must already embody a declared dangling-node policy.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "neighbour-aggregation",
+    "title": "Read neighbouring pumps",
+    "problem": "Botie has an undirected adjacency matrix and aligned scalar readings.",
+    "challenge": "Gather neighbouring readings with matrix multiplication, then divide each sum by its degree, returning zero for degree zero.",
+    "sources": {
+      "A": "Binary adjacency matrix",
+      "x": "Node readings"
+    },
+    "cases": [
+      {
+        "name": "Chain",
+        "data": {
+          "A": [
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              1
+            ],
+            [
+              0,
+              1,
+              0
+            ]
+          ],
+          "x": [
+            2,
+            8,
+            4
+          ]
+        },
+        "expected": [
+          8,
+          3,
+          8
+        ]
+      },
+      {
+        "name": "Isolated",
+        "data": {
+          "A": [
+            [
+              0,
+              1,
+              0
+            ],
+            [
+              1,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ],
+          "x": [
+            3,
+            7,
+            9
+          ]
+        },
+        "expected": [
+          7,
+          3,
+          0
+        ]
+      },
+      {
+        "name": "Pair",
+        "data": {
+          "A": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "x": [
+            1,
+            5
+          ]
+        },
+        "expected": [
+          5,
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "divideOrZero",
+      "inputs": [
+        {
+          "op": "matvec",
+          "inputs": [
+            {
+              "source": "A"
+            },
+            {
+              "source": "x"
+            }
+          ]
+        },
+        {
+          "op": "rowtotal",
+          "inputs": [
+            {
+              "source": "A"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each output remains attached to a node while summarising its neighbourhood.",
+    "limitation": "The zero fallback is explicit. For directed graphs, choose message orientation before multiplying.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "graph-convolution",
+    "title": "Pass measurements through one graph layer",
+    "problem": "Botie has an undirected adjacency matrix, node features, and supplied feature weights.",
+    "challenge": "Add identity, calculate symmetric degree scaling, mix features, apply weights, then ReLU.",
+    "sources": {
+      "A": "Undirected adjacency, zero diagonal",
+      "X": "Node feature rows",
+      "W": "Shared feature weights"
+    },
+    "cases": [
+      {
+        "name": "Connected pair",
+        "data": {
+          "A": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "X": [
+            [
+              2
+            ],
+            [
+              4
+            ]
+          ],
+          "W": [
+            [
+              2
+            ]
+          ]
+        },
+        "expected": [
+          [
+            6
+          ],
+          [
+            6
+          ]
+        ]
+      },
+      {
+        "name": "No external edges",
+        "data": {
+          "A": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "X": [
+            [
+              -2,
+              3
+            ],
+            [
+              4,
+              -1
+            ]
+          ],
+          "W": [
+            [
+              1,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ]
+        },
+        "expected": [
+          [
+            0,
+            3
+          ],
+          [
+            4,
+            0
+          ]
+        ]
+      },
+      {
+        "name": "Negative transform",
+        "data": {
+          "A": [
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "X": [
+            [
+              2
+            ],
+            [
+              4
+            ]
+          ],
+          "W": [
+            [
+              -1
+            ]
+          ]
+        },
+        "expected": [
+          [
+            0
+          ],
+          [
+            0
+          ]
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "relu",
+      "inputs": [
+        {
+          "op": "matmul",
+          "inputs": [
+            {
+              "op": "matmul",
+              "inputs": [
+                {
+                  "op": "symmetricDegrees",
+                  "inputs": [
+                    {
+                      "op": "addIdentity",
+                      "inputs": [
+                        {
+                          "source": "A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "source": "X"
+                }
+              ]
+            },
+            {
+              "source": "W"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Graph mixing and learned feature mixing operate on different axes.",
+    "limitation": "This is one forward layer with supplied weights. Symmetric scaling assumes a non-negative undirected graph.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "link-prediction",
+    "title": "Score a possible connection",
+    "problem": "Botie has supplied representations for two candidate nodes.",
+    "challenge": "Take their dot product and pass the logit through sigmoid.",
+    "sources": {
+      "u": "First node embedding",
+      "v": "Second node embedding"
+    },
+    "cases": [
+      {
+        "name": "Positive alignment",
+        "data": {
+          "u": [
+            1,
+            0
+          ],
+          "v": [
+            2,
+            1
+          ]
+        },
+        "expected": 0.8807970779778823
+      },
+      {
+        "name": "Opposite directions",
+        "data": {
+          "u": [
+            1,
+            0
+          ],
+          "v": [
+            -2,
+            1
+          ]
+        },
+        "expected": 0.11920292202211755
+      },
+      {
+        "name": "Zero logit",
+        "data": {
+          "u": [
+            1,
+            0
+          ],
+          "v": [
+            0,
+            1
+          ]
+        },
+        "expected": 0.5
+      }
+    ],
+    "recipe": {
+      "op": "sigmoid",
+      "inputs": [
+        {
+          "op": "dot",
+          "inputs": [
+            {
+              "source": "u"
+            },
+            {
+              "source": "v"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The decoder turns pair compatibility into a bounded score.",
+    "limitation": "Supplied embeddings must be learned without held-out target edges. The score is not automatically calibrated.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "confounding-and-comparisons",
+    "title": "Compare the observed group mixtures",
+    "problem": "Botie has means within dry and moist beds and each group’s own proportions.",
+    "challenge": "Calculate each weighted group mean, then subtract control from treatment.",
+    "sources": {
+      "treated": "Treatment stratum means",
+      "control": "Control stratum means",
+      "pt": "Treatment proportions",
+      "pc": "Control proportions"
+    },
+    "cases": [
+      {
+        "name": "Reversal",
+        "data": {
+          "treated": [
+            4,
+            9
+          ],
+          "control": [
+            3,
+            8
+          ],
+          "pt": [
+            0.9,
+            0.1
+          ],
+          "pc": [
+            0.1,
+            0.9
+          ]
+        },
+        "expected": -3
+      },
+      {
+        "name": "Equal composition",
+        "data": {
+          "treated": [
+            4,
+            9
+          ],
+          "control": [
+            3,
+            8
+          ],
+          "pt": [
+            0.5,
+            0.5
+          ],
+          "pc": [
+            0.5,
+            0.5
+          ]
+        },
+        "expected": 1
+      },
+      {
+        "name": "No stratum difference",
+        "data": {
+          "treated": [
+            4,
+            9
+          ],
+          "control": [
+            4,
+            9
+          ],
+          "pt": [
+            0.5,
+            0.5
+          ],
+          "pc": [
+            0.5,
+            0.5
+          ]
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "dot",
+          "inputs": [
+            {
+              "source": "treated"
+            },
+            {
+              "op": "probabilityVector",
+              "inputs": [
+                {
+                  "source": "pt"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "dot",
+          "inputs": [
+            {
+              "source": "control"
+            },
+            {
+              "op": "probabilityVector",
+              "inputs": [
+                {
+                  "source": "pc"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The calculation makes each group’s composition visible.",
+    "limitation": "This is an observed difference. A causal interpretation requires additional design and assumptions.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "randomised-experiments",
+    "title": "Compare randomly assigned groups",
+    "problem": "Botie recorded outcomes after assigning schedules under the stated independent-unit design.",
+    "challenge": "Average each group and subtract control from treatment.",
+    "sources": {
+      "treated": "Assigned treatment outcomes",
+      "control": "Assigned control outcomes"
+    },
+    "cases": [
+      {
+        "name": "Improvement",
+        "data": {
+          "treated": [
+            6,
+            8,
+            7
+          ],
+          "control": [
+            4,
+            5,
+            6
+          ]
+        },
+        "expected": 2
+      },
+      {
+        "name": "No mean difference",
+        "data": {
+          "treated": [
+            2,
+            4
+          ],
+          "control": [
+            1,
+            5
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Lower treatment outcome",
+        "data": {
+          "treated": [
+            1,
+            2
+          ],
+          "control": [
+            3,
+            4
+          ]
+        },
+        "expected": -2
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "mean",
+          "inputs": [
+            {
+              "source": "treated"
+            }
+          ]
+        },
+        {
+          "op": "mean",
+          "inputs": [
+            {
+              "source": "control"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Random assignment supports a comparison whose grouping was not chosen from predicted outcomes.",
+    "limitation": "This estimates an average assignment effect under the design assumptions, with finite-sample uncertainty.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "causal-adjustment",
+    "title": "Standardise the schedule comparison",
+    "problem": "Botie has both outcome means for each starting condition and one target population.",
+    "challenge": "Subtract control stratum means from treatment stratum means, then take their weighted average using target proportions.",
+    "sources": {
+      "treated": "Treatment stratum means",
+      "control": "Control stratum means",
+      "target": "Target stratum proportions"
+    },
+    "cases": [
+      {
+        "name": "Shared one-unit effect",
+        "data": {
+          "treated": [
+            4,
+            9
+          ],
+          "control": [
+            3,
+            8
+          ],
+          "target": [
+            0.6,
+            0.4
+          ]
+        },
+        "expected": 1
+      },
+      {
+        "name": "Different effects",
+        "data": {
+          "treated": [
+            4,
+            8
+          ],
+          "control": [
+            3,
+            4
+          ],
+          "target": [
+            0.8,
+            0.2
+          ]
+        },
+        "expected": 1.6
+      },
+      {
+        "name": "Other target",
+        "data": {
+          "treated": [
+            4,
+            8
+          ],
+          "control": [
+            3,
+            4
+          ],
+          "target": [
+            0.2,
+            0.8
+          ]
+        },
+        "expected": 3.4
+      }
+    ],
+    "recipe": {
+      "op": "dot",
+      "inputs": [
+        {
+          "op": "subtract",
+          "inputs": [
+            {
+              "source": "treated"
+            },
+            {
+              "source": "control"
+            }
+          ]
+        },
+        {
+          "op": "probabilityVector",
+          "inputs": [
+            {
+              "source": "target"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Both interventions are compared in the same target mixture.",
+    "limitation": "Causal interpretation requires a sufficient adjustment set, consistency, overlap, and the other stated design assumptions.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "treatment-effects-and-overlap",
+    "title": "Calculate an inverse-probability contrast",
+    "problem": "Botie has outcomes, binary treatment assignments, and valid supplied propensities.",
+    "challenge": "Weight treatment and control outcomes by their respective probabilities, subtract contributions, then average over all units.",
+    "sources": {
+      "T": "Binary treatment assignments",
+      "y": "Observed outcomes",
+      "e": "Propensities strictly between zero and one"
+    },
+    "cases": [
+      {
+        "name": "Balanced assignment",
+        "data": {
+          "T": [
+            1,
+            0,
+            1,
+            0
+          ],
+          "y": [
+            6,
+            4,
+            8,
+            5
+          ],
+          "e": [
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        "expected": 2.5
+      },
+      {
+        "name": "Equal observed outcomes",
+        "data": {
+          "T": [
+            1,
+            0
+          ],
+          "y": [
+            3,
+            3
+          ],
+          "e": [
+            0.5,
+            0.5
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Different propensities",
+        "data": {
+          "T": [
+            1,
+            0
+          ],
+          "y": [
+            2,
+            1
+          ],
+          "e": [
+            0.25,
+            0.5
+          ]
+        },
+        "expected": 3
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "subtract",
+          "inputs": [
+            {
+              "op": "divide",
+              "inputs": [
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "source": "T"
+                    },
+                    {
+                      "source": "y"
+                    }
+                  ]
+                },
+                {
+                  "op": "openProbabilities",
+                  "inputs": [
+                    {
+                      "source": "e"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "op": "divide",
+              "inputs": [
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "op": "subtract",
+                      "inputs": [
+                        {
+                          "op": "constant",
+                          "inputs": [],
+                          "settings": {
+                            "value": 1
+                          }
+                        },
+                        {
+                          "source": "T"
+                        }
+                      ]
+                    },
+                    {
+                      "source": "y"
+                    }
+                  ]
+                },
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "op": "constant",
+                      "inputs": [],
+                      "settings": {
+                        "value": 1
+                      }
+                    },
+                    {
+                      "op": "openProbabilities",
+                      "inputs": [
+                        {
+                          "source": "e"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Weighting changes how observed outcomes represent the target population under the identification assumptions.",
+    "limitation": "This uses the unnormalised all-unit mean. Positivity and no unmeasured confounding cannot be established by the arithmetic.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "saving-fitted-pipelines",
+    "title": "Reproduce the saved predictor",
+    "problem": "Botie has raw feature values and every fitted quantity used during training.",
+    "challenge": "Subtract training means, divide by positive training scales, apply weights, and add bias.",
+    "sources": {
+      "x": "Raw feature vector",
+      "mean": "Training means",
+      "scale": "Positive training scales",
+      "w": "Saved weights",
+      "b": "Saved bias"
+    },
+    "cases": [
+      {
+        "name": "Above the means",
+        "data": {
+          "x": [
+            12,
+            25
+          ],
+          "mean": [
+            10,
+            20
+          ],
+          "scale": [
+            2,
+            5
+          ],
+          "w": [
+            3,
+            -1
+          ],
+          "b": 2
+        },
+        "expected": 4
+      },
+      {
+        "name": "At the means",
+        "data": {
+          "x": [
+            10,
+            20
+          ],
+          "mean": [
+            10,
+            20
+          ],
+          "scale": [
+            2,
+            5
+          ],
+          "w": [
+            3,
+            -1
+          ],
+          "b": 2
+        },
+        "expected": 2
+      },
+      {
+        "name": "Below the means",
+        "data": {
+          "x": [
+            8,
+            15
+          ],
+          "mean": [
+            10,
+            20
+          ],
+          "scale": [
+            2,
+            5
+          ],
+          "w": [
+            3,
+            -1
+          ],
+          "b": 2
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "op": "dot",
+          "inputs": [
+            {
+              "op": "multiply",
+              "inputs": [
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "source": "x"
+                    },
+                    {
+                      "source": "mean"
+                    }
+                  ]
+                },
+                {
+                  "op": "positiveReciprocal",
+                  "inputs": [
+                    {
+                      "source": "scale"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "source": "w"
+            }
+          ]
+        },
+        {
+          "source": "b"
+        }
+      ]
+    },
+    "why": "The same retained transformation and model state produce the same numerical procedure.",
+    "limitation": "Feature order and units must match the saved contract. This example is a linear predictor, not arbitrary model serialisation.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "prediction-input-contracts",
+    "title": "Validate an incoming numerical batch",
+    "problem": "Botie must check record width and finiteness before using the model.",
+    "challenge": "Send the table through the finite-width validator, then calculate its column means to confirm the same accepted values pass through.",
+    "sources": {
+      "rows": "Input records",
+      "width": "Required feature count"
+    },
+    "cases": [
+      {
+        "name": "Two records",
+        "data": {
+          "rows": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "width": 2
+        },
+        "expected": [
+          2,
+          3
+        ]
+      },
+      {
+        "name": "One record",
+        "data": {
+          "rows": [
+            [
+              5,
+              7
+            ]
+          ],
+          "width": 2
+        },
+        "expected": [
+          5,
+          7
+        ]
+      },
+      {
+        "name": "Three features",
+        "data": {
+          "rows": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              3,
+              4,
+              5
+            ]
+          ],
+          "width": 3
+        },
+        "expected": [
+          2,
+          3,
+          4
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "columnmean",
+      "inputs": [
+        {
+          "op": "finiteWidth",
+          "inputs": [
+            {
+              "source": "rows"
+            },
+            {
+              "source": "width"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Validation checks the data boundary before downstream operations run.",
+    "limitation": "This numerical check cannot infer feature names or units. The request parser must enforce those separately.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "serving-predictions",
+    "title": "Predict a batch in order",
+    "problem": "Botie receives a validated feature table and fixed model parameters.",
+    "challenge": "Multiply each row by the weight vector, then add the same bias to each result.",
+    "sources": {
+      "X": "Feature rows",
+      "w": "Saved weights",
+      "b": "Bias"
+    },
+    "cases": [
+      {
+        "name": "Two requests",
+        "data": {
+          "X": [
+            [
+              1,
+              2
+            ],
+            [
+              3,
+              4
+            ]
+          ],
+          "w": [
+            2,
+            -1
+          ],
+          "b": 1
+        },
+        "expected": [
+          1,
+          3
+        ]
+      },
+      {
+        "name": "One request",
+        "data": {
+          "X": [
+            [
+              2,
+              3
+            ]
+          ],
+          "w": [
+            0.5,
+            2
+          ],
+          "b": -1
+        },
+        "expected": [
+          6
+        ]
+      },
+      {
+        "name": "Three requests",
+        "data": {
+          "X": [
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              1
+            ],
+            [
+              0,
+              2
+            ]
+          ],
+          "w": [
+            0.5,
+            2
+          ],
+          "b": -1
+        },
+        "expected": [
+          6,
+          3,
+          3
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "add",
+      "inputs": [
+        {
+          "op": "matvec",
+          "inputs": [
+            {
+              "source": "X"
+            },
+            {
+              "source": "w"
+            }
+          ]
+        },
+        {
+          "source": "b"
+        }
+      ]
+    },
+    "why": "Row order is preserved and all requests use the same parameter state.",
+    "limitation": "Inputs must already satisfy the saved feature and preprocessing contract.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "model-versioning",
+    "title": "Compare a candidate with the current version",
+    "problem": "Botie supplies predictions from both versions on the same ordered fixtures.",
+    "challenge": "Subtract current predictions from candidate predictions, square the changes, and average.",
+    "sources": {
+      "current": "Current-version fixture predictions",
+      "candidate": "Candidate fixture predictions"
+    },
+    "cases": [
+      {
+        "name": "One changed result",
+        "data": {
+          "current": [
+            4,
+            2
+          ],
+          "candidate": [
+            5,
+            2
+          ]
+        },
+        "expected": 0.5
+      },
+      {
+        "name": "No changes",
+        "data": {
+          "current": [
+            1,
+            3
+          ],
+          "candidate": [
+            1,
+            3
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Both changed",
+        "data": {
+          "current": [
+            0,
+            0
+          ],
+          "candidate": [
+            2,
+            -2
+          ]
+        },
+        "expected": 4
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "square",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "source": "candidate"
+                },
+                {
+                  "source": "current"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "A shared fixture set makes behavioural changes measurable.",
+    "limitation": "This is prediction change, not prediction error. It cannot choose the better model without a task criterion.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "monitoring-and-rollback",
+    "title": "Measure the error we can now observe",
+    "problem": "Botie has predictions and the later outcomes matched in the same order.",
+    "challenge": "Subtract outcomes, take absolute values, and average over the monitored window.",
+    "sources": {
+      "predicted": "Recorded predictions",
+      "actual": "Matched later outcomes"
+    },
+    "cases": [
+      {
+        "name": "Two errors",
+        "data": {
+          "predicted": [
+            10,
+            12
+          ],
+          "actual": [
+            11,
+            15
+          ]
+        },
+        "expected": 2
+      },
+      {
+        "name": "Accurate window",
+        "data": {
+          "predicted": [
+            4,
+            5
+          ],
+          "actual": [
+            4,
+            5
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Both directions",
+        "data": {
+          "predicted": [
+            2,
+            8
+          ],
+          "actual": [
+            5,
+            4
+          ]
+        },
+        "expected": 3.5
+      }
+    ],
+    "recipe": {
+      "op": "mean",
+      "inputs": [
+        {
+          "op": "absolute",
+          "inputs": [
+            {
+              "op": "subtract",
+              "inputs": [
+                {
+                  "source": "predicted"
+                },
+                {
+                  "source": "actual"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Outcome-based monitoring measures an error that input drift alone cannot establish.",
+    "limitation": "Labels must be correctly matched and representative. Report window size, model version, and subgroup results.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "project-sensor-investigation",
+    "title": "Build the inspection rule",
+    "problem": "Botie has retained reference values and a validation-selected threshold.",
+    "challenge": "Subtract the retained centre, divide absolute differences by retained MAD, and alert strictly above the fixed threshold.",
+    "sources": {
+      "readings": "Later pressure readings",
+      "centre": "Saved reference median",
+      "mad": "Positive saved MAD",
+      "threshold": "Fixed threshold"
+    },
+    "cases": [
+      {
+        "name": "Original test",
+        "data": {
+          "readings": [
+            9,
+            14,
+            16
+          ],
+          "centre": 10,
+          "mad": 1,
+          "threshold": 4
+        },
+        "expected": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "name": "Harder window",
+        "data": {
+          "readings": [
+            9,
+            14,
+            16,
+            17
+          ],
+          "centre": 10,
+          "mad": 1,
+          "threshold": 4
+        },
+        "expected": [
+          0,
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "name": "Different reference",
+        "data": {
+          "readings": [
+            4,
+            8,
+            12
+          ],
+          "centre": 6,
+          "mad": 2,
+          "threshold": 2
+        },
+        "expected": [
+          0,
+          0,
+          1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "greater",
+      "inputs": [
+        {
+          "op": "divide",
+          "inputs": [
+            {
+              "op": "absolute",
+              "inputs": [
+                {
+                  "op": "subtract",
+                  "inputs": [
+                    {
+                      "source": "readings"
+                    },
+                    {
+                      "source": "centre"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "source": "mad"
+            }
+          ]
+        },
+        {
+          "source": "threshold"
+        }
+      ]
+    },
+    "why": "The deployed rule reuses fitting and selection decisions instead of relearning from the test window.",
+    "limitation": "This is an alert procedure. Fault status comes from independent inspection, not the alert itself.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "project-demand-forecast",
+    "title": "Compare forecasts on the same later days",
+    "problem": "Botie supplies predictions from several procedures, with one procedure per row, and matching later outcomes.",
+    "challenge": "Subtract the same actual vector from every forecast row, take absolute errors, and average within each procedure.",
+    "sources": {
+      "predictions": "Rows of matched procedure forecasts",
+      "actual": "Later observed outcomes"
+    },
+    "cases": [
+      {
+        "name": "Trend example",
+        "data": {
+          "predictions": [
+            [
+              10,
+              12
+            ],
+            [
+              12,
+              14
+            ]
+          ],
+          "actual": [
+            12,
+            14
+          ]
+        },
+        "expected": [
+          2,
+          0
+        ]
+      },
+      {
+        "name": "Model loses",
+        "data": {
+          "predictions": [
+            [
+              10,
+              10
+            ],
+            [
+              14,
+              16
+            ]
+          ],
+          "actual": [
+            10,
+            11
+          ]
+        },
+        "expected": [
+          0.5,
+          4.5
+        ]
+      },
+      {
+        "name": "Tie",
+        "data": {
+          "predictions": [
+            [
+              8,
+              12
+            ],
+            [
+              12,
+              8
+            ]
+          ],
+          "actual": [
+            10,
+            10
+          ]
+        },
+        "expected": [
+          2,
+          2
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "rowmean",
+      "inputs": [
+        {
+          "op": "absolute",
+          "inputs": [
+            {
+              "op": "subtractRows",
+              "inputs": [
+                {
+                  "source": "predictions"
+                },
+                {
+                  "source": "actual"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Matching targets makes the comparison reflect forecast errors rather than different evaluation days.",
+    "limitation": "Forecasts must be stored before targets are observed. This workshop evaluates supplied predictions; fitting happens in the project code.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1
+  },
+  {
+    "id": "project-seed-counting",
+    "title": "Count candidate seeds in a tray",
+    "problem": "Botie has a grayscale tray image and a fixed intensity and minimum-area rule.",
+    "challenge": "Threshold the image, label four-neighbour regions, calculate each region’s size, and count those at least as large as the minimum.",
+    "sources": {
+      "image": "Grayscale tray image",
+      "threshold": "Strict intensity threshold",
+      "area": "Minimum component area"
+    },
+    "cases": [
+      {
+        "name": "Seeds and dust",
+        "data": {
+          "image": [
+            [
+              0,
+              9,
+              9,
+              0,
+              0
+            ],
+            [
+              0,
+              9,
+              9,
+              0,
+              8
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            [
+              7,
+              7,
+              0,
+              8,
+              8
+            ]
+          ],
+          "threshold": 5,
+          "area": 2
+        },
+        "expected": 3
+      },
+      {
+        "name": "Touching foreground",
+        "data": {
+          "image": [
+            [
+              9,
+              9,
+              0
+            ],
+            [
+              0,
+              9,
+              9
+            ]
+          ],
+          "threshold": 5,
+          "area": 2
+        },
+        "expected": 1
+      },
+      {
+        "name": "Only dust",
+        "data": {
+          "image": [
+            [
+              9,
+              0,
+              9
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ],
+          "threshold": 5,
+          "area": 2
+        },
+        "expected": 0
+      }
+    ],
+    "recipe": {
+      "op": "total",
+      "inputs": [
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "op": "regionSizes",
+              "inputs": [
+                {
+                  "op": "labelRegions",
+                  "inputs": [
+                    {
+                      "op": "greater",
+                      "inputs": [
+                        {
+                          "source": "image"
+                        },
+                        {
+                          "source": "threshold"
+                        }
+                      ]
+                    },
+                    {
+                      "op": "constant",
+                      "inputs": [],
+                      "settings": {
+                        "value": 4
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "source": "area"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Connectivity groups pixels before the area rule decides which regions to count.",
+    "limitation": "Counts assume each accepted connected region corresponds to one seed. Touching objects and lighting changes can violate that assumption.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "imageView": {
+      "inputs": {
+        "image": 9
+      }
+    }
   }
 ]

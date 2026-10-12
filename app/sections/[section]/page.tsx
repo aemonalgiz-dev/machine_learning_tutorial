@@ -18,6 +18,7 @@ type Props = { params: Promise<{ section: string }> };
 export const dynamicParams = false;
 
 export function generateStaticParams() {
+  // Published curriculum entries supply section routes, including new paths.
   return CURRICULUM.map((part) => ({ section: courseSectionId(part) }));
 }
 

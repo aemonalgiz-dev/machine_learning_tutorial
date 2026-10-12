@@ -870,6 +870,32 @@ const existingCurriculum: Part[] = [
 ];
 
 const topicIntroductions: Record<string, string> = {
+  "Predicting the Next Observation": "Tomorrow's value is unavailable when we make today's forecast. Begin with a simple prediction, then arrange earlier observations into inputs without borrowing the answer.",
+  "Patterns That Repeat or Move": "A series can repeat, drift, or react to recent observations. We will separate those behaviours before choosing a rule for updating a forecast.",
+  "Fitting and Testing Forecasts": "A useful forecast must work with the information available at its origin. Fit a small model, then recreate that boundary on successive later days.",
+  "Learning From Consequences": "Botie sees feedback only after choosing an action. We will distinguish learning about independent choices from decisions that change the state he faces next.",
+  "Planning Beyond the Next Reward": "An action can pay off later. Keep the reward sequence visible as we calculate returns, plan with a transition model, and learn action values from experience.",
+  "Describing What We Do Not Know": "A single estimate can hide how little evidence supports it. Describe possible outcomes, then update an uncertain failure rate as observations arrive.",
+  "Combining Noisy Evidence": "Measurements can disagree without either being useless. Account for their reliability and the way an underlying condition changes before combining them.",
+  "Predictions as Distributions": "An unmeasured location needs both a prediction and an account of what remains uncertain. We will see how a covariance rule lets measured locations inform it.",
+  "Making Parameter Updates": "A derivative tells us a local direction, but training still needs a rule for using it. Follow small batches, stored velocity, and adaptive scaling through actual parameter changes.",
+  "Understanding a Training Run": "A stalled loss can have several causes. Check the starting values and derivatives, then use separate training and validation evidence to decide whether to continue.",
+  "Choosing Useful Candidates": "A reader should not have to search the whole shelf. Begin with what previous readers opened, then use guide descriptions when interaction history is missing.",
+  "Learning From Interaction Patterns": "Readers can share preferences that item descriptions miss. Keep missing ratings distinct from dislikes while learning from neighbours and compact factor representations.",
+  "Evaluating Recommendations": "A useful guide needs to reach the part of the list someone sees. Evaluate the visible ranking and inspect readers and items with little history separately.",
+  "Recognising Unusual Records": "An unusual reading needs a reference. Compare a robust global baseline with a local neighbourhood, and keep unusualness separate from a confirmed fault.",
+  "Different Ways to Detect Unusualness": "Some observations are easy to isolate; others are hard to reconstruct. Work through both signals before deciding which cases deserve investigation.",
+  "Representing Relationships": "Independent rows leave out who is connected to whom. Record a network carefully, then follow probability through its links.",
+  "Learning Across Connections": "A node's neighbours can supply context. Gather that information, transform it with shared weights, and test what it tells us about missing links.",
+  "Asking What a Change Would Do": "Predicting an outcome and changing it are different questions. Examine why groups differ before using a random assignment to make a treatment comparison.",
+  "Working With Observational Evidence": "An old dataset cannot be rerun as an experiment. Make the assumptions behind adjustment and weighting explicit, including where the data provide no comparison.",
+  "From Training to a Repeatable Prediction": "Saved weights need the preparation and feature meanings that made them useful. Preserve that procedure and validate the records entering it.",
+  "Running and Identifying a Model": "A prediction should stay consistent across requests and traceable to a particular version. Test batch behaviour and preserve complete artifacts before changing the served model.",
+  "Maintaining the Prediction Service": "New inputs and later outcomes can reveal different problems. Monitor data, accuracy, and service behaviour separately, with a tested response when something changes.",
+  "Putting the Pieces Together": "A complete small project needs a question, a baseline, a fair test, and an explanation of failures. Follow Botie through sensor inspection, demand forecasting, and counting seeds in images.",
+  "Reasoning From Uncertain Evidence": "An observation can change what we believe, but we need to keep track of the group we are talking about. We will follow an alarm back to its possible causes, then compare rules that could have produced a recorded sequence.",
+  "Learning From Limited Images": "We may have too few labelled photographs to learn every visual pattern from scratch. We can create appropriate variations of our training images or test features learned elsewhere, while keeping the labels and evaluation honest.",
+  "Finding and Counting Objects": "Knowing an object is present does not tell us where it is or how many we found. We will describe locations with rectangles, measure their overlap, and work through what to do when several predictions point at the same object.",
   "From a measurement to a calculation": "Before asking a model to learn from numbers, we need to put those numbers in a form we can inspect. We will keep track of what each entry represents as we calculate with arrays.",
   "Working with whole arrays": "A calculation often needs the same reference for many observations, or only the observations meeting a condition. We need to express those choices without losing which values belong together.",
   "Calculations We Will Reuse": "Later models will combine feature columns, compare predictions with observations, and summarise their errors. We will calculate those pieces with NumPy and keep their intermediate results visible.",
@@ -895,11 +921,18 @@ function addedTopics(section: string): Topic[] {
   return topics;
 }
 
-export const CURRICULUM: Part[] = existingCurriculum.flatMap(part => {
+const foundationCurriculum: Part[] = existingCurriculum.flatMap(part => {
   const extra = addedTopics(part.title);
-  const before = extra.filter(topic => ["Can We Trust These Records?", "Establish a Fair Comparison"].includes(topic.heading));
-  const after = extra.filter(topic => !before.includes(topic));
-  const expanded = { ...part, topics: [...before, ...part.topics, ...after] };
+  const newTopics = extra.filter(topic => !part.topics.some(existing => existing.heading === topic.heading));
+  const before = newTopics.filter(topic => ["Can We Trust These Records?", "Establish a Fair Comparison"].includes(topic.heading));
+  const after = newTopics.filter(topic => !before.includes(topic));
+  const topics = part.topics.map(topic => {
+    const additions = extra.find(added => added.heading === topic.heading)?.concepts ?? [];
+    const retained = topic.concepts.filter(concept => concept.href !== "/concepts/reinforcement-learning");
+    const concepts = topic.heading === "Classical Computer Vision" ? [...additions, ...retained] : [...retained, ...additions];
+    return { ...topic, concepts };
+  });
+  const expanded = { ...part, topics: [...before, ...topics, ...after] };
   if (part.title === "Data Preparation") expanded.intro = "A model only sees the records we give it. Before fitting, we need to know what a row represents, which measurements are missing, and how categories, units, and time should be represented. We also need to keep information from the future out of a prediction about the present.";
   if (part.title !== "Introductory Mathematics") return [expanded];
   return [expanded, {
@@ -908,3 +941,22 @@ export const CURRICULUM: Part[] = existingCurriculum.flatMap(part => {
     topics: addedTopics("Python and NumPy"),
   }];
 });
+
+const newSection = (title: string, intro: string): Part => ({ title, intro, topics: addedTopics(title) });
+const probabilitySection = newSection("Probabilistic Models and Uncertainty", "A prediction is rarely the only plausible outcome. Botie will keep track of possible outcomes, update an uncertain failure rate, and combine noisy readings. We will distinguish uncertainty about a model from variation in the next observation, then use those ideas to predict between measured locations.");
+const optimisationSection = newSection("Optimisation and Training", "A model learns through changes to its parameters. We will follow those changes directly, from a small batch's gradient to momentum and adaptive updates. We will also check derivatives, inspect training curves, and decide when a saved model is a better choice than the final one.");
+const reinforcementSection = newSection("Reinforcement Learning", "Botie sometimes has to act before he knows which choice is best. We will begin with the feedback an action produces, then add changing states and rewards that arrive later. Planning with a known model and learning from observed transitions will give us two ways to improve his decisions.");
+const reinforcementIntro = existingCurriculum.flatMap(part => part.topics).flatMap(topic => topic.concepts).find(concept => concept.href === "/concepts/reinforcement-learning")!;
+reinforcementSection.topics[0].concepts.unshift(reinforcementIntro);
+
+export const CURRICULUM: Part[] = [
+  ...foundationCurriculum.flatMap(part => part.title === "Choosing and Checking a Model" ? [part, probabilitySection] : part.title === "Neural Networks" ? [part, optimisationSection] : [part]),
+  newSection("Time Series and Forecasting", "Tomorrow's demand is unknown when Botie needs to prepare for it. Start with a forecast that simply repeats a known value, then introduce earlier observations, repeating patterns, and fitted relationships. Every comparison will respect what could have been known at the time the forecast was made."),
+  reinforcementSection,
+  newSection("Recommendations and Ranking", "Botie has more guides than a reader can inspect. We will work out which ones to suggest using popularity, descriptions, and shared preferences, then evaluate the short list the reader actually sees. Missing interactions and new readers need their own treatment."),
+  newSection("Anomaly Detection", "An unexpected reading can mean a broken sensor, a real event, or an operating condition we have not seen before. We will compare several ways to recognise unusual records and turn their scores into an investigation rule. A high score will remain evidence to inspect, rather than a diagnosis."),
+  newSection("Graphs and Relational Learning", "A pump's reading can depend on the network around it. Graphs let us record those connections and use neighbouring measurements as context. We will begin with the representation, then follow information through walks, aggregation, learned layers, and predictions about missing links."),
+  newSection("Causal Inference and Experiments", "Knowing which plants grew well does not tell us which intervention helped them. We will examine how treatment groups were formed, design a randomised comparison, and state the assumptions needed to learn from observational records. The calculations will keep those assumptions visible."),
+  newSection("Deploying and Maintaining Models", "A model needs to keep behaving as intended after it leaves a training script. Botie will save the full prediction procedure, check incoming records, preserve model versions, and inspect later performance. We will also work through what a useful rollback must restore."),
+  newSection("Complete Projects", "Bring the pieces together around a question Botie needs to answer. Each small project includes a baseline, a repeatable procedure, held-out evaluation, and cases where the method fails. The datasets are small enough to inspect, so the reasoning stays visible as the work becomes more complete."),
+];

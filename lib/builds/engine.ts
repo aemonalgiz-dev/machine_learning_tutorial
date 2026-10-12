@@ -22,6 +22,8 @@ export interface Build {
   limitation?: string;
   // Start a separate saved draft when a challenge's inputs or objective change.
   draftVersion?: number;
+  // Pixel previews accompany the numerical editor for image-based examples.
+  imageView?: { inputs: Record<string, number | string>; output?: number; outputIndex?: number; pairedOutput?: number; remainderLabel?: string };
 }
 export interface Piece { id: string; tool: string; x: number; y: number; settings: Settings }
 export interface Connection { from: string; to: string; port: number }

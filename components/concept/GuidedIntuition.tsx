@@ -31,7 +31,11 @@ function SceneView({ scene }: { scene: Scene }) {
     return <div key={index} className="min-w-0">
       <p className="mb-2 text-sm font-medium">{panel.label}</p>
       <svg role="img" aria-label={panel.label} viewBox={`0 0 ${columns * 25} ${panel.cells.length * 25}`} className="mx-auto w-full max-w-52 rounded">
-        {panel.cells.flatMap((row, y) => row.map((value, x) => <rect key={`${x}-${y}`} x={x * 25 + 1} y={y * 25 + 1} width={23} height={23} rx={2} fill={value === 0 ? "#e2e8f0" : value === 2 ? "#f59e0b" : value === 3 ? "#10b981" : "#6366f1"} stroke={panel.selected?.includes(y * columns + x) ? "#e11d48" : "none"} strokeWidth={2.5}><title>{`Row ${y + 1}, column ${x + 1}: ${value === 0 ? "background" : value === 2 ? "changed cell" : value === 3 ? "selected result" : "foreground"}`}</title></rect>))}
+        {panel.cells.flatMap((row, y) => row.map((value, x) => {
+          const level = panel.maximum === undefined ? undefined : Math.round(255 * Math.max(0, Math.min(1, value / panel.maximum)));
+          const fill = level === undefined ? value === 0 ? "#e2e8f0" : value === 2 ? "#f59e0b" : value === 3 ? "#10b981" : "#6366f1" : `rgb(${level}, ${level}, ${level})`;
+          return <g key={`${x}-${y}`}><rect x={x * 25 + 1} y={y * 25 + 1} width={23} height={23} rx={2} fill={fill} stroke={panel.selected?.includes(y * columns + x) ? "#e11d48" : "none"} strokeWidth={2.5}><title>{scene.showValues ? `Row ${y}, column ${x}: ${value}` : `Row ${y + 1}, column ${x + 1}: ${value === 0 ? "background" : value === 2 ? "changed cell" : value === 3 ? "selected result" : "foreground"}`}</title></rect>{scene.showValues && <text x={x * 25 + 12.5} y={y * 25 + 15} textAnchor="middle" fontSize="7" fill={level === undefined ? value === 1 ? "#ffffff" : "#0b1220" : level >= 150 ? "#0b1220" : "#ffffff"}>{Number(value.toFixed(2))}</text>}</g>;
+        }))}
       </svg>
     </div>;
   })}</div>;

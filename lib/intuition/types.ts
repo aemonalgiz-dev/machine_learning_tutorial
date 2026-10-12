@@ -3,7 +3,7 @@ export type Strip = { label: string; items: string[]; active?: number[] };
 export type Scene =
   | { kind: "strips"; caption: string; rows: Strip[]; connected?: boolean }
   | { kind: "plot"; caption: string; points: Point[]; xLabel: string; yLabel: string; paths?: number[][][]; guides?: number[][]; labels?: string[]; bounds?: [number, number, number, number]; equalScale?: boolean }
-  | { kind: "tiles"; caption: string; panels: { label: string; cells: number[][]; selected?: number[] }[] }
+  | { kind: "tiles"; caption: string; showValues?: boolean; panels: { label: string; cells: number[][]; selected?: number[]; maximum?: number }[] }
   | { kind: "bars"; caption: string; items: { label: string; value: number; display?: string }[] };
 
 export interface IntuitionStep {

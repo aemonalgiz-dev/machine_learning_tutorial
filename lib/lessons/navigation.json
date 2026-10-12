@@ -187,5 +187,432 @@
     "section": "Choosing and Checking a Model",
     "topic": "Know the Limits of the Result",
     "blurb": "One average hides how it might change if different observations had been collected. Resampling the observed data gives us a way to study that dependence under explicit assumptions."
+  },
+  {
+    "id": "conditional-probability",
+    "title": "What Does an Alarm Tell Us?",
+    "section": "Introductory Mathematics",
+    "topic": "Reasoning From Uncertain Evidence",
+    "blurb": "An alarm may catch most faulty sensors and still be wrong surprisingly often. We need to know how common faults are before deciding what an alarm means."
+  },
+  {
+    "id": "likelihood",
+    "title": "Which Rule Could Have Produced These Observations?",
+    "section": "Introductory Mathematics",
+    "topic": "Reasoning From Uncertain Evidence",
+    "blurb": "A probability rule predicts possible observations. Likelihood holds the observations fixed and compares the rules that might have produced them. That distinction connects probability to fitting a model."
+  },
+  {
+    "id": "naive-bayes",
+    "title": "Naive Bayes",
+    "section": "Classical Machine Learning",
+    "topic": "Classification",
+    "blurb": "A warm casing and an unstable reading may each suggest a faulty sensor. We need a way to combine those clues, while being explicit about what we assume about their relationship."
+  },
+  {
+    "id": "support-vector-machines",
+    "title": "Support Vector Machines and Margins",
+    "section": "Classical Machine Learning",
+    "topic": "Classification",
+    "blurb": "Several lines may separate the same labelled examples. We need a reason to prefer one, and a way to handle examples that cannot all be separated cleanly."
+  },
+  {
+    "id": "hierarchical-clustering",
+    "title": "Hierarchical Clustering",
+    "section": "Classical Machine Learning",
+    "topic": "Clustering",
+    "blurb": "A collection can have small groups inside larger groups. Joining the closest groups one step at a time lets us inspect that hierarchy without choosing one group count at the outset."
+  },
+  {
+    "id": "density-based-clustering",
+    "title": "Density-Based Clustering",
+    "section": "Classical Machine Learning",
+    "topic": "Clustering",
+    "blurb": "Groups need not form round clouds, and isolated observations need not belong to any group. We can instead ask where enough neighbours support extending a cluster."
+  },
+  {
+    "id": "images-as-arrays",
+    "title": "Images as Arrays",
+    "section": "Classical Machine Learning",
+    "topic": "Classical Computer Vision",
+    "blurb": "Before a computer can find a seed in a photograph, it needs measurements to work with. We will look at the rows, columns, channels, and number types that make up an image."
+  },
+  {
+    "id": "image-thresholding",
+    "title": "Image Thresholding",
+    "section": "Classical Machine Learning",
+    "topic": "Classical Computer Vision",
+    "blurb": "A bright seed on a dark tray gives us a first rule to try. Compare each pixel with a cutoff, keep the result as a mask, and inspect where that rule fails."
+  },
+  {
+    "id": "morphology",
+    "title": "Cleaning Masks With Morphology",
+    "section": "Classical Machine Learning",
+    "topic": "Classical Computer Vision",
+    "blurb": "A threshold can leave speckles and gaps. We can test a small shape against the mask to remove or connect particular structures, provided we understand what else that operation will change."
+  },
+  {
+    "id": "connected-components",
+    "title": "Connected Components",
+    "section": "Classical Machine Learning",
+    "topic": "Classical Computer Vision",
+    "blurb": "A mask tells us which pixels were selected. To count regions, we need a definition of connected and a way to give each reachable group its own label."
+  },
+  {
+    "id": "image-augmentation",
+    "title": "Image Augmentation",
+    "section": "Computer Vision with Neural Networks",
+    "topic": "Learning From Limited Images",
+    "blurb": "The same seed can appear in several positions or orientations. We can teach a model which changes should preserve an answer, but the transformation must keep the image and its labels consistent."
+  },
+  {
+    "id": "transfer-learning",
+    "title": "Transfer Learning",
+    "section": "Computer Vision with Neural Networks",
+    "topic": "Learning From Limited Images",
+    "blurb": "A model trained on other photographs may already measure useful visual patterns. We can test those features with a new prediction head before deciding whether the feature extractor also needs to change."
+  },
+  {
+    "id": "bounding-boxes",
+    "title": "Bounding Boxes and Overlap",
+    "section": "Computer Vision with Neural Networks",
+    "topic": "Finding and Counting Objects",
+    "blurb": "Knowing that a seed appears in a photograph does not tell us where it is. Rectangles give us a location to predict, and overlap gives us a way to compare that prediction with a labelled target."
+  },
+  {
+    "id": "non-maximum-suppression",
+    "title": "Non-Maximum Suppression",
+    "section": "Computer Vision with Neural Networks",
+    "topic": "Finding and Counting Objects",
+    "blurb": "A detector can report several rectangles around the same seed. We will rank candidates, keep a strong one, and remove sufficiently overlapping alternatives while preserving candidates for other objects."
+  },
+  {
+    "id": "forecasting-baselines",
+    "title": "What Would We Predict Before Fitting Anything?",
+    "section": "Time Series and Forecasting",
+    "topic": "Predicting the Next Observation",
+    "blurb": "Tomorrow's water demand is unknown. Yesterday's demand gives Botie a prediction he can actually make, and a reference that a more complicated forecast should improve on."
+  },
+  {
+    "id": "lagged-features",
+    "title": "Building Inputs From Earlier Days",
+    "section": "Time Series and Forecasting",
+    "topic": "Predicting the Next Observation",
+    "blurb": "A prediction row needs information available before its target. We will turn one ordered record into rows of earlier readings without accidentally including the answer."
+  },
+  {
+    "id": "seasonality-and-differencing",
+    "title": "Separating Repetition From Change",
+    "section": "Time Series and Forecasting",
+    "topic": "Patterns That Repeat or Move",
+    "blurb": "A demand increase might be a lasting change or a normal part of the weekly schedule. Comparing like positions in a cycle helps us distinguish those possibilities."
+  },
+  {
+    "id": "exponential-smoothing",
+    "title": "Updating a Forecast Without Starting Over",
+    "section": "Time Series and Forecasting",
+    "topic": "Patterns That Repeat or Move",
+    "blurb": "Botie needs to respond to new demand without letting one unusual day replace everything he knows. A weighted update lets him control how quickly his estimate changes."
+  },
+  {
+    "id": "autoregressive-forecasting",
+    "title": "Learning From a Series' Own Past",
+    "section": "Time Series and Forecasting",
+    "topic": "Fitting and Testing Forecasts",
+    "blurb": "A trailing average gives every lag the same influence. An autoregressive model fits different coefficients for the earlier readings and then uses that same rule to predict ahead."
+  },
+  {
+    "id": "rolling-forecast-validation",
+    "title": "Testing a Forecast as Time Moves Forward",
+    "section": "Time Series and Forecasting",
+    "topic": "Fitting and Testing Forecasts",
+    "blurb": "One convenient cutoff can hide a forecasting failure. We will replay several prediction dates, preserving what was known at each one, and compare methods on matching targets."
+  },
+  {
+    "id": "exploration-and-bandits",
+    "title": "Trying an Action Before Knowing Its Value",
+    "section": "Reinforcement Learning",
+    "topic": "Learning From Consequences",
+    "blurb": "Botie can choose a watering schedule, but sees the result only for the schedule he actually tries. He must balance using his current favourite with learning about alternatives."
+  },
+  {
+    "id": "states-actions-and-transitions",
+    "title": "Describing What an Action Changes",
+    "section": "Reinforcement Learning",
+    "topic": "Learning From Consequences",
+    "blurb": "Watering changes the greenhouse Botie will face tomorrow. A state, an action, and a transition model let us describe that consequence before choosing a policy."
+  },
+  {
+    "id": "discounted-returns",
+    "title": "Valuing Rewards That Arrive Later",
+    "section": "Reinforcement Learning",
+    "topic": "Planning Beyond the Next Reward",
+    "blurb": "An action can cost water now and help a plant later. A return combines a sequence of rewards so Botie can compare more than the immediate outcome."
+  },
+  {
+    "id": "bellman-value-iteration",
+    "title": "Planning One Step, Then the Remaining Journey",
+    "section": "Reinforcement Learning",
+    "topic": "Planning Beyond the Next Reward",
+    "blurb": "A long sequence of choices is difficult to compare directly. We can combine the reward from one action with the value of the state it leaves behind, then improve those estimates repeatedly."
+  },
+  {
+    "id": "q-learning",
+    "title": "Learning Action Values From Experience",
+    "section": "Reinforcement Learning",
+    "topic": "Planning Beyond the Next Reward",
+    "blurb": "Botie may not know the transition probabilities. A sampled action, reward, and next state can still correct one entry in an action-value table."
+  },
+  {
+    "id": "distributions-and-expectations",
+    "title": "Planning for More Than One Possible Outcome",
+    "section": "Probabilistic Models and Uncertainty",
+    "topic": "Describing What We Do Not Know",
+    "blurb": "A delivery might contain different numbers of damaged sensors. Keep the possible outcomes and their probabilities together before deciding how many replacements to hold."
+  },
+  {
+    "id": "parameter-posteriors",
+    "title": "Updating an Unknown Failure Rate",
+    "section": "Probabilistic Models and Uncertainty",
+    "topic": "Describing What We Do Not Know",
+    "blurb": "A few failed sensors give evidence about a failure rate, but do not determine it exactly. Keep a distribution over plausible rates and update it as results arrive."
+  },
+  {
+    "id": "gaussian-sensor-fusion",
+    "title": "Combining Measurements With Different Reliability",
+    "section": "Probabilistic Models and Uncertainty",
+    "topic": "Combining Noisy Evidence",
+    "blurb": "Two thermometers disagree. Their known error variances tell us how strongly each reading should influence a shared estimate."
+  },
+  {
+    "id": "hidden-state-filtering",
+    "title": "Tracking a State We Cannot Observe Directly",
+    "section": "Probabilistic Models and Uncertainty",
+    "topic": "Combining Noisy Evidence",
+    "blurb": "An alarm does not directly reveal whether equipment is healthy. Combine how states change with how each state could produce the observed alarm."
+  },
+  {
+    "id": "gaussian-process-regression",
+    "title": "Predicting Between Measurements With Uncertainty",
+    "section": "Probabilistic Models and Uncertainty",
+    "topic": "Predictions as Distributions",
+    "blurb": "Botie has measured temperature at only a few positions. A covariance rule connects nearby locations and describes how uncertain an unmeasured location remains."
+  },
+  {
+    "id": "minibatch-gradients",
+    "title": "Learning From a Few Records at a Time",
+    "section": "Optimisation and Training",
+    "topic": "Making Parameter Updates",
+    "blurb": "Botie has more training records than he can process in one step. A batch gives him a manageable estimate of the direction in which to change the model."
+  },
+  {
+    "id": "momentum-updates",
+    "title": "Remembering the Direction of Earlier Updates",
+    "section": "Optimisation and Training",
+    "topic": "Making Parameter Updates",
+    "blurb": "Successive batches can pull a weight in different directions. A stored velocity lets Botie carry some of the previous update direction into the next step."
+  },
+  {
+    "id": "adaptive-gradients",
+    "title": "Giving Different Weights Different Step Scales",
+    "section": "Optimisation and Training",
+    "topic": "Making Parameter Updates",
+    "blurb": "Some parameters repeatedly receive larger gradients than others. Adam keeps separate running estimates of gradient direction and squared magnitude for each parameter."
+  },
+  {
+    "id": "initialisation-and-gradient-checks",
+    "title": "Checking a Model Before a Long Training Run",
+    "section": "Optimisation and Training",
+    "topic": "Understanding a Training Run",
+    "blurb": "A network can fail because its starting values suppress the signal or because its derivative is wrong. Test these separately before tuning the optimiser."
+  },
+  {
+    "id": "training-diagnostics",
+    "title": "Deciding When a Training Run Has Done Enough",
+    "section": "Optimisation and Training",
+    "topic": "Understanding a Training Run",
+    "blurb": "Training loss can improve after predictions on unseen records stop improving. Keep separate curves, choose a stopping rule in advance, and restore the best saved model."
+  },
+  {
+    "id": "popularity-baselines",
+    "title": "Recommending Something Before Knowing the Reader",
+    "section": "Recommendations and Ranking",
+    "topic": "Choosing Useful Candidates",
+    "blurb": "Botie has a shelf of guides and a record of which were opened. Begin with a popularity baseline, then examine what those records actually tell us."
+  },
+  {
+    "id": "content-based-ranking",
+    "title": "Matching a Reader’s Interests to Guide Descriptions",
+    "section": "Recommendations and Ranking",
+    "topic": "Choosing Useful Candidates",
+    "blurb": "Guide descriptions give us evidence even before a guide has been opened. Represent topics explicitly and compare them with a reader’s interests."
+  },
+  {
+    "id": "collaborative-filtering",
+    "title": "Learning From Readers With Similar Preferences",
+    "section": "Recommendations and Ranking",
+    "topic": "Learning From Interaction Patterns",
+    "blurb": "A guide’s description may miss what readers value. Shared ratings let Botie compare preferences, provided missing ratings remain distinct from dislikes."
+  },
+  {
+    "id": "recommendation-factorisation",
+    "title": "Compressing a Sparse Table of Preferences",
+    "section": "Recommendations and Ranking",
+    "topic": "Learning From Interaction Patterns",
+    "blurb": "A rating table can be enormous and mostly empty. Small vectors for readers and guides can share information across its observed entries."
+  },
+  {
+    "id": "ranking-evaluation",
+    "title": "Checking the List a Reader Actually Sees",
+    "section": "Recommendations and Ranking",
+    "topic": "Evaluating Recommendations",
+    "blurb": "A recommender usually shows a short list. Evaluate that list’s relevant items, their positions, and the cases where little history is available."
+  },
+  {
+    "id": "robust-anomaly-scores",
+    "title": "Finding Unusual Readings Without Letting Them Set the Reference",
+    "section": "Anomaly Detection",
+    "topic": "Recognising Unusual Records",
+    "blurb": "A faulty sensor can pull an ordinary mean toward itself. Use a robust centre and spread, then decide what a large deviation actually warrants."
+  },
+  {
+    "id": "local-density-anomalies",
+    "title": "Judging a Reading Against Its Neighbours",
+    "section": "Anomaly Detection",
+    "topic": "Recognising Unusual Records",
+    "blurb": "Different operating regimes can have different spreads. Local outlier factor compares a point’s density with the density around its neighbours."
+  },
+  {
+    "id": "isolation-forests",
+    "title": "Finding Readings That Are Easy to Separate",
+    "section": "Anomaly Detection",
+    "topic": "Different Ways to Detect Unusualness",
+    "blurb": "An isolated reading often needs few random splits to stand apart. Follow paths through small trees before averaging that evidence across a forest."
+  },
+  {
+    "id": "reconstruction-alerts",
+    "title": "Detecting Patterns a Model Cannot Reconstruct",
+    "section": "Anomaly Detection",
+    "topic": "Different Ways to Detect Unusualness",
+    "blurb": "A model trained to reproduce normal sensor patterns can expose departures through reconstruction error. The error still needs a validated alert rule."
+  },
+  {
+    "id": "graph-representations",
+    "title": "Recording Which Things Are Connected",
+    "section": "Graphs and Relational Learning",
+    "topic": "Representing Relationships",
+    "blurb": "A table of pump readings leaves out the pipes between pumps. A graph records those relationships so calculations can use the connections."
+  },
+  {
+    "id": "graph-random-walks",
+    "title": "Following Probability Through a Network",
+    "section": "Graphs and Relational Learning",
+    "topic": "Representing Relationships",
+    "blurb": "A random walker chooses among outgoing links. Follow the probability mass to see how graph structure changes where it accumulates."
+  },
+  {
+    "id": "neighbour-aggregation",
+    "title": "Letting a Node Read Its Neighbours’ Measurements",
+    "section": "Graphs and Relational Learning",
+    "topic": "Learning Across Connections",
+    "blurb": "A pump’s neighbours can provide useful context. Aggregate their readings while retaining the distinction between a node and its surroundings."
+  },
+  {
+    "id": "graph-convolution",
+    "title": "Learning From a Node and Its Neighbours Together",
+    "section": "Graphs and Relational Learning",
+    "topic": "Learning Across Connections",
+    "blurb": "A graph convolution combines node features, self-connections, degree scaling, and learned weights. Work through these pieces before calling the result a layer."
+  },
+  {
+    "id": "link-prediction",
+    "title": "Scoring Connections We Have Not Observed",
+    "section": "Graphs and Relational Learning",
+    "topic": "Learning Across Connections",
+    "blurb": "Node representations can score possible links, but missing links are not guaranteed negatives. Design the split and candidate set before evaluating."
+  },
+  {
+    "id": "confounding-and-comparisons",
+    "title": "Separating a Useful Prediction From a Causal Claim",
+    "section": "Causal Inference and Experiments",
+    "topic": "Asking What a Change Would Do",
+    "blurb": "Plants receiving extra water may grow poorly because they were already struggling. Compare the question a prediction answers with the question an intervention asks."
+  },
+  {
+    "id": "randomised-experiments",
+    "title": "Making a Fair Comparison by Assignment",
+    "section": "Causal Inference and Experiments",
+    "topic": "Asking What a Change Would Do",
+    "blurb": "Random assignment separates a treatment decision from the reasons a gardener might otherwise choose it. Estimate an average effect while keeping the experiment’s unit and uncertainty clear."
+  },
+  {
+    "id": "causal-adjustment",
+    "title": "Comparing Treatments in the Same Population",
+    "section": "Causal Inference and Experiments",
+    "topic": "Working With Observational Evidence",
+    "blurb": "When starting conditions affect treatment choice, standardisation can compare both treatments using one target population, if the measured conditions suffice to control confounding."
+  },
+  {
+    "id": "treatment-effects-and-overlap",
+    "title": "Reweighting Records Without Inventing Missing Evidence",
+    "section": "Causal Inference and Experiments",
+    "topic": "Working With Observational Evidence",
+    "blurb": "Inverse-probability weighting changes which records count most. Understand the treatment probabilities and overlap assumptions before interpreting the resulting contrast."
+  },
+  {
+    "id": "saving-fitted-pipelines",
+    "title": "Saving the Whole Prediction Procedure",
+    "section": "Deploying and Maintaining Models",
+    "topic": "From Training to a Repeatable Prediction",
+    "blurb": "Weights alone do not reproduce a prediction. Botie also needs feature order, fitted preparation, and the rules connecting them."
+  },
+  {
+    "id": "prediction-input-contracts",
+    "title": "Checking What Arrives at the Model",
+    "section": "Deploying and Maintaining Models",
+    "topic": "From Training to a Repeatable Prediction",
+    "blurb": "A model can produce a number from the wrong columns or units. Define and validate the request before trusting its arithmetic."
+  },
+  {
+    "id": "serving-predictions",
+    "title": "Keeping a Prediction Consistent Across Requests",
+    "section": "Deploying and Maintaining Models",
+    "topic": "Running and Identifying a Model",
+    "blurb": "The same input should have the same preparation and result whether it arrives alone or in a batch. Keep prediction free of accidental fitting and mutable shared state."
+  },
+  {
+    "id": "model-versioning",
+    "title": "Knowing Which Model Produced an Answer",
+    "section": "Deploying and Maintaining Models",
+    "topic": "Running and Identifying a Model",
+    "blurb": "A result needs a link to the model, preparation, data, and code that produced it. Version the prediction procedure so comparisons and rollbacks are meaningful."
+  },
+  {
+    "id": "monitoring-and-rollback",
+    "title": "Checking the Model After It Meets New Data",
+    "section": "Deploying and Maintaining Models",
+    "topic": "Maintaining the Prediction Service",
+    "blurb": "Inputs, outcomes, and service behaviour can change after launch. Monitor each separately and keep a tested route back to a known compatible version."
+  },
+  {
+    "id": "project-sensor-investigation",
+    "title": "Investigate a Sensor Before Calling It Faulty",
+    "section": "Complete Projects",
+    "topic": "Putting the Pieces Together",
+    "blurb": "Fit a reference from earlier readings, select an alert rule on validation records, and evaluate that fixed rule on later labelled cases."
+  },
+  {
+    "id": "project-demand-forecast",
+    "title": "Forecast Tomorrow’s Water Demand Without Seeing Tomorrow",
+    "section": "Complete Projects",
+    "topic": "Putting the Pieces Together",
+    "blurb": "Build lagged inputs, compare an autoregressive model with persistence, and evaluate both through a sequence of later forecast origins."
+  },
+  {
+    "id": "project-seed-counting",
+    "title": "Count Seeds While Keeping the Image Assumptions Visible",
+    "section": "Complete Projects",
+    "topic": "Putting the Pieces Together",
+    "blurb": "Turn a small tray image into a binary mask, label connected regions, and investigate when a region count stops matching the number of seeds."
   }
 ]
