@@ -9,6 +9,7 @@ export const websiteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.u
 // Read the literal exercise definitions without importing Next or rendering widgets.
 export async function collectExercises() {
   const lessons = [];
+  const supplements = JSON.parse(await readFile(path.join(websiteRoot, 'lib/lessons/supplements.json'), 'utf8'));
   for (const area of ["concepts", "primers"]) {
     const directory = path.join(websiteRoot, "app", area);
     for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -33,7 +34,7 @@ export async function collectExercises() {
         ts.forEachChild(node, visit);
       };
       visit(syntax);
-      lessons.push({ path: `/${area}/${entry.name}`, exercises });
+      lessons.push({ path: `/${area}/${entry.name}`, exercises: [...exercises, ...(supplements[entry.name]?.practice ?? [])] });
     }
   }
   const expanded = JSON.parse(await readFile(path.join(websiteRoot, "lib/lessons/published.json"), "utf8"));

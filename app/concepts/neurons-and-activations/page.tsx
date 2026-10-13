@@ -982,18 +982,23 @@ export default function NeuronsAndActivationsPage() {
             <>
               <SubSection title="23. The neuron needs an input shape, an activation and a parameter state" id="23-what-a-complete-implementation-states">
                 <p>
-                  A complete neuron states how many inputs it reads, which
-                  is its number of weights and cannot be zero; the order its
-                  weights match its inputs in, since they carry no names;
-                  that it holds a bias; which activation function it applies and what that
-                  activation function&rsquo;s slope is, so that the two travel together;
-                  what the slope is at the rectifier&rsquo;s kink; that the
-                  sigmoid is computed in a form that cannot overflow; the
-                  range each activation function&rsquo;s output lies in; and that it answers
-                  with the score and the output both, since the backward
-                  pass needs the score. It also states what a chain of them
-                  does when only affine operations occur between them, which is collapse,
-                  and why softmax needs a vector-valued interface.
+                  Start with the three components we introduced: weights, a bias
+                  and an activation function. Each input needs its matching weight,
+                  so their count and order must agree. The SDK requires at least one
+                  input. The bias supplies the part of the score that does not depend
+                  on an input value.
+                </p>
+                <p>
+                  The activation also needs a derivative for training. Keep the
+                  function and its derivative together, including the chosen slope
+                  at ReLU&rsquo;s corner. Calculate sigmoid in a numerically stable
+                  form and state the activation&rsquo;s output range.
+                </p>
+                <p>
+                  Retain the score as well as the output when the backward operation
+                  needs it. When connecting neurons, remember that a chain containing
+                  only affine operations is still one affine rule. Softmax needs a
+                  vector of scores because each output depends on the other scores.
                 </p>
               </SubSection>
 

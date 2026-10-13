@@ -5,10 +5,15 @@ import { loadPyodide } from "pyodide";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const lessons = JSON.parse(await readFile(path.join(root, "lib/lessons/published.json"), "utf8"));
+const supplements = JSON.parse(await readFile(path.join(root, 'lib/lessons/supplements.json'), 'utf8'));
+lessons.push(...Object.entries(supplements).map(([id, lesson]) => ({ id, quiz: [], ...lesson })));
 const examples = lessons.flatMap(lesson => lesson.parts.flatMap(part =>
   (part.examples ?? []).map(example => ({ lesson: lesson.id, ...example }))));
 const quizSetups = lessons.flatMap(lesson => lesson.quiz.filter(question => question.given?.code)
   .map(question => ({ lesson: lesson.id, title: question.prompt, code: question.given.code })));
+for (const lesson of lessons) for (const checkpoint of [...(lesson.checkpoints ?? []), ...(lesson.checkpoint ? [lesson.checkpoint] : [])]) {
+  quizSetups.push(...checkpoint.questions.filter(question => question.given?.code).map(question => ({ lesson: lesson.id, title: question.prompt, code: question.given.code })));
+}
 if (!examples.length) throw Error("No worked examples found. Generate the curriculum first.");
 const cache = path.join(root, ".practice-checks");
 await mkdir(cache, { recursive: true });

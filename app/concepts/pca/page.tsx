@@ -1126,21 +1126,24 @@ export default function PcaPage() {
                 <p>If two PCA fits disagree, first compare their preparation of the data. Did they centre, scale or do both? Did the covariance use a population or sample divisor, and did the solver decompose that covariance or the data matrix itself?</p>
                 <p>Next compare the requested component count, ordering, tolerances and treatment of tied or nearly tied eigenvalues. A sign convention is needed if the output must be deterministic. Report scores, components, reconstructions and explained variances with these choices so a numerical difference can be interpreted.</p>
                 <p>
-                  Most of those choices change a number without changing the
-                  fit, which is what makes them worth stating. The divisor
-                  scales every variance by one factor and leaves the
-                  directions and the shares alone, as Part 7 measured, so two
-                  implementations can disagree about every variance they
-                  report and agree about every component. The sign is the same
-                  kind of difference. The fit on this page keeps whichever
-                  sign the solver returned, which is why the millimetre
-                  component of Part 11 came back as (−0.996, −0.089) with both
-                  loadings negative while the metre one came back as
-                  (0.011, 1.000), and Part 4 is the reason neither sign means
-                  anything. A reader comparing two implementations has to know
-                  which of their disagreements are about the data and which
-                  are about these conventions, and only a stated contract
-                  tells them.
+                  Some differences are conventions, while others change the
+                  fitted geometry. Changing only the covariance divisor multiplies
+                  every variance by the same factor. The component directions and
+                  explained-variance shares stay the same, as Part 7 demonstrated.
+                </p>
+                <p>
+                  A component and its negative also describe the same line.
+                  Reversing its sign reverses the corresponding scores, but leaves
+                  a consistently calculated reconstruction unchanged. This page keeps
+                  the solver&rsquo;s returned sign, so negative loadings are not
+                  evidence of a different geometric fit.
+                </p>
+                <p>
+                  Feature scaling is different. Converting only one measurement&rsquo;s
+                  units changes its influence on covariance and can rotate the
+                  components, as the metre and millimetre examples showed. Compare
+                  preprocessing first, then divisors, signs and other solver
+                  conventions before deciding why two results disagree.
                 </p>
                 <DerivationTable
                   expressionHeading="Observations or feature condition"

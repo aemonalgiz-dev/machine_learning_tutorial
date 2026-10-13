@@ -1081,19 +1081,24 @@ export default function RandomForestsPage() {
                   differ.
                 </p>
                 <p>
-                  The seeding row is the one the bagging page recorded being
-                  got wrong. A committee that handed every member its own
-                  single seed made every tree draw the same features at every
-                  node, which is bagging wearing a forest&rsquo;s name, and
-                  the census was what caught it, since twenty trees that all
-                  rooted on the same feature are not a lottery. Each
-                  member&rsquo;s lottery is seeded from the committee&rsquo;s
-                  seed and its own position, so two members never share a
-                  draw, and a refit under the same seed reproduces every
-                  draw. That is also why a forest refuses a base tree handed
-                  to it. The restriction is a setting on the tree, and a tree
-                  handed in already configured would carry its own seed into
-                  every member, which is the fault by another route.
+                  Reusing the same random-generator setup for every tree can
+                  repeat the feature-sampling sequence. That defeats part of the
+                  intended diversity. This implementation derives a member&rsquo;s
+                  seed from the committee seed and the member&rsquo;s position,
+                  so a refit can reproduce the complete procedure.
+                </p>
+                <p>
+                  Different random streams can still choose the same feature or
+                  subset by chance. The requirement is not that every draw differ,
+                  but that trees are not forced to replay one identical stream.
+                  Inspecting the sampled features helps catch that implementation
+                  error; a repeated feature on its own does not prove an error.
+                </p>
+                <p>
+                  The SDK therefore constructs the trees inside the forest rather
+                  than accepting a preconfigured base tree. Depth, minimum sizes
+                  and feature-subset size are configured on the forest, which also
+                  controls how each member is seeded.
                 </p>
               </SubSection>
             </>

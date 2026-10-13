@@ -599,18 +599,22 @@ share of upper = position − 0.5 − lower       share of lower = 1 − that`}<
                   remove it from.
                 </p>
                 <p>
-                  The answer is neither one cell nor the whole patch. Cells are
-                  gathered into small groups, 2 by 2 by default, and each group
-                  is laid end to end into one vector of 36 numbers and divided
-                  by its own length. The 36 is four cells of nine buckets each,
-                  and the length is the same square root of a sum of squares
-                  that Part 1 used on two lists of brightnesses, so dividing by
-                  it leaves a vector of length exactly 1 whatever the contrast
-                  of the picture was. A group of cells is called a block, and the
-                  reason for choosing that size rather than the whole patch is
-                  that lighting across a real photograph is not uniform, so a
-                  factor that holds over a 16 pixel square often does not hold
-                  over a whole person.
+                  Group nearby cells into a block, two by two by default.
+                  Each cell contributes its nine direction counts. Placing those
+                  four lists end to end gives the block vector shown below.
+                </p>
+                <p>
+                  Divide a nonzero block vector by its Euclidean length to remove
+                  a common positive scale factor. In the ideal expression this
+                  produces unit length. A zero block needs a separate policy,
+                  and implementations may add a small stabilising value to the
+                  denominator rather than divide by zero.
+                </p>
+                <p>
+                  Normalise locally because illumination can vary across a
+                  photograph. A contrast change shared by a small patch may not
+                  be shared by the whole person. Block normalisation addresses
+                  that local scale change; it does not remove every lighting effect.
                 </p>
                 <Equation>{`block = ( cell₁ , cell₂ , cell₃ , cell₄ )        36 numbers
 

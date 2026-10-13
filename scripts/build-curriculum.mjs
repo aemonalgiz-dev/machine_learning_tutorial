@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { existsSync } from 'node:fs';
 import numpy from "./curriculum/numpy.mjs";
 import data from "./curriculum/data.mjs";
 import evaluation from "./curriculum/evaluation.mjs";
@@ -23,6 +24,7 @@ import { readingExtensions } from "./curriculum/reading-extensions.mjs";
 import { deepenProbability } from "./curriculum/depth-probability.mjs";
 import { deepenTraining } from "./curriculum/depth-training.mjs";
 import { deepenProjects } from "./curriculum/depth-projects.mjs";
+import { applyDepthSupplements, depthSupplements } from "./curriculum/depth/index.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const paths = [...forecasting, ...reinforcement, ...probabilistic, ...optimisation, ...recommendations, ...anomalies, ...graphs, ...causal, ...deployment, ...projects];
@@ -34,6 +36,25 @@ for (const lesson of lessons) lesson.quizId=`questions-on-parts-1-to-${lesson.pa
 deepenProbability(lessons);
 deepenTraining(lessons);
 deepenProjects(lessons);
+applyDepthSupplements(lessons);
+for (const [id, supplement] of Object.entries(depthSupplements)) {
+  if (!lessons.some(lesson => lesson.id === id) && !existsSync(path.join(root, 'app', 'concepts', id, 'page.tsx'))) throw Error(`${id}: supplement has no lesson.`);
+  if (!supplement.reason?.trim() || !supplement.parts.length) throw Error(`${id}: explain the gap this supplement addresses.`);
+  if (JSON.stringify(supplement).includes('\u2014')) throw Error(`${id}: remove the em dash.`);
+  const titles = new Set();
+  for (const part of supplement.parts) {
+    if (!part.title?.trim() || titles.has(part.title) || !part.paragraphs.some(text => text.trim())) throw Error(`${id}: incomplete or repeated supplementary explanation.`);
+    titles.add(part.title);
+    for (const example of part.examples ?? []) {
+      if (!example.code || !example.output || !example.paragraphs.length || !example.interpretation.length) throw Error(`${id}: incomplete supplementary program.`);
+      if (supplement.practice.some(exercise => exercise.solution.trim() === example.code.trim())) throw Error(`${id}: practice repeats the demonstrated program without a further task.`);
+    }
+  }
+  for (const exercise of supplement.practice) {
+    if (!exercise.task.length || !exercise.starter || !exercise.solution || !exercise.output || !exercise.hints.length || !exercise.tests?.length) throw Error(`${id}: a reusable procedure needs its contract, hints and behaviour tests.`);
+  }
+  if (supplement.checkpoint && (!titles.has(supplement.checkpoint.after) || !supplement.checkpoint.questions.every(question => question.given?.data))) throw Error(`${id}: checkpoint needs an existing explanation and self-contained questions.`);
+}
 const dataOrder = ["record-quality", "missing-measurements", "categorical-encoding", "cyclical-features", "data-leakage", "class-imbalance"];
 const navigation = [...numpy, ...[...data].sort((a,b) => dataOrder.indexOf(a.id) - dataOrder.indexOf(b.id)), ...evaluation, ...gaps];
 const ids = new Set();
@@ -60,6 +81,7 @@ for (const lesson of lessons) {
 // never imports every lesson's prose, Python solutions, and quiz explanations.
 const json = value => JSON.stringify(value, null, 2) + "\n";
 const outputs = new Map([
+  ["supplements.json", json(Object.fromEntries(Object.entries(depthSupplements).filter(([id]) => !ids.has(id))))],
   ["published.json", json(lessons)],
   ["navigation.json", json(navigation.map(({ id, title, section, topic, blurb }) => ({ id, title, section, topic, blurb })))],
   ["histories.json", json(Object.fromEntries(lessons.map(lesson => [lesson.id, lesson.history])))],

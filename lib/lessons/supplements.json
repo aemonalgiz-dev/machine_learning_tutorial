@@ -1,0 +1,1028 @@
+{
+  "recurrent-layers": {
+    "reason": "Make sequence boundaries, padding and backpropagation through time explicit.",
+    "parts": [
+      {
+        "title": "A New Sequence Needs a Deliberate Initial State",
+        "paragraphs": [
+          "If Botie processes one greenhouse's week and then another greenhouse's week, carrying hidden state across the boundary lets the second prediction depend on the first greenhouse. Reset state for independent sequences unless the task explicitly defines continuity.",
+          "For chunks of one continuous record, carrying the numerical state may be appropriate. Detaching its gradient at a chunk boundary truncates backpropagation while retaining the state value. That changes how far a later error can teach earlier computations, not what the retained vector currently contains."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Padding Should Not Become an Extra Observation",
+        "paragraphs": [
+          "A batch can contain sequences of different lengths. Padding gives them a rectangular storage layout, but the padded positions are not additional time steps in the original record. A length mask can keep the previous state when a position is padding.",
+          "Distinguish a padded zero from a real zero measurement. Their numerical values can be identical while their roles are different."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Ignore the storage padding after a short sequence",
+            "paragraphs": [
+              "The first two entries are observed inputs; the last two exist only to complete the batch layout."
+            ],
+            "code": "import numpy as np\ninputs = np.array([1.,2.,0.,0.])\nlength = 2\nstate = 0.\nhistory = []\nfor t, value in enumerate(inputs):\n    candidate = np.tanh(value + .5*state)\n    if t < length:\n        state = candidate\n    history.append(round(float(state), 4))\nprint(history)",
+            "output": "[0.7616, 0.983, 0.983, 0.983]",
+            "interpretation": [
+              "The state stops changing after the last real observation. Updating on the padded zeros would gradually erase information."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Shared Weights Receive Contributions from Every Use",
+        "paragraphs": [
+          "Unrolling the recurrent computation gives a copy of the update operation at each time step, but those copies share parameters. Backpropagation adds the gradient contributions from every use into the same weight arrays.",
+          "Clipping a gradient's norm can limit unusually large updates, but it does not repair a wrong derivative or restore information lost through vanishing gradients. Check a short deterministic sequence with finite differences before trusting a long training run."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "radial-basis-networks": {
+    "reason": "Fit the linear output layer, expose centre-width choices and evaluate extrapolation.",
+    "parts": [
+      {
+        "title": "A Centre and a Width Define One Local Response",
+        "paragraphs": [
+          "A radial basis unit responds according to distance from its centre. The width determines how quickly its response falls as the input moves away. Several centres divide the input space into overlapping regions of influence without assigning each input to only one region.",
+          "Choosing centres from training observations or fitted clusters is a modelling step. Learning widths or centres by optimisation is another. Keep those choices separate from fitting the output weights, which is a linear problem once the basis responses are fixed."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Turn Local Responses into a Regression Table",
+        "paragraphs": [
+          "Evaluate each basis at every training input to build a design matrix. Add an intercept column if the output rule needs a baseline. A least-squares solver can then fit the output coefficients.",
+          "The basis functions are nonlinear in the original input, but the prediction is linear in these output coefficients. This is the same distinction used in polynomial regression."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Fit two Gaussian basis responses and an intercept",
+            "paragraphs": [
+              "The centres and width are fixed teaching choices, not learned quantities in this program."
+            ],
+            "code": "import numpy as np\nx = np.array([-1.,0.,1.])\ny = np.array([0.,1.,0.])\ncentres = np.array([-1.,1.])\ndef design(values):\n    response = np.exp(-.5*((values[:,None]-centres[None,:])/1.)**2)\n    return np.column_stack([np.ones(len(values)),response])\nw = np.linalg.lstsq(design(x), y, rcond=None)[0]\nprint(np.round(design(x)@w, 4).tolist())\nprint(design(np.array([10.])).shape)",
+            "output": "[0.0, 1.0, 0.0]\n(1, 3)",
+            "interpretation": [
+              "Three fitted coefficients interpolate these three targets. That easy fit does not establish useful predictions away from the observations."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Far from Every Centre, Only the Baseline May Remain",
+        "paragraphs": [
+          "Gaussian basis responses approach zero far from their centres. With an intercept, the prediction then approaches that intercept. Without one, it approaches zero. Neither behaviour necessarily matches the underlying problem.",
+          "Inspect widths that are too narrow and too broad. Narrow units can leave unsupported gaps; broad units can create similar columns and unstable coefficients. Choose centres, widths and regularisation using an evaluation that reflects where new inputs will occur."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "residual-connections": {
+    "reason": "Trace the gradient route and distinguish identity from projection shortcuts.",
+    "parts": [
+      {
+        "title": "The Skip Route Also Carries a Gradient",
+        "paragraphs": [
+          "A residual block adds a learned correction to its input. Differentiating the sum gives a direct contribution from the identity route alongside the derivative through the correction. This is why the skip connection changes optimisation, not merely the appearance of a diagram.",
+          "The sum can still cancel in a particular direction, so a residual connection is not a guarantee that gradients never vanish. It supplies another route that the network can use."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Compare a small correction with a replacement",
+            "paragraphs": [
+              "For this scalar illustration, the correction multiplies its input by 0.1."
+            ],
+            "code": "import numpy as np\nx = 4.\ncorrection_weight = .1\nreplacement = correction_weight*x\nresidual = x + correction_weight*x\nprint(replacement, residual)\nprint(correction_weight, 1+correction_weight)",
+            "output": "0.4 4.4\n0.1 1.1",
+            "interpretation": [
+              "The final line gives derivatives with respect to the input. The residual path retains the direct derivative of one."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "An Addition Requires Compatible Representations",
+        "paragraphs": [
+          "If the correction changes channel count or spatial resolution, the original input cannot be added unchanged. A projection shortcut can map it to the required shape, often with a learned linear operation.",
+          "That projection is no longer an identity route. Include its parameters and computation when explaining the block. A shape match alone is not the learning objective; the combined representation must still be trained for the downstream task."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "embedding-layers": {
+    "reason": "Explain repeated-index gradients, padding and what embedding training can identify.",
+    "parts": [
+      {
+        "title": "A Lookup Selects Rows, Not Numerical Magnitudes",
+        "paragraphs": [
+          "A token ID identifies one row of the embedding table. Changing cat's ID from three to seven and moving its embedding row with it should leave the model's behaviour unchanged. The ID itself does not tell the model that cat is closer to one word than another.",
+          "The selected vector enters later computations, whose loss supplies a gradient for that row. Rows absent from the batch receive no lookup contribution from it. Their possible regularisation updates are a separate part of training."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Repeated Tokens Send Several Contributions to One Row",
+        "paragraphs": [
+          "If the same token occurs twice, both positions read the same parameter row. During the backward pass, their gradient contributions must be added. Overwriting the row with the last contribution loses part of the learning signal.",
+          "Use an accumulation operation that handles repeated indices. This connects the embedding update directly to the repeated-destination case from NumPy indexing."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Accumulate two occurrences of the same token",
+            "paragraphs": [
+              "Token one appears twice and token three once. Each occurrence has its own two-coordinate upstream gradient."
+            ],
+            "code": "import numpy as np\nids = np.array([1,3,1])\nupstream = np.array([[1.,2.],[3.,4.],[5.,6.]])\ngradient = np.zeros((4,2))\nnp.add.at(gradient, ids, upstream)\nprint(gradient.tolist())",
+            "output": "[[0.0, 0.0], [6.0, 8.0], [0.0, 0.0], [3.0, 4.0]]",
+            "interpretation": [
+              "The two contributions to row one add together. Their positions in the sentence remain separate even though their parameter row is shared."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Padding Is a Storage Token with a Special Role",
+        "paragraphs": [
+          "A padding ID lets different-length sequences share a batch shape. Decide whether its embedding is fixed and ensure padded positions are excluded from the relevant loss and attention operations. A zero embedding alone does not automatically mask all later computations.",
+          "Keep unknown tokens, padding and end-of-sequence tokens distinct. An unknown token represents content outside the vocabulary; padding represents no content at that position; an end marker represents an actual sequence boundary."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "positional-encoding": {
+    "reason": "Explain why content-only attention misses order, how positions combine and what extrapolation means.",
+    "parts": [
+      {
+        "title": "The Same Words Can Describe Different Events",
+        "paragraphs": [
+          "Compare the dog chased the cat with the cat chased the dog. A collection of word vectors contains the same words, but their positions change who did what. A model needs a signal that distinguishes those arrangements.",
+          "Without an order signal or order-dependent constraint, self-attention processes a reordering as a corresponding reordering of its inputs. Content similarity alone does not assign first, second or later roles. Causal masking supplies an ordering constraint, while positional information can describe locations and distances more directly."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Add a Position Signal without Creating More Token Rows",
+        "paragraphs": [
+          "An additive position vector has the same width as a token embedding. The model receives their sum at each sequence position. This preserves the table shape while making two occurrences of the same word distinguishable by location.",
+          "The addition does not attach a human-readable position label to a dedicated coordinate. Later learned operations must use the combined representation."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "One word at two positions",
+            "paragraphs": [
+              "The position vectors below are supplied illustrative vectors, not a fitted positional table."
+            ],
+            "code": "import numpy as np\nword = np.array([2.,1.])\nposition = np.array([[0.,1.],[1.,0.]])\nencoded = word + position\nprint(encoded.tolist())\nprint(encoded.shape)",
+            "output": "[[2.0, 2.0], [3.0, 1.0]]\n(2, 2)",
+            "interpretation": [
+              "Both rows began with the same word vector. Their differing position contributions make their resulting representations different."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "A Position Rule and a Trained Context Length Are Different Limits",
+        "paragraphs": [
+          "A sinusoidal formula can be evaluated at positions beyond those seen during training. That does not establish that the trained model will behave well there. Learned absolute tables can also have an explicit maximum index.",
+          "Relative-position methods and rotary methods change how positional relationships enter attention. They do not remove memory cost, training-distribution limits or the need to evaluate long-context behaviour. Distinguish a mathematically defined position from a context length the full model has learned to use."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "attention": {
+    "reason": "Teach padding masks, complete multihead shapes and attention interpretation limits.",
+    "parts": [
+      {
+        "title": "Mask a Score before Turning It into a Share",
+        "paragraphs": [
+          "A padded position should not receive attention merely because a batch needs a rectangular shape. Set its score to an excluded value before softmax so the allowed positions receive the whole normalised share. A causal mask additionally excludes future positions.",
+          "If an entire query row is masked, ordinary softmax has no allowed outcome. Handle that row explicitly according to the task. Replacing excluded scores with a large negative number is a numerical implementation choice; it does not define what an all-masked row should mean."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Remove an Unavailable Key and Renormalise",
+        "paragraphs": [
+          "An attention share is relative to the allowed keys. Removing one key changes the denominator and therefore the shares of the remaining keys, even when their original scores stay unchanged.",
+          "The resulting vector is a weighted sum of values. Scores and values have separate jobs, so keep both beside the calculation."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "A padded key must not receive a share",
+            "paragraphs": [
+              "The third key is padding. The two allowed scores are equal."
+            ],
+            "code": "import numpy as np\nscores = np.array([1.,1.,9.])\nallowed = np.array([True,True,False])\nmasked = np.where(allowed, scores, -np.inf)\nweight = np.exp(masked-np.max(masked))\nweight /= weight.sum()\nvalues = np.array([[2.,0.],[0.,4.],[100.,100.]])\nprint(weight.tolist())\nprint((weight@values).tolist())",
+            "output": "[0.5, 0.5, 0.0]\n[1.0, 2.0]",
+            "interpretation": [
+              "The very large padded score contributes nothing. Masking the output after softmax instead would have already changed the allowed weights."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Each Head Makes Its Own Comparison",
+        "paragraphs": [
+          "Multihead attention projects the representation into several query, key and value spaces. Each head calculates its own score table and weighted values. Concatenate those head outputs, then apply an output projection to mix their information.",
+          "Heads are learned computational components, not preassigned grammatical jobs. A head may show a recognisable pattern on some examples without reliably representing one human concept. Track batch, head, query, key and feature axes before combining arrays."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "A Large Attention Weight Is Not a Complete Explanation",
+        "paragraphs": [
+          "The output depends on value vectors, output projections, residual paths and later layers as well as attention weights. A large weight on one token does not by itself establish that the token caused the final decision in a particular human sense.",
+          "Inspect controlled input changes and resulting predictions alongside the attention display. Treat the display as a view of one operation in the model, with a clearly stated mask and layer, rather than a complete explanation of its reasoning."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": [
+      {
+        "title": "Can masked attention handle every permitted query row?",
+        "question": "Can masked attention handle every permitted query row?",
+        "task": [
+          "Write masked_attention(scores, values, allowed). scores is a finite (queries, keys) table; values is a finite (keys, features) table; allowed is a Boolean table matching scores. Every query must allow at least one key, and both tables must have positive dimensions.",
+          "Apply stable softmax only over allowed keys and return the weighted value table. Preserve inputs and raise ValueError for invalid layouts, non-Boolean masks or an all-masked query. Print the demonstration output rounded to four places."
+        ],
+        "starter": "import numpy as np\n\ndef masked_attention(scores, values, allowed):\n    # Write the procedure here.\n    raise NotImplementedError\n\nprint(np.round(masked_attention([[0,0,9],[1,2,3]], [[2,0],[0,6],[8,8]], [[True,True,False],[False,False,True]]),4).tolist())",
+        "solution": "import numpy as np\n\ndef masked_attention(scores, values, allowed):\n    scores = np.asarray(scores, dtype=float)\n    values = np.asarray(values, dtype=float)\n    allowed = np.asarray(allowed)\n    if scores.ndim != 2 or values.ndim != 2 or min(scores.shape) < 1 or min(values.shape) < 1 or scores.shape[1] != values.shape[0] or allowed.shape != scores.shape or allowed.dtype != bool:\n        raise ValueError('Incompatible attention inputs')\n    if not np.isfinite(scores).all() or not np.isfinite(values).all() or not allowed.any(axis=1).all():\n        raise ValueError('Invalid score or all-masked query')\n    masked = np.where(allowed,scores,-np.inf)\n    weight = np.exp(masked-masked.max(axis=1,keepdims=True))\n    weight /= weight.sum(axis=1,keepdims=True)\n    return weight@values\n\nprint(np.round(masked_attention([[0,0,9],[1,2,3]], [[2,0],[0,6],[8,8]], [[True,True,False],[False,False,True]]),4).tolist())",
+        "output": "[[1.0, 3.0], [8.0, 8.0]]",
+        "hints": [
+          "Exclude unavailable scores before finding the row maximum.",
+          "Normalise on the key axis, then multiply by values."
+        ],
+        "tests": [
+          {
+            "name": "Excluded values cannot change an answer",
+            "code": "s=np.array([[1000.,1001.,9000.]])\nv=np.array([[1.],[3.],[999.]])\nm=np.array([[True,True,False]])\nexpected=(1+3*np.e)/(1+np.e)\nassert np.allclose(masked_attention(s,v,m),[[expected]])\nv[2]=100000\nassert np.allclose(masked_attention(s,v,m),[[expected]])"
+          },
+          {
+            "name": "Independent query rows",
+            "code": "assert np.allclose(masked_attention([[0,0],[0,0]],[[2],[4]],[[True,False],[False,True]]),[[2],[4]])"
+          },
+          {
+            "name": "Reject an all-masked query",
+            "code": "try:\n    masked_attention([[1,2]],[[1],[2]],[[False,False]])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('Expected ValueError for an invalid input')"
+          },
+          {
+            "name": "Reject a numeric mask",
+            "code": "try:\n    masked_attention([[1]],[[1]],[[1]])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('Expected ValueError for an invalid input')"
+          }
+        ]
+      }
+    ],
+    "checkpoint": {
+      "after": "Remove an Unavailable Key and Renormalise",
+      "title": "Questions on Masked Attention",
+      "questions": [
+        {
+          "kind": "choice",
+          "given": {
+            "description": "Use this setup.",
+            "data": "Scores are [1,1,9]. The third key is padding and is excluded before softmax."
+          },
+          "prompt": "What shares should the two allowed keys receive?",
+          "options": [
+            "Equal shares summing to one",
+            "Tiny shares because the padded score is largest",
+            "Shares summing to less than one"
+          ],
+          "answer": 0,
+          "because": "The padded key is outside the normalisation. Equal allowed scores receive equal shares of the complete allowed distribution."
+        }
+      ]
+    }
+  },
+  "transformer-blocks": {
+    "reason": "Explain batching, feed-forward mechanics, full decoder boundaries and training state.",
+    "parts": [
+      {
+        "title": "A Batch Adds an Axis, Not a Conversation between Examples",
+        "paragraphs": [
+          "A decoder batch commonly stores batch, token and feature axes. Attention should compare positions within the same sequence, not words from unrelated examples in other batch rows.",
+          "Different sequence lengths need padding masks, while next-token training also needs a causal mask. Check both with unequal lengths. A triangular mask alone prevents looking forward but does not automatically remove every padded key."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "The Feed-Forward Network Reuses Its Rule at Every Position",
+        "paragraphs": [
+          "Attention mixes information between positions. The feed-forward network applies the same learned transformation independently to each position's current vector. Expanding and then reducing the feature width gives that transformation room to form nonlinear combinations.",
+          "This distinction explains why the block needs both operations. Sharing the same feed-forward weights across positions does not mean each position produces the same output."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Apply one position-wise transformation to two rows",
+            "paragraphs": [
+              "The supplied matrices isolate the expand, activate and contract sequence."
+            ],
+            "code": "import numpy as np\nX = np.array([[1.,-1.],[2.,1.]])\nW1 = np.array([[1.,0.,1.],[0.,1.,-1.]])\nW2 = np.array([[1.,0.],[0.,1.],[1.,1.]])\nhidden = np.maximum(X@W1, 0)\nprint(hidden.tolist())\nprint((hidden@W2).tolist())",
+            "output": "[[1.0, 0.0, 2.0], [2.0, 1.0, 1.0]]\n[[3.0, 2.0], [3.0, 2.0]]",
+            "interpretation": [
+              "The rows happen to produce equal final vectors despite different hidden activations. Shared weights do not require equal outputs, but they can discard distinctions."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "A Block Still Needs a Vocabulary Head and an Objective",
+        "paragraphs": [
+          "A decoder language model begins with token representations, applies a stack of blocks, and maps each final position to one score per vocabulary entry. The shifted target token supplies the training label at that position.",
+          "Gradients must pass from that loss through the vocabulary projection, every block and the input embeddings that participated. A forward pass through one block demonstrates architecture. It is not a pretrained language model and has no learned linguistic competence by itself."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Normalisation Placement Is Part of the Architecture",
+        "paragraphs": [
+          "Applying normalisation before a sublayer and applying it after the residual addition produce different computations and gradient paths. Preserve the selected convention when reproducing a model; moving a normalisation is not a formatting change.",
+          "Training and generation also require different execution behaviour for dropout and gradient tracking. Save enough configuration to reconstruct the exact block, including widths, head count, activation, normalisation convention and mask rules."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "next-token-prediction": {
+    "reason": "Complete a fitted language baseline and cover corpus splits, padding and token-weighted loss.",
+    "parts": [
+      {
+        "title": "Split Documents before Turning Them into Overlapping Windows",
+        "paragraphs": [
+          "Adjacent training windows share most of their tokens. Randomly splitting those windows can place almost identical passages in training and evaluation. Split at the document or other independent source level before constructing windows, and inspect duplicates across the boundary.",
+          "Decide how document boundaries are represented. Joining two unrelated documents without a separator creates a transition that never occurred in either source. The tokenizer, boundary rule and window construction belong to the training procedure."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Train a Small Next-Token Model before Adding a Network",
+        "paragraphs": [
+          "A bigram model keeps one next-token count row per current token. Adding a small count to every possible continuation prevents an unseen pair from receiving zero probability. Normalising each row produces a complete conditional distribution.",
+          "This model reads only the immediately preceding token. That limitation makes a useful baseline: the training target is the same kind of next-token target, but the context representation is deliberately restricted."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Learn transitions from two tiny sequences",
+            "paragraphs": [
+              "IDs zero, one and two stand for three vocabulary entries. The sequences are kept separate."
+            ],
+            "code": "import numpy as np\nsequences = [[0,1,2],[0,1,1,2]]\ncount = np.ones((3,3))\nfor sequence in sequences:\n    for current, target in zip(sequence[:-1], sequence[1:]):\n        count[current,target] += 1\nprobability = count/count.sum(axis=1, keepdims=True)\nprint(np.round(probability, 3).tolist())\ntest = [0,1,2]\nloss = -np.mean([np.log(probability[a,b]) for a,b in zip(test[:-1],test[1:])])\nprint(round(float(loss), 3))",
+            "output": "[[0.2, 0.6, 0.2], [0.167, 0.333, 0.5], [0.333, 0.333, 0.333]]\n0.602",
+            "interpretation": [
+              "The final test sequence overlaps the training examples, so this loss is only a calculation check. A genuine evaluation would use independent held-out text."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Average over the Tokens That Actually Carry Targets",
+        "paragraphs": [
+          "Sequences in a padded batch can contain different numbers of scored tokens. Sum the negative log probabilities on valid target positions and divide by the number of those positions. Equal weighting of per-sequence means answers a different question when lengths differ.",
+          "Keep end markers if they are part of the objective, and exclude storage padding. A batch with no valid targets needs an explicit skip or error policy. Dividing by one to hide a zero count does not create a meaningful loss."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Low Next-Token Loss Does Not Answer Every User Task",
+        "paragraphs": [
+          "The objective rewards probability on observed continuations. It does not directly certify factuality, instruction following, useful explanations or safety. A model can exploit repeated boilerplate and frequent tokens while failing on the decisions people care about.",
+          "Retain token-level loss as one diagnostic and evaluate relevant tasks separately. Compare losses only under compatible tokenisation, target masking and data conventions; changing those changes what one averaged term represents."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": [
+      {
+        "title": "Can you fit the token transitions without crossing documents?",
+        "question": "Can you fit the token transitions without crossing documents?",
+        "task": [
+          "Write bigram_table(documents, vocabulary_size, smoothing). documents is a sequence of one-dimensional integer token sequences; token IDs must be in range. vocabulary_size is a positive integer and smoothing is finite and positive. Empty documents are valid.",
+          "Start every transition count at smoothing, count adjacent pairs within each document only, and return a row-normalised probability table. Raise ValueError for invalid IDs or settings. Print the demonstration probabilities rounded to four places."
+        ],
+        "starter": "import numpy as np\n\ndef bigram_table(documents, vocabulary_size, smoothing):\n    # Write the procedure here.\n    raise NotImplementedError\n\nprint(np.round(bigram_table([[0,1,1],[1,2]],3,1),4).tolist())",
+        "solution": "import numpy as np\n\ndef bigram_table(documents, vocabulary_size, smoothing):\n    if isinstance(vocabulary_size,bool) or not isinstance(vocabulary_size,(int,np.integer)) or vocabulary_size < 1 or not np.isfinite(smoothing) or smoothing <= 0:\n        raise ValueError('Invalid vocabulary or smoothing')\n    count = np.full((vocabulary_size,vocabulary_size), float(smoothing))\n    for document in documents:\n        ids = np.asarray(document)\n        if ids.ndim != 1 or (ids.size and (not np.issubdtype(ids.dtype,np.integer) or np.any(ids<0) or np.any(ids>=vocabulary_size))):\n            raise ValueError('Invalid token IDs')\n        if ids.size > 1:\n            np.add.at(count,(ids[:-1],ids[1:]),1)\n    return count/count.sum(axis=1,keepdims=True)\n\nprint(np.round(bigram_table([[0,1,1],[1,2]],3,1),4).tolist())",
+        "output": "[[0.25, 0.5, 0.25], [0.2, 0.4, 0.4], [0.3333, 0.3333, 0.3333]]",
+        "hints": [
+          "Count pairs separately inside each document.",
+          "Repeated transitions must accumulate, including repeated self-transitions."
+        ],
+        "tests": [
+          {
+            "name": "Document boundaries do not invent transitions",
+            "code": "assert np.allclose(bigram_table([[0],[1]],2,1),np.full((2,2),.5))"
+          },
+          {
+            "name": "Repeated transitions and unused rows",
+            "code": "p=bigram_table([[0,0,0,0],[]],2,.5)\nassert np.allclose(p[0],[3.5/4,.5/4]) and np.allclose(p[1],[.5,.5])"
+          },
+          {
+            "name": "Reject out-of-range IDs",
+            "code": "try:\n    bigram_table([[0,2]],2,1)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('Expected ValueError for an invalid input')"
+          },
+          {
+            "name": "Reject fractional IDs",
+            "code": "try:\n    bigram_table([[0.,1.]],2,1)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('Expected ValueError for an invalid input')"
+          }
+        ]
+      }
+    ]
+  },
+  "autoregressive-generation": {
+    "reason": "Clarify cached state, context truncation and batch stopping.",
+    "parts": [
+      {
+        "title": "A Cache Reuses Computation from an Unchanged Prefix",
+        "paragraphs": [
+          "During causal generation, earlier token representations cannot depend on tokens that have not been generated yet. Their key and value projections can therefore be retained while a new query is calculated for the appended token.",
+          "The cache must match the model weights, position convention, mask and exact prefix. Editing an earlier token invalidates affected cached state. A cache accelerates the same intended computation; it does not supply additional knowledge or change the probability model by itself."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Different Sequences Can Finish at Different Times",
+        "paragraphs": [
+          "In a generated batch, one sequence can emit an end marker while another continues. Keep a finished mask and stop extending completed sequences. The remaining rows still need their own prefix and sampling state.",
+          "Also impose a maximum length. Reaching that limit means the run was truncated, which is different from the model choosing an end marker."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Retain a per-sequence stopping state",
+            "paragraphs": [
+              "Token zero is the end marker. The supplied choices illustrate three generation rounds."
+            ],
+            "code": "import numpy as np\nfinished = np.array([False,False])\nlength = np.zeros(2, dtype=int)\nfor chosen in [np.array([2,1]), np.array([0,3]), np.array([4,0])]:\n    length += ~finished\n    finished |= chosen == 0\nprint(length.tolist())\nprint(finished.tolist())",
+            "output": "[2, 3]\n[True, True]",
+            "interpretation": [
+              "The first sequence stops after its second generated token. The later supplied choice for that row is ignored by the length accounting."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Dropping Old Tokens Changes the Available Evidence",
+        "paragraphs": [
+          "A context limit can require truncating a long prefix. Decide which information is retained, including task instructions and recent conversation. A model cannot reliably use evidence that has been removed from its input.",
+          "Position handling and cache updates must remain consistent with the chosen truncation method. Test the complete generation implementation against an uncached reference on short prefixes before relying on an optimisation for long ones."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "sampling-and-temperature": {
+    "reason": "Separate policy order, stochastic reproducibility and evaluation over samples.",
+    "parts": [
+      {
+        "title": "Filtering Changes the Distribution, Not Just Its Display",
+        "paragraphs": [
+          "After selecting a permitted set of tokens, normalise the remaining weights again. The sampled probabilities belong to that filtered distribution, which can differ substantially from the original model distribution.",
+          "Temperature, top-k and nucleus filtering can be composed in different orders. State the order being used, and preserve at least one candidate. Temperature zero needs a separately defined greedy policy rather than literal division by zero."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Renormalise after a top-two choice",
+            "paragraphs": [
+              "The model probabilities are supplied. No retraining occurs."
+            ],
+            "code": "import numpy as np\nprobability = np.array([.5,.3,.2])\nkeep = np.argsort(-probability)[:2]\nfiltered = np.zeros_like(probability)\nfiltered[keep] = probability[keep]\nfiltered /= filtered.sum()\nprint(np.round(filtered, 4).tolist())",
+            "output": "[0.625, 0.375, 0.0]",
+            "interpretation": [
+              "The retained tokens now carry all probability mass. Their model probabilities were not originally these larger numbers."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "One Pleasant Completion Is Not a Sampling Evaluation",
+        "paragraphs": [
+          "A random seed can reproduce a particular draw sequence under the same implementation and request order. It does not establish that a sampling policy usually produces useful responses.",
+          "Evaluate several declared prompts and repeated samples, retaining failures as well as successes. Compare diversity, correctness and task constraints separately. Lower temperature can repeat an incorrect favourite more consistently; greater variety can reveal alternatives without making them more reliable."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "autoencoders": {
+    "reason": "Train both halves and expose the identity shortcut, scaling and latent sampling limits.",
+    "parts": [
+      {
+        "title": "Both Halves Learn from the Same Reconstruction Error",
+        "paragraphs": [
+          "The decoder receives the code and tries to recover the input. Its error supplies gradients for decoder weights, then continues through the code into encoder weights. Training only the decoder while keeping an arbitrary encoder fixed is a different procedure.",
+          "For a linear encoder and decoder, the chain rule is especially visible. Save the old parameter values while calculating both gradients, then update together. Biases and nonlinear activations can be added later without changing the need to connect both halves to the loss."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Fit a One-Coordinate Bottleneck",
+        "paragraphs": [
+          "The two input coordinates below always move together, so one code coordinate can retain all their information. That makes a useful first training check. If the coordinates varied independently, the same bottleneck would have to discard something.",
+          "This example uses mean squared reconstruction error with its explicit averaging convention. The encoder and decoder both receive updates from the loss."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Learn the redundant direction",
+            "paragraphs": [
+              "Rows are observations and columns are two perfectly related measurements."
+            ],
+            "code": "import numpy as np\nX = np.array([[-2.,-2.],[-1.,-1.],[1.,1.],[2.,2.]])\nencoder = np.array([[.2],[.3]])\ndecoder = np.array([[.3,.2]])\ninitial = np.mean((X@encoder@decoder-X)**2)\nfor _ in range(1000):\n    code = X@encoder\n    error = code@decoder-X\n    ddecoder = 2*code.T@error/X.size\n    dencoder = 2*X.T@(error@decoder.T)/X.size\n    encoder -= .02*dencoder\n    decoder -= .02*ddecoder\nprint(bool(np.mean((X@encoder@decoder-X)**2) < initial))\nprint(np.round(X@encoder@decoder, 2).tolist())",
+            "output": "True\n[[-2.0, -2.0], [-1.0, -1.0], [1.0, 1.0], [2.0, 2.0]]",
+            "interpretation": [
+              "The model learns an adequate code for this redundant dataset. Its code scale is not uniquely determined because encoder and decoder scalings can compensate."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "A Wide Shortcut Can Make Reconstruction Too Easy",
+        "paragraphs": [
+          "If the model can copy every input coordinate directly, low reconstruction loss may reveal little about useful structure. A bottleneck, denoising task, sparsity constraint or another explicit restriction changes what the model must learn.",
+          "Choose the restriction from the intended use. Compression, anomaly detection and representation learning need different evaluations. Inspect held-out reconstruction and downstream usefulness rather than assuming a low training loss establishes a meaningful code."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "A Decoder Does Not Specify Which Codes to Sample",
+        "paragraphs": [
+          "A conventional autoencoder learns codes for observed inputs, but leaves their overall distribution largely unconstrained. Randomly sampling a convenient Gaussian can visit code regions the decoder never encountered.",
+          "Inspect interpolations and sampled outputs separately from reconstruction. A VAE adds an explicit probabilistic objective and prior so generation has a defined starting distribution. That additional structure is a reason for the next method, not merely a different encoder name."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "generative-adversarial-networks": {
+    "reason": "Clarify alternating gradient ownership and diagnose missing modes beyond scalar losses.",
+    "parts": [
+      {
+        "title": "Freeze the Opponent’s Parameters without Breaking Its Derivative",
+        "paragraphs": [
+          "During a discriminator update, generated samples are treated as inputs from the current generator. During a generator update, the discriminator's parameters stay fixed, but its derivative with respect to the generated input must still flow back into the generator.",
+          "Removing that derivative path would leave the generator without feedback. Updating the discriminator at the same time with the generator's objective would train a different game. Make parameter ownership explicit in each half of the loop."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "A Correct Mean Can Hide Missing Variety",
+        "paragraphs": [
+          "Suppose real observations form two groups. A generator that always produces their midpoint can match the overall mean while producing neither group. Comparing a single average therefore misses a basic form of collapse.",
+          "Inspect a distribution-sensitive summary and representative samples. In higher dimensions, the measurement representation used for evaluation also determines which differences can be seen."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Compare a two-group source with a collapsed generator",
+            "paragraphs": [
+              "These supplied samples isolate the evaluation problem; they are not outputs from training in this program."
+            ],
+            "code": "import numpy as np\nreal = np.array([-2.,-2.,2.,2.])\ncollapsed = np.zeros(4)\nprint(float(real.mean()), float(collapsed.mean()))\nprint(float(real.var()), float(collapsed.var()))\nprint(int((real < -1).sum()), int((collapsed < -1).sum()))",
+            "output": "0.0 0.0\n4.0 0.0\n2 0",
+            "interpretation": [
+              "Equal means conceal both lost variance and a missing group. A useful assessment needs more than matching one moment."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "The Two Loss Curves Are Responses to Moving Opponents",
+        "paragraphs": [
+          "A discriminator loss changing across training can reflect changes in either model. A stronger discriminator can make the generator's task harder even when the generator has improved by another measure.",
+          "Save generated samples from fixed latent inputs alongside independent evaluation samples. Fixed inputs reveal how the mapping changes; fresh inputs reveal its current distribution. Repeat runs and inspect mode coverage, rather than selecting the checkpoint with the most attractive isolated image."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "diffusion-models": {
+    "reason": "Complete time-conditioned denoiser fitting and a multistep reverse sampler, with an explicit toy scope.",
+    "parts": [
+      {
+        "title": "The Denoiser Must Predict Noise It Was Not Given",
+        "paragraphs": [
+          "The earlier oracle check recovers a clean strip by supplying its actual noise. A learned denoiser receives only the noisy value and the timestep. Its target is the noise used to create that training pair, which stays on the training side of the loss.",
+          "To make a complete fit manageable, we will use one-dimensional clean samples instead of images. They come from a Gaussian centred at two with standard deviation one half. A separate linear predictor at each timestep can approximate the optimal noise prediction for this Gaussian teaching distribution."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Give Each Noise Level Its Own Training Pairs",
+        "paragraphs": [
+          "At one timestep, draw clean samples and independent standard-normal noise, combine them using the forward schedule, and fit noise from the noisy value plus an intercept. Repeat for every timestep. The fitted coefficient table represents timestep conditioning in this small example.",
+          "An image model usually shares a much richer neural predictor across noise levels and receives a timestep representation. Our separate regressions expose the same input-target separation without pretending to train an image generator."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "A Reverse Step Needs a Mean and a Noise Scale",
+        "paragraphs": [
+          "The predicted noise enters the reverse mean. Sampling then adds the chosen reverse noise term, except at the final step. A clean-sample estimate and a reverse sample are different quantities; jumping straight to the clean estimate skips the intended chain.",
+          "The program below uses the common DDPM posterior-variance schedule. Starting from a standard Gaussian is appropriate only when the final forward distribution is close enough to it. Sixty steps at the supplied rate make retained signal small for this toy, but finite-step and fitted-model error remain."
+        ],
+        "calculation": "αₜ = 1 - βₜ\nμθ(xₜ,t) = (xₜ - βₜ εθ(xₜ,t) / √(1-ᾱₜ)) / √αₜ\nβ̃ₜ = βₜ (1-ᾱₜ₋₁) / (1-ᾱₜ)\nxₜ₋₁ = μθ(xₜ,t) + √β̃ₜ z\nAt the final step, use no additional noise.",
+        "interpretation": []
+      },
+      {
+        "title": "Fit the Predictors, Then Generate without a Clean Input",
+        "paragraphs": [
+          "The first loop constructs supervised pairs and fits the timestep-specific predictors. The second loop begins from unrelated Gaussian noise and walks backward using only those fitted coefficients. It never reads a clean target or the original forward noise during generation.",
+          "Inspect generated mean and spread against the source distribution. This is a complete toy training and sampling procedure, with a deliberately simple Gaussian source and linear denoisers. It cannot demonstrate image structure, multimodal coverage or text conditioning."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "A trained scalar diffusion chain",
+            "paragraphs": [
+              "A fixed generator makes this example repeatable in the browser. Print the sample shape, then its mean and standard deviation rounded to three places. The source mean is two and its standard deviation is one half."
+            ],
+            "code": "import numpy as np\nrng = np.random.default_rng(12)\nbeta = np.full(60, .1)\nalpha = 1-beta\nretained = np.cumprod(alpha)\nmodel = []\nfor t in range(len(beta)):\n    clean = rng.normal(2., .5, 20000)\n    noise = rng.normal(size=len(clean))\n    noisy = np.sqrt(retained[t])*clean + np.sqrt(1-retained[t])*noise\n    design = np.column_stack([noisy, np.ones(len(noisy))])\n    model.append(np.linalg.lstsq(design, noise, rcond=None)[0])\ngenerated = rng.normal(size=5000)\nfor t in range(len(beta)-1, -1, -1):\n    predicted_noise = model[t][0]*generated + model[t][1]\n    mean = (generated-beta[t]*predicted_noise/np.sqrt(1-retained[t]))/np.sqrt(alpha[t])\n    previous_retained = retained[t-1] if t > 0 else 1.\n    variance = beta[t]*(1-previous_retained)/(1-retained[t])\n    generated = mean + np.sqrt(variance)*rng.normal(size=len(generated)) if t > 0 else mean\nprint(generated.shape)\nprint(round(float(generated.mean()), 3), round(float(generated.std()), 3))",
+            "output": "(5000,)\n2.007 0.377",
+            "interpretation": [
+              "The mean is close to the source mean, but the generated spread is noticeably smaller than one half. The coarse schedule, chosen reverse variance and fitted predictors approximate the reverse process. This is a working chain whose distribution still needs improvement, not a successful fit merely because it produces numbers. Try a finer schedule and compare repeated runs, including spread as well as location."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Why More Steps and Better Training Solve Different Problems",
+        "paragraphs": [
+          "A finer reverse schedule can reduce discretisation effects, while a more capable denoiser can reduce prediction error. Increasing sampling steps does not automatically fix a predictor trained on the wrong data, and a perfect training fit does not guarantee coverage of unseen modes.",
+          "Conditional generation adds another input, such as a class or text representation, and must be trained to use it. Guidance changes the sampling procedure and its tradeoffs. Keep those extensions separate from the unconditional scalar chain so the source of each improvement can be investigated."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": [],
+    "checkpoint": {
+      "after": "Fit the Predictors, Then Generate without a Clean Input",
+      "title": "Questions on Training and Reverse Sampling",
+      "questions": [
+        {
+          "kind": "choice",
+          "given": {
+            "description": "Use this setup.",
+            "data": "Training creates noisy values from clean samples and recorded random noise. Generation begins from a new Gaussian draw and uses the fitted timestep predictors."
+          },
+          "prompt": "Which quantity must generation estimate rather than receive from the training pair?",
+          "options": [
+            "The noise prediction at its current sample and timestep",
+            "The timestep index",
+            "The chosen beta schedule"
+          ],
+          "answer": 0,
+          "because": "Generation does not know the forward noise of a corresponding clean target. It uses the learned predictor at each current noisy state."
+        }
+      ]
+    }
+  },
+  "supervised-fine-tuning": {
+    "reason": "Make formatting, token masking and evaluation a complete adaptation procedure.",
+    "parts": [
+      {
+        "title": "The Conversation Template Is Part of the Training Input",
+        "paragraphs": [
+          "Role markers, separators and end markers tell the model where instructions and responses begin and end. Training with one template and serving with another changes the token sequence on which the model was conditioned.",
+          "Use the exact tokenizer and formatting convention intended for the base model. Preserve boundaries when packing multiple examples. If examples share one packed sequence, decide whether attention may cross their boundaries rather than silently training on unrelated preceding conversations."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Align the Response Mask after Shifting Targets",
+        "paragraphs": [
+          "A next-token input position predicts the following token. Therefore the response-only loss mask belongs to the shifted target positions. Masking the unshifted input roles can skip the first response token or include a prompt token by mistake.",
+          "Keep a tiny formatted sequence with explicit role labels as a fixture. Check the first response token, the end marker and padding independently before training on a large corpus."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Shift IDs and response membership together",
+            "paragraphs": [
+              "The final token is an end marker included in the response objective."
+            ],
+            "code": "import numpy as np\nids = np.array([10,11,20,21,0])\nis_response = np.array([False,False,True,True,True])\ninputs = ids[:-1]\ntargets = ids[1:]\nloss_mask = is_response[1:]\nprint(inputs.tolist())\nprint(targets.tolist())\nprint(loss_mask.tolist())",
+            "output": "[10, 11, 20, 21]\n[11, 20, 21, 0]\n[False, True, True, True]",
+            "interpretation": [
+              "The last prompt input predicts the first response target, so that target must be scored."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Demonstrations Teach Their Habits as well as Their Answers",
+        "paragraphs": [
+          "A dataset can teach verbosity, refusal patterns, formatting errors and unsupported claims alongside the intended task. Deduplicate and inspect examples, reserve independent prompts for validation, and test behaviours the base model should retain.",
+          "Compare the adapted model with the base model under the same prompting and decoding policy. Falling response loss is evidence of fitting the demonstrations, not proof of broader usefulness. LoRA changes which parameters are trained; it does not change these data and evaluation responsibilities."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": [
+      {
+        "title": "Can you score only the intended response targets?",
+        "question": "Can you score only the intended response targets?",
+        "task": [
+          "Write response_loss(logits, targets, mask). logits has shape (positions, vocabulary), targets is an integer vector with one valid ID per position, and mask is a Boolean vector selecting scored targets. Require finite logits, compatible nonempty dimensions and at least one selected target.",
+          "Return the mean negative log probability over selected positions, using stable log normalisation. Raise ValueError for invalid inputs. Print the demonstration loss with four decimal places."
+        ],
+        "starter": "import numpy as np\n\ndef response_loss(logits, targets, mask):\n    # Write the procedure here.\n    raise NotImplementedError\n\nprint(f'{response_loss([[1000.,1000.],[0.,np.log(3.)]],[0,1],[False,True]):.4f}')",
+        "solution": "import numpy as np\n\ndef response_loss(logits, targets, mask):\n    logits = np.asarray(logits, dtype=float)\n    targets, mask = np.asarray(targets), np.asarray(mask)\n    if logits.ndim != 2 or min(logits.shape) < 1 or targets.shape != (len(logits),) or mask.shape != targets.shape or mask.dtype != bool or not np.issubdtype(targets.dtype,np.integer):\n        raise ValueError('Incompatible target layout')\n    if not np.isfinite(logits).all() or np.any(targets<0) or np.any(targets>=logits.shape[1]) or not mask.any():\n        raise ValueError('Invalid target or empty objective')\n    shifted = logits-logits.max(axis=1,keepdims=True)\n    log_probability = shifted-np.log(np.exp(shifted).sum(axis=1,keepdims=True))\n    return float(-log_probability[np.arange(len(targets)),targets][mask].mean())\n\nprint(f'{response_loss([[1000.,1000.],[0.,np.log(3.)]],[0,1],[False,True]):.4f}')",
+        "output": "0.2877",
+        "hints": [
+          "Subtract each row maximum before exponentiating.",
+          "Gather target log probabilities, select by the shifted-target mask, then average."
+        ],
+        "tests": [
+          {
+            "name": "Unscored prompt logits do not affect loss",
+            "code": "a=response_loss([[0,100],[0,0]],[0,1],[False,True])\nb=response_loss([[999,-999],[0,0]],[0,1],[False,True])\nassert np.isclose(a,np.log(2)) and np.isclose(a,b)"
+          },
+          {
+            "name": "Large-score stability and token averaging",
+            "code": "assert np.isclose(response_loss([[1000,1000,1000],[0,0,0]],[0,2],[True,True]),np.log(3))"
+          },
+          {
+            "name": "Reject an all-masked objective",
+            "code": "try:\n    response_loss([[0,0]],[0],[False])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('Expected ValueError for an invalid input')"
+          },
+          {
+            "name": "Reject out-of-range targets",
+            "code": "try:\n    response_loss([[0,0]],[2],[True])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('Expected ValueError for an invalid input')"
+          }
+        ]
+      }
+    ],
+    "checkpoint": {
+      "after": "Align the Response Mask after Shifting Targets",
+      "title": "Questions on the First Response Target",
+      "questions": [
+        {
+          "kind": "choice",
+          "given": {
+            "description": "Use this setup.",
+            "data": "Tokens are [prompt_A, prompt_B, answer_A, end]. The objective scores answer_A and end only."
+          },
+          "prompt": "Which input position predicts the first scored response token?",
+          "options": [
+            "prompt_B",
+            "answer_A",
+            "end"
+          ],
+          "answer": 0,
+          "because": "Each input predicts the following token. The last prompt position predicts answer_A, so its shifted target must be included."
+        }
+      ]
+    }
+  },
+  "low-rank-adaptation": {
+    "reason": "Derive factor gradients and explain merge, rank and memory boundaries.",
+    "parts": [
+      {
+        "title": "The Factors Need Different Initial Roles",
+        "paragraphs": [
+          "If both factors are zero, each factor's gradient is multiplied by the other zero factor. Neither starts learning. Initialising one factor randomly and the other at zero keeps the initial effective update zero while allowing one gradient route to begin.",
+          "Using row inputs, write the adapter as x A B with A mapping down to the rank dimension and B mapping back to the output dimension. This is a convention for these examples; transpose conventions in other implementations must be followed consistently."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Trace Which Factor Receives the First Gradient",
+        "paragraphs": [
+          "The upstream derivative reaches B through x A. It reaches A through B, so when B begins at zero, A initially receives zero gradient. After B changes, both factors can learn.",
+          "The base weight remains fixed in this adaptation. Its contribution still affects the prediction and therefore the upstream loss derivative."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Differentiate one adapter output",
+            "paragraphs": [
+              "The supplied upstream value is the loss derivative with respect to the one-dimensional output. Scale is one."
+            ],
+            "code": "import numpy as np\nx = np.array([[1.,2.]])\nA = np.array([[.1],[.2]])\nB = np.zeros((1,1))\nupstream = np.array([[3.]])\ndB = (x@A).T@upstream\ndA = x.T@(upstream@B.T)\nprint(dB.tolist())\nprint(dA.tolist())",
+            "output": "[[1.5]]\n[[0.0], [0.0]]",
+            "interpretation": [
+              "B can change on the first update while A waits for a nonzero B. This is compatible with an initially zero adapter contribution."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Merging Must Preserve the Scale and the Base Version",
+        "paragraphs": [
+          "For a purely linear adapter, its scaled matrix product can be added to the compatible base weight for inference. Save the adapter scaling and the exact base-model identity. Applying it to a different base version does not generally reproduce the trained model.",
+          "Quantisation, dropout during training and implementation-specific layouts require additional care. Verify merged and unmerged evaluation outputs on preserved fixtures. The algebraic equivalence assumes the same linear operation and compatible numerical representation."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Fewer Trainable Parameters Does Not Eliminate Every Cost",
+        "paragraphs": [
+          "LoRA reduces the parameters receiving updates and their optimiser state. Activations, base weights and attention computation still consume memory and time. Increasing rank also increases adapter capacity and cost.",
+          "Choose target layers and rank through task evaluation, and compare with a full fine-tuning baseline when feasible. A low-rank update is a constrained change to a pretrained model, not a guarantee that a small dataset is sufficient or that the base model will retain every prior behaviour."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": [
+      {
+        "title": "Can you differentiate both adapter factors?",
+        "question": "Can you differentiate both adapter factors?",
+        "task": [
+          "Write adapter_gradients(X, A, B, upstream, scale). The row-input adapter is scale * X @ A @ B. X has shape (batch, inputs), A is (inputs, rank), B is (rank, outputs), and upstream is the derivative of the scalar loss with respect to the adapter output.",
+          "Return dA and dB without changing inputs. Require finite two-dimensional compatible arrays with positive dimensions and a finite scale; raise ValueError otherwise. Do not average the gradients again: upstream already carries the loss convention. Print both demonstration gradients."
+        ],
+        "starter": "import numpy as np\n\ndef adapter_gradients(X, A, B, upstream, scale):\n    # Write the procedure here.\n    raise NotImplementedError\n\ndA,dB = adapter_gradients([[1,2]],[[1],[1]],[[2]],[[3]],.5)\nprint(dA.tolist())\nprint(dB.tolist())",
+        "solution": "import numpy as np\n\ndef adapter_gradients(X, A, B, upstream, scale):\n    X,A,B,upstream = [np.asarray(v,dtype=float) for v in [X,A,B,upstream]]\n    if any(v.ndim != 2 or min(v.shape) < 1 or not np.isfinite(v).all() for v in [X,A,B,upstream]) or X.shape[1] != A.shape[0] or A.shape[1] != B.shape[0] or upstream.shape != (X.shape[0],B.shape[1]) or not np.isfinite(scale):\n        raise ValueError('Incompatible adapter inputs')\n    return scale*X.T@(upstream@B.T), scale*(X@A).T@upstream\n\ndA,dB = adapter_gradients([[1,2]],[[1],[1]],[[2]],[[3]],.5)\nprint(dA.tolist())\nprint(dB.tolist())",
+        "output": "[[3.0], [6.0]]\n[[4.5]]",
+        "hints": [
+          "Differentiate the final matrix product first.",
+          "Use the old A and B for both gradients."
+        ],
+        "tests": [
+          {
+            "name": "Finite differences for every factor entry",
+            "code": "X=np.array([[1.,2.],[-1.,.5]]); A=np.array([[.2,.1],[.3,-.4]]); B=np.array([[.5],[-.2]]); U=np.array([[2.],[-1.]])\ndA,dB=adapter_gradients(X,A,B,U,.7)\nfor matrix,gradient in [(A,dA),(B,dB)]:\n    for index in np.ndindex(matrix.shape):\n        old=matrix[index]; eps=1e-6\n        matrix[index]=old+eps; plus=np.sum((.7*X@A@B)*U)\n        matrix[index]=old-eps; minus=np.sum((.7*X@A@B)*U)\n        matrix[index]=old\n        assert np.isclose(gradient[index],(plus-minus)/(2*eps))"
+          },
+          {
+            "name": "Zero-initialised output factor",
+            "code": "dA,dB=adapter_gradients([[1,2]],[[.1],[.2]],[[0]],[[3]],1)\nassert np.allclose(dA,0) and np.allclose(dB,[[1.5]])"
+          },
+          {
+            "name": "Reject incorrect upstream shape",
+            "code": "try:\n    adapter_gradients([[1]],[[1]],[[1]],[[1,2]],1)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('Expected ValueError for an invalid input')"
+          }
+        ]
+      }
+    ]
+  },
+  "retrieval-augmented-generation": {
+    "reason": "Trace chunking, candidate recall, context construction and evidence-based answer evaluation.",
+    "parts": [
+      {
+        "title": "Split a Document without Separating a Claim from Its Conditions",
+        "paragraphs": [
+          "A passage should contain enough context to interpret its claim. Splitting a maintenance instruction from the warning immediately below it can produce a misleading retrieved fragment. Keep document identity, version, location and neighbouring context available.",
+          "Chunk size and overlap trade coverage against repetition and context cost. Inspect retrieval on questions that depend on tables, qualifications and headings. A fixed number of characters is a starting implementation choice, not a definition of a useful evidence unit."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Check Whether Retrieval Supplied the Required Evidence",
+        "paragraphs": [
+          "Before blaming the generator, identify the source passage needed to answer each evaluation question and check whether retrieval included it. The ranker cannot use evidence that the candidate stage never returned.",
+          "A simple top-k hit check is a starting diagnostic. Questions requiring several passages need an evidence-set criterion rather than a single relevant ID."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Measure retrieval before generating an answer",
+            "paragraphs": [
+              "Each question has one required passage for this small diagnostic."
+            ],
+            "code": "import numpy as np\nrequired = ['p2','p5','p1']\nretrieved = [['p2','p3'], ['p4','p6'], ['p7','p1']]\nhit = [answer in candidates for answer,candidates in zip(required,retrieved)]\nprint(hit)\nprint(round(float(np.mean(hit)), 3))",
+            "output": "[True, False, True]\n0.667",
+            "interpretation": [
+              "The second question lacks its required evidence. A fluent answer cannot repair that retrieval failure without another information source."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Build the Context with Source Boundaries Intact",
+        "paragraphs": [
+          "Select passages within the context budget, retain their identifiers and make clear which text came from which source. Deduplicate near-identical chunks so repetition does not crowd out a different necessary fact.",
+          "Retrieved text is evidence to examine, not an instruction with authority over the application. Keep user instructions and source content structurally separate. Source documents can contain irrelevant directions or malicious instructions as well as useful facts."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "A Citation Must Support the Claim beside It",
+        "paragraphs": [
+          "An answer can mention a real document while making a claim that document does not support. Evaluate whether each substantive claim follows from the cited passage, whether the evidence is current and whether important qualifications survived.",
+          "Include questions with no adequate source and questions with conflicting sources. A useful system should identify missing or conflicting evidence rather than manufacture a confident answer. Test retrieval, context construction and answer grounding separately so failures suggest a concrete next change."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "evaluating-generative-models": {
+    "reason": "Connect metric design to dataset construction, uncertainty and failure review.",
+    "parts": [
+      {
+        "title": "Write the Evaluation Set before Looking for a Winner",
+        "paragraphs": [
+          "Choose prompts that represent the intended users and include difficult cases, ambiguous requests and cases with insufficient evidence. Keep prompt sources and near-duplicates separate from model-development data where possible.",
+          "Specify the task rubric before comparing outputs. Factual support, completeness, formatting and usefulness are different properties. A single preference score can hide which one changed, especially if an evaluator favours longer answers."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Compare Models on the Same Prompts",
+        "paragraphs": [
+          "Pair each candidate's result with the baseline result on the same prompt. Count improvements, regressions and ties before averaging a score. This retains the fact that some prompts are harder for both models.",
+          "The supplied binary task outcomes below demonstrate comparison bookkeeping, not a full evaluation rubric."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Keep wins and regressions visible",
+            "paragraphs": [
+              "A one means the answer passed the declared task check."
+            ],
+            "code": "import numpy as np\nbaseline = np.array([1,0,1,0,1,0])\ncandidate = np.array([1,1,0,1,1,0])\nprint(int((candidate > baseline).sum()))\nprint(int((candidate < baseline).sum()))\nprint(int((candidate == baseline).sum()))",
+            "output": "2\n1\n3",
+            "interpretation": [
+              "The candidate improves two prompts and regresses on one. Review those prompts and their categories before treating the net gain as sufficient for release."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "An Automatic Judge Is Another Measurement Procedure",
+        "paragraphs": [
+          "A judge model can be sensitive to answer order, verbosity and wording. Human ratings can also vary. Use a clear rubric, blind model identity where practical, check agreement and inspect disagreement cases.",
+          "Keep enough labelled examples to compare automatic judging with the task's actual requirements. A judge's confident score is not a substitute for source verification on factual tasks or execution on programming tasks."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Image Quality and Distribution Coverage Need Separate Evidence",
+        "paragraphs": [
+          "Sharp individual images can coexist with missing modes or repeated training examples. Compare representative sample collections, diversity and distribution-sensitive metrics under a stated feature representation and sample size.",
+          "No single score establishes that a generator covers every meaningful group or respects every constraint. Preserve failure examples and subgroup results, and repeat stochastic evaluations with declared settings rather than selecting only favourable samples."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  },
+  "u-net": {
+    "reason": "Extend labelled segmentation into loss masking and per-image evaluation.",
+    "parts": [
+      {
+        "title": "Unlabelled Pixels Are Not Automatically Background",
+        "paragraphs": [
+          "A segmentation target assigns a class to each labelled pixel. Some datasets leave uncertain or uninspected pixels unlabelled. Treating those as background teaches the model a claim the annotator did not make.",
+          "Keep a validity mask for supervised loss and metrics when the annotation scheme requires one. Apply spatial augmentations to the image, target and validity mask together. Document class IDs, ignored values and the difference between a missing mask and an all-background mask."
+        ],
+        "interpretation": []
+      },
+      {
+        "title": "Measure Foreground Agreement beside Pixel Accuracy",
+        "paragraphs": [
+          "A tray can contain much more background than seed. Predicting background everywhere may achieve high pixel accuracy while missing every object. Foreground IoU and Dice focus the comparison on overlap, with an explicit convention for empty masks.",
+          "Report metrics per image or acquisition group as well as any pooled score. Large easy images can otherwise dominate the aggregate."
+        ],
+        "interpretation": [],
+        "examples": [
+          {
+            "title": "Compare overlap on one labelled mask",
+            "paragraphs": [
+              "The prediction contains two of three seed pixels and one extra background pixel."
+            ],
+            "code": "import numpy as np\ntarget = np.array([[0,1,1],[0,1,0]], dtype=bool)\nprediction = np.array([[0,1,0],[0,1,1]], dtype=bool)\noverlap = (target & prediction).sum()\nunion = (target | prediction).sum()\nprint(float(overlap/union))\nprint(float(2*overlap/(target.sum()+prediction.sum())))",
+            "output": "0.5\n0.6666666666666666",
+            "interpretation": [
+              "IoU and Dice use different denominators. Neither tells us whether the connected foreground corresponds to the correct number of separate seeds."
+            ]
+          }
+        ]
+      },
+      {
+        "title": "A New Camera Can Change More Than Resolution",
+        "paragraphs": [
+          "Lighting, colour response, focus and framing can all change the input distribution. A random pixel split from the same photographs cannot assess transfer to a new acquisition setup.",
+          "Hold out appropriate plants, trays or sessions, and inspect boundaries and small objects separately. Compare performance after resizing carefully: resampling can erase thin structures even when the final mask has the expected dimensions."
+        ],
+        "interpretation": []
+      }
+    ],
+    "practice": []
+  }
+}

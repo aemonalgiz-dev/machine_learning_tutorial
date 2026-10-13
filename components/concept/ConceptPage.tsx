@@ -21,6 +21,7 @@ import type { Exercise } from "@/lib/exercises";
 import { lessonHistories, type HistoryLessonId } from "@/lib/history";
 import { HistoricalContext } from "./HistoricalContext";
 import { journeyFor } from "@/lib/builds/journey";
+import { addLessonSupplement } from './LessonSupplement';
 
 export interface ConceptSection {
   title: string;
@@ -85,9 +86,10 @@ export function ConceptPage({
   playgroundIntro,
   playgroundTitle,
   playground,
-  sections,
+  sections: authoredSections,
   prerequisites,
 }: ConceptPageProps) {
+  const sections = addLessonSupplement(lessonId, authoredSections);
   const opening: NavigableSection = {
     title: openingTitle,
     id: sectionId(openingTitle),
