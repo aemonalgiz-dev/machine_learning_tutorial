@@ -56,12 +56,7 @@ export default function TheWordLatticePage() {
 <>
               <SubSection title="1. Where the greedy scan left off">
                 <p>
-                  The previous page took the longest entry of a word list that
-                  fitted where the scan was standing, cut there, and went again.
-                  Two things went wrong with that and they are worth having in
-                  front of us as numbers, because everything on this page is
-                  aimed at the first of them and nothing on this page touches the
-                  second.
+                  The greedy scan chose the longest dictionary entry at its current position, committed to that cut, and continued. An early choice could leave an awkward remainder. It also could not return a word absent from the dictionary. This lesson addresses the first problem by comparing complete paths through the sentence. The missing-word problem will remain.
                 </p>
                 <NumberTable
                   headings={[
@@ -167,12 +162,7 @@ export default function TheWordLatticePage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  This is the move the whole page rests on. The previous
-                  page&rsquo;s rule scored a position, since the longest entry
-                  beginning here is a fact about here. A path is a whole reading,
-                  so anything said about a path is said about the sentence, and a
-                  candidate taken early can now be made to answer for what it
-                  leaves behind.
+                  A path represents a complete segmentation. That gives us a way to score an early choice together with the pieces it leaves for the rest of the sentence. We can now compare a long first word with a shorter one without committing before we know how the sentence ends.
                 </p>
                 <KeepInMind>
                   A reading and a path are the same object seen twice. Finding a
@@ -382,11 +372,7 @@ export default function TheWordLatticePage() {
                   </>
                 </WorkedExample>
                 <p>
-                  It is worth being exact about what has been settled here. The
-                  method has not discovered that the sentence is about research.
-                  It has reported that under one particular set of counts the
-                  research reading is the likelier of the two, and the twentieth
-                  section is about how much weight that will carry.
+                  The method ranks the research reading higher under the supplied counts. It has not independently established what the writer intended. Section 20 examines how dependent that preference is on the evidence and scoring assumptions.
                 </p>
                 <KeepInMind>
                   Where the previous page had two defensible answers and a
@@ -922,14 +908,7 @@ export default function TheWordLatticePage() {
                   {"score of a character no entry covers  =  log( 1 / total )"}
                 </Equation>
                 <p>
-                  Against a list counted 33 times that is −3.4965, which is worse
-                  than the rarest of the five entries at −2.1102 and much worse
-                  than the commonest at −1.1939. It is a convention rather than a
-                  measurement and it is worth saying so plainly, because it is
-                  doing real work. Set it lower and a stretch of unknown
-                  characters becomes so expensive that the path will contort to
-                  avoid it; set it higher and single characters start winning
-                  against real words.
+                  With a total count of 33, the fallback log score is −3.4965, below the rarest listed entry at −2.1102 and the commonest at −1.1939. This fallback is a convention rather than an observed frequency. Lowering it penalizes unknown-character paths more heavily; raising it can make individual characters preferable to listed words. We should test that policy on text containing unknowns.
                 </p>
                 <LatticeBoard scenarioKeys={["name"]} />
                 <p>
@@ -1115,7 +1094,7 @@ export default function TheWordLatticePage() {
                 </p>
                 <>
 <p>
-                  The second is that the scores are not probabilities of anything, and it is worth seeing why rather than taking it as a caution. Every entry&rsquo;s share is its count over the total of every count, so the shares of the entries add to exactly one already. Each single character the list does not hold is then handed another share of one over the total on top of that.
+                  The listed word probabilities already sum to one because each is its count divided by the count total. The fallback then assigns additional mass to unlisted characters without renormalizing that distribution. We can use the resulting values as path scores, but should not describe the full extended scoring rule as a normalized word probability model.
                 </p>
                 <p>
                   The numbers being multiplied together therefore add to more than one over the things they describe, so a score ranks readings correctly and is no probability.

@@ -68,7 +68,7 @@ test('execution errors count as failed and a wrong statistic receives staged coa
   await page.getByRole('navigation',{name:'Journey stages'}).getByRole('button',{name:/Build your solution/}).click();
   await page.getByRole('checkbox',{name:'Animate signals',exact:true}).uncheck();
   await page.getByRole('button',{name:'Test all examples',exact:true}).click();
-  await expect(page.getByTestId('construction-counter')).toHaveText('0 passed · 1 failed · 2 not run');
+  await expect(page.getByTestId('construction-counter')).toHaveText('0 passed · 3 failed · 0 not run');
   for(const name of ['Deaths recorded each week','Add a list'])await page.getByRole('button',{name,exact:true}).click();
   for(const name of ['Deaths recorded each week output','Add a list input 1: Numbers','Add a list output','Result input 1: Your result'])await page.getByRole('button',{name,exact:true}).click();
   await page.getByRole('button',{name:'Test all examples',exact:true}).click();

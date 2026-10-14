@@ -77,7 +77,7 @@ export function WorkshopPiece({ piece, name, labels, connections, settings, valu
           onPointerDown={onOutput} onClick={e => { e.stopPropagation(); if (e.detail === 0) onOutputKey(); }}>→</button>}
       </div>
       {value !== undefined ? <div className={styles.readout} data-testid="component-value"><WorkshopValue value={value}/></div>
-        : <p className={styles.waiting}>{hasSignal ? "No value returned" : result ? "Your answer will arrive here." : "Run to see the result."}</p>}
+        : <p className={styles.waiting}>{hasSignal ? "No value returned" : result ? "Your answer will arrive here." : "Waiting for valid inputs. Select this piece to inspect them."}</p>}
     </div>
   </div>;
 }

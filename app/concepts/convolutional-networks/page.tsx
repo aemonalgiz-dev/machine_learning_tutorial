@@ -120,11 +120,7 @@ export default function ConvolutionalNetworksPage() {
                   caption="The same 40 epochs, batches of 16 and step size as every other network on the page. The seed sets the starting weights."
                 />
                 <p>
-                  It names about two held-out pictures in three, it does not
-                  finish learning even the pictures it was trained on, and
-                  moving a picture by one pixel changes its answer on about a
-                  third of them. That is the failure the rest of the page is
-                  measured against.
+                  This baseline correctly names about two thirds of the held-out pictures. It also has errors on the training pictures, and a one-pixel shift changes its answer on about a third of the images. We now have specific things to investigate: fitting the shapes, predicting new examples, and responding to small movements.
                 </p>
                 <KeepInMind>
                   A dense layer is told nothing about which pixels are
@@ -671,10 +667,7 @@ export default function ConvolutionalNetworksPage() {
                   it had not seen.
                 </p>
                 <KeepInMind>
-                  Pooling helped here, and some of the help may be nothing
-                  more than keeping the dense layer small enough that 240
-                  pictures could constrain it. The measurement cannot say how
-                  much.
+                  Pooling helped in this experiment. It also reduced the size of the dense layer, leaving fewer parameters for the 240 training images to constrain. These measurements do not separate that benefit from pooling&apos;s other effects.
                 </KeepInMind>
               </SubSection>
 

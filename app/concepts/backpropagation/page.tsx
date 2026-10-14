@@ -75,20 +75,11 @@ export default function BackpropagationPage() {
 <>
               <SubSection title="1. What the forward pass left behind">
                 <p>
-                  Backpropagation reverses something, so start with the thing
-                  it reverses. One row, (1, 2), goes into the 2-3-1 network.
-                  Each hidden neuron forms a score from the row, the rectifier
-                  applies ReLU to each score, the output neuron forms
-                  a score from the three activations, its activation function is the identity
-                  so that score is the prediction, and the prediction is
-                  measured against the target of 1 by half the squared miss.
+                  Let&apos;s follow a prediction before trying to work backwards from its error. The row (1, 2) enters a network with two inputs, three hidden neurons and one output neuron. Each hidden neuron forms a weighted score and applies ReLU. The output neuron combines those three activations. Its activation is identity, so its score is also the prediction. We compare that prediction with a target of one using half the squared error.
                 </p>
                 <ForwardTrace />
                 <p>
-                  Six kinds of intermediate value, and every one of them is
-                  kept. That is not tidiness. The backward pass is about to ask
-                  for each of them by name, and a forward pass that discarded
-                  its scores would have to be run again to recover them.
+                  We keep the intermediate values from that calculation. During the backward pass, a derivative can depend on an input or score computed earlier. Saving those values lets us calculate the derivatives without running the forward pass again.
                 </p>
                 <KeepInMind>
                   The forward pass is a sequence of small computations that

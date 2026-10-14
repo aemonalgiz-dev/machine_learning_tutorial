@@ -174,13 +174,7 @@ export default function FiniteScalarQuantisationPage() {
             <>
               <SubSection title="4. Bounding a coordinate so the levels have somewhere to be">
                 <p>
-                  A coordinate arriving from a model can be any size at all, and
-                  a finite set of levels cannot cover the whole number line at a
-                  useful spacing. So the first step is to squeeze the coordinate
-                  into a bounded interval, and the function used for it is the
-                  hyperbolic tangent, which takes any number and returns
-                  something strictly between &minus;1 and 1, leaves small numbers
-                  almost alone and flattens large ones towards the ends.
+                  A model&apos;s coordinate can fall outside the range covered by our finite levels. We first map it into a bounded interval using tanh. Near zero the function changes values only slightly; farther out it approaches the interval&apos;s ends. In exact arithmetic its output is strictly between minus one and one, though floating-point evaluation can round to an endpoint. We then scale and round to the permitted levels.
                 </p>
                 <Equation>{"bounded  =  tanh(z)     in  (−1, 1)"}</Equation>
                 <p>
@@ -827,13 +821,7 @@ export default function FiniteScalarQuantisationPage() {
                   caption="Six hundred vectors, rounded to a fixed grid and to a fitted table of the same size."
                 />
                 <p>
-                  The fitted table is better everywhere, by between 2.04 and 4.96
-                  times. That is the honest price of the method, and it is worth
-                  reading twice before deciding it is small. What is bought with
-                  it is that the right-hand column of that table required a fit
-                  and the left-hand one did not, and that in a model being trained
-                  end to end the fit would be happening inside the training loop
-                  and interacting with everything else in it.
+                  On the comparisons shown, the fitted codebook&apos;s reconstruction error is lower by factors from 2.04 to 4.96. The fixed grid avoids fitting a codebook, but pays for that simplicity in reconstruction error here. In an end-to-end learned system, we would also need to examine how the encoder adapts to the quantizer before extending this result.
                 </p>
                 <KeepInMind>
                   On this collection the fixed grid is between two and five times
@@ -1032,13 +1020,7 @@ export default function FiniteScalarQuantisationPage() {
                   simple counting.
                 </p>
                 <p>
-                  This cuts both ways, and it is worth being clear which way. A
-                  method that chose the number of codes from the data would be a
-                  method with a fit in it, which is the thing being given up. The
-                  fixed count is the price of that, and its practical form is
-                  that the level counts have to be chosen by somebody who has
-                  looked at the vectors, which is a fit performed by a person
-                  rather than by an algorithm.
+                  We have fixed the number of levels rather than learned representatives from the data. That still leaves a modelling choice: how many levels should each coordinate receive? We can compare candidate settings on suitable development data. Avoiding codebook fitting does not remove the need to select and evaluate that choice.
                 </p>
                 <KeepInMind>
                   Removing the fit does not remove the need to know something

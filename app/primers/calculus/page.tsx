@@ -54,11 +54,7 @@ export default function CalculusPrimerPage() {
       <PrimerSection title="1. Change Between Two Points">
 
         <p>
-          Everything here rests on comparing two changes. An output changes as an
-          input changes, and the question is always how much of the one you get
-          for the other. On a straight line that comparison has a name, the
-          slope, and you compute it from any two points by dividing the rise, how
-          far up the line went between them, by the run, how far across.
+          Suppose we change the input to a function and watch its output move. How much does the output change for each unit of input? On a straight line, that rate is the slope. We can find it from any two points: measure the vertical change, called the rise, and divide it by the horizontal change, called the run.
         </p>
         <Equation>{"slope = rise / run"}</Equation>
         <WorkedExample>
@@ -93,9 +89,7 @@ export default function CalculusPrimerPage() {
 
       <PrimerSection title="2. Slope as a Rate">
         <p>
-          Now the reframing that turns a fact about a drawing into something
-          worth having. A slope is not only a tilt. When the two axes carry
-          units, rise over run carries units too, and the slope becomes a rate.
+          Suppose the horizontal axis records time and the vertical axis records distance. The slope tells us how much distance changes per unit of time, so it describes a speed. Other axis units give other rates. This is why measuring the tilt of a line can answer a question about something changing.
         </p>
         <WorkedExample>
           <p>
@@ -266,10 +260,7 @@ export default function CalculusPrimerPage() {
 
       <PrimerSection title="5. The Derivative">
         <p>
-          The value those averages close in on, 2 here, is the instantaneous rate
-          of change of the curve at x = 3. That is what a derivative is, and it
-          is worth saying plainly that you have already computed one. The name
-          arrives after the idea rather than before it.
+          Those average rates approach 2 as the interval around x = 3 shrinks. We call the limiting rate the derivative at that point. We have reached it by asking what happens to a familiar rise-over-run calculation as its two locations come together.
         </p>
         <p>
           Writing the gap as h, the definition says to take the average slope
@@ -402,10 +393,9 @@ export default function CalculusPrimerPage() {
 
       <PrimerSection title="8. Reading What the Derivative Says">
         <p>
-          A derivative is not merely another formula to carry around. It
-          describes the curve, and three readings cover most of what anyone needs
-          from it. Take f&rsquo;(x) = x − 1 and evaluate it in a few places.
+          What can a derivative tell us about a curve before we draw the whole thing? Its sign shows whether the curve is rising or falling as we move right, and its magnitude tells us how rapidly the height changes locally. Let&apos;s evaluate the derivative below at a few locations.
         </p>
+        <Equation>{"f′(x) = x − 1"}</Equation>
         <NumberTable
           headings={["x", "f'(x)", "what the curve is doing there"]}
           rows={[
@@ -460,8 +450,7 @@ export default function CalculusPrimerPage() {
           </p>
         </KeepInMind>
         <p>
-          Those three readings are enough to find the bottom of a curve, which is
-          what the rest of this primer does with them.
+          We can use these local slopes to choose a direction that lowers this curve. The following sections work through those steps and explain why their size matters.
         </p>
       </PrimerSection>
 
@@ -606,9 +595,7 @@ export default function CalculusPrimerPage() {
             ]}
           />
           <p>
-            The height fell from 10 to 5.92, which is the whole point of the
-            exercise, and the slope at the new location will be smaller than 4,
-            so the next stride will be shorter.
+            The step lowered the height from 10 to 5.92. At the new location, the slope is smaller than 4. Keeping the same learning rate therefore gives a shorter next step on this curve.
           </p>
         </WorkedExample>
         <p>Carrying on from there, the next few steps go like this.</p>

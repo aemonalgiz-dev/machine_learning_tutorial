@@ -76,7 +76,7 @@ export default function PictureVectorPage() {
                   Every picture on this page is sixteen pixels on a side, with one brightness per pixel, and holds one of four shapes, a cross, the outline of a square, a filled disc or a diagonal bar. Each shape is drawn at a random position and a random size, against a random background, lifted by a random amount above that background, with a little noise on every pixel, so that no two crosses are alike and no single pixel gives a cross away.
                 </p>
                 <p>
-                  We would like a way of saying that two crosses are near each other and a cross and a disc are not, and that turns out to be much harder to write down than it sounds.
+                  We can recognise two crosses even when their positions or brightness differ. How could we give the computer a distance that reflects that resemblance? We will start by comparing pixels, then examine the representation learned by a network trained to classify the shapes.
                 </p>
                 <p>
                   The page asks six questions, in order. When two pictures are compared pixel by pixel, how often is a picture&rsquo;s nearest neighbour the same kind, and why does it miss? What is the vector a trained network gives a picture, and how is it read off? Where do pictures the network never saw land in that space, and is a picture&rsquo;s nearest neighbour there its own kind more often than its nearest by pixels?
@@ -553,13 +553,7 @@ export default function PictureVectorPage() {
             <>
               <SubSection title="13. What the naming asked for">
                 <p>
-                  The card this page sits under says pictures of one kind land
-                  near each other without anyone having asked for that. It is
-                  worth being exact about what was asked. The loss asked that
-                  each picture&rsquo;s own score come out highest, and the scores
-                  are one flat layer on top of the sixteen numbers, so to satisfy
-                  it the sixteen numbers had to be arranged so that a flat cut
-                  can separate each kind from the others.
+                  The classifier was trained to give each picture&apos;s correct class the highest score. Those scores come from a linear layer over the sixteen learned features. Training therefore encourages features that this layer can use to separate the classes. It does not directly ask for a nearest-neighbour arrangement, so we need to measure whether nearby vectors actually share a shape.
                 </p>
                 <p>
                   That is a demand about the arrangement, though it is weaker
@@ -814,12 +808,7 @@ export default function PictureVectorPage() {
 
               <SubSection title="20. Do rings gather?">
                 <p>
-                  The more interesting question is about positions rather than
-                  names. If the vector describes pictures and not only which
-                  label to give them, rings ought to land near each other even
-                  though nothing ever called them anything. To test that, the 60
-                  rings are added to the 240 held-out pictures, and each
-                  ring&rsquo;s nearest neighbour among the other 299 is found.
+                  We can also test a shape that the classifier never learned to name. If its vectors describe useful visual relationships, perhaps pictures of rings will be close to other rings. We add 60 rings to the 240 held-out pictures and find each ring&apos;s nearest neighbour among the other 299. This lets us investigate the representation beyond the labels used during fitting.
                 </p>
                 <PictureVectorSphere initialRings />
                 <p className={caption}>
@@ -846,12 +835,7 @@ export default function PictureVectorPage() {
 
               <SubSection title="21. Here the pixels do better, and the earlier layer best of all">
                 <p>
-                  This is the place where the method loses to the obvious
-                  alternative, and it is worth stating plainly. Comparing rings
-                  by their raw pixels, 46 of 60 have another ring as nearest
-                  neighbour, more than the vector manages on any of the three
-                  seeds. The reason shows up when every layer is asked the same
-                  question.
+                  For the rings, raw pixels do better: 46 of 60 have another ring as their nearest neighbour. That exceeds the learned vector result under all three seeds. Let&apos;s ask the same question at each layer to see where the representation loses this useful distinction.
                 </p>
                 <PictureSeedLedger view="rings" />
                 <p className={caption}>

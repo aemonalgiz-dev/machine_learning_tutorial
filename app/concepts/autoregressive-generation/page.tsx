@@ -28,7 +28,7 @@ export default function Page() {
     sections={[
 { title: "Part 1. Follow One Complete Loop", content: <>
 <SubSection title="1. Read the prefix and select the next token">
-<p>{"A next-token model answers one question, which is what token is likely to follow this text. A response is many tokens long. The loop in this part is how one answer at a time becomes a sequence, and following it once with real numbers shows everything it does."}</p>
+<p>{"We know how to predict a distribution for the next token. How does that become a whole response? After choosing one token, we append it to the prefix and make another prediction. Let's follow the changing prefix and the scores used at each step, including the decision to stop."}</p>
 <p>{"Tokenize the prompt and run a forward pass. The final position's vocabulary scores describe what may follow the whole prefix. Convert them to a distribution, then apply the chosen selection rule."}</p>
 <p>{"The live example uses the seven-entry vocabulary from the previous lesson and the prompt <start> the cat. A forward pass returns a row of seven scores at each of the three positions. The first two rows are predictions about tokens the prompt already contains, so generation has no use for them. Only the last row, the one read after the whole prefix, is turned into a distribution."}</p>
 <NumberTable headings={["candidate", "probability after <start> the cat"]} rows={[["<start>", "0.1756"], ["the", "0.1208"], ["cat", "0.1815"], ["dog", "0.2334"], ["sat", "0.0395"], ["slept", "0.1728"], ["<end>", "0.0763"]]} caption="The decoder is untrained, so these shares say nothing about language. They are the distribution the loop has to choose from." />

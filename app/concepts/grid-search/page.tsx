@@ -159,9 +159,7 @@ export default function GridSearchPage() {
                   held-out one.
                 </p>
                 <KeepInMind>
-                  Choosing a hyperparameter means scoring each candidate on
-                  rows the fit was denied and comparing those scores. That is
-                  the evaluation data that played no part in selecting the fit.
+                  We compare candidate hyperparameters using observations excluded from each candidate&apos;s fit. Those observations are validation data: their scores now help us select the setting. They are therefore part of model selection, and we still need a separate final assessment if we want an independent estimate of the selected procedure&apos;s performance.
                 </KeepInMind>
               </SubSection>
             </>

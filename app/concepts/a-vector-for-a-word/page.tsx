@@ -61,14 +61,7 @@ export default function WordVectorPage() {
 <>
               <SubSection title="1. What a word’s number can and cannot say">
                 <p>
-                  A tokenizer finishes by handing every piece of text a number,
-                  and that number is a name. It says which row of a lookup table
-                  the word lives in, so we can check whether two pieces of text
-                  are the same piece of text, and that is genuinely all it
-                  promises. Nothing about the numbers being ordered makes the
-                  words ordered, and nothing about two numbers being close makes
-                  the words close, which is easy to say and worth measuring
-                  before we accept it.
+                  A tokenizer gives each piece an ID so we can find it again. That number identifies an entry in a table; it does not measure the piece&apos;s meaning. We could renumber the vocabulary and still identify exactly the same words. So, if we want to compare words numerically, we need something beyond their IDs.
                 </p>
                 <p>
                   The corpus this page works on is twenty-four short documents, twelve of them about cooking and twelve about sailing, and they hold twenty-three distinct words between them. The numbers are dealt out commonest first, so a number does carry exactly one fact about a word, which is roughly how common it was. What it does not carry is anything about what the word means.
@@ -145,13 +138,7 @@ export default function WordVectorPage() {
 
               <SubSection title="3. A position instead of a number">
                 <p>
-                  Replace each word&rsquo;s single number with several numbers,
-                  and read those numbers as coordinates. The word is then a
-                  point somewhere, and points can be compared in ways names
-                  cannot, since two points have a direction from one to the
-                  other and an amount of separation between them. That is the
-                  whole idea, and everything the rest of the page does is a
-                  consequence of it.
+                  We can assign each word a vector and treat its entries as coordinates. Now we can measure distances or compare directions. But putting words at points does not make those comparisons useful by itself. We need a way of choosing the coordinates so that the relationships reflect something we care about in the text.
                 </p>
                 <p>
                   How the coordinates are worked out is a separate subject with
@@ -345,10 +332,7 @@ export default function WordVectorPage() {
                   <p>
                     Now compare that with the ruler. <em>king</em> and{" "}
                     <em>man</em>, which are at right angles, are 1.4142 apart.{" "}
-                    <em>man</em> and <em>woman</em>, which point in precisely
-                    the same direction, are 2.0000 apart. The ruler and the
-                    angle do not merely differ in the fine detail here, they put
-                    the pairs in opposite orders.
+                    <em>man</em> and <em>woman</em>, which point in precisely the same direction, are 2.0000 apart. Distance and angle therefore rank these pairs differently. We need to decide which kind of resemblance the task calls for.
                   </p>
                   <p>
                     Both gaps come straight from the distance formula of
@@ -530,13 +514,7 @@ export default function WordVectorPage() {
             <>
               <SubSection title="10. Which words are nearest this one">
                 <p>
-                  Once every word has a position and we have a way of scoring a
-                  pair, the first new question falls out. Take a word, score it
-                  against every other word in the vocabulary, sort, and read off
-                  the top of the list. Nothing in the fit was asked to produce a
-                  list of neighbours; the list is a consequence of every word
-                  having been placed somewhere, which is why the answer is worth
-                  looking at and is not merely definitional.
+                  Now we can search for a word&apos;s neighbours. Compare its vector with each other vocabulary vector, sort the scores, and inspect the closest entries. The fitting objective did not directly specify this list, so the neighbours give us a way to investigate the relationships the representation learned.
                 </p>
                 <InAModel title="The five words nearest sail">
                   <p>
@@ -563,9 +541,7 @@ export default function WordVectorPage() {
 
               <SubSection title="11. Whether the answer is any good">
                 <p>
-                  A list of neighbours looks convincing whatever it contains, so
-                  it is worth checking it in both directions. In the direction
-                  that works, <em>sail</em> and <em>rope</em> score 0.9825 while{" "}
+                  A neighbour list can look plausible even when its relationships are weak. Let&apos;s inspect examples where it agrees with the known topic groups and where it does not. In the first case, <em>sail</em> and <em>rope</em> score 0.9825 while{" "}
                   <em>sail</em> and <em>flour</em> score 0.0661 and{" "}
                   <em>sail</em> and <em>oven</em> score &minus;0.0518. Words
                   from the same topic are near one, words from different topics
@@ -633,12 +609,7 @@ export default function WordVectorPage() {
 
               <SubSection title="12. How alike two named words are">
                 <p>
-                  The second question is the smaller one, and it is worth
-                  separating from the first because it is the one that gets used
-                  inside larger systems. Given two words we already have in
-                  mind, how alike are they? That is a single number, computed
-                  without touching the rest of the vocabulary, and it can be
-                  compared across pairs because the scale is fixed at both ends.
+                  We can also compare a particular pair of words without searching the whole vocabulary. The similarity is calculated from their two vectors. With the same scoring rule and fixed scale, we can compare that value with scores for other pairs. This smaller calculation is useful inside systems that already know which candidates they need to evaluate.
                 </p>
                 <p>
                   Being able to compare across pairs is the part that a number
@@ -856,7 +827,7 @@ export default function WordVectorPage() {
                   This happens because the word that was added first is a whole unit of the sum, and the other two frequently cancel a good part of each other. The published accounts of the analogy result usually say that the question words are excluded and leave it at that, so I measured how often it actually matters.
                 </p>
                 <p>
-                  Over every ordered triple of the twenty-three words, which is 10,626 questions, the top answer without exclusion is one of the three words already in the question 4,118 times, a share of 0.3875. That is often and not always, and it is worth saying so plainly instead of repeating the stronger claim.
+                  Among the 10,626 ordered triples of these twenty-three words, the top answer without exclusion is one of the question&apos;s own words in 4,118 cases, a share of 0.3875. That happens often in this experiment, but it does not happen for every triple.
                 </p>
                 <p>
                   The split within those 4,118 is the more interesting half.
@@ -1033,13 +1004,7 @@ export default function WordVectorPage() {
                   along axes that have nothing to do with each other.
                 </p>
                 <p>
-                  One small thing does change under a turn, and it is worth
-                  reporting because it looks like a contradiction and is not.
-                  The full ranking of neighbours survives for 21 of the 23
-                  words and not for all of them. The two exceptions swap a pair
-                  of words whose cosines are equal to sixteen digits, so what
-                  moved is which of two exactly tied words the sort happened to
-                  put first, and a tie has to be broken somehow.
+                  The full neighbour ordering survives the rotation for 21 of the 23 words. In the other two lists, a pair swaps places even though its cosines agree to sixteen digits. This is sensitivity in the ordering of effectively tied results, rather than a meaningful change in the underlying geometry.
                 </p>
                 <KeepInMind>
                   A fit determines the comparisons between positions and not the
@@ -1240,7 +1205,7 @@ export default function WordVectorPage() {
                 "The cosines between words of different topics move, because those are the smallest and so the least stable",
               ],
               1,
-              "A rotation preserves every dot product, so every length and every cosine stays where it was, the largest change over all 253 pairs being below 1e-15, while sail’s first coordinate swings from 0.5369 to −0.5223. What moved is which of two exactly tied words the sort happened to put first, and a tie has to be broken somehow. All 23 words keep the same nearest word, so nothing about the comparison itself changed, which is the whole point of the demonstration.",
+              "A rotation preserves dot products and therefore lengths and cosine similarities. The largest measured change across the 253 pairs is below 1e-15, even as sail's first coordinate moves from 0.5369 to −0.5223. All 23 words keep their nearest word. Only the ordering within effectively tied scores changes, showing why a coordinate can change substantially without changing the comparison we care about.",
             ),
             several(
               "Which of these does the rotation rule out?",

@@ -22,7 +22,7 @@ export const models = {
     source("Breiman, Friedman, Olshen and Stone (1984), Classification and Regression Trees", "https://doi.org/10.1201/9781315139470"),
   ],
   "A single rule may describe a population poorly because different parts of it behave differently. Perhaps one measurement is useful for one group, while another becomes useful only after we have separated that group from the rest.",
-  "The 1984 Classification and Regression Trees book brought together a systematic treatment of learning tree-shaped prediction rules. It addressed both how to split observations and how to avoid keeping every split that improves the training fit. The problem was not merely drawing a flowchart; it was finding a useful flowchart from data.",
+  "The 1984 Classification and Regression Trees book brought together a systematic treatment of learning tree-shaped prediction rules. We need a way to choose each split from observations, then decide when extra branches stop helping. A branch can improve the training fit simply by following details that do not recur in new data. The book addressed how to grow the tree and how to prune it back.",
   "At each step, a tree asks a question about an input and divides the examples according to the answer. Each resulting group can ask another question. The final groups provide predictions. A sequence of simple questions can describe quite different regions, but continuing until every training case is isolated usually records details that will not repeat. Stopping and pruning are therefore part of the method."),
 
   "bagging": history("What If One Small Change Produces a Different Tree?", [

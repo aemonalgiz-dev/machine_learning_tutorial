@@ -75,14 +75,7 @@ export default function ParagraphVectorsPage() {
 <>
               <SubSection title="1. The collection every number here comes from">
                 <p>
-                  A position for a text has to be learned from usage, so nothing
-                  on this page can be shown on a single sentence, and every
-                  number below comes from one collection of thirty short
-                  documents. Fifteen of them are about cooking and fifteen about
-                  sailing, each eight words long, and each drawn with replacement
-                  from a list of ten words about its own subject. The two lists
-                  share no word at all, so twenty words in two hundred and forty
-                  occurrences is the whole of it.
+                  We will learn from thirty short documents, fifteen about cooking and fifteen about sailing. Each document has eight words, sampled with replacement from its topic&apos;s ten-word list. The lists do not overlap, giving twenty words across two hundred and forty occurrences. We know the intended topic structure, so we can check whether the learned document vectors reflect it.
                 </p>
                 <NumberTable
                   headings={["about", "the ten words it draws from"]}
@@ -275,20 +268,14 @@ export default function ParagraphVectorsPage() {
 
               <SubSection title="6. What the row is forced to learn">
                 <p>
-                  It is worth being precise about what the objective actually
-                  rewards, since the phrase about a row learning the subject of a
-                  document is a description of an outcome rather than of a
-                  mechanism. What is rewarded is raising the score of the words
-                  that really are in the document and lowering the score of a
-                  handful of words drawn at random, at every one of that
-                  document&rsquo;s eight positions.
+                  The objective does not explicitly label a document&apos;s subject. At each training position, it increases the score of an observed word and decreases scores for sampled negative words. A topic-like arrangement can emerge when documents share these prediction patterns. We should check that outcome separately from describing the objective.
                 </p>
                 <>
 <p>
                   A row that leaned towards one cooking word and away from everything else would do well at one position and badly at seven, so the only row that does well across all eight is one that leans towards all eight words at once. Here the eight words are drawn from a list of ten, and any two cooking documents are drawing from the same ten, so the rows that serve two cooking documents well are similar rows.
                 </p>
                 <p>
-                  That is the whole of why the fitted positions come out separated by subject, and it depends on the collection having a structure of that kind rather than on anything in the method.
+                  Documents from one topic repeatedly ask their vectors to help predict that topic&apos;s words. In this constructed collection, that gives them related training signals and can bring their fitted representations together. Whether useful groups emerge on another collection depends on its patterns and on how well training fits them.
                 </p>
 </>
                 <WhyThisWorks title="Why the first update moves the output table before the document vector">
@@ -505,13 +492,7 @@ export default function ParagraphVectorsPage() {
 
               <SubSection title="11. Settings that separate nothing at all">
                 <p>
-                  Every number above comes from thirty passes at a step size of
-                  0.1, and it is worth saying plainly why, since those are not the
-                  settings the published work uses. At the reference settings of
-                  ten passes from a step size of 0.025, this collection offers
-                  2,400 positions in total, which is not enough movement to get
-                  anywhere. The cost falls from 4.1586 to 4.1155, barely off the
-                  4.1589 an untrained pair costs.
+                  The results above use thirty passes at a step size of 0.1. At the reference settings discussed here, ten passes starting at 0.025, the small collection supplies only 2,400 training positions. Its cost changes from 4.1586 to 4.1155, close to the untrained pair cost of 4.1589. That run has made little progress, so we must report the stronger training settings when discussing the later results.
                 </p>
                 <p>
                   The document positions are then still essentially where they were
@@ -608,10 +589,7 @@ export default function ParagraphVectorsPage() {
                   can go.
                 </p>
                 <KeepInMind>
-                  Pooling a text is a calculation with one answer. Placing a text
-                  here is a search with a starting point, and a search that is
-                  stopped early has not merely lost accuracy, as sections 14 and
-                  20 both show in different ways.
+                  With fixed word vectors, pooling gives us a direct calculation. Inferring a paragraph vector instead runs an optimization from an initial value. Stopping early can leave the representation strongly dependent on that starting point. Sections 14 and 20 test this by comparing runs rather than assuming a chosen pass count is sufficient.
                 </KeepInMind>
               </SubSection>
 
@@ -906,12 +884,7 @@ export default function ParagraphVectorsPage() {
                   for free and paying only for the composition.
                 </p>
                 <KeepInMind>
-                  On a collection whose subjects are made of disjoint word lists,
-                  averaging the words is close to the ideal method, since which
-                  list a document drew from is the only fact there is and every
-                  word announces it. That is the case where a learned position has
-                  nothing to add, and it is worth knowing that it is also the case
-                  most easily built for a teaching page.
+                  This corpus makes averaging a strong baseline. Each topic has its own disjoint word list, so every word identifies which group supplied the document. A learned document vector has little extra structure to recover. We should keep that favourable setup in mind before extending the comparison to ordinary documents.
                 </KeepInMind>
               </SubSection>
 
@@ -1087,10 +1060,7 @@ export default function ParagraphVectorsPage() {
 
               <SubSection title="23. Documents that supply no useful training signal" id="23-the-cases-with-nothing-to-descend-on">
                 <p>
-                  Four inputs make the placement undefined rather than merely
-                  awkward, and in each one it is worth knowing which quantity fails
-                  and why, since each is a decision anybody implementing the method
-                  has to make.
+                  The four cases below leave the inference procedure without a required quantity or require an explicit policy. Check which part of the calculation fails before deciding how the implementation should respond.
                 </p>
                 <DerivationTable
                   expressionHeading="Document or vocabulary evidence"
@@ -1121,13 +1091,7 @@ export default function ParagraphVectorsPage() {
                   ]}
                 />
                 <p>
-                  The first of those is the one that arises in ordinary use rather
-                  than in a constructed example, and it is worth contrasting with
-                  the pooled answer to the same input. Pooling a text of unknown
-                  words gives the origin, which is honestly nothing; this gives a
-                  random direction of ordinary length, which is confidently
-                  something. Of the two, the second is the harder mistake to
-                  notice.
+                  Consider a text containing only unknown words. Under the fallback used here, pooling returns a zero vector. Paragraph inference can instead leave an ordinary-length random initial vector when it receives no usable training signal. Neither is a learned description of the text. The second is easier to mistake for one unless we report that inference had no evidence.
                 </p>
                 <KeepInMind>
                   A method that answers a question by search rather than by formula

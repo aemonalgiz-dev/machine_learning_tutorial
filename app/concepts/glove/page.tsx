@@ -75,10 +75,10 @@ export default function GlovePage() {
               <SubSection title="1. Twenty-four sentences, and two halves that never mix">
                 <>
 <p>
-                  Everything on this page is fitted to one small corpus, and it is worth knowing exactly what is in it before any method touches it. Twenty-four sentences, twelve about a chef and twelve about an astronomer. The cooking half uses onion, garlic, flour, salt, soup, broth and the rest; the astronomy half uses moon, star, orbit, telescope, comet and nebula.
+                  We will use twenty-four sentences, twelve about a chef and twelve about an astronomer. The cooking sentences include onion, garlic, flour, salt, soup and broth. The astronomy sentences include moon, star, orbit, telescope, comet and nebula. Knowing how the corpus is constructed lets us check whether the learned representation reflects its topic pattern.
                 </p>
                 <p>
-                  No content word appears in both halves. What the two halves do share is seven words that carry no topic at all, the, and, with, in, of, into and for, and those seven turn out to matter more here than anything else.
+                  The content words are separate, while both topics use the, and, with, in, of, into and for. In this corpus, those shared words occur across subjects. We will compare their context statistics with words that help distinguish cooking from astronomy.
                 </p>
 </>
                 <p>
@@ -145,12 +145,7 @@ export default function GlovePage() {
                   form have not changed.
                 </p>
                 <KeepInMind>
-                  A window-sliding method never reads a summary, so on every pass it
-                  pays again to re-derive, one position at a time, the statistic a
-                  counting method wrote down before it started. That is the
-                  observation this page&rsquo;s method begins from, and the two
-                  numbers above, 281 against 720 and then 281 against 5,760, are what
-                  it is an observation about.
+                  A window-based training pass revisits individual context occurrences. GloVe first aggregates co-occurrence counts and fits those statistics. Repeating our corpus changes the total counts, but leaves 281 distinct observed pairs to represent, while the number of context occurrences grows from 720 to 5,760. This gives us a concrete way to compare the work performed by the two training arrangements.
                 </KeepInMind>
               </SubSection>
 
@@ -296,11 +291,7 @@ export default function GlovePage() {
 </>
                 <Equation>{"P(k | i) / P(k | j)     far from one where k belongs to one word alone"}</Equation>
                 <p>
-                  The ratio cancels what the two words share and what neither has,
-                  and leaves what separates them. That is the observation the whole
-                  method is built backwards from, and it is worth seeing on the
-                  running corpus straight away, because on a corpus this small it
-                  runs into its own limit at once.
+                  A probability ratio compares how two words relate to the same context. Contexts associated similarly with both give ratios near one, while distinguishing contexts can give very different ratios. Let&apos;s calculate these on our small corpus and also check what happens when a required count is zero.
                 </p>
                 <GloveRatios />
                 <p>
@@ -382,7 +373,7 @@ export default function GlovePage() {
               <SubSection title="10. The two spare numbers, and the sum at the end">
                 <>
 <p>
-                  The two spare numbers are doing real work and it is easy to miss what. A word like the occurs beside almost everything, so every count in its row is large. Without a spare number to carry that fact, the dot products in that row would all have to be large, and the would end up close to every word in the table.
+                  The two bias terms can account for broad frequency effects. A frequent word such as the has large counts across much of its row. Without those biases, the dot products would have to account for that baseline as well as the particular associations. Separating the terms gives the fit another way to represent the counts.
                 </p>
                 <p>
                   The spare number absorbs the part of a count that is explained by how common the two words are on their own, and leaves the dot product carrying only what is particular to the pair.
@@ -545,11 +536,7 @@ export default function GlovePage() {
                   never use.
                 </p>
                 <KeepInMind>
-                  The two halves of the weighting are separable and only one of them
-                  is exercised at this size. That is a fact about the corpus rather
-                  than the method, and it is worth carrying, since a demonstration on
-                  twenty-four sentences cannot show the cap doing the job it was put
-                  there for.
+                  At this corpus size, we exercise only one part of the weighting function. None of these observations demonstrates how its cap affects much larger counts. Keep that limitation in mind when comparing this small run with training on a larger corpus.
                 </KeepInMind>
               </SubSection>
             </>

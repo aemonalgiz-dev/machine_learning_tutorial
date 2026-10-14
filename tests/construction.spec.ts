@@ -137,7 +137,7 @@ test("learners configure, move and remove their pieces, and undo restores the co
   await page.getByRole("button",{name:"Fit construction",exact:true}).click();
   const handle=page.getByRole("button",{name:"Inspect or move Set a constant",exact:true});
   await handle.focus();await page.keyboard.press("ArrowDown");
-  await expect(page.getByTestId("construction-counter")).toHaveText("0 passed · 0 failed · 3 not run");
+  await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
   await page.getByRole("button",{name:"Undo",exact:true}).click();
   await handle.click();
   await page.getByRole("button",{name:"Remove this piece",exact:true}).click();

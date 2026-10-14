@@ -131,15 +131,7 @@ export default function UnigramLanguageModelPage() {
 
               <SubSection title="3. Running the procedure the other way round">
                 <p>
-                  Kudo&rsquo;s change is easier to state than it looks. Instead
-                  of starting small and adding, start with a vocabulary far
-                  larger than anything wanted, give every piece in it a
-                  probability, and then remove pieces, a fraction at a time,
-                  choosing at each step the ones whose loss would cost the
-                  corpus least. A piece survives not because of a step it won
-                  long ago but because, right now, with the whole rest of the
-                  vocabulary present, the corpus would be measurably harder to
-                  spell without it.
+                  The unigram approach begins with a large candidate vocabulary and assigns probabilities to its pieces. We then estimate how much worse the corpus would be represented if particular pieces were removed. Pruning the least useful candidates gradually reduces the vocabulary. A piece&apos;s value is reconsidered alongside the alternatives still available, rather than fixed by an earlier merge decision.
                 </p>
                 <p>
                   That is a statement about the whole vocabulary rather than
@@ -501,7 +493,7 @@ export default function UnigramLanguageModelPage() {
             trueFalse(
               "Finding the likeliest spelling of a word and finding the probability of the word are the same pass over the same arcs, with a maximum in one where the other has a sum.",
               true,
-              "The first recurrence keeps the best route into each position and the second keeps the total over all routes into it, and that is the entire difference between them. Neither ever enumerates a spelling, which is the whole point of reading a piece as a step between two positions, since on a six-symbol word seventeen arcs stand for 28 spellings. The total is never below the maximum, and the two are equal only when the word has one spelling.",
+              "One recurrence keeps the highest-scoring route into each position. The other sums the probabilities of all routes into it. Neither needs to enumerate every full spelling: the six-symbol example uses seventeen arcs to represent 28 paths. The sum is at least the maximum and exceeds it when another path has positive probability.",
             ),
         ],
         },
@@ -563,20 +555,14 @@ export default function UnigramLanguageModelPage() {
 </>
                 <>
 <p>
-                  The second panel is where I found something I had not expected. Run the same two steps on the four words and the model does not merely improve, it becomes certain. Low spelled whole goes from 0.020 to 0.265 to 0.312 and then stops, at exactly five sixteenths, which is the share of the corpus that word occupies.
+                  The second panel shows a more concentrated fit on the four repeated words. The probability of the whole-word piece low rises from 0.020 to 0.265 to 0.312, approaching its corpus share of five sixteenths. We need to distinguish that piece probability from the probability of a particular segmentation conditioned on the word.
                 </p>
                 <p>
                   Meanwhile lo, which no occurrence needs, goes from 0.028 to 0.011 to 0.000134 and keeps falling. The likeliest spelling of lowest never changes, and its score falls from &minus;7.30 to &minus;9.45 to &minus;18.39 to &minus;36.75 to &minus;73.50, roughly doubling every round.
                 </p>
 </>
                 <KeepInMind>
-                  On a corpus of four repeated words there is nothing left for
-                  the model to be uncertain about, so it stops being uncertain,
-                  and a word the corpus does not contain becomes arbitrarily
-                  improbable while remaining spellable. That is correct
-                  behaviour on a corpus this degenerate rather than a fault, and
-                  it is worth seeing because it is what a real corpus does a
-                  little of everywhere.
+                  This small corpus rewards whole-word entries very strongly. Alternative spellings can become extremely unlikely even while remaining representable. A new word assembled from those low-probability pieces may therefore receive a tiny score. The behaviour follows the training objective on these repeated forms; it is a reason to test held-out words too.
                 </KeepInMind>
               </SubSection>
 
@@ -844,9 +830,7 @@ export default function UnigramLanguageModelPage() {
 
               <SubSection title="20. The sentence at three sizes">
                 <p>
-                  It is worth seeing the pieces themselves rather than the
-                  counts, since the two kinds of mistake look completely
-                  different.
+                  Let&apos;s inspect the actual pieces in both cases. Their counts alone do not show whether a spelling failed because a useful piece was absent or because the scoring chose another path.
                 </p>
                 <SentencePair />
                 <p>
@@ -994,14 +978,7 @@ export default function UnigramLanguageModelPage() {
 
               <SubSection title="23. Shrinking is greedy too, in the other direction">
                 <p>
-                  Part 1 said that merging is greedy and never revisits a piece
-                  it added. It is worth being exact about what shrinking fixes
-                  and what it does not, because the improvement is real and
-                  smaller than it first looks. Each removal here is chosen with
-                  the whole current vocabulary in view, which is genuinely better
-                  than choosing a join with almost nothing in view. But a piece
-                  once removed is gone, and its loss was computed while every
-                  other piece was still present.
+                  Pruning evaluates a piece in the context of the vocabulary currently available. That can account for alternatives that a local merge rule does not consider. But the removal is still a commitment: once a piece is gone, a later change can make it useful again without bringing it back. Removing several pieces based on their separate current costs also need not preserve those costs jointly.
                 </p>
                 <>
 <p>
@@ -1096,7 +1073,7 @@ export default function UnigramLanguageModelPage() {
                     {
                       expression: "a vocabulary that cannot spell some word",
                       reason:
-                        "undefined, not merely bad. That word has probability zero, the corpus is a product containing a zero, and its log likelihood is minus infinity, so no two such vocabularies can be compared and the ranking that drives the whole procedure has nothing to rank. This is why a single symbol is never a candidate for removal and why a vocabulary smaller than the alphabet is refused rather than approximated; on the eighteen sentences that floor is 52 rows.",
+                        "assigned zero probability. The corpus then has log likelihood minus infinity, leaving no finite likelihood comparison between proposals with that failure. This implementation protects single-symbol coverage and rejects requested sizes below its required alphabet. On the eighteen-sentence example that floor is 52 rows.",
                     },
                     {
                       expression: "two spellings with the same probability",

@@ -81,7 +81,7 @@ export default function PoolingATextPage() {
                   Suppose every word already has a position, so that a text of eight words is eight positions, and suppose we want to ask whether two texts are about the same thing. Nothing about eight positions answers that. We could compare them word against word, but the two texts will not be the same length, and even where they are, the third word of one has no reason to line up with the third word of the other.
                 </p>
                 <p>
-                  Anything downstream that reads a fixed number of inputs, which is most things, cannot take a text at all until the text has been reduced to a fixed number of them.
+                  Suppose the next model expects a fixed-width input vector, such as a classifier with one weight per input. A variable number of token vectors will not fit that interface directly. Pooling gives us one vector of the required width, though other architectures can process the sequence without pooling it this way.
                 </p>
 </>
                 <>
@@ -96,11 +96,7 @@ export default function PoolingATextPage() {
                   {"one text  ↦  one position of a fixed width"}
                 </Equation>
                 <KeepInMind>
-                  The width of a pooled position is fixed by the word positions
-                  it is built from and not by the text, so it is the same four
-                  numbers whether the text was three words or three hundred. That
-                  is the whole reason to pool, and everything the rest of the page
-                  measures is what the fixed width costs.
+                  With four-coordinate word vectors, pooling returns four coordinates whether the text contains three words or three hundred. That makes the result convenient for a fixed-width comparison or model. We now need to examine which information disappears when we combine the token vectors.
                 </KeepInMind>
               </SubSection>
 
@@ -426,7 +422,7 @@ export default function PoolingATextPage() {
               <SubSection title="10. Why the comparison is the angle and not the distance">
                 <>
 <p>
-                  A pooled position has a length, and it is worth asking what the length is a fact about before using it for anything. Under the plain average the three texts come out at lengths 0.4886, 0.5083 and 0.5279, close to each other because all three texts are eight words long and the words of each point broadly the same way.
+                  What does the length of a pooled vector tell us? For the plain average, these three texts give lengths 0.4886, 0.5083 and 0.5279. They contain eight words each, with their word vectors pointing broadly in similar directions. We will compare other pooling rules before interpreting length as a property of the text.
                 </p>
                 <p>
                   Under the smooth weights they come out between 0.0104 and 0.0112, because no weight there is above 0.028. Under the last rule they come out between 0.0048 and 0.0062, because most of what was there has been taken out.
@@ -646,20 +642,10 @@ export default function PoolingATextPage() {
 
               <SubSection title="14. What that weighting is worth">
                 <p>
-                  On the hand-built collection it is worth a great deal. The
-                  share of the answer supplied by the falls from 0.8000 to 0.5396
-                  and each of cat and dog rises from 0.1000 to 0.2302, and the
-                  margin between the two subjects goes from 0.1640 to 0.3871,
-                  which is more than double. The most alike pair of documents
-                  across the two subjects falls from 0.8349 to 0.6105.
+                  The change is substantial on the hand-built collection. The contribution from the falls from 0.8000 to 0.5396, while cat and dog each rise from 0.1000 to 0.2302. The topic margin increases from 0.1640 to 0.3871. The most similar cross-topic document pair falls from 0.8349 to 0.6105, making those groups easier to distinguish under this measure.
                 </p>
                 <p>
-                  On the twenty-four documents it is worth much less, for the
-                  reason Part 2 gave, which is that the weights themselves barely
-                  differ there. The margin moves from 0.0622 to 0.0819 and the
-                  three texts&rsquo; margin from 0.2106 to 0.2331. Both are real
-                  improvements and neither is the kind of change that decides
-                  whether a method works.
+                  On the twenty-four documents, the weights differ much less, so the effect is smaller. The topic margin moves from 0.0622 to 0.0819, and the three-text comparison from 0.2106 to 0.2331. These measured improvements do not establish how much a downstream task would benefit.
                 </p>
                 <NumberTable
                   headings={[
@@ -873,9 +859,7 @@ export default function PoolingATextPage() {
                   average managed.
                 </p>
                 <KeepInMind>
-                  Removing one direction out of four is a large intervention and it
-                  is worth more here than every weighting on the page put together.
-                  The next section is where that turns out to have a price.
+                  Removing one of four directions changes a large part of the representation. Here it improves the separation more than the weighting choices did. Next we will inspect what useful information that removal can also discard.
                 </KeepInMind>
               </SubSection>
 
@@ -1136,10 +1120,7 @@ export default function PoolingATextPage() {
 
               <SubSection title="25. Empty texts and averages with no direction" id="25-the-cases-with-nothing-to-compute">
                 <p>
-                  Four inputs make one of these calculations undefined rather than
-                  merely awkward, and it is worth knowing which quantity fails and
-                  why, since each one is a decision anybody implementing this has
-                  to make.
+                  The cases below expose undefined calculations or missing information. For each one, identify the quantity we cannot compute and choose an explicit response rather than quietly manufacturing a vector.
                 </p>
                 <DerivationTable
                   expressionHeading="Text, vocabulary or shared direction"

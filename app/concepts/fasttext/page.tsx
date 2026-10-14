@@ -73,21 +73,14 @@ export default function FasttextPage() {
               <SubSection title="1. Two lists of words, and the form left out of one">
                 <>
 <p>
-                  Everything on this page is fitted to one small corpus, and what matters about it is not only what it holds but what it deliberately does not. Two hundred sentences of five to eight words each, every sentence drawn from one of two word lists and never from both. One list holds twenty forms of five verbs, play, stay, say, walk and talk, in their various endings; the other holds eleven words about money, stock, bond, market, price and so on.
+                  We will use two hundred generated sentences, each five to eight words long. Each draws from either a list of twenty forms of play, stay, say, walk and talk, or a list of eleven finance words such as stock, bond, market and price. The lists never mix within a sentence. This keeps the context pattern controlled while we investigate what spelling contributes.
                 </p>
                 <p>
                   That comes to 1,311 word occurrences across 31 distinct words, and no word appears in both lists.
                 </p>
 </>
                 <p>
-                  The verb list holds play, plays, player and played. It does not
-                  hold playing. Every short run of letters that playing is made of
-                  turns up somewhere in the corpus, in the four play forms and in
-                  staying, saying, walking and talking, and the word itself turns
-                  up in no sentence at all. That single absence is what the rest of
-                  the page is about, because it is the smallest honest version of
-                  the situation every model meets the moment it is asked about
-                  text it was not trained on.
+                  There is a deliberate omission: the corpus contains play, plays, player and played, but never playing. Its shorter character pieces occur in those forms and in staying, saying, walking and talking. Can the model build a useful representation for the unseen word from pieces it has learned elsewhere? That is the question we will test.
                 </p>
                 <KeepInMind>
                   The sentences are nonsense, which is deliberate. Words are drawn
@@ -133,13 +126,7 @@ export default function FasttextPage() {
 
               <SubSection title="3. The missing word is not a special case">
                 <p>
-                  It would be comfortable to read playing as a contrivance, one
-                  word held back so that the page has something to show. This
-                  corpus cannot settle that either way, and it is worth saying so
-                  before leaning on it. Its sentences draw words uniformly from a
-                  fixed list, so its commonest word appears 73 times and its rarest
-                  17, and not one of the 31 appears only once. A text made that way
-                  has no tail of rare words for a missing word to come from.
+                  Holding out playing gives us a controlled test, but this corpus cannot show how often the problem occurs in ordinary text. Its words are sampled uniformly from a fixed list: the most frequent appears 73 times, the least frequent 17 times, and none of the 31 appears only once. We deliberately omitted a word; we did not reproduce a natural distribution with a long tail of rare forms.
                 </p>
                 <p>
                   So the case has to be made rather than found. Take a word the
@@ -263,14 +250,7 @@ export default function FasttextPage() {
                 </p>
                 <Equation>{"vector(w) = row(w) + Σ over the pieces g of <w> of row(g)"}</Equation>
                 <p>
-                  On this corpus play, plays, player and played all add the rows
-                  for &lt;pl, pla, lay, &lt;pla, play and &lt;play, six pieces they
-                  have in common, so anything the corpus teaches about any one of
-                  them moves all four. Staying and saying share ten pieces with
-                  playing, all of them from the ending; walking and talking share
-                  three, ing, ing&gt; and ng&gt;. That sharing is the whole of what
-                  the method adds, and it is worth noticing that it is decided
-                  before any fitting, by the spellings alone.
+                  Play, plays, player and played share the pieces &lt;pl, pla, lay, &lt;pla, play and &lt;play. Updating one of those shared rows therefore changes several word representations. Playing also shares ten ending pieces with staying and saying, and three with walking and talking: ing, ing&gt; and ng&gt;. Spelling determines these shared rows before training; the corpus determines how their values change.
                 </p>
                 <WhyThisWorks title="Why a sum, and why the choice is nearly invisible">
                   <p>
@@ -520,12 +500,7 @@ export default function FasttextPage() {
             <>
               <SubSection title="12. No piece short enough to exist">
                 <p>
-                  Before counting what the pieces cost, it is worth knowing exactly
-                  what they add, and there is a clean way to ask. Set the shortest
-                  piece to fifty characters. The longest wrapped word in this corpus
-                  is nine characters, so no word has a piece at all, every row kept
-                  for the pieces stays where it started, and what is left ought to
-                  be the plain method exactly.
+                  We can check the contribution of character pieces by disabling them. Set the minimum piece length to fifty characters. The longest wrapped word here has nine, so no pieces qualify and their rows receive no updates. The remaining calculation should agree with the plain word-level method.
                 </p>
                 <FasttextReduction />
                 <p>
@@ -660,13 +635,7 @@ export default function FasttextPage() {
                   words, which is no longer an answer worth reading.
                 </p>
                 <p>
-                  What the sweep does not show is a smooth curve, and it is worth
-                  reporting rather than smoothing over. Fifty rows put the missing
-                  form at 0.1133 to the money words and two hundred rows put it at
-                  0.2285, which is worse at the larger table. Which particular
-                  pieces happen to collide is a fact about the hash and this
-                  vocabulary, not a quantity that improves steadily as the table
-                  grows.
+                  The sweep is uneven. With fifty rows, the missing form&apos;s similarity to the finance words is 0.1133; with two hundred rows it is 0.2285, worse for this comparison. A larger table changes which pieces collide under this hash. It need not improve this particular result at every size.
                 </p>
                 <NumberTable
                   headings={[

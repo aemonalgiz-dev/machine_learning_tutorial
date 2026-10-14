@@ -89,10 +89,7 @@ export default function MultiplePolynomialRegressionPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  That is the whole motivation. Some of the difference between
-                  people of one height goes with another measured variable, and
-                  multiple regression lets several inputs contribute to one
-                  prediction.
+                  Age gives us another possible source of information about these two people. Multiple regression lets several measured inputs contribute to the prediction, so people with the same height no longer have to receive the same answer.
                 </p>
               </SubSection>
 
@@ -302,15 +299,7 @@ export default function MultiplePolynomialRegressionPage() {
                   />
                 </WorkedExample>
                 <p>
-                  Changing one coefficient changes what the others need to do,
-                  so the fit chooses all of them at once. RSS is a bowl over
-                  every coefficient together, the same bowl the regression
-                  page drew over a slope and an intercept, with one more
-                  direction per input, and the least-squares answer is its one
-                  lowest point. Each coefficient is chosen in the context of
-                  every other input in the model, which is why adding or
-                  removing an input can move every coefficient, not only the
-                  one that came or went.
+                  We fit the coefficients together because they contribute to the same predictions. Changing one can change which values work best for the others. The sum of squared residuals forms a quadratic surface over these choices, like the error surface we saw for a slope and intercept. Least squares finds a minimum of that surface. There can be more than one minimizing coefficient vector if the columns are linearly dependent. Adding or removing a column can therefore change the other fitted coefficients as well.
                 </p>
               </SubSection>
             </>
@@ -343,11 +332,7 @@ export default function MultiplePolynomialRegressionPage() {
                   caption="A second column, built from the first before any fitting starts."
                 />
                 <p>
-                  A model can receive transformed versions of an existing input
-                  as extra inputs, and the fit neither knows nor cares that one
-                  column was made from another. Polynomial regression is
-                  nothing more than this. It builds the power columns and hands
-                  the widened table to the machinery of Parts 1 and 2.
+                  We can create additional features from an existing input, then fit their coefficients together. Polynomial regression uses powers of the original inputs for those new columns. The fitting machinery from Parts 1 and 2 still applies, although the resulting relationship with the original input can be curved.
                 </p>
               </SubSection>
 
@@ -570,21 +555,11 @@ export default function MultiplePolynomialRegressionPage() {
 
               <SubSection title="15. Residual patterns and underfitting">
                 <p>
-                  The degree-1 model is not just worse by the numbers. Its
-                  misses have a shape. Plot each residual against time and the
-                  line&rsquo;s residuals are negative at both ends and
-                  positive in the middle, which is the arc it could not draw,
-                  left over in the errors.
+                  Look at the residuals against time. For the degree-one model, they are negative at both ends and positive in the middle. That pattern shows the arc the line failed to describe. We can use the residual plot to see a limitation that one overall score would hide.
                 </p>
                 <ResidualPatternChart />
                 <p>
-                  On the ideal throw the parabola&rsquo;s residuals are zero.
-                  On the noisy throw they are a scatter with no obvious curve,
-                  which is what residuals look like when the model has taken
-                  the structure and left the noise. A visible pattern in the
-                  residuals says the model has left systematic structure
-                  unexplained, and that is worth checking on any fit, not only
-                  polynomial ones.
+                  The parabola has zero residuals on the ideal throw. On the noisy throw, its residuals have no obvious remaining curve. That is consistent with having captured the main pattern, though it is not proof that the remaining errors contain no structure. Residual plots are useful for checking many fitted models, including these polynomial ones.
                 </p>
                 <p>
                   This has a name. A model too rigid to represent the pattern
@@ -741,11 +716,7 @@ export default function MultiplePolynomialRegressionPage() {
                   ]}
                 />
                 <p>
-                  A score becomes concerning because of how it was achieved
-                  and whether the model generalises, and not merely because it
-                  is high. Fourteen noisy points and a degree-13 curve will
-                  score exactly 1 by threading every one of them, and that
-                  says nothing about the fifteenth.
+                  A high training score needs to be interpreted alongside the model and the amount of data. In exact arithmetic, a degree-thirteen polynomial can interpolate fourteen points at distinct inputs and give an R² of one when that score is defined. That perfect fit does not tell us how it will predict a fifteenth observation.
                 </p>
               </SubSection>
 

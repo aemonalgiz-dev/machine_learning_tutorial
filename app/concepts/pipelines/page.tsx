@@ -220,12 +220,7 @@ export default function PipelinesPage() {
                 </p>
                 <Equation>{"standardizer, fitted after the expansion, learned\n  height    centre 167.11     spread 10.38\n  height²   centre 28033.78   spread 3467.39"}</Equation>
                 <p>
-                  That is the rule, and at predict time nothing else would
-                  work, since the standardizer will be handed the
-                  expansion&rsquo;s output and so has to have been fitted on
-                  the expansion&rsquo;s output; a standardizer fitted on the
-                  raw height would meet a column called height squared that it
-                  had never learned a scaling for, and refuse it.
+                  The standardizer will receive expanded features when we predict, so it must learn its reference values from expanded training features too. If we fitted it on raw height alone, it would have no learned centre or scale for the new height-squared column. The pipeline keeps this order consistent between fitting and prediction.
                 </p>
                 <KeepInMind>
                   A step is fitted on the output of the step before it, never
@@ -711,15 +706,7 @@ export default function PipelinesPage() {
             <>
               <SubSection title="20. Expand then standardize, or standardize then expand">
                 <p>
-                  Two steps can run in two orders, and the chain treats the
-                  order as part of the model rather than as a detail, so it is
-                  worth asking whether the model can tell. Expand height and
-                  then standardize both columns, and the ridge is handed two
-                  columns each with centre zero and spread one. Standardize
-                  height and then square it, and the ridge is handed the
-                  standardized height beside its square, whose centre is one
-                  and whose spread is something else. The chart runs both
-                  orders at six penalties on the same four folds.
+                  Does preprocessing order change the model? Expand height first and standardize afterwards, and ridge receives two centred, unit-spread columns. Standardize height first and square it afterwards, and the square column has mean one under the population-variance convention used here, with a different spread. The chart compares both orders at six penalties on the same four folds.
                 </p>
                 <StepOrderChart />
                 <p>

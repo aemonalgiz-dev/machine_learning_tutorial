@@ -38,15 +38,7 @@ export default function MovingAVocabularyPage() {
       tagline={"A vocabulary learned under one tokenization scheme may need to be used under another. We will follow what happens to its pieces, including boundaries that disappear and entries that become indistinguishable after the move."}
       prerequisites={
         <>
-          You need two things from earlier in this section. The first is what a
-          vocabulary is, which is a list of spellings with a position for each,
-          so that a text becomes a list of positions. The second is byte pair
-          encoding, since both vocabularies on this page are learned that way,
-          and in particular the marker that says a piece ended a word rather
-          than continuing one. Nothing else on this page is new machinery. Every
-          other page in this section is about learning a vocabulary; this one is
-          about a vocabulary that already exists and has to be used somewhere it
-          was not learned.
+          We will use what we know about vocabulary IDs and byte-pair encoding, including its end-of-word marker. This time a vocabulary and its learned vectors already exist. We want to adapt them to text about a different subject. Which rows can we reuse, and what should we do for pieces the old vocabulary never represented?
         </>
       }
 
@@ -150,11 +142,7 @@ export default function MovingAVocabularyPage() {
 
               <SubSection title="3. Three ways out, and what each of them costs">
                 <p>
-                  Written down plainly there are three things one can do with a
-                  model whose vocabulary no longer suits its data, and it is
-                  worth setting them beside each other before any mechanism,
-                  because the method below is the third of them and its whole
-                  claim is about the second.
+                  Before moving any rows, let&apos;s compare the available choices for a model whose vocabulary no longer suits its data. The table shows the alternatives and their costs. We will then investigate the third approach and compare its starting point with learning new rows from scratch.
                 </p>
                 <DerivationTable
                   expressionHeading="what to do"
@@ -511,15 +499,7 @@ export default function MovingAVocabularyPage() {
 its text    "ew"          the marker is gone, and no text can hold it
 read again  e, w${"</w>"}       the w now says a word ended here`}</Equation>
                 <p>
-                  It is worth being clear about why this cannot be repaired
-                  inside the third rule. Decoding has to produce text, because
-                  text is the only thing the old vocabulary knows how to read,
-                  and a marker is not part of the text. One could imagine
-                  passing the position along beside the text, and then the old
-                  vocabulary would need an entry point that encodes a fragment
-                  known to sit inside a word, which is a different operation
-                  from encoding a text and not one any of these vocabularies
-                  offers.
+                  This rule decodes the new piece to text and asks the old tokenizer to encode that text. The old tokenizer therefore loses the marker describing where the piece occurred inside a word. Preserving that information would require a fragment-encoding interface with an explicit boundary context. The tokenizers used here do not provide that operation.
                 </p>
                 <KeepInMind>
                   The copy rule exists because of this. Within one convention it
@@ -591,14 +571,7 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
                   caption="Same corpus, same size, same number of merges. The only difference is which end of a word each vocabulary marks."
                 />
                 <p>
-                  Two of the seventeen land on a plausible row, and it is worth
-                  seeing why. The continuation piece est decodes to
-                  the text est, which the byte pair vocabulary reads as the
-                  whole word est, and it happens to hold a row for exactly that
-                  spelling, so the mapping is right. The word-initial piece low
-                  lands on the row for low with its marker in the same way, and
-                  that one is right about the letters and wrong about the claim,
-                  since a word-initial piece is not a piece that ended a word.
+                  Two of the seventeen cases happen to reach plausible rows. The continuation piece est becomes plain text est, which the old vocabulary treats as a whole word and can represent with a matching spelling. The word-initial piece low similarly reaches a whole-word low entry. Its letters match, but its original boundary role does not. A matching spelling therefore needs closer inspection.
                 </p>
                 <KeepInMind>
                   The copy rule compares spellings, and two conventions have
@@ -737,10 +710,7 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
 
               <SubSection title="17. What a larger new vocabulary does to that">
                 <p>
-                  The size of the new vocabulary is a free choice, so it is
-                  worth seeing what the choice does to the move rather than
-                  guessing. Fit the pastry corpus at nine sizes, move the report
-                  vocabulary into each, and count the two routes at each size.
+                  Let&apos;s fit the pastry corpus at nine vocabulary sizes. For each one, transfer the report vocabulary and count how many rows use each transfer route. That shows how the chosen size changes the amount of exact reuse and composed initialization.
                 </p>
                 <SurvivalSweep />
                 <p>
@@ -942,13 +912,7 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
             <>
               <SubSection title="23. Spelling is preserved and position is not">
                 <p>
-                  Everything measured above follows from one property of the
-                  third rule, and it is worth stating as a fact about the method
-                  rather than as a result. The only channel between the two
-                  vocabularies is text. A piece is not text; a piece is text
-                  together with a claim about where in a word it sat, and that
-                  claim is written in a marker which is not part of any string
-                  the piece stands for.
+                  The third rule passes only decoded text between the vocabularies. A vocabulary piece may also carry a boundary role, recorded by a marker that is not part of that text. The transfer therefore cannot preserve every part of the original piece&apos;s interpretation through this interface.
                 </p>
                 <p>
                   So the move is exactly as faithful as the copy rule can make
@@ -995,13 +959,7 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
 
               <SubSection title="25. A piece may survive and still be doing another job">
                 <p>
-                  The last point is the one the copy rule cannot see, and it is
-                  the reason the previous section is not merely cautious. A
-                  spelling shared by two vocabularies is copied exactly and its
-                  row arrives intact, carrying everything the old model learned
-                  about that piece. What the spelling does not carry is which
-                  words the piece turns up in, and on two corpora about different
-                  subjects that can be entirely different.
+                  Even an exact row copy has a limit. The spelling and vector survive, but the new corpus may use that spelling in different words or contexts. Copying gives us an initialization from what the old model learned. It does not establish that the vector already suits the new subject.
                 </p>
                 <NumberTable
                   headings={[

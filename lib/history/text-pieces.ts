@@ -36,7 +36,7 @@ export const textPieces = {
   ],
   "Suppose we have room for only a few vocabulary additions. Two candidate pieces may each cover many occurrences, but much of their coverage may overlap. Selecting both on their standalone counts can spend the second slot on information the first already supplied.",
   "This is related to a broader optimisation problem studied by Nemhauser, Wolsey and Fisher in 1978: choosing a limited set of items when each new item's benefit can diminish as the selected set grows. Their results explain why greedy selection can be useful under specific assumptions about the objective.",
-  "We select a candidate, mark what it covers, and recalculate what each remaining candidate would add. The next decision uses new coverage, not the original total. Applying that principle to vocabulary selection requires an explicit definition of the units being covered. A guarantee for a coverage objective does not automatically guarantee shorter token sequences or a better language model."),
+  "We select a candidate, mark what it covers, and recalculate what each remaining candidate would add. Ordinary weighted set union allows overlaps while counting each position once. Our tokenizer instead rejects occurrences that overlap an earlier piece. That difference makes selection order matter and prevents us from transferring the standard set-coverage guarantee to this implementation. We can still inspect its choices and compare its coverage and encoded lengths directly."),
 
   "morfessor": history("Could Repeated Word Parts Reveal How Words Are Built?", [
     source("Creutz and Lagus (2002), Unsupervised Discovery of Morphemes", "https://aclanthology.org/W02-0603/"),

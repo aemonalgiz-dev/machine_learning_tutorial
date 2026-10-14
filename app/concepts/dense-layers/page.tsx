@@ -73,7 +73,7 @@ export default function DenseLayersPage() {
 <>
               <SubSection title="1. Three neurons reading the same two numbers">
                 <p>
-                  Take one person from the crowd the classification pages keep returning to, written in standard units so that (1, 2) means one deviation taller than average and two deviations heavier. The neurons page hands that row to one neuron and gets one number back. Hand the same row to three neurons at once and three numbers come back, and that is the whole of what a layer adds.
+                  Take one person in standardized units: (1, 2) means one standard deviation taller than average and two heavier. One neuron reads this row and returns one output. What if we want several different responses to the same measurements? We can give the row to three neurons, each with its own weights and bias. Their outputs form the next layer&apos;s input.
                 </p>
                 <p>
                   Nothing about any neuron has changed. Each still holds one weight per input and a bias, forms its score, applies its activation function, and passes on the output.
@@ -330,13 +330,7 @@ export default function DenseLayersPage() {
 
               <SubSection title="8. The activation function is applied one entry at a time">
                 <p>
-                  After the multiply, each neuron transforms only its own score,
-                  so the activation function is applied to every entry of z on its own and
-                  the result has z&rsquo;s shape. That is what lets a whole
-                  layer share one activation function applied to one block in a single call,
-                  and it is why softmax is not among the four activation functions here,
-                  since softmax reads a whole row of scores to answer any one
-                  of them, which the neurons page sets out.
+                  After the weighted sums, each neuron applies its activation to its own score. An elementwise activation therefore keeps the shape of z, and we can apply it across the layer in one call. Softmax behaves differently: each output depends on the whole row of scores. That is why it is treated separately from the four elementwise activations here.
                 </p>
                 <Equation>{"a = f(z), entry by entry\n\nrectifier   (3, −1, 1) → (3, 0, 1)\nsigmoid     (3, −1, 1) → (0.9526, 0.2689, 0.7311)\ntangent     (3, −1, 1) → (0.9951, −0.7616, 0.7616)"}</Equation>
                 <p>

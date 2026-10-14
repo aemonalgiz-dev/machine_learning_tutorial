@@ -418,13 +418,7 @@ export default function LearningTheMetricPage() {
 
               <SubSection title="11. A weight used twice has two slopes, and they add">
                 <p>
-                  That the two slopes should be added is the whole point of the
-                  arrangement, and it is easy to get wrong, by stepping each copy
-                  on its own slope and ending up with two copies that no longer
-                  agree. The check is to nudge a weight up and down by a tiny
-                  amount, run both pictures through the nudged network again, and
-                  measure how much the pair loss changed. That measurement knows
-                  nothing about copies.
+                  Both pictures use the same weights, so both routes contribute to one parameter gradient. We add those contributions before updating. If we updated two separate copies instead, they could stop representing the same mapping. To check the shared gradient, nudge one weight, run both pictures again, and measure the change in their pair loss.
                 </p>
                 <SharedWeightsCheck />
                 <p className={caption}>
@@ -452,12 +446,7 @@ export default function LearningTheMetricPage() {
 
               <SubSection title="12. The last layer’s biases learn nothing">
                 <p>
-                  The last row of the table above is a bias of the layer that
-                  produces the position, and its summed slope is exactly zero,
-                  not merely small. Through the first pictures&rsquo; copy its
-                  slope is 0.1462 and through the second it is &minus;0.1462. The
-                  reason is that a bias adds the same amount to every position, and
-                  the loss only ever reads the difference between two positions.
+                  The final embedding-layer bias shifts both pictures by the same amount. Their difference is unchanged, so a loss depending only on that difference has zero gradient for the shared bias. In this calculation, the two route contributions are 0.1462 and −0.1462 and cancel. This conclusion depends on that particular loss and output arrangement.
                 </p>
                 <Equation>
                   {"(p(a) + c) − (p(b) + c) = p(a) − p(b)"}
@@ -512,7 +501,7 @@ export default function LearningTheMetricPage() {
             trueFalse(
               "Searched among all 300 pictures, the reference classifier’s layer finds the right kind for far fewer squares than for crosses, discs or bars.",
               true,
-              "It gives a nearest neighbour of the right kind to 56 crosses, 58 discs and 59 bars of 60, and to only 40 squares. The rings it was never shown land among the squares and take their places as nearest neighbours, which is the whole point about a ruler borrowed from a classifier.",
+              "The nearest neighbour has the correct known class for 56 crosses, 58 discs and 59 bars out of sixty each, but only 40 squares. The unseen rings often become the squares' nearest neighbours. This shows a limitation of using a classifier's representation as a distance: it was trained to distinguish its known classes, while our retrieval question includes another shape.",
             ),
             choice(
               "Both pictures of a pair go through one set of weights. What forces that?",

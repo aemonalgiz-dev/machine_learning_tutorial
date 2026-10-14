@@ -40,9 +40,7 @@ print(design(np.array([10.])).shape)`, '[0.0, 1.0, 0.0]\n(1, 3)', 'Three fitted 
 Inspect widths that are too narrow and too broad. Narrow units can leave unsupported gaps; broad units can create similar columns and unstable coefficients. Choose centres, widths and regularisation using an evaluation that reflects where new inputs will occur.`),
  ]),
  'residual-connections': add('Trace the gradient route and distinguish identity from projection shortcuts.', [
-  show(p('The Skip Route Also Carries a Gradient', `A residual block adds a learned correction to its input. Differentiating the sum gives a direct contribution from the identity route alongside the derivative through the correction. This is why the skip connection changes optimisation, not merely the appearance of a diagram.
-
-The sum can still cancel in a particular direction, so a residual connection is not a guarantee that gradients never vanish. It supplies another route that the network can use.`), worked('Compare a small correction with a replacement', 'For this scalar illustration, the correction multiplies its input by 0.1.', `x = 4.
+  show(p('The Skip Route Also Carries a Gradient', "A residual block adds a learned correction to its input. When we differentiate that sum, we get a contribution from the unchanged input alongside the derivative through the correction. Follow those two paths in the diagram: both contribute to how an earlier layer receives a gradient.\n\nThe contributions can still cancel in a particular direction. A residual connection gives the gradient another route, but it does not guarantee that gradients remain large throughout the network."), worked('Compare a small correction with a replacement', 'For this scalar illustration, the correction multiplies its input by 0.1.', `x = 4.
 correction_weight = .1
 replacement = correction_weight*x
 residual = x + correction_weight*x

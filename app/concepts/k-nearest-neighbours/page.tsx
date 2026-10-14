@@ -60,12 +60,7 @@ export default function KNearestNeighboursPage() {
                 belong to.
               </p>
               <p>
-                The method answers the way a person would. Look at whoever the
-                new arrival most resembles. The dashed lines reach out to the k
-                stored people nearest the query, those neighbours each vote
-                their own label, and the majority wins. Drag the ringed point
-                around and watch the lines grab different neighbours and the
-                answer follow.
+                We will use resemblance as our starting rule. The dashed lines connect the new person to the k nearest stored people. Each neighbour votes for its own label, and the majority decides the prediction. Move the ringed point and watch which neighbours it reaches. Where does the prediction change?
               </p>
               <>
                 <p>
@@ -92,12 +87,7 @@ export default function KNearestNeighboursPage() {
               </p>
               <Equation>{"distance = √((height₁ − height₂)² + (weight₁ − weight₂)²)"}</Equation>
               <p>
-                Compute that distance from the query to every stored person,
-                keep the k smallest, and let those k labels vote, majority
-                rules. That is the entire mechanism, which is itself the
-                lesson. Where regression compressed the data into a few fitted
-                numbers and then discarded it, this method keeps every example
-                and compresses nothing.
+                To make a prediction, calculate the distance to each stored person and keep the k smallest distances. Those neighbours supply the votes. We therefore need to keep the training examples available for later predictions. A fitted regression line can predict from its coefficients alone; this method still needs the observations.
               </p>
               <p>
                 The number k is the one dial, and it is kept odd here so a

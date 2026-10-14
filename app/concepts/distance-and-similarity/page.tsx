@@ -79,14 +79,7 @@ export default function DistanceAndSimilarityPage() {
 <>
               <SubSection title="1. What a table of positions claims">
                 <p>
-                  Suppose we have given every word in a collection of texts a
-                  handful of coordinates, so that each word is a point rather
-                  than a number in a list. On its own that is a table, and a
-                  table makes no claim about anything. It becomes a claim only
-                  at the moment we say that two words near each other in it are
-                  alike, because near is not a property of the table, it is a
-                  property of the table together with some rule for turning two
-                  rows into one verdict.
+                  Suppose each word already has a vector. We want to use those vectors to find similar words, but we still need to choose what similarity means numerically. Should we compare the distance between their endpoints, or the directions they point in? Those choices can rank the same words differently. Let&apos;s calculate both before deciding which information we want to keep.
                 </p>
                 <p>
                   So the interesting object is not really the positions. It is the rule, and the positions are worth exactly what the rule can read out of them. Two people can hold the same table, ask the same question of it, and get different answers, and neither of them has made a mistake, because they picked up different rules.
@@ -237,9 +230,7 @@ export default function DistanceAndSimilarityPage() {
             <>
               <SubSection title="5. Three words small enough to count on paper">
                 <p>
-                  Before reading rules off a fitted table, where nobody can
-                  check the arithmetic, it is worth building the crudest
-                  possible table by hand. Take two words from the collection,{" "}
+                  Let&apos;s first use a small table whose entries we can inspect directly. We can check the arithmetic there before applying the rules to fitted vectors. Take two words from the collection,{" "}
                   <span className="font-mono">oven</span> and{" "}
                   <span className="font-mono">wind</span>, and give every other
                   word two numbers, which are how often it stood within two
@@ -623,13 +614,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
 
               <SubSection title="13. What a length records, measured two ways">
                 <p>
-                  If the length of a position carries how much of the word we
-                  saw, and its direction carries how the word was used, then a
-                  rule that ignores length is asking about usage and a rule that
-                  reads it is asking about usage and volume together. That is
-                  the standard argument for comparing word positions by angle,
-                  and on this collection it is worth checking rather than
-                  repeating, because the two fits disagree about it.
+                  Sometimes vector length reflects frequency or magnitude while direction reflects the pattern of usage. In that case cosine and a length-sensitive score answer different questions. But we need to check whether the fitted vectors actually have that interpretation. The two fits here behave differently, so we cannot assume it from the representation&apos;s name.
                 </p>
                 <LengthAgainstUse />
                 <p className="text-sm text-slate-600 dark:text-slate-400">
@@ -750,10 +735,7 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
                 <p>
                   Standing at <span className="font-mono">oven</span> instead,
                   five rules of six agree on{" "}
-                  <span className="font-mono">eggs</span>, and the disagreement
-                  vanishes. That is the ordinary case, and it is worth knowing
-                  that the rules mostly agree before spending any time on where
-                  they do not.
+                  <span className="font-mono">eggs</span>, and the disagreement vanishes. Many of the rankings in this example agree. The differences we examine next concern the cases where choosing a rule changes the result.
                 </p>
               </SubSection>
 
@@ -1010,11 +992,7 @@ a million out            squared lengths  ≈ 4 × 10¹²     step between machi
                 </WhyThisWorks>
                 <KeepInMind>
                   <p>
-                    This is a fact about how a gap is computed rather than about
-                    any table of positions, and it is worth knowing because the
-                    failure is silent. A gap that has lost every one of its
-                    digits is still a non-negative number and still takes its
-                    place in a sort beside the readings that survived.
+                    Numerical cancellation can erase a small distance even when the inputs are valid. A result rounded to zero still looks like an acceptable nonnegative distance and can enter the neighbour ordering without an error. We need to check the calculation itself when comparing nearly coincident vectors.
                   </p>
                 </KeepInMind>
               </SubSection>
@@ -1070,13 +1048,7 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
             <>
               <SubSection title="22. Nothing in the data chooses the rule">
                 <p>
-                  Everything so far has been a comparison between rules, and it
-                  is worth being clear that no amount of further data settles
-                  which one to take. A collection of documents fixes the
-                  positions, and having fixed them it has said everything it can
-                  say. Which of the six readings of those positions is the right
-                  one is a question about what we meant by alike, and the
-                  documents were never asked.
+                  The fitted vectors alone cannot tell us which definition of similarity suits our task. We can test candidate measures against relevant judgments or downstream outcomes. Without such a criterion, collecting more documents does not decide whether length, direction or another property is what we meant by alike.
                 </p>
                 <p>
                   That is not a counsel of despair, because the choice can be argued from properties rather than guessed. If a word&rsquo;s volume in the collection should not affect who its neighbours are, that argues for the angle and rules out four of the others, and step 12 makes the argument checkable. If some coordinate is a category code, that argues for the rule that reads equality and rules out the rest.

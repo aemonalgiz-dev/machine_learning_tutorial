@@ -107,10 +107,7 @@ export default function DecisionTreesPage() {
                   ]}
                 />
                 <p>
-                  A tree is a hierarchy with questions at the nodes and
-                  predictions at the leaves. Load the muddled crowd above and
-                  set the depth cap to two for a tree that has all of these,
-                  a root, two internal questions beneath it, and four leaves.
+                  A larger tree lets one answer lead to another question. The starting question is the root, later questions are internal nodes, and the final predictions are leaves. Load the muddled crowd and set the depth cap to two. You can follow a person from the root through a second question to one of four leaves.
                 </p>
               </SubSection>
 
@@ -229,11 +226,7 @@ export default function DecisionTreesPage() {
                   ]}
                 />
                 <p>
-                  A useful question creates child groups whose mixtures are
-                  cleaner than the parent&rsquo;s. Which of the three is best
-                  needs no arithmetic. What needs arithmetic is ranking the
-                  seventeen other candidates the search also tries, and that
-                  is what the next Part builds.
+                  The best of these three questions is easy to spot because its two groups have clearer labels. A computer needs a numerical comparison to choose it. There are seventeen other candidate splits here too, so in the next part we will build a score that can compare all of them.
                 </p>
                 <p>
                   Cleaner is the right test because of what a node is for. A
@@ -1007,11 +1000,7 @@ export default function DecisionTreesPage() {
                 </p>
               </WorkedExample>
               <p>
-                Positive gain means the split reduces the expected impurity.
-                Zero means it leaves it unchanged, which is section 20&rsquo;s
-                crossed crowd at every candidate. Larger means a cleaner
-                immediate division, and impurity gain is nothing more than the
-                expected label mixture a question removes.
+                A positive gain means the split reduces expected impurity; zero means it leaves impurity unchanged, as in section 20&apos;s crossed example. A larger gain favours a cleaner immediate division under this criterion. It does not by itself tell us how the full tree will perform on new observations.
               </p>
             </SubSection>
           ),

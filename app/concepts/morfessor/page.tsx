@@ -42,15 +42,7 @@ export default function MorfessorPage() {
       tagline={"Words often share stems and endings, such as walk in walked and walking. Morfessor looks for reusable parts by balancing the cost of storing a vocabulary against the cost of describing the observed words."}
       prerequisites={
         <>
-          You need two things from earlier in this section. Something has
-          already decided where the words are, so everything below takes a text
-          cut on its spaces and asks what the pieces inside a word should be.
-          And you have seen a vocabulary grown by counting, where the piece
-          bought next is whichever one shortens the corpus most right now. This
-          page keeps the same question and changes the answer to it, so the
-          first part is a measurement of what counting does to words whose
-          joints nobody disputes. Logarithms appear, and one binomial
-          coefficient, and nothing else.
+          We will work inside words that have already been separated at spaces. Earlier methods selected pieces using corpus counts. Here we will ask a more specific question: can a compact description of the corpus favour recurring stems and endings? The first example compares learned pieces with familiar word forms. We will introduce the logarithms and the binomial coefficient when we need them for the description cost.
         </>
       }
 
@@ -105,7 +97,7 @@ export default function MorfessorPage() {
                 <CountCutLadder />
                 <>
 <p>
-                  The first four rows bought are al, alk, la and pla. Every one of them cuts a stem somewhere inside it. The reason is not subtle. In walk and talk, and in every form built on either of them, the letters a and l sit next to each other, which is eight of the twelve words, and the counting finds no pair that occurs more often than that.
+                  The first selected pieces are al, alk, la and pla. They divide familiar stems internally. For example, a and l are adjacent in walk, talk and all their forms, which covers eight of the twelve words. A frequency-based rule has a good reason to select that pair, even though its objective does not require it to respect a stem boundary.
                 </p>
                 <p>
                   So a joins l, and then al joins k, and by the third row the play forms have contributed la. Nothing in the counting has any way of preferring the boundary between walk and ing to the boundary between w and alk.
@@ -224,7 +216,7 @@ export default function MorfessorPage() {
               <SubSection title="6. Three amounts, added">
                 <>
 <p>
-                  The message has three parts and it is worth naming them before any formula. The first spells every piece of the list out, one character at a time, with a marker after each so a reader knows where one spelling stops. The second says how often each piece is used, since a reader who is about to decode references needs to know what they are worth.
+                  Before writing the cost formula, let&apos;s describe what the encoded message must contain. It first spells each vocabulary piece, including a marker for the end of its spelling. It also records how often each piece is used, so a decoder can interpret the references that follow.
                 </p>
                 <p>
                   The third is the corpus itself, written as a run of references, where a piece that is used often is cheap per use and a piece that is used once is dear every single time.
@@ -457,14 +449,7 @@ export default function MorfessorPage() {
 
               <SubSection title="12. What the criterion does and does not fix">
                 <p>
-                  With the three parts written down, the definition is complete
-                  and it is worth being precise about what has been defined. A
-                  set of pieces has been given a number. Any two sets of pieces
-                  can now be compared, including sets nobody would ever propose,
-                  and the comparison is arithmetic rather than judgement. That is
-                  a great deal more than the counting rule had, since the counting
-                  rule can only compare two candidates at the same vocabulary
-                  size.
+                  We now have a total description cost for a proposed set of pieces and its encoding of the corpus. That lets us compare proposals with different vocabulary sizes using the same objective. A smaller cost means a shorter description under this coding scheme. It does not directly establish a better linguistic analysis.
                 </p>
                 <p>
                   What has not been defined is any way of finding the best set.
@@ -643,22 +628,13 @@ export default function MorfessorPage() {
                   Every seeded visiting order tried reaches the same six.
                 </p>
                 <KeepInMind>
-                  This is the result the method exists for, and it is worth
-                  keeping in view how narrow the demonstration is. Twelve words
-                  with three shared stems and three shared endings is the most
-                  favourable arrangement imaginable, and the next Part uses the
-                  same twelve words to break it.
+                  The learned pieces match the familiar stems and endings in this example. The setup is favourable: twelve words deliberately share three stems and three endings. In the next part we change the treatment of those same words to see how dependent the result is on the chosen objective.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="16. A larger corpus, pass by pass">
                 <p>
-                  On the eighteen sentences the walk is longer and it is worth
-                  watching, because a pass does not only add pieces. Fitted with
-                  the text half of the cost weighted at a quarter, which Part 6
-                  explains, the search takes eight passes and the list shrinks
-                  from 67 pieces to 57 while the total falls from 1391.8737 to
-                  976.7130.
+                  On the eighteen sentences, the search can remove pieces as well as add them. With the text-cost weight set to one quarter, it runs for eight passes. The vocabulary shrinks from 67 pieces to 57, while the total cost falls from 1391.8737 to 976.7130. Part 6 explains the weighting choice.
                 </p>
                 <SearchEpochs />
                 <p>
@@ -960,14 +936,7 @@ export default function MorfessorPage() {
 
               <SubSection title="23. The list has no alphabet in it">
                 <p>
-                  Here is where this method is worse than the one it is being
-                  compared with, and it is worth reporting rather than burying.
-                  Nothing in the criterion rewards keeping a piece for a character
-                  no word needs on its own. On the eighteen sentences the letter k
-                  never survives as a piece of its own, because every word that
-                  uses it can be spelled from longer pieces, and the same is true
-                  of almost every letter at the settings that give the most
-                  compact description.
+                  The compact description does not necessarily keep a standalone entry for every character. In these eighteen sentences, k is always covered by longer selected pieces and does not survive on its own. Many other letters disappear too at the most compact settings. That creates a problem when a new word needs a character in a combination the selected pieces cannot spell.
                 </p>
                 <HeldOutReadings />
                 <p>

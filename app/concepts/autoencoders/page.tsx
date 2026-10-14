@@ -28,7 +28,7 @@ export default function Page() {
     sections={[
 { title: "Part 1. Three Components of Reconstruction", content: <>
 <SubSection title="1. Give the encoder, code, and decoder separate jobs">
-<p>{"Most models are asked to produce something different from their input, a label or a number. An autoencoder is asked to produce its own input back. That sounds pointless until the input is forced through a narrow middle on the way. What comes out the other side then shows what the middle was able to carry."}</p>
+<p>{"Suppose we ask a model to reconstruct the same measurements we give it. Copying them would be easy. But what if every observation must first pass through a representation with fewer coordinates? The model has to choose what to retain. Comparing its reconstruction with the original lets us investigate what that restricted representation can carry."}</p>
 <p>{"The encoder maps an observation to a representation called a latent code. The code is the information passed through the middle of the system. The decoder maps that code back into the input's original arrangement."}</p>
 <p>{"Take the two sensors from the opening and one observation in which they read 3 and −1. The encoder on this page keeps their average, so the code is the single number 1, and the decoder copies that number into both outputs."}</p>
 <Equation>{"Observation:     [3, −1]    two numbers\nCode:            [1]        one number\nReconstruction:  [1, 1]     two numbers"}</Equation>

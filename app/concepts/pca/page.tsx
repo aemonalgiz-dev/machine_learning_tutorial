@@ -83,13 +83,7 @@ export default function PcaPage() {
                 </p>
                 <LinkedMeasurements />
                 <p>
-                  So does each feature contribute entirely new information?
-                  Not entirely. Much of what the weight line says, the height
-                  line already said, and a single combined measurement of
-                  how big someone is would describe most of the shared
-                  pattern. Not all of it, since being heavy for your height
-                  is real and is not on that combined axis, which is the part
-                  that is unique to each feature.
+                  How much new information does weight add once we know height? In this group, the two measurements share a pattern: taller people tend to be heavier. A combined measure of size could describe much of that pattern. We would still need another measurement to describe differences such as being heavier or lighter than expected for one&apos;s height.
                 </p>
                 <p>
                   The idea grows with the number of columns. Measure sixty
@@ -636,11 +630,7 @@ export default function PcaPage() {
                 <Equation>{"Z = X W"}</Equation>
                 <CoordinateChange />
                 <KeepInMind>
-                  PCA transforms each observation from the original feature
-                  coordinates into coordinates along the principal
-                  components, and it applies the same projections to every
-                  row. It changes the coordinate system; it does not merely
-                  draw a line through the data.
+                  PCA gives each observation coordinates along the principal-component directions. We apply those same projections to every row, allowing us to represent the data in the new coordinate system or keep a smaller set of components.
                 </KeepInMind>
               </SubSection>
             </>

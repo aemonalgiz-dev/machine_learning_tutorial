@@ -91,8 +91,8 @@
       {
         "title": "The Skip Route Also Carries a Gradient",
         "paragraphs": [
-          "A residual block adds a learned correction to its input. Differentiating the sum gives a direct contribution from the identity route alongside the derivative through the correction. This is why the skip connection changes optimisation, not merely the appearance of a diagram.",
-          "The sum can still cancel in a particular direction, so a residual connection is not a guarantee that gradients never vanish. It supplies another route that the network can use."
+          "A residual block adds a learned correction to its input. When we differentiate that sum, we get a contribution from the unchanged input alongside the derivative through the correction. Follow those two paths in the diagram: both contribute to how an earlier layer receives a gradient.",
+          "The contributions can still cancel in a particular direction. A residual connection gives the gradient another route, but it does not guarantee that gradients remain large throughout the network."
         ],
         "interpretation": [],
         "examples": [
@@ -569,8 +569,8 @@
       {
         "title": "A Decoder Does Not Specify Which Codes to Sample",
         "paragraphs": [
-          "A conventional autoencoder learns codes for observed inputs, but leaves their overall distribution largely unconstrained. Randomly sampling a convenient Gaussian can visit code regions the decoder never encountered.",
-          "Inspect interpolations and sampled outputs separately from reconstruction. A VAE adds an explicit probabilistic objective and prior so generation has a defined starting distribution. That additional structure is a reason for the next method, not merely a different encoder name."
+          "A conventional autoencoder learns codes that let it reconstruct observed inputs. But where should we draw a code for a new example? The training objective leaves the distribution of codes largely unconstrained, so sampling a convenient Gaussian can land in a region the decoder has never seen.",
+          "Try sampling and interpolation as well as reconstruction. The next method, a VAE, introduces a probabilistic objective and an explicit prior to give generation a defined starting distribution."
         ],
         "interpretation": []
       }

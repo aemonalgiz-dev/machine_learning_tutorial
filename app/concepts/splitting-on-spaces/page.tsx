@@ -71,18 +71,11 @@ export default function SplittingOnSpacesPage() {
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
                 </Equation>
                 <p>
-                  To a machine that is 51 characters in a row, and nothing in
-                  those 51 characters is marked as a beginning or an end.
-                  Anything that wants to count words, look words up, or learn
-                  something about a word has to be told where one word stops and
-                  the next starts, and there is no way to read that off the text
-                  without a rule that somebody wrote. The question comes before
-                  every other question about text, and it is asked once, before
-                  any model exists.
+                  The program receives 51 characters. Spaces and punctuation give us possible clues, but we still need a rule that decides which characters belong together. If we want word counts or vocabulary lookups, those decisions will affect every result that follows. Let&apos;s begin with the simplest rule we can inspect: split at white space.
                 </p>
                 <>
 <p>
-                  It is worth separating that question from the one it is usually confused with. Deciding where the words are is a claim about the writing system, since English puts gaps between its words and Chinese does not. Deciding what a model&rsquo;s units are is a claim about a corpus, since a vocabulary of forty thousand entries has to spell every text it will ever meet out of pieces it has already seen.
+                  Finding word boundaries and choosing a model&apos;s token vocabulary are related decisions, but they need not have the same answer. A representation might use words, word parts or bytes. Here we will first inspect the boundaries supplied by whitespace. Later lessons will examine how a vocabulary represents the resulting text, including unfamiliar pieces.
                 </p>
                 <p>
                   This page is entirely about the first, and the rule it describes is the shortest of the answers these pages cover, which is why it comes before the rest of them.
@@ -136,10 +129,7 @@ export default function SplittingOnSpacesPage() {
 
               <SubSection title="3. Separate the Alvarez sentence wherever spaces occur" id="3-the-running-sentence-cut">
                 <p>
-                  Put the sentence to the rule and seven pieces come out. The
-                  playground above is doing exactly this, and it is worth reading
-                  the seven before going any further, because every difficulty on
-                  the rest of the page is already visible in them.
+                  The whitespace rule returns seven pieces. Compare them with the original sentence in the playground. In particular, look at what happens to the abbreviation, contraction and hyphenated forms. Those examples will help us decide what this rule has and has not resolved.
                 </p>
                 <WorkedExample title="Seven pieces, and where each came from">
                   <Equation>
@@ -583,12 +573,7 @@ export default function SplittingOnSpacesPage() {
             <>
               <SubSection title="13. It is exact, and there is nothing to fit first">
                 <p>
-                  Five sections of failures make it easy to forget that this rule
-                  is used deliberately, underneath most of the methods that
-                  criticise it, including the subword learners at the end of this
-                  section. It is worth saying what it has that they do not,
-                  since those properties are why it is still where a pipeline
-                  starts.
+                  Despite these limitations, whitespace splitting can be a useful first step when the input and task suit it. Some of the subword implementations in these lessons use it to restrict where pieces are learned. The following comparison explains the practical properties we gain from such a small rule.
                 </p>
                 <>
 <p>

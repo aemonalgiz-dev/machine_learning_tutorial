@@ -74,22 +74,11 @@ export default function LogisticRegressionPage() {
 <>
               <SubSection title="1. A binary prediction problem">
                 <p>
-                  Each dot in the box above is one student. The input x is the
-                  number of hours they studied, and the outcome y is whether
-                  they passed. Fails sit on the floor of the plot and passes
-                  on the ceiling, because the outcome is one or the other with
-                  nothing between.
+                  Each dot above is one student. We know how many hours they studied and whether they passed. We place failures at zero and passes at one, so the plot has two rows of outcomes.
                 </p>
                 <Equation>{"y = 1 for passed        y = 0 for failed"}</Equation>
                 <p>
-                  Zero and one are labels, and nothing more. Passing is not
-                  one unit more than failing, and the model will not treat it
-                  so. The twelve students the page works with have a mixed
-                  middle. Below three and a half hours everyone failed, above
-                  five and a half everyone passed, and between them the two
-                  outcomes are tangled together. Someone at four and a half
-                  hours might go either way, and the model is going to use the
-                  hours to estimate how likely each way is.
+                  Zero and one encode the two outcomes. The probability we want to predict can lie between them. In our twelve students, everyone below three and a half hours failed, and everyone above five and a half passed. Between those limits the results overlap. For someone who studied four and a half hours, we would like an estimate of the chance of passing.
                 </p>
               </SubSection>
 
@@ -100,14 +89,7 @@ export default function LogisticRegressionPage() {
                 </p>
                 <LinearProbabilityFailure />
                 <p>
-                  A straight line can produce any value. A probability has to
-                  stay between zero and one. This line predicts −0.09 for a
-                  student who studied one hour and 1.18 for one who studied
-                  eight, and neither is a chance of anything. The red
-                  stretches are every input at which the line has stopped
-                  meaning what it was asked to mean. A probability model has
-                  to return a value between zero and one for every possible
-                  input, not only for the inputs it happened to see.
+                  The line predicts −0.09 after one hour of study and 1.18 after eight hours. Neither is a valid probability. The red portions of the graph show where it leaves the interval from zero to one. We need a rule whose outputs stay in that interval across its input domain, including inputs absent from training.
                 </p>
               </SubSection>
             </>

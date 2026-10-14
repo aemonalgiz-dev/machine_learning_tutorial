@@ -69,10 +69,7 @@ export default function MulticlassClassificationPage() {
 <>
               <SubSection title="1. From two classes to three">
                 <p>
-                  The logistic page had one observation, one positive class,
-                  one negative class, and one estimated probability. The
-                  probability of the negative class was one minus that number,
-                  because the two outcomes were the only two there were.
+                  Logistic regression gave each observation a probability for one of two possible outcomes. Once we knew that probability, the remaining probability belonged to the other outcome. How should we arrange the answer when there are more than two classes?
                 </p>
                 <Equation>{"P(class 0 | x) + P(class 1 | x) = 1"}</Equation>
                 <p>
@@ -231,13 +228,7 @@ export default function MulticlassClassificationPage() {
 
               <SubSection title="8. How the classes compete">
                 <p>
-                  In the assembly line above, hold two scores where they are
-                  and raise the third. Its probability rises, both of the
-                  others fall, and the total stays at one. Nothing was done to
-                  the other two scores. Their probabilities fell because the
-                  shared total grew, and that is what competition means here.
-                  Every class&rsquo;s probability is divided by the same
-                  denominator, so no class can gain without the others losing.
+                  Hold two scores fixed and raise the third in the display above. Its probability rises while the others fall, even though their scores haven&apos;t changed. The denominator is shared: increasing one exponential also increases the total used to normalize every class. The probabilities must still add to one.
                 </p>
               </SubSection>
 

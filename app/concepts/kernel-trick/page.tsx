@@ -65,7 +65,7 @@ export default function KernelTrickPage() {
             <SubSection title="Place a flat sheet in the gap">
               <p>With three coordinates, the equivalent of our straight divider is a <strong>plane</strong>: a flat surface, like a sheet of glass extending in both directions. We can place that sheet above the blue points and below the amber points.</p>
               <p>Use Place a plane in the walkthrough. Move the sheet too low, and some blue points end up above it. Move it too high, and amber points end up below it. Between the groups, there is a range of positions that separate this example successfully.</p>
-              <p>This is what a useful transformation gives us: a representation in which a simple boundary can do the job. We are choosing the sheet&apos;s position by hand here. During training, a classifier uses the supplied labels to choose its boundary. Its learning objective determines which separating boundary it prefers, or how to handle mistakes when perfect separation is impossible.</p>
+              <p>In the transformed representation, we can place a simple boundary between the groups. Here we move that sheet by hand so we can see why it separates them. A trained classifier would use the labelled examples to choose its boundary. Its objective decides which separator to prefer, or how to handle mistakes when the groups cannot be separated perfectly.</p>
             </SubSection>
             <SubSection title="Read that decision in the original picture">
               <p>Select Original view. A point near the centre would rise only a little, so it would remain below the sheet. A point far from the centre would rise above it. The points that would reach the sheet exactly form a circle in the original view.</p>

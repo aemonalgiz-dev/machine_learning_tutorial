@@ -78,7 +78,7 @@ export default function DistanceMetricsPage() {
               <SubSection title="1. Two people, one number">
                 <>
 <p>
-                  The crowd in the box above is the one from the nearest neighbours page, five children and six adults measured by height and weight, and the ringed person at 150 centimetres and 45 kilograms is the one being classified. That page found the three nearest people and let them vote, and it never said what nearest meant, because everyone assumed the straight line.
+                  The plot uses the nearest-neighbours example: five children and six adults, measured by height and weight. We want to classify the ringed person at 150 centimetres and 45 kilograms by asking the three nearest people to vote. But how should we measure &apos;nearest&apos;? So far we have used straight-line distance. Let&apos;s see what changes when we choose another rule.
                 </p>
                 <p>
                   Switch the metric in the box and two things move at once, which people the ringed person actually consults and the shaded map of what the model would answer everywhere else. Under four of the six metrics the three consulted are the same three and the answer is child; under cosine the third voter is a different adult and the answer is adult; under Hamming every person in the crowd is at exactly the same distance and the vote is decided by whoever happens to come first.
@@ -178,12 +178,7 @@ Cosine distance: approximately 0.000189`}</Equation>
                 </WorkedExample>
                 <PairMeasurer panel="working" />
                 <KeepInMind>
-                  Three of the six read the gaps and differ only in how they
-                  combine them. The other three each throw something away
-                  first, the size of every gap for Hamming, the lengths of
-                  both rows for cosine, and the units of every column for
-                  Canberra, and in each case the thing thrown away is the
-                  thing that carries no meaning in the data it was built for.
+                  Some of these measures combine the numerical gaps differently. Others change which information counts as a difference. Hamming checks whether entries match, regardless of the size of a mismatch. Cosine compares directions, ignoring vector lengths. Canberra scales each gap by the magnitudes of the two entries. Each choice can be useful, but only if the information it ignores is unimportant to our question.
                 </KeepInMind>
               </SubSection>
 

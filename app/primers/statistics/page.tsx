@@ -38,9 +38,7 @@ export default function StatisticsPrimerPage() {
       tagline={"A collection of measurements does not explain itself. We need ways to describe what is typical, how much the values differ, and how much confidence we should place in the patterns we observe."}
       prerequisites={
         <>
-          Arithmetic, and a willingness to add five numbers by hand. The same
-          five people carry the whole primer, so every figure here can be
-          checked against the one before it.
+          You will need ordinary arithmetic. We will use the same five people throughout the primer, so you can check each new calculation against measurements you already know.
         </>
       }
     >
@@ -53,15 +51,11 @@ export default function StatisticsPrimerPage() {
       <PrimerSection title="1. Observations and Variables">
 
         <p>
-          Five people, each measured twice. That is the whole dataset, and it
-          carries every idea on this page.
+          Let&apos;s start with five people. We have measured each person&apos;s height and weight, and we want to see what we can learn about the group from those measurements.
         </p>
         <Equation>{"height (cm):  160   165   170   175   180\nweight (kg):   58    66    68    74    74"}</Equation>
         <p>
-          Two words are worth fixing before anything is computed. An observation
-          is one of the five people, one row, everything measured about a single
-          case. A variable is one of the two measurements taken across all of
-          them, one column, the same quantity recorded for everybody.
+          Before we calculate anything, we need names for the things in our table. An observation is one person: a row holds the measurements from that person. A variable is something we measure across the group, such as height. It occupies a column because we record that same quantity for everyone.
         </p>
         <p>
           Almost everything in this primer is a statement about a column, or
@@ -290,8 +284,7 @@ export default function StatisticsPrimerPage() {
         </p>
         <KeepInMind>
           <p>
-            The denominator depends on that choice, and it is worth meeting now
-            rather than being surprised by it later.
+            Are these five people the entire population we want to describe, or a sample used to estimate variation in a larger population? That choice changes the denominator:
           </p>
           <Equation>{"population:  σ² = Σ(xᵢ − μ)² / N          divide by 5, giving 50\nsample:      s² = Σ(xᵢ − x̄)² / (n − 1)    divide by 4, giving 62.5"}</Equation>
           <p>
@@ -849,8 +842,7 @@ export default function StatisticsPrimerPage() {
 
       <PrimerSection title="18. Distributions">
         <p>
-          A distribution has more to it than a centre and a spread, and it is
-          worth saying so before any particular shape arrives.
+          Two groups can share a mean and standard deviation while placing their observations very differently. To see that difference, we need to look at the distribution: which values occur and how often.
         </p>
         <p>
           Two columns can have identical means and identical standard deviations
@@ -1017,9 +1009,7 @@ export default function StatisticsPrimerPage() {
 
       <PrimerSection title="21. The Normal Distribution">
         <p>
-          The curve in the box above is the normal distribution, the bell shape,
-          and it is worth introducing as one distribution among many rather than
-          as what data looks like.
+          The curve above is a normal distribution, often called a bell curve. It gives us one useful model for how values can be distributed. We will examine its properties here, then ask when that shape is a reasonable description of observations.
         </p>
         <p>
           It is symmetric about its mean, most of its probability sits near the
@@ -1057,8 +1047,7 @@ export default function StatisticsPrimerPage() {
             normal produces confident nonsense about their tails.
           </p>
           <p>
-            Being numerical is not a reason to assume the bell. It is worth
-            looking at the shape of a column before assuming anything about it.
+            A column of numbers can be skewed, have several peaks, or take only a few distinct values. Plot the observations and consider how they were collected before choosing a normal model.
           </p>
         </KeepInMind>
       </PrimerSection>

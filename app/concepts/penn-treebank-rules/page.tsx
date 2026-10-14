@@ -75,12 +75,7 @@ export default function PennTreebankRulesPage() {
                   text might be in Thai.
                 </p>
                 <p>
-                  These rules were written by somebody with a different problem.
-                  A person was about to sit down and mark, for every unit in a
-                  sentence, what part of speech it was and which units it grouped
-                  with. That person needs one row per thing the grammar has a
-                  name for. We carry the same sentence the other two pages carry,
-                  because it already breaks in three separate places.
+                  Now imagine annotating an English sentence with parts of speech and grammatical structure. What should count as one unit for that work? Some contractions need to be separated even though they contain no space. The Penn Treebank conventions answer that annotation question. Let&apos;s apply them to our familiar sentence and inspect the resulting units.
                 </p>
                 <Equation>
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
@@ -201,10 +196,7 @@ export default function PennTreebankRulesPage() {
 
               <SubSection title="4. What the rules read, and what they do not">
                 <p>
-                  It is worth being exact about how little there is here, because
-                  the rest of the page turns on it. The whole method is one pass
-                  over each run of non-space characters, asking three kinds of
-                  question.
+                  This implementation scans each non-space run using the rules below. We will follow which test applies at each position, since the order and the exception lists determine the output.
                 </p>
                 <DerivationTable
                   expressionHeading="the question"
@@ -238,10 +230,7 @@ export default function PennTreebankRulesPage() {
                   English newspaper prose.
                 </p>
                 <KeepInMind>
-                  Two word lists, one of eight endings and one of ten whole
-                  forms, and everything else is a character read in place. That
-                  is the whole method, and the reason it still runs on anything
-                  is that there is nothing in it to load.
+                  This implementation combines two small word lists with rules that inspect nearby characters. One list contains eight endings and the other ten whole forms. There are no fitted parameters to load. Its behaviour comes from those written rules, which also means that an unhandled form needs a new rule or a different method.
                 </KeepInMind>
               </SubSection>
             </>
@@ -662,11 +651,7 @@ export default function PennTreebankRulesPage() {
             <>
               <SubSection title="13. The quotation mark, rewritten into two characters">
                 <p>
-                  Everything so far has been a decision about where to cut. This
-                  clause is different in kind, and it is what makes these rules
-                  unlike the two before them. A quotation mark is not only
-                  separated from the word beside it, it is replaced by something
-                  that is not in the text.
+                  Here the rule changes the text representation as well as separating a token. It replaces a quotation mark with another spelling. That means reconstruction needs to account for rewriting, not only for where boundaries were inserted.
                 </p>
                 <Equation>
                   {"an opening \"    becomes  two backquotes\n" +
@@ -866,13 +851,7 @@ export default function PennTreebankRulesPage() {
                   its own.
                 </p>
                 <p>
-                  Whether that is a cost or a benefit depends entirely on what is
-                  reading them. To the annotator it was a benefit and the whole
-                  point, since a comma has a part of speech in the treebank and
-                  needs a row. To a model counting how often words turn up
-                  together it is a third of every window spent on marks that carry
-                  almost no information about the sentence around them. The rules
-                  make one choice and everything downstream lives with it.
+                  Whether separate punctuation tokens help depends on the task. Treebank annotation needs a place to attach punctuation&apos;s grammatical label. A fixed-width word-context window then includes those punctuation positions too, reducing how many surrounding words it reaches. Punctuation can still carry useful information; we should test the convention against the intended task.
                 </p>
                 <p>
                   The other component is smaller than it looks. At most 26 of the
@@ -1005,9 +984,7 @@ export default function PennTreebankRulesPage() {
                 </p>
                 <KeepInMind>
                   There is no fact of the matter about{" "}
-                  <span className="font-mono">low-cost</span>, and there is a fact
-                  of the matter about what the treebank did with it. The second is
-                  what these rules define, and it is worth having.
+                  <span className="font-mono">low-cost</span>, for which the treebank supplies a particular convention. These rules implement that convention; they do not settle every possible interpretation of the text.
                 </KeepInMind>
               </SubSection>
 

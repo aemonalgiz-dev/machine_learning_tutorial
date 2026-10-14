@@ -133,15 +133,7 @@ export default function WordPiecePage() {
 
               <SubSection title="3. What we wanted to ask instead">
                 <p>
-                  What a vocabulary row is worth is not how often its two halves
-                  happen to be adjacent, but whether those halves belong
-                  together, so that a model reading the joined piece learns
-                  something it could not get from the two separately. The test
-                  for belonging together is comparison against chance. If the
-                  two halves were sprinkled through the corpus independently of
-                  one another, how often would they land next to each other by
-                  accident, and how does that compare with how often they
-                  actually do?
+                  A frequent pair may simply contain two individually frequent symbols. To distinguish that case, this implementation compares the pair count with the counts of its components. A pair that occurs more often than those separate frequencies would suggest receives a stronger association score. This is a rule for choosing merges, not proof that a joined piece has a linguistic meaning or will help every downstream model.
                 </p>
                 <p>
                   Written out that way the fix is almost forced. We already have
@@ -174,37 +166,17 @@ export default function WordPiecePage() {
                   {"score(a, b)  =  count(a, b) / ( count(a) × count(b) )"}
                 </Equation>
                 <p>
-                  The denominator is the whole of the idea. Two halves that are
-                  each common make it large, so a pair of common symbols has to
-                  be extraordinarily frequent together to score well; two halves
-                  that are each rare make it small, so a pair of rare symbols
-                  needs only to be seen together a few times. A pair whose halves
-                  never appear apart from each other scores highest of all,
-                  because then the numerator and both parts of the denominator
-                  are counting the same occurrences.
+                  The denominator changes what we reward. Common components make it large, so a frequent pair can still receive a small score. Rare components make it small, which can give a rare pair a high score. When each component appears only in this pair, the ratio is the reciprocal of the pair count. That illustrates the preference for rare, tightly associated pairs; it does not mean every such pair outranks every other candidate.
                 </p>
                 <WhyThisWorks title="Where the division comes from">
                   <p>
-                    Think of the corpus as a bag of symbols, and give it the
-                    simplest possible model, one in which each symbol is drawn
-                    on its own with a probability equal to its share of the bag.
-                    The model&rsquo;s log likelihood of the corpus is then the
-                    sum over symbols of how often each occurs times the log of
-                    its share. Now merge a pair. Every one of its occurrences
-                    stops being two draws and becomes one, so the corpus gains,
-                    per occurrence, exactly this.
+                    We can connect the ratio to a local log-probability comparison. Treat symbol shares and a candidate pair&apos;s share as fixed values. Replacing two symbol factors with one candidate factor gives the difference below. This comparison helps explain the score, but it does not refit and normalize a new vocabulary model.
                   </p>
                   <Equation>
                     {"log p(ab)  −  log p(a)  −  log p(b)"}
                   </Equation>
                   <p>
-                    Turning shares back into counts, and noticing that the
-                    corpus total appears in every candidate and so cannot change
-                    which of them is largest, that quantity ranks the candidates
-                    in exactly the order the division above does. So the figure
-                    is not an invention with a likelihood story attached
-                    afterwards. It is what the likelihood gain per occurrence
-                    reduces to once the constant is dropped.
+                    Substituting the count divided by the corpus total for each share leaves the log of the ratio score times that total. At one merge step the total is common to the candidates, so ranking these local differences gives the same order as ranking the ratio. A full likelihood change after a merge would also account for changed counts and normalization.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
@@ -248,10 +220,7 @@ export default function WordPiecePage() {
                   answer on the same eleven rows.
                 </p>
                 <KeepInMind>
-                  Every number in that table comes from one pass over the corpus.
-                  The score costs a division per candidate and one extra count
-                  per symbol, so nothing about this is more expensive than
-                  counting pairs was.
+                  We need both symbol counts and pair counts. Once we have those, evaluating a candidate adds a multiplication and a division. That gives a similar counting workflow to BPE, with some extra work for the association score.
                 </KeepInMind>
               </SubSection>
 
@@ -341,12 +310,12 @@ export default function WordPiecePage() {
                 "The count of the commoner of the two halves",
               ],
               0,
-              "The denominator is the whole of the idea. Two halves that are each common make it large, so a pair of common symbols has to be extraordinarily frequent together to score well, and a pair whose halves never appear apart from each other scores highest of all.",
+              "The denominator is the product of the component counts. Large counts reduce the ratio unless the pair count grows enough to compensate. This can favour rare, tightly associated pairs over more frequent ones.",
             ),
             trueFalse(
-              "Dropping the corpus total from the likelihood gain per occurrence leaves exactly the division the rule uses, because the total appears in every candidate alike.",
+              "At fixed shares, dropping the common corpus total and the increasing logarithm preserves the ranking of the local comparison, leaving the ratio score.",
               true,
-              "Merging a pair turns two draws into one at every occurrence, and the corpus gains the log of the pair’s share less the logs of the two halves’ shares. Turning shares back into counts puts the corpus total into every candidate, where it cannot change which is largest, so the figure is not an invention with a likelihood story attached afterwards. What it ranks is the gain one occurrence makes, which Part 6 shows is not the gain all of them make together.",
+              "At fixed shares, replacing two symbol factors with a candidate-pair factor gives its log share minus the logs of the component shares. Converting shares to counts introduces a corpus total common to every candidate, so this local comparison ranks candidates like the ratio score. It is not the full change obtained by refitting all probabilities after a merge.",
             ),
             choice(
               "On the four words, e followed by s occurs nine times with halves occurring seventeen and nine times, and i followed by d occurs three times with each half occurring three times. Which does the score take?",
@@ -794,13 +763,7 @@ export default function WordPiecePage() {
 
               <SubSection title="18. The fewest times a pair may be seen, as a filter and as a stopping test">
                 <p>
-                  A score computed from one occurrence is a fact about one word,
-                  so every implementation of this refuses to merge a pair seen
-                  fewer than some small number of times. There are two ways to
-                  read that rule and they are not the same rule. Either the
-                  minimum filters the candidates before the best is chosen, or it
-                  is a test applied to the winner, which ends the run when the
-                  winner fails it.
+                  A minimum pair count lets us exclude candidates supported by very little evidence. But when should we apply that filter? We could remove rare candidates before ranking them, or rank everything and stop if the winner is too rare. Those procedures need not choose the same merges.
                 </p>
                 <p>
                   Under counting the two readings coincide, since the winner
@@ -836,10 +799,7 @@ export default function WordPiecePage() {
                   candidates gets all ten.
                 </p>
                 <KeepInMind>
-                  A rule that behaves identically under one scoring and
-                  catastrophically differently under another is exactly the kind
-                  of thing that survives a change of scoring unexamined. Under
-                  counting there is no difference to notice.
+                  A stopping rule that worked with counts can behave differently after we change the score. This example gives us a specific condition to test when reusing a merge loop.
                 </KeepInMind>
               </SubSection>
             </>
@@ -863,13 +823,7 @@ export default function WordPiecePage() {
                   {"score  =  c / ( c × c )  =  1 / c"}
                 </Equation>
                 <p>
-                  That is not a large number, and worse, it falls as the pair gets
-                  commoner. Two symbols bound together nine times score one ninth;
-                  two symbols bound together twice score one half. So among pairs
-                  that are perfectly bound, the rule prefers the rarest, which is
-                  the reverse of what anybody wants from a vocabulary, and the
-                  division above is where that comes from rather than any choice
-                  an implementation made.
+                  Among pairs whose components occur only together, the ratio falls as the count rises. The table compares a pair observed twice with pairs observed more often. This preference may conflict with an aim such as reducing the corpus&apos;s encoded length, because a common pair offers more opportunities to shorten it.
                 </p>
                 <NumberTable
                   headings={[
@@ -887,74 +841,36 @@ export default function WordPiecePage() {
                   caption="Two pairs on one corpus, each of whose halves never occurs apart from its partner, one of them seen twice and the other seen as often as the left column says."
                 />
                 <p>
-                  It is also worth saying what is <em>not</em> undefined here.
-                  Because the two halves are counted everywhere including inside
-                  the pair, the denominator can never reach zero, so the division
-                  is always safe. A version that counted only the halves&rsquo;
-                  free occurrences would divide by nothing at all for a perfectly
-                  bound pair, and would be undefined rather than infinitely good,
-                  which is a distinction worth keeping straight, since the second
-                  reading is the intuitive one and it is the one that breaks.
+                  It is also worth saying what is <em>not</em> undefined for an observed candidate. Both component counts include the candidate&apos;s occurrences, so both are positive. Counting only occurrences outside the pair would be a different score; for a perfectly bound pair it would create a zero denominator.
                 </p>
                 <KeepInMind>
-                  Among perfectly bound pairs the score is one over the count, so
-                  the strongest evidence of belonging together is scored worse the
-                  more of it there is. Any implementation reaching that region is
-                  making an arbitrary choice, and the minimum count of section 18
-                  is the usual way of keeping out of it.
+                  A minimum count can remove the rarest candidates, but among the perfectly bound pairs that remain, this ratio still prefers the smaller count. The filter does not change the score&apos;s underlying preference.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="20. What the ratio is not maximising">
                 <p>
-                  Section 4 derived the score as the likelihood gain one
-                  occurrence of a merge produces. The gain the whole corpus makes
-                  is that quantity multiplied by how many occurrences there are,
-                  and the rule does not do the multiplication. So the pair that
-                  raises the corpus likelihood most is not generally the pair
-                  this rule takes.
+                  The local comparison in section 4 describes one occurrence using fixed shares. Multiplying it by the pair count gives a count-weighted proxy. That proxy can rank candidates differently from the ratio alone. Neither calculation is the exact corpus likelihood change after all vocabulary probabilities are refitted.
                 </p>
                 <Equation>
-                  {"total gain  =  count(a, b) × log( N × score(a, b) )"}
+                  {"count-weighted proxy  =  count(a, b) × log( N × score(a, b) )"}
                 </Equation>
                 <p>
-                  On the four words, where the corpus is 79 symbols long, that
-                  total is largest for the pair s followed by t, at 19.55. The
-                  pair the score takes, i followed by d, gains 9.81, and the pair
-                  counting takes, e followed by s, gains 13.83. So neither rule
-                  takes the pair that most raises the quantity the score was
-                  derived from, and the pair that does is ranked fourth by the
-                  score and joint first by the count, losing that tie on
-                  alphabetical order.
+                  On the four-word corpus of 79 symbols, the count-weighted proxy is largest for s followed by t, at 19.55. The ratio selects i followed by d, whose proxy value is 9.81. Raw pair counting selects e followed by s, whose value is 13.83. This gives us three different rankings of the same candidates. The proxy&apos;s winner is fourth under the ratio and joint first under counts, where it loses the alphabetical tie-break.
                 </p>
                 <WhyThisWorks title="Why the multiplication is left out">
                   <p>
-                    Doing it properly would restore most of what the count rule
-                    was criticised for in Part 1, since the factor in front is the
-                    count and a common pair carries a large one. The published
-                    rule is the per-occurrence figure, which is a deliberate lean
-                    away from frequency and towards association, rather than an
-                    approximation to the total that somebody failed to finish. It
-                    is worth knowing that it is not the greedy maximiser of the
-                    likelihood it is usually described as maximising.
+                    The count multiplier gives frequent pairs more influence when we estimate a total change. Our teaching implementation instead ranks the per-occurrence association score. That choice favours association over raw frequency. It is not a calculation of the full change in corpus likelihood after refitting the vocabulary probabilities, and should not be presented as one.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The rule greedily maximises association per occurrence, where
-                  the derivation it is usually presented with would maximise total
-                  likelihood gain, and on the four words those pick different
-                  pairs at the very first turn.
+                  The association score and the count-weighted proxy choose different pairs on the first turn of this example. Keep their meanings separate from a fully refitted likelihood comparison.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="21. When the greedy cut can fail, and when it cannot">
                 <p>
-                  Taking the longest piece at each position is greedy, and the
-                  worry that goes with any greedy rule is that it takes too much
-                  early and leaves a remainder it cannot finish, when some other
-                  division of the same word would have worked. It is worth being
-                  precise about when that can happen, because it is a fact about
-                  the vocabulary rather than about the cut.
+                  Could taking the longest available piece prevent us from completing a word? It can: the chosen prefix may leave a suffix that the continuation vocabulary cannot represent, even though a shorter prefix would have allowed a complete split. Let&apos;s examine which vocabulary entries make that possible.
                 </p>
                 <p>
                   Every merged continuation piece is built out of continuation
@@ -1036,7 +952,7 @@ export default function WordPiecePage() {
                     {
                       expression: "a pair whose halves never occur apart",
                       reason:
-                        "scored one over its own count, which falls as the evidence grows. The division is safe, since each half is counted everywhere including inside the pair; it is the intuitive version, dividing by the halves’ free occurrences, that is undefined rather than infinite. Either way the rule stops discriminating usefully in this region and a minimum count is what keeps a run out of it.",
+                        "The score becomes the reciprocal of the pair count when the components occur only together. This favours rarer perfectly bound pairs. A minimum count removes candidates below its threshold, but does not remove that preference among the remaining candidates.",
                     },
                     {
                       expression: "a pair seen exactly once",
@@ -1046,7 +962,7 @@ export default function WordPiecePage() {
                     {
                       expression: "the pair that most raises the likelihood",
                       reason:
-                        "not what the rule takes. The rule compares the gain one occurrence makes and never multiplies by how many occurrences there are, so on the four words it takes a pair gaining 9.81 while a pair gaining 19.55 is available. Restoring the multiplication would restore most of the preference for frequency the rule exists to avoid, so this is a choice rather than an oversight.",
+                        "This implementation maximizes the association ratio. A count-weighted local log-score proxy instead prefers the candidate valued at 19.55 over the selected candidate valued at 9.81. Computing the actual likelihood change would also require updating and normalizing the vocabulary probabilities.",
                     },
                     {
                       expression: "a vocabulary smaller than the alphabet",
@@ -1072,7 +988,7 @@ export default function WordPiecePage() {
                     {
                       expression: "the shortest reading of a word",
                       reason:
-                        "not asked for, and here not different either. Longest match is greedy, but with every symbol of the corpus in the vocabulary a single character is always available at any position after the first, so the cut succeeds whenever any division does. Cap the alphabet, as a real vocabulary does, and the guarantee goes with it.",
+                        "Longest match seeks a left-to-right split and does not in general minimize token count. In the vocabulary tested here, retaining the component symbols ensures a complete split whenever the necessary symbols are available. A vocabulary missing single-symbol fallbacks can require backtracking to find a split that greedy decoding misses.",
                     },
                     {
                       expression: "which of two schemes is better",
@@ -1126,7 +1042,7 @@ export default function WordPiecePage() {
               "The numerator and both parts of the denominator are counting the same occurrences, so the score is c divided by its own square. Among perfectly bound pairs the rule therefore prefers the rarest, and the division is where that comes from rather than any choice an implementation made.",
             ),
             several(
-              "Which of these hold for the pair that most raises the corpus likelihood on the four words?",
+              "Which statements hold for the pair with the largest count-weighted proxy in the four-word example?",
               [
                 "It is s followed by t, gaining 19.55",
                 "It is ranked fourth by the score",
@@ -1134,8 +1050,8 @@ export default function WordPiecePage() {
                 "It is the pair the score takes at the first turn",
               ],
               [0, 1, 2],
-              "The total gain is the per-occurrence figure multiplied by how many occurrences there are, and the rule does not do the multiplication, so neither rule takes it. The score takes i followed by d, gaining 9.81, which is a deliberate lean away from frequency and towards association rather than an approximation somebody failed to finish.",
-              { description: "Compare the measured candidates from the four-word corpus. A score rank of one is best; equal counts are ordered alphabetically.", data: "Pair    Total likelihood gain    Score rank    Count rank\ns + t   19.55                    4             joint 1\ni + d    9.81                    1             below 1\ne + s   13.83                    below 1       joint 1" },
+              "Multiplying the local log-score difference by the number of occurrences changes the ranking. The proxy selects s followed by t at 19.55, while the ratio selects i followed by d at 9.81. This comparison uses fixed shares; it does not claim these are exact refitted corpus likelihood gains.",
+              { description: "Compare the measured candidates from the four-word corpus. A score rank of one is best; equal counts are ordered alphabetically.", data: "Pair    Count-weighted proxy    Score rank    Count rank\ns + t   19.55                   4             joint 1\ni + d    9.81                   1             below 1\ne + s   13.83                   below 1       joint 1" },
             ),
             trueFalse(
               "With every symbol of the corpus in the vocabulary in both forms, the greedy left-to-right cut succeeds exactly when some division of the word into vocabulary pieces exists.",

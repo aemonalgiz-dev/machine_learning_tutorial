@@ -53,26 +53,14 @@ export default function LinearAlgebraPrimerPage() {
       <PrimerSection title="1. Several Numbers as One Object">
 
         <p>
-          One observation usually contains several measurements. A person might
-          be recorded as a height, a weight and an age, and those three numbers
-          describe one example rather than three, so they should travel through a
-          model together rather than separately.
+          Suppose we record someone&apos;s height, weight and age. These measurements belong to one person, so a model needs to receive them together. We need a way to keep that grouping as we calculate.
         </p>
         <Equation>{"(170, 72, 35)"}</Equation>
         <p>
-          That grouping is a vector. Three things are true of it and worth
-          fixing now. Each position has a defined meaning, so the first entry is
-          the height and stays the height. The order cannot be shuffled, because
-          shuffling it would silently change what every entry means. And the
-          number of entries is called the dimension, so this is a
-          three-dimensional vector.
+          We can put those measurements in an ordered list called a vector. Here the first position means height. If we swap it with weight, we change the meaning of the input even though the numbers themselves have not changed. The number of entries is the vector&apos;s dimension, so our list of three measurements is a three-dimensional vector.
         </p>
         <p>
-          It is tempting to define a vector as &ldquo;a list of numbers&rdquo;
-          and stop, though a list is only how it is written down. The useful idea
-          is that several related quantities have been packaged into one
-          mathematical object, so that one symbol can stand for a whole
-          observation and one operation can act on all of it at once.
+          Imagine recording several measurements of one person. We want to keep those measurements together and perform calculations on them in a consistent order. A vector lets us treat that collection as one mathematical object. We usually write its coordinates as a list, but it also comes with operations such as addition and multiplication by a scalar.
         </p>
         <p>
           A two-entry vector also has a picture, drawn as a point or an arrow on
@@ -94,10 +82,7 @@ export default function LinearAlgebraPrimerPage() {
         </p>
         <KeepInMind>
           <p>
-            These are not quite the same thing, and it is worth not saying that
-            they are. A point is where something is. A vector is a direction and
-            a distance, which is to say a movement, and it can be applied
-            starting from anywhere.
+            A point describes a location. In this geometric picture, a vector describes a displacement: a direction and a distance we can apply from any starting point. Using coordinates for both can hide that distinction, so keep an eye on what each set of numbers represents.
           </p>
           <p>
             Coordinates let both be written with the same pair of numbers, which
@@ -225,8 +210,7 @@ export default function LinearAlgebraPrimerPage() {
 
       <PrimerSection title="5. Differences and Distance">
         <p>
-          Before measuring the distance between two points, it is worth being
-          explicit about subtraction, because distance is built directly on it.
+          To measure how far apart two points are, first subtract their coordinates. The result describes the displacement from one point to the other. We can then measure the length of that displacement.
         </p>
         <p>
           Take the points a = (1, 2) and b = (4, 6), and ask what movement

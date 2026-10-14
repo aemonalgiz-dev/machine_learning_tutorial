@@ -80,7 +80,7 @@ export default function NormalisationLayersPage() {
               <SubSection title="1. A layer learns against numbers that keep changing">
                 <>
 <p>
-                  Take the crowd network the dropout page trains, sixteen rectified hidden units reading a person&rsquo;s height and weight, and one output unit reading those sixteen. The output unit&rsquo;s weights are being tuned against the sixteen numbers the hidden layer hands it for each person, and every step of training also moves the hidden layer, so the numbers the output unit was tuned against last epoch are not the numbers it reads this epoch.
+                  Recall the network from the dropout lesson. Its sixteen ReLU hidden units read height and weight, and the output unit reads their activations. During training we update both layers. So, while the output unit is learning how to use those sixteen values, the hidden layer is changing the values it supplies. We can measure those changes instead of assuming they are small.
                 </p>
                 <p>
                   I measured how far they move. Over four hundred epochs on the whole crowd, the mean of one hidden unit over the twenty-five people travels from 0.439 to 1.529, and its deviation from 0.819 to 3.097.
@@ -88,15 +88,7 @@ export default function NormalisationLayersPage() {
 </>
                 <DriftChart />
                 <p>
-                  Read the two readouts against each other. The largest mean
-                  shift from the first epoch to the last is 1.0897, and the
-                  largest move any unit&rsquo;s mean makes in a single epoch is
-                  0.1375, so the block the output layer reads is being moved
-                  underneath the output layer at every step rather than
-                  settling, by weights the output layer has no say in. That is
-                  the moving target the original paper named internal
-                  covariate shift, and on this network the chart above is the
-                  measurement of it.
+                  Across this run, the largest shift in a hidden unit&apos;s mean is 1.0897. The largest mean change within one epoch is 0.1375. The inputs reaching the output layer therefore change during training. The original batch-normalization paper called changes in internal distributions internal covariate shift. These mean and standard-deviation traces show aspects of that change, but they do not describe the full distributions or establish why normalization might help.
                 </p>
                 <KeepInMind>
                   A hidden layer&rsquo;s outputs are a distribution the layer
@@ -376,7 +368,7 @@ export default function NormalisationLayersPage() {
                 <RunningFiguresChart />
                 <>
 <p>
-                  A tenth of the way each step is the default momentum of 0.9, which keeps nine tenths of what it had, and it is worth saying that some frameworks name the same update by the other number, so a momentum of 0.1 there is this 0.9 and not a different rate. A larger batch makes each step&rsquo;s figures a better estimate of the whole and does nothing to the number of steps the average needs, which is why a batch layer is trained for a good while before anyone trusts its predictions.
+                  Here momentum 0.9 means retaining nine tenths of the previous estimate and adding one tenth of the new batch statistic. Some frameworks call the new-statistic weight momentum instead, so their 0.1 can describe this same update. A larger representative batch can make a batch statistic less noisy, but it does not change the retention factor or erase the running estimate&apos;s history. Check the update convention when moving between implementations.
                 </p>
                 <p>
                   On twenty of the crowd the running mean after one step is 15.19 centimetres against a batch mean of 151.9, and a person predicted through that layer would be standardised by a crowd that does not exist.
@@ -712,14 +704,7 @@ export default function NormalisationLayersPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Twenty of the crowd under RMS come out as 1.3622 and 0.3799
-                  for the first person, 1.3390 and 0.4549 for the second, rows
-                  that stay apart because what the layer kept is each
-                  row&rsquo;s proportions and not only which entry was larger.
-                  Conventionally the shift is dropped as well as the centring;
-                  the layer here keeps a shift defaulting to zero, which is
-                  the conventional model exactly and lets one shape serve the
-                  family.
+                  With RMS normalization, the first two rows are [1.3622, 0.3799] and [1.3390, 0.4549]. They remain different because the operation preserves within-row proportions rather than centring first. Conventional RMSNorm omits a shift. This implementation includes a shift initialized to zero; it matches that no-shift form while the shift stays zero, but learning a nonzero shift changes the model.
                 </p>
                 <KeepInMind>
                   RMS normalisation is layer normalisation with the mean route

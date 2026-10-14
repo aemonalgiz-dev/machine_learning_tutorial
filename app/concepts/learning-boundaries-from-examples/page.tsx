@@ -59,14 +59,7 @@ export default function LearningBoundariesFromExamplesPage() {
 <>
               <SubSection title="1. What scoring a whole sentence at once buys, and where it leaves you">
                 <p>
-                  The previous page gave every character of a text one of four
-                  places in its word, and chose the whole run of places at once
-                  by adding up a score along it and taking the largest total.
-                  That is a real advantage and it is worth naming before we give
-                  it up. A word cannot be left half open, a boundary in one spot
-                  can be paid for by what it forces two characters later, and
-                  the answer that comes back is the best reading of the sentence
-                  under one account of what sentences look like.
+                  The hidden-state model chooses a whole sequence of character roles. Its transition rules can keep those roles consistent, and an early decision can be judged by what must follow it. Here we will try a different approach: predict each boundary from its nearby characters. That makes individual decisions easier to inspect, but we give up the same kind of joint sequence constraint.
                 </p>
                 <>
 <p>
@@ -116,13 +109,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 </p>
                 <GapStrip scenarioKeys={["sentence"]} showSentences />
                 <p>
-                  Forty-one of the forty-four gaps agree with the reading a
-                  person gives, and the three that do not are the three drawn in
-                  red, all of them inside the surname. What matters for now is
-                  not the score but the shape of the answer, since every one of
-                  those bars was arrived at without consulting any other bar, and
-                  the three wrong ones can be pointed at individually in a way
-                  the previous method offers no vocabulary for.
+                  The model agrees with our reference at forty-one of the forty-four gaps. The three disagreements, shown in red, are inside the surname. Each gap was classified independently of the others. We can therefore examine the local evidence and score for a particular mistaken boundary, while remembering that the classifier does not check whether all those decisions form a plausible segmentation together.
                 </p>
                 <KeepInMind>
                   One question per gap, answered from the characters around that
@@ -134,12 +121,7 @@ export default function LearningBoundariesFromExamplesPage() {
 
               <SubSection title="3. A corpus that can be marked one gap at a time">
                 <p>
-                  This is the argument the method was invented for, and it is
-                  about who has to do the work rather than about accuracy.
-                  Imagine somebody going through text marking boundaries and
-                  stopping wherever they are unsure. Whether a compound noun is
-                  one word or two is genuinely arguable, so a careful annotator
-                  leaves such gaps alone and marks the ones they are certain of.
+                  Imagine asking someone to annotate boundaries and allowing them to leave uncertain cases unmarked. A compound noun may have more than one reasonable treatment under different conventions. A boundary classifier can learn from the gaps the annotator did label without requiring a complete segmentation for every sentence. That is a practical reason to investigate this arrangement, separate from its accuracy.
                 </p>
                 <p>
                   To a gap-at-a-time learner that corpus is simply fewer
@@ -272,13 +254,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 </p>
 </>
                 <p>
-                  Our own sentence needs both halves, and it is worth being exact
-                  about which does what. The full stop that ends Dr. is followed
-                  by a boundary; the apostrophe inside didn&rsquo;t and the hyphen
-                  inside low-cost are not. All three are a letter next to a
-                  punctuation mark, so the kinds alone cannot separate them, and
-                  which character it is has to settle it. Meanwhile in a name
-                  nobody has written down, the kinds are all there is.
+                  Our sentence shows why both character identity and character category can help. The full stop after Dr. is followed by a boundary, while the apostrophe in didn&apos;t and the hyphen in low-cost are internal. Broad categories such as letter and punctuation cannot separate all those decisions. Exact character features help with familiar patterns; category features can still apply when a new name contains unfamiliar combinations.
                 </p>
                 <GapStrip scenarioKeys={["unfamiliar", "chen"]} showSentences />
                 <p>
@@ -388,13 +364,7 @@ export default function LearningBoundariesFromExamplesPage() {
 
               <SubSection title="8. Correcting only the gaps it gets wrong">
                 <p>
-                  Walk through the marked gaps one at a time. Score the gap with
-                  the weights as they currently stand. If the sign agrees with
-                  what the annotator marked, change nothing at all and move on. If
-                  it does not, add one to every weight the gap asked about when
-                  the annotator said cut, and subtract one when they said keep
-                  going. That is the whole learning rule, and it is worth noticing
-                  that it never looks at a gap it is already right about.
+                  Visit each labelled gap and score it with the current weights. If the predicted sign agrees with the annotation, leave the weights alone. Otherwise update each active feature weight: add one for a required cut, or subtract one for a required continuation. This perceptron rule makes corrections only on mistaken labelled examples.
                 </p>
                 <Equation>
                   {"on a mistake:  weight(question)  ←  weight(question) + label,  with label = +1 to cut and −1 to join"}
@@ -699,13 +669,7 @@ export default function LearningBoundariesFromExamplesPage() {
                 </WorkedExample>
                 <WhyThisWorks title="What a score contribution can and cannot explain">
                   <p>
-                    It is worth being exact about what this is and is not. This is
-                    a decomposition of the score, so it says what the arithmetic
-                    did. It does not say what caused the boundary in the language,
-                    and a different order of the corrections produces a different
-                    set of weights, as the tenth section showed. Reading it as
-                    evidence about English rather than about this fit would be
-                    reading it for more than it holds.
+                    These contributions explain how this fitted model obtained its score. They do not establish a linguistic cause for the boundary. A different order of training corrections can produce different weights, as section 10 showed, so read the display as an account of this calculation rather than a general rule about English.
                   </p>
                   <p>
                     What it does support is a repair. A gap answered wrongly names
@@ -1090,12 +1054,7 @@ export default function LearningBoundariesFromExamplesPage() {
 
               <SubSection title="20. Independence is false about language">
                 <p>
-                  The assumption underneath every answer on this page is that the
-                  boundary at one gap can be settled without knowing the boundary
-                  at any other. That assumption is false, and it is worth saying
-                  as a fact rather than as a caveat. The gaps of a text are the
-                  boundaries of the same words, so the answer at one gap and the
-                  answer at the next describe two ends of one object.
+                  The classifier makes each gap decision independently. It cannot use another predicted boundary as evidence or enforce consistency across a whole word. Boundaries describe parts of the same segmentation, so that restriction can matter. The examples below test cases whose required relationship falls outside the local decision rule.
                 </p>
                 <p>
                   What is tempting here is to conclude that the answers can

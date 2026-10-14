@@ -32,7 +32,7 @@ export default function Page() {
           content: <>
             <SubSection title="1. Separate the decision from its consequences">
               <p>In supervised learning, we supply examples of the answer we want. For our robot, that could mean labeling each junction with the turn it should take. But sometimes it is easier to judge an outcome than to describe every decision needed to reach it. We can recognize a successful delivery without writing a rule for every possible route.</p>
-              <p>Reinforcement learning gives us a way to learn from those outcomes. The learner acts, receives feedback, and adjusts its future choices. We need a few distinct components to make that loop work:</p>
+              <p>We can learn from the consequences of actions when we don&apos;t have a correct action label for every situation. The learner chooses an action and receives feedback about what happened. Over repeated experience it can adjust its choices. Before running that loop, let&apos;s identify the components involved:</p>
               <ul className="list-disc space-y-2 pl-6">
                 <li><strong>Agent:</strong> the decision maker. Here, it is the robot and the rule that chooses its route.</li>
                 <li><strong>Environment:</strong> what the agent interacts with. Our simulator responds to a route choice with an outcome.</li>
@@ -143,7 +143,7 @@ export default function Page() {
                 <Equation>{"log(pₐ) = zₐ - log(Σₖ exp(zₖ))"}</Equation>
                 <p>Differentiate with respect to one logit zⱼ. The first term contributes one when j is the sampled action and zero otherwise, which is the indicator. The second term contributes the exponential of zⱼ divided by the sum, and that ratio is exactly pⱼ, the probability softmax gives action j:</p>
                 <Equation>{"∂ log(pₐ) / ∂ zⱼ = 1[j = a] - exp(zⱼ) / Σₖ exp(zₖ)\n                 = 1[j = a] - pⱼ"}</Equation>
-                <p>Two things follow. The sampled action&rsquo;s entry is one less its probability, which is positive, and every other entry is the negative of that action&rsquo;s probability. One experience therefore moves every logit, not only the chosen one. And since the indicator sums to one and the probabilities sum to one, the three entries add up to zero. In the worked update they are minus one third, two thirds and minus one third. The step shifts probability toward the sampled action and away from the rest rather than raising or lowering all three scores together.</p>
+                <p>For the sampled action, the derivative is one minus its probability. For every other action, it is the negative of that other action&apos;s own probability. The entries sum to zero because both the indicator and the probability vector sum to one. In our example, a positive advantage raises the selected logit and lowers the others, making the sampled action more likely. A negative advantage reverses that direction; a zero advantage gives no update.</p>
               </WhyThisWorks>
               <p>The indicator creates a positive direction for the selected action and negative directions for the others. The advantage sets the sign and size of that feedback. The learning rate controls the size of the parameter change. This is gradient ascent, so we add the update.</p>
               <p>Use the sampled Straight action, a zero baseline, and a learning rate of 0.1:</p>

@@ -97,13 +97,7 @@ export default function RandomForestsPage() {
 
               <SubSection title="2. Why strong features dominate">
                 <p>
-                  The reason is not mysterious. At the root of any of these
-                  trees two candidates compete, the best question height can
-                  ask and the best question weight can ask, and the tree
-                  takes whichever earns the larger impurity reduction on the
-                  rows it was given. Change the rows and both gains change.
-                  Whether the winner changes depends on how far apart they
-                  were.
+                  At the root, each tree compares the best available height split with the best weight split. It chooses the one with the larger impurity reduction on its sample. Resampling changes both gains, but the same feature can keep winning if its advantage is large. That helps explain why many of these trees still begin with height.
                 </p>
                 <SplitCompetition />
                 <p>
@@ -119,10 +113,7 @@ export default function RandomForestsPage() {
 
               <SubSection title="3. Structural similarity versus error correlation">
                 <p>
-                  Before changing anything it is worth separating three
-                  ideas that the word similar runs together, because the
-                  forest is judged on the third and the census only shows the
-                  first.
+                  When we say two trees are similar, we might mean their first split, their predictions, or their errors. The following comparison separates those meanings. Agreement on a root feature alone does not tell us how much their mistakes overlap.
                 </p>
                 <DerivationTable
                   expressionHeading="the idea"
@@ -708,9 +699,7 @@ export default function RandomForestsPage() {
                 </p>
                 <BoundaryDisagreement />
                 <KeepInMind>
-                  The feature lottery changes not only individual trees but
-                  the committee&rsquo;s decision regions, and most of the
-                  change lands where the votes were already close.
+                  Sampling features changes the individual trees and can change the ensemble&apos;s decision regions. Here most changes occur where the earlier votes were already close.
                 </KeepInMind>
               </SubSection>
             </>

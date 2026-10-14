@@ -117,13 +117,7 @@ export default function PatchingWithoutAVocabularyPage() {
                   never met.
                 </p>
                 <p>
-                  What is left is a narrower question. We may not keep a list of
-                  which runs of bytes are worth a name, but nothing stops us
-                  deciding, for a particular text, where one piece ends and the
-                  next begins. The pieces will not be named and nothing will
-                  recognise one when it comes round again. They will merely be
-                  boundaries, and the sequence a model reads will be as long as
-                  the number of boundaries rather than as long as the text.
+                  Could we group bytes without assigning each possible group a permanent vocabulary entry? We can choose boundaries for the current text, then pass the resulting blocks to the next stage. The model would process one representation per block instead of one per byte. Those blocks have no reusable vocabulary IDs; their boundaries and representations are computed for this input.
                 </p>
                 <KeepInMind>
                   Grouping and naming are separable, and this page keeps only the
@@ -186,14 +180,7 @@ export default function PatchingWithoutAVocabularyPage() {
                   {"blocks  =  ⌈ bytes ∕ size ⌉"}
                 </Equation>
                 <p>
-                  It is worth being clear that this is a real method and not a
-                  straw one. It is what MegaByte does, and the block size is the
-                  only knob. The argument for it is that the small model reading
-                  the bytes inside a block can learn to repair whatever the cut
-                  broke, so the boundaries need not be good ones, they need only
-                  be regular. Whether that argument holds is an empirical
-                  question about the model rather than about the cutting, and it
-                  is not one this page can settle.
+                  Fixed-size byte blocks are also used in MegaByte&apos;s multiscale architecture. Regular cuts make the block layout predictable, while its local model processes bytes within each block. Whether the resulting model can handle awkward cuts is an empirical question. This page inspects the segmentation itself and does not reproduce a full MegaByte training experiment.
                 </p>
                 <KeepInMind>
                   A fixed size gives an exactly predictable sequence length,
@@ -460,10 +447,7 @@ export default function PatchingWithoutAVocabularyPage() {
                       "7.99784   7.99572   7.99572   8.00000"}
                   </Equation>
                   <p>
-                    Every number can be checked from the definition in section 9
-                    with nothing more than a logarithm. The fourth is exactly 8,
-                    because the stretch in front of it never occurred. The other
-                    three are within three thousandths of it.
+                    We can check these values using the logarithm in section 9. The fourth is exactly 8 because its preceding context was unseen. The other three differ from it by less than three thousandths.
                   </p>
                   <p>
                     Here is the first of them written out. One value holds
@@ -708,13 +692,7 @@ export default function PatchingWithoutAVocabularyPage() {
                   writing.
                 </p>
                 <p>
-                  Eight copies of one sentence is 176 bytes. It is worth saying
-                  plainly how little that is, and how much it depends on the
-                  sentence being repeated exactly rather than on there being 176
-                  bytes of English. On the eighteen sentences, which are 763 bytes
-                  of genuinely varied writing, the same rule needs a context of
-                  four bytes rather than two to produce anything word-shaped at
-                  all.
+                  Eight exact copies of one sentence supply 176 bytes, with a very strong repeated pattern. The eighteen varied sentences supply 763 bytes and behave differently: this rule needs a four-byte context, rather than two, before its blocks resemble words. Repetition in a tiny example can make the method look more decisive than it is on varied text.
                 </p>
                 <KeepInMind>
                   The threshold and the amount credited to an unseen byte are two
@@ -1054,12 +1032,7 @@ export default function PatchingWithoutAVocabularyPage() {
 
               <SubSection title="23. The threshold is not determined by anything">
                 <p>
-                  The number the cut is made at has no value the mathematics
-                  prefers, and it does not merely tune the answer, it spans the
-                  whole range of possible answers. On the eighteen sentences it
-                  takes the total from 188 blocks to 18, and 18 is one block per
-                  sentence, meaning the model has been handed each sentence whole
-                  and the grouping has done nothing at all.
+                  The threshold can change the segmentation substantially. On the eighteen sentences, the sweep ranges from 188 blocks to 18. At 18, each sentence is passed as one whole block, with no internal boundaries. The method supplies no universally preferred threshold, so we need a criterion for deciding which grouping is useful.
                 </p>
                 <NumberTable
                   headings={["threshold, in bits", "blocks", "cuts inside a word"]}
@@ -1226,7 +1199,7 @@ export default function PatchingWithoutAVocabularyPage() {
                 "Two bits sits below the uninformed baseline of 65.6 per cent",
               ],
               0,
-              "The threshold does not merely tune the answer, it spans the whole range of possible answers, taking the total from 188 blocks to 18, where 18 is one block per sentence and the grouping has done nothing at all. There is no setting at which the method reports how confident it is in a boundary.",
+              "The threshold sweep ranges from 188 blocks to 18, where each sentence becomes one block. The threshold therefore controls how much internal segmentation we obtain. It does not turn the cut score into a calibrated probability that a proposed boundary is correct.",
             ),
             several(
               "Which of these follow from the pieces being a property of the guesser rather than of the text?",

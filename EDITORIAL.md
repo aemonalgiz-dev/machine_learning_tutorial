@@ -3,6 +3,27 @@
 The site teaches novice and technical readers in the author's direct,
 example-led voice. These rules reflect the author's stated preferences.
 
+Write as someone who enjoys working out how these methods work and wants the
+reader to be able to work them out too. Let that interest show through a useful
+question, an observation about the example, or a patient explanation. Do not
+manufacture excitement with claims about an idea's importance. Do not invent
+personal experiences, add deliberate mistakes, or remove qualifications to
+make the writing sound casual. Accuracy and depth still come first.
+
+Avoid rhetorical contrasts such as "not just X, but Y", polished slogans,
+decorative metaphors and anonymous appeals to experts. Prefer ordinary verbs
+to "serves as", "underscores" or "exemplifies". Omit stock transitions such as
+"Furthermore", "Crucially" and "In summary". Let the next sentence explain
+the actual connection. Do not arrange explanations into triplets for rhythm;
+a method that really has three components should still explain all three.
+
+Paragraphs can have different lengths. A short observation or a question can
+stand on its own when the reader has enough context. Use lists for things the
+reader needs to compare or follow, not as a default prose template. Keep
+headings specific to what the reader is trying to understand. Finish an
+explanation with what its result means or the question it leaves us, without
+adding a ceremonial conclusion. Preserve existing heading IDs and links.
+
 The explanation should answer a chain of questions: Why do we care about this
 problem? What information or operation are we missing? What are the fundamental
 components of the proposed solution? How do we use them, one step at a time?

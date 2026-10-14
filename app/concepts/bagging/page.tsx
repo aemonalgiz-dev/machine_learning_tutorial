@@ -69,13 +69,7 @@ export default function BaggingPage() {
 <>
               <SubSection title="1. One deep tree">
                 <p>
-                  Set the slider in the box above to one member. That is one
-                  fully grown tree on the trees page&rsquo;s tangled crowd,
-                  twenty-five people whose middle was built to be nearly
-                  noise. It scores 0.920 on the people it trained on, and the
-                  regions show how it got there, rectangles fitted around the
-                  particular people it happened to receive. Nothing about
-                  bagging yet. This is the baseline.
+                  Set the member slider to one. We now have a fully grown tree trained on a resample of the tangled crowd: twenty-five people with deliberately noisy labels in the middle. Its training accuracy is 0.920. The rectangular regions show how closely it follows the particular people it received. Keep this single-tree result in mind as we add more members.
                 </p>
               </SubSection>
 
@@ -477,7 +471,7 @@ export default function BaggingPage() {
             trueFalse(
               "A majority vote is a kind of averaging, so the same variance argument applies to it.",
               true,
-              "Write each tree’s vote for one class as a one or a zero. The mean of those indicators is the share of trees voting for the class, and the committee picks the class with the largest share. The caveat is not the averaging but the independence, since bagged trees are not independent.",
+              "For one class, we can write each tree's vote as one when it selects that class and zero otherwise. Averaging those indicators gives the share of votes, and the largest share wins. When we reason about how much averaging helps, we must also account for agreement between the trees. Bagged trees are not independent, so their shared mistakes can remain in the combined prediction.",
             ),
             choice(
               "The variance of the ensemble mean is ρσ² + (1 − ρ)σ² / B. Which part does growing B never touch?",
@@ -920,7 +914,7 @@ expected omitted 9.01`,
             ),
             exercise(
               "Judge every person out of bag",
-              ["Section 22 says a person’s judges number between three and thirteen on this committee, and section 20 says the whole committee’s verdict and the judges’ verdict differ for eight people. Build the out-of-bag estimate and read both claims off it.", "Print how many people have at least one judge, the fewest and most judges anyone has, the mean number of judges, and the number of people whose two verdicts differ. The mean is a number the page does not quote, and it is worth comparing with the mean omitted count from the previous problem."],
+              ["Section 22 says a person’s judges number between three and thirteen on this committee, and section 20 says the whole committee’s verdict and the judges’ verdict differ for eight people. Build the out-of-bag estimate and read both claims off it.", "Print the number of people with at least one judge, the minimum and maximum judge counts, the mean judge count, and how many people receive different verdicts from the two methods. Compare your mean judge count with the mean omitted count you calculated in the previous problem."],
               `from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
@@ -956,7 +950,7 @@ people whose two verdicts differ 8`,
             ),
             exercise(
               "Bag stumps and watch the bias stay",
-              ["Section 25 bags twenty-five stumps, trees allowed one question each, and finds they score 0.72 on the training crowd. Build that committee by handing the bagging frame a stump as its base model, and compare it with one stump and with the deep committee.", "Print the training score of a single stump, of the bagged stumps and of the bagged deep trees, then the out-of-bag scores of the two committees. The stumps’ out-of-bag score is a number the page does not quote, and it is worth looking at beside the deep trees’ 0.64."],
+              ["Section 25 bags twenty-five stumps, trees allowed one question each, and finds they score 0.72 on the training crowd. Build that committee by handing the bagging frame a stump as its base model, and compare it with one stump and with the deep committee.", "Print the training scores for a single stump, the bagged stumps and the bagged deep trees. Then print the out-of-bag scores for both ensembles. Compare the stump ensemble's out-of-bag result with the deep trees' reported 0.64."],
               `from oop_ml import BaggingClassifier, DecisionTreeClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])

@@ -161,7 +161,7 @@ export default function Page() {
         {
           title: "Part 5. Give All Five Parameters a Training Signal",
           content: <>
-            <p>The reconstruction term asks whether codes can account for the observations. For this linear decoder and Gaussian code, we can calculate the expected squared reconstruction error exactly. The variance contributes too: even when the decoder at the mean is correct, sampled codes vary around it.</p>
+            <p>The decoder should be able to reconstruct the observations from sampled codes. For this linear decoder with Gaussian codes, we can calculate the expected squared reconstruction error exactly. The code variance contributes to that expectation: getting the mean&apos;s reconstruction right does not make every sampled reconstruction right.</p>
             <Equation>{"μ = a × x + b\nv = exp(c)\ne = x - (w × μ + d)\n\nExpected reconstruction term = ½(e² + w²v)\nKL term = ½(μ² + v - 1 - c)\nLoss = average of both terms over the observations"}</Equation>
             <p>This is the negative evidence lower bound with a constant omitted. Ordinary nonlinear VAEs estimate the reconstruction expectation using sampled codes. Here the exact expectation lets us investigate the same two competing terms without sampling noise in the training curve.</p>
             <p>Each parameter needs the derivative of this complete objective. First calculate the signal arriving at the encoder mean. Then apply the chain rule to the slope and bias that produced it. Average per-observation derivatives before updating.</p>

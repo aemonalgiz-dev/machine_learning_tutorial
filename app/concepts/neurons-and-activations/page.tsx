@@ -69,7 +69,7 @@ export default function NeuronsAndActivationsPage() {
               <SubSection title="1. Two measurements in standard units">
                 <>
 <p>
-                  A neuron here reads two numbers about a person, their height and their weight, and it reads them after the feature scaling page&rsquo;s standardisation, so that each is the number of standard deviations above the crowd&rsquo;s mean. Done that way the two inputs share a scale, the two weights the neuron puts on them can be compared, and the whole crowd fits in a window three deviations each way, which is the square the box above draws.
+                  Our neuron reads a person&apos;s height and weight. We standardize both inputs using the group&apos;s mean and standard deviation, as in the feature-scaling lesson. A value of one then means one standard deviation above that measurement&apos;s mean. This gives the two weights a comparable input scale. The plot shows three standard deviations in each direction, which contains this example&apos;s observations.
                 </p>
                 <p>
                   The crowd&rsquo;s mean height is 151.48 centimetres with a deviation of 15.61, and its mean weight 51.48 kilograms with a deviation of 14.45.
@@ -614,11 +614,7 @@ export default function NeuronsAndActivationsPage() {
 
               <SubSection title="15. The four slopes side by side">
                 <p>
-                  Laid over one another the four slopes tell the whole story
-                  of which activation function to use where. The identity and the rectifier
-                  reach 1 and stay there, the tangent reaches 1 at a score
-                  of zero and falls away on both sides, and the sigmoid
-                  reaches a quarter at its best and falls away just as fast.
+                  Compare the derivatives in the plot. Identity has slope one everywhere. ReLU has slope one on its positive side and zero on its negative side. The hyperbolic tangent reaches one at zero and becomes flatter farther away. Sigmoid peaks at one quarter and also becomes flatter. These slopes help us understand how an activation affects a passing gradient; the surrounding weights matter too.
                 </p>
                 <ActivationSlopeChart />
                 <KeepInMind>
@@ -686,37 +682,20 @@ export default function NeuronsAndActivationsPage() {
 
               <SubSection title="17. Ten neurons in a chain">
                 <p>
-                  The trouble compounds. A gradient passing back through
-                  ten sigmoid neurons in a chain is multiplied by ten slopes,
-                  each at most a quarter, so in the best case, with every one
-                  of the ten scores exactly zero, it keeps a quarter to the
-                  tenth power.
+                  For this calculation, isolate the activation derivatives in a chain of ten sigmoid units. Each derivative is at most one quarter, so their product is largest when all ten scores are zero. The full network gradient also includes the intervening weights; we are examining the activation contribution on its own.
                 </p>
                 <Equation>
                   {"0.25¹⁰ = 9.537 × 10⁻⁷\n0.1491¹⁰ = 5.4 × 10⁻⁹"}
                 </Equation>
                 <p>
-                  Under a millionth at the single best point, and the second
-                  line, at the tall heavy person&rsquo;s slope of 0.1491, is
-                  two hundred times smaller than that. The tangent peaks at
-                  1 rather than a quarter, so a chain of tangent neurons
-                  starves four times more slowly per layer and starves all
-                  the same once the scores drift from zero. The rectifier
-                  passes the gradient through at exactly 1 wherever the
-                  score is positive, however long the chain, and that is
-                  the whole reason it took over. Nothing is broken in a
-                  starved chain and nothing raises; the walk just stalls,
-                  which the{" "}
+                  The product of ten sigmoid derivatives is under a millionth even at their maximum. At the example slope of 0.1491, the second calculation gives a still smaller product. Tanh can have derivative one near zero, while ReLU has derivative one throughout its positive side. These avoid this particular contraction where their derivatives are near one. But a network&apos;s gradient also passes through weights, and inactive ReLU units have zero derivative, so neither activation guarantees a healthy gradient through the whole network. Very small gradients can make learning slow without raising an error, as the{" "}
                   <Link href="/concepts/training-a-network" className={link}>
                     training page
                   </Link>{" "}
                   shows happening.
                 </p>
                 <KeepInMind>
-                  Ten sigmoid slopes multiply to under a millionth at their
-                  very best, and no learning rate recovers what the chain has
-                  multiplied away, since the rate scales the product it is
-                  given rather than restoring what the squashes removed.
+                  A larger learning rate multiplies all parameter updates. It can increase a small update, but it does not fix unequal gradient shrinkage across layers and may make other updates unstable. Activation choice and the scale of the weights both need attention.
                 </KeepInMind>
               </SubSection>
 

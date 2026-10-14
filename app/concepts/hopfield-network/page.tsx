@@ -67,7 +67,7 @@ export default function HopfieldNetworkPage() {
               <SubSection title="1. Addressed by content, answered by settling">
                 <>
 <p>
-                  The small grids at the top of the playground are the shapes the network was shown, a T, an L and a cross on twenty-five cells, and the first thing to know is that it did not keep them. Nothing in the network is a T. What it holds is one number for every pair of cells, saying whether those two cells tended to agree or disagree across the shapes it saw, and the shapes survive only as that pattern of agreement.
+                  The network has been shown the T, L and cross displayed above, each on twenty-five cells. It does not retain a separate picture to look up during recall. Instead, it stores a weight for each pair of cells, based on how those cells agreed or disagreed across the training shapes. Let&apos;s see how that table of relationships can help recover a damaged pattern.
                 </p>
                 <p>
                   Recall starts from whatever state the network is handed and lets each cell ask the others what it should be, until no cell wants to change, and the place it stops is the answer.
@@ -81,9 +81,7 @@ export default function HopfieldNetworkPage() {
                   way up a slope, and recall is a ball rolling down.
                 </p>
                 <KeepInMind>
-                  A memory here is a resting state, a state no single cell wants to leave, and recall is the walk to the
-                  nearest one. The network answers a damaged copy of a thing with the thing, which is what makes it an
-                  associative memory rather than a lookup.
+                  A stable state is a pattern that no single-cell update changes. Starting from a damaged pattern, recall follows updates until it settles. It may recover a stored shape, but it can also reach another stable pattern. There is no guarantee that the result is the nearest stored shape. This ability to recover from a partial or damaged cue is what we mean by associative memory.
                 </KeepInMind>
               </SubSection>
 

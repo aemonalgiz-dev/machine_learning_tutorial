@@ -88,12 +88,7 @@ export default function SelfOrganisingMapPage() {
                   found is whatever structure the two columns already have.
                 </p>
                 <p>
-                  The k-means page took a crowd like this one and sorted it into
-                  a fixed number of groups, each group described by one point
-                  that is the average of its members. That answer is useful and
-                  it is incomplete in a particular way. It tells you who goes
-                  with whom, and it tells you nothing at all about how the
-                  groups sit relative to one another.
+                  K-means gave us a centre for each group and assigned observations to those centres. We can compare the centres in measurement space, but the method does not arrange them on a map with a prescribed neighbourhood. A self-organising map adds that arrangement. We will see how neighbouring map cells influence one another while they learn.
                 </p>
                 <KeepInMind>
                   Both methods on this page work on unlabelled measurements. No
@@ -769,7 +764,7 @@ export default function SelfOrganisingMapPage() {
                 </p>
                 <>
 <p>
-                  On a three by three grid over the same eleven people it is far worse than that, and it is worth seeing how much worse. The two pairs of cells at opposite corners of the grid are the furthest apart anything can be there, 2.83 steps, and one of those pairs came to rest 78.831 apart while the other came to rest 11.344 apart.
+                  A three-by-three grid gives another example of the distortion. Both opposite-corner pairs are 2.83 grid steps apart, but their learned vectors end up 78.831 and 11.344 apart in measurement space. Equal map distances therefore do not mean equal differences between represented observations.
                 </p>
                 <p>
                   A pair one step apart came to rest 28.622 apart, further than the second of those corner pairs. The closest pair of all, 4.757, sits across a diagonal rather than side by side.

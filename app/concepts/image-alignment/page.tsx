@@ -67,14 +67,7 @@ export default function ImageAlignmentPage() {
           content: (
             <>
               <p>
-                The keypoints lesson ends on an admission with a number in it.
-                After a quarter turn of the picture, every corner is found again
-                in exactly the place it should be, with its strength agreeing to
-                the last bit, and the descriptions of the corresponding corners
-                sit 1.443376 apart on a scale whose maximum is 2.0. That is the
-                same distance a square&rsquo;s top-left corner sits from its own
-                top-right corner. After the turn the descriptor does not recognise
-                a corner as itself. It recognises it as some other corner.
+                Recall the quarter-turn experiment in the keypoints lesson. Every corner was detected again in its expected position, with the same measured strength. But the corresponding descriptors were 1.443376 apart on a distance scale whose maximum is 2.0. That was as far apart as the square&apos;s top-left and top-right corners. We found the location successfully, yet its description changed enough to resemble another corner. Let&apos;s examine what the rotation did to the patch.
               </p>
               <p>
                 The reason is where the patch is read from. The descriptor is the

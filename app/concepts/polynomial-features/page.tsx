@@ -75,13 +75,7 @@ export default function PolynomialFeaturesPage() {
 <>
               <SubSection title="1. Twenty-two people, and the shape weight really follows">
                 <p>
-                  We have twenty-two people measured three ways, height in
-                  centimetres, waist girth in centimetres, and weight in
-                  kilograms. The smallest is a child of 104 centimetres weighing
-                  16.1 kilograms and the largest an adult of 191 centimetres
-                  weighing 81.3, and everyone in between is arranged along that
-                  span. Predicting weight from height is the obvious thing to
-                  want, and a straight line is the obvious way to want it.
+                  We have measured twenty-two people: height and waist girth in centimetres, and weight in kilograms. They range from a child who is 104 centimetres tall and weighs 16.1 kilograms to an adult who is 191 centimetres tall and weighs 81.3 kilograms. Suppose we want to predict weight from height. We know how to fit a straight line, so let&apos;s start there and inspect where it misses.
                 </p>
                 <p>
                   There is a reason to expect trouble before any fitting
@@ -189,13 +183,7 @@ export default function PolynomialFeaturesPage() {
                   </p>
                 </InAModel>
                 <p>
-                  It is worth seeing the two fits side by side in the playground
-                  at the top. At degree 1 the line cuts through the young people
-                  and comes out under the tall ones; at degree 3 it follows the
-                  same sweep the people do. The 191 centimetre adult is still
-                  missed by 8.44 kilograms at degree three, and that is because
-                  he really is light for his height, which is a fact about him
-                  and not a shortcoming of the curve.
+                  Compare degree one with degree three in the playground. The cubic follows the broad curve of the observations more closely, but still misses the 191-centimetre adult&apos;s weight by 8.44 kilograms. Height alone cannot describe every difference between people. A remaining residual can reflect information absent from the input as well as a limitation of the chosen curve.
                 </p>
                 <KeepInMind>
                   Expanding the columns changes the design of the fit and not
@@ -643,15 +631,7 @@ export default function PolynomialFeaturesPage() {
                   caption="The same expansions, with and without shrinkage, on the same seven held-back people."
                 />
                 <p>
-                  A penalty of one thousandth takes degree fourteen from
-                  −24,967.20 to 0.9631, which is a working model built out of a
-                  fit that was ruinous a moment earlier. It does not quite reach
-                  the 0.9762 that degree four managed without any penalty at all,
-                  and the same penalty applied at degree four makes things
-                  slightly worse rather than better, 0.9675 against 0.9762. So the
-                  shrinkage is insurance. Where the degree was already sensible
-                  it costs 0.0087 of the second score, and where it was not it
-                  is worth about twenty-five thousand.
+                  For degree fourteen, a penalty of one thousandth changes the reported score from −24,967.20 to 0.9631. That is a large improvement on this split. It remains below the unpenalized degree-four score of 0.9762. At degree four, the same penalty reduces the score to 0.9675, a drop of 0.0087. Regularization helps the unstable fit here, but its strength still needs to be selected and evaluated.
                 </p>
                 <KeepInMind>
                   A penalty and a high degree belong together. The degree
@@ -959,7 +939,7 @@ export default function PolynomialFeaturesPage() {
                 "The penalty removes the need to measure on people the fit never saw",
               ],
               0,
-              "The wild swings come from very large weights cancelling almost exactly at the people and not at all between them, so making large weights expensive repairs them. The shrinkage is insurance. Where the degree was already sensible it costs 0.0087 of the held-back score, and where it was not it is worth about twenty-five thousand.",
+              "Large opposing coefficients nearly cancel at the training observations but can give very different predictions between them. Penalizing their size reduces these swings in this experiment. The held-out effect depends on the degree: the chosen penalty loses 0.0087 at degree four while rescuing a much worse degree-fourteen fit. That comparison supports testing the penalty, not applying one strength indiscriminately.",
             ),
             several(
               "Which of these did the page measure about writing the heights in metres rather than centimetres?",

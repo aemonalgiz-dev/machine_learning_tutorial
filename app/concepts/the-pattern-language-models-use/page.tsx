@@ -75,22 +75,10 @@ export default function PatternWordsPage() {
 <>
               <SubSection title="1. Four rules, and the character none of them keeps">
                 <p>
-                  The four rules on the pages before this one disagree about
-                  almost everything, and agree about one thing without ever
-                  saying so. Splitting on spaces asks where the gaps are, the
-                  boundary rules ask which pairs of characters a word may break
-                  between, the annotation rules ask which units a grammar talks
-                  about, and the translation rules ask what a phrase table
-                  should have a row for. Every one of them answers with the
-                  writing and throws the spacing away.
+                  The earlier methods mostly returned word-like pieces while leaving ordinary spacing out of the token sequence. That is convenient when counting words or annotating grammar. What if a language model must reproduce the spacing as part of its output? Then the representation needs to keep information those earlier tasks could discard.
                 </p>
                 <p>
-                  That is invisible until something has to go the other way. A
-                  model that reads text and produces text has to hand a person a
-                  sentence at the end, and if the pieces it was trained on do
-                  not carry the spacing then something else has to put the
-                  spacing back by guessing. We carry the same sentence the other
-                  pages carry, since it breaks in the places that matter.
+                  Once spacing is lost, a later step has to reconstruct it using additional rules or guesses. We will examine a pattern that keeps it attached to the pieces. Our familiar sentence lets us compare the result with the earlier tokenizers, including punctuation and the boundaries beside it.
                 </p>
                 <Equation>
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
@@ -496,11 +484,7 @@ export default function PatternWordsPage() {
 
               <SubSection title="9. Twelve branches, and the four that six sentences reach">
                 <p>
-                  The last branch is a bare run of spacing, which catches
-                  whatever is left, and that is the twelve. It is worth seeing
-                  which of them actually do anything, since a rule with twelve
-                  clauses and a rule with four are different objects however the
-                  first is written.
+                  The final branch matches remaining runs of whitespace, completing the twelve alternatives. We can record which branches actually match our examples to see how much of the rule those examples exercise.
                 </p>
                 <BranchReader />
                 <p>
@@ -939,9 +923,7 @@ export default function PatternWordsPage() {
 
               <SubSection title="18. A first cut, before any vocabulary is learned">
                 <p>
-                  It is worth being exact about where this method stops, because
-                  the pieces on this page are not what a model reads. They are the
-                  units a vocabulary is then learned inside, and{" "}
+                  The pieces produced by this pattern are an intermediate representation. A later subword vocabulary can split within them, so they are not necessarily the final tokens a model receives. In particular,{" "}
                   <span className="font-mono">·Alvarez</span> will very likely be
                   cut again into two or three smaller pieces by the method on the{" "}
                   <Link href="/concepts/byte-pair-encoding" className={link}>
@@ -1159,12 +1141,7 @@ export default function PatternWordsPage() {
 
               <SubSection title="22. How far the difference reaches, and where it stops">
                 <p>
-                  Before treating that as a serious defect it is worth asking
-                  when it shows, because a character being in the wrong class is
-                  not the same as a text being cut differently. The classes only
-                  decide where one run stops and the next begins, so a character
-                  with spacing on both sides is a run of one whichever class it
-                  is in.
+                  A character in the wrong category does not always change token boundaries. If whitespace isolates it on both sides, it remains a one-character run under either classification. Let&apos;s test it next to other characters to expose where the category choice affects the segmentation.
                 </p>
                 <p>
                   I put each of the 1,151 into four arrangements and asked
@@ -1298,7 +1275,7 @@ export default function PatternWordsPage() {
                 </p>
                 <>
 <p>
-                  Part 5 measured one instance of that and it is worth stating in general. The classes an expression names are defined by the engine, so two engines can agree about every operator and part company over what a letter is; and they can also part company over what the operators do, since the greedy and the lazy readings of a repetition, the meaning of a lookahead at the end of a text, and whether a match may be empty are all conventions rather than consequences.
+                  The regex engine defines character classes and matching behaviour. Two implementations can therefore interpret similar-looking expressions differently, especially when one uses Unicode properties and another approximates them. Check the actual class membership and matching semantics, including repetition and lookahead, when porting the pattern.
                 </p>
                 <p>
                   The same expression is then two different rules, and both are being applied faithfully.

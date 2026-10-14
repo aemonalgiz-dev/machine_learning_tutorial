@@ -84,11 +84,7 @@ export default function KernelRidgePage() {
                 <Equation>{"minimise  ‖y − Xw‖² + λ‖w‖²"}</Equation>
                 <Equation>{"w = (XᵀX + λI)⁻¹ Xᵀ y"}</Equation>
                 <p>
-                  The matrix being inverted is p by p, where p counts the
-                  features. That is the fact to hold onto, because the whole
-                  page is about finding a second way to write w whose matrix
-                  is n by n, where n counts the rows, and then noticing what
-                  the second way lets us do that the first cannot.
+                  In the expression above, the matrix has one row and column per feature, so its size is p by p. We will now rewrite the same fitted rule using one weight per training observation. That gives us an n-by-n system. Why bother? The second form lets us replace explicit feature inner products with kernel evaluations.
                 </p>
                 <KeepInMind>
                   The penalty page owns the penalty. Everything it says about
@@ -111,13 +107,7 @@ export default function KernelRidgePage() {
                 <Equation>{"w = Xᵀ (XXᵀ + λI)⁻¹ y = Xᵀ a"}</Equation>
                 <Equation>{"a = (K + λI)⁻¹ y,   K = XXᵀ"}</Equation>
                 <p>
-                  The vector a is called the dual weights, and it has one
-                  entry per row. The matrix K is n by n and holds the inner
-                  product of every training row with every other, and it is
-                  called the Gram matrix. Nothing else about the rows
-                  survives into the solve. A prediction is then an inner
-                  product too, the new row against each training row,
-                  weighted by a.
+                  The vector a contains the dual weights, one for each training row. The n-by-n matrix K records the inner product of every training row with every other row. This is the Gram matrix. The solve uses those comparisons rather than the feature vectors directly. For a new observation, we compare it with each training row and combine the comparisons using a.
                 </p>
                 <Equation>{"prediction(x) = xᵀw = Σᵢ aᵢ (x · xᵢ) + ȳ"}</Equation>
                 <WhyThisWorks title="Why the two forms agree">

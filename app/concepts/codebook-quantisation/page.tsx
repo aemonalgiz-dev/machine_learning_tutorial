@@ -73,15 +73,7 @@ export default function CodebookQuantisationPage() {
                 <p>
                   Every other page in this section carries one sentence,{" "}
                   <em>Dr. Alvarez didn&rsquo;t expect the low-cost
-                  re-analysis.</em> It is there because it breaks things, and
-                  none of the things it breaks are things this method can meet.
-                  The method here is vector quantisation, and it reads vectors
-                  rather than writing, so a sentence
-                  would have to be turned into vectors before it arrived, and
-                  every interesting decision would then have been taken by
-                  whatever did the turning. So this page carries a picture
-                  instead, and says so plainly rather than pretending the
-                  sentence still fits.
+                  re-analysis.</em> Vector quantisation starts with numerical vectors, so we need an example where we can inspect those inputs directly. We will use image patches here. A text system could quantise learned text vectors too, but that would require us to explain the text-to-vector model first. The picture lets us concentrate on how continuous vectors become discrete codes.
                 </p>
                 <p>
                   The picture is sixteen pixels down and sixteen across, each
@@ -124,10 +116,7 @@ export default function CodebookQuantisationPage() {
                   caption="Every picture has the same 128 pieces; what differs is how many of them are different from each other."
                 />
                 <p>
-                  The playground above quantises any of the four at any table
-                  size. It is worth turning the table size down to 2 on the
-                  photograph and watching the reconstruction beside it, before
-                  reading any of the arithmetic below.
+                  The playground can quantise each of the four images at different codebook sizes. Set the photograph&apos;s size to two and compare it with the reconstruction. Which differences can two representatives retain, and which have disappeared?
                 </p>
                 <KeepInMind>
                   The photograph is the running example. The other three are
@@ -218,12 +207,7 @@ export default function CodebookQuantisationPage() {
             <>
               <SubSection title="5. The rule, in one line">
                 <p>
-                  Keep a fixed list of vectors. Each one owns the number that is
-                  its position in the list, counting from zero. To give a new
-                  vector a number, measure how far it is from every entry and
-                  answer with the position of the nearest. That is the whole
-                  method, and everything else on this page is a consequence of
-                  it or a cost of it.
+                  We keep a list of representative vectors called a codebook. Each entry&apos;s position is its code. To encode a new vector, compare it with the entries and return the nearest entry&apos;s position. To reconstruct it, retrieve that representative. The reconstructed vector may differ from the original, so we will measure the error as well as the size of the codebook.
                 </p>
                 <Equation>
                   {"number of v  =  the position i minimising  ||v − entryᵢ||²"}
@@ -724,7 +708,7 @@ export default function CodebookQuantisationPage() {
                 </p>
                 <InAModel>
                   <p>
-                    This is where the method is worse than the obvious alternative, and it is worth saying rather than burying. A fixed grid of levels, where each coordinate is rounded to one of a few evenly spaced values, covers the whole square whatever arrives and needs nothing fitted; it would round (0.90, 0.05) to something near (0.90, 0.05).
+                    A fixed coordinate grid handles this example differently. It rounds each coordinate to a permitted level without fitting representatives to a sample, so it covers the square even in regions absent from training. With sufficiently fine levels, it would keep (0.90, 0.05) close to its original position. We should compare that alternative when the fitted codebook leaves this region poorly represented.
                   </p>
                   <p>
                     It pays for that by spending entries on regions no picture ever visits, which is why the fitted table wins by 249.5 times on the picture it was fitted for. A fixed grid would have kept that edge and would have spent some of its levels on brightness pairs this photograph never produces, where the fitted table put all sixteen of its entries inside the band its own pieces occupy.
@@ -875,14 +859,7 @@ export default function CodebookQuantisationPage() {
 
               <SubSection title="23. The two ends of the range">
                 <p>
-                  The smallest table has one entry, and it is worth looking at
-                  because it is exactly the case where the method does nothing.
-                  Every piece becomes the number 0, the number costs zero bits
-                  because it could not have been anything else, and the rounding
-                  error is 0.113862, which is precisely the mean squared distance
-                  from the pieces to their own mean. The single entry is the
-                  mean, so the error is the spread of the collection and the
-                  numbers carry none of it.
+                  With one codebook entry, every input patch receives code zero. No bits are needed to distinguish that code from another code, because there is no alternative. The representative is the mean patch, and the reported reconstruction error is 0.113862. That equals the mean squared distance to the patch mean. We still have to store the representative, but the sequence of codes retains none of the differences among patches.
                 </p>
                 <p>
                   The largest table is the one section 17 reached, 53 entries

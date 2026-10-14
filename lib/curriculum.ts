@@ -457,7 +457,7 @@ const existingCurriculum: Part[] = [
           {
             "title": "U-Net",
             "href": "/concepts/u-net",
-            "blurb": "Sometimes we need to know which pixels belong to an object, not just whether the object is present. U-Net learns from images paired with labelled masks and carries spatial detail forward to help reconstruct those boundaries."
+            "blurb": "Where does an object begin and end in an image? U-Net learns from images paired with labelled masks, using spatial detail from earlier layers to help predict the region belonging to each object."
           }
         ]
       },

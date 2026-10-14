@@ -84,10 +84,7 @@ export default function GradientDescentRegressionPage() {
                   />
                 </WorkedExample>
                 <p>
-                  Nothing on this page will improve on those numbers. They are
-                  the destination, and everything the walk does can be judged
-                  by how close to them it gets and how long it takes. Do not
-                  start the walk yet.
+                  We already know the best-fitting line for these observations. That gives us a useful way to check a different method: start from another line and improve it through small adjustments. Before starting the updates, let&apos;s see what one adjustment actually changes.
                 </p>
               </SubSection>
 
@@ -167,11 +164,7 @@ export default function GradientDescentRegressionPage() {
                 </p>
                 <LineSearchPlayground panels={["line"]} initialLevel={20} initialSlope={0.2} />
                 <p>
-                  Every combination of level and slope defines one candidate
-                  line, and every candidate line earns one loss. That is the
-                  whole of what the walk is going to search through, and doing
-                  it by hand first makes the next section&rsquo;s picture
-                  obvious rather than abstract.
+                  Each choice of level and slope gives us a line, and we can measure its loss on these observations. Try a few choices by hand. In the next picture we will give each choice a position and use its loss as the height, so we can see where better-fitting lines are located.
                 </p>
               </SubSection>
 
@@ -184,12 +177,7 @@ export default function GradientDescentRegressionPage() {
                 <Equation>{"(level, slope)  ⟼  MSE"}</Equation>
                 <LineSearchPlayground panels={["line", "surface"]} initialLevel={20} initialSlope={0.2} />
                 <p>
-                  Move a slider and both panels move together. That is the
-                  central picture of the page. Fitting a line can be seen as
-                  moving a line through the data, or as moving a point across
-                  an error surface, and those are the same act. The
-                  regression page found the bottom of this surface by algebra.
-                  This page is going to walk down to it.
+                  Move one slider and watch both panels. In the data plot, we change the line. In the loss plot, we move the point representing that line&apos;s settings. They describe the same adjustment. We previously used algebra to find the minimum; now we will use the slope of this surface to decide which adjustment to try next.
                 </p>
               </SubSection>
             </>
@@ -263,12 +251,7 @@ export default function GradientDescentRegressionPage() {
             <>
               <SubSection title="9. Anatomy of one pass">
                 <p>
-                  A pass is a fixed sequence, and it is worth seeing it as one
-                  before seeing any of its arithmetic. Use the current
-                  settings. Make predictions. Take residuals. Square and average
-                  them into the loss. Read the gradient. Scale it by the
-                  learning rate. Update both settings. Begin again from the new
-                  ones.
+                  One update begins with the current parameters. We use them to calculate predictions and residuals, then average the squared residuals to measure loss. The gradient tells us how that loss changes locally with each parameter. We scale it by the learning rate and subtract it from the current parameters. The next update must use the new values.
                 </p>
                 <PassInspector />
                 <p>

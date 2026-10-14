@@ -79,7 +79,7 @@ export default function DropoutPage() {
               <SubSection title="1. A wide network on a mixed crowd">
                 <>
 <p>
-                  Take the tangled crowd from the bagging page, twenty-five people measured by height and weight, twelve of them children and thirteen adults, with the middle of the crowd mixed on purpose so that no smooth boundary separates the two. Give a network sixteen rectified hidden units, which for twenty rows of two numbers is far more than it needs, and train it hard, four hundred full-batch steps at a stride of one.
+                  Let&apos;s return to the tangled crowd from the bagging lesson: twenty-five people measured by height and weight, twelve children and thirteen adults. We deliberately mixed the labels in the middle. For each training fold we give a network sixteen ReLU hidden units and twenty of the people, then run four hundred full-batch updates with a learning rate of one. How closely will it fit those people, and how well will that carry over to the five held out?
                 </p>
                 <p>
                   It learns the mixed middle person by person. Held out fold by fold, five folds so every person is left out once and averaged over five seeds, it calls 99.2 percent of the rows it trained on correctly and 74.4 percent of the people it did not see.
@@ -546,11 +546,7 @@ export default function DropoutPage() {
                   <Link href="/concepts/pooling" className={link}>
                     pooling page&rsquo;s
                   </Link>{" "}
-                  layer took the opposite decision and recomputes its winners
-                  instead of storing them, and the difference between the two
-                  is the whole point. A pooling winner is a function of
-                  numbers the response already holds. A mask is a draw, and
-                  nothing that survives the forward pass can reproduce it.
+                  layer instead recomputes its winners from values the response already stores. A pooling winner is determined by those values. A dropout mask came from a random draw, so we must retain the mask or enough random state to reproduce that exact draw.
                 </p>
                 <p>A seeded dropout layer must be reproducible across a sequence of passes while still producing new masks on later passes. Its random generator therefore advances after every draw.</p>
 <p>The layer keeps that generator state when a training step occurs. Reconstructing a seeded generator from its initial seed after every step would repeat the same mask, permanently removing the same contributions instead of varying them across training passes.</p>

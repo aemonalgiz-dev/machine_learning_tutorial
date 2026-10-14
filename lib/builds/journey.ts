@@ -1,7 +1,7 @@
 import { lessonHistories,type HistoryLessonId } from "../history";
 import type { LessonHistory } from "../history/types";
 import { labLessons,labHref } from "../labs";
-import { buildById,firstUse } from "./catalog";
+import { BUILDS,buildById,firstUse } from "./catalog";
 import { TOOLS } from "./tools";
 import { assemble,evaluate,expressionTools,type Build,type Data,type Settings } from "./engine";
 export interface JourneyData {
@@ -10,6 +10,20 @@ export interface JourneyData {
   history:LessonHistory;
   tools:{key:string;earlier?:{title:string;href:string};example?:{inputs:Data[];settings:Settings;output:Data}}[];
   previous?:{title:string;href:string};next?:{title:string;href:string};
+}
+let earlierExamples: Map<string, NonNullable<JourneyData["tools"][number]["example"]>> | undefined;
+function exampleFor(key: string) {
+  if (!earlierExamples) {
+    earlierExamples = new Map();
+    for (const build of BUILDS) {
+      const graph = assemble(build.recipe, TOOLS), trace = evaluate(graph, build.cases[0].data, TOOLS);
+      for (const step of trace.steps) {
+        const piece = graph.pieces.find(piece => piece.id === step.id)!;
+        if (TOOLS[piece.tool] && !earlierExamples.has(piece.tool)) earlierExamples.set(piece.tool, { inputs: step.inputs, settings: piece.settings, output: step.output });
+      }
+    }
+  }
+  return earlierExamples.get(key);
 }
 export function journeyFor(id:string):JourneyData {
   const original=buildById[id];if(!original)throw Error(`Missing construction: ${id}`);
@@ -23,7 +37,7 @@ export function journeyFor(id:string):JourneyData {
       "Botie's workshop lets us make those instructions visible. A source supplies data, an operation changes or combines it, and a wire carries the result into another operation. The result is where we check whether the whole construction does what we asked.",
       "In the lessons, we will start with the problems people were trying to solve. Botie will introduce the tools they developed, show how the pieces work, and then work through that problem with you in a construction. You will keep using familiar tools as the problems become more involved.",
     ]}:lessonHistories[id as HistoryLessonId],
-    tools:keys.map(key=>{const first=labLessons.find(l=>l.id===firstUse[key]);const piece=reference.pieces.find(p=>p.tool===key);const step=trace.steps.find(s=>s.id===piece?.id);return {key,...(first&&first.id!==id&&labLessons.indexOf(first)<at?{earlier:{title:first.title,href:labHref(first.id)}}:firstUse[key]==="workshop-guide"&&id!=="workshop-guide"?{earlier:{title:"The workshop tutorial",href:"/lab/workshop-guide"}}:{}),...(piece&&step?{example:{inputs:step.inputs,settings:piece.settings,output:step.output}}:{})};}),
+    tools:keys.map(key=>{const first=labLessons.find(l=>l.id===firstUse[key]);const piece=reference.pieces.find(p=>p.tool===key);const step=trace.steps.find(s=>s.id===piece?.id);return {key,...(first&&first.id!==id&&labLessons.indexOf(first)<at?{earlier:{title:first.title,href:labHref(first.id)}}:firstUse[key]==="workshop-guide"&&id!=="workshop-guide"?{earlier:{title:"The workshop tutorial",href:"/lab/workshop-guide"}}:{}),example:piece&&step?{inputs:step.inputs,settings:piece.settings,output:step.output}:exampleFor(key)};}),
     ...(at>0?{previous:{title:labLessons[at-1].title,href:labHref(labLessons[at-1].id)}}:{}),
     ...(at<labLessons.length-1?{next:{title:labLessons[at+1].title,href:labHref(labLessons[at+1].id)}}:{}),
   };

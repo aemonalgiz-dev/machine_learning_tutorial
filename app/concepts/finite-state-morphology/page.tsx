@@ -68,11 +68,7 @@ export default function FiniteStateMorphologyPage() {
                 </p>
 </>
                 <p>
-                  That is not a criticism, and it is the reason those methods
-                  work on languages nobody on the team speaks. It is a
-                  commitment, though, and it is worth being precise about what
-                  is being committed to. The pieces are wherever the counts fall.
-                  Nothing in any of those methods knows that{" "}
+                  These objectives let a method learn pieces without someone supplying a linguistic analysis of every word. Their decisions follow corpus statistics, however. They do not explicitly encode the grammatical fact that{" "}
                   <span className="font-mono">re</span> is a prefix, that{" "}
                   <span className="font-mono">ed</span> makes a past tense, or
                   that <span className="font-mono">bake</span> and{" "}
@@ -150,13 +146,7 @@ export default function FiniteStateMorphologyPage() {
 
               <SubSection title="3. The other way to get the pieces">
                 <p>
-                  The alternative is old and it is not complicated. Somebody who
-                  knows the language writes down its stems, writes down its
-                  endings, and writes down which endings may follow which stems.
-                  A word is then read by finding a way of spelling it out of
-                  those pieces in an order the writer allowed, and what comes
-                  back is not only where the word divides but what each division
-                  is doing.
+                  We can also supply linguistic knowledge directly. Someone writes a lexicon of stems and endings, together with rules for which combinations are allowed. The analyzer then searches for a permitted sequence that spells the observed word. Its result can identify the pieces and their grammatical roles. We will build a small grammar so we can inspect exactly which analyses it permits.
                 </p>
                 <p>
                   Our sentence has a word of exactly this shape.
@@ -166,12 +156,7 @@ export default function FiniteStateMorphologyPage() {
                   A reader who knows English sees{" "}
                   <span className="font-mono">re-analysis</span> as{" "}
                   <span className="font-mono">re</span> in front of{" "}
-                  <span className="font-mono">analysis</span>, and would say
-                  without hesitating that the prefix means again. That reading
-                  does not depend on having seen the word before, which is the
-                  whole point, and it is the thing a person can write down and a
-                  count cannot discover. What follows is what happens when
-                  somebody does write it down.
+                  <span className="font-mono">analysis</span>, and would interpret the prefix as again. A written rule can apply that analysis even when this particular word was absent from a corpus. Let&apos;s see how to express the rule and which words it allows the analyzer to read.
                 </p>
                 <KeepInMind>
                   A learned vocabulary holds what its corpus held. A written
@@ -680,13 +665,7 @@ export default function FiniteStateMorphologyPage() {
                   {"178 lines,  6 states   →   1074 words,  1184 readings"}
                 </Equation>
                 <p>
-                  It is worth saying where the 178 comes from, because the machine
-                  actually has 342 steps in it. The stems are written once and
-                  named, and a prefix has to lead somewhere, so the stem list
-                  appears in two states instead of one. In a real toolchain you
-                  write it once and the compiler makes the copy, and a step
-                  reading nothing would remove the duplication entirely; here it
-                  is a consequence of the rule from section 4.
+                  The description counted 178 contributions, while the constructed machine contains 342 transitions. Some stems appear in two states because a prefix needs a route into the stem list. A compiler can generate that repetition from a lexicon written once. Allowing an empty-input transition would provide another construction; the rule used in section 4 produces the explicit copies here.
                 </p>
                 <KeepInMind>
                   A word list of a thousand forms is a thousand lines to write and
@@ -741,13 +720,7 @@ export default function FiniteStateMorphologyPage() {
                   of them as the words have.
                 </p>
                 <p>
-                  This is the honest place where the method is worse than the
-                  obvious alternative, and it is worth stating plainly instead of
-                  burying it. If what you want is short sequences, a learned
-                  vocabulary gets them by spending memory, and spending memory is
-                  easy. A grammar cannot be made to produce a shorter cut without
-                  making it describe the language differently, which is not a
-                  setting anybody can turn.
+                  If the goal is simply a shorter token sequence, a learned vocabulary can store frequent whole forms. A morphological grammar has a different job: its divisions express the analysis we wrote into it. Changing those divisions merely to shorten the sequence would change what it says about the language. We should choose the representation according to the task.
                 </p>
                 <NumberTable
                   headings={["method", "size", "pieces per word", "words held whole"]}
@@ -1042,21 +1015,10 @@ export default function FiniteStateMorphologyPage() {
                   one.
                 </p>
                 <p>
-                  There is a genuine decision attached and it is worth naming.
-                  Either the analyser is the whole answer, in which case an
-                  unreadable word stops the pipeline and the grammar has to grow
-                  until it does not; or the analyser is one of two methods and
-                  something else takes over where it returns nothing, in which
-                  case what reaches the model downstream is a mixture of labelled
-                  and unlabelled pieces, and whatever consumes it has to be built
-                  to cope with both.
+                  We also need a policy for words the grammar cannot analyze. We could stop and extend the grammar, or pass the word to a fallback method. With a fallback, later code must handle both labelled morphological pieces and pieces without that analysis. Neither choice makes the unrecognized word disappear from the problem.
                 </p>
                 <KeepInMind>
-                  The reading a grammar cannot produce was never considered and
-                  rejected. It was never among the things the method was able to
-                  say, in the way that a function is not merely inaccurate
-                  outside its domain, and that is why there is nothing to score
-                  on busiest.
+                  No permitted path spells busiest under this grammar. The analyzer therefore has no candidate to score, rather than a low-scoring candidate it rejected. To handle the word, we need to extend the grammar or apply the declared fallback.
                 </KeepInMind>
               </SubSection>
 

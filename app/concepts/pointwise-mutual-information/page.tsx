@@ -78,10 +78,10 @@ export default function PointwiseMutualInformationPage() {
               <SubSection title="1. Twenty-four short notes, and two halves that never mix">
                 <>
 <p>
-                  Everything on this page is measured on one corpus, and it is worth knowing what is in it before any score touches it. Twenty-four notes of six words each, twelve about cooking and twelve about sailing. The cooking half is spelled from flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan; the sailing half from sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew.
+                  We will measure associations in twenty-four six-word notes, half about cooking and half about sailing. The cooking list is flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan. The sailing list is sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew. These known topic groups give us a reference for interpreting the scores.
                 </p>
                 <p>
-                  No word of one half ever appears in the other. What the two halves do share is three words that carry no topic at all, and, the and we, and those three turn out to matter more here than any of the twenty.
+                  The two topic lists do not overlap. Both halves also use and, the and we. In this constructed corpus, those shared words do not identify the topic. That makes them useful for comparing frequent co-occurrence with an association that tells us something about the subject.
                 </p>
 </>
                 <p>
@@ -345,13 +345,7 @@ export default function PointwiseMutualInformationPage() {
                 </p>
                 <WhyThisWorks title="Why the ceiling makes rare words loud">
                   <p>
-                    A word counted once has a tiny rate, so one over that rate is
-                    large, so its ceiling is high and one single co-occurrence is
-                    enough to reach it. A word counted five hundred times has a
-                    low ceiling and cannot reach a large score with anything. The
-                    consequence is that the highest scores in any corpus belong to
-                    the rarest words, on the thinnest evidence, and that is what
-                    the last part of this page comes back to.
+                    A rare word can receive a very large PMI score from a single co-occurrence because its expected count under independence is so small. A frequent word has a lower ceiling under the corresponding probability constraint. This gives PMI a tendency to favour rare pairs, but it does not guarantee which pair will rank highest in every corpus. We need to inspect the evidence behind a large score.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
@@ -366,12 +360,7 @@ export default function PointwiseMutualInformationPage() {
 
               <SubSection title="9. This score, and the mutual information it is named after">
                 <p>
-                  The name causes trouble and it is worth spending a paragraph on.
-                  Mutual information is a single number describing two whole
-                  distributions, and it is the average of the quantity on this page
-                  taken over every pair, weighted by how likely each pair is. The
-                  score here is one term of that average, before it is averaged,
-                  which is what the word pointwise is doing in the name.
+                  Pointwise mutual information assigns a score to one outcome pair. Mutual information averages that score over the joint distribution of two random variables, weighting each pair by its joint probability. Keeping the distinction clear prevents us from treating one large pair score as a summary of the entire relationship.
                 </p>
                 <Equation>{"mutual information = Σ over every pair of  rate(w, c) × score(w, c)"}</Equation>
                 <p>
@@ -458,12 +447,7 @@ export default function PointwiseMutualInformationPage() {
                   takes far more text.
                 </p>
                 <p>
-                  The lowest score in the whole of the twenty-four notes is
-                  −0.5108, and every pair sitting at it was seen together exactly
-                  once. That is the shape of the problem. A pair below chance is
-                  by definition a pair with few observations, so the very score
-                  that says the two words avoid each other is the score computed
-                  from the least evidence.
+                  Here the lowest score is −0.5108, and every pair at that score occurred together once. These estimates rely on little evidence. That is a property of this small corpus, however: a pair can occur below its independence expectation even when its observed count is large. We should consider both the observed count and the expected count when interpreting a negative score.
                 </p>
                 <p>
                   The usual response is to keep the positive half and set

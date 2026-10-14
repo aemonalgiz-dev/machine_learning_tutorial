@@ -52,11 +52,7 @@ export default function KernelPcaPage() {
           <Link href="/concepts/kernel-trick" className={link}>
             the kernel trick
           </Link>
-          . The first owns the eigenvector route and the four height and weight measurements this
-          page reuses; the second owns the trick itself, the lifted space and
-          the radial kernel&rsquo;s reach. Read both first, since this page
-          borrows the eigenvalue from one and the swap from the other and
-          adds one step of its own, centring a cloud it cannot see.
+          . The PCA lesson explains eigenvectors and supplies the four height and weight measurements we reuse. The kernel lesson explains transformed features and the radial kernel&apos;s reach. We will bring those ideas together here, then work out how to centre transformed observations using their kernel comparisons.
         </>
       }
 
@@ -95,7 +91,7 @@ export default function KernelPcaPage() {
               <SubSection title="2. The arc, carried over">
                 <>
 <p>
-                  The PCA page ended on twelve people along a curve and showed that a straight axis is a poor summary of them, with a first component claiming 68 percent of the variance and a reconstruction error of 3,316 from one number per person. It is worth being exact about what that axis did and did not do, because this page will measure the kernel&rsquo;s answer against it.
+                  The PCA lesson used twelve people arranged along a curve. Its first linear component accounted for 68 percent of the variance, and reconstruction from one coordinate had an error of 3,316. We will keep those measurements as our comparison when investigating whether a kernel representation helps.
                 </p>
                 <p>
                   The curve rises at both ends and dips in the middle, and nearly all of its spread runs along height, so the first component runs nearly along height too.

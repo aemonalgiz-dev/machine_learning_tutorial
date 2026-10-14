@@ -69,13 +69,7 @@ export default function HebbianPcaPage() {
 <>
               <SubSection title="1. A neuron with two weights">
                 <p>
-                  Everything on the PCA page came out of a matrix. The covariance
-                  matrix was built from every person at once and an eigensolver was
-                  asked for the directions it only stretches, a calculation in which
-                  the whole crowd is consulted before any answer appears. This page
-                  reaches the same directions by a route that never sees two people
-                  together. A single unit holds one weight for height and one for
-                  weight, reads a person, and fires by the dot product of the two.
+                  In the PCA lesson, we built a covariance matrix from the observations and used an eigensolver to find its principal directions. Could a unit approach a principal direction by seeing one observation at a time? Here it holds one weight for height and one for weight. Its response is their dot product with the incoming measurements. We will start with that response and examine how an update changes the weights.
                 </p>
                 <Equation>{"y = w · x = w_height × (height − mean height) + w_weight × (weight − mean weight)"}</Equation>
                 <>

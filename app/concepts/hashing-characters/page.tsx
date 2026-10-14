@@ -107,20 +107,14 @@ export default function HashingCharactersPage() {
 
               <SubSection title="2. Computing the position instead of storing one">
                 <p>
-                  A table has two jobs, and it is worth separating them, because
-                  only one of them is expensive. It holds what a model learned
-                  about each entry, which is the rows of numbers, and it holds the
-                  mapping from a piece of writing to which row that is. The
-                  mapping is the part that has to be built from a corpus, saved,
-                  shipped and kept in step with the model, and it is the part that
-                  can be unfamiliar with something.
+                  Separate the learned embedding rows from the rule that selects a row for a character. A corpus-built vocabulary stores that selection rule as a mapping, which must stay consistent with the model. Hashing replaces the mapping with a fixed calculation. We still need the embedding table, but an unfamiliar character no longer needs a newly stored vocabulary entry.
                 </p>
                 <>
 <p>
                   Hashing removes the second job entirely. A character already has a number, the one Unicode gave it, and there is a piece of arithmetic that turns any whole number into a position inside a range we chose. Multiply it by a fixed odd number and take the remainder on dividing by the height of the table.
                 </p>
                 <p>
-                  That is the whole mapping. It is a handful of instructions, it stores nothing, it was fitted to nothing, and it answers for a character from a script nobody has ever put to it in exactly the same time it answers for the letter e.
+                  That formula assigns a bucket without learning a vocabulary from a corpus. The same operations apply to a character from an unfamiliar script as to the letter e. Several characters can reach the same bucket, so the smaller fixed table introduces collisions. We will measure those collisions rather than assume they are harmless.
                 </p>
 </>
                 <Equation>
@@ -278,15 +272,7 @@ export default function HashingCharactersPage() {
                   number stands for.
                 </p>
                 <p>
-                  It is worth being careful about what has been settled there,
-                  because the previous page drew the same line and it matters more
-                  here. Every character can be turned into buckets and every text
-                  can be given back, since the character numbers are kept beside
-                  the buckets and it is those that decoding reads. What has not
-                  been settled is whether a model trained on English knows
-                  anything about the rows a Greek letter lit. Representable and
-                  learnable are separate questions, and only the first of them has
-                  an answer here.
+                  We can map every character to buckets. We can also reconstruct the text here because we retain the original character numbers beside those buckets and use those numbers when decoding. The bucket IDs alone are not a reversible encoding. Nor does representability establish understanding: an English-trained model may have learned nothing useful about the rows selected by a Greek character.
                 </p>
                 <InAModel>
                   <p>
@@ -856,13 +842,7 @@ export default function HashingCharactersPage() {
             <>
               <SubSection title="17. A word as the set of buckets its pieces light">
                 <p>
-                  The same move applies one level up, and it is worth a section
-                  because it buys something the character version cannot. Wrap a
-                  word in a boundary mark, cut it into every run of three
-                  characters, hash each of those runs into a bucket, and let the
-                  word be the set of buckets that came up. A word of n characters
-                  gives n runs, so the word cat wrapped as _cat_ gives _ca, cat
-                  and at_.
+                  We can hash short character runs as well as individual characters. Wrap each word in boundary markers, take its overlapping trigrams, and map them to buckets. For example, _cat_ gives _ca, cat and at_. A word of n characters produces n such runs under this wrapping rule, allowing related spellings to share some buckets.
                 </p>
                 <p>
                   What arrives at the model is a set rather than a sequence, and a
@@ -873,10 +853,7 @@ export default function HashingCharactersPage() {
                 </p>
                 <TrigramFingerprints />
                 <KeepInMind>
-                  The boundary mark has to be a character the words do not
-                  contain, or an inner run of three will be mistaken for one at an
-                  edge. An underscore is the usual choice and is exactly wrong for
-                  identifiers written in snake case.
+                  The boundary marker must be distinguishable from characters inside a word. An underscore would collide with the ordinary underscores in a snake_case identifier. Choose a marker outside the permitted input alphabet, or escape it so a literal occurrence can be distinguished.
                 </KeepInMind>
               </SubSection>
 
@@ -1146,7 +1123,7 @@ export default function HashingCharactersPage() {
                     {
                       expression: "the boundary mark around a word",
                       reason:
-                        "a decision, and the natural default is wrong for some text. It must be a character the words never contain, or an inner run of three is read as one at an edge, and the usual underscore is contained by anything written in snake case. A space serves where a whitespace split guarantees the words hold none.",
+                        "a representation choice. It must be distinguishable from literal input characters. An underscore causes ambiguity in snake_case text. After a whitespace split, a space can be used because those word pieces contain no spaces; otherwise we need a suitable marker or escaping rule.",
                     },
                     {
                       expression: "a word with nothing in it",

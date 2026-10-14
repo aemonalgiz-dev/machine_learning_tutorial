@@ -70,13 +70,7 @@ export default function UnicodeWordBoundariesPage() {
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
                 </Equation>
                 <p>
-                  Cutting that at every run of white space gives seven pieces,
-                  and they are reasonable pieces. The trouble is not the pieces.
-                  It is that the rule which produced them has an assumption
-                  inside it that it never states, which is that whoever wrote the
-                  text put a gap between one word and the next. That is a habit
-                  of a writing system rather than a property of language, and it
-                  is false of a great deal of the world&rsquo;s writing.
+                  Splitting this sentence at runs of white space gives seven plausible pieces. That works because the writer put gaps where the words separate. Other writing systems do not use spaces that way. We need to examine what a boundary rule can infer from characters when that convenient clue is absent.
                 </p>
                 <p>
                   Here is the same rule on eleven characters of Japanese, which
@@ -138,22 +132,13 @@ export default function UnicodeWordBoundariesPage() {
                   that has to run while somebody is typing needs.
                 </p>
                 <KeepInMind>
-                  The standard defines where a word may break and does not define
-                  a word. That gap is not an oversight and it is the subject of
-                  the last part of this page, but it is worth noticing this
-                  early, because everything the rules do well follows from having
-                  asked the smaller question.
+                  The Unicode rules identify boundary positions using character properties. They do not promise a linguistic analysis of every word. We will see both what these rules handle and where a language-specific method is still needed.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="3. Compare space cuts with Unicode boundaries in the Alvarez sentence" id="3-the-running-sentence-under-both-rules">
                 <p>
-                  Putting the sentence to the boundary rules gives nine words
-                  where the space rule gave seven, and the playground above is
-                  doing exactly that. It is worth reading the nine against the
-                  seven before going further, because every difficulty on the
-                  rest of the page is already visible in the difference between
-                  them.
+                  These boundary rules return nine segments where whitespace splitting returned seven. Compare both results with the sentence in the playground. The changed treatment of punctuation and internal boundaries gives us specific cases to investigate.
                 </p>
                 <WorkedExample title="Nine words, and where each came from">
                   <Equation>
@@ -500,7 +485,7 @@ export default function UnicodeWordBoundariesPage() {
                 </WhyThisWorks>
                 <>
 <p>
-                  There is a case where the hiding is too eager, and it is worth reporting rather than smoothing over. The character that joins two emoji into one picture is an invisible formatting character by category, and the standard gives it a class of its own precisely so that a joined sequence stays together. Treated as ordinary invisible formatting, as it is here, it is absorbed into the emoji before it and the sequence breaks after it, so two joined emoji come back as two segments rather than one.
+                  Our simplified implementation mishandles the zero-width joiner in some emoji sequences. The Unicode word-boundary rules give it special treatment, while this implementation treats it like ordinary ignored formatting. It attaches to the preceding emoji and allows a break after it, returning two segments for a joined sequence. This is an implementation limitation, not a claim about the full standard.
                 </p>
                 <p>
                   That is a real difference from a complete implementation and it is on the classes rather than on the rules.
@@ -703,13 +688,7 @@ export default function UnicodeWordBoundariesPage() {
 
               <SubSection title="12. Words, or every segment">
                 <p>
-                  The rules cut a text into segments that tile it, and then
-                  somebody has to say which segments are words. That second step
-                  is not the standard&rsquo;s and there is more than one defensible
-                  answer, so it is worth seeing both. On the sentence about Dr. Alvarez the
-                  rules find 19 segments. Nine of them hold a letter or a digit
-                  and are the nine words of section 3. The other ten are the six
-                  spaces, the two hyphens and the two full stops.
+                  The rules divide the text into segments that cover it completely. We still need to decide which segments count as words for our task. On the sentence about Dr. Alvarez, the rules return 19 segments. Nine contain a letter or digit; those are the nine we counted as words in section 3. The remaining segments are six spaces, two hyphens and two full stops. Let&apos;s compare the complete segmentation with the word-only result.
                 </p>
                 <NumberTable
                   headings={[

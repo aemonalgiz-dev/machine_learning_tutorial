@@ -80,13 +80,7 @@ export default function MosesRulesPage() {
                   when the pieces come out.
                 </p>
                 <p>
-                  These rules were written by somebody with the pieces coming
-                  out of one end of a system and going back in at the other. A
-                  translation system was trained on pieces, decoded into pieces,
-                  and then had to hand a reader a sentence, so whatever was done
-                  on the way in had to be undoable on the way out. We carry the
-                  same sentence the other pages carry, because it breaks in the
-                  three places that matter here.
+                  A translation system has an additional problem: it must turn its output pieces back into readable text. The choices made during tokenization affect what can be reconstructed afterwards. We will use the same sentence to examine punctuation and spacing decisions, then check how the reverse operation handles them.
                 </p>
                 <Equation>
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
@@ -212,10 +206,7 @@ export default function MosesRulesPage() {
 
               <SubSection title="4. What the rules read, and what they do not">
                 <p>
-                  It is worth being exact about how little there is here. The
-                  whole method is one pass over each run of characters that has
-                  no spacing in it, followed by a second pass that settles the
-                  final stop, and the questions asked are these.
+                  The implementation first processes each non-whitespace run, then makes a second pass to handle the final stop. We can inspect the decisions in order:
                 </p>
                 <DerivationTable
                   expressionHeading="the question"
@@ -291,11 +282,7 @@ export default function MosesRulesPage() {
                   word with a stop after it.
                 </p>
                 <KeepInMind>
-                  Where the annotation rules answer from the position of the
-                  stop in the text, these answer from the identity of the word in
-                  front of it, and that is the choice which forces a list. The
-                  two answers disagree far more often than the sentence about Dr. Alvarez
-                  suggests.
+                  For this full-stop decision, the Moses-style rule looks at the preceding word&apos;s identity, using a list of forms that should keep their stop. The annotation rule instead uses its position in the text. Let&apos;s try more than Dr. Alvarez, because that one example hides several ways the two rules disagree.
                 </KeepInMind>
               </SubSection>
 
@@ -475,11 +462,7 @@ export default function MosesRulesPage() {
 
               <SubSection title="10. Fifty-five entries, and how many a corpus reaches">
                 <p>
-                  A list that carries a method and a list nobody hits are
-                  different objects, so it is worth counting. The English list
-                  here holds 55 entries, of which 27 are named words, 26 are the
-                  single capitals that catch an initial in a name, and 2 keep
-                  their stop only when a figure follows.
+                  The English exception list has 55 entries: 27 named forms, 26 individual capital letters for initials, and two forms whose stops are kept only before a number. Let&apos;s measure how often these entries affect the examples rather than infer their usefulness from the list&apos;s length.
                 </p>
                 <p>
                   Counting over the six-sentence notebook would say nothing,
@@ -785,10 +768,7 @@ export default function MosesRulesPage() {
                   in has to be undone on the way out.
                 </p>
                 <p>
-                  The test is simple and it is worth stating before the numbers.
-                  Take the pieces, throw away the spans, join them in order with
-                  nothing between them, and ask whether what comes out is
-                  everything in the source that is not spacing.
+                  We can test whether tokenization preserves the non-spacing characters. Discard the spans, concatenate the pieces without separators, and compare the result with the source after removing spacing. State that target clearly: passing this check would not establish that the original spacing can be recovered.
                 </p>
                 <RoundTripPanel />
                 <p>
@@ -832,11 +812,7 @@ export default function MosesRulesPage() {
                   mark and each stands alone, and the two texts are told apart.
                 </p>
                 <KeepInMind>
-                  A rewriting can be undone only when nothing else produces the
-                  same characters, and the annotation rules&rsquo; quotation
-                  marks fail that against a spelling their own corpus was full
-                  of, since the whole point of choosing two backquotes was that
-                  a typist of the period wrote them.
+                  To reverse a rewrite uniquely, different original forms must remain distinguishable. Replacing plain quotation marks with backquotes can erase that distinction when the source already contains literal backquotes. We need retained source information or an escaping convention to reconstruct both cases correctly.
                 </KeepInMind>
               </SubSection>
 
@@ -968,7 +944,7 @@ export default function MosesRulesPage() {
                 "Backquotes are not characters a phrase table is allowed to hold",
               ],
               1,
-              "A rewriting can be undone only when nothing else produces the same characters, and the whole point of choosing two backquotes was that a typist of the period wrote them. A sentence with plain quotation marks and the same sentence typed with backquotes and apostrophes come back as the identical seven pieces under the annotation rules. Under these rules the plain one gives seven pieces and the typed one nine, because a backquote is not a quotation mark and each stands alone.",
+              "The annotation rules map a sentence with plain quotation marks and its backquote-and-apostrophe variant to the same seven pieces. Those pieces alone cannot tell us which form was supplied. The Moses-style rules here keep them distinct: the plain version gives seven pieces and the typed version nine, since the backquotes are treated separately.",
             ),
             trueFalse(
               "Joining the pieces with one space between each pair gives back all eighteen minuted sentences.",
@@ -1214,12 +1190,7 @@ export default function MosesRulesPage() {
                   The last row is worth dwelling on, because the reason for it is
                   arbitrary rather than principled. A hyphen is one of the
                   characters these rules leave inside a word, so{" "}
-                  <span className="font-mono">low-cost</span> survives, and an
-                  underscore is not on that list, so the file name is cut in two
-                  at a character doing exactly the same job. Nothing about
-                  writing decides that. It is which characters somebody thought
-                  of when the clause was written, and the annotation rules happen
-                  to have thought of neither and so keep the whole thing.
+                  <span className="font-mono">low-cost</span> survives. The underscore is absent from that rule&apos;s allowed list, so the filename is split there. This difference comes from the written punctuation policy. The annotation rules use another policy and keep this filename together.
                 </p>
                 <KeepInMind>
                   Anything reading text with identifiers, addresses or code in it
@@ -1276,12 +1247,7 @@ export default function MosesRulesPage() {
 
               <SubSection title="24. An abbreviation ending a sentence has no answer">
                 <p>
-                  There is one case where no list helps and no rule helps, and it
-                  is worth stating as a fact about English writing rather than as
-                  a shortcoming of anything. A sentence that ends in an
-                  abbreviation is written with one full stop, and that stop is
-                  closing the abbreviation and closing the sentence at the same
-                  time.
+                  A sentence can end with an abbreviation and use one full stop for both the abbreviation and sentence boundary. A rule looking only at that punctuation mark cannot determine the intended structure in every case. We need context or an explicit convention for handling the ambiguity.
                 </p>
                 <Equation>
                   {"The re-analysis was signed by Okafor Co.\n\n" +

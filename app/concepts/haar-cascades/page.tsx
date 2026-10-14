@@ -123,13 +123,7 @@ export default function HaarCascadesPage() {
                 </p>
 </>
                 <p>
-                  It is worth seeing how badly wrong. On a picture six hundred
-                  pixels square, timing two thousand repetitions of each, adding
-                  up a one-pixel box and adding up the whole picture differ by a
-                  factor of between 107 and 130 across the six runs I measured.
-                  The box holds 360,000 times as many pixels and the arithmetic
-                  underneath is vectorised, so the ratio is far below the count
-                  of pixels, and it is still two orders of magnitude.
+                  On the six timing runs here, directly summing a 600-by-600 image took between 107 and 130 times as long as summing a one-pixel box, with two thousand repetitions per measurement. The full image contains 360,000 pixels. Vectorized arithmetic makes the runtime ratio much smaller than the pixel-count ratio, but the larger sum still takes substantially more work.
                 </p>
                 <InAModel>
                   <p>
@@ -267,12 +261,7 @@ export default function HaarCascadesPage() {
 
               <SubSection title="6. The same four entries whatever the box, measured">
                 <p>
-                  The claim that a rectangle total is a constant cost is easy to
-                  state and easy to believe for the wrong reason, so it is worth
-                  counting rather than asserting. A box of one pixel names four
-                  table entries. A box of 360,000 pixels names four table
-                  entries. That is not a saving of a factor of a few; it is the
-                  removal of the size of the box from the cost altogether.
+                  Once the summed-area table exists, a rectangle query reads four entries whether the rectangle contains one pixel or 360,000. The number of lookups no longer grows with rectangle area. Building the table still has a cost, so we will account for that before deciding when it helps.
                 </p>
                 <p>
                   Timed rather than counted, on the same six hundred pixel
@@ -306,13 +295,7 @@ export default function HaarCascadesPage() {
                   that.
                 </p>
                 <p>
-                  For the search this page is about, forty is nothing. There are
-                  3,025 window positions and each of them reads several
-                  rectangles, so the table has repaid itself before the sweep
-                  has crossed the first row. It is worth saying plainly all the
-                  same, because it is the one place where the obvious
-                  alternative wins, and the condition under which it wins is
-                  roughly forty reads.
+                  This search checks 3,025 window positions, with several rectangles at each position. It passes the measured break-even point of roughly forty queries within the first row. For only a few queries, direct summation can still be cheaper because it avoids building the table. That break-even count belongs to these timings, rather than being a universal constant.
                 </p>
                 <KeepInMind>
                   <p>
@@ -407,7 +390,7 @@ export default function HaarCascadesPage() {
               <SubSection title="9. Compare five rectangle features on small images" id="9-five-layouts-worked-on-pictures-small-enough-to-count">
                 <>
 <p>
-                  The original paper uses five layouts, and it is worth seeing what each answers on a picture with four pixels on a side. Two cells side by side, or two stacked, answer the question of whether there is an edge running one way or the other. Three in a row, or three in a column, set the middle cell against both flanks and so answer whether there is a strip or a band.
+                  The five layouts shown here compare different neighbouring regions. Two side-by-side rectangles respond to a vertical contrast; two stacked rectangles respond to a horizontal contrast. Three rectangles in a row or column compare the middle with both sides, making them useful for a strip or band. We can inspect their responses on a four-by-four image.
                 </p>
                 <p>
                   Four in a chequer sets one diagonal pair against the other, which neither of the first two kinds can see at all.
@@ -580,7 +563,7 @@ export default function HaarCascadesPage() {
               <SubSection title="13. The windows the detector was trained on">
                 <>
 <p>
-                  This is the only method in this part of the site that is fitted rather than designed, so it needs examples. The target here is a bright band four rows deep across the middle of a twelve by twelve window, jittered one row up or down, laid over a cluttered ground and finished with a little speckle.
+                  This detector learns its tests from examples, so we need labelled target and background patches. Our target is a bright band four rows deep across the middle of a twelve-by-twelve window. We move it one row up or down between examples, place it on a cluttered background, and add a little speckle.
                 </p>
                 <p>
                   A background is that cluttered ground with no band in it. The clutter is blocky rather than per-pixel, in three by three blocks, and that choice is load-bearing, since per-pixel noise averages away inside the very first rectangle total and would have left the two classes trivially apart.
@@ -775,7 +758,7 @@ export default function HaarCascadesPage() {
                   The first stage on its own lets 117 of 2,000 fresh backgrounds through where all three together let 1, which is the whole argument for having three. The shares one stage passes to the next are 0.0585, then 0.0256, then 0.3333, and multiplying those three gives 0.0005, which is the 1 in 2,000 that arrives at the end.
                 </p>
                 <p>
-                  Overall the fresh draw is scored at 0.998 accuracy, 0.94 recall and 0.9792 precision, and the recall is the honest cost of the calibration, which keeps every target it saw and promises nothing about a target it did not.
+                  On the fresh sample, accuracy is 0.998, recall is 0.94 and precision is 0.9792. The recall shows that some new targets were missed, even though calibration kept every target it was shown. Keeping the calibration targets does not guarantee that every later target will pass.
                 </p>
 </>
                 <p>
@@ -922,10 +905,7 @@ export default function HaarCascadesPage() {
 
               <SubSection title="21. The cost, four ways, and why one of the savings is small">
                 <p>
-                  There are several things the sweep could be compared against
-                  and they give very different numbers, so it is worth setting
-                  all four beside each other rather than quoting whichever is
-                  most impressive.
+                  Let&apos;s compare all four alternatives on the same search. Their costs include different amounts of work, so quoting one ratio without naming the baseline would make the speed claim difficult to interpret.
                 </p>
                 <SweepCostComparison />
                 <NumberTable
@@ -1108,11 +1088,7 @@ export default function HaarCascadesPage() {
 
               <SubSection title="27. The cases the definition does not reach">
                 <p>
-                  Finally, the inputs on which there is no answer to give, or on
-                  which the answer is a decision rather than a consequence.
-                  These are facts about the method and not about any particular
-                  program, and where there is a genuine choice it is worth
-                  knowing what turns on it.
+                  Some inputs leave the detector without the information it needs. Other cases require us to choose a policy. The table separates these cases and explains which choices affect the result.
                 </p>
                 <DerivationTable
                   expressionHeading="The case"
@@ -1151,13 +1127,7 @@ export default function HaarCascadesPage() {
                   ]}
                 />
                 <p>
-                  The last of those is the one most often glossed over, and it
-                  is worth being precise about what the table does and does not
-                  buy. Because a rectangle total costs four lookups whatever the
-                  size of the rectangle, growing every cell of a reading by a
-                  factor costs nothing extra, so searching several sizes costs
-                  the same per size rather than more for the large ones. What it
-                  does not do is remove the need to search them.
+                  A larger rectangle still needs four summed-area lookups. Scaling a feature therefore does not increase the lookup count for that feature. But each scale is another search to perform, and the number of valid window positions can differ by scale. The table speeds up rectangle totals; it does not find an object&apos;s scale for us.
                 </p>
               </SubSection>
             </>

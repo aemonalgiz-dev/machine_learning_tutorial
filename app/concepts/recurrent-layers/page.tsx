@@ -25,7 +25,7 @@ export default function RecurrentLayersPage() {
     sections={[
       { title: "Part 1. Carry a State from One Step to the Next", defaultOpen: true, content: <>
         <SubSection title="1. Reuse one update rule">
-          <p>A dense layer answers each row from that row alone. Hand it the readings of a sequence one at a time and its fourth answer knows nothing about the first three. For a sentence, a melody or a week of temperatures that is the wrong arrangement, because what a reading means depends on what came before it.</p>
+          <p>Suppose a dense layer receives a week&apos;s temperatures one reading at a time. Each call sees the current reading alone. By Thursday it has no record of what happened on Monday. If earlier readings matter to the prediction, we need a way for information to survive between calls. The same need arises when we read a sentence word by word.</p>
           <p>What is missing is something carried from one step to the next. A recurrent layer keeps a small vector called the hidden state. At every step it reads the current input together with its own previous state, calculates a new state, and hands that state to the next step.</p>
           <p>At the first step, the SDK starts the hidden state at zero. We concatenate the current input with that state, calculate a weighted sum and bias, then apply tanh. The result becomes the next hidden state. The same weights are reused at every step.</p>
           <Equation>{`combined_t = concatenate(input_t, hidden_(t−1))\nhidden_t = tanh(W combined_t + b)`}</Equation>

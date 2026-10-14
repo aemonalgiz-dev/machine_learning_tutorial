@@ -91,7 +91,7 @@ export default function SearchingACollectionOfPicturesPage() {
                 <Equation>{"picture  →  network  →  v  =  (v₁, v₂, …, v₁₆),     each vᵢ between −1 and 1"}</Equation>
                 <>
 <p>
-                  The collection searched is 4000 pictures, 1000 of each kind, drawn under a seed of 11, which is far more than the 240 the network learned from, and a forward pass costs little enough that drawing more is free. The questions are the other 240 pictures of the network&rsquo;s own draw, 60 of each kind, the half it was scored on and never trained on, so no question is a picture the network memorised and none of them is in the collection.
+                  We will search a collection of 4000 generated pictures, 1000 of each shape, using seed 11. The trained network can encode each new picture with a forward pass. Our queries are its 240 held-out pictures, sixty of each kind. Those queries were excluded from training and are separate from the search collection, so the task is to find similar pictures rather than retrieve an identical entry.
                 </p>
                 <p>
                   Each of the sixteen numbers comes out of a hyperbolic tangent and so lies between −1 and 1, and the collection&rsquo;s vectors average a length of 3.03, against the 4 a vector sitting in a corner of that range would have, so most pictures push most of their sixteen numbers close to one end or the other.
@@ -203,7 +203,7 @@ export default function SearchingACollectionOfPicturesPage() {
                   Four of the 240 questions have a nearest picture of another kind. Held-out picture 16, a cross, has a disc nearest at 0.7969 and only three crosses among its ten; picture 35, a bar, has a disc at 1.0619 and two bars among its ten; picture 140, a cross, has a disc at 0.7080 and six crosses; and picture 185, a square, has a bar at 1.0721 and not one square among its ten.
                 </p>
                 <p>
-                  The button in the playground steps through them, and it is worth looking at each question beside what came back, since all four nearest distances are larger than picture 0&rsquo;s 0.5278, which puts these questions where the collection is thin.
+                  Use the playground button to inspect each query beside its returned neighbours. All four nearest distances exceed picture zero&apos;s 0.5278. That suggests these query representations have less nearby support in this particular collection, which is useful context when judging the matches.
                 </p>
 </>
                 <p>
@@ -698,12 +698,7 @@ export default function SearchingACollectionOfPicturesPage() {
 
               <SubSection title="17. Checking the probability on these pictures">
                 <p>
-                  The whole route rests on that one probability, so it is worth
-                  checking on these vectors rather than trusting. The widget sets
-                  picture 0 against 200 pictures of the collection on 2000 fresh
-                  planes each, takes the share of planes that put each pair on
-                  the same side, and compares it with one minus the pair&rsquo;s
-                  angle over π. The mean gap is 0.0059 and the largest 0.0232.
+                  Let&apos;s check the collision probability numerically. For each comparison between picture zero and 200 collection pictures, the widget draws 2000 fresh planes and records how often both vectors fall on the same side. It compares that frequency with the angular formula. The mean discrepancy is 0.0059 and the largest is 0.0232, showing the sampling variation in this experiment.
                 </p>
                 <Equation>{"spread of a share of 2000 fair coin flips  ≤  √(0.25 / 2000)  =  0.0112"}</Equation>
                 <p>

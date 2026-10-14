@@ -67,18 +67,7 @@ export default function FeatureImportancePage() {
 <>
               <SubSection title="1. Three different questions">
                 <p>
-                  Ask a fitted model which of its columns mattered and it can
-                  reasonably answer three different questions. Which columns
-                  did it ask about most often? Which columns removed the most
-                  impurity when it asked? And which columns would it miss if
-                  they were taken away, in the sense that its predictions
-                  would get worse? Those sound like one question and they are
-                  not, because a column can be asked about at every other node
-                  and remove almost nothing, or be asked about once at the
-                  root and decide everything, or be leaned on so heavily that
-                  scrambling it wrecks the model while another column that
-                  removed more impurity in the growing turns out to be
-                  replaceable.
+                  Suppose we ask a forest which input mattered most. We could count how often it split on that input. We could add up the impurity reductions from those splits. Or we could scramble the input in held-out data and measure how much worse prediction becomes. These ask different questions. A column used at many small splits may contribute little compared with one useful root split. A column may also be replaceable by another correlated column. Let&apos;s calculate the measures on the same forest and see why their answers differ.
                 </p>
                 <DerivationTable
                   expressionHeading="the question"
@@ -262,10 +251,7 @@ export default function FeatureImportancePage() {
                   <Equation>{"height credit ≈ 9.702\nweight credit ≈ 2.778\ntotal credit ≈ 9.702 + 2.778 = 12.480"}</Equation>
                 </>
                 <KeepInMind>
-                  The split reading is nothing more than this ledger. Every
-                  bias it has is a bias in which questions the search chose
-                  and how many people it chose them for, because the
-                  arithmetic afterwards is a weighted sum.
+                  This importance score comes directly from the recorded splits. After fitting, we add up their weighted contributions. Its limitations therefore depend on which questions the tree chose and how many observations reached each split. The score describes that fitted tree; it does not establish what caused the outcome.
                 </KeepInMind>
               </SubSection>
 
@@ -332,12 +318,7 @@ export default function FeatureImportancePage() {
 
               <SubSection title="9. Why the split reading is free">
                 <p>
-                  Nothing in Part 2 touched the data again. Every gain and
-                  every row count was recorded when the tree was grown, so the
-                  reading is one walk of the tree, and for a forest one walk of
-                  each member. That is why it is the reading every tree library
-                  hands out by default, and why it is worth knowing exactly
-                  what it is a reading of before it is handed on.
+                  This measure uses gains and row counts recorded when the tree was fitted. Computing it afterwards requires traversing the tree, or each tree in a forest, without evaluating the data again. That makes it inexpensive to report. We should still describe it as a measure of the fitted splits rather than an independent evaluation of predictive importance.
                 </p>
                 <KeepInMind>
                   The reading costs one walk of the tree and inherits every

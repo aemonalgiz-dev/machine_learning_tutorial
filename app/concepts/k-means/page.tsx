@@ -71,7 +71,7 @@ export default function KMeansPage() {
               <SubSection title="1. Eight people and no answers">
                 <>
 <p>
-                  Look at what is missing from the box above. Every scatter on this site so far coloured its dots before any model arrived, fails and passes, children and adults. Here every person starts uncoloured, and the colours you see were put there by the method, which was told only how many groups to look for.
+                  In our earlier classification examples, the children and adults were labelled before we trained a model. Here we give the method measurements without those labels. We ask it to form a chosen number of groups, and the colours in the plot show the groups it found.
                 </p>
                 <p>
                   The eight people it opens on are two tight clumps, four short and light around 121 centimetres and 26 kilograms, four tall and heavy around 181 and 80, and with k set to 2 the method finds exactly those two clumps.
@@ -225,13 +225,7 @@ export default function KMeansPage() {
 
               <SubSection title="6. The update step can only lower it">
                 <p>
-                  The second step holds the assignment fixed and moves each
-                  centre to the mean of its current members. This is the step
-                  that needs an argument, since it is not obvious that the
-                  mean is the best place to put a centre rather than merely a
-                  reasonable one. It is the best place, exactly. Work one
-                  coordinate at a time and ask which value c makes the total
-                  squared distance to the group smallest.
+                  Now keep the group memberships fixed and move each centre. Where should it go? We want the location with the smallest total squared distance to its members. We can answer one coordinate at a time. The calculation below shows why the group&apos;s mean minimizes that total.
                 </p>
                 <DerivationTable
                   expressionHeading="step"
@@ -263,10 +257,7 @@ export default function KMeansPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  The update step is the exact minimiser of the inertia for a
-                  fixed assignment, because the mean minimises squared
-                  Euclidean distance. That word Euclidean is doing real work,
-                  and Part 5 collects on it.
+                  For fixed group assignments, the mean minimizes the sum of squared Euclidean distances. That is why this update cannot increase the objective. Changing the distance rule may require a different centre update, which we examine in Part 5.
                 </KeepInMind>
               </SubSection>
 

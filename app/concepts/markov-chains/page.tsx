@@ -84,7 +84,7 @@ export default function MarkovChainsPage() {
                 </p>
                 <>
 <p>
-                  It tells us a great deal. After a vowel the next letter is a vowel 14.61 percent of the time, and after a consonant it is a vowel 52.70 percent of the time, so the kind of letter just read moves the chance of a vowel by a factor of more than three and a half.
+                  The preceding letter does help. In this text, a vowel follows a vowel 14.61 percent of the time, but follows a consonant 52.70 percent of the time. That is a difference of more than a factor of three and a half. A model that uses the previous letter&apos;s category can represent a pattern that independent draws would miss.
                 </p>
                 <p>
                   Two choices were made before any counting. Spaces are dropped, as Markov dropped them, and y is counted as a consonant, which is the usual convention and is wrong for a word like rhythm; a different choice would move every number on the page slightly.
@@ -125,14 +125,7 @@ export default function MarkovChainsPage() {
                   {"P(Xₜ₊₁ = j | Xₜ = i, Xₜ₋₁, …, X₀)  =  P(Xₜ₊₁ = j | Xₜ = i)  =  pᵢⱼ"}
                 </Equation>
                 <p>
-                  A sequence that behaves this way is a Markov chain, the
-                  letters or whatever else it moves between are its states, and
-                  pᵢⱼ is the probability of a step from state i to state j. The
-                  claim is one of conditional independence. The letter two
-                  places back still predicts the next letter, since it predicts
-                  the letter in between, and step 17 measures by how much; what
-                  the assumption says is that once the letter in between is
-                  known, the one before it adds nothing further.
+                  A sequence satisfying this assumption is a Markov chain. Its possible conditions are called states, and pᵢⱼ is the probability of moving from state i to state j. The assumption is conditional independence: once we know the current state, earlier states add no further information about the next one. That still allows a state two steps back to predict a later state indirectly, through the intervening transition. Step 17 measures this relationship in our example.
                 </p>
                 <p>
                   A second assumption is folded into that equation, and it is
@@ -584,7 +577,7 @@ export default function MarkovChainsPage() {
                 <MarkovShares />
                 <>
 <p>
-                  That agreement is almost guaranteed, and it is worth seeing why before being impressed by it. Take the share of steps that start at each letter and multiply it by the table. What comes out is the share of steps that end at each letter, and the two shares differ only by the first and last letter of each sentence, so the text&rsquo;s own letter shares nearly solve πP = π by construction.
+                  This agreement partly follows from how the transition table was estimated. Weighting its rows by the observed proportions of starting letters gives the proportions of ending letters. Those counts differ mainly at sentence boundaries, so the empirical letter frequencies nearly satisfy the stationary equation by construction. That check alone is weak evidence that the model captures all of the text&apos;s sequential structure.
                 </p>
                 <p>
                   On oh my dear Dinah, a single sentence where the two ends are two of its thirteen letters, the gap is 0.3846 against 0.3488. On 128 sentences it is 0.3814 against 0.3816.

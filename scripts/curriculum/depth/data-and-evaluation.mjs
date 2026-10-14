@@ -4,9 +4,7 @@ export default {
   p('Follow People through the Groups Before Dividing', `A warning system can catch most faults while producing many false alarms. To see why, start with a population rather than a percentage. Separate faulty sensors from working sensors, then ask how many in each group trigger the light.
 
 Only after counting those two routes should we restrict attention to the sensors whose lights are on. The denominator has changed from all sensors, or all faulty sensors, to all alarms. That change of group is the reason the two conditional probabilities differ.`, '1,000 sensors: 10 faulty, 990 working\n80% of faulty sensors trigger: 8 alarms\n10% of working sensors trigger: 99 alarms\nFaulty among alarms = 8 / (8 + 99) ≈ 0.0748'),
-  show(p('Carry the Same Test into a Different Population', `Suppose Botie checks a batch already suspected of damage. The warning light has the same sensitivity and false-alarm rate, but faults are more common before the light is observed. The composition of the alarm group changes.
-
-This is why a probability attached to a test result needs a population assumption. A result measured in one setting cannot automatically be carried to another with a different starting rate.`), worked('Change only the starting failure rate', 'The two entries represent ordinary stock and a damaged shipment.', `prior = np.array([0.01, 0.20])
+  show(p('Carry the Same Test into a Different Population', "Now suppose Botie checks a batch that may have been damaged in transit. Faults are more common in this batch. Even with the same sensitivity and false-alarm rate, the warning light now means something different: a larger share of the alarms can come from faulty sensors.\n\nSo, before using a probability attached to a test result, we need to know which population it describes. A result from ordinary deliveries may not apply to this damaged batch."), worked('Change only the starting failure rate', 'The two entries represent ordinary stock and a damaged shipment.', `prior = np.array([0.01, 0.20])
 sensitivity, false_alarm = 0.8, 0.1
 alarm_fault = prior * sensitivity
 alarm_working = (1 - prior) * false_alarm

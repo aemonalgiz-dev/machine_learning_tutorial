@@ -99,23 +99,10 @@ export default function TrainingANetworkPage() {
                   below reaches 1.000.
                 </p>
                 <p>
-                  Everything the chain is made of has already been built. Two
-                  measurements feed six units with hyperbolic tangent activations, those six feed a
-                  single unit that does not, a loss scores the answer against
-                  the truth, and a backward walk hands every one of the
-                  twenty-five numbers in the chain a slope. What is left is the
-                  part none of those pages covered, which is what to do with
-                  those slopes, how many times, on which rows, and when to
-                  stop.
+                  We have already met the components of this network. Two measurements feed six tanh units, and those activations feed one output unit with no nonlinear activation. The loss compares its prediction with the target, and backpropagation gives a derivative for each of its twenty-five parameters. Now we need to use those derivatives. How large should an update be, which observations should it use, and when have we trained enough?
                 </p>
                 <p>
-                  It is worth saying plainly what the loop adds, since none of
-                  it is arithmetic. Something has to count the passes, decide
-                  which rows each step reads and in what order, keep whatever
-                  is worth looking at afterwards, and say when to stop, and
-                  every one of those is a decision somebody makes rather than a
-                  quantity anything computes. Section 28 sets them out with
-                  what each of them costs.
+                  The training loop controls how we use the calculations. It selects observations for each update, counts passes and records results, then applies a stopping rule. These decisions affect the model we end up with. Section 28 describes the choices and their practical costs.
                 </p>
                 <KeepInMind>
                   Nothing on this page is a new piece of machinery. The four
@@ -1056,23 +1043,11 @@ export default function TrainingANetworkPage() {
             <>
               <SubSection title="24. The same request, sent twice">
                 <p>
-                  A training loop has at least two sources of randomness, the
-                  draw of the starting numbers and the order the rows are
-                  visited in, and both are usually controlled by a seed. It is
-                  worth knowing precisely what fixing them buys, so the
-                  measurement below runs the same configuration twice and then
-                  changes one seed at a time.
+                  We can vary the initial parameter draw separately from the order in which training rows are visited. The experiment below repeats one configuration, then changes one seed at a time. That lets us inspect what reproducibility means for this implementation and how much each random choice affects the result.
                 </p>
                 <SeedLedger show="runs" />
                 <p>
-                  Two identical requests land on 0.05945412 and 0.05945412, the
-                  same to the last bit, which is what makes any of the numbers
-                  on this page quotable. Changing only the order the rows are
-                  visited in, with the starting numbers untouched, gives
-                  0.05903582 instead, so the order is doing real work. And
-                  changing that same order seed on a run that takes the whole
-                  crowd in one batch changes nothing whatever, both landing on
-                  0.53659416.
+                  Repeating the same configuration gives 0.05945412 both times. Changing only the row-order seed gives 0.05903582 with the same initial weights. In the full-batch comparison, both order seeds give 0.53659416. Row order changes which observations contribute to intermediate minibatch updates, whereas these full-batch runs use the complete group for each update.
                 </p>
                 <KeepInMind>
                   The order the rows are visited in matters only once the epoch
@@ -1259,11 +1234,7 @@ export default function TrainingANetworkPage() {
 
               <SubSection title="29. Training settings that produce no useful update" id="29-where-the-loop-stops-being-defined">
                 <p>
-                  A loop can be handed settings that are not wrong so much as
-                  empty, and it is worth going through them once, because
-                  several of them run all the way to the end and hand back a
-                  perfectly ordinary number. The table gathers the cases, with
-                  what the mathematics says in each.
+                  Some settings allow the loop to run while preventing useful learning. The table shows what happens in each case and which conditions should be checked explicitly.
                 </p>
                 <DerivationTable
                   expressionHeading="Training setting"
@@ -1457,7 +1428,7 @@ export default function TrainingANetworkPage() {
                 "A seed that makes a run reproducible also makes it representative",
               ],
               [0, 1, 2],
-              "Shuffling a set you are about to average over in full is a no-op, so both whole-batch runs land on 0.53659416, while in batches of ten the same change moves the final loss to 0.05903582 and the order is doing real work. What a seed does not fix is which resting place the walk finds, and of the four starts three call every person correctly while the fourth reaches 0.9667 at a loss about half as much again as the best. Reproducible and representative are separate properties that the word deterministic runs together.",
+              "Both full-batch runs produce 0.53659416 in this experiment. With batches of ten, changing row order gives a final loss of 0.05903582 because it changes the intermediate updates. Initialization matters too: three of four starting draws classify every person correctly, while the fourth reaches 0.9667 with a loss about half again as large as the best. A fixed seed repeats one run; it does not show that the run represents all plausible starts. Floating-point reduction order can also matter in other full-batch implementations.",
             ),
             choice(
               "Why must a layer that silences a random share of its units be carried through the step rather than rebuilt from its settings?",

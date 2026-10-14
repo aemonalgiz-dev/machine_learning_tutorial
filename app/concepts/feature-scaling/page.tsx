@@ -108,14 +108,7 @@ export default function FeatureScalingPage() {
 
               <SubSection title="2. The neighbours change with the unit">
                 <p>
-                  Now let the unit decide a real question. A person of 150 cm
-                  and 60 kg is put to the crowd and their three nearest
-                  neighbours vote on whether they are a child or an adult. The
-                  widget takes that vote four times, with the heights written
-                  in millimetres, in centimetres and in metres, and then with
-                  both columns standardized so that each is measured in its own
-                  spreads. Drag the green query about to find the people the
-                  four readings disagree on.
+                  Let&apos;s see whether that choice changes a prediction. We have a person who is 150 cm tall and weighs 60 kg. Their three nearest neighbours will vote on whether they are a child or an adult. The widget repeats the vote with height in millimetres, centimetres and metres, then with both columns standardized by their own standard deviations. Move the green query and look for positions where the votes disagree.
                 </p>
                 <UnitDistortion />
                 <InAModel title="The vote at 150 cm and 60 kg">

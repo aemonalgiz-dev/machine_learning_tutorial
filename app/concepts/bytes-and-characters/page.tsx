@@ -70,14 +70,7 @@ export default function BytesAndCharactersPage() {
 <>
               <SubSection title="1. One sentence, and eighteen sentences it is not in">
                 <p>
-                  Every page in this section carries the same sentence, and this
-                  one carries beside it the eighteen sentences the merging page
-                  is built from. They are ordinary English about reports and
-                  costs and analyses, they were written so that every character
-                  the sentence uses turns up somewhere in them, and they do not
-                  contain the sentence. That last part is the whole arrangement,
-                  since a vocabulary is only interesting on writing it was not
-                  built from.
+                  We will reuse the eighteen-sentence corpus from the merging lesson and test on the same held-out sentence. The corpus contains every character needed by that sentence, but not the sentence itself. This lets us check whether the representation can handle a new arrangement of familiar characters before trying unfamiliar symbols.
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <p>
@@ -750,14 +743,7 @@ export default function BytesAndCharactersPage() {
 
               <SubSection title="17. Two numbers, and they move against each other">
                 <p>
-                  A reading is judged on two numbers together, how many entries
-                  its table holds and how many numbers a text becomes, and it is
-                  worth noticing that the three readings on this page do not order
-                  the same way on both. The byte table is the largest of the three
-                  at 256 entries and ties for the longest sequences. The character
-                  table is the smallest at 37 and gives sequences of the same
-                  length. The merged table is in between on entries and shortest
-                  on sequences.
+                  Compare table size with sequence length. On these examples, the byte table has 256 entries and ties for the longest sequences. The character table has 37 entries and gives sequences of the same length. The merged table lies between them in entry count and gives the shortest sequences. There is no single ordering that makes one representation smallest in both respects.
                 </p>
                 <p>
                   Which is to say that on this corpus, and on English generally,
@@ -769,10 +755,7 @@ export default function BytesAndCharactersPage() {
                   would be right.
                 </p>
                 <KeepInMind>
-                  The byte reading buys nothing at all on text written in basic
-                  English. Everything it is worth is bought on text that is not,
-                  which is the argument for measuring it on something else before
-                  choosing.
+                  On this basic-English example, byte encoding does not shorten the sequence. Its fixed alphabet becomes more useful when the input contains characters absent from the training corpus. We should test that case before judging the representation from familiar English text alone.
                 </KeepInMind>
               </SubSection>
 

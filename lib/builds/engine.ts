@@ -39,7 +39,7 @@ export function same(a: Data | undefined, b: Data): boolean {
 }
 export const show = (data: Data | undefined): string => data === undefined ? "Waiting for an input" : JSON.stringify(data, (_, v) => typeof v === "number" ? Number(v.toFixed(4)) : v);
 
-export function evaluate(graph: Construction, data: Record<string, Data>, tools: Record<string, Tool>): Trace {
+export function evaluate(graph: Construction, data: Record<string, Data>, tools: Record<string, Tool>, target = "output"): Trace {
   const trace: Trace = { steps: [] }, done = new Map<string, Data>(), active = new Set<string>();
   function visit(id: string): Data {
     if (done.has(id)) return done.get(id)!;
@@ -59,12 +59,31 @@ export function evaluate(graph: Construction, data: Record<string, Data>, tools:
     try {
       output = piece.tool === "output" ? inputs[0] : piece.tool.startsWith("source:") ? data[piece.tool.slice(7)] : tool.run(inputs, piece.settings);
       if (output === undefined) throw Error("This source is missing from the example.");
-      const check = (v: Data): void => { if (typeof v === "number" && !Number.isFinite(v)) throw Error("The result is not a finite number. Check for division by zero or an invalid input."); if (Array.isArray(v)) v.forEach(check); else if (v && typeof v === "object") Object.values(v).forEach(check); }; check(output);
+      let entries = 0;
+      const check = (v: Data): void => {
+        if (++entries > 12000 || typeof v === "string" && v.length > 20000) throw Error("This result is too large for the live workshop. Try smaller inputs or fewer repetitions.");
+        if (typeof v === "number" && !Number.isFinite(v)) throw Error("The result is not a finite number. Check for division by zero or an invalid input.");
+        if (Array.isArray(v)) v.forEach(check); else if (v && typeof v === "object") Object.values(v).forEach(check);
+      }; check(output);
     } catch (error) { trace.error = { id, message: error instanceof Error ? error.message : "This machine cannot use those inputs." }; throw error; }
     active.delete(id); done.set(id, output); trace.steps.push({ id, inputs, output }); return output;
   }
-  try { trace.output = visit("output"); } catch { /* The trace identifies the first broken operation. */ }
+  try { trace.output = visit(target); } catch { /* The trace identifies the first broken operation. */ }
   return trace;
+}
+
+// Inspect unfinished branches too. A learner can try a tool before connecting
+// it to Result; doing so must never count as passing a lesson's tests.
+export function previewConstruction(graph: Construction, data: Record<string, Data>, tools: Record<string, Tool>) {
+  const signals = new Map<string, Trace["steps"][number]>();
+  const issues = new Map<string, NonNullable<Trace["error"]>>();
+  for (const piece of graph.pieces) {
+    if (signals.has(piece.id)) continue;
+    const trace = evaluate(graph, data, tools, piece.id);
+    for (const signal of trace.steps) signals.set(signal.id, signal);
+    if (trace.error) issues.set(piece.id, trace.error);
+  }
+  return { signals, issues };
 }
 
 export function expressionTools(expression: Expression): string[] {

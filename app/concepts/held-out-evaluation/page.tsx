@@ -45,16 +45,11 @@ export default function HeldOutEvaluationPage() {
       tagline={"A rule can fit the examples it has already seen without being useful on new ones. We need to put some examples aside and use them to check the predictions after fitting."}
       prerequisites={
         <>
-          This page settles a debt. Page after page here has ended by saying
-          the honest judge is data the fit never saw, and here that sentence
-          gets its machinery. The running example is the{" "}
+          We have fitted models to observations. Now we need to find out how they behave on observations that weren&apos;t used to choose their settings. We will use the{" "}
           <Link href="/concepts/multiple-polynomial-regression" className={link}>
             polynomial page
           </Link>
-          &rsquo;s fifteen noisy measurements of a thrown ball and its degree
-          dial, so read that page first, at least as far as the degree sweep.
-          The section on folding a classifier borrows the twelve overlapping
-          people from{" "}
+          &rsquo;s fifteen noisy measurements of a thrown ball and its degree control. Read that example first, at least as far as the degree sweep. When we get to classification, we will use the twelve overlapping people from{" "}
           <Link href="/concepts/judging-a-classifier" className={link}>
             judging a classifier
           </Link>
@@ -75,15 +70,7 @@ export default function HeldOutEvaluationPage() {
 <>
               <SubSection title="1. Fifteen measurements and a practice booklet">
                 <p>
-                  Think of a student preparing for an exam from a booklet of
-                  practice questions. Score them on those same practice
-                  questions and you cannot tell two very different students
-                  apart, the one who understood the subject and the one who
-                  memorised the answer key, since both score perfectly. The
-                  only way to separate them is a question they have not seen.
-                  Everything on this page is that idea applied to fits, and
-                  the fit in question is a curve through the fifteen noisy
-                  measurements of the thrown ball.
+                  Suppose a student practises from a booklet and then takes an exam containing those exact questions. A good score could come from understanding the subject or from remembering the answers. New questions give us a better way to check. A fitted model has a similar problem: it has already used the training observations to choose its settings. We will reserve some of the thrown ball&apos;s fifteen measurements and see how well a curve predicts them.
                 </p>
                 <>
 <p>

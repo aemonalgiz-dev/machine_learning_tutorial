@@ -44,7 +44,7 @@ precision = 1/variance
 mean = (precision@reading)/precision.sum()
 combined_variance = 1/precision.sum()
 print(round(float(mean), 3))
-print(round(float(combined_variance), 3))`, '20.4\n0.9', 'The noisier reading moves the estimate only modestly. Its variance, not merely the fact that it is another reading, determines its influence.')),
+print(round(float(combined_variance), 3))`, '20.4\n0.9', "The noisier reading moves the estimate only modestly. We give it less influence because its variance says that it is a less precise measurement.")),
   p('Copying One Thermometer Does Not Give Us Two Thermometers', `If both displayed readings come from the same instrument, their errors can move together. Treating them as independent would count the same information twice and report unjustified precision.
 
 For equal-variance readings, the variance of their average includes their covariance. As correlation approaches one, averaging offers almost no reduction. Independence is therefore a substantive assumption about the sensors, not a convenient detail of the formula.`, 'Var((X + Y)/2) = (Var(X) + Var(Y) + 2 Cov(X,Y)) / 4\nEqual variance σ² and correlation ρ:\nVar(average) = σ²(1 + ρ)/2'),

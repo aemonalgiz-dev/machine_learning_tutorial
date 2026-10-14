@@ -52,10 +52,7 @@ export default function TheStandardScorePage() {
           <Link href="/concepts/feature-scaling" className={link}>
             feature scaling
           </Link>{" "}
-          page, which is the sibling to this one; the standard score is the
-          member of that family that is not merely a rescaling, and this page is
-          about why it is the one reached for by default. The fits it is
-          measured on are the{" "}
+          page covers the wider scaling family. Here we combine centring with division by standard deviation and investigate when that helps. We will compare its effect on the{" "}
           <Link href="/concepts/k-nearest-neighbours" className={link}>
             nearest neighbours
           </Link>
@@ -81,15 +78,7 @@ export default function TheStandardScorePage() {
 <>
               <SubSection title="1. Twenty-four trees, two units">
                 <p>
-                  The orchard this page works through is twenty-four apple
-                  trees. Each one was measured twice before the harvest, its
-                  trunk girth written down in millimetres and the water it was
-                  given over the season written down in metres, and then the
-                  fruit it bore was weighed in kilograms. Both units are ones
-                  somebody could reasonably have chosen, and neither is wrong;
-                  what matters is that they are a thousand apart, so the trunk
-                  numbers run in the hundreds while the water numbers run below
-                  one.
+                  Our example is an orchard of twenty-four apple trees. Before harvest, we recorded trunk girth in millimetres and seasonal water in metres. We then weighed the fruit in kilograms. Those are reasonable units, but they leave us with trunk measurements in the hundreds and water measurements below one. What happens when a model compares these numbers directly?
                 </p>
                 <NumberTable
                   headings={["column", "smallest", "largest", "average", "spread"]}
@@ -108,10 +97,7 @@ export default function TheStandardScorePage() {
                   is also the column that carries almost nothing.
                 </p>
                 <KeepInMind>
-                  Nothing so far is a criticism of the data. The trees were
-                  measured correctly and both units are honest. The trouble
-                  begins only when a fit adds a gap in millimetres to a gap in
-                  metres as though the two were the same size.
+                  The measurements themselves are valid. The problem appears when a model combines numerical differences across these columns without accounting for their scales. Changing the unit of water would change its influence on that calculation, even though the trees received the same amount.
                 </KeepInMind>
               </SubSection>
 
@@ -625,11 +611,7 @@ export default function TheStandardScorePage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Any rescaling that keeps the order of a column leaves a tree
-                  unchanged, so this holds for every member of the scaling
-                  family and not only for the standard score. Trees, forests and
-                  boosted trees are all of that kind, and standardizing their
-                  inputs changes the printed thresholds and nothing else.
+                  For an exact axis-aligned tree search, a strictly increasing transformation preserves the available training-row partitions. Positive affine rescaling also carries the usual midpoint thresholds into equivalent thresholds in exact arithmetic. Numerical precision, approximate split searches and other implementation details can still affect a fitted tree. Nonlinear transformations can also change how a midpoint threshold behaves between training observations.
                 </KeepInMind>
               </SubSection>
 
@@ -742,7 +724,7 @@ export default function TheStandardScorePage() {
             trueFalse(
               "The tree grown on standard scores roots on water below −0.08217, and its twenty-four predictions are identical to those of the tree grown on the recorded columns.",
               true,
-              "That threshold multiplied by the water spread and put back about the average water is 0.665, which is the recorded tree’s own threshold, because the threshold was chosen from the same column that was rescaled and moves along with it. The largest gap between the two sets of twenty-four predictions is exactly zero, both trees have eight leaves, and both score 0.8940 held out tree by tree. Any rescaling that keeps a column’s order leaves a tree unchanged, so this holds for the whole scaling family and not only for the standard score.",
+              "Converting this standardized threshold back to the original water units gives 0.665, the recorded tree's threshold. The twenty-four predictions agree exactly, both trees have eight leaves, and both score 0.8940 on the held-out comparison. That is the expected result for this affine rescaling and exact split procedure; it should not be read as a guarantee for every transformation and implementation.",
             ),
             trueFalse(
               "On this orchard the standard score was the best of the readings measured.",
@@ -767,11 +749,7 @@ export default function TheStandardScorePage() {
                 </p>
                 <Equation>{"held-out score = (held-out value − training average) / training spread"}</Equation>
                 <KeepInMind>
-                  Held-out rows standardized this way need not average zero and
-                  need not have a spread of one, and usually will not. The two
-                  promises of step 7 were about the rows the two numbers came
-                  from; the held-out rows are being measured against those rows,
-                  which is the whole point of holding them out.
+                  The held-out rows need not have mean zero or standard deviation one after this transformation. Those properties hold for the training rows used to learn the reference, subject to the numerical convention. New rows are measured against that same saved reference, rather than fitted to a new one of their own.
                 </KeepInMind>
               </SubSection>
 

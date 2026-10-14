@@ -78,10 +78,7 @@ export default function RidgeLassoPage() {
                   the whole of this page follows from the gap between them.
                 </p>
                 <p>
-                  Look at the bars under the curve rather than the curve. Each
-                  is one of the nine coefficients. They are what the fit
-                  actually chose, and everything the curve does between the
-                  readings is built out of them.
+                  Look at the bars below the curve. They show the nine coefficients chosen by the fit. Each coefficient multiplies one power of the input, and their combined contributions determine the curve between the readings.
                 </p>
               </SubSection>
 
@@ -108,12 +105,7 @@ export default function RidgeLassoPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  A moderate prediction produced by large opposing pieces is
-                  sensitive to the smallest change in any of them. Nudge the
-                  t⁶ coefficient by a hundredth of a percent and the prediction
-                  moves by more than four metres. That sensitivity is the
-                  problem regularisation is for, and it is worth seeing before
-                  any penalty is mentioned.
+                  Here large opposing contributions produce a moderate final prediction. Increasing the t⁶ coefficient by a hundredth of a percent moves the prediction by more than four metres. That sensitivity gives us a concrete reason to try a penalty on coefficient size.
                 </p>
               </SubSection>
 
@@ -136,11 +128,7 @@ export default function RidgeLassoPage() {
                   caption="Three excellent training scores, three sets of coefficients that agree on nothing, and one penalty that brings them within two percent of each other."
                 />
                 <p>
-                  Small change in the data, large change in the coefficients,
-                  large change in the curve between the readings. That is what
-                  an unstable model is, and it is a stronger case for restraint
-                  than the curve looking implausible, because it says the fit
-                  will not survive contact with the next sample.
+                  A small change in the data has produced large changes in the coefficients and in the curve between observations. That is evidence of instability. It gives us a reason to test a penalty: can we make the fitted rule less sensitive to which noisy measurements happen to appear in the sample?
                 </p>
               </SubSection>
             </>
@@ -496,16 +484,7 @@ export default function RidgeLassoPage() {
                   </p>
                 </WorkedExample>
                 <p>
-                  Notice also where ridge went. Not toward the origin along
-                  the line from the least-squares point, but across, to a pair
-                  where both coefficients carry some of the effect. Two large
-                  opposing coefficients cost a great deal in β², and two
-                  moderate shared ones cost less while predicting nearly the
-                  same, so ridge picks a smaller and steadier pair from among
-                  the many that fit similarly. That is the whole of what
-                  &ldquo;spreading credit across correlated inputs&rdquo; means,
-                  and it is a consequence of the circle rather than a belief
-                  about features.
+                  Notice where ridge moves in the coefficient plot. It favours a pair that shares the effect across the two correlated inputs. Large coefficients with opposing signs can nearly cancel in the predictions while still incurring a large squared penalty. More moderate coefficients can make similar predictions at a lower penalty cost. That explains the movement here; it does not tell us that either input has a particular causal role.
                 </p>
               </SubSection>
             </>

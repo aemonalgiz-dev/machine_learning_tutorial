@@ -79,7 +79,7 @@ candidates = [0,1,2,3]
 visible = [1,2]
 candidate_recall = len(relevant.intersection(candidates))/len(relevant)
 precision = len(relevant.intersection(visible))/len(visible)
-print(candidate_recall, precision)`, '0.5 0.5', 'Improving the order might move guide two first. Recovering guide five requires changing retrieval, not merely the ranker.')),
+print(candidate_recall, precision)`, '0.5 0.5', "A better ordering could move guide two into first place. Guide five needs a different repair: retrieval must include it before the ranker can place it anywhere.")),
   p('Average across Requests with a Defined Policy for Empty Targets', `Some evaluation requests have no labelled relevant guide. Recall then has a zero denominator. Decide whether those requests are excluded from that metric or assigned a documented convention, and report how many there are.
 
 Inspect new readers, new guides and low-exposure topics separately. An average dominated by frequent readers can conceal poor results for everyone else. Offline relevance reflects the collection and exposure process; an online change still needs a careful comparison of user outcomes.`),

@@ -28,7 +28,7 @@ export default function Page() {
     sections={[
 { title: "Part 1. Make Training Examples From Text", content: <>
 <SubSection title="1. Turn a sequence into inputs and targets">
-<p>{"A model learns from pairs, an input and the answer it should have given. For most tasks somebody has to write the answers. Text is unusual because it already contains them. Cover the last token of any stretch of text, and the covered token is the answer to the question of what comes next."}</p>
+<p>{"Suppose we show a model the beginning of a sentence and hide the next token. The original text already tells us which token followed, so we can compare the model's prediction with that observation. Repeating this throughout a corpus gives us training examples without asking someone to label each continuation by hand."}</p>
 <p>{"Before anything can be calculated, the text has to become numbers. This page’s vocabulary holds seven entries, <start>, the, cat, dog, sat, slept and <end>, numbered 0 to 6 in that order. The word the is token 1, cat is token 2, sat is token 4 and <end> is token 6."}</p>
 <p>{"A token ID identifies an entry in the vocabulary. An embedding gives that ID a vector; a transformer processes the vectors using available context. A final projection produces one logit, or unnormalized score, per vocabulary entry."}</p>
 <p>{"The training target at each position is the following token in the original text. The example uses explicit start and end tokens to show the boundaries. Real training pipelines also need policies for document boundaries, sequence packing, padding, and truncation."}</p>

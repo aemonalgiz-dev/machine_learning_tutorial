@@ -77,7 +77,7 @@ export default function ConvolutionPage() {
 <>
               <SubSection title="1. The picture we will carry through the page">
                 <p>
-                  The grid on the left of the playground is eight cells by eight, with a four by four square painted in the middle of it, and every cell holds either a zero or a one. That is sixty-four numbers, and it is the picture every claim on this page is made about. The small grid in the middle holds nine weights.
+                  Our first image is an eight-by-eight grid with a four-by-four square in its middle. Every pixel is zero or one. Beside it is a three-by-three grid of weights. Instead of combining all sixty-four image values at once, we will place these nine weights over one small patch and calculate a response there.
                 </p>
                 <p>
                   The grid on the right is what comes back when those nine weights are swept across the picture, and it is six cells by six because a three by three window fits into an eight by eight picture in six places along each side.
@@ -1335,12 +1335,7 @@ export default function ConvolutionPage() {
             <>
               <SubSection title="29. The conventions needed to reproduce a convolution" id="29-what-a-complete-implementation-must-specify">
                 <p>
-                  Two convolutions can agree on every word of the description
-                  above and still answer different numbers on the same picture. The
-                  decisions that separate them are mostly invisible until that
-                  happens, so it is worth writing down what a complete
-                  implementation has to fix. The table records what this one fixes
-                  and where it declines to offer a choice at all.
+                  Two convolution implementations can use the same general method and still produce different outputs because of choices such as padding or kernel orientation. The table below states the conventions used here. Check them when comparing this implementation with another library.
                 </p>
                 <DerivationTable
                   expressionHeading="the decision"

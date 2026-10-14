@@ -73,15 +73,7 @@ export default function JudgingAClassifierPage() {
 <>
               <SubSection title="1. Twelve people, and two the boundary cannot place">
                 <p>
-                  Twelve people are in the box above, six children and six
-                  adults measured by height and weight, and each is labelled
-                  with the chance the fitted model gives them of being an
-                  adult. Ten of them are easy. Two are not, since there is a
-                  child at 168 centimetres and 66 kilograms, and an adult at
-                  150 centimetres and 50 kilograms. Their measurements overlap
-                  the other class, and this fitted model gives the child a
-                  higher adult score than the adult. A single threshold on
-                  those scores cannot classify both correctly.
+                  The plot contains twelve people, six children and six adults, measured by height and weight. Beside each person is the fitted model&apos;s probability of adulthood. Most are easy to separate, but look at the child at 168 centimetres and 66 kilograms and the adult at 150 centimetres and 50 kilograms. Their measurements overlap the other group. The model gives this child a higher adult score than this adult, so moving a single threshold cannot classify both correctly.
                 </p>
                 <>
 <p>

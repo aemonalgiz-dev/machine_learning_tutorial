@@ -261,8 +261,8 @@
       {
         "title": "5. Why a List and an Array Give Different Answers",
         "paragraphs": [
-          "Suppose Botie wants to double three temperature differences. A Python list is a collection of references to objects. Multiplying that list by an integer repeats the collection. NumPy gives its array a different multiplication rule: perform the operation at every position. The brackets look similar, but they do not promise the same behaviour.",
-          "A list is useful while collecting records of changing length. An array is useful once we want a rectangular collection with one numerical representation and operations over its entries. Converting at that boundary makes our intention explicit."
+          "Suppose Botie wants to double three temperature differences. We put the numbers in a Python list and multiply by two. That sounds reasonable, but Python repeats the list instead of doubling its entries. Why? A list stores references to objects, and its multiplication operation means repeat the collection.",
+          "A NumPy array gives multiplication a different meaning: apply it to each entry. We will see both results below. Lists are useful while collecting entries, including records of different lengths. For a rectangular numerical table, an array lets us give the entries a common data type and calculate across them."
         ],
         "interpretation": [],
         "examples": [
@@ -282,8 +282,8 @@
       {
         "title": "6. A Second Name Is Not a Second Set of Readings",
         "paragraphs": [
-          "Assigning an array to another variable does not copy its measurements. Both names refer to the same array. If we change it through one name, the other name sees that change. This matters when we want to retain the original readings while trying a correction.",
-          "Use copy when independence is the intention, and keep names that describe which version they hold. We will distinguish views and copies in indexing, but this first case does not even create a view: it simply gives the original object another name."
+          "Botie saves his readings under another variable name, then changes one value. Both names now show the change. Assignment gave the existing array another name; it did not make a second array.",
+          "If we want to keep the original while trying a correction, we need copy. Give the saved copy a name that tells us what it holds. Later we will look at views, which can also share data, but here we have only one array with two names."
         ],
         "calculation": "original = np.array([12., 18.])\nalias = original\nsaved = original.copy()\nalias[0] = 99\n# original is now [99., 18.]; saved is still [12., 18.]",
         "interpretation": []
@@ -789,8 +789,8 @@
       {
         "title": "5. Keep the Greenhouse Axis When Subtracting Its Mean",
         "paragraphs": [
-          "After finding each greenhouse's average, Botie wants deviations on every day. A reduction normally removes the axis it combines. With keepdims=True, that axis remains with length one, preserving the layout needed for subtraction.",
-          "Read the operation in words first: combine days, retain greenhouses. Then inspect the resulting shape. The singleton row can be reused across every day without confusing the averages with a list of daily values."
+          "We have each greenhouse's average. Now we want to subtract it from that greenhouse's reading on every day. There is a small layout problem: a reduction normally removes the axis it combines.",
+          "Using keepdims=True leaves that axis in place with length one. Here we combine the days and keep the greenhouse columns. The result is one row of averages that NumPy can reuse down the table, with each average still in the correct column."
         ],
         "interpretation": [],
         "examples": [
@@ -1199,8 +1199,8 @@
       {
         "title": "6. Build Coordinates and Measurements Separately",
         "paragraphs": [
-          "A planned experiment needs positions as well as readings. The coordinate array says where measurements will be taken; a second array stores their values. Creating both does not mean the measurements already exist.",
-          "Choose linspace when endpoints and the number of positions define the design. Choose arange when a step defines it, taking care with floating-point endpoints. Integer indices are often a clearer starting point for a fixed sampling schedule."
+          "Botie plans to place thermometers along a bed. Before any thermometer reports, we already know where its reading will belong. We can store the positions in one array and reserve a second array for the measurements.",
+          "If we know the endpoints and how many positions we want, linspace gives us that arrangement. If we know the step between positions, arange may be more convenient, though floating-point steps need care near the endpoint. For a fixed sampling schedule, we can also start with integer indices and convert them to times or positions."
         ],
         "interpretation": [],
         "examples": [
@@ -1622,8 +1622,8 @@
       {
         "title": "5. Choose Two Cells or a Rectangular Subtable",
         "paragraphs": [
-          "Botie asks for the first and last days from the first and last greenhouses. Two index arrays used together select paired positions: first with first, last with last. They do not automatically select every combination.",
-          "np.ix_ constructs the independent row and column selections for a rectangular subtable. State which of these questions you mean before writing the indices. Both expressions are valid, so the wrong interpretation need not raise an error."
+          "Botie asks for the first and last days from the first and last greenhouses. Do we want two particular cells, or every combination of those days and greenhouses? Both are sensible requests.",
+          "Two index arrays used together select pairs: first with first, last with last. To get the rectangular subtable, we can use np.ix_ to make the row and column selections independent. The example below shows both. NumPy accepts either expression, so we need to decide which request we mean before writing it."
         ],
         "interpretation": [],
         "examples": [
@@ -2089,8 +2089,8 @@
       {
         "title": "5. A Valid Shape Can Still Mix Up Our Records",
         "paragraphs": [
-          "Botie has two days of three greenhouse readings. reshape keeps the sequence of elements while assigning new boundaries. It does not understand that the first three values belong to one day. Transpose instead exchanges the existing axes and preserves those relationships.",
-          "This distinction becomes important when images or batches are flattened for a model. Save the original axis convention and use the matching inverse transformation. An array returning to the right shape is not sufficient if its entries have moved to different meanings."
+          "Botie's logger sent two days of readings from three greenhouses. We can reshape those six numbers into several valid tables. But reshape only follows the sequence of entries and gives it new boundaries. It has no way to know which readings belong to Monday.",
+          "Transpose does a different job: it exchanges the existing axes, so the relationships between days and greenhouses remain attached to their positions. This becomes important when we flatten an image or a batch for a model. We need to remember the original axis order to reconstruct it; getting the dimensions right alone does not put every value back where it belongs."
         ],
         "interpretation": [],
         "examples": [
@@ -2524,8 +2524,8 @@
       {
         "title": "5. Compare Every Reading with Every Reference",
         "paragraphs": [
-          "One reference per column was enough for centring. A nearest-neighbour calculation needs something else: every query compared with every stored reference. Give queries a new reference axis and references a new query axis. The subtraction then retains both identities.",
-          "The extra dimensions represent reuse, not newly observed data. If there are many queries and references, the resulting table can be large. Broadcasting avoids physically repeating the inputs, but the subtraction still creates its output."
+          "For centring, each column needed one reference. Now suppose we want the nearest stored reading to each new reading. We need to compare every query with every reference. How can we keep track of all those pairs?",
+          "Give the queries a new reference axis, and give the references a new query axis. Subtracting then produces a table with a position for every pair. NumPy can reuse the inputs without physically repeating them, but it still creates the subtraction result. With many queries and references, that result can take a lot of memory."
         ],
         "interpretation": [],
         "examples": [
@@ -2959,8 +2959,8 @@
       {
         "title": "5. Keep the Day Even When Its Reading Is Missing",
         "paragraphs": [
-          "Selecting good readings removes positions from the array. That helps when computing a summary, but it can make the remaining readings appear to belong to consecutive days. A forecast or plot may need to preserve the missing day.",
-          "np.where can choose a replacement at each original position. Keep the validity mask as well, so later code can distinguish an observed value from a replacement. Replacing a reading does not recover what the thermometer would have measured."
+          "Suppose Wednesday's reading is missing. If we select only the valid readings, Wednesday's position disappears. That is convenient for some summaries, but a plot or forecast could now mistake Thursday for Wednesday.",
+          "We can use np.where to supply a replacement while keeping every position. We also keep the validity mask, which records where the real measurements were. The replacement lets a calculation proceed; the mask tells us which value we still don't know."
         ],
         "interpretation": [],
         "examples": [
@@ -3350,8 +3350,8 @@
       {
         "title": "6. Choose the Weight That Matches the Question",
         "paragraphs": [
-          "Weights describe how much each entry contributes. Counts can recover an overall observation mean from group means. Reliability weights express a different modelling assumption and should not be substituted merely because they are available.",
-          "Check that weights align with the values, that their total is positive, and that their interpretation permits the values supplied. NumPy can calculate the weighted average, but cannot decide which population we wanted to describe."
+          "How much should each daily average contribute? If we want the mean across all the original readings, a day with more readings must count for more. The number of readings provides its weight.",
+          "Weighting by a sensor's reliability would answer a different question, so we shouldn't substitute those weights just because we have them. Keep each weight beside the value it belongs to and check that the total weight is positive. We also need to check whether the supplied weights make sense for the question. NumPy can do the arithmetic once we have made that choice."
         ],
         "interpretation": [],
         "examples": [
@@ -3766,8 +3766,8 @@
       {
         "title": "6. A Conditional Result Does Not Always Prevent a Bad Calculation",
         "paragraphs": [
-          "Botie wants a ratio only where the denominator is nonzero. Writing a division inside np.where still constructs the divided array before where selects entries. That can produce invalid values or warnings in positions we intended to discard.",
-          "The divide operation itself accepts a where mask and an output array. Initialise that output with the value we want at excluded positions. This puts the condition on the arithmetic rather than only on its displayed result."
+          "Botie needs a ratio only where the denominator is nonzero. It is tempting to put the division inside np.where and expect the unwanted positions to be skipped. But Python evaluates that division before where chooses which results to keep. We can still get a division-by-zero warning.",
+          "Instead, put the condition on np.divide itself. It accepts a where mask and an output array. We first fill that output with our chosen missing value, then divide only at the allowed positions. The other positions keep the value we supplied."
         ],
         "interpretation": [],
         "examples": [
@@ -4179,8 +4179,8 @@
       {
         "title": "5. When No Coefficient Can Satisfy Every Measurement",
         "paragraphs": [
-          "An exact solve asks for a coefficient vector that satisfies every equation. Measurements usually contain noise, so those equations may disagree. Least squares asks instead for predictions whose squared residuals have the smallest total.",
-          "The design matrix needs one row per observation and one column per coefficient. A column of ones represents an intercept. After solving, calculate predictions and residuals yourself. That makes the solver's answer a model we can inspect, rather than an unexplained array."
+          "An exact solve asks for coefficients that satisfy every equation. What if the measurements contain noise and the equations disagree? Then we can look for predictions whose squared residuals have the smallest total. That is the least-squares problem.",
+          "We arrange one observation per row of the design matrix, with a column for each coefficient. A column of ones allows the model to fit an intercept. Once the solver returns its coefficients, let's use them to calculate the predictions and residuals. Those show how the fitted rule behaves on our actual measurements."
         ],
         "interpretation": [],
         "examples": [
@@ -4487,7 +4487,7 @@
       },
       {
         "title": "Check the whole contract",
-        "explanation": "Agreement includes layout and usable values, not only a similar printed number.",
+        "explanation": "Check the shape and whether every value is finite as well as comparing the printed result. A plausible number in the wrong layout can still break the next calculation.",
         "rows": [
           [
             "Checks",
@@ -4588,8 +4588,8 @@
       {
         "title": "5. A Small Dtype Can Change the Arithmetic",
         "paragraphs": [
-          "Image values often arrive as unsigned eight-bit integers. That representation stores a limited range and has no place for a negative difference. Cast before subtracting when we need signed differences or floating-point arithmetic. Casting after an overflow cannot recover the lost result.",
-          "The same principle applies to accumulation: choose a representation that can hold the result, not merely each input. A calculation that finishes without an exception can still be numerically unsuitable for its purpose."
+          "Image values often arrive as unsigned eight-bit integers. Those integers have a limited range and cannot represent a negative difference. If we subtract before changing the dtype, we may already have lost the answer we wanted. Converting the result afterwards cannot undo that overflow.",
+          "We need a signed or floating-point representation before the subtraction. When adding many values, we also need a type large enough for their total. Python finishing the calculation without an exception does not tell us whether the chosen representation was suitable."
         ],
         "interpretation": []
       },
@@ -5071,8 +5071,8 @@
       {
         "title": "6. A Repeatable Estimate Can Still Be Noisy",
         "paragraphs": [
-          "A seed fixes one simulated run. It does not make that run representative. If Botie compares two training methods, inspect a declared collection of seeds or repeated splits, while keeping the evaluation question unchanged.",
-          "Report the variation as well as the average. Do not keep drawing until a preferred method wins. More repetitions describe sensitivity to the random choices under the experiment we specified; they do not repair a biased dataset or a leaking split."
+          "A seed lets us repeat one simulated run. How much did that particular run influence our conclusion? To compare training methods, we can use a set of seeds or repeated splits chosen in advance and report how the results vary.",
+          "Keep the evaluation question the same across those runs. Drawing again until our preferred method wins would change the comparison. Repetition helps us understand sensitivity to random choices, but a biased dataset or a leaking split still needs to be fixed."
         ],
         "interpretation": []
       }
@@ -5475,8 +5475,8 @@
       {
         "title": "5. Does Calling the Function Change Its Input?",
         "paragraphs": [
-          "Botie passes a training array to a function, then uses the same array to fit another model. If the first function centres its argument in place, the second model receives different data. This can happen even when the first function returns a correct result.",
-          "Decide whether mutation is part of the interface. A function that promises to preserve input should create its result separately. Document the exception if an in-place operation is deliberate. Returning an array and changing the caller's array are two separate effects."
+          "Botie centres a training array in a function, then gives the original array to a second model. If the function changed its input in place, that second model now receives centred data too. The first function can return the right result and still cause this surprise.",
+          "We need to decide whether changing the caller's array is part of the function's job. If it promises to leave the input alone, create the result separately. If an in-place change is deliberate, say so in the function's documentation so its caller can keep a copy when needed."
         ],
         "interpretation": []
       },
@@ -5970,8 +5970,8 @@
       {
         "title": "6. Save the Information Needed to Use the Array Tomorrow",
         "paragraphs": [
-          "Keep column names, units, missing-value conventions and the source period beside a dataset. For a fitted transformation, keep the training reference and its feature order. A fresh process should be able to reconstruct the same inputs without remembering what happened in a notebook.",
-          "When a format or schema changes, give it a version and validate that version while loading. Reject an unsupported layout explicitly. Guessing that a two-column file must have the expected meanings can produce plausible but incorrect predictions."
+          "Imagine opening this dataset in a fresh Python process a month from now. Would we still know which column is temperature, what its units are, and how a missing reading was recorded? Keep those details beside the arrays, along with the period the records came from. For a fitted transformation, save the training reference in its feature order too.",
+          "Give changes to the file layout a version that the loader can check. If a version is unsupported, report that explicitly. Guessing the meaning of an unfamiliar two-column file could give us convincing numbers for the wrong calculation."
         ],
         "interpretation": []
       }
@@ -6206,7 +6206,7 @@
     "openingTitle": "What Should We Do With an Empty Cell?",
     "opening": [
       "Botie opens the greenhouse report and finds a blank temperature. Perhaps the sensor lost power, or perhaps it stopped reporting when the greenhouse became too hot. Those possibilities have different implications.",
-      "A numerical method may still require a value in that position. We can supply a replacement, but we must keep clear that it is an estimate. Filling a cell makes an array usable; it does not recover the measurement that was never recorded."
+      "The calculation we want to run may still need a number in that cell. We can estimate one from the available readings. But we should keep track of where we made that substitution: we now have a usable input, while the actual temperature remains unknown."
     ],
     "prerequisites": [
       {
@@ -6575,7 +6575,7 @@
     "openingTitle": "Is Glass Really Twice as Much Roof as Plastic?",
     "opening": [
       "Botie wants to include greenhouse roof material in a temperature model. The materials are glass, plastic, and mesh. A model needs usable inputs, so assigning each name an ID seems like a reasonable start.",
-      "But an ID is an address, not a measurement. If a numerical model multiplies those IDs by a shared coefficient, it treats the gaps between IDs as meaningful. We need a way to indicate the material without claiming that one material is twice another."
+      "The IDs tell us which material a row describes. They don't measure anything about the roof. If we multiply them by one shared coefficient, however, their numerical gaps affect the prediction. We need to tell the model which material is present without making an arbitrary choice of IDs look like a measured difference."
     ],
     "prerequisites": [
       {
@@ -7010,7 +7010,7 @@
     "openingTitle": "Why Does Midnight Look So Far From Eleven?",
     "opening": [
       "Botie records greenhouse temperatures throughout the day. If we encode the hour as a number from zero to 23, late evening and early morning sit at opposite ends of the number line. On a clock they are neighbours.",
-      "The issue is the shape of the information. An hour of the day repeats after a full turn. We can preserve that relationship by placing each hour around a circle and describing its position with two coordinates."
+      "A clock gives us a useful picture here. The hour moves around the face and returns to its starting position each day. We can put our hour values on a circle too, then use two coordinates to describe each position. Hours on either side of midnight will stay close together."
     ],
     "prerequisites": [
       {
@@ -7933,7 +7933,7 @@
     "openingTitle": "Did We Observe It Twice, or Import It Twice?",
     "opening": [
       "Botie joins two greenhouse log files and finds the same event ID twice. If both entries describe the same measurement, counting both gives that event extra influence. If two different events happen to have the same temperature, removing one would discard real information.",
-      "The distinction comes from what a row represents. We need an event identity, a time, a unit, and a collection rule before deciding which repetitions are errors."
+      "Before deleting either row, we need to know how an event was identified and recorded. Its time and units help us interpret the measurement. The collection rule tells us whether two matching rows could legitimately describe separate events."
     ],
     "prerequisites": [
       {
@@ -8271,7 +8271,7 @@
         }
       ],
       "blocks": [
-        "As data-mining systems combined many records and preprocessing steps, evaluation could accidentally give a model information unavailable in the real prediction setting. High scores then measured access to privileged evidence as well as predictive ability.",
+        "When we combine records from several systems, a later event can slip into the inputs for an earlier prediction. Preprocessing can also use information from data we intended to hold out. The resulting score then reflects information the model would not have had when it needed to make the real decision.",
         "Kaufman and colleagues examined leakage as information about a target that is not legitimately available to the prediction process. Our invented repair records make the timing issue explicit. Other forms include fitting preprocessing on test data or placing copies of an observation on both sides of a split."
       ]
     },
@@ -8599,7 +8599,7 @@
     "openingTitle": "How Did a Model Miss Every Failure and Still Look Good?",
     "opening": [
       "Botie checks a batch containing 95 healthy sensors and five failed sensors. A rule that always says healthy gets most answers right. It also fails at the entire reason we might have built an alert system.",
-      "The class counts shape both the learning problem and the score. We need to keep the rare class visible, then decide how different mistakes should influence training and decisions."
+      "We need to ask how well the rule finds the five failures. That is a different question from how often it is right across the whole batch. The class counts affect training as well as evaluation, so we will also look at what changes when mistakes on the rare class receive more weight."
     ],
     "prerequisites": [
       {
@@ -8616,7 +8616,7 @@
         }
       ],
       "blocks": [
-        "Classification datasets often contain many examples of one outcome and few of another. Researchers found that a method could favour the majority while performing poorly on the minority that mattered to the application.",
+        "Consider a classifier trained on records where one outcome is much more common than the other. It can reduce its total mistakes by favouring the common class, even if the rare cases are the ones we most need to find. Work on imbalanced classification addresses that mismatch between a convenient training objective and the job the model is meant to do.",
         "Chawla and colleagues' 2002 SMOTE paper studied synthetic minority oversampling, creating additional minority examples between nearby observations. That is one response to imbalance, not a universal remedy. Our lesson first makes the evaluation problem visible; it does not generate synthetic sensor records."
       ]
     },
@@ -8906,7 +8906,7 @@
     "blurb": "A complicated predictor needs a simple comparison. Before fitting one, we can measure how well a rule that always predicts a training average performs on new observations.",
     "openingTitle": "Would the Average Have Done Just as Well?",
     "opening": [
-      "Botie has a new model for greenhouse temperature. Its error sounds small, but small compared with what? If a simple rule would do just as well, the extra complexity has not yet earned its place.",
+      "Botie has a new model for greenhouse temperature. Its reported error sounds small. But could we get a similar result by predicting the training average every time? Let's measure that simple rule before deciding whether the new model is helping.",
       "We will start with a deliberately limited predictor: use the average training temperature for every new observation. That gives us a baseline, a result the more elaborate method should improve under the same evaluation conditions."
     ],
     "prerequisites": [
@@ -9233,7 +9233,7 @@
     "openingTitle": "Should We Collect More Readings or Change the Rule?",
     "opening": [
       "Botie's temperature model makes errors on new days. We could collect more days, or choose a more flexible rule. Those changes address different problems, so it helps to inspect the behaviour we already have.",
-      "Fit the same kind of model using several training-set sizes and measure both training and validation error. The resulting learning curves show how the method responds to more examples. They provide evidence for a decision, not a promise about what the next batch will do."
+      "We can investigate by fitting the same procedure with different amounts of training data. At each size, measure how well it fits those observations and how well it predicts a separate validation set. Plotting the two errors gives us learning curves. Their shapes can help us decide what to try next, although another batch of observations may behave differently."
     ],
     "prerequisites": [
       {
@@ -9614,7 +9614,7 @@
     "openingTitle": "Should We Inspect Every Sensor That Might Fail?",
     "opening": [
       "Botie's model assigns each greenhouse sensor a probability of failure. An inspection costs time, but missing a real failure also has a cost. A probability alone does not decide which action is preferable.",
-      "We need a rule connecting those probabilities to consequences. A threshold says how large the estimated probability must be before we act. The appropriate threshold depends on the decision we are making."
+      "How large should the failure probability be before Botie inspects the sensor? That cutoff is our decision threshold. To choose it, we need to compare the consequences of inspecting with the consequences of leaving the sensor alone."
     ],
     "prerequisites": [
       {
@@ -9941,7 +9941,7 @@
     "openingTitle": "Can We Trust the Number Beside the Prediction?",
     "opening": [
       "Suppose Botie's model gives a group of sensors an 80 percent chance of failure. If we saw many comparable predictions, we would expect failures in roughly eight out of ten cases. That interpretation is what gives the probability practical meaning.",
-      "Our small report has four such predictions, and only two sensors failed. That is evidence to inspect, not proof from four observations alone. We need to compare estimated probabilities with observed frequencies while keeping the sample size visible."
+      "Now look at our small report: four sensors received that prediction, and two failed. Is the model overstating the risk, or could this be ordinary variation in a small group? Four cases cannot settle that question. We will compare predicted probabilities with observed frequencies and keep the number of observations beside each comparison."
     ],
     "prerequisites": [
       {
@@ -10281,7 +10281,7 @@
     "blurb": "Several rows can belong to the same greenhouse, patient, or device. If we want to predict for a new entity, a random row split can put familiar entities on both sides of the evaluation.",
     "openingTitle": "Was the Greenhouse New, or Just the Row?",
     "opening": [
-      "Botie records several readings from each greenhouse. We want to know whether a model will work for a greenhouse it has never encountered. Randomly splitting individual readings can put one greenhouse's morning reading in training and its afternoon reading in validation.",
+      "Botie takes several readings from each greenhouse. Suppose the model will be used in a greenhouse it has never encountered. A random row split could put one greenhouse's morning reading in training and its afternoon reading in validation. We would then be checking another reading from a familiar greenhouse, which is an easier question than the one we meant to ask.",
       "Those are different rows, but they share the same greenhouse. The model may benefit from familiar construction, sensor behaviour, and location. To answer the new-greenhouse question, the whole greenhouse must stay on one side of the split."
     ],
     "prerequisites": [
@@ -10742,8 +10742,8 @@
       {
         "title": "4. Connect the Alert to an Investigation",
         "paragraphs": [
-          "Inspect subgroup performance when labels become available, check collection changes, and compare against the intended deployment population. A monitoring distance is useful when it leads to a concrete investigation.",
-          "Thresholds for alerts should account for ordinary sampling variation, seasonality, and the cost of investigating. Do not automatically retrain because one small batch looks different."
+          "When the outcomes arrive, check performance within the affected groups. We can also investigate whether the collection process changed and whether these are the conditions the model was intended to handle.",
+          "An alert threshold needs to allow for ordinary sampling variation and seasonal changes. Investigating an alert costs time too. One unusual small batch is a reason to look more closely, rather than an instruction to retrain immediately."
         ],
         "interpretation": [
           "The workshop calculates a transparent category distance. Its labels and proportions stay visible so the number has an interpretation."
@@ -11086,7 +11086,7 @@
       {
         "title": "2. Recompute the Complete Statistic",
         "paragraphs": [
-          "For each resample, repeat the statistic of interest. Here that statistic is the mean. For more complicated estimates, the required procedure can include refitting a model or preprocessing rather than merely resampling an already summarised number."
+          "For each resample, calculate the quantity we are studying again. Here we want a mean, so that is all we need to recompute. If we were studying a fitted model, we might need to repeat its preprocessing and fitting too. Resampling a final score alone would miss the variation introduced by those earlier choices."
         ],
         "calculation": "First mean = (10 + 10 + 30) / 3 ≈ 16.6667\nSecond mean = (20 + 20 + 20) / 3 = 20\nThird mean = (10 + 30 + 30) / 3 ≈ 23.3333",
         "interpretation": [
@@ -11511,8 +11511,8 @@
       {
         "title": "7. Carry the Same Test into a Different Population",
         "paragraphs": [
-          "Suppose Botie checks a batch already suspected of damage. The warning light has the same sensitivity and false-alarm rate, but faults are more common before the light is observed. The composition of the alarm group changes.",
-          "This is why a probability attached to a test result needs a population assumption. A result measured in one setting cannot automatically be carried to another with a different starting rate."
+          "Now suppose Botie checks a batch that may have been damaged in transit. Faults are more common in this batch. Even with the same sensitivity and false-alarm rate, the warning light now means something different: a larger share of the alarms can come from faulty sensors.",
+          "So, before using a probability attached to a test result, we need to know which population it describes. A result from ordinary deliveries may not apply to this damaged batch."
         ],
         "interpretation": [],
         "examples": [
@@ -11740,7 +11740,7 @@
     "openingTitle": "We Have the Results. Which Setting Explains Them?",
     "opening": [
       "Botie tests a batch of seeds and records whether each one germinates. A proposed germination probability tells us how plausible each outcome would be. But the outcomes have already happened. What Botie wants to choose is the probability used by his model.",
-      "So, let's keep the observed seeds fixed and try several possible settings. We will ask which setting assigns the greatest probability to this same sequence, then work out what that comparison does and does not tell us."
+      "Let's try several proposed germination probabilities against the seeds we actually observed. Which setting makes that sequence most likely? Once we can calculate the comparison, we can ask how much it tells us about seeds we haven't tested."
     ],
     "prerequisites": [
       {
@@ -12224,8 +12224,8 @@
       {
         "title": "2. Name the Independence Assumption",
         "paragraphs": [
-          "The naive assumption is conditional independence: within a fixed class, learning one feature does not change the model's probability for another. It is not a claim that warm casings and unstable readings are unrelated across the whole population.",
-          "Under that assumption, multiply the feature likelihoods within each class. Then use Bayes' rule to include the prior and normalise across classes."
+          "Let's make an assumption we can calculate with. Within each class, the model treats the features as conditionally independent. Once we specify faulty or working, learning that the casing is warm does not change the model's probability of an unstable reading. Across the whole population, the two signs can still be related because both may be more common in faulty sensors.",
+          "With that assumption, we can multiply the feature likelihoods for each class. Bayes' rule then brings in the prior class probabilities and lets us normalize the results. Later we will look at what happens when the signs are related even within a class."
         ],
         "calculation": "Faulty contribution = 0.2 × 0.8 × 0.7 = 0.112\nWorking contribution = 0.8 × 0.1 × 0.2 = 0.016\nFaulty posterior = 0.112 / (0.112 + 0.016) = 0.875",
         "interpretation": [
@@ -12619,7 +12619,7 @@
       ],
       "blocks": [
         "A separator that makes no training mistakes may still sit unnecessarily close to observations. Maximum-margin methods made the distance from a boundary part of the fitting problem. Real datasets then posed another difficulty: measurement error and overlapping classes can make perfect separation impossible.",
-        "Cortes and Vapnik's 1995 support-vector networks paper extended the approach to non-separable data. The useful idea here is a tradeoff: prefer a wide margin, but allow violations at a cost. Our small geometric examples illustrate that objective; they do not claim to reproduce the paper's optical-character experiments."
+        "Cortes and Vapnik's 1995 support-vector networks paper allowed the classifier to handle data that could not be separated perfectly. A point could violate the margin, but doing so carried a cost. The model could then balance a wider margin against those violations. We will use small geometric examples to understand that choice; the paper's experiments concerned optical character recognition."
       ]
     },
     "intuition": [
@@ -13165,7 +13165,7 @@
       ],
       "blocks": [
         "Grouping many observations poses a practical search problem: there are too many possible partitions to inspect exhaustively. Ward's 1963 procedure described forming a hierarchy through successive merges chosen by an objective. It made the sequence of grouping decisions part of the result.",
-        "Different merge criteria produce different hierarchies. Ward's criterion uses the increase in within-group squared variation. Our first construction uses single linkage, the nearest cross-group pair, so we can see exactly which distance caused a merge. We should not call these two criteria interchangeable."
+        "Once groups contain several sensors, there is more than one way to decide which groups are closest. Ward's criterion chooses the merge with the smallest increase in within-group squared variation. We will begin with single linkage instead: find the nearest pair with one sensor in each group. That lets us point to the distance responsible for each merge. These criteria can produce different hierarchies."
       ]
     },
     "intuition": [
@@ -13647,8 +13647,8 @@
       {
         "title": "2. Let Core Points Extend the Region",
         "paragraphs": [
-          "Choose an unvisited core point and begin a cluster. Visit its neighbours. Every core neighbour can bring in its own neighbours, so expansion can follow a curved chain of dense locations.",
-          "This is not a requirement that every member be near one shared centre. Nor is it unrestricted single-linkage chaining: a sparse sequence of non-core points cannot keep extending the region."
+          "Start a cluster at an unvisited core point and inspect its neighbours. A neighbour that is also a core point can bring in its own neighbours. Repeating this step lets the cluster follow the curved path of densely placed sensors.",
+          "The distinction between core and border points matters here. Expansion continues through core points. A sparse chain of border points cannot extend the cluster indefinitely, even if each point is close to the next."
         ],
         "interpretation": [
           "The ability to continue through core points explains how an irregular path can stay together."
@@ -14154,8 +14154,8 @@
       {
         "title": "1. Separate Position From Measurement",
         "paragraphs": [
-          "A grayscale image stores one intensity value at each grid position. Its shape gives the height first, then the width. Array indexing follows that order: row, then column. In a displayed image, rows usually increase downward and columns increase to the right.",
-          "A geometric coordinate is often written as x followed by y. That reverses the order used to index an image array. We should state which convention we are using before selecting a pixel."
+          "Let's begin with grayscale. Each position holds one intensity measurement. The array's first dimension is its height and the second is its width, so we index it by row followed by column. In the displayed image, moving down increases the row number; moving right increases the column number.",
+          "This is easy to mix up with a geometric coordinate written as x followed by y. That convention names the horizontal position first. Before selecting a pixel, check whether the function wants an array index or a geometric coordinate."
         ],
         "calculation": "image.shape = (height, width)\nimage[row, column] = image[y, x]",
         "interpretation": [
@@ -14643,8 +14643,8 @@
       {
         "title": "2. Inspect the Mask Before Summarising It",
         "paragraphs": [
-          "Summing a binary mask counts selected pixels. The mean gives the selected share of the image. Neither tells us how many separate seeds are present. A single seed can occupy many pixels.",
-          "Display the mask alongside the photograph. We want to see whether selection follows the objects, not just whether its total looks plausible."
+          "If we add the mask's ones, we count selected pixels. Taking its mean gives the selected fraction of the image. But Botie wanted seeds, and one seed can occupy many pixels.",
+          "Put the mask beside the photograph. Does the selected region follow each seed? That is the first check to make before we try to turn regions into an object count."
         ],
         "calculation": "Selected pixels = 2\nTotal pixels = 9\nSelected share = 2 / 9 ≈ 0.2222",
         "interpretation": [
@@ -15232,8 +15232,8 @@
       {
         "title": "4. Put the Operations in the Intended Order",
         "paragraphs": [
-          "Opening performs erosion followed by dilation with the same footprint. It removes structures that cannot survive the erosion, then expands what remains. Closing performs dilation followed by erosion and can fill small gaps or connect nearby parts.",
-          "These operations are useful only when their geometry fits the task. Opening can remove narrow real objects. Closing can merge two real seeds that were separate. Inspect the original, intermediate, and final masks."
+          "Erosion can remove the speck, but it also shrinks the seed. We can follow it with dilation using the same footprint to expand the surviving region. This pair of operations is called opening. Reversing the order gives closing, which can fill small gaps or connect nearby parts.",
+          "Look at the intermediate mask as well as the result. A thin real object might disappear during opening. Closing might connect two seeds that we wanted to count separately. The footprint's size and shape therefore need to match what we are trying to keep."
         ],
         "calculation": "Opening = dilate(erode(mask, footprint), footprint)\nClosing = erode(dilate(mask, footprint), footprint)",
         "interpretation": [
@@ -15771,8 +15771,8 @@
       {
         "title": "3. Continue Until Every Foreground Pixel Has a Label",
         "paragraphs": [
-          "Resume the scan. A labelled foreground pixel already belongs to a region, while an unlabelled one starts a new region. Background stays zero.",
-          "Our workshop scans rows from top to bottom and columns from left to right, assigning consecutive labels. The label numbers are identifiers, not measurements or rankings. Another correct implementation could number the same groups differently."
+          "Now resume scanning the mask. A labelled foreground pixel already belongs to a region. An unlabelled foreground pixel begins the search for another region. We leave background at zero.",
+          "Our workshop scans each row from left to right, then moves down, assigning consecutive labels as it discovers regions. Those numbers let us refer to the groups. A different scan order could give the same groups different numbers without changing the segmentation."
         ],
         "calculation": "Labelled mask:\n1 1 0 2\n0 1 0 2\n0 0 0 0\nRegion count = 2",
         "interpretation": [
@@ -16059,7 +16059,7 @@
     "openingTitle": "Does Turning the Tray Change What Is Growing in It?",
     "opening": [
       "Botie's training photographs show seeds facing in only a few directions. A new photograph places the same kind of seed the other way around. We still recognise it, but why should a model know that orientation was irrelevant?",
-      "We can show the model transformed versions of its training images. First, though, we need to decide what each transformation is allowed to change. A flipped seed can keep its class label. A flipped photograph with an unflipped segmentation mask is now incorrectly labelled."
+      "We can include transformed copies in training. But we need to follow what happens to the answer too. Flipping a seed photograph can leave its class unchanged. For segmentation, the target is a picture: we must flip its mask by the same operation, or we will tell the model to label the wrong pixels."
     ],
     "prerequisites": [
       {
@@ -16708,8 +16708,8 @@
       {
         "title": "2. Freeze Parameters and Preserve the Input Contract",
         "paragraphs": [
-          "Freezing the extractor means its parameters receive no optimiser updates. In an implementation, parameter gradients and training/evaluation mode are separate controls. Dropout and batch-normalisation behaviour can change even when parameter updates are disabled.",
-          "Use the preprocessing expected by the pretrained weights, including channel order, resizing policy, and normalisation. If we cache fixed features, the extractor must run with the intended deterministic evaluation behaviour."
+          "Let's first keep the feature extractor's parameters fixed and train only the new head. Disabling optimizer updates is one part of that job. Dropout and batch normalization also have training and evaluation behaviours, which are controlled separately from whether parameters receive updates.",
+          "The images must be prepared as the pretrained weights expect. Check their channel order and resizing policy, as well as normalization. If we cache features to reuse later, run the extractor in the intended deterministic evaluation mode so the saved values represent the same procedure."
         ],
         "interpretation": [
           "The PyTorch reference shows these controls in a real model. Here we work directly with fixed feature rows so the boundary is explicit."
@@ -17212,8 +17212,8 @@
       {
         "title": "2. Find the Region Shared by Both Rectangles",
         "paragraphs": [
-          "The intersection starts at the larger left boundary and the larger top boundary. It ends at the smaller right boundary and the smaller bottom boundary.",
-          "If those choices give a negative width or height, the rectangles do not overlap along that direction. Clamp each intersection length at zero before multiplying. Otherwise, multiplying two negative lengths could create a false positive area."
+          "To find the shared part of two rectangles, choose the farther-right left boundary and the lower top boundary. For the other side, choose the nearer-left right boundary and the higher bottom boundary. Those choices give the intersection limits.",
+          "A negative width or height means there is no overlap in that direction. Set that length to zero before calculating area. Otherwise two negative lengths could multiply to a positive number and report an overlap that does not exist."
         ],
         "calculation": "intersection_width = max(0, min(right_A, right_B) - max(left_A, left_B))\nintersection_height = max(0, min(bottom_A, bottom_B) - max(top_A, top_B))\nintersection_area = intersection_width × intersection_height",
         "interpretation": [
@@ -17725,8 +17725,8 @@
       {
         "title": "3. Repeat Only With Candidates That Survived",
         "paragraphs": [
-          "Take the highest-scoring candidate still waiting and repeat the comparison. A candidate already removed must never suppress another box. That is what makes this a greedy sequence rather than one simultaneous comparison of every pair.",
-          "Suppose A overlaps B, and B overlaps C, but A does not overlap C enough. After keeping A and suppressing B, C remains eligible. Letting the removed B suppress C would implement a different rule."
+          "After keeping the highest-scoring box, remove its sufficiently overlapping alternatives. Then choose the highest score among the boxes still waiting. Removed boxes take no further part in the decisions.",
+          "Suppose A overlaps B, and B overlaps C, but A does not overlap C enough to suppress it. Keeping A removes B while leaving C eligible. If the removed B were allowed to suppress C too, we would be running a different algorithm."
         ],
         "calculation": "Waiting: A, B, C\nKeep A; suppress B\nWaiting: C\nKeep C",
         "interpretation": [
@@ -18133,7 +18133,7 @@
       ],
       "blocks": [
         "Forecasting grew around decisions that had to be made before demand, production, or other measurements were known. A method needed to earn its complexity against forecasts available from the existing record. Hyndman and Athanasopoulos's forecasting text formalises simple rules as benchmarks in this workflow.",
-        "We will use an invented greenhouse record. Repeating the last observation is called a naive forecast. It is useful as a reference because it asks whether a learned model contributes anything beyond persistence."
+        "We will begin by predicting that tomorrow's demand equals the latest observed demand. This is a naive, or persistence, forecast. Our greenhouse record is invented so we can check every prediction. A more complicated method should be compared with this rule on the same future days."
       ]
     },
     "intuition": [
@@ -18569,8 +18569,8 @@
       {
         "title": "1. Define What One Row Represents",
         "paragraphs": [
-          "One row represents a forecast made at one time for one target. With two lags, column zero contains the older reading and column one the more recent reading. Use this same order during fitting and prediction.",
-          "The first two dates cannot supply complete rows. Dropping them is different from filling missing history with zeros, which would invent observations."
+          "Each row will represent one forecast: the readings available when we make it, paired with the later value we want to predict. With two lags here, the older reading goes in column zero and the newer one in column one. We must use that order when predicting too.",
+          "The first two dates do not have enough preceding readings for complete rows. We omit them. Filling that unavailable history with zeros would tell the model that measurements existed when they did not."
         ],
         "calculation": "Series = [4,6,5,9]\nX = [[4,6], [6,5]]\ny = [5,9]",
         "interpretation": [
@@ -18892,7 +18892,7 @@
       ],
       "blocks": [
         "Time-series modelling developed tools for records whose levels or recurring patterns changed over time. Differencing became a central part of the Box-Jenkins ARIMA approach: model changes when a more stable relationship can be expressed there.",
-        "Differencing does not magically make every record stationary. We will inspect a deliberately simple trend and cycle so the effect of each subtraction is visible, then state what that toy example leaves unresolved."
+        "Let's try differencing on a record where we know the trend and repeating cycle we put into it. We can watch what each subtraction removes. A real record may retain changing behaviour afterwards, so differencing is something to inspect, not an automatic guarantee of stationarity."
       ]
     },
     "intuition": [
@@ -19318,8 +19318,8 @@
       {
         "title": "1. Separate Observation, State, and Forecast",
         "paragraphs": [
-          "The observation is what actually happened. The state is the level estimate retained between updates. Before seeing a new observation, that existing state supplies its forecast. After observing the outcome, update the state for the next forecast.",
-          "Using the updated state to claim a forecast of the observation that created it would mix fitting with prediction."
+          "Before today's reading arrives, Botie has yesterday's retained level estimate. He uses that to forecast today. Once the actual demand is known, he can update the level for tomorrow.",
+          "Keep those two moments separate in the code. If we update first and then score the result against today's reading, we are using part of the answer in what we call a forecast."
         ],
         "calculation": "Before observation: forecast[t] = level[t-1]\nAfter observation: update level[t]",
         "interpretation": [
@@ -19607,7 +19607,7 @@
         }
       ],
       "blocks": [
-        "Yule's 1927 investigation of disturbed periodic series was an important early contribution to autoregressive modelling. The central idea relates a present value to earlier values of the same process, leaving a remainder for unexplained variation.",
+        "Yule's 1927 work investigated disturbed periodic series by relating a value to earlier values of the same process. That gives us a way to learn how earlier readings contribute, while leaving a remainder for variation the relationship does not explain. We will use that idea with Botie's demand history.",
         "Later ARIMA methods combined autoregressive terms with other components, including differencing. Our exercise fits a small autoregression directly with least squares; it is not an automatic ARIMA-selection procedure."
       ]
     },
@@ -19989,7 +19989,7 @@
       ],
       "blocks": [
         "Forecasting researchers needed evaluations that respected the order in which observations became available. Tashman's 2000 review discussed out-of-sample testing choices, including rolling origins, rather than treating one fitted historical curve as evidence of future accuracy.",
-        "The practical idea is to repeat the forecasting decision under several historical information boundaries. Our small replay uses known arrays so we can inspect those boundaries without downloading a dataset."
+        "Let's replay the decision at several earlier dates. At each date we expose only the observations that would have been available then, fit the procedure, and record its forecast before checking the later result. The small arrays let us inspect these time boundaries directly."
       ]
     },
     "intuition": [
@@ -20495,8 +20495,8 @@
       {
         "title": "2. Update an Average Without Storing Every Reward",
         "paragraphs": [
-          "Keep a count and mean separately for each action. When that action receives another reward, increment its count and move its estimate toward the new reward by the reciprocal of the updated count.",
-          "The first observation establishes the mean for a previously untried action. Updating every action with the same reward would attribute feedback to choices that were never made."
+          "Keep a separate count and reward estimate for each schedule. When Botie tries one schedule, only that schedule has gained a new observation. Increase its count and move its mean toward the new reward by the reciprocal of the updated count.",
+          "For the first trial, that sets the estimate to the observed reward. Updating the untried schedule too would give it credit or blame for an outcome we never observed under that choice."
         ],
         "calculation": "Old estimate = 7; previous count = 1; new reward = 3\nNew count = 2\nNew estimate = 7 + (3 - 7) / 2 = 5",
         "interpretation": [
@@ -20768,7 +20768,7 @@
     "openingTitle": "The Greenhouse Remembers What Botie Did Yesterday",
     "opening": [
       "A schedule's value depends on the soil. Watering a dry tray may help, while watering an already wet tray may waste water. The same action cannot be evaluated sensibly without describing the situation in which it is taken.",
-      "We will give the greenhouse a small set of possible states, describe which actions Botie can take, and list how those actions change the probabilities of the next state. That gives us the pieces of a Markov decision process."
+      "Let's describe the situations the greenhouse can be in. For each state, we need to know which actions Botie can take and what might happen after each action. The next state may be uncertain, so we will record transition probabilities. Along with the reward rule, these give us a small Markov decision process to investigate."
     ],
     "prerequisites": [
       {
@@ -21154,7 +21154,7 @@
     "openingTitle": "Would Botie Reject a Useful Action Because It Costs Something Now?",
     "opening": [
       "Watering costs resources immediately, while healthier growth appears later. If Botie judges only the immediate reward, the useful action can look worse than doing nothing.",
-      "We need to specify how rewards across time belong to one decision. A return accumulates them. Discounting gives an explicit rule for how the contribution changes with delay, so we can inspect the objective we are asking Botie to pursue."
+      "We need a way to judge an action using rewards that arrive later too. A return combines rewards over time. Discounting controls how much a delayed reward contributes compared with an immediate one. Before calculating it, we should ask whether that preference matches the job we want Botie to do."
     ],
     "prerequisites": [
       {
@@ -21249,7 +21249,7 @@
         ],
         "calculation": "G = r[0] + gamma × r[1] + gamma^2 × r[2]\nFor [-1,0,4] and gamma=0.5:\nG = -1 + 0.5 × 0 + 0.25 × 4 = 0",
         "interpretation": [
-          "Changing gamma changes the objective, not merely a numerical tuning detail."
+          "Gamma controls how much future rewards contribute to the return. Changing it can change which behaviour the agent prefers."
         ]
       },
       {
@@ -21634,8 +21634,8 @@
       {
         "title": "2. Distinguish Evaluating a Policy From Improving It",
         "paragraphs": [
-          "Policy evaluation averages action values using a fixed policy's action probabilities. Value iteration instead takes the greatest action value in each state. Those operations answer different questions.",
-          "Evaluation asks how a given policy behaves. The optimality update asks what would happen if the best currently estimated action were selected. An action chosen greedily from inaccurate values need not already be optimal."
+          "Suppose we already have a policy. To estimate how it behaves, we average action values using the probabilities with which that policy chooses actions. Value iteration asks a different question: which action currently has the greatest estimated value in this state?",
+          "That maximum is the optimality update we will use. Early estimates can be inaccurate, so choosing their current best action does not mean we have already found the optimal policy. We repeat the updates and examine convergence under the model's assumptions."
         ],
         "calculation": "Fixed policy: V_new(s) = sum_a policy(a|s) Q(s,a)\nOptimality update: V_new(s) = max_a Q(s,a)",
         "interpretation": [
@@ -21987,7 +21987,7 @@
     "openingTitle": "What If Nobody Gave Botie the Transition Table?",
     "opening": [
       "The planner in the previous lesson had a complete description of the little greenhouse. In a new environment, Botie may only know what happened after an action he tried. He needs a way to learn from that transition without pretending he has already measured every possible outcome.",
-      "We will keep a table with one estimate for each state-action pair. An observed reward and the estimated value of the next opportunity provide a target for correcting the entry that was actually used."
+      "We can keep one estimate for each state-action pair. After Botie tries an action, its reward gives us new evidence. If the task continues, our estimates for the next state contribute to the target too. We use that target to correct the entry for the action he actually took, and repeat as more experience arrives."
     ],
     "prerequisites": [
       {
@@ -22716,8 +22716,8 @@
       {
         "title": "1. Separate Outcomes From Their Probabilities",
         "paragraphs": [
-          "Store the outcomes in one vector and their probabilities in a second vector with the same order. Probabilities cannot be negative and must sum to one. These conditions mean the table allocates all the probability across the outcomes we included.",
-          "The count is discrete. A continuous measurement, such as temperature, instead uses a density whose area over an interval gives a probability. The height of a density at one point is not itself a probability."
+          "Let's make a table with one position for each possible count of damaged sensors. Beside that count, put its probability. Every probability must be nonnegative, and together they must add to one, because our listed outcomes exhaust the possibilities.",
+          "A count takes discrete values. Temperature is different: a continuous model describes it with a density. To find the probability of a temperature range, we take the area under that density over the range. The density's height at a single temperature is not a probability."
         ],
         "interpretation": [
           "A distribution is a description of uncertainty under a model, not a guarantee about the next delivery."
@@ -22854,7 +22854,7 @@
     "openingTitle": "Does One Failure Mean Half the Sensors Will Fail?",
     "opening": [
       "One of Botie’s first two sensors fails. The observed fraction is easy to calculate, but two trials give little information about the supplier’s long-run rate.",
-      "Instead of treating one estimate as certain, we will represent uncertainty over the rate itself. The prior describes what rates were plausible before these trials; the likelihood describes how each rate could produce them; the posterior combines the two."
+      "Several failure rates could plausibly have produced these few results. We will keep track of that uncertainty instead of immediately choosing one rate. First we describe which rates seem plausible before the trials; that is the prior. Then we calculate how likely the observed results would be at each rate. Combining that likelihood with the prior gives the posterior, our updated distribution over rates."
     ],
     "prerequisites": [
       {
@@ -23228,7 +23228,7 @@
     "openingTitle": "Which Thermometer Should Botie Trust More?",
     "opening": [
       "Two thermometers read the same room at the same time. One is much noisier than the other. Simply averaging them gives both the same influence, even though they do not carry the same information.",
-      "We will first assume independent, unbiased Gaussian errors with known positive variances. Under those assumptions, inverse variance measures the precision of a reading, and precision supplies a principled weight."
+      "How much more influence should the quieter thermometer have? We can derive a weighting rule if the errors are independent and Gaussian, have no bias, and have known positive variances. Under those assumptions, a smaller error variance gives a reading more weight. Its reciprocal is called precision. We will use it to work out the contribution of each thermometer."
     ],
     "prerequisites": [
       {
@@ -23563,7 +23563,7 @@
             "code": "import numpy as np\nreading = np.array([20., 24.])\nvariance = np.array([1., 9.])\nprecision = 1/variance\nmean = (precision@reading)/precision.sum()\ncombined_variance = 1/precision.sum()\nprint(round(float(mean), 3))\nprint(round(float(combined_variance), 3))",
             "output": "20.4\n0.9",
             "interpretation": [
-              "The noisier reading moves the estimate only modestly. Its variance, not merely the fact that it is another reading, determines its influence."
+              "The noisier reading moves the estimate only modestly. We give it less influence because its variance says that it is a less precise measurement."
             ]
           }
         ]
@@ -23656,7 +23656,7 @@
       ],
       "blocks": [
         "Rabiner’s 1989 tutorial explained hidden Markov models and their use in speech recognition. A sound recording gives noisy observations of an underlying sequence, rather than a direct label for each state.",
-        "The forward calculation also gives a general recipe for tracking hidden conditions: predict state probabilities, weight them by observation likelihoods, and normalise. Our pump is a teaching example with supplied transition and alarm probabilities."
+        "We can use the same forward calculation to track the pump. First the transition model tells us how its condition might have changed. We then ask how likely the alarm is under each possible condition and update their probabilities. Our pump example uses supplied transition and alarm probabilities so we can follow each update by hand."
       ]
     },
     "quiz": [
@@ -24190,7 +24190,7 @@
       },
       {
         "kind": "trueFalse",
-        "prompt": "It must satisfy covariance validity conditions, not just contain plausible-looking similarities.",
+        "prompt": "A covariance matrix has to be symmetric and positive semidefinite. Plausible-looking similarity scores alone do not ensure those properties.",
         "answer": true,
         "because": "Symmetry and positive semidefiniteness matter.",
         "given": {
@@ -24595,7 +24595,7 @@
     "openingTitle": "Must We Read Every Record Before Changing One Weight?",
     "opening": [
       "Botie’s prediction model has one weight, but the records keep growing. Calculating the effect of every record before each update can become expensive.",
-      "A smaller batch lets us update sooner. We need to understand what is being averaged, why the direction varies between batches, and how to avoid giving a short final batch the wrong scale."
+      "Using a smaller batch means we can make an update before reading the entire dataset. But different batches may suggest different directions. We will calculate the contribution from each observation first, then see how averaging a batch affects the update, including a short batch at the end of an epoch."
     ],
     "prerequisites": [
       {
@@ -25006,7 +25006,7 @@
     "openingTitle": "Why Does the Weight Keep Moving Back and Forth?",
     "opening": [
       "One batch tells Botie to increase a weight, while the next tells him to decrease it. Some of that variation comes from sampling, and some comes from the shape of the loss.",
-      "Momentum introduces a second piece of state: a velocity that combines earlier gradients with the current one. We will watch both the velocity and the parameter, rather than describe the method only as moving faster."
+      "Could the recent gradients help us decide which way to move? Momentum keeps a velocity between updates and combines it with the current gradient. We need to track that velocity separately from the parameter: a parameter can keep moving in its previous direction even after the latest gradient changes sign."
     ],
     "prerequisites": [
       {
@@ -25372,7 +25372,7 @@
     "openingTitle": "Should Every Weight Use the Same Effective Step?",
     "opening": [
       "Two model weights can receive gradients with very different sizes. A single learning rate may make one change abruptly while the other barely moves.",
-      "Adaptive methods retain a history of gradient magnitudes. Adam combines that scaling information with a smoothed gradient direction. We will introduce its two stored arrays separately before using either in an update."
+      "Adam keeps a record of the gradients it has seen for each parameter. One running estimate smooths the gradients themselves. Another tracks their squared magnitudes and sets the scale used in the update. We will calculate these separately so we can see what each contributes."
     ],
     "prerequisites": [
       {
@@ -25799,7 +25799,7 @@
     "openingTitle": "Is the Model Learning Slowly, or Is the Calculation Wrong?",
     "opening": [
       "Botie starts a training run and the loss hardly changes. Increasing the learning rate might help, but it might also hide a broken derivative or make an unstable calculation worse.",
-      "We will check two things first: whether initial weights let signals travel through the model, and whether a tiny parameter perturbation agrees with the derivative our code returns."
+      "Before changing the learning rate, let's inspect the starting weights. Do they allow useful signals to reach the later layers? Then we can check a derivative independently by nudging one parameter and measuring the change in loss. Agreement gives us a reason to trust the update calculation."
     ],
     "prerequisites": [
       {
@@ -26399,7 +26399,7 @@
       {
         "title": "2. Define Improvement and Patience",
         "paragraphs": [
-          "Choose whether a lower or higher metric is better, a minimum meaningful improvement, and a patience count. Save a copy of the model state whenever the criterion improves. Reset the counter on improvement and stop when the declared number of unsuccessful checks occurs."
+          "We need to decide what counts as an improvement before watching the run. Does a better metric go up or down, and how large must the change be? Whenever the criterion improves, save a copy of the model. A patience count lets us allow some unsuccessful checks before stopping. Reset that count on improvement, and stop when it reaches the limit we chose."
         ],
         "calculation": "Validation losses = [0.8, 0.5, 0.55, 0.6]\nBest zero-based epoch = 1\nWith patience 2, stop after epoch 3\nRestore the checkpoint from epoch 1",
         "interpretation": [
@@ -26751,8 +26751,8 @@
       {
         "title": "1. Define What One Interaction Means",
         "paragraphs": [
-          "A click, an open, a completed reading, and a rating are different observations. Here each binary entry says whether a reader opened a guide during a fixed window. Counting every repeated refresh would answer a different question.",
-          "A zero says there was no recorded open. It does not distinguish dislike from lack of exposure. Keep that distinction when constructing labels."
+          "What should count as an interaction? Opening a guide is different from rating it or finishing it. In this example, one means that a reader opened the guide during a specified window. Repeated refreshes do not add more ones.",
+          "Zero means that no open was recorded. Perhaps the reader disliked the guide, but perhaps it was never shown to them. The table alone cannot distinguish those explanations, so we should not treat every zero as a negative review."
         ],
         "interpretation": [
           "Our matrix is an interaction record, not a table of explicit likes and dislikes."
@@ -27131,8 +27131,8 @@
       {
         "title": "1. Make Coordinates Comparable",
         "paragraphs": [
-          "An item vector and reader vector must use the same feature order and preparation. A value for irrigation cannot be compared with a value for lighting just because they occupy the same position in differently constructed arrays.",
-          "A profile may come from an explicit request or an average of previously liked item vectors. That averaging is a modelling choice: a reader may have several distinct interests that one average hides."
+          "The guide and reader vectors need matching coordinates. If one position means irrigation in the guide but lighting in the profile, multiplying those entries compares unrelated quantities. Use the same feature preparation and order for both.",
+          "We could build the reader profile from an explicit request or average the vectors of guides they liked. That average is a modelling choice. Someone interested in two distinct subjects may be poorly described by a point between them."
         ],
         "interpretation": [
           "Start with labelled topic features before introducing opaque learned coordinates."
@@ -27519,8 +27519,8 @@
       {
         "title": "1. Keep Missing Ratings Missing",
         "paragraphs": [
-          "Store an observed mask alongside the rating values, or use a missing marker deliberately. A missing rating is not a zero-star review. Means, overlap counts, and similarities must use only observed entries.",
-          "Two readers who share only one rated item provide fragile similarity evidence. Require enough overlap or shrink unreliable similarities rather than treating every apparent agreement equally."
+          "A blank rating means we haven't observed the reader's opinion. It is not a zero-star review. We can keep a mask beside the rating table to say which entries are known, then use only those entries for means and similarity calculations.",
+          "How much evidence supports a similarity? Two readers who agree on their only shared rated item may look close by accident. We can require more overlap or reduce the influence of similarities supported by few ratings."
         ],
         "interpretation": [
           "Training means must be computed from training ratings only."
@@ -27908,8 +27908,8 @@
       {
         "title": "2. Fit Observed Entries Only",
         "paragraphs": [
-          "Use a mask to identify training ratings. A squared-error objective sums errors on those entries; unobserved cells are not zero-rating targets. Regularisation can discourage excessively large factors.",
-          "Implicit feedback requires a different interpretation of observations and often a different objective or confidence scheme. Do not silently reuse an explicit-rating loss on clicks."
+          "We know the ratings at some positions in the table. A mask identifies those training entries, and the squared-error objective compares predictions with the ratings there. Unobserved positions have no rating target. A regularization penalty can also discourage excessively large factors.",
+          "Clicks require a different interpretation: an absent click might mean the item was never seen. We need to choose an objective or confidence scheme appropriate to that feedback before reusing the factor model."
         ],
         "calculation": "Prediction = dot([1,2], [2,1]) = 4\nObserved rating = 5\nResidual = 4 - 5 = -1",
         "interpretation": [
@@ -28305,8 +28305,8 @@
       {
         "title": "1. Fix the Candidate Set and Cutoff",
         "paragraphs": [
-          "Specify which items could have been recommended at the prediction time. Exclude unavailable items and make the handling of previously seen items explicit. A list evaluated against ten sampled negatives can produce a different score from one ranked against the whole catalogue.",
-          "Choose a cutoff that matches what the reader sees. Keep training interactions out of held-out relevance labels."
+          "When Botie made the recommendation, which guides could he have shown? We should evaluate against that candidate set, excluding unavailable items and deciding how to handle guides already read. Ranking against ten sampled alternatives can give a different score from ranking against the whole catalogue.",
+          "The cutoff should match the number of recommendations the reader sees. Keep the interactions used for fitting separate from the held-out relevance labels we use to judge that list."
         ],
         "interpretation": [
           "Comparisons need the same candidates and exclusion rules."
@@ -28381,7 +28381,7 @@
             "code": "import numpy as np\nrelevant = {2,5}\ncandidates = [0,1,2,3]\nvisible = [1,2]\ncandidate_recall = len(relevant.intersection(candidates))/len(relevant)\nprecision = len(relevant.intersection(visible))/len(visible)\nprint(candidate_recall, precision)",
             "output": "0.5 0.5",
             "interpretation": [
-              "Improving the order might move guide two first. Recovering guide five requires changing retrieval, not merely the ranker."
+              "A better ordering could move guide two into first place. Guide five needs a different repair: retrieval must include it before the ranker can place it anywhere."
             ]
           }
         ]
@@ -28443,7 +28443,7 @@
     "openingTitle": "Should a Broken Sensor Help Define What Looks Normal?",
     "opening": [
       "Most of Botie’s pressure readings are close together, but one is much larger. If that reading helps determine the average and spread used to judge it, it can make itself look less unusual.",
-      "A median centre and median absolute deviation give us a reference less sensitive to extreme values. They identify unusual observations under a reference distribution, not the cause of a fault."
+      "Can we choose a reference that one extreme reading has less power to move? The median gives us a centre, and the median absolute deviation gives us a measure of spread. We can use them to judge how unusual a reading is relative to the reference records. That score will not tell us why the reading is unusual; a fault is one possibility to investigate."
     ],
     "prerequisites": [
       {
@@ -28859,7 +28859,7 @@
     "openingTitle": "Can a Sparse Group Be Normal?",
     "opening": [
       "One pump runs under tightly controlled pressure, while another normally varies more. A single global distance threshold can flag the second pump’s ordinary readings and miss a gap inside the first pump’s tight group.",
-      "A local comparison asks whether a point is much more isolated than the points around it. We will build that comparison from neighbours, reachability distances, and local densities."
+      "Let's compare each reading with the readings near it. Is it much more isolated than its neighbours are? We will start by finding those neighbours, then introduce reachability distance and use it to calculate a local density comparison."
     ],
     "prerequisites": [
       {
@@ -29476,8 +29476,8 @@
       {
         "title": "3. Average Trees and Normalise",
         "paragraphs": [
-          "Average path lengths across fitted trees. The conventional score uses a normalising expected path length for the training subsample size, then applies a decreasing exponential. Shorter average paths produce larger scores.",
-          "The normaliser depends on sample size, not the number of trees. Our exercise uses the harmonic-number expression directly for a small sample."
+          "One random tree can give a misleadingly short or long path, so we average across the fitted trees. We then compare the average with a reference path length for the training subsample size. The conventional exponential score makes shorter paths produce larger anomaly scores.",
+          "That reference depends on subsample size, not on how many trees we fitted. For the small sample in the exercise, we can calculate it directly from the harmonic-number expression."
         ],
         "calculation": "c(n) = 2 H(n-1) - 2(n-1)/n, for n > 1\nscore = 2^(-mean_path / c(n))",
         "interpretation": [
@@ -29601,7 +29601,7 @@
     "openingTitle": "What Does Botie’s Model Fail to Rebuild?",
     "opening": [
       "Normal pump operation produces related pressure and flow readings. A reconstruction model learns to reproduce those patterns through a restricted representation.",
-      "A new combination may reconstruct poorly, even if neither reading is unusual alone. We will separate the reconstruction, the error score, and the decision to alert."
+      "A new pressure-flow combination may be hard to reconstruct even when each reading looks ordinary on its own. We can measure that reconstruction error and decide when it warrants an alert. Let's keep the predicted reconstruction visible so we can see which relationship the model failed to reproduce."
     ],
     "prerequisites": [
       {
@@ -29921,8 +29921,8 @@
       {
         "title": "4. Investigate Failure Modes",
         "paragraphs": [
-          "A powerful model can learn an almost identity mapping and reconstruct anomalies too. A restrictive model can reject legitimate variation. Compare simple robust or density baselines and examine errors by operating mode.",
-          "When labels arrive late, store scores and model versions so later investigations can reconstruct why an alert occurred. Do not automatically treat every alert as a confirmed fault."
+          "What happens if the model can copy almost any input? It may reconstruct a faulty case well too. A model with too little capacity has the opposite problem: it may struggle with normal variation. Compare the alert results with simpler robust-score or density methods and inspect them within each operating mode.",
+          "Keep the scores and model versions when sending an alert for inspection. If the diagnosis arrives later, those records let us recover why the alert was raised. Until then, it remains a case to investigate rather than a confirmed fault."
         ],
         "interpretation": [
           "The workshop returns an alert mask while preserving intermediate reconstruction errors for inspection."
@@ -30291,8 +30291,8 @@
       {
         "title": "1. Separate Node Features From Edges",
         "paragraphs": [
-          "A feature matrix stores readings with one row per node. An adjacency matrix stores relationships, with rows and columns using the same node order. The two matrices have different meanings even if both contain numbers.",
-          "An undirected connection appears in both directions. A directed edge needs an explicit convention; in this lesson a row identifies the source and a column the destination."
+          "We need two tables for different jobs. The feature matrix gives one row of measurements per node. The adjacency matrix records which nodes are connected, using that same node order for its rows and columns.",
+          "An undirected connection appears in both directions. For a directed edge, we need an agreed orientation. Here the row names the source and the column names the destination. That convention will determine which matrix multiplication sends information the way we intend."
         ],
         "interpretation": [
           "Changing node order requires changing both adjacency axes and feature rows together."
@@ -30427,7 +30427,7 @@
     "openingTitle": "Where Does a Walker Go From Here?",
     "opening": [
       "Imagine Botie inspecting a network by choosing an outgoing connection at each step. A junction with several links gives several possible next positions.",
-      "We do not need to sample one route to describe every possibility. A probability vector and a transition matrix let us calculate where a whole collection of walkers would be expected to go."
+      "Rather than following only one sampled route, we can keep a probability for each node. The transition matrix describes the next move from every current node. Combining the two gives us the distribution of possible locations after one step, so we can follow how probability moves through the network."
     ],
     "prerequisites": [
       {
@@ -30835,7 +30835,7 @@
       ],
       "blocks": [
         "GraphSAGE learned functions for sampling and aggregating local neighbourhood information, allowing representations to be constructed from node features and neighbourhoods. This differs from storing a separate learned vector for every node identity.",
-        "Our lesson isolates a full-neighbour mean. It does not reproduce GraphSAGE’s sampling and learned combination, but makes the message-gathering operation visible before adding trainable transformations."
+        "Before adding learned transformations, let's calculate the mean of all a node's neighbours. That smaller operation lets us see exactly which readings reach each node. GraphSAGE also samples neighbours and learns how to combine their information; our first example isolates the gathering step."
       ]
     },
     "quiz": [
@@ -31545,8 +31545,8 @@
       {
         "title": "2. Normalise at Both Ends",
         "paragraphs": [
-          "Symmetric normalisation divides each adjacency entry by the square root of the product of its endpoint degrees. This differs from dividing only by the receiving node’s degree.",
-          "For an irregular graph, symmetric-normalised rows need not sum to one. The matrix is a propagation operator, not automatically a Markov transition matrix."
+          "A connection joins nodes that may have very different numbers of neighbours. Symmetric normalization scales its weight using both endpoint degrees, dividing by the square root of their product. Dividing only by the receiving node's degree would give a different operation.",
+          "On an irregular graph, the symmetrically normalized rows may not sum to one. We are using this matrix to propagate features, so we should not automatically interpret its entries as transition probabilities."
         ],
         "calculation": "A_tilde = A + I\nS[i,j] = A_tilde[i,j] / sqrt(degree[i] × degree[j])",
         "interpretation": [
@@ -31737,7 +31737,7 @@
     "openingTitle": "Which Connection Might Be Missing From the Map?",
     "opening": [
       "Botie’s network map is incomplete. Some connections were recorded, while others have not yet been inspected. He wants a useful order in which to check possible missing links.",
-      "A link model combines representations for two nodes into a score. We will calculate one simple decoder, then examine why training and evaluation must keep hidden links out of the information used to produce those representations."
+      "We can score a possible connection using the representations of its two endpoints. But how were those representations obtained? If they already used the connection we supposedly held out, the test would reveal its own answer. We will calculate a simple pair score and follow which edges are available at each stage."
     ],
     "prerequisites": [
       {
@@ -32369,8 +32369,8 @@
       {
         "title": "2. Identify a Common Cause",
         "paragraphs": [
-          "Starting soil condition influences both watering decisions and growth. It is therefore a possible confounder of their relationship. The observed treatment and control groups can differ before treatment occurs.",
-          "A confounder is defined by its causal role, not merely by correlation or predictive importance. Domain knowledge and the timing of measurements matter."
+          "Starting soil condition could influence both the gardener's watering choice and the plant's growth. That makes it a possible confounder: the groups may differ for a reason that existed before treatment.",
+          "A correlation alone does not establish that role. We need knowledge of how the measurements and decisions arose, including their timing. A feature that predicts growth well is not automatically something we should adjust for."
         ],
         "interpretation": [
           "Measuring a variable after treatment can give it a very different role."
@@ -32723,8 +32723,8 @@
       {
         "title": "1. Define the Unit and Assignment",
         "paragraphs": [
-          "A unit might be a plant, bed, or whole greenhouse. Randomise at a level that makes the intervention meaningful. If water runs between neighbouring beds, one bed’s treatment can affect another’s outcome, violating a no-interference assumption.",
-          "Document the assignment probabilities and collect outcomes consistently. Analysing plants as independent when treatment was assigned to whole greenhouses understates uncertainty."
+          "What receives the random assignment: a plant, a bed, or a greenhouse? Choose a unit that fits how the watering is actually applied. If water runs from one bed into another, treating one bed can affect the other's outcome, so the no-interference assumption may fail.",
+          "Record the assignment probabilities and measure outcomes consistently. If whole greenhouses received the assignments, treating every plant as an independent experiment would overstate how much independent evidence we have."
         ],
         "interpretation": [
           "The examples assume independent units and no spillovers."
@@ -33143,8 +33143,8 @@
       {
         "title": "2. Select a Target Population",
         "paragraphs": [
-          "The target weights describe how common each starting condition is in the population whose effect we want. They must be non-negative and sum to one.",
-          "Using treatment-group weights for one mean and control-group weights for the other recreates the original compositional problem. Use the same target for both potential intervention means."
+          "Suppose we want the effect for a particular mix of dry and moist beds. The target weights record the proportions of those starting conditions. They must be nonnegative and sum to one.",
+          "Use that same mix to average the outcomes under both schedules. If we instead use the treated group's proportions for one average and the control group's for the other, differences in starting conditions enter the comparison again."
         ],
         "calculation": "Target weights = [0.6,0.4]\nStandardised treatment = 0.6 × 4 + 0.4 × 9 = 6\nStandardised control = 0.6 × 3 + 0.4 × 8 = 5\nDifference = 1",
         "interpretation": [
@@ -33573,8 +33573,8 @@
       {
         "title": "1. Name the Missing Outcomes",
         "paragraphs": [
-          "Each unit has a potential outcome under treatment and under control, but only one is observed. An average treatment effect concerns the population average of their difference. Individual effects are generally not directly observed.",
-          "Let e(X) be the treatment probability given pretreatment covariates. It is not the probability of a favourable outcome, nor a confidence score for the outcome model."
+          "For each bed, imagine its outcome under the new schedule and its outcome under the control schedule. We observe only the one corresponding to what it received. The average treatment effect concerns the average difference between those potential outcomes, even though we usually cannot measure an individual bed's difference directly.",
+          "The propensity e(X) describes the probability of receiving treatment given pretreatment measurements. It says how the schedule was assigned. It is not a predicted growth outcome or a confidence score for that prediction."
         ],
         "interpretation": [
           "A propensity model predicts assignment, while an outcome model predicts the response."
@@ -33718,7 +33718,7 @@
     "openingTitle": "Why Did the Saved Model Give a Different Answer?",
     "opening": [
       "Botie saves a model’s weights and loads them tomorrow. The code runs, but predictions change because the new process prepares inputs differently.",
-      "A deployed prediction is a procedure, not just a weight array. We need to save the fitted preparation and feature contract alongside the model, then verify the loaded procedure against known examples."
+      "Suppose we save the model weights but forget the training mean used to centre its inputs. We can reload the weights and still get different predictions. We need to save the fitted preparation alongside the model, with a description of the expected features. Then we can check whether the loaded procedure reproduces known examples."
     ],
     "prerequisites": [
       {
@@ -34403,8 +34403,8 @@
       {
         "title": "1. Write the Contract Before the Parser",
         "paragraphs": [
-          "Decide whether a request is one record or a batch, which fields are required, and whether unknown fields are rejected or ignored. Specify units separately from numerical type. A float does not tell us Celsius versus Fahrenheit.",
-          "For categorical inputs, define unknown-category handling. For missing measurements, either reject them or apply a saved imputation rule; never invent a zero silently."
+          "Let's decide what the service accepts before converting a request to an array. Is it one record or a batch? Which fields must be present, and what happens to unfamiliar fields? The numeric type is not enough to describe a measurement: a float could be Celsius or Fahrenheit.",
+          "Categorical fields need a rule for unknown categories. A missing measurement needs either a clear rejection or the saved imputation procedure. Quietly inserting zero would give the model a value with a meaning the caller never supplied."
         ],
         "interpretation": [
           "The examples reject missing or extra fields and non-finite numbers."
@@ -34782,8 +34782,8 @@
       {
         "title": "1. Separate Fitting, Prediction, and Transport",
         "paragraphs": [
-          "Fitting changes model state using training data. Prediction uses that state to calculate outputs. Transport parses requests and serialises responses. Keeping these responsibilities distinct makes each easier to test.",
-          "The service should not accidentally call a fitting method during inference. A request should not update shared training means or overwrite model parameters."
+          "The prediction function should use the fitted state as it stands. It should not relearn a mean from the current request or overwrite a parameter. Otherwise one caller could change another caller's answer.",
+          "Keep fitting separate from this calculation. The transport layer can then parse the request, call the prediction function, and serialize its result. We can test the numerical procedure before adding the endpoint around it."
         ],
         "interpretation": [
           "Our function receives only validated arrays and immutable model state."
@@ -34927,7 +34927,7 @@
     "openingTitle": "Which Set of Weights Answered Yesterday’s Request?",
     "opening": [
       "Botie replaces a model and later receives a report about an incorrect prediction. The current model behaves differently, and the original files were overwritten.",
-      "A versioned artifact preserves the exact state used for prediction. A manifest describes its inputs and provenance, while a retained reference to that version lets us reproduce or roll back the procedure."
+      "To investigate the report, we need the exact version that made the prediction. Save each version's fitted state and a manifest describing its inputs and origin. Keep a reference to the version used for each prediction so we can reproduce the calculation or restore an earlier compatible procedure."
     ],
     "prerequisites": [
       {
@@ -35289,7 +35289,7 @@
     "openingTitle": "What Should Botie Watch Once the Model Is Running?",
     "opening": [
       "A model passed its release checks, but the new season brings different temperatures and a changed sensor firmware. The service still returns numbers quickly. That does not tell us whether they remain useful.",
-      "Monitoring needs several views: input quality, distribution changes, prediction quality when labels arrive, and service health. A signal should lead to an investigation or a defined response."
+      "We need to look beyond whether the service responds. Are the inputs still valid and familiar? Once outcomes arrive, are the predictions still useful? Service failures and delays need their own checks. For each signal, decide what evidence we would inspect and what response it could justify."
     ],
     "prerequisites": [
       {
@@ -35562,8 +35562,8 @@
       {
         "title": "4. Respond and Roll Back as a Whole Procedure",
         "paragraphs": [
-          "If an input contract breaks, reject or quarantine invalid requests according to the service policy. If a candidate release causes a regression, restore the compatible previous procedure and verify it on fixtures.",
-          "Automatic retraining is not a universal response to drift. A pipeline bug needs repair, and new training data may contain the same bug. Record the diagnosis, preserve artifacts, and reassess before promotion."
+          "If requests violate the input contract, follow the service's rejection or quarantine policy. If a new release makes predictions worse, restore a compatible earlier procedure and check it on the saved fixtures.",
+          "Retraining will not fix every change. A unit-conversion bug, for example, may affect the new training data too. Record what went wrong, keep the relevant artifacts, and verify the repair before promoting another version."
         ],
         "interpretation": [
           "Botie’s workshop calculates observed error against later outcomes rather than treating drift as an accuracy label."
@@ -35663,7 +35663,7 @@
     "openingTitle": "Which Readings Should Botie Send for Inspection?",
     "opening": [
       "Botie cannot ask a technician to inspect every pressure reading. He needs a small, understandable alert procedure and an honest estimate of how often it sends the wrong cases for review.",
-      "This project combines reference fitting, anomaly scores, threshold selection, and held-out evaluation. The arrays are deliberately small and synthetic so every decision can be checked before the same procedure is applied to a larger record."
+      "We will build the alert procedure from the readings through to the decision to request an inspection. Along the way, we need a fitted reference and a way to select a threshold without using the final test answers. The records are small and synthetic so we can check those choices before trying the procedure on a larger dataset."
     ],
     "prerequisites": [
       {
@@ -36104,7 +36104,7 @@
     "openingTitle": "How Much Water Should Botie Prepare for the Next Day?",
     "opening": [
       "Botie needs a forecast before tomorrow’s water demand is known. A model that sees tomorrow while constructing today’s input can look excellent in a notebook and be impossible to use.",
-      "This project rebuilds the forecast procedure at successive origins. We will retain a simple persistence baseline, fit an autoregression using only the available prefix, and inspect errors on later days."
+      "We will replay the forecast at successive dates. At each date, the model gets only the history available then. A persistence forecast gives us a simple comparison for the fitted autoregression. After saving both predictions, we can look at the later demand and measure their errors on the same target."
     ],
     "prerequisites": [
       {
@@ -36427,7 +36427,7 @@
           "For deployment, save schema and preparation with the chosen model and record forecast timestamps. Monitor errors after actual demand arrives, without silently changing the evaluation window."
         ],
         "interpretation": [
-          "Your final report should include the information boundary and failure cases, not just the better score."
+          "Explain what information the forecast could use at prediction time, show where it failed, and compare its score with the baseline. That gives someone else enough context to judge the result."
         ]
       },
       {
@@ -36587,7 +36587,7 @@
     "openingTitle": "When Does One Bright Region Mean One Seed?",
     "opening": [
       "Botie photographs seeds on a dark tray and needs a count. Bright pixels look promising, but one seed spans several pixels, dust can look like a seed, and two touching seeds can become one region.",
-      "This project combines image representation, thresholding, connected components, and a size filter. We will make the assumptions testable rather than treat the final count as automatically correct."
+      "Let's build a count from the photograph. We will select candidate pixels, group connected ones, and examine whether a size rule separates seeds from small specks. At each stage we will keep the intermediate image visible. That lets us investigate a wrong count instead of treating the final number as sufficient evidence."
     ],
     "prerequisites": [
       {
@@ -36896,8 +36896,8 @@
       {
         "title": "3. Find Connected Regions",
         "paragraphs": [
-          "Under four-neighbour connectivity, pixels connect vertically and horizontally, not only by diagonal contact. Use a visited array and a queue or stack to traverse each new foreground region.",
-          "The traversal data structures have distinct jobs: the mask says where foreground exists, visited prevents repeat work, the stack holds coordinates awaiting inspection, and the region size counts the pixels reached."
+          "We will connect pixels across shared sides: up, down, left and right. Touching only at a corner does not connect them under this four-neighbour rule. Start from an unvisited foreground pixel and use a queue or stack to find the rest of its region.",
+          "The mask tells us which pixels are foreground. A visited array prevents us from processing one twice. The queue or stack holds coordinates we still need to inspect, while a counter records the region's size. Each structure has a different job, so we will keep them separate in the implementation."
         ],
         "interpretation": [
           "Changing to eight-neighbour connectivity changes what counts as one region."

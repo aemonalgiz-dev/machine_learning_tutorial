@@ -40,11 +40,7 @@ export default function MaximumMatchingPage() {
       tagline={"When spaces do not tell us where words end, a dictionary gives us one possible guide. Maximum matching takes the longest word it recognises at each position, leaving us to examine when that local choice fails."}
       prerequisites={
         <>
-          Everything earlier in this section assumed that something in the
-          writing marks where one word stops, and this page is the first that
-          cannot assume it. Nothing else is needed. There is no probability here
-          and no training of any kind; the only arithmetic is counting, and the
-          only knowledge the method has is a list of words somebody wrote down.
+          So far, our examples have offered visible clues such as spaces. Now we will try text where those clues do not identify every word. This first method uses a supplied word list. We need no training procedure yet: we will look for matching entries and see what happens when several entries could fit.
         </>
       }
 
@@ -57,12 +53,7 @@ export default function MaximumMatchingPage() {
 <>
               <SubSection title="1. Our sentence, with its spaces taken out">
                 <p>
-                  We have been carrying one sentence through this section, and
-                  every rule so far has begun by looking for whitespace in it.
-                  Take the whitespace away and the sentence is still perfectly
-                  readable, since a reader finds the words from knowing English
-                  rather than from the gaps, and every rule we have written stops
-                  working at once.
+                  Let&apos;s remove the spaces from our example sentence. We may still recognise the words because we know English, though some passages can become ambiguous. A space-based program has no such knowledge. We will give it a word list and ask how it could use that list to propose boundaries.
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <p>
@@ -74,13 +65,7 @@ export default function MaximumMatchingPage() {
                 </p>
                 <SpacelessSentence />
                 <p>
-                  It is worth being precise about what has gone. The rules were
-                  never reading the language. They were reading a mark the writer
-                  put in, and doing an increasingly careful job of deciding what
-                  belongs on either side of that mark. With the mark gone there
-                  is nothing left for them to be careful about, and the pattern
-                  language models use, which is the most elaborate of the five,
-                  answers ten pieces because it still finds the punctuation.
+                  Removing spaces takes away a major cue used by the earlier rules. Some punctuation is still present: the language-model pattern returns ten pieces because it can split around those characters. But it has no dictionary or learned boundary model with which to recover all the intended words from the remaining letter runs.
                 </p>
                 <KeepInMind>
                   Splitting on spaces was never a way of finding words. It was a
@@ -93,11 +78,7 @@ export default function MaximumMatchingPage() {
 
               <SubSection title="2. How many ways forty-five characters can be cut">
                 <p>
-                  Before reaching for a method it is worth knowing how large the
-                  problem is. Between any two neighbouring characters there is
-                  either a boundary or there is not, and those choices are
-                  independent, so a text has one fewer place to decide about
-                  than it has characters, and two ways to decide each of them.
+                  How many possible boundary patterns are there before we consult a dictionary? Each gap between adjacent characters has two choices, cut or continue. There is one fewer gap than characters. These are combinatorial choices; we have not assumed that linguistic boundaries are probabilistically independent.
                 </p>
                 <Equation>{"readings of n characters  =  2^(n − 1)"}</Equation>
                 <p>
@@ -114,7 +95,7 @@ export default function MaximumMatchingPage() {
                     ["we play at the wildlife park", "9", "256"],
                     ["research into the origin of life", "6", "32"],
                   ]}
-                  caption="Two to the power of one less than the length, counted for the three texts this page works through. It counts every cut and not only the readings a word list allows, which is why it grows so fast."
+                  caption="This counts all binary boundary patterns for each of the three texts. Many patterns will not be valid dictionary segmentations, which is why the unrestricted count is much larger than the set we eventually search."
                 />
                 <p>
                   Nine characters give 256 and that is enumerable by hand. The
@@ -161,11 +142,7 @@ export default function MaximumMatchingPage() {
                   fixture cannot.
                 </p>
                 <KeepInMind>
-                  The earlier rules do not merely do badly on a Chinese sentence.
-                  Four of the five hand back the whole sentence as one word, and
-                  the standard word boundary rule hands back one word per
-                  character, which are the two most wrong answers available. A
-                  reader finds five words in it.
+                  On this Chinese sentence, four of the five earlier rules return the entire sentence as one piece. The standard word-boundary rule returns one piece per character. Neither matches the five-word segmentation we use as the reference here. We need more information about which adjacent characters form words.
                 </KeepInMind>
               </SubSection>
 
@@ -304,13 +281,7 @@ export default function MaximumMatchingPage() {
                   caption="The same 45 characters against a list of 810 ordinary English words, where a space would have given seven words. The two scans agree here, and 24 is also the fewest pieces any reading against that list could have used, reached by exactly one reading."
                 />
                 <p>
-                  It is worth being careful about whose fault that is, because
-                  the obvious reading of the number is the wrong one. The failure
-                  is not greed. Searching every reading whose pieces are either
-                  entries or lone characters, the fewest any of them uses is also
-                  24, and exactly one reading reaches it, which is the one the
-                  method found. There was no better answer available and the
-                  method did not pass one by.
+                  Here the dictionary is the limiting factor. An exhaustive search using its entries and lone-character fallbacks also needs at least 24 pieces. Exactly one path reaches that minimum, and the greedy method found it. A better search cannot return a shorter path until the available pieces change.
                 </p>
                 <p>
                   The failure is the list. Alvarez is a surname and an ordinary
@@ -444,11 +415,7 @@ export default function MaximumMatchingPage() {
                   {"take  =  the longest w with  text[j − |w| : j] = w  and  w in the list"}
                 </Equation>
                 <p>
-                  The two are usually called forward and backward maximum
-                  matching, and it is worth resisting the idea that one of them
-                  is the method and the other is a variation on it. They are the
-                  same greedy discipline applied along a text that has two ends.
-                  Neither has a claim on being first.
+                  These are forward and backward maximum matching. Both make a greedy longest-match choice, but they begin at opposite ends. Neither direction is inherently the reference answer. We can compare the segmentations they produce on the same text.
                 </p>
                 <KeepInMind>
                   A rule that reads a text in order has to be told which order,
@@ -527,10 +494,7 @@ export default function MaximumMatchingPage() {
 
               <SubSection title="12. Running both, and keeping one">
                 <p>
-                  Since both scans are cheap, the obvious move is to run both and
-                  keep whichever answer looks more like a segmentation. That is
-                  the bidirectional heuristic, and it is worth writing its rules
-                  down in full because they look like principles and are not.
+                  We can run both scans and apply a preference rule when they disagree. That is the bidirectional heuristic. The rules below are chosen preferences, so we should test their consequences rather than treat them as guarantees of a correct segmentation.
                 </p>
                 <DerivationTable
                   expressionHeading="rule"
@@ -606,14 +570,7 @@ export default function MaximumMatchingPage() {
                 </p>
                 <WorkedExample>
                   <p>
-                    The measurement that makes this a failure rather than a
-                    difference of opinion is the count. Searching every reading
-                    of those nine characters whose pieces are entries or lone
-                    characters, the fewest any of them uses is five, and two
-                    readings reach five. The left-hand scan answered six. It did
-                    not merely give an answer someone might disagree with; it
-                    gave an answer that is worse by the crudest measure
-                    available, and a shorter one was sitting there.
+                    An exhaustive search over the permitted pieces finds two five-piece segmentations of these nine characters. The forward greedy scan returns six pieces. If our criterion is the fewest pieces, it has missed a better available path. That does not make either five-piece result linguistically correct by itself; it establishes a failure under the stated count criterion.
                   </p>
                 </WorkedExample>
                 <p>

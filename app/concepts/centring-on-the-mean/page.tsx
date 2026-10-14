@@ -81,10 +81,10 @@ export default function CentringOnTheMeanPage() {
 <>
               <SubSection title="1. Where zero sits in the crowd">
                 <p>
-                  The crowd is eleven people, five children and six adults, with heights between 118 and 183 centimetres and weights between 24 and 83 kilograms. Every one of those numbers is measured from zero, and a height of zero and a weight of zero describe nobody in the crowd or anywhere else, so the point every number is measured from is 118 centimetres below the shortest person in it.
+                  Here are eleven people, five children and six adults. Their heights range from 118 to 183 centimetres, and their weights from 24 to 83 kilograms. The coordinates measure each person from zero. If we want to ask who is taller or heavier than this group&apos;s average, that is an inconvenient reference point. Let&apos;s move it to the group&apos;s centre.
                 </p>
                 <p>
-                  Centring moves that point to the average person, by taking each column&rsquo;s mean away from every value in the column and dividing what is left by nothing.
+                  For each column, we subtract its mean from every measurement. That is centring. We keep the original units, so a centred height still measures a difference in centimetres.
                 </p>
                 <Equation>{"centred value = value − mean of its column"}</Equation>
                 <WorkedExample title="The crowd, centred">

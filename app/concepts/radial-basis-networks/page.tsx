@@ -25,8 +25,8 @@ export default function RadialBasisNetworksPage() {
     sections={[
       { title: "Part 1. Describe a Region by Its Centre and Width", defaultOpen: true, content: <>
         <SubSection title="1. Measure distance from a reference point">
-          <p>A neuron scores an input by a weighted sum, and a weighted sum has an opinion everywhere. Push the input far enough along the direction of the weights and the score keeps rising, however unlike the training data that input has become. Some patterns do not behave that way. A reading matters when it is close to a particular value and matters less the further it moves from that value, on either side.</p>
-          <p>A radial basis unit is built for that case. Where a neuron holds a direction, this unit holds a place, called its centre, and it answers with how close the input is to that place. Three things go into the answer. They are the centre, a distance from it, and a width that says how far still counts as close.</p>
+          <p>A weighted score keeps increasing as we move farther in the direction of its weights. But suppose our detector should respond most strongly near a particular reading and become quieter on either side. We need a response based on distance from a reference location.</p>
+          <p>A radial basis unit stores that reference location as its centre. We measure the input&apos;s distance from the centre, then turn the distance into a response. For the Gaussian unit used here, a width controls how quickly the response falls as we move away. Let&apos;s vary the centre and width separately before combining several units.</p>
           <p>For one input coordinate, the centre is one number. For several coordinates, it is a vector with one entry per feature. We subtract the centre from the input, square each difference, and add the squared differences. This gives squared Euclidean distance.</p>
           <p>Squaring makes equal displacements on opposite sides contribute equally. The Gaussian unit depends on distance from the centre, not on the direction from which the input approached it. That dependence on radius is why it is called radial.</p>
         </SubSection>

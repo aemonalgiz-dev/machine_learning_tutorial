@@ -72,7 +72,7 @@ export default function LatentSemanticAnalysisPage() {
               <SubSection title="1. Twenty-four documents, and four small enough to print">
                 <>
 <p>
-                  Everything on this page is fitted to one of two collections, and it is worth knowing exactly what is in them before any method touches them. The larger one is twenty-four documents, twelve about cooking and twelve about sailing. The cooking half is written from ten words, flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan; the sailing half from ten of its own, sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew.
+                  We will compare two collections. The larger has twenty-four documents, twelve about cooking and twelve about sailing. Cooking uses flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan. Sailing uses sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew. The separate topic lists let us check whether the representation recovers the structure we put into the text.
                 </p>
                 <p>
                   No content word appears in both halves. What the two halves do share is three words carrying no subject at all, and, the and we, and each document uses exactly one of them.
@@ -106,12 +106,7 @@ export default function LatentSemanticAnalysisPage() {
 
               <SubSection title="2. A row is a word and a column is a document">
                 <p>
-                  Write down one row for every distinct word and one column for
-                  every document, and in each cell put how many times that word
-                  was used in that document. That is the whole of the input.
-                  Nothing about order survives it, so the cat sat and sat the
-                  cat give the same column, and nothing about which document
-                  came first survives it either.
+                  Put one word in each row and one document in each column. Each cell counts that word&apos;s occurrences in that document. This representation keeps frequencies but loses word order: the cat sat and sat the cat produce the same column. Reordering the document columns changes where we find them, but supplies no new information about their content.
                 </p>
                 <>
 <p>
@@ -193,13 +188,7 @@ export default function LatentSemanticAnalysisPage() {
                   the same for all four columns.
                 </p>
                 <p>
-                  The damage is not only that the row says nothing. It is that
-                  the row is loud. Under plain counts the takes a third of the
-                  weight of every column, so a third of what any comparison of
-                  two documents is reading is a quantity that is identical in
-                  both and could not possibly separate them. Every document is
-                  being pulled towards every other by the same amount, and that
-                  pull is a third of the signal.
+                  In this example, the occupies a third of the raw count total in every document column. It contributes to comparisons, yet its identical counts cannot distinguish the documents. We need to consider how a shared frequent word affects similarity before treating the count vectors as descriptions of topic.
                 </p>
                 <KeepInMind>
                   The trouble with a word used everywhere is that its row is
@@ -264,12 +253,7 @@ export default function LatentSemanticAnalysisPage() {
 
               <SubSection title="6. What the weighting does on a larger collection">
                 <p>
-                  On the twenty-four documents the weighting moves very little,
-                  and it is worth reporting that rather than the usual claim made
-                  for it. No word appears in every document there. The three shared
-                  words are each in eight documents and the subject words in five
-                  to seven, so the weights run only from 2.0217 to 2.4271 and the
-                  most common word is barely held back at all.
+                  The weighting changes little on these twenty-four documents. No word appears everywhere. Each shared word appears in eight documents, and topic words appear in five to seven, giving weights from 2.0217 to 2.4271. The most frequent words therefore receive only a modest reduction relative to the others in this corpus.
                 </p>
                 <NumberTable
                   headings={[
@@ -566,7 +550,7 @@ export default function LatentSemanticAnalysisPage() {
                 <WorkedExample title="The four-document collection, by hand">
                   <>
 <p>
-                    The same two facts fall out of the small collection in numbers anyone can check, and under plain counts they are whole numbers. Its four numbers are the square roots of 7, 3, 1 and 1, so the shares are seven twelfths, three twelfths, one twelfth and one twelfth. On the first direction all four documents sit at the square root of seven over two, which is 1.3229, the same value for every one of them, so it does not merely fail to separate the pairs, it reports them as identical.
+                    For the smaller count table, the singular values are the square roots of 7, 3, 1 and 1. Their squared shares are seven twelfths, three twelfths, one twelfth and one twelfth. All four documents have the same first coordinate, approximately 1.3229. Keeping only that coordinate would discard the differences between the pairs, despite retaining the largest share of the squared magnitude.
                   </p>
                   <p>
                     On the second, the two cat documents sit at one value and the two boat documents at minus it. The word the sits at 2 on the first direction and at exactly 0 on the second, in the same place a word used in every document has to be.
@@ -621,10 +605,7 @@ one boat document against the other       3 − 2  =  1`}</Equation>
 
               <SubSection title="13. Subtracting each word’s mean first">
                 <p>
-                  The other decomposition on this site starts by moving the data
-                  so that its mean is at the origin, and that step is exactly
-                  what is missing here. It is worth doing to the same table, once,
-                  to see what the omission costs and what it buys.
+                  PCA centres its input before decomposition, while this LSA calculation does not. Let&apos;s centre the same table once and compare the result. That will show which variation is being summarized under each choice.
                 </p>
                 <p>
                   Subtract from every row its own mean across the documents and
@@ -778,12 +759,7 @@ one boat document against the other       3 − 2  =  1`}</Equation>
                   the top.
                 </p>
                 <p>
-                  The table as counted does better at that question, and it is
-                  worth saying so plainly. Its angles between two cooking words
-                  run all the way from 0.0000 to 0.8571, which is a real
-                  ordering, and the fit at two directions replaces that ordering
-                  with a single value. Switch the widget in Part 1 to the second
-                  view and the amber band collapses to a point at the second row.
+                  For this particular comparison, the original counts preserve more distinctions. Cooking-word cosine similarities range from 0.0000 to 0.8571, but the two-component representation gives them one value. In the second view of Part 1&apos;s widget, the amber band collapses to a point. Reducing dimensions has removed an ordering we might have wanted to keep.
                 </p>
                 <NumberTable
                   headings={[

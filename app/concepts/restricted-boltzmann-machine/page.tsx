@@ -92,7 +92,7 @@ export default function RestrictedBoltzmannMachinePage() {
                 </p>
                 <>
 <p>
-                  Here no cell is wired to any other cell. Every cell is wired instead to a short row of hidden units, the bars under the shapes in the playground, and the hidden units are wired to nothing but the cells. Click the T and two of the three bars stand up while the third stays down.
+                  This time, the visible cells have no connections to one another. They connect to the hidden units shown as bars below the shapes. The hidden units also have no connections among themselves. Click the T and watch the hidden responses: two of the three bars rise while the other stays low. We will work out what those responses represent.
                 </p>
                 <p>
                   Click the L and a different pair stands. Each shape has become a short code over the hidden units, and nobody gave the machine that code. It arrived at one, because three hidden units were all it had to tell three shapes apart with.
@@ -179,13 +179,7 @@ export default function RestrictedBoltzmannMachinePage() {
 </>
                 <InAModel title="What this becomes at scale">
                   <p>
-                    On a page of handwritten digits the cells are pixels and the
-                    hidden units come out as strokes, a bar here and a curve
-                    there, each one turning on for the digits that contain it.
-                    Stacking those descriptions, so that a second machine learns
-                    from the first one&rsquo;s hidden layer, is what the 2006
-                    papers did, and it is why this small model is worth reading
-                    about at all.
+                    With image data, hidden units can learn responses to recurring pixel patterns, such as strokes, though a unit need not acquire such a clear interpretation. The 2006 work explored learning further representations from these hidden activations. Our small shape example lets us inspect the first such representation directly.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -224,9 +218,7 @@ export default function RestrictedBoltzmannMachinePage() {
                   it does not.
                 </p>
                 <KeepInMind>
-                  Low energy means plausible, which is the opposite direction
-                  from a score, and it is worth fixing now because every number
-                  in Part 5 runs the same way.
+                  Under this model, lower energy corresponds to higher probability after normalization. Keep that direction in mind when interpreting the energies in Part 5: a larger energy is not a stronger match.
                 </KeepInMind>
               </SubSection>
 
@@ -303,12 +295,7 @@ export default function RestrictedBoltzmannMachinePage() {
 
               <SubSection title="7. Why the product splits">
                 <p>
-                  It is worth seeing that the first line is forced rather than
-                  chosen, because the same argument is what fails the moment a
-                  wire is put inside a layer. Fix the cells and write zⱼ for
-                  hidden unit j&rsquo;s own weighted sum. Everything in the
-                  energy that mentions the hidden units is then a sum of one
-                  term per unit, and each term involves only that unit.
+                  Fix the visible cells and write zⱼ for the hidden unit&apos;s weighted input. Because hidden units have no connections to one another, each term involving a hidden unit depends only on that unit once the visible state is fixed. This is what lets the conditional distribution factor. Adding connections within the hidden layer would break that calculation.
                 </p>
                 <Equation>
                   {"zⱼ = bⱼ + Σᵢ vᵢ·wᵢⱼ\nE(v, h) = −Σᵢ aᵢ·vᵢ − Σⱼ hⱼ·zⱼ"}

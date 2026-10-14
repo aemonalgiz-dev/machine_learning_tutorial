@@ -178,14 +178,7 @@ export default function GreedyCoveragePage() {
             <>
               <SubSection title="4. What a piece covers, and what it leaves bare">
                 <p>
-                  Applying a piece to a word is a scan from the left. Wherever the
-                  piece matches on positions nothing has claimed, claim them and
-                  skip past the match; otherwise move along one and look again.
-                  The pieces already chosen are applied first, in the order they
-                  were chosen, and a candidate is then worth whatever it can still
-                  find. That is the only mechanism on the page, and it is why the
-                  order pieces were chosen in is part of the model rather than an
-                  accident of the fit.
+                  To apply a piece, scan the word from the left. When it matches positions that are still unclaimed, claim them and move past the match. Otherwise move forward one position and try again. We apply selected pieces in their selection order before evaluating a new candidate, so earlier choices affect which positions remain available. The model must retain that order to repeat the same encoding.
                 </p>
                 <WorkedExample title="The word widest, and two candidates for it">
                   <>
@@ -298,14 +291,7 @@ export default function GreedyCoveragePage() {
 </>
                 </WorkedExample>
                 <p>
-                  That is the structural difference between the two methods, and
-                  it is worth naming here rather than in the comparison, since it
-                  follows from the objective alone. Merging builds long pieces out
-                  of short ones and keeps every rung, so a word that fails to match
-                  the long piece still matches the rungs. Coverage buys pieces
-                  outright and buys no rungs, because a rung covers positions its
-                  parent already covers and is therefore worth nothing at the
-                  moment the parent is in.
+                  Merging creates longer pieces through intermediate pieces, retaining those earlier entries as possible fallbacks. The coverage rule selects a whole candidate for the positions it newly covers. Once a larger piece already covers those positions, selecting a smaller piece within it adds no coverage there. This difference follows from what the two selection objectives reward.
                 </p>
                 <KeepInMind>
                   The chosen pieces are not built from one another, so nothing
@@ -361,91 +347,77 @@ export default function GreedyCoveragePage() {
                 "A bare position can always be bought, since single symbols are candidates too",
               ],
               [0, 1, 2],
-              "Already chosen pieces are applied first, in the order they were chosen, and a candidate is worth whatever it can still find, so its value only falls. Single symbols are not candidates at all, because the alphabet is in the vocabulary anyway and a single symbol covers nothing that was not already going to be its own token.",
+              "The tokenizer applies selected pieces first, in their learned order, and scores later candidates on the unclaimed spans that remain. Single symbols are already available as fallbacks, so the selection stage considers longer pieces. A chosen piece can prevent another candidate from using an overlapping span.",
             ),
         ],
         },
         {
-          title: "Part 3. A Hard Problem With a Known Guarantee",
+          title: "Part 3. When a Coverage Guarantee Applies",
+          id: "part-3-a-hard-problem-with-a-known-guarantee",
           content: (
             <>
-              <SubSection title="8. Choosing the best set is not something anyone can do">
+              <SubSection title="8. Why choosing the best combination is difficult" id="8-choosing-the-best-set-is-not-something-anyone-can-do">
                 <p>
-                  Notice what the rule is an approximation to. The question we
-                  actually want answered is which set of k pieces covers the most
-                  positions, and that question has nothing greedy in it. Taking
-                  the best piece first is one way to build a set of k; there are
-                  many others, and no reason yet to think the first is the best.
+                  Choosing the largest immediate gain may rule out a better combination later. To understand that difficulty, first consider a related mathematical problem: choose up to k sets of positions to maximize the weight of their union. We will then check how its assumptions compare with this tokenizer&apos;s rules.
                 </p>
                 <>
 <p>
-                  The question is a known one and the answer is that it cannot be computed. Choosing k sets to cover as much of a universe as possible is weighted maximum coverage, whose decision form is the set covering problem on Karp&rsquo;s 1972 list, and no method is known that answers it exactly without, in the worst case, examining a number of subsets that grows exponentially in the number of candidates.
+                  That set problem is weighted maximum coverage. Its general form is NP-hard, so no polynomial-time exact algorithm is known for all inputs. This does not make an exact answer impossible: exhaustive search and other exact methods can solve suitable instances. The difficulty is how the work grows in the worst case.
                 </p>
                 <p>
-                  The eighteen sentences supply 815 candidates and the rule runs for 69 turns on them, so the exact answer would mean weighing 815 things taken 69 at a time, which is not a search anybody runs.
+                  The eighteen sentences supply 815 candidate pieces, and this fit selects 69. Enumerating every possible selection of that size would be an enormous search. Greedy selection gives us a manageable procedure, while leaving open how far its result is from the best achievable one.
                 </p>
 </>
                 <KeepInMind>
-                  The greedy rule is not a shortcut somebody took to save effort
-                  on an easy problem. The exact problem is intractable, and every
-                  practical answer to it is an approximation of some kind.
+                  Exact methods can be useful for small cases. We will use one below to check a two-piece result. For larger cases, a guarantee needs a theorem whose assumptions match the actual objective and selection rule.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="9. What the guarantee promises, and what it does not">
                 <>
 <p>
-                  What makes this particular approximation worth building a method on is that it is not merely a heuristic. Coverage is a monotone submodular function of a set of pieces, which means two things. Adding a piece never lowers the coverage, and a piece added to a larger set never covers more than the same piece added to a smaller one, since the larger set has already taken some of what it would have claimed.
+                  For ordinary weighted set coverage, selecting a candidate adds every position in its set to a union. Overlaps are allowed and each position&apos;s weight is counted once. This objective is monotone: adding a set cannot lower coverage. It is submodular: the same set can add no more to a larger union than to a smaller union contained within it.
                 </p>
                 <p>
-                  For any function with those two properties, the greedy rule run for k turns reaches at least 1 &minus; 1/e of what the best set of k could reach.
+                  For a nonnegative monotone submodular objective that is zero for the empty set, selecting the largest marginal gain at each step has the following bound under a budget of k equally costly selections:
                 </p>
 </>
                 <Equation>{"greedy coverage after k turns   ≥   (1 − 1/e) × best coverage any k pieces reach"}</Equation>
                 <>
 <p>
-                  That fraction is 0.632, and Feige&rsquo;s 1998 result says no polynomial method improves on it in general. So the honest reading of the guarantee is narrow, and it is worth being exact about, because it is often quoted as though it said more. It is a worst case over every possible input, so it promises nothing about a typical corpus.
+                  This is a worst-case bound of about 0.632 relative to the best selection of the same size. It applies to the weighted-union formulation just described. Our tokenizer adds a different constraint: an occurrence must lie wholly on unclaimed positions, and pieces are applied in rank order. A partial overlap rejects the entire occurrence instead of adding its still-uncovered positions. The theorem therefore does not establish this bound for the tokenizer.
                 </p>
                 <p>
-                  It bounds coverage and says nothing at all about sequence length, which is the quantity anything reading the pieces actually pays. And it compares the rule to the best set of the same size rather than to any absolute standard, so a problem on which every set is bad has a guarantee that is satisfied by something bad.
+                  Even for the weighted-union problem, the bound concerns covered positions. It does not bound the number of tokens needed to encode new text. We need to measure that separately, using text beyond the training corpus.
                 </p>
 </>
                 <WhyThisWorks title="Where the fraction comes from">
                   <>
 <p>
-                    Let the best set of k pieces cover a total of B. At any point, the k pieces of that best set together cover at least B minus whatever the greedy rule has already taken, so at least one of them covers a kth of that shortfall, and the greedy rule takes something at least as good.
+                    In the weighted-union problem, let the best k sets cover weight B. If our current coverage is C, those optimal sets together can still add at least the remaining gap. At least one can therefore add a kth of that gap. Greedy selection chooses a set with a gain at least that large.
                   </p>
                   <p>
-                    So the shortfall shrinks by a factor of at least 1 &minus; 1/k every turn, and after k turns what is left is at most B(1 &minus; 1/k) raised to the k, which approaches B/e from below. What has been taken is therefore at least B(1 &minus; 1/e).
+                    Each selection reduces the remaining gap to at most the fraction shown below. Applying that relation k times gives the stated coverage bound. The proof depends on being able to add a set&apos;s uncovered positions even when other positions in that set are already covered.
                   </p>
+                  <Equation>{"gap after one more selection ≤ (1 − 1/k) × current gap\ngap after k selections ≤ B(1 − 1/k)^k ≤ B/e\ncoverage after k selections ≥ B(1 − 1/e)"}</Equation>
 </>
                 </WhyThisWorks>
                 <KeepInMind>
-                  Submodularity is what the argument rests on, and here it is
-                  simply the fact that a position can only be covered once. The
-                  guarantee is about coverage against the best coverage, and no
-                  result on this page bounds how long the resulting text will be.
+                  Here is where the tokenizer differs. In the symbols a b c d, choosing b c first blocks a b c, leaving a and d as single symbols. Choosing a b c first covers three positions and blocks b c. The same two pieces give different coverage in different orders. This is not the order-independent union used in the proof.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="10. Where the rule falls short, on two words">
                 <p>
-                  A worst-case fraction is easier to think about beside a case
-                  where the rule really does lose something, and two words are
-                  enough. Take costing three times and costly three times, which
-                  is 39 positions. The best single piece is cost, four positions in
-                  six word occurrences, worth 24, and nothing beats it, so the
-                  first turn is forced and correct. With two pieces to spend the
-                  rule takes cost and then the ending ing with its mark, and
-                  reaches 33.
+                  Let&apos;s check a small tokenizer case directly. Take costing three times and costly three times, giving 39 symbol positions. The best first piece is cost, covering four positions in each of six word occurrences. With two selections allowed, the greedy rule takes cost and then the marked ending ing, reaching 33 positions.
                 </p>
                 <BestTwoRows />
                 <>
 <p>
-                  The best pair, found by enumerating every pair of candidates rather than by another heuristic, is the two whole words, which cover all 39 between them. The rule reaches 84.6% of that, which is comfortably above the 63.2% the theorem allows and still a real loss, and the loss was locked in by a first move that was the best available at the time.
+                  Enumerating the possible pairs finds a better result: the two whole words cover all 39 positions. Greedy selection reaches 84.6% of that coverage. The first choice had the largest immediate gain, but it prevented the better two-piece combination.
                 </p>
                 <p>
-                  The cost in the currency that matters is larger than the cost in coverage. Under the two pieces the rule chose, the six word occurrences read as 15 pieces, since costly comes apart as cost, then l, then a marked y. Under the best pair they read as 6, one per word.
+                  Encoding length shows another cost. With the greedy pieces, the six word occurrences require 15 tokens; costly becomes cost followed by l and a marked y. With the two whole words, they require six tokens. Coverage and encoded length describe different aspects of the result.
                 </p>
 </>
                 <KeepInMind>
@@ -489,12 +461,10 @@ export default function GreedyCoveragePage() {
                 </KeepInMind>
               </SubSection>
 
-              <SubSection title="12. The two units on the four words, where I expected a tie">
+              <SubSection title="12. Counting the end marker for both candidates" id="12-the-two-units-on-the-four-words-where-i-expected-a-tie">
                 <>
                   <p>
-                    I originally expected character counting to make the marked ending
-                    tie with newest. That counted the extra end marker for the ending
-                    but forgot to count it for the whole word.
+                    It is easy to count the extra end marker for the short ending and overlook it for the whole word. Apply the same character-counting convention to both candidates:
                   </p>
                   <Equation>{"marked est, counting characters = 4 × 9 = 36\nmarked newest, counting characters = 7 × 6 = 42"}</Equation>
                   <p>
@@ -506,7 +476,7 @@ export default function GreedyCoveragePage() {
                 <UnitRivals />
                 <>
 <p>
-                  The whole run comes out the same four pieces in the same order, at 42, 21, 20 and 12 rather than 36, 18, 15 and 10. So on this corpus the unit changes every number and no decision, and the claim I had written down does not reproduce. The arithmetic of why is worth following, since it says when the claim would have been right.
+                  The run selects the same four pieces in the same order, now with scores of 42, 21, 20 and 12 instead of 36, 18, 15 and 10. The unit changes every score here without changing a selection. We need a different comparison to see when the unit can change the winner.
                 </p>
                 <p>
                   Both leading candidates end a word, so both collect one extra character per occurrence, which is worth 6 to newest and 9 to the ending. The ending does gain more, and the gap it had to close was 9, so closing it by 3 leaves it 6 behind.
@@ -522,12 +492,7 @@ export default function GreedyCoveragePage() {
 
               <SubSection title="13. Six words where the unit really does decide">
                 <p>
-                  The claim is repairable, and repairing it shows exactly what kind
-                  of corpus is needed. The extra character goes to word-final
-                  candidates only, so the flip needs a word-final candidate close
-                  behind a word-internal one. Take test, rest and best three times
-                  each, against stem, stop and stub five times each, which is 96
-                  positions and 120 characters.
+                  For the winner to change, the extra weight must close the original score gap. A word-final candidate can gain on an internal one because only the former contains the marker. Try test, rest and best three times each, against stem, stop and stub five times each. This corpus has 96 symbol positions and 120 characters under the two conventions.
                 </p>
                 <>
                   <p>
@@ -574,26 +539,26 @@ export default function GreedyCoveragePage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "What exactly does the 1 − 1/e guarantee promise?",
+              "For ordinary weighted set coverage, what does the 1 − 1/e guarantee promise?",
               [
-                "That after k turns the rule reaches at least 0.632 of what the best set of k pieces could reach",
+                "After k selections, greedy weighted-union coverage reaches at least 0.632 of the optimal coverage using up to k sets",
                 "That the rule covers at least 0.632 of every position in the corpus",
                 "That the resulting text is at most 1/0.632 times the shortest reading possible",
                 "That the rule is within 0.632 of the best set on a typical corpus",
               ],
               0,
-              "It is a worst case over every possible input, so it promises nothing about a typical corpus, and it compares the rule to the best set of the same size rather than to any absolute standard, so a problem on which every set is bad has a guarantee satisfied by something bad. It also bounds coverage and says nothing about sequence length, which is the quantity anything reading the pieces actually pays.",
+              "For nonnegative weighted set coverage, the bound compares greedy union coverage with the best union under the same selection budget. It gives no bound on encoded sequence length. The tokenizer's rejection of partially overlapping occurrences changes the problem, so we cannot transfer the guarantee to it.",
             ),
             several(
-              "Coverage is a monotone submodular function of a set of pieces. What do those properties say here?",
+              "In ordinary weighted set coverage, what do monotonicity and submodularity mean?",
               [
                 "Adding a piece never lowers the coverage",
-                "A piece added to a larger set never covers more than the same piece added to a smaller one",
+                "A set adds no more weight to a larger union than to a smaller union contained within it",
                 "The bound they give is on how long the resulting text will be",
                 "The greedy rule is therefore optimal at every size",
               ],
               [0, 1],
-              "The larger set has already taken some of what the piece would have claimed, and here that is simply the fact that a position can only be covered once. The two properties buy a bound and not optimality, since greedy choice is optimal at one piece and can be beaten from two onward. And the bound is on coverage against the best coverage of the same size. Nothing on the page bounds sequence length, which is what anything reading the pieces pays.",
+              "Adding a set cannot reduce a union's coverage. As that union grows, more of the new set's positions may already be counted, so its marginal contribution cannot increase. These properties apply to set union. Rejecting a whole occurrence because part overlaps, as the tokenizer does, needs a separate analysis.",
             ),
             choice(
               "On costing and costly, three times each, the rule spends two pieces and reaches 33 of the 39 positions. What does the best pair do?",
@@ -604,12 +569,12 @@ export default function GreedyCoveragePage() {
                 "Covers 33, so the rule was already optimal",
               ],
               0,
-              "The best pair, found by enumerating every pair of candidates rather than by another heuristic, is the two whole words. The rule reaches 84.6% of that coverage, comfortably above the 63.2% the theorem allows and still a real loss, and the cost in the currency that matters is larger than the cost in coverage.",
+              "The two whole words cover all 39 positions and encode the six word occurrences in six tokens. The greedy result covers 33 positions and needs 15 tokens. This small exhaustive comparison shows the cost of an immediate choice without relying on a guarantee for a different coverage problem.",
             ),
             trueFalse(
               "Counting characters rather than positions makes the marked ending est tie with newest on the four words.",
               false,
-              "That was the expectation written down first, and it counted the extra end marker for the ending while forgetting it for the whole word. Both candidates end a word, so newest gains 6 and the ending gains 9, and since the gap to close was 9, closing it by 3 leaves the ending 6 behind at 36 against 42.",
+              "Both candidates contain an end marker. Counting that extra character raises newest's score from 36 to 42 and the ending's from 27 to 36. The ending gains more, but newest remains ahead by six.",
             ),
             choice(
               "Where does the unit genuinely change what gets bought?",
@@ -638,19 +603,10 @@ export default function GreedyCoveragePage() {
                 </p>
                 <CoverageGains />
                 <p>
-                  The shape of that profile is the submodularity of Part 3 made
-                  visible. Each piece chosen removes positions from every candidate
-                  still standing, so the value of the best remaining candidate can
-                  only fall, and the sequence 62, 42, 35, 34, 24, 21, 21, 16 is
-                  monotone all the way down to a tail of twos. The flat stretches
-                  are ties, runs where several pieces were each worth the same, and
-                  the longest of them is thirteen turns in a row each worth two.
+                  In this run the selected gains begin 62, 42, 35, 34, 24, 21, 21 and 16, then continue down to twos. Equal adjacent values mean the selected pieces contributed the same amount on their respective turns. This profile describes the measured run; it is not a proof that the tokenizer&apos;s order-dependent objective is submodular.
                 </p>
                 <KeepInMind>
-                  The falling profile is guaranteed rather than observed, since a
-                  piece cannot be worth more later than it was worth earlier. What
-                  the corpus decides is how quickly it falls and where it reaches
-                  zero.
+                  As pieces claim spans, they remove opportunities from overlapping candidates. Inspect the recorded gains to see how that affects this corpus. The weighted-union theorem above cannot by itself establish a guarantee for these non-overlapping selections.
                 </KeepInMind>
               </SubSection>
 
@@ -675,14 +631,7 @@ export default function GreedyCoveragePage() {
                 </p>
                 <InAModel>
                   <p>
-                    At the scale a language model works at, tens of thousands of
-                    rows over billions of words, the two effects measured below are
-                    the ones to expect to survive, since both follow from the
-                    objective rather than from this corpus. They are a shorter
-                    reading of the text the pieces were chosen from, and a longer
-                    reading of text they were not. How large either is at that
-                    scale is not something this page measures, and eighteen
-                    sentences would be a poor guide to it.
+                    The two vocabularies favour different kinds of pieces in this experiment. Their objectives help explain the preference, but eighteen sentences cannot establish which will encode a much larger training or held-out corpus more efficiently. That comparison needs its own data and evaluation.
                   </p>
                 </InAModel>
                 <KeepInMind>
@@ -884,13 +833,7 @@ export default function GreedyCoveragePage() {
 
               <SubSection title="21. How long a piece may be, which nothing decides">
                 <p>
-                  The last section suggests a repair, and it is worth measuring
-                  rather than assuming. Candidates are runs of two or more symbols
-                  with no upper limit, so if the limit is lowered the whole-word
-                  rows become unbuyable and the rule has to spend its budget on
-                  shorter pieces. Nothing in the objective says where that limit
-                  should be, and the two readings do not agree about where it
-                  should be either.
+                  We can test a possible repair by limiting candidate length. Currently candidates can contain any run of two or more symbols. A shorter maximum would rule out some whole-word entries and force selection among shorter pieces. The objective does not choose that limit for us, and the two evaluations below need not favour the same setting.
                 </p>
                 <LengthCeiling />
                 <>
@@ -918,9 +861,9 @@ export default function GreedyCoveragePage() {
                   rows={[
                     { expression: "the unit a covering is counted in", reason: "undecided by the objective, which says to cover the most text and does not say what text is measured in. Counting positions and counting characters are both natural and differ by one per word-final position; on three endings against three openings the first is chosen by the second, at 30 against 27 one way and 36 against 30 the other." },
                     { expression: "two candidates covering the same amount", reason: "the objective is indifferent, so no answer is more correct. A choice must be made and any choice is arbitrary; taking the lexicographically smaller at least makes the fit repeatable, where taking whichever was met first makes it depend on the order the words arrived in. Ties are common rather than rare here, and on the eighteen sentences thirteen consecutive turns were each worth exactly two." },
-                    { expression: "the best set of a given size", reason: "not what the rule finds, and not something anyone can find. The exact problem is weighted maximum coverage, whose decision form has been known to be NP-complete since 1972, and greedy choice can be beaten from two pieces onward, by 6 positions in 39 on the two-word corpus of section 10." },
-                    { expression: "how far short the rule can fall", reason: "bounded, at 1 − 1/e of the best set of the same size, which is 63.2%, and no polynomial method does better in general. The bound is worst case over every input rather than typical; the two-word corpus reaches 84.6% of the best pair, and nothing predicts that in advance." },
-                    { expression: "how long a text will be", reason: "outside the guarantee entirely. Coverage is bounded against the best coverage and sequence length is not bounded against anything, and the two come apart in practice, since the vocabulary that reads the training corpus in 296 pieces reads a held-out sentence in 32 where a merged one of the same size reads it in 27." },
+                    { expression: "the best set of a given size", reason: "Greedy selection does not search every combination. Exact search on the small two-word case finds a pair covering six more positions than the greedy pair. Larger cases require a choice of search method and computational budget." },
+                    { expression: "how far short the rule can fall", reason: "The 1 − 1/e theorem applies to ordinary weighted set union. This tokenizer rejects partially overlapping occurrences and depends on selection order, so that theorem supplies no bound for its result. The two-word example reaches 84.6% of the best pair's coverage by direct measurement." },
+                    { expression: "how long a text will be", reason: "Measure encoded length separately from coverage. Here a coverage vocabulary encodes the training corpus in 296 pieces but needs 32 for a held-out sentence. A merged vocabulary of the same size needs 27 for that sentence." },
                     { expression: "the longest a piece may be", reason: "a decision with no answer in the objective. Uncapped, the rule buys whole words; capped at five symbols on the eighteen sentences it reads the corpus 28 pieces longer and the held-out sentence 4 pieces shorter. Which of those is the right trade is a fact about the text a model will read." },
                     { expression: "a word the corpus saw exactly once", reason: "worth covering, and by construction worth exactly as much as a short piece seen several times, since the objective multiplies length by count. Refusing such a piece is a frequency floor imposed from outside; accepting it spends a row that can never be used on any other text. Fifty-four of the seventy-two distinct words here occur once, and ten of forty-eight rows go on them." },
                     { expression: "whether a chosen piece is a sensible unit", reason: "not a question the objective can be asked. It scores runs of symbols by how much they account for, so a piece that stops one letter short of a stem is exactly as good as one that does not, and expecte and analys are both bought. Supplying that judgement means maximising something else." },
@@ -1074,7 +1017,7 @@ for size in [11, 12, 13]:
   covers 33 of 39, corpus 15 pieces
 3 chosen: cost 24, ing</w> 9, ly</w> 6
   covers 39 of 39, corpus 12 pieces`,
-              { hints: ["n_chosen_pieces is how many pieces the fit took, and each chosen piece carries the coverage it had when it was taken, so the figures fall from one piece to the next.", "total_coverage adds those up, and the corpus cost is the sum of encode(text).n_tokens over the two texts."], check: numberCheck("How many pieces does the corpus cost once the rule has chosen three?", 12, 0, "The third piece is the ending ly with its mark, worth 6, and with it every one of the 39 positions is covered, exactly as the best pair covers them. The six words still cost 12 pieces, two each, where the two whole words cost 6. Full coverage only says no symbol is left standing alone. It does not say how many pieces the covering is made of, which is why Part 3 insists that the guarantee bounds coverage and says nothing about how long the text will be.") },
+              { hints: ["n_chosen_pieces gives the number selected. Each chosen piece records how much new coverage it contributed when selected.", "total_coverage adds those contributions. To measure encoded length, add encode(text).n_tokens for the two texts."], check: numberCheck("How many pieces does the corpus cost once the rule has chosen three?", 12, 0, "Adding the marked ending ly covers the final six positions. All 39 are now covered, but the six words still require 12 tokens. Selecting the two whole words would require six. Complete coverage therefore does not establish that we have found the shortest encoding.") },
             ),
             exercise(
               "Move the ceiling on how long a piece may be",

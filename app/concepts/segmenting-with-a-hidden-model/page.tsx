@@ -59,13 +59,7 @@ export default function SegmentingWithAHiddenModelPage() {
 <>
               <SubSection title="1. What both dictionary methods have in common">
                 <p>
-                  The greedy scan and the best whole path disagree about a great
-                  many texts, and on one thing they cannot disagree. Both build
-                  their answer out of entries of a word list, so a reading
-                  containing a word the list lacks was never among the candidates
-                  and no improvement to the scoring can reach it. That is not a
-                  weakness of either rule. It is what it means to answer with
-                  entries.
+                  Both dictionary methods are limited by their entries. Even a better path score cannot select a word the candidate list never included. Could we learn where words begin and end from examples instead? We will use sentences with labelled boundaries to learn a model over character positions.
                 </p>
                 <p>
                   Here is the failure with everything else held still. Three
@@ -144,13 +138,7 @@ export default function SegmentingWithAHiddenModelPage() {
             <>
               <SubSection title="3. Where a character sits in its word">
                 <p>
-                  Take a word and look at each of its characters in turn. If the
-                  word has several characters then one of them is the first, one
-                  is the last, and any others are somewhere in between. If the
-                  word has only one character then that character is the whole
-                  word and none of those three descriptions fits it. That is four
-                  descriptions, and every character of every word has exactly one
-                  of them.
+                  Consider where a character sits within its word. In a multi-character word it can begin the word, lie in the middle, or end it. A one-character word needs its own label because the character both begins and ends that word. These give us four states with which to describe a segmentation.
                 </p>
                 <Equation>
                   {"a word of one character      →   S"}
@@ -219,7 +207,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 />
                 <>
 <p>
-                  This is a sharper statement than it looks, and it is worth setting against the previous page. A word lattice contains only the readings its list permits, which on twenty-eight characters of ordinary English was 2,592 out of 134,217,728. The places here reach every cut there is, the 134,217,728 rather than the 2,592, including all the ones no dictionary would ever allow.
+                  The state representation can express boundary patterns beyond a fixed dictionary. On the twenty-eight-character example, the word lattice allowed 2,592 of the 134,217,728 possible patterns. The character-role representation can describe all 134,217,728 before their scores are considered, including many segmentations we would reject linguistically. Representation coverage alone does not choose a good reading.
                 </p>
                 <p>
                   That is the same fact as section 1 seen from the other side, since a word nobody listed sits on some cut of the characters that spell it, and every cut is reachable here.
@@ -387,14 +375,7 @@ export default function SegmentingWithAHiddenModelPage() {
 
               <SubSection title="7. A count of zero would end the search before it started">
                 <p>
-                  A run of letters is scored by multiplying together one number
-                  per character and one per step between characters, and any one
-                  of those numbers being zero makes the whole product zero. The
-                  row that never occurred would therefore not merely be
-                  unfavoured; it would be impossible, and every reading that used
-                  it would be ruled out by an accident of what the corpus happened
-                  to contain. So a fixed amount is added to every outcome that can
-                  happen, before the counts are turned into shares.
+                  A path score multiplies emission and transition probabilities. One zero makes the entire product zero, excluding every path that uses it. With a small corpus, a permitted event may have zero count simply because it was never observed. We therefore add a smoothing amount to allowed outcomes before normalizing the counts. Transitions forbidden by the state design remain forbidden.
                 </p>
                 <Equation>
                   {"P(next place | this place)  =  (count of the pair + a) / (count of this place + 2a)"}
@@ -594,7 +575,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 <WhyThisWorks title="The same path search, with states in place of dictionary words">
                   <>
 <p>
-                    It is worth being exact about what is the same as the previous page and what is not. There, the thing being chosen at each position was a word from a list and the table had one entry per position; here, the thing being chosen is a place out of four and the table has four entries per character.
+                    The earlier word-lattice search stored a best path value at each text position. Here we need a best value for each possible character role as well, so the table has four entries per character. The dynamic-programming idea is similar, but its state must retain the role needed to score the next transition.
                   </p>
                   <p>
                     Both are the recurrence Bellman described and Viterbi published, and the difference is only what the states are. The consequence of the change is the whole page, since a state that is a word can only ever be a word somebody listed and a state that is a place is available at every character of every text.
@@ -665,7 +646,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 "To refine the estimates that the counting had already produced",
               ],
               0,
-              "A row that never occurred would not merely be unfavoured; it would be impossible. Smoothing here makes an estimate exist at all for the outcomes a small corpus did not happen to show, rather than improving one that was already there.",
+              "Without smoothing, an unobserved allowed event receives zero probability and rules out every path containing it. Smoothing gives those events nonzero estimates. It expresses a modelling choice about missing evidence; it does not establish how often they actually occur.",
             ),
             choice(
               "The word lattice kept one number per position. Why does this search keep four per character?",
@@ -730,7 +711,7 @@ export default function SegmentingWithAHiddenModelPage() {
 </>
                 <>
 <p>
-                  The second text is the same trick failing, and it is our own sentence, so it is worth dwelling on. The surname in front of the research characters is five characters the corpus has never seen. The word list answers eight pieces, five of them single characters. The places answer seven, having glued the first two characters of the name together into a two-character word, which is one piece closer and still wrong, and the four-word reading a person gives is out of reach for both.
+                  Our surname example shows the remaining difficulty. The corpus has never seen its five characters. Dictionary matching returns eight pieces, including five single characters. The hidden-state method returns seven after joining the first two surname characters, but still differs from the four-word reference. Its representation permits that reference in principle; the learned scores and unknown-character treatment do not select it here.
                 </p>
                 <p>
                   The nineteenth section is about why that particular wrong answer, and it turns out to have nothing to do with the name.
@@ -747,7 +728,7 @@ export default function SegmentingWithAHiddenModelPage() {
               <SubSection title="14. How much tagged text the trade needs">
                 <>
 <p>
-                  Everything so far has been read off corpora of two to five sentences, which is enough to see a mechanism and not enough to say what it is worth. So here is a measurement. A language is generated with a fixed seed, seventy words spelled out of forty characters, with a few words carrying most of the text and a long tail behind them, which is the shape a real vocabulary has.
+                  Two- to five-sentence examples let us inspect the mechanism, but they are too small to assess performance broadly. We will also use a seeded synthetic language with seventy words drawn from forty characters. Its frequency distribution gives a few words many occurrences and leaves a longer tail of less frequent words, providing a larger controlled comparison.
                 </p>
                 <p>
                   Both methods are fitted on the first two sentences of one corpus, then the first five, and so on, and both are scored on the same two hundred held-out sentences, a word counting as found only when both its ends land where the sentence put them.
@@ -862,10 +843,7 @@ export default function SegmentingWithAHiddenModelPage() {
                   </p>
                 </InAModel>
                 <KeepInMind>
-                  Twice the bits, and the difference between a ceiling near 0.92
-                  and one near 0.61. More tagged text raises the first and lowers
-                  the second, so on an alphabet this method is not merely weaker;
-                  it stops improving and then gets worse.
+                  In these synthetic experiments, the changed setting doubles the reported bits and lowers the observed ceiling from roughly 0.92 to roughly 0.61. Adding labelled text improves the first setting while worsening the second. This is a result for these constructions and model assumptions, not a general conclusion that more training text harms alphabetic-language segmentation.
                 </KeepInMind>
               </SubSection>
 
@@ -891,13 +869,7 @@ export default function SegmentingWithAHiddenModelPage() {
                   after a page on the word lattice rather than instead of it.
                 </p>
                 <p>
-                  On our own sentence it changes nothing, and it is worth saying
-                  why rather than leaving the earlier widget to be noticed. The
-                  five characters of the transliterated surname are exactly a
-                  stretch no entry covers, so they are handed over, and the places
-                  answer the same four pieces there that they answered on their
-                  own. The combination cannot be better than its second half on the
-                  stretch where the first half has nothing.
+                  The combined method leaves this surname result unchanged. No dictionary entry covers its five characters, so that whole span goes to the hidden-state fallback. The fallback returns the same four pieces as it did alone. Combining the methods cannot improve a span where it simply delegates to the same unchanged procedure.
                 </p>
                 <KeepInMind>
                   Neither method dominates and the union of them dominates both,
@@ -971,7 +943,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 </p>
                 <>
 <p>
-                  There is a genuine choice underneath this and it is worth naming, since it is the sort of thing that is usually left to whoever writes the code. The spare slot could be one share per place, as it is here, or the four places could be given different shares for unfamiliar characters, or a stretch of them could be refused outright and left uncut for something else to look at.
+                  Unknown-character handling is a policy we must choose. Here each role has its reserved unknown probability. We could estimate different behaviour for character categories, or reject an unknown span and leave it for another method. Those choices change path scores, so the implementation needs to document which one it uses.
                 </p>
                 <p>
                   Taking the first, as here, gives a confident answer that on the surname is wrong; taking the second means estimating four numbers from the one thing the corpus cannot show; taking the third gives no answer and marks the stretch for whatever comes next. Nothing in the mathematics prefers any of the three.
@@ -1009,15 +981,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 </p>
                 <WhyThisWorks title="Separating the definition of a boundary from the data used to learn it">
                   <p>
-                    It is worth separating the two, because they fail differently.
-                    The annotation standard is a definitional question and no amount
-                    of data settles it, since the data is what carries the
-                    definition. The helping is an estimation question and more data
-                    does settle it, in the sense that the counts eventually
-                    outweigh whatever is added to them. On a corpus of four
-                    sentences they are indistinguishable in their effect, which is
-                    exactly why a small measurement cannot tell you which one you
-                    are looking at.
+                    The annotation convention defines the segmentation we want to learn. More examples do not decide which convention we should have chosen. Smoothing is an estimation choice: with enough representative observations for an event, a fixed smoothing contribution becomes small relative to its count. On four sentences, both choices can strongly affect the answer, so one small result cannot cleanly separate their effects.
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
@@ -1116,7 +1080,7 @@ export default function SegmentingWithAHiddenModelPage() {
                 "That corpora of it are smaller, so a word list has too few entries to compete",
               ],
               0,
-              "On the English words the places top out at 0.6087 and then fall back to 0.5186 as the corpus grows, because a wider vocabulary uses every letter in every position, while on the character language they climb past 0.92. So on an alphabet the method is not merely weaker; it stops improving and then gets worse. The deciding quantity can be computed from a corpus before any segmenter is built.",
+              "In this experiment, the alphabetic-word model peaks at 0.6087 and later falls to 0.5186 as the corpus grows. The character-language model rises above 0.92. The role-conditioned character statistics differ between these constructions, which helps explain the result. It does not establish the same trend for every alphabetic language or every segmentation model.",
             ),
             trueFalse(
               "Handing the word lattice’s stretches of single characters to the places improves the reading of our own sentence.",
@@ -1189,7 +1153,7 @@ P(S | S) = 0.5000
 P(a | B) = 0.5000, P(a | S) = 0.2000
 P(c | B) = 0.1667, P(c | S) = 0.4000
 P(z | B) = 0.1667, P(z | S) = 0.2000`,
-              { hints: ["fit takes a list of sentences, each a list of its words. A sentence given as one string would be read as one-character words, which the corpus refuses.", "The four places are the members of BoundaryTag, and the model answers initial_log_probability, transition_log_probability and emission_log_probability, all in log space, so math.exp turns each into a share.", "A forbidden step answers minus infinity, which math.exp turns into zero, so testing the log value against -math.inf is what leaves the eight admissible steps."], check: numberCheck("What share does the model give to a word ending straight after a middle character, P(E | M)?", 0.6667, 0.0005, "The only middle character in the corpus, the b of abc, was followed by an end once and by another middle never, so the counts are one and zero over one. Adding one to each of the two admissible successors gives (1 + 1) over (1 + 2), which is two thirds, and the middle that never occurred gets the remaining third rather than nothing, which is the whole point of the helping.") },
+              { hints: ["fit takes a list of sentences, each a list of its words. A sentence given as one string would be read as one-character words, which the corpus refuses.", "The four places are the members of BoundaryTag, and the model answers initial_log_probability, transition_log_probability and emission_log_probability, all in log space, so math.exp turns each into a share.", "A forbidden step answers minus infinity, which math.exp turns into zero, so testing the log value against -math.inf is what leaves the eight admissible steps."], check: numberCheck("What share does the model give to a word ending straight after a middle character, P(E | M)?", 0.6667, 0.0005, "The only observed middle character, b in abc, was followed by an end once and by another middle zero times. Add-one smoothing gives the two permitted successors probabilities of two thirds and one third. The unseen but allowed transition can now participate in a scored path.") },
             ),
             exercise(
               "Find three words the sentences never held",

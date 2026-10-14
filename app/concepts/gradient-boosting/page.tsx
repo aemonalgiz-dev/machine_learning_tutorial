@@ -80,10 +80,10 @@ export default function GradientBoostingPage() {
               <SubSection title="1. Start from the flat mean">
                 <>
 <p>
-                  The page answers six questions in order. What does one round of boosting actually fit, and why is the miss on each reading the direction in which the error falls fastest? How do stumps, each nearly useless alone, assemble into the arc of the throw, and what happens to the misses as they do? What does the learning rate change, and is a small rate with more rounds really the better model once it is measured?
+                  Let&apos;s start with one prediction and examine the errors it leaves behind. A boosting round fits another small model to help correct those errors. We will follow the thrown ball&apos;s measurements through successive rounds and work out why squared error leads us to fit the residuals. Then we can see what the learning rate changes.
                 </p>
                 <p>
-                  How deep should each member be? When do we stop adding rounds, and how would we know? And how does this differ from bagging, which also grows many trees, and from AdaBoost, which also grows them in sequence?
+                  As we add rounds, we will also need to decide how deep each tree should be and when to stop. We can check those choices on held-out data. Along the way, we will compare boosting with bagging and with AdaBoost, since growing many trees does not always mean combining them in the same way.
                 </p>
 </>
                 <p>

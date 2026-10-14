@@ -210,11 +210,7 @@ export default function ShapesAndFlatteningPage() {
                   arrangements of an identical amount of data.
                 </p>
                 <p>
-                  Ask for each of them as a shape on its own and the answer
-                  keeps both facts. The first reads (2, 2, 2) and holds 8
-                  numbers; the second reads (8,) and holds 8 numbers. The
-                  counts are equal and the arrangements are not, which is the
-                  whole of the distinction this page is built on.
+                  The first arrangement has shape (2, 2, 2); the flattened arrangement has shape (8,). Both contain eight values. Flattening changes how we address those values, so the receiving layer needs to know which arrangement it will get.
                 </p>
                 <ExtentProbe />
                 <p>

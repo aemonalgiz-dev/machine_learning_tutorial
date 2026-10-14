@@ -71,14 +71,7 @@ export default function LossFunctionsPage() {
 <>
               <SubSection title="1. A guess, a truth, and a price">
                 <p>
-                  Take the four people the PCA page measured, 180, 160, 175 and
-                  165 centimetres, weighing 78, 58, 63 and 73 kilograms, and
-                  draw a line through their mean point with a slope of 0.6
-                  kilograms per centimetre. The line guesses a weight for each
-                  of them, 74, 62, 71 and 65, and each guess misses. The
-                  question a loss answers is how much those four misses should
-                  cost, as one number, so that a better line is one with a
-                  smaller number and the search for it can begin.
+                  Let&apos;s reuse the four people from the PCA example. Their heights are 180, 160, 175 and 165 centimetres, and their weights are 78, 58, 63 and 73 kilograms. A line through their mean point with slope 0.6 predicts weights of 74, 62, 71 and 65 kilograms. Each prediction misses. We need to turn those errors into a number we can compare across candidate lines. A loss function tells us how to do that.
                 </p>
                 <NumberTable
                   headings={["person", "guessed", "measured", "miss, guess less truth"]}
@@ -224,11 +217,7 @@ export default function LossFunctionsPage() {
                   the misses is not a miss at all.
                 </p>
                 <KeepInMind>
-                  Squared error makes a miss of eight kilograms cost four times
-                  a miss of four and pull twice as hard. That is the right
-                  rule when the noise around each measurement is bell-shaped,
-                  which is Gauss&rsquo;s 1809 argument, and it is the wrong
-                  rule when some of the misses are not noise.
+                  Squared error gives larger misses disproportionately more influence. Under independent Gaussian errors with constant variance, minimizing it corresponds to maximum-likelihood fitting. That is one reason for using it. But unusually large errors can then dominate the fit, so we should inspect outliers and the measurement process before deciding it suits this dataset.
                 </KeepInMind>
               </SubSection>
 
@@ -963,12 +952,7 @@ export default function LossFunctionsPage() {
                   ]}
                 />
                 <KeepInMind>
-                  Squared error moved three kilograms for one mistyped weight
-                  and absolute error would not stop stepping for a clean one,
-                  and cross-entropy charged 5.2 for one wrong label. Each of
-                  those is the loss doing what its formula says, so choosing
-                  one is a claim about what the misses in the data are, and it
-                  is worth making that claim out loud before the fit.
+                  Our examples produced different consequences: a mistyped weight moved the squared-error fit by three kilograms, constant-sized absolute-error steps kept crossing a clean optimum, and cross-entropy assigned 5.2 to one confidently wrong label. These follow from the objectives and update choices. Before selecting a loss, we should consider what errors the data contains and how much influence each error should have.
                 </KeepInMind>
               </SubSection>
             </>

@@ -81,12 +81,7 @@ export default function PoolingPage() {
                 </p>
 </>
                 <p>
-                  The layers above pay for it twice over. They have more numbers
-                  to read, and they have to learn that a finding two cells to the
-                  left means what the same finding here means, which is a fact
-                  about geometry that they are being asked to work out from
-                  examples. A layer that summarised each small neighbourhood
-                  would spare them both.
+                  Later layers must process those large maps. They may also need to treat nearby detections as similar, even when an edge shifts slightly. Pooling summarizes a small neighbourhood so they receive fewer values and less precise location information. We will check when that loss of detail helps and when it removes information we need.
                 </p>
                 <KeepInMind>
                   Shrinking a map is worth doing because the map is redundant,
@@ -652,7 +647,7 @@ export default function PoolingPage() {
                 <ShareTotalsChart />
                 <>
 <p>
-                  Sixteen of the first thirty-two sides miss, which is half of them, and the furthest away is side 31, at 1.0000000000000004, which is 4.4e-16 above one. That is far below the rounding already present in any gradient reaching the layer, so the practical answer is that this does not matter. The reason it is worth a section is that a test asserting the sum is exactly one passes at side 2 and fails at side 7, and a test written only against a window of two would never find out.
+                  For sixteen of the first thirty-two window widths, the computed sum differs slightly from one. The largest is 1.0000000000000004 at width 31, about 4.4e-16 above one. These are small floating-point errors, so the test should use a suitable tolerance. An exact-equality test happens to pass at width two and fail at width seven; checking only the first case would miss that numerical issue.
                 </p>
                 <p>
                   A maximum, whose shares are a single 1 and some zeros, is exact at every side.

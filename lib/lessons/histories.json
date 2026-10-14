@@ -322,7 +322,7 @@
       }
     ],
     "blocks": [
-      "As data-mining systems combined many records and preprocessing steps, evaluation could accidentally give a model information unavailable in the real prediction setting. High scores then measured access to privileged evidence as well as predictive ability.",
+      "When we combine records from several systems, a later event can slip into the inputs for an earlier prediction. Preprocessing can also use information from data we intended to hold out. The resulting score then reflects information the model would not have had when it needed to make the real decision.",
       "Kaufman and colleagues examined leakage as information about a target that is not legitimately available to the prediction process. Our invented repair records make the timing issue explicit. Other forms include fitting preprocessing on test data or placing copies of an observation on both sides of a split."
     ]
   },
@@ -335,7 +335,7 @@
       }
     ],
     "blocks": [
-      "Classification datasets often contain many examples of one outcome and few of another. Researchers found that a method could favour the majority while performing poorly on the minority that mattered to the application.",
+      "Consider a classifier trained on records where one outcome is much more common than the other. It can reduce its total mistakes by favouring the common class, even if the rare cases are the ones we most need to find. Work on imbalanced classification addresses that mismatch between a convenient training objective and the job the model is meant to do.",
       "Chawla and colleagues' 2002 SMOTE paper studied synthetic minority oversampling, creating additional minority examples between nearby observations. That is one response to imbalance, not a universal remedy. Our lesson first makes the evaluation problem visible; it does not generate synthetic sensor records."
     ]
   },
@@ -495,7 +495,7 @@
     ],
     "blocks": [
       "A separator that makes no training mistakes may still sit unnecessarily close to observations. Maximum-margin methods made the distance from a boundary part of the fitting problem. Real datasets then posed another difficulty: measurement error and overlapping classes can make perfect separation impossible.",
-      "Cortes and Vapnik's 1995 support-vector networks paper extended the approach to non-separable data. The useful idea here is a tradeoff: prefer a wide margin, but allow violations at a cost. Our small geometric examples illustrate that objective; they do not claim to reproduce the paper's optical-character experiments."
+      "Cortes and Vapnik's 1995 support-vector networks paper allowed the classifier to handle data that could not be separated perfectly. A point could violate the margin, but doing so carried a cost. The model could then balance a wider margin against those violations. We will use small geometric examples to understand that choice; the paper's experiments concerned optical character recognition."
     ]
   },
   "hierarchical-clustering": {
@@ -512,7 +512,7 @@
     ],
     "blocks": [
       "Grouping many observations poses a practical search problem: there are too many possible partitions to inspect exhaustively. Ward's 1963 procedure described forming a hierarchy through successive merges chosen by an objective. It made the sequence of grouping decisions part of the result.",
-      "Different merge criteria produce different hierarchies. Ward's criterion uses the increase in within-group squared variation. Our first construction uses single linkage, the nearest cross-group pair, so we can see exactly which distance caused a merge. We should not call these two criteria interchangeable."
+      "Once groups contain several sensors, there is more than one way to decide which groups are closest. Ward's criterion chooses the merge with the smallest increase in within-group squared variation. We will begin with single linkage instead: find the nearest pair with one sensor in each group. That lets us point to the distance responsible for each merge. These criteria can produce different hierarchies."
     ]
   },
   "density-based-clustering": {
@@ -674,7 +674,7 @@
     ],
     "blocks": [
       "Forecasting grew around decisions that had to be made before demand, production, or other measurements were known. A method needed to earn its complexity against forecasts available from the existing record. Hyndman and Athanasopoulos's forecasting text formalises simple rules as benchmarks in this workflow.",
-      "We will use an invented greenhouse record. Repeating the last observation is called a naive forecast. It is useful as a reference because it asks whether a learned model contributes anything beyond persistence."
+      "We will begin by predicting that tomorrow's demand equals the latest observed demand. This is a naive, or persistence, forecast. Our greenhouse record is invented so we can check every prediction. A more complicated method should be compared with this rule on the same future days."
     ]
   },
   "lagged-features": {
@@ -700,7 +700,7 @@
     ],
     "blocks": [
       "Time-series modelling developed tools for records whose levels or recurring patterns changed over time. Differencing became a central part of the Box-Jenkins ARIMA approach: model changes when a more stable relationship can be expressed there.",
-      "Differencing does not magically make every record stationary. We will inspect a deliberately simple trend and cycle so the effect of each subtraction is visible, then state what that toy example leaves unresolved."
+      "Let's try differencing on a record where we know the trend and repeating cycle we put into it. We can watch what each subtraction removes. A real record may retain changing behaviour afterwards, so differencing is something to inspect, not an automatic guarantee of stationarity."
     ]
   },
   "exponential-smoothing": {
@@ -729,7 +729,7 @@
       }
     ],
     "blocks": [
-      "Yule's 1927 investigation of disturbed periodic series was an important early contribution to autoregressive modelling. The central idea relates a present value to earlier values of the same process, leaving a remainder for unexplained variation.",
+      "Yule's 1927 work investigated disturbed periodic series by relating a value to earlier values of the same process. That gives us a way to learn how earlier readings contribute, while leaving a remainder for variation the relationship does not explain. We will use that idea with Botie's demand history.",
       "Later ARIMA methods combined autoregressive terms with other components, including differencing. Our exercise fits a small autoregression directly with least squares; it is not an automatic ARIMA-selection procedure."
     ]
   },
@@ -747,7 +747,7 @@
     ],
     "blocks": [
       "Forecasting researchers needed evaluations that respected the order in which observations became available. Tashman's 2000 review discussed out-of-sample testing choices, including rolling origins, rather than treating one fitted historical curve as evidence of future accuracy.",
-      "The practical idea is to repeat the forecasting decision under several historical information boundaries. Our small replay uses known arrays so we can inspect those boundaries without downloading a dataset."
+      "Let's replay the decision at several earlier dates. At each date we expose only the observations that would have been available then, fit the procedure, and record its forecast before checking the later result. The small arrays let us inspect these time boundaries directly."
     ]
   },
   "exploration-and-bandits": {
@@ -880,7 +880,7 @@
     ],
     "blocks": [
       "Rabiner’s 1989 tutorial explained hidden Markov models and their use in speech recognition. A sound recording gives noisy observations of an underlying sequence, rather than a direct label for each state.",
-      "The forward calculation also gives a general recipe for tracking hidden conditions: predict state probabilities, weight them by observation likelihoods, and normalise. Our pump is a teaching example with supplied transition and alarm probabilities."
+      "We can use the same forward calculation to track the pump. First the transition model tells us how its condition might have changed. We then ask how likely the alarm is under each possible condition and update their probabilities. Our pump example uses supplied transition and alarm probabilities so we can follow each update by hand."
     ]
   },
   "gaussian-process-regression": {
@@ -1118,7 +1118,7 @@
     ],
     "blocks": [
       "GraphSAGE learned functions for sampling and aggregating local neighbourhood information, allowing representations to be constructed from node features and neighbourhoods. This differs from storing a separate learned vector for every node identity.",
-      "Our lesson isolates a full-neighbour mean. It does not reproduce GraphSAGE’s sampling and learned combination, but makes the message-gathering operation visible before adding trainable transformations."
+      "Before adding learned transformations, let's calculate the mean of all a node's neighbours. That smaller operation lets us see exactly which readings reach each node. GraphSAGE also samples neighbours and learns how to combine their information; our first example isolates the gathering step."
     ]
   },
   "graph-convolution": {

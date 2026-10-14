@@ -59,8 +59,7 @@ export default function SimpleLinearRegressionPage() {
 <>
               <SubSection title="1. Paired observations">
                 <p>
-                  Five people, each measured twice. Everything on this page is
-                  built from them.
+                  Let&apos;s use five people whose heights and weights we have measured. We will keep returning to these same observations as we work out how to choose a line.
                 </p>
                 <Equation>{"height (cm):  160   165   170   175   180\nweight (kg):   58    66    68    74    74"}</Equation>
                 <p>
@@ -101,10 +100,7 @@ export default function SimpleLinearRegressionPage() {
                   ]}
                 />
                 <p>
-                  The hat on ŷ is doing real work. It separates what the line
-                  predicts from what was actually measured, which is written
-                  plain as y, and the gap between those two is the whole subject
-                  of Part 2.
+                  The hat distinguishes a prediction, ŷ, from the observed value, y. Keeping the two symbols separate lets us describe the error between what the line predicted and what we measured. Part 2 works through those gaps.
                 </p>
               </SubSection>
 
@@ -348,8 +344,7 @@ export default function SimpleLinearRegressionPage() {
 
               <SubSection title="10. The least-squares solution">
                 <p>
-                  Here is the answer ahead of its derivation, because it is worth
-                  being able to read before it is worth being able to prove.
+                  Here is the fitted rule. Let&apos;s read what its slope and intercept mean for the people in our table, then derive how the fit chose them.
                 </p>
                 <Equation>{"β = Σ(xᵢ − x̄)(yᵢ − ȳ) / Σ(xᵢ − x̄)²\n\nα = ȳ − β·x̄"}</Equation>
                 <p>
@@ -729,9 +724,7 @@ export default function SimpleLinearRegressionPage() {
               </p>
               <Equation>{"xᵢ − x̄ = 0  for every person\nΣ(xᵢ − x̄)² = 0"}</Equation>
               <p>
-                The slope formula divides by that, so it has no answer. It is
-                worth being precise about what has actually failed, because
-                &ldquo;there is no line&rdquo; is not quite right.
+                The slope formula would divide by zero. That means these observations do not identify a unique slope. It does not mean that no line can make predictions for them.
               </p>
               <p>
                 A prediction at 170 cm is still perfectly available, and it is the

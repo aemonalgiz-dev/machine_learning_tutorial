@@ -28,7 +28,7 @@ export default function Page() {
     sections={[
 { title: "Part 1. Distinguish Scores, Probabilities, and Choices", content: <>
 <SubSection title="1. A score is not a probability">
-<p>{"Three different things are easy to run together here. A model produces scores. The scores are turned into probabilities. A selection rule turns the probabilities into one chosen token. The controls in this lesson act on the second step, and they are easier to follow once the three are held apart."}</p>
+<p>{"Before moving the controls, follow how a token is selected. The model first produces scores. We turn those scores into a probability distribution, then select one token from it. Temperature and filtering change the distribution used for selection. Keeping that sequence in view helps us see which part of the process a control actually affects."}</p>
 <p>{"A logit can be any finite real number. Softmax compares all vocabulary logits to produce nonnegative shares that total one. The absolute size of a score is less important than its difference from other scores."}</p>
 <p>{"The live example holds four candidates and their scores fixed. The candidate sat has a logit of 2, slept has 1, ran has 0 and sang has −1. None of those is a probability. They do not total one, and one of them is negative. Softmax turns them into the shares in the last column."}</p>
 <NumberTable headings={["candidate", "logit", "probability"]} rows={[["sat", "2", "0.6439"], ["slept", "1", "0.2369"], ["ran", "0", "0.0871"], ["sang", "−1", "0.0321"]]} caption="The live table at a temperature of one with top-p at one. Part 2 shows the arithmetic." />

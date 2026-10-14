@@ -104,7 +104,7 @@ export default function KeypointsAndDescriptorsPage() {
               <SubSection title="2. Most positions cannot say where they came from">
                 <>
 <p>
-                  It is worth watching that happen rather than taking it. Put a bright square on dark ground, cut a five-wide patch from the middle of its left edge, and then slide a window down that edge one row at a time, measuring how far what the window sees is from the patch we cut. Five of the fifteen stops come out at a distance of exactly zero.
+                  Let&apos;s try it. Take a five-pixel-wide patch from the middle of the bright square&apos;s left edge. Slide the comparison window down the edge and measure its distance from that patch. Five of the fifteen positions give distance zero, so the local patch cannot tell those positions apart.
                 </p>
                 <p>
                   Not nearly zero; the same numbers in the same order. Slide the same window past the corner instead and exactly one stop matches, which is the corner itself.
@@ -112,13 +112,7 @@ export default function KeypointsAndDescriptorsPage() {
 </>
                 <ApertureSlide />
                 <p>
-                  This is the aperture problem, and the name is a good one. Look
-                  at a long edge through a small hole and you can see when it
-                  moves across itself and not when it moves along itself, so the
-                  hole gives you one of the two numbers you wanted and there is
-                  nothing to be done about the other. A corner shows through the
-                  same hole as two edges at once, and moving it in any direction
-                  changes what the hole sees.
+                  This is the aperture problem. Imagine looking at a long straight edge through a small hole. Movement across the edge changes the visible patch, but movement along it may leave the patch looking the same. We then lack evidence for one component of motion. A corner contains changes in two directions, so moving it either way can change what we see.
                 </p>
                 <KeepInMind>
                   A position is worth describing exactly when moving a window
@@ -342,11 +336,7 @@ eigenvalues  =  ( trace ± √( trace² − 4 × determinant ) ) / 2`}
 
               <SubSection title="9. Along a straight edge the shape term is exactly zero">
                 <p>
-                  Now the determinant, and here the numbers stop being close.
-                  The corner reads 30.222222. The middle of the edge reads 0.0,
-                  and it is worth being careful about what kind of zero that is.
-                  It is not a small number that rounding could have moved; it is
-                  zero because of what the matrix is.
+                  The corner&apos;s determinant is 30.222222, while the middle of the edge gives zero. In this ideal example, that zero comes from a rank-deficient matrix: the gradients provide variation in only one direction. It is not just a small nonzero determinant rounded for display.
                 </p>
                 <WhyThisWorks title="Why gradients along one direction give a zero determinant">
                   <>
@@ -653,7 +643,7 @@ distance     =  length of ( one description − the other )`}
               <SubSection title="16. What the two steps buy, measured">
                 <>
 <p>
-                  It is worth checking that they buy what they promise rather than assuming it. Add ten to every pixel of the picture and the description of that same corner moves by 1.2 × 10⁻¹⁵. Multiply every pixel by three and it moves by 2.0 × 10⁻¹⁶. I expected both of those to be exactly zero and they are not, because the subtraction and the division are done in floating point and their last bits do not always land where the algebra says.
+                  Adding ten to every pixel changes this corner descriptor by 1.2 × 10⁻¹⁵. Multiplying every pixel by three changes it by 2.0 × 10⁻¹⁶. The algebra predicts invariance for these transformations, while floating-point subtraction and division leave tiny residual differences. Compare within a numerical tolerance rather than requiring bit-for-bit equality.
                 </p>
                 <p>
                   On a scale whose maximum is 2, moving by 10⁻¹⁵ is nothing, but it is rounding rather than identity and the difference is worth stating.
@@ -893,13 +883,7 @@ distance     =  length of ( one description − the other )`}
             <>
               <SubSection title="22. What the method costs">
                 <p>
-                  The saving is downstream and it is worth being exact about
-                  where. Finding the places costs a full pass over the picture
-                  whatever happens, since a score has to be computed at every
-                  one of the 2,304 pixels before the strongest few can be
-                  chosen, and that is one sweep per gradient direction plus one
-                  per averaged product. Nothing about keeping 47 answers makes
-                  that stage cheaper.
+                  Keeping 47 keypoints saves work in the later description and matching stages. Detecting them still requires a score at all 2,304 pixels, including the gradient passes and averaged products. We should include that full-image work when measuring the total cost.
                 </p>
                 <SceneLedger show="cost" />
                 <p>

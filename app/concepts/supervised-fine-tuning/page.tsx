@@ -28,7 +28,7 @@ export default function Page() {
     sections={[
 { title: "Part 1. Define the Behavior Before Training", content: <>
 <SubSection title="1. Start with a pretrained model and target responses">
-<p>{"A pretrained language model has learned one thing, which is to continue text. Nothing in that training says a question should be followed by its answer, or that an answer should stop when it is complete. A question followed by another question is also a plausible continuation. What the model is missing is a demonstration of the continuation we want."}</p>
+<p>{"A pretrained language model has learned patterns through predicting text continuations. Its training data may include questions and answers, but the prediction objective alone does not require every response to follow our intended task or format. We can demonstrate the behaviour we want with selected prompt-response pairs and continue training on them. That is supervised fine-tuning."}</p>
 <p>{"Supervised fine-tuning continues training from existing parameters using examples selected for a task or behavior. A prompt-response pair might demonstrate answering a question, extracting fields, summarizing a passage, or following a required output format."}</p>
 <p>{"The target response is labeled data: it specifies what the model should be encouraged to produce. More examples are not automatically better if their responses conflict, contain errors, or fail to represent the intended use."}</p>
 <p>{"This page follows one pair all the way through. The prompt is a start token and two words, and the response is one word and an end token."}</p>

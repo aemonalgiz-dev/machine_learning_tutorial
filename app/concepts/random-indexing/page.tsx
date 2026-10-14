@@ -71,7 +71,7 @@ export default function RandomIndexingPage() {
               <SubSection title="1. Twenty-four documents, and three sentences small enough to check">
                 <>
 <p>
-                  Everything on this page is fitted to one of two collections, and it is worth knowing what is in them before any method touches them. The larger one is twenty-four documents, twelve about cooking and twelve about sailing. The cooking half is written from ten words, flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan; the sailing half from ten of its own, sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew.
+                  We will reuse twenty-four documents with two controlled topics. The cooking half uses flour, sugar, butter, eggs, oven, bake, stir, whisk, dough and pan. The sailing half uses sail, wind, boat, harbour, anchor, tide, mast, rope, deck and crew. A smaller collection later lets us calculate individual updates by hand.
                 </p>
                 <p>
                   No subject word appears in both halves. What the halves share is three words carrying no subject at all, and, the and we, and each document uses exactly one of them.
@@ -139,14 +139,7 @@ export default function RandomIndexingPage() {
 
               <SubSection title="3. Most pairs of words never once met">
                 <p>
-                  It would be reasonable to expect a table of who appeared beside
-                  whom to be useful only for pairs that did appear beside each
-                  other. It is not, and the reason is the whole point of
-                  counting. Two words that never met can still be recognised as
-                  alike, because what is compared is not the cell where they
-                  meet but their two rows, and two words that keep the same
-                  company have similar rows whether or not they ever shared a
-                  document.
+                  What about two words that never occur beside one another? Their rows can still look similar if they occur beside the same other words. We compare the whole context profiles, not only the cell for the pair itself. That lets the representation express a relationship supported by shared contexts even when the words never meet.
                 </p>
                 <p>
                   On the twenty-four documents, 110 of the 190 pairs made of two
@@ -189,13 +182,7 @@ export default function RandomIndexingPage() {
                   </p>
                 </>
                 <InAModel>
-                  At this size the objection is entirely theoretical, and it is
-                  worth saying so plainly. Building 529 numbers to keep 368 is
-                  not a hardship. The complaint is about the order of the two
-                  steps rather than about their sizes, because the widest object
-                  the calculation ever holds is one that exists only so that
-                  something much narrower can be got out of it, and it has to be
-                  complete before the narrowing can start.
+                  At this scale, forming 529 entries to retain 368 is inexpensive. The concern becomes practical with larger vocabularies: building the full co-occurrence table can require much more storage than the representation we keep. Random indexing lets us investigate a way to accumulate a smaller representation directly.
                 </InAModel>
                 <KeepInMind>
                   There is a second cost hidden in the order, which is that the
@@ -285,12 +272,7 @@ export default function RandomIndexingPage() {
 
               <SubSection title="7. Nothing is fitted and nothing is decomposed">
                 <p>
-                  It is worth pausing on what is absent. There is no objective
-                  being minimised, so there is no learning rate and no question
-                  of whether the walk has converged. There are no eigenvectors,
-                  so no decomposition has to be run and nothing has to be
-                  reordered by how much it accounts for. There is no second pass
-                  over the collection.
+                  These updates accumulate context vectors directly. They do not minimize a loss by gradient descent, so there is no learning rate or convergence loop to tune. We also avoid decomposing a full co-occurrence table. One pass can build the representation, with later observations contributing further updates.
                 </p>
                 <p>
                   The only randomness in the whole procedure is the draw of the
@@ -522,7 +504,7 @@ export default function RandomIndexingPage() {
               <SubSection title="12. If they were exactly perpendicular, nothing would be lost">
                 <>
 <p>
-                  It is worth being precise about what near-perpendicularity is buying, because there is a clean statement available and it is stronger than the usual hand-wave. Suppose for a moment the drawn directions really were exactly at right angles to each other and all of the same length. Then multiplying the table of counts by them would be a rotation of the space the rows live in, and a rotation changes no angle between any two rows at all.
+                  Consider an ideal comparison first. If the context directions were mutually orthogonal and all had the same length, mapping count rows onto them would preserve angles, up to a common scale in lengths. That would preserve the comparisons exactly. Random indexing uses approximately orthogonal directions in a smaller space, so we need to measure the resulting distortion.
                 </p>
                 <p>
                   Every question anybody wanted to ask of the table would come back identical, and the narrowing would have cost nothing at all.
@@ -531,7 +513,7 @@ export default function RandomIndexingPage() {
                 <WhyThisWorks title="What exact orthogonality would preserve, and why we approximate it">
                   <>
 <p>
-                    They are not exactly at right angles, and they cannot be, since a space of d numbers holds at most d directions mutually at right angles and there are usually more words than that. What Johnson and Lindenstrauss proved in 1984 is that this hardly matters. A random linear map into d dimensions keeps every distance among a set of points to within a factor of one plus or minus epsilon, provided d is roughly the logarithm of how many points there are divided by epsilon squared, and crucially that has nothing to do with how many dimensions the points started in.
+                    A d-dimensional space can contain at most d mutually orthogonal nonzero directions, fewer than the number of words in many vocabularies. The Johnson-Lindenstrauss result gives a related reason to consider random projections: for a fixed finite set of points, suitable random maps can preserve distances approximately with high probability using a dimension proportional to the logarithm of the point count divided by the squared error tolerance. That bound need not depend on the original dimension. It does not guarantee that every sparse projection or small draw used here preserves every comparison.
                   </p>
                   <p>
                     Achlioptas showed in 2001 that a sparse map with entries only −1, 0 and +1 satisfies the same bound as one drawn from a bell curve.

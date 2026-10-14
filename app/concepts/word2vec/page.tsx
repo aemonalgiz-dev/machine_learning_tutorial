@@ -62,9 +62,7 @@ export default function Word2vecPage() {
           <Link href="/concepts/distance-metrics" className={link}>
             cosine
           </Link>{" "}
-          between their vectors throughout, which is an angle rather than a
-          distance, and it is worth being comfortable with that difference
-          before the first fit.
+          similarity between their vectors throughout. It measures the cosine of their angle: vectors pointing in the same direction have similarity one, even if their lengths differ. The linked lesson compares that directional similarity with distance.
         </>
       }
 
@@ -78,20 +76,14 @@ export default function Word2vecPage() {
               <SubSection title="1. Two lists of words that never meet">
                 <>
 <p>
-                  Everything on this page is fitted to one small corpus, and it is worth knowing exactly what is in it before any method touches it. Two hundred sentences of five to eight words each, and every sentence is drawn from one of two word lists and never from both. One list holds twenty forms of five verbs, play, stay, say, walk and talk, in their various endings; the other holds eleven words about money, stock, bond, market, price and so on.
+                  What evidence will these vectors learn from? Our corpus contains two hundred sentences, each five to eight words long. Every sentence uses one of two word lists. The first contains twenty forms of play, stay, say, walk and talk; the second contains eleven words about money, including stock, bond, market and price. The lists never mix within a sentence. That separation gives us a pattern to look for in the learned vectors.
                 </p>
                 <p>
                   That comes to 1,311 word occurrences across 31 distinct words, and no word appears in both lists.
                 </p>
 </>
                 <p>
-                  The sentences themselves are nonsense, which is the point.
-                  Nothing in them is grammatical and nothing means anything, so
-                  there is no hidden knowledge of English for a method to
-                  exploit, and the only structure available is which words turn
-                  up beside which. If a method recovers the two lists it did so
-                  from company alone, and if it does not, we can say so with a
-                  number rather than an impression.
+                  These generated sentences are deliberately artificial. We sample from the two word lists without writing grammatical sentences, so we know which contextual pattern the experiment supplies. If the learned vectors separate the lists, we can check that result against the construction. It would not establish that the method had learned grammar or a general account of meaning.
                 </p>
                 <KeepInMind>
                   The one thing that is true of this corpus and hidden from every
@@ -655,12 +647,7 @@ export default function Word2vecPage() {
 
               <SubSection title="15. What the tree saves, honestly">
                 <p>
-                  On the corpus this page uses, the tree saves almost nothing,
-                  and it is worth saying so plainly rather than quoting the
-                  logarithm and moving on. Thirty one words give an average path
-                  of 4.9008 branch points against a sweep of 31, so the saving is
-                  a factor of about six, and against the six rows negative
-                  sampling touches it is a saving of about one row.
+                  With this small vocabulary, hierarchical softmax uses an average of 4.9008 branch decisions per target instead of scoring all 31 words. That is about six times fewer output decisions than a full sweep. Against this negative-sampling setup&apos;s six output rows, however, the difference is only about one row. These operation counts help explain the methods; they are not measured runtime ratios.
                 </p>
                 <>
 <p>

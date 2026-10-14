@@ -72,14 +72,7 @@ export default function NGramsPage() {
 <>
               <SubSection title="1. What this method is for">
                 <p>
-                  The pages on either side of this one decide where the pieces
-                  of a text are, splitting on spaces by the simplest rule there
-                  is and the Unicode boundaries by a standard written to cover
-                  every writing system at once. This page starts after that
-                  decision has been made. It takes the pieces as given and asks
-                  a different question, which is how often each run of adjacent
-                  pieces occurs, and what those counts let you say about a word
-                  you have not read yet.
+                  Once we have chosen text pieces, we can ask which pieces tend to occur together. Does knowing the preceding word help us predict the next one? We will count runs of adjacent tokens at different lengths and use those counts to build a prediction rule. The tokenizer is fixed for this experiment, so we can focus on what the counts tell us.
                 </p>
                 <p>
                   Context can help a speech recogniser choose between words
@@ -1175,11 +1168,7 @@ export default function NGramsPage() {
                   the model being a different model because the text was different.
                 </p>
                 <p>
-                  This is not peculiar to counting runs. Anything fitted to a
-                  corpus inherits it. It is worth stating here because the counting
-                  is so direct that the inheritance can be looked up entry by
-                  entry, which is more than can be said for most of the models on
-                  this site.
+                  The count table reflects the corpus from which it was estimated. We can inspect individual entries to see that dependence directly. Other fitted language models also depend on their training data, although their learned relationships may be harder to read entry by entry.
                 </p>
                 <KeepInMind>
                   A model of this kind will happily predict text from a domain
@@ -1223,11 +1212,7 @@ export default function NGramsPage() {
 
               <SubSection title="27. Where the arithmetic runs out">
                 <p>
-                  Beside the three limits above there are cases where the
-                  definition simply has nothing to say, and it is worth knowing
-                  which is which. Each row below is a fact about the mathematics
-                  rather than a matter of taste, and several of them carry a choice
-                  that somebody has to make and that changes the answer.
+                  The following cases need an explicit implementation policy or make a requested calculation undefined. The table names the missing quantity and explains what each policy changes.
                 </p>
                 <DerivationTable
                   expressionHeading="Context or observed sequence"

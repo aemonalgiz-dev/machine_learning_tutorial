@@ -23,7 +23,7 @@ import { UNetTrainingCurves } from "@/components/widgets/UNetTrainingCurves";
 export const metadata: Metadata = {
   title: "U-Net · oop_ml",
   description:
-    "Sometimes we need to know which pixels belong to an object, not just whether the object is present. U-Net learns from images paired with labelled masks and carries spatial detail forward to help reconstruct those boundaries.",
+    "To outline an object, we need a prediction for each pixel. U-Net learns from images paired with labelled masks, using spatial information from the encoder to help the decoder recover the regions and their boundaries.",
 };
 
 const link =
@@ -39,7 +39,7 @@ export default function UNetPage() {
       playgroundTitle="Follow image details down and back up the network"
       playgroundIntro="Compare the predicted mask with the target pixel by pixel. Pay particular attention to boundaries and thin shapes when the skip connections are removed."
       title="U-Net"
-      tagline={"Sometimes we need to know which pixels belong to an object, not just whether the object is present. U-Net learns from images paired with labelled masks and carries spatial detail forward to help reconstruct those boundaries."}
+      tagline={"To outline an object, we need a prediction for each pixel. U-Net learns from images paired with labelled masks, using spatial information from the encoder to help the decoder recover the regions and their boundaries."}
       prerequisites={
         <>
           The way down is the network on the{" "}
@@ -77,7 +77,7 @@ export default function UNetPage() {
                   Every picture here is one of the sixteen by sixteen pictures from the convolutional networks page, a cross, a square outline, a filled disc or a diagonal bar drawn at a random place and size, brightness and background, with a little noise on every pixel. That page asked which of the four kinds each picture held.
                 </p>
                 <p>
-                  This one asks, for every one of its 256 pixels, whether the pixel belongs to the shape. The answer is a picture of its own, one yes or no per pixel, and every picture in the collection is drawn with that answer attached, which is called its mask. The box at the top of the page shows the first held-out picture of each kind with its mask.
+                  Now we want a decision for each of the image&apos;s 256 pixels: does it belong to the shape? We train with labelled data, pairing every image with its correct segmentation mask. In this drawn dataset we know the mask because we placed the shape ourselves. The display shows held-out images with their masks, so we can compare a predicted region with the labelled target.
                 </p>
 </>
                 <NumberTable
@@ -838,10 +838,7 @@ export default function UNetPage() {
                   right.
                 </p>
                 <KeepInMind>
-                  Before a network is trained to answer every pixel, it is worth
-                  measuring how much of the answer a rule on each
-                  picture&rsquo;s brightness already gives, and here it gave all
-                  but one pixel in 61,440.
+                  Before training, compare with a brightness-threshold baseline. On these held-out images, that rule gets all but one of 61,440 pixels right. A network result needs to be judged against that strong performance on this deliberately simple image distribution.
                 </KeepInMind>
               </SubSection>
             </>

@@ -67,7 +67,7 @@ export default function BytePairEncodingPage() {
                   Every page in this section carries the same sentence, and this one carries a corpus beside it. The sentence is the one below, and I wrote the corpus myself, eighteen short sentences of ordinary English about reports and costs and analyses, chosen so that every character the sentence uses turns up somewhere in them and so that the words are plausible neighbours of the sentence&rsquo;s own.
                 </p>
                 <p>
-                  The corpus does not contain the sentence, and that is the whole arrangement we are going to study, since a vocabulary is only interesting on text it was not built from.
+                  The held-out sentence is absent from the corpus. We can therefore test how the learned pieces represent new text, while using familiar characters so that unknown-character handling does not obscure the first example.
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <p>
@@ -270,13 +270,7 @@ export default function BytePairEncodingPage() {
 
               <SubSection title="7. Joining the commonest pair, and repeating">
                 <p>
-                  Take the pair with the largest count, replace every occurrence
-                  of it everywhere in the corpus with a single new symbol which
-                  is the two written together, and add that symbol to the
-                  vocabulary. Then count again on the respelled corpus and do it
-                  once more. That is the whole loop, and it stops when the
-                  vocabulary has reached the size we asked for, or earlier if no
-                  pair is left that occurs at least twice.
+                  Choose the pair with the largest count and replace its non-overlapping occurrences with a joined symbol. Add that symbol to the vocabulary, then count adjacent pairs again in the updated corpus. Repeating this changes which longer pieces can become candidates. In this implementation, we stop at the requested vocabulary size, or earlier when no pair occurs at least twice.
                 </p>
                 <DerivationTable
                   expressionHeading="the step"
@@ -587,13 +581,7 @@ export default function BytePairEncodingPage() {
             <>
               <SubSection title="13. The number asked for, and the rows that result">
                 <p>
-                  Adding 257 rows raises a bookkeeping question, and the answer
-                  shows on the readouts, so it is worth saying rather than
-                  leaving to be discovered. The number we ask for bounds only
-                  what the corpus taught, which is the alphabet, the stand-in
-                  and the merges. The 257 sit underneath that and outside the
-                  budget, so asking for 54 gives a table of 311 rows and asking
-                  for 137 gives one of 394.
+                  In this implementation, the requested vocabulary budget covers the corpus alphabet, the stand-in and the learned merges. The 257 fallback rows are additional. Consequently a request for 54 gives 311 total rows, while a request for 137 gives 394. Read the total table size when estimating storage, rather than assuming the request is a cap on every row.
                 </p>
                 <NumberTable
                   headings={["asked for", "merges", "learned from the corpus", "rows in the table"]}
@@ -687,14 +675,7 @@ export default function BytePairEncodingPage() {
 
               <SubSection title="16. What the number trades">
                 <p>
-                  Between those bounds the size is a real trade, and it is worth
-                  naming both sides plainly. A larger vocabulary means shorter
-                  sequences, so whatever reads the pieces does less work per
-                  sentence and carries information a shorter distance. It also
-                  means more rows, and in a language model each row is an entire
-                  vector to learn, so the parameter count grows with the
-                  vocabulary while the number of times each new row is seen in
-                  training falls.
+                  Increasing the vocabulary can shorten the encoded sequences, reducing the number of positions a later model must process. It also adds embedding rows to learn and store. Some new pieces occur rarely, so their vectors receive little training evidence. We need to compare both sequence lengths and table costs for the text we expect to use.
                 </p>
                 <p>
                   That second effect is the one that decides where to stop in

@@ -191,13 +191,7 @@ export default function WhatATokenIsPage() {
             <>
               <SubSection title="4. A list, and the position each piece holds">
                 <p>
-                  A vocabulary is a list of pieces, fixed once it is built,
-                  with each piece owning its position in the list. Position
-                  zero is the first entry, position one the second, and the
-                  number a piece goes in as is simply where it sits. There is no
-                  second table of numbers to keep in step with the first, which
-                  is the whole reason for making the position the number rather
-                  than storing a number beside each piece.
+                  In this implementation, a vocabulary is a fixed list of pieces. The position of a piece is its ID: zero for the first entry, one for the second, and so on. To encode a piece we find its position; to decode an ID we retrieve the piece at that position. This keeps both operations tied to the same ordering.
                 </p>
                 <p>
                   The tables on this page are built from six sentences, the
@@ -405,12 +399,7 @@ export default function WhatATokenIsPage() {
             <>
               <SubSection title="8. The sentence one character at a time">
                 <p>
-                  The smallest units worth using are the characters themselves.
-                  Every character of the six sentences becomes an entry, spaces
-                  and punctuation included, which gives 37 entries. The running
-                  sentence then becomes 51 numbers, one for each character it
-                  contains, and the space carries a number of its own like
-                  everything else.
+                  We can also give individual characters their own entries. The six sentences contain 37 distinct characters when we include spaces and punctuation. The running sentence then becomes 51 IDs, one per character. Its spaces have IDs too, which will matter when we try to reconstruct the text. Later we will consider bytes as another choice of unit.
                 </p>
                 <Equation>
                   {"D  r  .  ␣  A  l  v  a  r  e  z  ␣  d  i  d  n  '  t  ...\n" +
@@ -675,14 +664,8 @@ export default function WhatATokenIsPage() {
 
               <SubSection title="14. What the stand-in throws away">
                 <p>
-                  It is worth being precise about what is lost, because the
-                  loss is total rather than partial. The number 0 does not carry
-                  a blurred version of{" "}
-                  <span className="font-mono">calibration</span>. It carries
-                  nothing about it at all, not its length, not its letters, not
-                  whether it was a name or a verb. Reading the numbers back
-                  gives the same sentence for both, with the same gap in the
-                  same place.
+                  The reserved ID 0 tells us that the vocabulary could not represent this piece. It does not preserve the spelling of{" "}
+                  <span className="font-mono">calibration</span>. Many unseen pieces receive that same ID, so we cannot recover which spelling occupied the gap by decoding it. Both sentences therefore decode to the same result.
                 </p>
                 <Equation>
                   {"The calibration drift was larger than expected.\n" +
@@ -875,15 +858,7 @@ export default function WhatATokenIsPage() {
                   it substitutes twice, for the two accented letters.
                 </p>
                 <p>
-                  The distinction between the two failures matters. The
-                  character rule could round trip both texts perfectly if the
-                  corpus it was built from had contained a line break and an
-                  accent, so its failure is a fact about this corpus. The
-                  whole-word rule could not round trip the second text however
-                  much text it had been built from, so its failure is a fact
-                  about the rule. When a scheme reports a loss it is worth
-                  asking which of the two kinds it is, since only one of them
-                  goes away with more data.
+                  These failures need different repairs. Adding the missing line break and accented character to this character vocabulary would let it round trip both texts. The whole-word rule discards information during splitting, so adding more vocabulary entries cannot recover it. When decoding loses something, check whether it was absent from the vocabulary or removed before the lookup.
                 </p>
                 <KeepInMind>
                   A round trip can fail because the table was too small or
@@ -1059,7 +1034,7 @@ export default function WhatATokenIsPage() {
             choice(
               "What does the reserved entry at number 0 carry about the word it stood in for?",
               [
-                "Nothing at all, not its length, not its letters, not whether it was a name or a verb",
+                "It identifies an unknown piece but does not preserve its spelling or length",
                 "A blurred version of the word",
                 "Its first letter, which the alphabetical table preserves",
                 "Enough to tell one unseen word from another when the numbers are read back",

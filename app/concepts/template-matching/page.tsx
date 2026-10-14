@@ -65,12 +65,7 @@ export default function TemplateMatchingPage() {
 <>
               <SubSection title="1. The question, and the picture we keep asking it of">
                 <p>
-                  Suppose we already have a small picture of something and we
-                  want to know whereabouts it appears in a larger picture. We
-                  are not asking what is in the larger picture, and we are not
-                  asking whether the thing is the kind of thing it is. We have a
-                  particular arrangement of brightness in hand and we want its
-                  position.
+                  Suppose we have a small picture of a cross and want to find it in a larger scene. We already know the appearance we are looking for. The question is where a similar arrangement of brightness occurs. We can slide the small picture over the scene and compare the values at each position.
                 </p>
                 <>
 <p>
@@ -113,13 +108,7 @@ export default function TemplateMatchingPage() {
                   starts and why it predates everything else by decades.
                 </p>
                 <p>
-                  The small picture is called the template, the large one the
-                  picture or the scene, and the grid of scores that comes out is
-                  the score surface. The surface is worth looking at rather than
-                  discarding, since it holds every position and not just the
-                  winner, and the difference between a picture that contains the
-                  thing and one that does not is visible in its shape long
-                  before any number is read off it.
+                  We call the small picture the template. Comparing it at each position in the larger scene gives us a grid of scores, or score surface. Keep that surface in view. It shows whether the best match stands out from the alternatives, or whether many positions look almost equally plausible. A best score alone cannot establish that the object is present.
                 </p>
               </SubSection>
 
@@ -277,14 +266,7 @@ export default function TemplateMatchingPage() {
                   rather than by having judged anything.
                 </p>
                 <p>
-                  The reason is easy to see once it is stated. A large sum of
-                  products can be had two ways, by agreeing with the template
-                  where it is bright, or by being bright everywhere and nothing
-                  more than that. The
-                  flat white patch takes the second route and gets there just as
-                  well. Nothing in the rule distinguishes the two routes, because
-                  nothing in the rule ever looks at what the patch would have
-                  been without its overall brightness.
+                  A large sum of products can come from matching the template&apos;s bright regions, but a uniformly bright patch can also produce a large total. The raw score has no separate way to account for the patch&apos;s mean brightness. We need to decide whether that brightness is useful evidence or something the comparison should remove.
                 </p>
                 <KeepInMind>
                   This is not a corner case arranged to embarrass the rule. Any
@@ -828,13 +810,7 @@ where a lower score is better     ratio = runner-up / winner`}</Equation>
                   that difference as evidence of distinctiveness.
                 </p>
                 <p>
-                  It is worth knowing that these two measurements can point in
-                  opposite directions on the same input, and worth knowing why,
-                  which is that a good score and a distinctive score are not the
-                  same property. The remedy is not to prefer the worse rule; it
-                  is to read the ratio as the answer to its own narrow question
-                  and to notice, when it comes back at exactly 1.0, that an exact
-                  tie is what a repeated object looks like.
+                  A high match score and a distinctive match answer different questions. Several repeated objects can all match well, leaving the best and second-best scores tied and their ratio at 1.0. Inspect the score surface alongside the ratio before interpreting that tie as a poor match.
                 </p>
               </SubSection>
             </>
@@ -1126,11 +1102,7 @@ pixels read = positions × h × w`}</Equation>
 
               <SubSection title="29. A patch with one brightness, which is a different case">
                 <p>
-                  A flat patch inside an otherwise varied picture is not the same
-                  situation. The template is fine, the search is well posed, and
-                  one position among many cannot be scored. There is a real
-                  choice here and it is worth naming, since any implementation
-                  faces it.
+                  A flat candidate patch inside a varied image is a local problem: the template can still be valid, while this one position has no defined normalized comparison. We need a policy for skipping or marking that candidate without confusing it with a well-defined low score.
                 </p>
                 <p>
                   The options are to refuse the whole search, which throws away

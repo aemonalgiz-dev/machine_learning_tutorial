@@ -81,7 +81,7 @@ export default function FiltersAndEdgesPage() {
                 </p>
                 <>
 <p>
-                  There is one more thing in it, and it is deliberate. The whole scene is a little brighter on the right than on the left, by 0.30 spread evenly across the forty eight columns, which is 0.00638 per column. That is a ramp, and it is what a scene looks like when the lamp is off to one side.
+                  There is also a gradual change in illumination. The right side is brighter than the left by 0.30, spread evenly across forty-eight columns, or about 0.00638 per column. We call this a brightness ramp. It gives us a simple way to investigate uneven lighting, as though the lamp were off to one side.
                 </p>
                 <p>
                   Without it the page could not tell the difference between a method that reads the objects and a method that reads the lighting, and the playground above lets you take the ramp away and put it back.
@@ -179,14 +179,7 @@ export default function FiltersAndEdgesPage() {
 
               <SubSection title="4. What that costs, and where it is the wrong trade">
                 <p>
-                  It is worth saying plainly what has been given up, because the
-                  answer is a lot. The threshold in step 2 needed one comparison
-                  per pixel and gave a verdict about all 2304 of them, saying of
-                  each one whether it belonged to a shape. Reading differences
-                  instead costs thirty four multiplications and additions per
-                  pixel, and what comes back is an answer about the 450 pixels
-                  that sit on a boundary, from which it takes a further step to
-                  work out which side of the boundary the object is on.
+                  The threshold in step 2 made one comparison per pixel and classified all 2304 positions as foreground or background. Our difference calculation costs thirty-four multiplications and additions per pixel and highlights 450 boundary positions. Those responses do not yet tell us which side belongs to an object. Detecting a boundary and segmenting a region are different stages.
                 </p>
                 <p>
                   So where the lighting is genuinely fixed, the threshold is the
@@ -647,12 +640,7 @@ export default function FiltersAndEdgesPage() {
                   the central difference is thirty two.
                 </p>
                 <p>
-                  What every one of them does share is that its weights add to
-                  zero. That is what makes the answer zero on any flat region,
-                  whatever the brightness of that region, since the positive and
-                  negative weights then meet the same value and cancel. It is also
-                  why adding a constant to every pixel, which is what a second lamp
-                  did in Part 1, changes no answer anywhere.
+                  These filters all have weights that sum to zero. On a flat patch, each weight multiplies the same brightness, so the positive and negative contributions cancel. Adding a constant brightness to every sampled pixel also cancels in this way. That explains why the second lamp in Part 1 leaves the responses unchanged; at image boundaries, the result also depends on how missing neighbouring pixels are supplied.
                 </p>
                 <KeepInMind>
                   The size of the answer is a property of the grid as much as of
@@ -918,8 +906,7 @@ export default function FiltersAndEdgesPage() {
 
               <SubSection title="21. The gradient crosses the edge, it does not run along it">
                 <p>
-                  This is the thing most often got the wrong way round, so it is
-                  worth being blunt. The arrow points the way the brightness{" "}
+                  Check the arrow against the image. It points in the direction where brightness{" "}
                   <em>increases</em>. Standing on a boundary, the way the
                   brightness increases is across it, from the dark side to the
                   bright side. The boundary itself runs at right angles to that.
@@ -962,14 +949,7 @@ export default function FiltersAndEdgesPage() {
             <>
               <SubSection title="22. A derivative of something sampled at whole pixels">
                 <p>
-                  Everything on this page has been calling the answer a rate of
-                  change, and it is worth saying what that phrase can and cannot
-                  mean here. A rate of change is defined for a quantity known at
-                  every point of a continuum. Brightness is known at whole pixels
-                  and nowhere between them, so there is no rate of change to
-                  compute; there is only an estimate of what the rate would have
-                  been had the scene been sampled finely enough for the question
-                  to have an answer.
+                  The image gives us samples at pixel positions. To interpret an edge response as a rate of change, we assume an underlying brightness field and approximate its derivative from those samples. We cannot recover every variation between pixels from the grid alone. The sampling resolution and the chosen filter therefore limit what this estimate can tell us.
                 </p>
                 <>
 <p>
@@ -1036,15 +1016,7 @@ export default function FiltersAndEdgesPage() {
 
               <SubSection title="23. One threshold cannot do both jobs">
                 <p>
-                  The obvious last step is to decide, at every pixel, whether it
-                  is on an edge, by keeping the pixels whose sharpness is above
-                  some number. On the scene as it is drawn that works perfectly,
-                  and it is worth seeing why before seeing why it does not
-                  generally. Drawn by arithmetic the scene has no noise, so flat
-                  ground never answers above 0.0511 and the faintest pixel on a
-                  real boundary answers 0.898, more than seventeen times as much.
-                  Every threshold between those two labels all 2304 pixels
-                  correctly.
+                  We could keep every pixel whose gradient magnitude exceeds a cutoff. In this noise-free drawn scene, the largest background response is 0.0511 and the smallest true-boundary response is 0.898. A threshold between them separates all 2304 labelled positions correctly. The clean gap is why this example is easy; noise and weaker boundaries can remove it.
                 </p>
                 <p>
                   Now add the thing a photograph has and a drawing does not. With

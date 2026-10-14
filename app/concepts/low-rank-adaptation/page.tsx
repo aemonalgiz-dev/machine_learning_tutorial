@@ -28,7 +28,7 @@ export default function Page() {
     sections={[
 { title: "Part 1. Freeze the Base and Describe a Correction", content: <>
 <SubSection title="1. Separate what stays fixed from what learns">
-<p>{"The previous lesson fine-tuned by letting every weight move. A projection that carries one layer’s values to the next has one weight for every pairing of an input coordinate with an output coordinate. A model built from many wide projections therefore has a great many weights, and a fully fine-tuned copy for each task has to store all of them again. The question in the title is whether a task’s change really needs that many numbers."}</p>
+<p>{"Full fine-tuning allows the pretrained weights to change. In a wide projection, every input-output coordinate pair has a weight, so there may be many values to update and save for each task. Could we describe a useful change with fewer trainable numbers? We will keep the original matrix fixed and build an additional update from smaller factors."}</p>
 <p>{"LoRA freezes a pretrained weight matrix and adds a trainable low-rank update. During task training, gradients update the adapter factors while the base matrix stays fixed. The full model still runs a forward and backward computation through the relevant paths."}</p>
 <p>{"It helps to name the two things separately. The base is the pretrained matrix. It is frozen, which means the optimizer never writes to it. The correction is a second matrix of the same shape that is added to the base. The adapted projection is their sum, and only the correction is learned."}</p>
 <Equation>{"Adapted projection = base     + correction\n                     (frozen)   (learned)"}</Equation>
@@ -124,7 +124,7 @@ export default function Page() {
 
 </SubSection>
 <SubSection title="6. Choose and evaluate the adaptation">
-<p>{"Nothing so far has been trained, so it is worth saying where this operation meets the previous lesson. Training runs the model forward with the adapted output y in place of the base output, computes the response loss, and the gradient of that loss travels back along both routes. On the base route it arrives at W, which is frozen, so nothing is written. On the adapter route it arrives at A and B, and those are updated."}</p>
+<p>{"So far we have calculated an adapter output without training it. During training, that output contributes to the response loss, and backpropagation computes the required derivatives. The optimizer leaves the base matrix W fixed and updates the adapter factors A and B. Gradients may still need to pass through the frozen base operation to reach earlier trainable parts of the model."}</p>
 <p>{"A real setup chooses which projections receive adapters, a rank and scaling policy, the training examples, and the optimizer. The response loss can be the same supervised objective used for full fine-tuning. The difference is which parameters are allowed to change."}</p>
 <p>{"Each of those choices has a cost that the tiny example makes visible. Every projection given an adapter adds another pair of factors to train and store. A higher rank allows more directions and costs more parameters, and past the break-even point it costs more than the full update it was meant to replace. The scaling sets how large the correction is beside the frozen base."}</p>
 <p>{"LoRA is not quantization. Quantization changes how numerical values are represented or computed. The two techniques can be combined, but parameter rank and numeric precision solve different storage and computation problems."}</p>

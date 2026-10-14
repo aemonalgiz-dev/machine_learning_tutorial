@@ -65,13 +65,7 @@ export default function SentencePiecePage() {
 <>
               <SubSection title="1. One sentence, one corpus, and the step before everything">
                 <p>
-                  We carry the same sentence as the other pages in this section,
-                  and beside it the same corpus of eighteen short sentences of
-                  ordinary English about reports and costs and analyses. The
-                  corpus holds 72 distinct words across 133 occurrences and does
-                  not contain the sentence, which is the arrangement we want,
-                  since a vocabulary is only interesting on text it was not
-                  built from.
+                  We will reuse the eighteen-sentence corpus and the held-out sentence from the earlier lessons. The corpus contains 72 distinct words across 133 occurrences. Keeping the text fixed lets us examine what changes when spacing is represented differently before the merging loop begins.
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <>
@@ -191,12 +185,7 @@ export default function SentencePiecePage() {
                   guesswork.
                 </p>
                 <p>
-                  It is worth saying plainly what SentencePiece is not. It is not
-                  a third way of choosing pieces alongside merging and shrinking.
-                  It is a treatment of the text that either of those can be run
-                  on, and section 13 shows both running on the same four words.
-                  The contribution is the step before the learner, which is why
-                  this page spends its first half there.
+                  SentencePiece supports learners such as BPE and unigram; it is not a competing merge score. In this lesson we focus on how it prepares text, especially how it represents spaces, before the learner runs. Section 13 compares both learners on the same four words. The implementation details here describe the site&apos;s teaching version, rather than every option in the external library.
                 </p>
                 <KeepInMind>
                   The whole idea is that the space stops being a separator and
@@ -224,13 +213,7 @@ export default function SentencePiecePage() {
                   when a different one is used.
                 </p>
                 <p>
-                  The mark goes in front of a word rather than behind it, which
-                  is the mirror image of the boundary marker in section 3 and is
-                  not merely a matter of taste. A mark in front says a space
-                  preceded this, and a space preceded the first word too, so one
-                  is prepended to the whole text. Marking the front means no
-                  letter is ever doubled, since a letter is a letter wherever it
-                  sits and the mark is a symbol of its own.
+                  Here the marker goes before a word to represent a preceding space. We also insert a dummy initial marker so the first word follows the same convention; the original text need not actually begin with a space. Because the marker is its own symbol, an ordinary letter does not need a separate identity merely because it ends a word.
                 </p>
                 <Equation>{`hello  world   →   ${MARK}hello${MARK}world`}</Equation>
                 <KeepInMind>
@@ -318,7 +301,7 @@ export default function SentencePiecePage() {
                 </p>
                 <>
 <p>
-                  That second step is a genuine decision rather than a consequence of the first, and it is worth flagging now because the closing part measures what happens without it. Taken together the two steps amount to splitting on whitespace and putting a mark at the front of each piece, which sounds like it has quietly restored the thing the method set out to remove.
+                  That second step is a separate design choice. Together, these steps resemble splitting on whitespace and placing a marker at the start of each resulting piece. Later we will disable the restriction and measure how it changes the learned vocabulary, so we can distinguish the effect of marking spaces from the effect of restricting merges.
                 </p>
                 <p>
                   It has not, and the difference is precise. The mark is inside the unit, so it is a symbol the learner counts, merges and stores, and it comes back out at the other end. A separator is none of those things.
@@ -788,13 +771,7 @@ export default function SentencePiecePage() {
 
               <SubSection title="18. Where it reads the sentence worse, and why">
                 <p>
-                  This is the place on the page where the method is beaten by the
-                  thing it replaces, so it is worth understanding rather than
-                  noting. The front-marked fit spends 42 of its 99 merges on
-                  pieces that begin with a space. Those rows are useful only at
-                  the start of a word. A word the corpus never contained is
-                  usually met somewhere other than at its start, and there they
-                  are no help at all.
+                  In this run, 42 of the 99 merges create pieces beginning with the space marker. Those entries apply at word starts and cannot be reused as ordinary internal pieces. That helps explain the comparison with the earlier representation. A marker can preserve useful boundary information while also limiting where a learned piece matches.
                 </p>
                 <p>
                   The stem expect is the cleanest case. The corpus holds expected
@@ -981,7 +958,7 @@ export default function SentencePiecePage() {
                     {
                       expression: "which character stands for a space",
                       reason:
-                        "undetermined beyond one requirement, that no text contain it. Every admissible character gives a different vocabulary, because the tie rule compares symbols and a symbol has a codepoint. On the four words the mark used here and an underscore each give 27 rows, 18 of which agree, and the nine that differ separate building a word and then attaching its space from growing the word outward from the space.",
+                        "a choice that must remain distinguishable from literal text. Its codepoint can also affect this implementation's tie-breaking. On the four-word corpus, the usual marker and underscore each produce 27 rows, of which 18 match after marker normalization. The nine differences reflect whether tied merges build a word internally or grow it from its leading marker. Different markers need not change every vocabulary, but they do in this example.",
                     },
                     {
                       expression: "two pairs with the same count",
@@ -1026,7 +1003,7 @@ export default function SentencePiecePage() {
                     {
                       expression: "a text with no whitespace and no repetition",
                       reason:
-                        "one unit, and a vocabulary that is the alphabet plus whatever pairs happened to repeat inside it. Nothing refuses and nothing warns. The count of merges actually learned against the count asked for is the only signal, and it is worth reading, because a fit that stopped early stopped because its corpus ran out of evidence.",
+                        "one unit, with a vocabulary made from the alphabet and the pairs that repeat within it. The fit may finish without an error even when it learns fewer merges than requested. Compare the achieved size with the requested size: here an early stop means no remaining pair meets the repetition rule.",
                     },
                   ]}
                 />

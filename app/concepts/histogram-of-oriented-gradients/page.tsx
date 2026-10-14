@@ -314,12 +314,7 @@ with  w = 180 / 9 = 20 degrees`}</Equation>
 
               <SubSection title="8. How heavily a pixel votes">
                 <p>
-                  A pixel does not vote once. It votes with a weight equal to
-                  how sharply the brightness is changing there, so a pixel in
-                  the middle of a strong edge counts for a great deal and a
-                  pixel in a nearly flat region counts for almost nothing. That
-                  is what stops a large area of very slight shading from
-                  outvoting the outline that we actually care about.
+                  We weight each pixel&apos;s contribution by the strength of its brightness gradient. A strong edge therefore contributes more than a nearly flat patch. This helps prevent weak shading from dominating the description simply because it covers many pixels. We will still need to account for changes in contrast when we compare images.
                 </p>
                 <Equation>{`H(cell, b) = sum over pixels in the cell of  magnitude(pixel) × share(direction(pixel), b)`}</Equation>
                 <>
@@ -880,12 +875,7 @@ answer = cut / ‖cut‖`}</Equation>
                   above is the useful answer and the 0 is the useless one.
                 </p>
                 <KeepInMind>
-                  Folding the circle is a deliberate loss of information, chosen
-                  because for the job of finding people that information was
-                  noise. It is worth asking, before taking the default, whether
-                  the thing being described is ever going to appear against a
-                  background lighter than itself, since if it is not then the
-                  fold has cost something and bought nothing.
+                  Combining opposite gradient directions makes the descriptor less sensitive to contrast reversal. That can help when the same outline appears lighter than its background in one image and darker in another. If the direction of contrast is useful evidence for our task, unsigned orientations discard it. We should compare that choice with the signed version.
                 </KeepInMind>
               </SubSection>
 
@@ -1171,7 +1161,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
               "A quarter turn moves the description 5.2331 where its own length is 5, and at 6 buckets, where a quarter turn is exactly three of them, it still moves 0.95 of its own length, with no way of rescaling a block bringing any of it below 0.98. The directions are only half the problem, since the cells have moved as well and no arithmetic over buckets can undo that.",
             ),
             choice(
-              "Why is the description of an object twice as far away not merely a poorer match?",
+              "What changes in the descriptor when the same object appears at half its previous image size?",
               [
                 "It fills a quarter as many cells, so it is a different length, and two descriptions of different lengths do not correspond position by position",
                 "Its rates of change are weaker, so every entry comes out smaller",
