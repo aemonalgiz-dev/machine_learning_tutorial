@@ -96,7 +96,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             >
               oop_ml
             </a>
-            .
+            .{" "}
+            <Link href="/privacy" className="underline-offset-4 hover:underline">
+              Privacy
+            </Link>
           </div>
         </footer>
       </body>

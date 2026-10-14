@@ -1,6 +1,15 @@
+import { randomBytes } from "node:crypto";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The salt behind the anonymous visitor key in app/site-activity/route.ts.
+  // A fresh one is made for every build, so visitor keys cannot be joined
+  // across deploys. Only that server route reads it, so it is inlined into the
+  // server bundle and never shipped to a browser.
+  env: {
+    FITLAB_INSIGHTS_SALT: process.env.FITLAB_INSIGHTS_SALT ?? randomBytes(32).toString("hex"),
+  },
+
   // Production source maps are unnecessary for serving lessons and add about
   // 30 MiB to the server output. Keep Amplify's deployment budget for content.
   productionBrowserSourceMaps: false,

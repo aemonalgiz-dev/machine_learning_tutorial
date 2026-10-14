@@ -92,6 +92,12 @@ export function markFinished(lesson: string, sectionId: string) {
     ...current,
     done: { ...current.done, [lesson]: [...already, sectionId] },
   });
+  // instrumentation-client.ts counts the first finish of each section.
+  try {
+    window.dispatchEvent(new CustomEvent("fitlab:finished", { detail: { section: sectionId } }));
+  } catch {
+    // Counting is never allowed to stop progress from being recorded.
+  }
 }
 
 // Called by a lesson when it opens, so that the home and section pages know
