@@ -1,9 +1,11 @@
-import { test,expect,type Page } from "@playwright/test";
+import { test,expect,type Page,type Locator } from "@playwright/test";
 import { BUILDS,buildById } from "../lib/builds/catalog";
 import { TOOLS } from "../lib/builds/tools";
 import { assemble,evaluate,same,plug,type Construction } from "../lib/builds/engine";
 import { labLessons } from "../lib/labs";
 import { journeyFor } from "../lib/builds/journey";
+import { validConstructionForBuild } from "../lib/builds/workshop-session";
+import { openWorkspaceControls, openLessonNotes, showEarlierWorkshop } from "./helpers/open-workshop";
 
 test("every lesson has an executable construction, coherent tools and an empty starting task",()=>{
   expect(BUILDS).toHaveLength(labLessons.length + 1);
@@ -12,6 +14,7 @@ test("every lesson has an executable construction, coherent tools and an empty s
     const b=buildById[lesson.id],journey=journeyFor(lesson.id);expect(b,lesson.id).toBeDefined();
     expect(journey.history.blocks.length,lesson.id).toBeGreaterThan(1);
     const graph=assemble(b.recipe,TOOLS);expect(graph.pieces.length,lesson.id).toBeLessThanOrEqual(36);
+    expect(validConstructionForBuild(graph,b,TOOLS),lesson.id).toBe(true);
     expect(graph.pieces.length,lesson.id).toBeGreaterThan(2);
     for(const sample of b.cases){const result=evaluate(graph,sample.data,TOOLS);expect(result.error,lesson.id).toBeUndefined();expect(same(result.output,sample.expected),lesson.id).toBe(true);}
     expect(JSON.stringify(b),lesson.id).not.toContain("\u2014");
@@ -60,21 +63,40 @@ test("alternate constructions work, rewiring changes the math, and loops and zer
   expect(evaluate(graph,{weeklyCounts:[]},TOOLS).error?.message).toContain("finite number");
 });
 
-async function openBuild(page:Page,slug:string){await page.goto(`/lab/${slug}`);await page.getByRole("navigation",{name:"Journey stages"}).getByRole("button",{name:/Build your solution/}).click();await page.getByRole("checkbox",{name:"Animate signals",exact:true}).uncheck();}
+async function openEarlierWorkspace(page:Page){
+  await showEarlierWorkshop(page);
+}
+async function openBuild(page:Page,slug:string){
+  await page.goto(`/lab/${slug}`);
+  if(slug==="workshop-guide"){
+    await page.getByRole("navigation",{name:"Workshop introduction"}).getByRole("button",{name:/Build from an empty floor/}).click();
+    await openWorkspaceControls(page);
+  }else if(slug==="simple-linear-regression"){
+    await page.getByText("Lesson reference and earlier work",{exact:true}).click();
+    const historical=page.getByText("Build the historical fitting calculation",{exact:true});
+    await historical.click();
+    await openWorkspaceControls(historical.locator(".."));
+  }else await openEarlierWorkspace(page);
+  await page.getByRole("checkbox",{name:"Animate signals",exact:true}).uncheck();
+}
 async function wire(page:Page,a:string,b:string){await page.getByRole("button",{name:a,exact:true}).click();await page.getByRole("button",{name:b,exact:true}).click();}
-async function run(page:Page,counts:string){await page.getByRole("button",{name:"Test all examples",exact:true}).click();await expect(page.getByTestId("construction-counter")).toHaveText(counts);}
+async function run(page:Page|Locator,counts:string){await page.getByRole("button",{name:"Test all examples",exact:true}).click();await expect(page.getByTestId("construction-counter")).toHaveText(counts);}
 
 test("Botie carries the city's records from the history into the tools and construction",async({page})=>{
   await page.goto("/primers/statistics#workshop");
   const journey=page.getByTestId("workshop-journey");
+  await expect(journey.getByTestId("construction-floor")).toBeVisible();
+  await openLessonNotes(page);
+  await journey.getByRole("button",{name:"What Could a City Learn from Its Records?",exact:true}).click();
   await expect(journey.getByRole("heading",{name:"What Could a City Learn from Its Records?",exact:true})).toBeVisible();
   const stages=journey.getByRole("navigation",{name:"Journey stages"});
-  await stages.getByRole("button",{name:/Get to know the tools/}).click();
-  await expect(journey.getByText(/Let's return to the city's records/)).toBeVisible();
-  await expect(journey.getByText(/How many deaths were recorded in an average week/)).toBeVisible();
-  await stages.getByRole("button",{name:/Build your solution/}).click();
-  await expect(journey.getByTestId("construction-context")).toContainText("not Graunt's records");
+  await journey.getByRole("button",{name:"Look inside the tools",exact:true}).click();
+  await expect(journey.getByRole("region",{name:"Get to know the tools"})).toBeVisible();
+  await stages.getByRole("button",{name:"Account for the weeks behind the total",exact:true}).click();
+  await journey.getByText("Context for this challenge",{exact:true}).click();
+  await expect(journey.getByTestId("construction-context")).toContainText("invented weekly death counts");
   await expect(journey.getByRole("button",{name:"Deaths recorded each week",exact:true})).toBeVisible();
+  await journey.getByText("Examples and results",{exact:true}).click();
   await expect(journey.getByRole("button",{name:/Five weekly records/})).toBeVisible();
   await expect(journey).not.toContainText(/box masses|sorting gate|delivery/i);
   await page.setViewportSize({width:320,height:900});
@@ -102,28 +124,30 @@ test("a learner builds a real mean from an empty floor, inspects a mistake, and 
   await page.getByRole("button",{name:"Inspect or move Divide",exact:true}).click();
   await expect(page.getByLabel("Construction inspector")).toContainText("Amount144");
   await page.reload();
-  await page.getByRole("navigation",{name:"Journey stages"}).getByRole("button",{name:/Build your solution/}).click();
+  await page.getByRole("button",{name:"Full workspace and earlier draft",exact:true}).click();
   await expect(page.locator("[data-piece]")).toHaveCount(5);
-  await expect(page.getByTestId("construction-counter")).toHaveText("0 passed · 0 failed · 3 not run");
+  await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
   expect(errors).toEqual([]);
 });
 
 test("Botie introduces the tools, carries earlier tools forward and keeps later lessons open",async({page})=>{
   await page.goto("/lab/workshop-guide");
-  await expect(page.getByRole("heading",{name:"How Do We Give a Machine a Job?",exact:true})).toBeVisible();
-  await page.getByRole("button",{name:"Continue with Botie",exact:false}).click();
-  await expect(page.getByText(/A source supplies data/)).toBeVisible();
-  await page.getByRole("navigation",{name:"Journey stages"}).getByRole("button",{name:/Get to know/}).click();
-  await page.getByLabel("Multiply example: Value",{exact:true}).fill("4");
-  await expect(page.getByText("8",{exact:true})).toBeVisible();
-  await page.getByRole("button",{name:"Open the empty workshop",exact:false}).click();
+  await expect(page.getByTestId("construction-floor")).toBeVisible();
+  await expect(page.locator("[data-piece]")).toHaveCount(4);
+  await wire(page,"Sensor reading output","Multiply input 1: Value");
+  await run(page,"3 passed · 0 failed · 0 not run");
+  await page.getByRole("navigation",{name:"Workshop introduction"}).getByRole("button",{name:/Build from an empty floor/}).click();
   await expect(page.locator("[data-piece]")).toHaveCount(1);
-  await page.getByRole("navigation",{name:"Journey stages"}).getByRole("button",{name:/Explain it/}).click();
-  await page.getByRole("link",{name:/Statistics & Probability Primer/}).click();
+  await page.getByRole("button",{name:"Try the replacement sensor",exact:true}).click();
+  await page.getByRole("link",{name:"Start with city records",exact:true}).click();
   await expect(page.getByTestId("workshop-journey")).toBeVisible();
   await page.goto("/lab/attention");
-  await page.getByRole("navigation",{name:"Journey stages"}).getByRole("button",{name:/Get to know/}).click();
-  await expect(page.getByText("A tool you have used before").first()).toBeVisible();
+  await openLessonNotes(page);
+  await page.getByRole("button",{name:"Look inside the tools",exact:true}).click();
+  const tools=page.getByRole("region",{name:"Get to know the tools"});
+  const multiply=tools.locator("summary").filter({hasText:/^Multiply$/});
+  await multiply.click();
+  await expect(multiply.locator("..").getByText(/This operation also appears in/)).toBeVisible();
 });
 
 test("learners configure, move and remove their pieces, and undo restores the construction",async({page})=>{
@@ -138,22 +162,22 @@ test("learners configure, move and remove their pieces, and undo restores the co
   const handle=page.getByRole("button",{name:"Inspect or move Set a constant",exact:true});
   await handle.focus();await page.keyboard.press("ArrowDown");
   await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
-  await page.getByRole("button",{name:"Undo",exact:true}).click();
+  await page.getByRole("button",{name:"Undo",exact:true}).first().click();
   await handle.click();
   await page.getByRole("button",{name:"Remove this piece",exact:true}).click();
   await expect(handle).toHaveCount(0);
-  await page.getByRole("button",{name:"Undo",exact:true}).click();
+  await page.getByRole("button",{name:"Undo",exact:true}).first().click();
   await expect(handle).toHaveCount(1);
   await run(page,"3 passed · 0 failed · 0 not run");
   const wireToRemove=page.getByRole("button",{name:/Select connection 2:/});
   await wireToRemove.focus();await page.keyboard.press("Delete");
   await expect(page.getByRole("button",{name:/Select connection/})).toHaveCount(2);
-  await page.getByRole("button",{name:"Undo",exact:true}).click();
+  await page.getByRole("button",{name:"Undo",exact:true}).first().click();
   await expect(page.getByRole("button",{name:/Select connection/})).toHaveCount(3);
-  await page.getByRole("button",{name:"Expand floor",exact:true}).click();
-  await expect(page.getByRole("button",{name:"Return to lesson",exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Expand floor",exact:true}).first().click();
+  await expect(page.getByRole("button",{name:"Return to lesson",exact:true}).first()).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("button",{name:"Expand floor",exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Expand floor",exact:true}).first()).toBeVisible();
 });
 
 test("every workshop's worked construction executes in the browser and still requires testing",async({page})=>{
@@ -162,10 +186,11 @@ test("every workshop's worked construction executes in the browser and still req
   const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
   for(const b of BUILDS){
     await openBuild(page,b.id==="neurons-and-activations"?"neuron":b.id);
-    await page.getByText("Stuck? Inspect a worked construction",{exact:true}).click();
-    await page.getByRole("button",{name:"Assemble an example",exact:true}).click();
-    await expect(page.getByTestId("construction-counter"),b.id).toHaveText(`0 passed · 0 failed · ${b.cases.length} not run`);
-    await run(page,`${b.cases.length} passed · 0 failed · 0 not run`);
+    const workspace=b.id==="simple-linear-regression"?page.getByText("Build the historical fitting calculation",{exact:true}).locator(".."):page;
+    await workspace.getByText("Stuck? Inspect a worked construction",{exact:true}).click();
+    await workspace.getByRole("button",{name:"Assemble an example",exact:true}).click();
+    await expect(workspace.getByTestId("construction-counter"),b.id).toHaveText(`0 passed · 0 failed · ${b.cases.length} not run`);
+    await run(workspace,`${b.cases.length} passed · 0 failed · 0 not run`);
   }
   expect(errors).toEqual([]);
 });
@@ -173,7 +198,7 @@ test("every workshop's worked construction executes in the browser and still req
 test("construction stays usable on narrow screens and inside lessons",async({page})=>{
   await page.emulateMedia({reducedMotion:"reduce"});
   await page.goto("/concepts/neurons-and-activations#workshop");
-  await page.getByRole("navigation",{name:"Journey stages"}).getByRole("button",{name:/Build your solution/}).click();
+  await openEarlierWorkspace(page);
   await page.getByText("Stuck? Inspect a worked construction",{exact:true}).click();
   await page.getByRole("button",{name:"Assemble an example",exact:true}).click();
   await run(page,"8 passed · 0 failed · 0 not run");
@@ -182,7 +207,8 @@ test("construction stays usable on narrow screens and inside lessons",async({pag
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`width ${width}`).toBe(true);
     await page.getByRole("button",{name:"Fit construction",exact:true}).click();
   }
-  await page.getByRole("navigation",{name:"Journey stages"}).getByRole("button",{name:/Explain it/}).click();
-  await page.getByRole("link",{name:"Write the calculation in Python",exact:false}).click();
+  await page.getByRole("button",{name:"Full workspace and earlier draft",exact:true}).click();
+  await page.getByText(journeyFor("neurons-and-activations").plan!.reflection.prompt,{exact:true}).click();
+  await page.getByRole("link",{name:"Work through the Python challenges",exact:false}).click();
   await expect(page.getByText("Write and run Python",{exact:true})).toBeVisible();
 });

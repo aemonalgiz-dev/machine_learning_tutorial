@@ -21,8 +21,10 @@ export function CourseBreadcrumbs() {
       className="mx-auto flex max-w-3xl flex-wrap items-center gap-x-3 gap-y-1 px-6 pt-8 font-mono text-xs text-muted"
     >
       <Link href="/" className="transition hover:text-foreground">
-        All sections
+        Learn
       </Link>
+      <span aria-hidden="true">/</span>
+      <Link href={lesson.areaHref} className="transition hover:text-foreground">{lesson.areaTitle}</Link>
       <span aria-hidden="true">/</span>
       <Link href={lesson.sectionHref} className="transition hover:text-foreground">
         Section {lesson.sectionNumber} · {lesson.sectionTitle}

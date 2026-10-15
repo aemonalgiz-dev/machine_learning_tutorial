@@ -74,9 +74,8 @@ test("NumPy results operate the belt and checks reject hardcoded or malformed an
   await page.getByRole("button", { name: "Run code & test", exact: true }).click();
   await expect(page.getByLabel("Code test counts", { exact: true })).toHaveText("0 passed · 1 failed · 5 not run");
   await page.reload();
-  await page.getByRole("button", { name: "Open calculation and Python bench", exact: true }).click();
-  await page.getByRole("navigation", { name: "Workshop experiments" }).getByRole("button", { name: "NumPy" }).click();
   await expect(page.locator(".cm-content")).toContainText("inspect this failure");
+  await expect(page.getByLabel("Code test counts", { exact: true })).toHaveText("0 passed · 1 failed · 5 not run");
 });
 
 test("the final experiment reveals the limit and remains usable on small screens", async ({ page }) => {

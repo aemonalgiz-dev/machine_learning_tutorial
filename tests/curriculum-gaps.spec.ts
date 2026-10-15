@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openFullWorkshop } from "./helpers/open-workshop";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { TOOLS } from "../lib/builds/tools";
@@ -12,7 +13,7 @@ const ids = ["conditional-probability", "likelihood", "naive-bayes", "support-ve
 const run = (key: string, ...inputs: Data[]) => TOOLS[key].run(inputs, {});
 
 test("gap lessons are complete and join existing topics in prerequisite order", () => {
-  expect(lessonOrder).toHaveLength(196);
+  expect(lessonOrder).toHaveLength(208);
   for (const section of CURRICULUM) expect(new Set(section.topics.map(topic => topic.heading)).size).toBe(section.topics.length);
   for (const id of ids) {
     const lesson = expandedLessonById[id];
@@ -125,8 +126,7 @@ test("pixel examples respond to edits, expose mask errors, and fit small screens
 test("all fourteen workshops start empty and pass their construction cases", async ({ page }) => {
   test.setTimeout(240_000);
   for (const id of ids) {
-    await page.goto(`/lab/${id}`);
-    await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+    await openFullWorkshop(page, id);
     await expect(page.locator("[data-piece]")).toHaveCount(1);
     await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();

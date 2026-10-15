@@ -1,5 +1,19 @@
 # Editorial guide
 
+## Learning areas and navigation
+
+The homepage links to learning areas. Each area contains sections, and each
+section contains lessons. Mathematics and Programming appears first. Keep
+section and lesson URLs stable when changing their place in the navigation.
+Register each section once in `lib/learning-areas.ts`; other areas should link
+to shared prerequisites instead of copying their lessons. Subject groups help
+readers browse, while adjacent lesson links retain the curriculum order inside
+the current learning area. Mark areas without published lessons as being in
+preparation. Run the navigation contracts in `tests/learning-areas.spec.ts`
+when adding or moving sections.
+
+## Writing the lessons
+
 The site teaches novice and technical readers in the author's direct,
 example-led voice. These rules reflect the author's stated preferences.
 
@@ -172,8 +186,8 @@ existing fragment IDs when changing section titles.
   A topic is ready when the learner can explain its components, carry out a
   complete procedure and investigate a case where its assumptions fail.
   Quiz explanations remain visible until the reader chooses to continue.
-- Botie's journey introduces the historical problem, lets the reader try each
-  component, then opens a construction challenge. Embed the workshop after the
+- Botie's journey connects a construction to its historical problem and lets
+  the reader try each component as it becomes useful. Embed the workshop after the
   explanation it depends on and before Python practice. State the objective before the controls, calculate
   feedback from the actual settings, and show both actual and required results.
   Keep hints, worked setups, explanations and Python accessible without locks.
@@ -183,7 +197,8 @@ existing fragment IDs when changing section titles.
   Prefer manipulating the objects involved in the problem: placing a machine,
   connecting an input, moving a part, or changing a route. Introduce one new
   component at a time. The workshop guide teaches placing, configuring, wiring
-  and testing. Lesson challenges start with an empty floor: the learner chooses
+  and testing. A learner's first independent construction starts with an empty
+  floor; a later challenge can reuse their own tested pieces. The learner chooses
   components and their arrangement. Later lessons reuse earlier tools, with
   links back to their introductions. Keep the whole journey freely accessible.
   Make the effect visible where it happens, and let the reader pause and follow
@@ -198,6 +213,27 @@ existing fragment IDs when changing section titles.
   metaphor. Before introducing tools, have Botie explain which part of that
   problem the reader will build. Label invented historical examples as invented
   and explain the limits of any simplified model.
+- Workshop journeys open on a playable construction. Keep the problem and its
+  historical explanation close to the activity, with sources available on demand.
+  The controls tutorial may begin with a partly connected example, then moves to
+  an empty floor. Longer lesson constructions can offer an intermediate calculation
+  taken from the actual method; describe its inputs and role precisely. Carry the
+  learner's tested pieces into the full problem, retaining any existing draft.
+  Set aside a changed-input case, invite a prediction before showing its result,
+  and check the earlier examples too. A variation is practice evidence, not proof
+  of mastery. Keep guidance, original workspaces and Python challenges accessible.
+  Record assistance honestly, and distinguish an explored explanation from a
+  construction that has passed its checks. Do not add points or completion quotas.
+- Each workshop has an authored plan in `lib/builds/journeys/`. Choose its opening,
+  intermediate calculation and changed case for a reason specific to that lesson.
+  Do not infer the learning sequence from the number of operations or automatically
+  reserve the last case. Predictions suit numerical consequences; comparisons,
+  diagnoses and design decisions need their own questions and explanatory feedback.
+  Connect to named earlier capabilities and the learner's saved work. Say when no
+  earlier attempt is saved instead of implying they completed it. A prior machine
+  can be carried only when its input meanings can be mapped consistently and its
+  calculation passes checks in both settings. Copy the learner's pieces on request,
+  retain the existing draft and require a new test in the new problem.
 - Match instructions to actual controls, fixtures and defaults. Do not ask a
   reader to move a slider that is absent, or describe one dataset while the
   widget loads another without explaining how to select it.

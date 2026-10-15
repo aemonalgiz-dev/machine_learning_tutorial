@@ -87,6 +87,18 @@ export const expandedLessonIds = [
   "monitoring-and-rollback",
   "project-sensor-investigation",
   "project-demand-forecast",
-  "project-seed-counting"
+  "project-seed-counting",
+  "design-from-decisions",
+  "design-without-a-model",
+  "design-information-boundaries",
+  "design-pipeline-capacity",
+  "design-queues-and-bursts",
+  "design-memory-budget",
+  "design-edge-or-cloud",
+  "design-feasible-tradeoffs",
+  "design-sensitive-assumptions",
+  "design-prototype-experiments",
+  "design-fallbacks",
+  "design-inspection-review"
 ] as const;
 export type ExpandedLessonId = typeof expandedLessonIds[number];

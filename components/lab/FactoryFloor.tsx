@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useLearnerField, useLearnerRecord } from "@/lib/learner-state";
 import { Botie, BotieSays } from "@/components/site/Botie";
 import { FACTORY_JOBS, FLOOR_HEIGHT, FLOOR_WIDTH, GRID, MACHINE_HEIGHT, MACHINE_WIDTH, connect, inputsFor, inletY, machineHelp, machineNames, outletY, placement, traceCircuit, type Circuit, type Machine, type MachineKind, type Trace, type Wire } from "@/lib/factory";
 import styles from "./FactoryFloor.module.css";
@@ -15,33 +16,50 @@ const number = (n: number) => Number(n.toFixed(3)).toString();
 const destination = (n: number | null) => n === 1 ? "Workshop" : n === 0 ? "Storage" : "Waiting at the gate";
 const keyOf = (wire: Wire) => `${wire.from}:${wire.to}:${wire.port}`;
 
+function validCircuit(raw: unknown): boolean {
+  const value=raw as Circuit;
+  return !!value && Array.isArray(value.machines) && value.machines.length<=40 &&
+    value.machines.every(machine=>machine && typeof machine.id==="string" && Object.hasOwn(machineNames,machine.kind) && [machine.x,machine.y,machine.value].every(Number.isFinite)) &&
+    new Set(value.machines.map(machine=>machine.id)).size===value.machines.length && value.machines.some(machine=>machine.id==="gate") &&
+    Array.isArray(value.wires) && value.wires.length<=120 && value.wires.every(wire=>wire &&
+      value.machines.some(machine=>machine.id===wire.from) && value.machines.some(machine=>machine.id===wire.to && Number.isInteger(wire.port) && wire.port>=0 && wire.port<inputsFor(machine.kind)));
+}
+
 export function FactoryFloor({ onOpenBench }: { onOpenBench: (stage?: number) => void }) {
-  const [jobIndex, setJobIndex] = useState(0);
-  const [circuit, setCircuit] = useState<Circuit>(() => clone(FACTORY_JOBS[0].starter));
-  const [undo, setUndo] = useState<Circuit[]>([]);
+  const saved=useLearnerRecord("factory:v1", ()=>({jobIndex:0,circuit:clone(FACTORY_JOBS[0].starter),undo:[] as Circuit[],
+    drafts:{} as Record<number,Circuit>,selectedPart:0,deliveries:[] as Delivery[],hint:false,showExample:false,zoom:1,speed:1,animate:true,solved:[] as number[]}), raw=>{
+      const value=raw as {jobIndex:number;selectedPart:number;circuit:Circuit;drafts:Record<number,Circuit>;undo:Circuit[]};
+      return !!value && Number.isInteger(value.jobIndex) && value.jobIndex>=0 && value.jobIndex<FACTORY_JOBS.length &&
+        Number.isInteger(value.selectedPart) && value.selectedPart>=0 && value.selectedPart<FACTORY_JOBS[value.jobIndex].batch.length &&
+        validCircuit(value.circuit) && !!value.drafts && Object.values(value.drafts).every(validCircuit) && Array.isArray(value.undo) && value.undo.every(validCircuit);
+    });
+  const [jobIndex,setJobIndex]=useLearnerField(saved, "jobIndex");
+  const [circuit,setCircuit]=useLearnerField(saved, "circuit");
+  const [undo,setUndo]=useLearnerField(saved, "undo");
+  const [drafts,setDrafts]=useLearnerField(saved, "drafts");
   const [tool, setTool] = useState<MachineKind | null>(null);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
-  const [selectedPart, setSelectedPart] = useState(0);
+  const [selectedPart,setSelectedPart]=useLearnerField(saved, "selectedPart");
   const [playback, setPlayback] = useState<Playback | null>(null);
-  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
-  const [hint, setHint] = useState(false);
-  const [showExample, setShowExample] = useState(false);
+  const [deliveries,setDeliveries]=useLearnerField(saved, "deliveries");
+  const [hint,setHint]=useLearnerField(saved, "hint");
+  const [showExample,setShowExample]=useLearnerField(saved, "showExample");
   const [notice, setNotice] = useState("");
-  const [zoom, setZoom] = useState(1);
-  const [speed, setSpeed] = useState(1);
-  const [animate, setAnimate] = useState(true);
+  const [zoom,setZoom]=useLearnerField(saved, "zoom");
+  const [speed,setSpeed]=useLearnerField(saved, "speed");
+  const [animate,setAnimate]=useLearnerField(saved, "animate");
   const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState<{ id: string; x: number; y: number } | null>(null);
   const [wireCursor, setWireCursor] = useState<{ x: number; y: number } | null>(null);
-  const [solved, setSolved] = useState<number[]>([]);
+  const [solved,setSolved]=useLearnerField(saved, "solved");
   const floor = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const nextId = useRef(0);
   const drag = useRef<{ id: string; offsetX: number; offsetY: number; original: Machine } | null>(null);
   const portDrag = useRef<{ from: Socket; x: number; y: number } | null>(null);
   const lastWireDrag = useRef(-Infinity);
-  const drafts = useRef(new Map<number, Circuit>());
+  useEffect(() => { nextId.current=Math.max(nextId.current,0,...circuit.machines.map(machine=>Number(machine.id.replace("placed-",""))||0)); }, [circuit]);
   const job = FACTORY_JOBS[jobIndex];
   const activeTrace = playback?.traces[playback.index];
   const activeStep = activeTrace?.steps[playback?.step ?? -1];
@@ -63,7 +81,7 @@ export function FactoryFloor({ onOpenBench }: { onOpenBench: (stage?: number) =>
     });
     observer.observe(viewport.current);
     return () => observer.disconnect();
-  }, [expanded]);
+  }, [expanded, setZoom]);
 
   function edit(next: Circuit, message = "") {
     if (busy) return;
@@ -76,8 +94,8 @@ export function FactoryFloor({ onOpenBench }: { onOpenBench: (stage?: number) =>
   }
   function changeJob(index: number) {
     if (index === jobIndex) return;
-    drafts.current.set(jobIndex, clone(circuit));
-    setJobIndex(index); setCircuit(clone(drafts.current.get(index) ?? FACTORY_JOBS[index].starter)); setUndo([]); setTool(null); setSocket(null); setSelected(null); setSelectedPart(0); setPlayback(null); setDeliveries([]); setHint(false); setShowExample(false); setNotice(""); setDragging(null); drag.current = null;
+    setDrafts(previous=>({...previous,[jobIndex]:clone(circuit)}));
+    setJobIndex(index); setCircuit(clone(drafts[index] ?? FACTORY_JOBS[index].starter)); setUndo([]); setTool(null); setSocket(null); setSelected(null); setSelectedPart(0); setPlayback(null); setDeliveries([]); setHint(false); setShowExample(false); setNotice(""); setDragging(null); drag.current = null;
     viewport.current?.scrollTo({ left: 0, top: 0 });
   }
   function point(event: { clientX: number; clientY: number }) {

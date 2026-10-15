@@ -2,6 +2,8 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useLearnerField, useLearnerRecord, useLearnerState, migrateLearnerRecord } from "@/lib/learner-state";
+import { useProgressAccount } from "@/lib/progress";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { STAGES, STARTER, SOLUTION, TEST_HARNESS, evaluatePart, type Part, type Settings, type Activation } from "@/lib/neuron-lab";
 import { usePython } from "@/lib/use-python";
@@ -21,7 +23,11 @@ type Scene = { scores: number[]; bins: number[] };
 type Run = Scene & { cursor: number; done: boolean; id: number };
 
 export function NeuronLab() {
-  const [bench, setBench] = useState<number | null>(null);
+  const account=useProgressAccount();
+  return <LearnerNeuronLab key={account??"guest"}/>;
+}
+function LearnerNeuronLab() {
+  const [bench,setBench]=useLearnerState<number|null>("neuron:view:v1",null);
   return <>
     <div hidden={bench !== null}><FactoryFloor onOpenBench={(stage = 0) => setBench(stage)} /></div>
     {bench !== null && <><button type="button" className={`${button} mb-5`} onClick={() => setBench(null)}>← Back to the factory floor</button><NeuronBench initialStage={bench} /></>}
@@ -29,13 +35,14 @@ export function NeuronLab() {
 }
 
 function NeuronBench({ initialStage }: { initialStage: number }) {
-  const [stage, setStage] = useState(initialStage);
-  const [settings, setSettings] = useState<Settings>({ ...STAGES[initialStage].settings });
-  const [selected, setSelected] = useState(0);
-  const [hint, setHint] = useState(false);
-  const [completed, setCompleted] = useState<number[]>([]);
+  const saved=useLearnerRecord("neuron:bench:v1",()=>({stage:initialStage,settings:{...STAGES[initialStage].settings} as Settings,selected:0,hint:false,completed:[] as number[],answer:null as string|null}));
+  const [stage,setStage]=useLearnerField(saved, "stage");
+  const [settings,setSettings]=useLearnerField(saved, "settings");
+  const [selected,setSelected]=useLearnerField(saved, "selected");
+  const [hint,setHint]=useLearnerField(saved, "hint");
+  const [completed,setCompleted]=useLearnerField(saved, "completed");
   const [run, setRun] = useState<Run | null>(null);
-  const [answer, setAnswer] = useState<string | null>(null);
+  const [answer,setAnswer]=useLearnerField(saved, "answer");
   const sequence = useRef(0);
   const floor = useRef<HTMLDivElement>(null);
   const chapter = STAGES[stage];
@@ -60,7 +67,7 @@ function NeuronBench({ initialStage }: { initialStage: number }) {
       }
     }, 550);
     return () => clearTimeout(timer);
-  }, [run, batch, stage]);
+  }, [run, batch, stage, setCompleted]);
 
   function changeStage(next: number) {
     setStage(next);
@@ -310,18 +317,25 @@ type CodeResult = { tests: Test[]; scene: Scene | null; error?: string; stdout: 
 const DRAFT_KEY = "fitlab.neuron-lab.code.v1";
 
 function CodePanel({ onResult, onEdit }: { onResult: (scene: Scene | null, passed: boolean) => void; onEdit: () => void }) {
-  const [code, setCode] = useState(() => { try { return localStorage.getItem(DRAFT_KEY) ?? STARTER; } catch { return STARTER; } });
-  const [result, setResult] = useState<CodeResult | null>(null);
-  const [solution, setSolution] = useState(false);
+  const account=useProgressAccount();
+  const saved=useLearnerRecord("neuron:code:v1",{code:STARTER,result:null as CodeResult|null,solution:false});
+  const [code,setCode]=useLearnerField(saved, "code");
+  const [result,setResult]=useLearnerField(saved, "result");
+  const [solution,setSolution]=useLearnerField(saved, "solution");
+  useEffect(()=>{
+    if(account)return;
+    try {const code=localStorage.getItem(DRAFT_KEY);if(code!==null)migrateLearnerRecord("neuron:code:v1",{code,result:null,solution:false},null);}catch{/* Old drafts are optional. */}
+  },[account]);
   const alive = useRef(true);
   const currentCode = useRef(code);
+  useEffect(() => { currentCode.current = code; }, [code]);
   const { run, stop, busy, status } = usePython(true);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const edit = (value: string) => {
     currentCode.current = value;
     setCode(value);
     onEdit();
-    try { localStorage.setItem(DRAFT_KEY, value); } catch { /* The editor still works without storage. */ }
+
   };
   const execute = async () => {
     if (busy) return;
@@ -373,7 +387,7 @@ function CodePanel({ onResult, onEdit }: { onResult: (scene: Scene | null, passe
       </>}
       <button type="button" onClick={() => setSolution(!solution)} className="text-accent underline underline-offset-4">{solution ? "Hide the worked solution" : "Show the worked solution"}</button>
       {solution && <><PythonCode source={SOLUTION} label="One way to build the neuron" /><button type="button" disabled={busy} className={button} onClick={() => edit(SOLUTION)}>Use this solution</button></>}
-      <p className="text-xs leading-5 text-muted">Your code is saved in this browser when storage is available. Viewing the solution does not pass the tests.</p>
+      <p className="text-xs leading-5 text-muted">Your code saves in this browser and syncs when you are signed in. Viewing the solution does not pass the tests.</p>
     </div>
   </div>;
 }

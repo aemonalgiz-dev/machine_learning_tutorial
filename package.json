@@ -13,6 +13,8 @@
     "pretest:practice": "npm run prepare:python -- --verify",
     "test:runner": "python scripts/test_runner.py",
     "test:browser": "playwright test",
+    "test:backend": "playwright test --config playwright.backend.config.ts",
+    "check:backend": "node scripts/check-account-backend.mjs",
     "predev": "npm run prepare:python",
     "prebuild": "npm run curriculum:check && npm run prepare:python -- --verify",
     "dev": "next dev",

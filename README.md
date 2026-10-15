@@ -36,6 +36,115 @@ npm run dev
 
 The site runs at `http://localhost:3000` and the API at
 `http://localhost:8000`. See `.env.example` for `NEXT_PUBLIC_API_BASE_URL`.
+For a fresh local checkout, copy that example to `.env.development.local`.
+
+## Accounts and saved work
+
+The compute API and account backend are separate services. The compute API
+fits the numerical examples. The private [`../backend`](../backend) service
+handles sign-in and stores learner work in its database. The website forwards
+account requests through `/account-api`; the browser stays on the website's
+origin, including during the sign-in callback.
+
+For local development, prepare the backend from its directory:
+
+```powershell
+.venv/Scripts/python -m fitlab_backend.local prepare
+```
+
+This creates an ignored `.env` with a random session secret and applies the
+local SQLite migrations. Existing configuration and data stay in place. Fill
+`FITLAB_OIDC_ISSUER`, `FITLAB_OIDC_CLIENT_ID`, and `FITLAB_OIDC_CLIENT_SECRET`
+in that backend file using your identity provider's values. For the existing
+Cognito pool, also set `FITLAB_COGNITO_DOMAIN` to its HTTPS managed-login
+domain, without a path. This enables the direct **Create account** button and
+Cognito logout. Keep the app client secret in the backend only. Then run:
+
+```powershell
+.venv/Scripts/python -m fitlab_backend.local check
+.venv/Scripts/python -m fitlab_backend.local run
+```
+
+The local backend listens on `127.0.0.1:8001` and expects the website at
+`http://localhost:3000`. Add this line to the website's
+`.env.development.local`, then restart the Next.js dev server:
+
+```dotenv
+OOP_ML_ACCOUNTS_URL=http://127.0.0.1:8001
+```
+
+Use `.env.development.local` for this local address. Next.js also reads
+`.env.local` in production, where the account backend must use HTTPS.
+
+Open `/account` and choose **Create account** or **Sign in**. Registration opens
+Cognito's signup page using the same authorization-code flow as sign-in,
+including state, nonce and PKCE. Cognito handles the password and email
+verification. FitLab creates its account after a verified callback, then
+returns the learner to `/account` to sync their work.
+
+The Cognito app client must enable the authorization-code grant and the
+`openid`, `email` and `profile` scopes. Enable self-service signup in the pool
+and configure its email verification and delivery. Register the exact URLs:
+
+| Environment | Callback | Sign-out |
+| --- | --- | --- |
+| Local | `http://localhost:3000/account-api/auth/callback` | `http://localhost:3000/account` |
+| Production | `https://fitlab.dev/account-api/auth/callback` | `https://fitlab.dev/account` |
+
+Use the deployed hostname if it differs from `fitlab.dev`, and configure a
+separate development app client when keeping local access separate. The
+backend's site origin determines the callback; browser-supplied URLs cannot
+override it. Cognito's signup endpoint and its parameters are described in
+[the managed-login documentation](https://docs.aws.amazon.com/cognito/latest/developerguide/managed-login-endpoints.html).
+
+Quiz answers, Python drafts,
+workshop constructions, journey decisions and notes use the same account sync.
+Guest work stays separate until the learner chooses to import it. Leaving the
+URL unset or empty keeps guest learning available.
+
+Run `npm run check:backend -- --site http://localhost:3000` with the services
+running to check backend health, its session response, and the website's
+account proxy. For production configuration, use
+`npm run check:backend -- --production --site https://fitlab.dev`. Run
+`npm run test:backend` for the runtime configuration, proxy and backend
+integration contracts. The real-service tests require the private backend
+checkout and its development dependencies. Set `FITLAB_BACKEND_PATH` and
+`FITLAB_BACKEND_PYTHON` when they are outside the default sibling checkout.
+Those tests start a disposable database and test identity provider; they do
+not change real accounts. They check signup redirects, callback validation
+and restored work, but cannot verify the live Cognito pool's email delivery
+or registration settings. These checks do not deploy services.
+
+For Amplify, deploy and configure the backend first. Set
+`OOP_ML_ACCOUNTS_URL` in the website app's Amplify environment variables to the
+backend's HTTPS service URL, without credentials, a query or a fragment. Set
+the backend's `FITLAB_SITE_ORIGIN` to the exact website origin, for example
+`https://fitlab.dev`, and register
+`https://fitlab.dev/account-api/auth/callback` with the identity provider.
+Keep the backend's database URL, session secret and OIDC credentials in the
+backend deployment only.
+
+Keep the production compute API setting (`NEXT_PUBLIC_API_BASE_URL`, and
+`OOP_ML_API_URL` when using the `/backend` rewrite) separate from the account
+URL. Preserve the existing deployed compute address when adding accounts.
+The localhost values in `.env.example` are only for development.
+
+The checked-in `amplify.yml` runs the existing npm build pipeline and
+`scripts/prepare-account-runtime.mjs` before building. The script writes only
+the account service URL to `.env.production`, preserving other existing
+settings. This follows [Amplify's server runtime environment setup](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-environment-variables.html).
+Amplify build variables alone do not make the URL available to the Next.js
+server. Removing the variable and rebuilding writes an empty value so a
+previous service URL cannot remain in that generated file. A configured
+non-HTTPS URL fails the production preparation step. Redeploy after changing
+the URL; the script does not provision or deploy the backend.
+
+Before enabling accounts on the main branch, check `/account-api/session`
+and complete a sign-in on an Amplify preview branch with its own matching
+backend site origin and identity-provider callback. The repository uses
+Next.js 16.3.3; [Amplify's published Next.js support page](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-amplify-support.html)
+currently lists versions through 15. A local build does not establish hosting
+compatibility for the account routes.
 
 ## Adding or editing a lesson
 
@@ -63,8 +172,16 @@ A section may hold questions instead of prose (`quiz`, built with the helpers
 in `lib/quizzes.ts`) or problems to work through with the library (`practice`,
 built with the helpers in `lib/exercises.ts`). Both kinds report themselves to
 the progress the reader's browser keeps (`lib/progress.ts`), which is what the
-marks on the home page and the section pages read. There is no account and
-nothing leaves the browser.
+marks on the home page and the section pages read. Guests keep progress in
+their browser. Signed-in readers sync their work through the independent
+private `../backend` repository; the account page offers an explicit guest
+work import. `lib/learner-state.ts` stores quiz answers, Python drafts/results,
+Botie journeys and constructions, experiment inputs, and preferences. Each
+activity has its own server revision and an account-scoped offline cache.
+Conflicting device edits are preserved for an explicit choice on `/account`.
+New activities should use `useLearnerRecord` and `useLearnerField`, with a
+stable, versioned key; write on user edits, never on mounting default values.
+Keep timers, pointer gestures and active code execution outside saved records.
 
 Primers use `PrimerPage`, `PrimerSection`, `PrimerQuiz`, `PrimerPractice` and
 the same section navigation.
@@ -120,7 +237,7 @@ not source-code checks or proof against hard-coded answers. Results show
 passed and failed counters, skipped counts when applicable, and individual
 assertions with expected/actual values.
 Reading a solution does not mark its tests as passed. The existing local course
-progress is preserved. Exercises do not use accounts, rewards or locked steps.
+progress is preserved. Sign-in is optional; exercises have no locked steps.
 
 Python runs in a dedicated [Pyodide worker](https://pyodide.org/en/stable/usage/webworker.html).
 The engine is pinned to 314.0.7. It loads only on Run, downloads NumPy, and

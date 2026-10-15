@@ -3,7 +3,9 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { challengeQuestion, type Exercise, NUMPY_SETUP_COMMANDS, SETUP_COMMANDS } from "@/lib/exercises";
-import { draftKey, readDraft, writeDraft, type PracticeDraft } from "@/lib/practice-drafts";
+import { draftKey, readDraft, type PracticeDraft } from "@/lib/practice-drafts";
+import { useLearnerField, fingerprint, migrateLearnerRecord, useLearnerRecord, useLearnerStorageStatus } from "@/lib/learner-state";
+import { getProgressAccount, useProgressAccount } from "@/lib/progress";
 import { usePython } from "@/lib/use-python";
 import type { PythonResult } from "@/lib/python";
 import { ProgramOutput, PythonCode } from "./PythonCode";
@@ -32,12 +34,29 @@ export function PracticeDeck(props: PracticeProps) {
 }
 
 function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
-  const [card, setCard] = useState(0);
-  const [attempts, setAttempts] = useState<Attempt[]>(() => exercises.map((problem) => ({
-    ...readDraft(draftKey(lesson, problem), problem), solutionShown: false,
-  })));
+  const account = useProgressAccount();
+  const key = `practice:${lesson}:${fingerprint(exercises.map(problem => [problem.title, problem.starter, problem.output]))}`;
+  const work = useLearnerRecord(key, () => ({ card: 0, attempts: exercises.map((problem): Attempt => ({
+    code: problem.starter, solved: false, hintsShown: 0, solutionShown: false,
+  })) }), raw => {
+    const value = raw as { card: number; attempts: Attempt[] };
+    return !!value && Number.isInteger(value.card) && value.card >= 0 && value.card < exercises.length &&
+      Array.isArray(value.attempts) && value.attempts.length === exercises.length && value.attempts.every(entry =>
+        entry && typeof entry.code === "string" && typeof entry.solved === "boolean" && Number.isInteger(entry.hintsShown));
+  });
+  const [card, setCard] = useLearnerField(work, "card");
+  const [attempts, setAttempts] = useLearnerField(work, "attempts");
   const latest = useRef(attempts);
-  const [saved, setSaved] = useState<boolean | null>(null);
+  useEffect(() => { latest.current = attempts; }, [attempts]);
+  const { storageFailed } = useLearnerStorageStatus();
+  useEffect(() => {
+    if (getProgressAccount() !== account) return;
+    try {
+      if (exercises.some(problem => localStorage.getItem(draftKey(lesson, problem)))) migrateLearnerRecord(key, {
+        card: 0, attempts: exercises.map(problem => ({ ...readDraft(draftKey(lesson, problem), problem), solutionShown: false })),
+      }, account);
+    } catch { /* Old drafts are optional. */ }
+  }, [key, lesson, exercises, account]);
   const [expectedShown, setExpectedShown] = useState(false);
   const reported = useRef(false);
   const mounted = useRef(true);
@@ -58,11 +77,11 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
   }, [allFinished, onFinished]);
 
   const update = (index: number, changes: Partial<Attempt>) => {
-    const next = latest.current.map((entry, at) => at === index ? { ...entry, ...changes } : entry);
-    latest.current = next;
-    setAttempts(next);
-    const entry = next[index];
-    setSaved(writeDraft(draftKey(lesson, exercises[index]), { code: entry.code, solved: entry.solved, hintsShown: entry.hintsShown }));
+    setAttempts(previous => {
+      const next = previous.map((entry, at) => at === index ? { ...entry, ...changes } : entry);
+      latest.current = next;
+      return next;
+    });
   };
 
   const execute = async (check: boolean) => {
@@ -85,7 +104,6 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
     if (busy) stop();
     setCard(index);
     setExpectedShown(false);
-    setSaved(null);
   };
   const result = attempt.result;
   const stale = result && result.source !== attempt.code;
@@ -176,7 +194,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
                 className="rounded-md border border-accent-fill px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent-soft disabled:opacity-40">Run tests</button>
               {busy && <Quiet onClick={() => stop()}>Stop</Quiet>}
               <Quiet disabled={busy} onClick={() => update(card, { code: current.starter, result: undefined })}>Reset code</Quiet>
-              <span className="ml-auto text-xs text-muted">{saved === true ? "Saved in this browser" : saved === false ? "Draft could not be saved in this browser" : "Drafts stay in this browser"}</span>
+              <span className="ml-auto text-xs text-muted">{storageFailed ? "Browser storage is full. Keep this tab open until sync finishes." : account ? "Drafts save here and sync to your account" : "Saved in this browser"}</span>
             </div>
           </div>
 

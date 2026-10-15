@@ -7,7 +7,9 @@
 // every component at once. The choice is remembered in this browser and put
 // back before the next page paints by the script in app/layout.tsx.
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { migrateLearnerRecord, useLearnerState } from "@/lib/learner-state";
+import { useProgressAccount } from "@/lib/progress";
 
 const KEY = "oop_ml.theme";
 
@@ -43,12 +45,22 @@ const serverTheme = (): Theme => "dark";
 
 export function ThemeToggle() {
   const theme = useSyncExternalStore(subscribe, current, serverTheme);
+  const account = useProgressAccount();
+  const [preference, setPreference] = useLearnerState<Theme>("preferences:theme", "dark", { validate: value => value === "light" || value === "dark" });
+  useEffect(() => {
+    if (account) return;
+    try {
+      const old = localStorage.getItem(KEY);
+      if (old === "light" || old === "dark") migrateLearnerRecord("preferences:theme", old, null);
+    } catch { /* The theme remains usable without browser storage. */ }
+  }, [account]);
+  useEffect(() => { apply(preference); }, [preference, account]);
   const next: Theme = theme === "dark" ? "light" : "dark";
 
   return (
     <button
       type="button"
-      onClick={() => apply(next)}
+      onClick={() => { setPreference(next); apply(next); }}
       aria-label={`Switch to the ${next} theme`}
       title={`Switch to the ${next} theme`}
       className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-surface text-muted transition hover:text-foreground"

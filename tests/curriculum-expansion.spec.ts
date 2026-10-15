@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openFullWorkshop } from "./helpers/open-workshop";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { expandedLessons } from "../lib/lessons";
@@ -93,8 +94,7 @@ test("editable examples calculate from changed data and expose invalid missing r
 
 test("new workshops start empty and the constructions pass their actual cases", async ({ page }) => {
   for (const id of ["numpy-axes", "categorical-encoding", "probability-calibration"]) {
-    await page.goto(`/lab/${id}`);
-    await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+    await openFullWorkshop(page, id);
     await expect(page.locator("[data-piece]")).toHaveCount(1);
     await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();

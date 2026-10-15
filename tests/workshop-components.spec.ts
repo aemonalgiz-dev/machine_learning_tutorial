@@ -1,8 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
+import { openFullWorkshop } from "./helpers/open-workshop";
 
 async function open(page: Page, slug: string, example = false) {
-  await page.goto(`/lab/${slug}`);
-  await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+  await openFullWorkshop(page, slug);
   await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
   if (example) {
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();

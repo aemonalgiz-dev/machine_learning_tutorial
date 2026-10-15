@@ -614,5 +614,89 @@
     "section": "Complete Projects",
     "topic": "Putting the Pieces Together",
     "blurb": "Turn a small tray image into a binary mask, label connected regions, and investigate when a region count stops matching the number of seeds."
+  },
+  {
+    "id": "design-from-decisions",
+    "title": "What Would This Prediction Actually Change?",
+    "section": "Define the ML Problem",
+    "topic": "Decisions Before Models",
+    "blurb": "A model can flag a pump that may fail, but someone still has to decide what to do. Begin with that decision and work backwards to the information it needs."
+  },
+  {
+    "id": "design-without-a-model",
+    "title": "Do We Need a Learned Model Yet?",
+    "section": "Define the ML Problem",
+    "topic": "Decisions Before Models",
+    "blurb": "A fixed rule already catches some faults. Work out what a learned model would have to improve before paying for its extra work."
+  },
+  {
+    "id": "design-information-boundaries",
+    "title": "What Can the System Know at Decision Time?",
+    "section": "Define the ML Problem",
+    "topic": "The Information We Can Use",
+    "blurb": "A reading can describe an earlier event and still arrive too late. Design a data contract that respects both clocks."
+  },
+  {
+    "id": "design-pipeline-capacity",
+    "title": "Where Does the Prediction Pipeline Run Out of Room?",
+    "section": "Model the System Before Building It",
+    "topic": "Throughput and Waiting",
+    "blurb": "A fast model can sit inside a slow service. Follow requests through preparation, inference, and storage to find the stage that limits the whole path."
+  },
+  {
+    "id": "design-queues-and-bursts",
+    "title": "What Happens When Requests Arrive Together?",
+    "section": "Model the System Before Building It",
+    "topic": "Throughput and Waiting",
+    "blurb": "Average demand can fit while a burst still leaves people waiting. Follow unfinished requests from one interval to the next."
+  },
+  {
+    "id": "design-memory-budget",
+    "title": "Will the Model Fit on the Device?",
+    "section": "Model the System Before Building It",
+    "topic": "Memory and Communication",
+    "blurb": "A model file can fit while its running process runs out of memory. Account for parameters, temporary values, and the rest of the runtime."
+  },
+  {
+    "id": "design-edge-or-cloud",
+    "title": "Should the Prediction Happen Here or on a Server?",
+    "section": "Model the System Before Building It",
+    "topic": "Memory and Communication",
+    "blurb": "Sending an image away adds work before inference can begin. Compare communication and computation, then examine what happens when the connection disappears."
+  },
+  {
+    "id": "design-feasible-tradeoffs",
+    "title": "Which Designs Are Actually Acceptable?",
+    "section": "Compare Designs Under Constraints",
+    "topic": "Requirements and Trade-offs",
+    "blurb": "A design can be fast, accurate, or inexpensive without meeting the job’s requirements. Remove infeasible options before comparing the choices that remain."
+  },
+  {
+    "id": "design-sensitive-assumptions",
+    "title": "Which Assumption Could Change Our Decision?",
+    "section": "Compare Designs Under Constraints",
+    "topic": "Requirements and Trade-offs",
+    "blurb": "An estimate can look convincing because its uncertain inputs were hidden. Vary the assumptions and find where the preferred design changes."
+  },
+  {
+    "id": "design-prototype-experiments",
+    "title": "What Should the Prototype Teach Us?",
+    "section": "Test the Design and Plan for Failure",
+    "topic": "Evidence Before Release",
+    "blurb": "A prototype should answer a question that could change the design. Test interacting choices together instead of changing everything and guessing what helped."
+  },
+  {
+    "id": "design-fallbacks",
+    "title": "What Should Happen When the Model Cannot Help?",
+    "section": "Test the Design and Plan for Failure",
+    "topic": "Evidence Before Release",
+    "blurb": "A missing reading or unavailable model still requires a response. Build a route that makes the failure visible and sends the case somewhere useful."
+  },
+  {
+    "id": "design-inspection-review",
+    "title": "Can We Defend the Inspection Service Design?",
+    "section": "Test the Design and Plan for Failure",
+    "topic": "Bring the Design Together",
+    "blurb": "Bring the requirements back to the complete service. Check fault misses and queue capacity separately, then identify what the prototype still has not demonstrated."
   }
 ]

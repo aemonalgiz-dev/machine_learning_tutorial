@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openFullWorkshop } from './helpers/open-workshop';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { buildById } from '../lib/builds/catalog';
@@ -64,8 +65,7 @@ test('VAE derivatives match finite differences and the complete loop improves th
 });
 
 test('execution errors count as failed and a wrong statistic receives staged coaching',async({page})=>{
-  await page.goto('/lab/statistics');
-  await page.getByRole('navigation',{name:'Journey stages'}).getByRole('button',{name:/Build your solution/}).click();
+  await openFullWorkshop(page, 'statistics');
   await page.getByRole('checkbox',{name:'Animate signals',exact:true}).uncheck();
   await page.getByRole('button',{name:'Test all examples',exact:true}).click();
   await expect(page.getByTestId('construction-counter')).toHaveText('0 passed · 3 failed · 0 not run');

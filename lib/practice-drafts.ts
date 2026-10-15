@@ -1,4 +1,5 @@
 import type { Exercise } from "./exercises";
+import { getProgressAccount } from "./progress";
 
 export interface PracticeDraft {
   code: string;
@@ -13,7 +14,9 @@ function fingerprint(value: string): string {
 }
 
 export function draftKey(lesson: string, problem: Exercise): string {
-  return `oop_ml.code.v1:${lesson}:${fingerprint(problem.title + problem.starter + problem.output)}`;
+  const account = getProgressAccount();
+  const prefix = account ? `oop_ml.code.v1:account:${account}` : "oop_ml.code.v1";
+  return `${prefix}:${lesson}:${fingerprint(problem.title + problem.starter + problem.output)}`;
 }
 
 export function readDraft(key: string, problem: Exercise): PracticeDraft {

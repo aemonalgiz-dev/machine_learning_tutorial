@@ -14,7 +14,8 @@
 // because the reason under the answer is a summary and the part is the
 // argument.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useLearnerField, fingerprint, useLearnerRecord } from "@/lib/learner-state";
 import { QuizQuestion, answersOf, arranged, isCorrect } from "@/lib/quizzes";
 import { BotieSays } from "@/components/site/Botie";
 import { PythonCode } from "./PythonCode";
@@ -35,15 +36,25 @@ export function QuizDeck({
   questions,
   revisit = [],
   onFinished,
+  lesson,
+  section,
 }: {
   questions: QuizQuestion[];
   revisit?: RevisitLink[];
   onFinished?: () => void;
+  lesson: string;
+  section: string;
 }) {
-  const [card, setCard] = useState(0);
-  const [attempts, setAttempts] = useState<Attempt[]>(() =>
-    questions.map(() => ({ picked: [], answered: false })),
-  );
+  const saved = useLearnerRecord(`quiz:${lesson}:${section}:${fingerprint(questions)}`, () => ({
+    card: 0, attempts: questions.map((): Attempt => ({ picked: [], answered: false })),
+  }), value => {
+    const record = value as { card: number; attempts: Attempt[] };
+    return !!record && Number.isInteger(record.card) && record.card >= 0 && record.card <= questions.length &&
+      Array.isArray(record.attempts) && record.attempts.length === questions.length && record.attempts.every((attempt, i) =>
+        attempt && typeof attempt.answered === "boolean" && Array.isArray(attempt.picked) && attempt.picked.every(index => Number.isInteger(index) && index >= 0 && index < (questions[i].kind === "trueFalse" ? 2 : (questions[i] as { options: string[] }).options.length)));
+  });
+  const [card, setCard] = useLearnerField(saved, "card");
+  const [attempts, setAttempts] = useLearnerField(saved, "attempts");
   const reported = useRef(false);
 
   const finished = card >= questions.length;

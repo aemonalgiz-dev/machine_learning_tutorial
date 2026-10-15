@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useLearnerField, useLearnerRecord } from "@/lib/learner-state";
 import { BotieSays } from "../site/Botie";
 import { assemble, evaluate, type Build, type Data } from "@/lib/builds/engine";
 import { TOOLS } from "@/lib/builds/tools";
@@ -16,15 +17,16 @@ function ValueEditor({ value, label, change }: { value: Data; label: string; cha
 }
 
 export function LessonExperiment({ build, outputLabel }: { build: Build; outputLabel: string }) {
-  const [caseIndex, setCaseIndex] = useState(0);
-  const [data, setData] = useState(build.cases[0].data);
+  const saved = useLearnerRecord(`experiment:${build.id}:v${build.draftVersion??1}`, {caseIndex:0,data:build.cases[0].data});
+  const [caseIndex, setCaseIndex] = useLearnerField(saved, "caseIndex");
+  const [data, setData] = useLearnerField(saved, "data");
   const graph = useMemo(() => assemble(build.recipe, TOOLS), [build.recipe]);
   const trace = evaluate(graph, data, TOOLS);
   const imageView = build.imageView;
   const outputImage = imageView?.outputIndex !== undefined && Array.isArray(trace.output) ? trace.output[imageView.outputIndex] : trace.output;
   return <section className="space-y-5" aria-label="Explore the lesson calculation">
-    {["forecasting-baselines", "exponential-smoothing", "project-demand-forecast"].includes(build.id) && <ForecastSequence />}
-    {build.id === "q-learning" && <ActionSequence />}
+    {["forecasting-baselines", "exponential-smoothing", "project-demand-forecast"].includes(build.id) && <ForecastSequence lesson={build.id} />}
+    {build.id === "q-learning" && <ActionSequence lesson={build.id} />}
     <BotieSays>{build.problem}</BotieSays>
     <label className="block text-sm font-semibold">Choose an example<select value={caseIndex} onChange={event => { const index = Number(event.target.value); setCaseIndex(index); setData(build.cases[index].data); }} className="mt-2 block min-h-11 w-full rounded-lg border border-line bg-surface p-3">{build.cases.map((sample, i) => <option key={sample.name} value={i}>{sample.name}</option>)}</select></label>
     <div className="space-y-4">{Object.entries(data).map(([key, value]) => {

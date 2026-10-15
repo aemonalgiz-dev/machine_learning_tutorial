@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openFullWorkshop } from "./helpers/open-workshop";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { CURRICULUM } from "../lib/curriculum";
@@ -19,8 +20,8 @@ const lessons = expandedLessons.filter(lesson => Object.hasOwn(sections, lesson.
 const run = (name: string, ...inputs: Data[]) => TOOLS[name].run(inputs, {});
 
 test("ten new sections contain complete lessons and preserve the reinforcement introduction", () => {
-  expect(CURRICULUM).toHaveLength(22);
-  expect(lessonOrder).toHaveLength(196);
+  expect(CURRICULUM).toHaveLength(26);
+  expect(lessonOrder).toHaveLength(208);
   expect(lessons).toHaveLength(47);
   for (const [title, count] of Object.entries(sections)) {
     const section = CURRICULUM.find(part => part.title === title)!;
@@ -91,6 +92,7 @@ test("all section overviews link to actual lessons and the landing page remains 
     for (const topic of section.topics) for (const lesson of topic.concepts) expect(html).toContain(`href="${lesson.href}"`);
   }
   await page.goto("/#course");
+  await page.getByRole("navigation", { name: "Learning areas", exact: true }).getByRole("link", { name: /^Machine Learning/ }).click();
   await expect(page.getByRole("link", { name: /Time Series and Forecasting/ }).first()).toBeVisible();
   await page.setViewportSize({ width: 390, height: 950 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -143,8 +145,7 @@ test("a construction in every new section starts empty and passes its test cases
   test.setTimeout(240_000);
   for (const section of Object.keys(sections)) {
     const lesson = lessons.find(lesson => lesson.section === section)!;
-    await page.goto(`/lab/${lesson.id}`);
-    await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+    await openFullWorkshop(page, lesson.id);
     await expect(page.locator("[data-piece]")).toHaveCount(1);
     await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();

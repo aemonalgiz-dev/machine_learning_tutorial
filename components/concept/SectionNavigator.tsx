@@ -41,7 +41,7 @@ import {
 import { usePathname } from "next/navigation";
 import { QuizDeck, RevisitLink } from "./QuizDeck";
 import { PracticeDeck } from "./PracticeDeck";
-import { declareRequired, markFinished } from "@/lib/progress";
+import { declareRequired, markFinished, useProgressAccount } from "@/lib/progress";
 import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
 import { LessonGame } from "@/components/lab/LessonGame";
@@ -124,6 +124,7 @@ export function SectionNavigator({
   const settled = useRef(false);
   const keepScroll = useRef<number | null>(null);
   const lesson = usePathname() ?? "";
+  const accountId = useProgressAccount();
 
   const rawHash = useSyncExternalStore(subscribeToHash, readHash, noHash);
 
@@ -196,7 +197,7 @@ export function SectionNavigator({
   const finishable = sections.filter((section) => kindOf(section) === "quiz" || kindOf(section) === "practice").length;
   useEffect(() => {
     if (lesson) declareRequired(lesson, finishable);
-  }, [lesson, finishable]);
+  }, [lesson, finishable, accountId]);
 
   if (sections.length === 0) return null;
 
@@ -252,17 +253,21 @@ export function SectionNavigator({
             {kind === "game" && entry.journey && <LessonGame data={entry.journey} active={index === current} />}
             {kind === "quiz" && (
               <QuizDeck
+                key={accountId ?? "guest"}
                 questions={entry.quiz as QuizQuestion[]}
+                lesson={lesson}
+                section={entry.id}
                 revisit={revisit}
-                onFinished={() => lesson && markFinished(lesson, entry.id)}
+                onFinished={() => lesson && markFinished(lesson, entry.id, accountId)}
               />
             )}
             {kind === "practice" && (
               <PracticeDeck
+                key={accountId ?? "guest"}
                 exercises={entry.practice as Exercise[]}
                 lesson={lesson}
                 active={index === current}
-                onFinished={() => lesson && markFinished(lesson, entry.id)}
+                onFinished={() => lesson && markFinished(lesson, entry.id, accountId)}
               />
             )}
           </section>

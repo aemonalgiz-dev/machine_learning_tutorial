@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { missions, labLessons, missionById } from "../lib/labs";
 import { passed } from "../lib/labs/types";
 import { expandedLessonIds } from "../lib/lessons/ids";
+import { journeyPlans } from "../lib/builds/journeys";
 
 test("legacy simulation challenges retain their working, nontrivial solutions", () => {
   const expanded = new Set<string>(expandedLessonIds);
@@ -39,25 +40,26 @@ test("unknown workshop lessons return 404", async ({ request }) => {
   expect((await request.get("/lab/not-a-lesson")).status()).toBe(404);
 });
 
-test("Botie's directory keeps mathematics first and finds the related journey", async ({ page }) => {
+test("Botie's directory introduces the controls, then starts its subjects with mathematics", async ({ page }) => {
   await page.goto("/lab");
   await expect(page.getByRole("heading", { name: "Botie's workshop", exact: true })).toBeVisible();
-  await expect(page.locator("main section").first()).toContainText("Introductory Mathematics");
-  await expect(page.getByRole("link", { name: /Start the workshop tutorial/ })).toHaveAttribute("href", "/lab/workshop-guide");
-  await page.getByRole("searchbox").fill("Fit a line");
-  await page.getByRole("link", { name: /Fit a line to the observations/ }).click();
-  await expect(page.getByTestId("workshop-journey")).toBeVisible();
-  await expect(page.getByRole("navigation", { name: "Journey stages" })).toBeVisible();
-  await page.getByRole("button", { name: /Build your solution/ }).click();
-  await expect(page.locator("[data-piece]")).toHaveCount(1);
+  await expect(page.locator("main section").first()).toContainText("Getting started");
+  await expect(page.locator("main section").nth(1)).toContainText("Introductory Mathematics");
+  await expect(page.getByRole("link", { name: "Build your first machine →", exact: true })).toHaveAttribute("href", "/lab/workshop-guide");
+  await page.getByRole("searchbox").fill("delivery");
+  const regression = page.getByRole("link", { name: /Predict delivery times with Botie/ });
+  await expect(regression).toHaveAttribute("href", "/lab/simple-linear-regression");
+  await regression.click();
+  await expect(page).toHaveURL(/\/lab\/simple-linear-regression$/);
+  await expect(page.getByTestId("regression-journey")).toBeVisible();
 });
 
 test("concepts and primers embed the journey and retain practice links", async ({ page }) => {
   for (const href of ["/concepts/attention", "/primers/statistics"]) {
     await page.goto(`${href}#workshop`);
     await expect(page.getByTestId("workshop-journey")).toBeVisible();
-    await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Explain it/ }).click();
-    await page.getByRole("link", { name: /Write the calculation in Python/ }).click();
+    await page.getByText(journeyPlans[href.split("/").pop()!].reflection.prompt, { exact: true }).click();
+    await page.getByRole("link", { name: /Work through the Python challenges/ }).click();
     await expect(page.getByTestId("workshop-journey")).toHaveCount(0);
     await expect(page.getByText("Write and run Python", { exact: true })).toBeVisible();
     await page.goBack();
@@ -69,7 +71,7 @@ test("large, image and text constructions fit inside narrow pages", async ({ pag
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const slug of ["attention", "template-matching", "the-pattern-language-models-use", "the-standard-score", "reinforcement-learning"]) {
     await page.goto(`/lab/${slug}`);
-    await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+    await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: journeyPlans[slug].construction.title, exact: true }).click();
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();
     await page.getByRole("button", { name: "Assemble an example", exact: true }).click();
     for (const width of [1440, 1024, 768, 390, 320]) {

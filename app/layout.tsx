@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CourseBreadcrumbs } from "@/components/course/CourseBreadcrumbs";
 import { LessonFooter } from "@/components/course/LessonFooter";
-import { ProgressPill } from "@/components/site/ProgressPill";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+import { AccountSync } from "@/components/site/AccountSync";
 import { SupportMessage } from "@/components/site/SupportMessage";
 import { Botie } from "@/components/site/Botie";
 import { REPOSITORY } from "@/lib/site";
@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "oop_ml: machine learning, one concept at a time",
+  title: "FitLab: Machine Learning for Everyone",
   description:
     "Machine learning explained through the problems each method was developed to solve, with interactive examples and Python challenges to work through the ideas yourself.",
 };
@@ -46,36 +46,28 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: restoreTheme }} />
 
         <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
-          <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3">
+          <nav aria-label="Main navigation" className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-6 py-3">
             <Link
               href="/"
               className="flex items-center gap-2 font-mono text-base font-bold tracking-tight text-foreground"
             >
               <Botie size={32} decorative />
-              oop_ml
+              FitLab
             </Link>
-            <Link href="/lab" className="text-sm font-semibold text-accent hover:underline">Workshops</Link>
-            <div className="hidden items-center gap-5 text-sm text-muted sm:flex">
+            <div className="order-3 flex w-full flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted sm:order-none sm:w-auto">
               <Link href="/#course" className="transition hover:text-foreground">
-                Course
+                Learn
               </Link>
-              <Link href="/sections/mathematics-as-needed" className="transition hover:text-foreground">
-                Primers
+              <Link href="/lab" className="inline-flex min-h-9 items-center transition hover:text-foreground">
+                Workshops
               </Link>
-              <a
-                href={REPOSITORY}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition hover:text-foreground"
-              >
-                Library <span aria-hidden="true">↗</span>
-              </a>
+              <Link href="/search" className="inline-flex min-h-9 items-center transition hover:text-foreground">Search</Link>
+              <Link href="/about" className="inline-flex min-h-9 items-center transition hover:text-foreground">About</Link>
             </div>
             <div className="ml-auto flex items-center gap-3">
-              <ProgressPill />
+              <AccountSync />
               <ThemeToggle />
             </div>
-            <SupportMessage />
           </nav>
         </header>
 
@@ -86,8 +78,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
 
         <footer className="border-t border-line">
-          <div className="mx-auto max-w-5xl px-6 py-6 text-sm text-muted">
-            The examples use NumPy and{" "}
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-6 text-sm text-muted">
+            <p>The examples use NumPy and{" "}
             <a
               href={REPOSITORY}
               target="_blank"
@@ -96,10 +88,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             >
               oop_ml
             </a>
-            .{" "}
+            .</p>
             <Link href="/privacy" className="underline-offset-4 hover:underline">
               Privacy
             </Link>
+            <SupportMessage />
           </div>
         </footer>
       </body>

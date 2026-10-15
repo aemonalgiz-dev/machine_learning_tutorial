@@ -1,9 +1,9 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
 import type { Construction } from "../lib/builds/engine";
+import { openFullWorkshop } from "./helpers/open-workshop";
 
 async function open(page: Page) {
-  await page.goto("/lab/workshop-guide");
-  await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+  await openFullWorkshop(page, "workshop-guide");
   await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
 }
 async function point(locator: Locator) {
@@ -131,11 +131,19 @@ for (const direction of ["forward", "backward", "vertical"] as const) {
     const geometry = await check();
     expect(geometry.startError).toBeLessThan(2); expect(geometry.endError).toBeLessThan(2);
     const wire = page.getByTestId("connection-path");
-    const midpoint = await wire.evaluate(element => {
-      const path = element as SVGPathElement, p = path.getPointAtLength(path.getTotalLength() / 2);
-      const screen = new DOMPoint(p.x, p.y).matrixTransform(path.getScreenCTM()!); return { x: screen.x, y: screen.y };
+    const reachablePoint = await wire.evaluate(element => {
+      const path = element as SVGPathElement, hit = path.parentElement!.querySelector('[role="button"]');
+      // The geometric midpoint can lie behind the sticky navigation or outside
+      // the scrolled viewport. Click a segment the learner can actually reach.
+      const fractions = [0.5, ...Array.from({ length: 19 }, (_, index) => [(19 - index) / 40, (21 + index) / 40]).flat()];
+      for (const fraction of fractions) {
+        const point = path.getPointAtLength(path.getTotalLength() * fraction);
+        const screen = new DOMPoint(point.x, point.y).matrixTransform(path.getScreenCTM()!);
+        if (document.elementFromPoint(screen.x, screen.y) === hit) return { x: screen.x, y: screen.y };
+      }
+      throw Error("No reachable wire segment is visible in the construction viewport");
     });
-    await page.mouse.click(midpoint.x, midpoint.y);
+    await page.mouse.click(reachablePoint.x, reachablePoint.y);
     await expect(page.getByRole("button", { name: /Select connection 1:/ })).toHaveAttribute("aria-pressed", "true");
     await expect(wire).toHaveCount(1);
     await page.getByRole("button", { name: "Remove this connection", exact: true }).click();

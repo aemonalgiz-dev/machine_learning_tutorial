@@ -5,16 +5,18 @@
 
 import { finishedCount, useProgress } from "@/lib/progress";
 import { lessonOrder } from "@/lib/course-navigation";
+import { useAccount } from "@/lib/accounts";
 
 export function ProgressPill() {
   const lessons = lessonOrder;
   const progress = useProgress();
+  const account = useAccount();
   const done = finishedCount(progress, lessons);
   const share = lessons.length === 0 ? 0 : Math.round((100 * done) / lessons.length);
 
   return (
     <span
-      title={`${done} of ${lessons.length} lessons finished in this browser`}
+      title={`${done} of ${lessons.length} lessons finished${account.user ? " in your account" : " in this browser"}`}
       className="hidden items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 font-mono text-xs text-muted sm:inline-flex"
     >
       <span className="h-1.5 w-16 overflow-hidden rounded-full bg-raised" aria-hidden="true">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useLearnerField, useLearnerRecord } from "@/lib/learner-state";
 import { BotieSays } from "@/components/site/Botie";
 import { MatrixVectorCalculation } from "./MatrixVectorCalculation";
 import { WorkshopValue } from "./WorkshopValue";
@@ -12,10 +12,11 @@ const steps = ["Start with one bill", "Keep the customers together", "Arrange th
 export function MatrixBookkeeping({ build }: { build: Build }) {
   const sample = build.cases[0].data;
   const initial = (sample.loaves as number[]).map((loaves, i) => [loaves, (sample.bottles as number[])[i]]);
-  const [step, setStep] = useState(0);
-  const [purchases, setPurchases] = useState(initial);
-  const [prices, setPrices] = useState(sample.prices as number[]);
-  const [customersAsRows, setCustomersAsRows] = useState(false);
+  const saved=useLearnerRecord(`matrix:${build.id}:v${build.draftVersion??1}`, {step:0,purchases:initial,prices:sample.prices as number[],customersAsRows:false});
+  const [step,setStep]=useLearnerField(saved, "step");
+  const [purchases,setPurchases]=useLearnerField(saved, "purchases");
+  const [prices,setPrices]=useLearnerField(saved, "prices");
+  const [customersAsRows,setCustomersAsRows]=useLearnerField(saved, "customersAsRows");
   const rows = step === 0 ? purchases.slice(0, 1) : purchases;
   const columnNames = ["Bread", "Milk"];
   function changeQuantity(row: number, column: number, text: string) {

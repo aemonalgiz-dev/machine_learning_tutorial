@@ -1,4 +1,5 @@
 import { CURRICULUM, type Part, type Topic } from "./curriculum";
+import { LEARNING_AREAS, learningAreaHref, learningAreaSections } from "./learning-areas";
 
 function anchorOf(title: string): string {
   return title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -17,8 +18,8 @@ export const findCourseSection = (id: string) => CURRICULUM.find(part => courseS
 export const lessonHrefs = (part: Part): string[] =>
   part.topics.flatMap(topic => topic.concepts.flatMap(concept => (concept.href ? [concept.href] : [])));
 
-// Every lesson on the site in reading order, which is also the order a reader
-// is carried through by the link at the end of each one.
+// All published lessons, used for indexing and prerequisite checks. Adjacent
+// lesson links below follow the reading path inside each learning area.
 export const lessonOrder: string[] = CURRICULUM.flatMap(lessonHrefs);
 
 // The lesson a reader would sensibly start on: the first one after the
@@ -32,6 +33,8 @@ export interface LessonLink {
 
 export interface LessonLocation {
   title: string;
+  areaTitle: string;
+  areaHref: string;
   sectionTitle: string;
   sectionHref: string;
   // One-based, as a reader counts.
@@ -44,18 +47,21 @@ export interface LessonLocation {
 
 // Client navigation imports this shared table directly. Passing it through the
 // root layout serializes the entire course into every page's HTML and RSC files.
-export const lessonLocations: Record<string, LessonLocation> = (() => {
-  const all: { href: string; title: string; part: Part; index: number }[] = CURRICULUM.flatMap((part, index) =>
+export const lessonLocations: Record<string, LessonLocation> = Object.fromEntries(
+  LEARNING_AREAS.flatMap(area => {
+  const all: { href: string; title: string; part: Part; index: number }[] = learningAreaSections(area).flatMap((part, index) =>
     part.topics.flatMap(topic => topic.concepts.flatMap(concept =>
       concept.href ? [{ href: concept.href, title: concept.title, part, index }] : []
     ))
   );
-  return Object.fromEntries(all.map((lesson, at) => {
+  return all.map((lesson, at) => {
     const siblings = lessonHrefs(lesson.part);
     const previous = all[at - 1];
     const next = all[at + 1];
     return [lesson.href, {
       title: lesson.title,
+      areaTitle: area.title,
+      areaHref: learningAreaHref(area),
       sectionTitle: lesson.part.title,
       sectionHref: courseSectionHref(lesson.part),
       sectionNumber: lesson.index + 1,
@@ -64,8 +70,9 @@ export const lessonLocations: Record<string, LessonLocation> = (() => {
       ...(previous ? { previous: { title: previous.title, href: previous.href } } : {}),
       ...(next ? { next: { title: next.title, href: next.href } } : {}),
     }];
-  }));
-})();
+  });
+  }),
+);
 
 // Old homepage fragment links now open the same topic on its own section page.
 export const legacyCourseDestinations: Record<string, string> = Object.fromEntries(

@@ -1,4 +1,4 @@
-// What the reader has finished, kept in their own browser.
+// Completion records, cached separately for guests and signed-in accounts.
 //
 // A quiz records itself when its last card is answered and a set of problems
 // when every coding challenge has passed its output check. A lesson records how
@@ -6,15 +6,14 @@
 // of them has been. The home page and the section pages read the same record
 // to mark lessons off and to fill the progress bars.
 //
-// Nothing leaves the browser. There is no account and no server, so the record
-// is whatever this browser remembers, and clearing the site's data clears it.
-// That is the right trade for a course with no sign-in: a reader loses nothing
-// they could not get back by reading again, and the site never asks who they
-// are.
+// accounts.ts handles synchronization. Importing guest progress is explicit,
+// so a shared browser never silently merges different people's records.
 
 import { useSyncExternalStore } from "react";
 
 const KEY = "oop_ml.progress.v1";
+let accountId: string | null = null;
+const storageKey = () => accountId ? `${KEY}:account:${accountId}` : KEY;
 
 export interface Progress {
   // Lesson path, such as /concepts/k-means, to the ids of the sections on it
@@ -30,20 +29,30 @@ const EMPTY: Progress = { done: {}, required: {} };
 // or useSyncExternalStore sees a new value every render and loops.
 let cached: Progress | null = null;
 const listeners = new Set<() => void>();
+const changes = new Set<() => void>();
+const scopes = new Set<() => void>();
 
-function normalised(parsed: unknown): Progress {
+export function normalised(parsed: unknown): Progress {
   if (!parsed || typeof parsed !== "object") return EMPTY;
   const raw = parsed as Partial<Progress>;
-  return {
-    done: raw.done && typeof raw.done === "object" ? raw.done : {},
-    required: raw.required && typeof raw.required === "object" ? raw.required : {},
-  };
+  const validLesson = (key: string) => /^\/(concepts|primers)\/[a-z0-9][a-z0-9-]{0,140}$/.test(key);
+  const done: Record<string, string[]> = {};
+  const required: Record<string, number> = {};
+  if (raw.done && typeof raw.done === "object") for (const [key, value] of Object.entries(raw.done).slice(0, 512)) {
+    if (validLesson(key) && Array.isArray(value)) done[key] = [...new Set(value.filter(
+      (id): id is string => typeof id === "string" && /^[a-z0-9][a-z0-9-]{0,159}$/.test(id),
+    ))].slice(0, 128).sort();
+  }
+  if (raw.required && typeof raw.required === "object") for (const [key, value] of Object.entries(raw.required).slice(0, 512)) {
+    if (validLesson(key) && Number.isInteger(value) && value >= 0 && value <= 128) required[key] = value;
+  }
+  return { done, required };
 }
 
-function read(): Progress {
+export function readProgress(): Progress {
   if (cached) return cached;
   try {
-    const stored = window.localStorage.getItem(KEY);
+    const stored = window.localStorage.getItem(storageKey());
     cached = stored ? normalised(JSON.parse(stored)) : EMPTY;
   } catch {
     cached = EMPTY;
@@ -51,24 +60,26 @@ function read(): Progress {
   return cached;
 }
 
-function write(next: Progress) {
+function write(next: Progress, local = true) {
   cached = next;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(next));
+    window.localStorage.setItem(storageKey(), JSON.stringify(next));
   } catch {
     // Private windows and blocked storage still get a working page; the
     // record simply does not outlive it.
   }
   listeners.forEach((listener) => listener());
+  if (local) changes.forEach((listener) => listener());
 }
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
   // Another tab finishing a quiz shows up here too.
   const onStorage = (event: StorageEvent) => {
-    if (event.key === KEY) {
+    if (event.key === storageKey() || event.key === null) {
       cached = null;
       listener();
+      changes.forEach((changed) => changed());
     }
   };
   window.addEventListener("storage", onStorage);
@@ -81,11 +92,12 @@ function subscribe(listener: () => void) {
 const noProgress = () => EMPTY;
 
 export function useProgress(): Progress {
-  return useSyncExternalStore(subscribe, read, noProgress);
+  return useSyncExternalStore(subscribe, readProgress, noProgress);
 }
 
-export function markFinished(lesson: string, sectionId: string) {
-  const current = read();
+export function markFinished(lesson: string, sectionId: string, expectedAccount = accountId) {
+  if (expectedAccount !== accountId) return;
+  const current = readProgress();
   const already = current.done[lesson] ?? [];
   if (already.includes(sectionId)) return;
   write({
@@ -104,7 +116,7 @@ export function markFinished(lesson: string, sectionId: string) {
 // how much of it there is to finish. Written only when the count changes, so
 // opening a lesson twice does not notify anyone of nothing.
 export function declareRequired(lesson: string, count: number) {
-  const current = read();
+  const current = readProgress();
   if (current.required[lesson] === count) return;
   write({ ...current, required: { ...current.required, [lesson]: count } });
 }
@@ -125,4 +137,48 @@ export function lessonStarted(progress: Progress, lesson: string): boolean {
 
 export function finishedCount(progress: Progress, lessons: string[]): number {
   return lessons.filter((lesson) => lessonFinished(progress, lesson)).length;
+}
+
+export const getProgressAccount = () => accountId;
+
+export function setProgressAccount(id: string | null) {
+  if (id === accountId) return;
+  accountId = id;
+  cached = null;
+  scopes.forEach(listener => listener());
+  listeners.forEach(listener => listener());
+}
+
+export function useProgressAccount() {
+  return useSyncExternalStore((listener) => {
+    scopes.add(listener);
+    return () => { scopes.delete(listener); };
+  }, getProgressAccount, () => null);
+}
+
+export function onProgressChange(listener: () => void) {
+  changes.add(listener);
+  return () => { changes.delete(listener); };
+}
+
+export function guestProgress(): Progress {
+  try { return normalised(JSON.parse(window.localStorage.getItem(KEY) ?? "null")); }
+  catch { return EMPTY; }
+}
+
+export function mergeProgress(left: Progress, right: Progress): Progress {
+  const done = { ...left.done };
+  for (const [lesson, sections] of Object.entries(right.done)) {
+    done[lesson] = [...new Set([...(done[lesson] ?? []), ...sections])].sort();
+  }
+  return { done, required: { ...left.required, ...right.required } };
+}
+
+export function receiveProgress(remote: unknown, expectedAccount: string) {
+  if (expectedAccount !== accountId) return;
+  write(mergeProgress(normalised(remote), readProgress()), false);
+}
+
+export function importGuestProgress() {
+  if (accountId) write(mergeProgress(guestProgress(), readProgress()));
 }

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { openFullWorkshop } from "./helpers/open-workshop";
 import { expandedLessons } from "../lib/lessons";
 import { TOOLS } from "../lib/builds/tools";
 import { sectionId } from "../components/concept/sectionId";
@@ -56,8 +57,7 @@ test("array arrangement tools preserve entries and reject incomplete layouts", (
 
 test("new array workshops start empty and solve changed-input cases", async ({ page }) => {
   for (const id of ["numpy-creation", "numpy-reshaping", "numpy-numerical-checks"]) {
-    await page.goto(`/lab/${id}`);
-    await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+    await openFullWorkshop(page, id);
     await expect(page.locator("[data-piece]")).toHaveCount(1);
     await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();

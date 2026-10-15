@@ -1,17 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useLearnerField, useLearnerRecord } from "@/lib/learner-state";
 import { BotieSays } from "../site/Botie";
 
 const button = "min-h-11 rounded-lg border border-line bg-surface px-4 py-2 text-sm font-semibold disabled:opacity-50";
 const value = (n: number) => Number(n.toFixed(3));
 
-export function ForecastSequence() {
+export function ForecastSequence({lesson}: {lesson:string}) {
   const observations = [8, 10, 9, 13, 12];
-  const [method, setMethod] = useState("persistence");
-  const [step, setStep] = useState(1);
-  const [level, setLevel] = useState(observations[0]);
-  const [records, setRecords] = useState<{ day: number; prediction: number; actual: number }[]>([]);
+  const saved=useLearnerRecord(`forecast:${lesson}:v1`, {method:"persistence",step:1,level:observations[0],records:[] as {day:number;prediction:number;actual:number}[]});
+  const [method,setMethod]=useLearnerField(saved, "method");
+  const [step,setStep]=useLearnerField(saved, "step");
+  const [level,setLevel]=useLearnerField(saved, "level");
+  const [records,setRecords]=useLearnerField(saved, "records");
   const prediction = method === "persistence" ? observations[step - 1] : level;
   const complete = step === observations.length;
   const reset = () => { setStep(1); setLevel(observations[0]); setRecords([]); };
@@ -41,12 +42,13 @@ export function ForecastSequence() {
   </section>;
 }
 
-export function ActionSequence() {
-  const [state, setState] = useState(0);
-  const [table, setTable] = useState([[0, 0], [0, 0]]);
-  const [done, setDone] = useState(false);
-  const [steps, setSteps] = useState(0);
-  const [last, setLast] = useState<string | null>(null);
+export function ActionSequence({lesson}: {lesson:string}) {
+  const saved=useLearnerRecord(`actions:${lesson}:v1`, {state:0,table:[[0,0],[0,0]],done:false,steps:0,last:null as string|null});
+  const [state,setState]=useLearnerField(saved, "state");
+  const [table,setTable]=useLearnerField(saved, "table");
+  const [done,setDone]=useLearnerField(saved, "done");
+  const [steps,setSteps]=useLearnerField(saved, "steps");
+  const [last,setLast]=useLearnerField(saved, "last");
   const choose = (action: number) => {
     const terminal = state === 1 && action === 1;
     const next = action === 0 ? 1 : state;

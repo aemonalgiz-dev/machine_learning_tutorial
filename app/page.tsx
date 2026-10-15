@@ -1,79 +1,28 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Botie } from "@/components/site/Botie";
+import { LessonSearchForm } from "@/components/site/LessonSearchForm";
 import { LegacyCourseLinks } from "@/components/course/LegacyCourseLinks";
-import { CURRICULUM } from "@/lib/curriculum";
-import { COFFEE_URL } from "@/lib/site";
-import {
-  courseSectionHref,
-  firstLesson,
-  legacyCourseDestinations,
-  lessonCount,
-  lessonHrefs,
-} from "@/lib/course-navigation";
-
-// The author's description of FitLab, adapted from the Patreon introduction.
-const WHAT_YOU_GET: [string, string][] = [
-  [
-    "History and motivation",
-    "Every lesson is grounded in the history of the mathematics, the logic, and the needs of the time.",
-  ],
-  [
-    "Charts that are real models",
-    "Change the data and the model fits again, so you can test what a method does instead of taking my word for it.",
-  ],
-  [
-    "Accessible to everyone",
-    "You don't need a degree or a strong background in mathematics to make progress. The site teaches the mathematics you need.",
-  ],
-  [
-    "Comprehensive quizzes",
-    "Questions throughout each lesson, so you can feel your knowledge growing.",
-  ],
-  [
-    "Interactive coding challenges",
-    "Challenges specific to the topic at hand, with tests so you can verify your results.",
-  ],
-];
+import { legacyCourseDestinations } from "@/lib/course-navigation";
+import { LEARNING_AREAS, learningAreaHref, learningAreaSections } from "@/lib/learning-areas";
+import { JourneyResume } from "@/components/site/JourneyResume";
 
 export default function Home() {
-  const total = CURRICULUM.reduce((sum, part) => sum + lessonCount(part), 0);
-
   return (
     <div className="mx-auto w-full max-w-5xl px-6 pb-12 pt-6 sm:pb-20 sm:pt-8">
       <LegacyCourseLinks destinations={legacyCourseDestinations} />
-
-      <header className="mb-12">
+      <header className="mb-10">
         <h1 className="sr-only">FitLab: Machine Learning for Everyone</h1>
-        <div
-          role="img"
-          aria-label="FitLab. Machine Learning for Everyone. A fitted line, a matrix, and a neural network connect the ideas in the course."
-          className="relative mb-8 overflow-hidden rounded-2xl border border-line bg-[#060d15] shadow-sm"
-        >
+        <div role="img" aria-label="FitLab. Machine Learning for Everyone. A fitted line, a matrix, and a neural network connect the ideas in the course." className="relative mb-6 overflow-hidden rounded-2xl border border-line bg-[#060d15] shadow-sm">
           <div aria-hidden="true" className="relative hidden h-64 sm:block lg:h-[300px]">
             {/* Crop the artwork's extra left margin to center its title and diagrams together. */}
             <div className="absolute inset-y-0 right-0 w-[120%]">
-              <Image
-                src="/branding/fitlab-banner.png"
-                alt=""
-                fill
-                sizes="(min-width: 1024px) 1172px, calc(120vw - 57.6px)"
-                loading="eager"
-                fetchPriority="high"
-                className="object-cover object-[right_40%]"
-              />
+              <Image src="/branding/fitlab-banner.png" alt="" fill sizes="(min-width: 1024px) 1172px, calc(120vw - 57.6px)" loading="eager" fetchPriority="high" className="object-cover object-[right_40%]" />
             </div>
           </div>
           <div aria-hidden="true" className="relative min-h-52 sm:hidden">
             <div className="absolute inset-y-0 right-0 w-[46%] max-w-60">
-              <Image
-                src="/branding/fitlab-banner.png"
-                alt=""
-                fill
-                sizes="560px"
-                loading="eager"
-                className="object-cover object-right"
-              />
+              <Image src="/branding/fitlab-banner.png" alt="" fill sizes="560px" loading="eager" className="object-cover object-right" />
               <div className="absolute inset-0 bg-gradient-to-r from-[#060d15] via-[#060d15]/20 to-transparent" />
             </div>
             <div className="relative max-w-[75%] px-6 py-9">
@@ -82,92 +31,46 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href={firstLesson}
-            className="inline-flex items-center gap-2 rounded-md bg-accent-fill px-5 py-2.5 text-sm font-semibold text-accent-ink shadow-sm transition hover:brightness-110"
-          >
-            Start with a prediction <span aria-hidden="true">→</span>
-          </Link>
-          <Link
-            href="#course"
-            className="inline-flex items-center gap-2 rounded-md border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-foreground transition hover:bg-raised"
-          >
-            Browse the sections
-          </Link>
+        <div className="text-center">
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link href="/lab/workshop-guide" className="inline-flex min-h-11 items-center gap-3 rounded-lg bg-accent-fill px-5 py-3 text-sm font-semibold text-accent-ink hover:brightness-110">Build your first machine with Botie <span aria-hidden="true">→</span></Link>
+            <Link href="#course" className="inline-flex min-h-11 items-center rounded-lg border border-line bg-surface px-5 py-3 text-sm font-semibold hover:bg-raised">Browse the lessons</Link>
+          </div>
+          <p className="mt-3 text-sm text-muted">All lessons and workshops are free.</p>
         </div>
-        <p className="mt-6 text-center font-mono text-xs text-muted">
-          {CURRICULUM.length} sections · {total} lessons · always free ·{" "}
-          {COFFEE_URL ? (
-            <a
-              href={COFFEE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent underline-offset-4 hover:underline"
-            >
-              feel free to buy me a coffee <span aria-hidden="true">↗</span>
-            </a>
-          ) : (
-            "feel free to buy me a coffee"
-          )}
-        </p>
       </header>
 
-      <section className="mb-12 flex flex-wrap items-center gap-5 rounded-2xl border border-line bg-surface p-5 sm:flex-nowrap sm:p-6" aria-labelledby="meet-botie">
-        <Botie size={116} />
-        <div className="min-w-0"><p className="mb-2 font-mono text-xs uppercase tracking-wider text-accent">Learn and build with Botie</p><h2 id="meet-botie" className="text-2xl font-semibold">Meet Botie. He could use a hand.</h2><p className="mt-3 text-sm leading-7 text-muted">Botie starts with the problems people were trying to solve and the ideas they developed along the way. We will work through the pieces before you use them to build a solution of your own. As the problems grow, you will keep using the tools you already understand.</p><div className="mt-4 flex flex-wrap gap-3"><Link href="/lab/workshop-guide" className="rounded-lg bg-accent-fill px-4 py-3 text-sm font-semibold text-accent-ink">Start the journey with Botie →</Link><Link href="/lab" className="rounded-lg border border-line px-4 py-3 text-sm font-semibold hover:bg-raised">Browse the workshops</Link></div></div>
-      </section>
+      <JourneyResume />
 
-      <section aria-labelledby="shape" className="mb-16">
-        <h2 id="shape" className="mb-5 text-xl font-semibold text-foreground">
-          Here is what you get on FitLab.
-        </h2>
-        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {WHAT_YOU_GET.map(([title, detail], index) => (
-            <li key={title} className="rounded-xl border border-line bg-surface p-4 shadow-sm">
-              <p className="mb-2 font-mono text-xs text-accent">0{index + 1}</p>
-              <h3 className="font-semibold text-foreground">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{detail}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <nav id="course" aria-label="Course sections" className="scroll-mt-24">
-        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">The course</h2>
-          <p className="font-mono text-xs text-muted">
-            Follow the sections in order, or pick a subject to revisit.
-          </p>
-        </div>
-        <ol className="relative ml-4 space-y-5 border-l border-line pl-8">
-          {CURRICULUM.map((part, index) => {
-            const lessons = lessonHrefs(part);
-            return (
-              <li key={part.title} className="relative">
-                <span
-                  aria-hidden="true"
-                  className="absolute -left-[2.45rem] top-5 flex h-7 w-7 items-center justify-center rounded-full border border-line bg-surface font-mono text-xs font-semibold text-accent"
-                >
-                  {index + 1}
-                </span>
-                <Link
-                  href={courseSectionHref(part)}
-                  className="group block rounded-xl border border-line bg-surface p-5 shadow-sm transition hover:border-accent-fill/60 hover:bg-raised"
-                >
-                  <p className="mb-2 font-mono text-xs text-muted">
-                    Section {index + 1} · {lessons.length} lessons
-                  </p>
-                  <h3 className="text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
-                    {part.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">{part.intro}</p>
+      <section id="course" aria-labelledby="learning-areas" className="scroll-mt-28">
+        <h2 id="learning-areas" className="text-2xl font-semibold">What would you like to learn?</h2>
+        <nav aria-label="Learning areas" className="mt-5">
+          <ul className="space-y-3">
+            {LEARNING_AREAS.map(area => (
+              <li key={area.id}>
+                <Link href={learningAreaHref(area)} className="group flex items-center gap-5 rounded-xl border border-line bg-surface p-5 transition hover:border-accent-fill/60 hover:bg-raised sm:p-6">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-semibold group-hover:text-accent">{area.title}</h3>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">{area.description}</p>
+                    {!learningAreaSections(area).length && <p className="mt-2 text-xs text-accent">Lessons in preparation</p>}
+                  </div>
+                  <span aria-hidden="true" className="shrink-0 text-xl text-accent">→</span>
                 </Link>
               </li>
-            );
-          })}
-        </ol>
-      </nav>
+            ))}
+          </ul>
+        </nav>
+        <div className="mt-7"><LessonSearchForm /></div>
+      </section>
+
+      <aside aria-labelledby="meet-botie" className="mt-10 flex items-start gap-4 border-t border-line pt-7 sm:items-center">
+        <div className="shrink-0"><Botie size={72} /></div>
+        <div>
+          <h2 id="meet-botie" className="text-lg font-semibold">Have a problem you want to work through?</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">There is a workshop for every lesson. Choose the topic you want to understand, build a solution with Botie, and see what happens when the example changes.</p>
+          <Link href="/lab" className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">Find a workshop →</Link>
+        </div>
+      </aside>
     </div>
   );
 }

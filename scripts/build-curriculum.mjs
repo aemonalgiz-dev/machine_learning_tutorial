@@ -19,6 +19,10 @@ import graphs from "./curriculum/graph-path.mjs";
 import causal from "./curriculum/causal-path.mjs";
 import deployment from "./curriculum/deployment-path.mjs";
 import projects from "./curriculum/projects-path.mjs";
+import designProblem from "./curriculum/design-problem.mjs";
+import designResources from "./curriculum/design-resources.mjs";
+import designComparisons from "./curriculum/design-comparisons.mjs";
+import designEvidence from "./curriculum/design-evidence.mjs";
 import { readingVoice } from "./curriculum/reading-voice.mjs";
 import { readingExtensions } from "./curriculum/reading-extensions.mjs";
 import { deepenProbability } from "./curriculum/depth-probability.mjs";
@@ -28,8 +32,8 @@ import { applyDepthSupplements, depthSupplements } from "./curriculum/depth/inde
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const paths = [...forecasting, ...reinforcement, ...probabilistic, ...optimisation, ...recommendations, ...anomalies, ...graphs, ...causal, ...deployment, ...projects];
-const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths];
-const lessons = [...numpy, ...data, ...evaluation, ...gaps].map(lesson => ({ ...lesson, reading: readingVoice[lesson.id],
+const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths, ...designProblem, ...designResources, ...designComparisons, ...designEvidence];
+const lessons = [...numpy, ...data, ...evaluation, ...gaps].map(lesson => ({ ...lesson, reading: lesson.reading ?? readingVoice[lesson.id],
   intuition: [...lesson.intuition, ...(readingExtensions[lesson.id] ? [readingExtensions[lesson.id]] : [])] }));
 // Existing quiz bookmarks keep working as the preceding explanation grows.
 for (const lesson of lessons) lesson.quizId=`questions-on-parts-1-to-${lesson.parts.length}`;

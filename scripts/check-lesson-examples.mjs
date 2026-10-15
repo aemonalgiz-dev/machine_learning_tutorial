@@ -4,9 +4,11 @@ import path from "node:path";
 import { loadPyodide } from "pyodide";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const lessons = JSON.parse(await readFile(path.join(root, "lib/lessons/published.json"), "utf8"));
+let lessons = JSON.parse(await readFile(path.join(root, "lib/lessons/published.json"), "utf8"));
 const supplements = JSON.parse(await readFile(path.join(root, 'lib/lessons/supplements.json'), 'utf8'));
 lessons.push(...Object.entries(supplements).map(([id, lesson]) => ({ id, quiz: [], ...lesson })));
+const filter = process.argv[2];
+if (filter) lessons = lessons.filter(lesson => lesson.id.includes(filter));
 const examples = lessons.flatMap(lesson => lesson.parts.flatMap(part =>
   (part.examples ?? []).map(example => ({ lesson: lesson.id, ...example }))));
 const quizSetups = lessons.flatMap(lesson => lesson.quiz.filter(question => question.given?.code)

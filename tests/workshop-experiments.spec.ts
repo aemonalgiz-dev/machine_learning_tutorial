@@ -3,6 +3,7 @@ import { BUILDS, buildById } from "../lib/builds/catalog";
 import { assemble, previewConstruction, evaluate, plug, same } from "../lib/builds/engine";
 import { TOOLS } from "../lib/builds/tools";
 import { journeyFor } from "../lib/builds/journey";
+import { openFullWorkshop } from "./helpers/open-workshop";
 
 test("live previews agree with every workshop case, including branches disconnected from Result", () => {
   const before = JSON.stringify(BUILDS);
@@ -41,8 +42,7 @@ test("live inspection reports cycles and invalid math without losing independent
 });
 
 async function open(page: Page, slug: string, assembled = true) {
-  await page.goto(`/lab/${slug}`);
-  await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+  await openFullWorkshop(page, slug);
   await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
   if (assembled) {
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();

@@ -4,8 +4,7 @@
 //
 // A reader who has reached the end of a lesson should not have to climb back
 // to the course map to find the next one. The two links here follow the
-// curriculum's reading order, across section boundaries, so the whole course
-// can be read by pressing the same link a hundred times.
+// reading order inside the lesson's learning area, across section boundaries.
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -46,12 +45,12 @@ export function LessonFooter() {
         </Link>
       ) : (
         <Link
-          href="/"
+          href={lesson.areaHref}
           className="group rounded-xl border border-line bg-surface p-4 transition hover:border-accent-fill/60 hover:bg-raised sm:text-right"
         >
           <span className="mb-1 block font-mono text-xs text-muted">That is the last lesson</span>
           <span className="font-semibold text-foreground group-hover:text-accent">
-            Back to the course
+            Back to {lesson.areaTitle}
           </span>
         </Link>
       )}

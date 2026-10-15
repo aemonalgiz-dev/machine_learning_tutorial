@@ -1318,5 +1318,161 @@
       "Early digital picture-processing work described operations that inspect pixel neighbourhoods and identify connected structures. Connectivity turns a mask of individual foreground pixels into regions that can be measured.",
       "Our tray uses invented grayscale pixels and a simple four-neighbour rule. A region is an image structure; interpreting it as one seed requires additional assumptions about separation, lighting, and noise."
     ]
+  },
+  "design-from-decisions": {
+    "title": "A Requirement Has to Describe Something People Need",
+    "sources": [
+      {
+        "title": "NASA Systems Engineering Handbook: System Design Processes",
+        "url": "https://www.nasa.gov/reference/4-0-system-design-processes/"
+      }
+    ],
+    "blocks": [
+      "Engineers working on large systems have to translate a broad request into parts that can be built and tested. NASA’s systems engineering handbook describes a progression from stakeholder expectations to technical requirements and a design. Otherwise, separate teams can each deliver a working component while the assembled system fails the people using it.",
+      "We will use that reasoning for an invented pump inspection service. The arithmetic can tell us whether a proposed inspection policy meets stated limits. Whether the predictions are good enough still needs evidence from representative pumps. First principles give us a way to question the design; they do not supply missing measurements."
+    ]
+  },
+  "design-without-a-model": {
+    "title": "Learning Needs Something to Improve On",
+    "sources": [
+      {
+        "title": "Martin Zinkevich: Rules of Machine Learning",
+        "url": "https://developers.google.com/machine-learning/guides/rules-of-ml"
+      }
+    ],
+    "blocks": [
+      "Google’s Rules of Machine Learning recommends starting without machine learning when the necessary data are not available, and establishing metrics early. A working heuristic can make a service useful while its team learns what the problem actually demands.",
+      "For our inspection service, the temperature rule provides that first comparison. We will assign invented costs to missed faults and inspections. Those values explain the calculation; a real maintenance team would need to justify its own costs and any limits that cannot be traded away."
+    ]
+  },
+  "design-information-boundaries": {
+    "title": "A Model Inherits Its Data Dependencies",
+    "sources": [
+      {
+        "title": "Sculley and colleagues: Hidden Technical Debt in Machine Learning Systems (2015)",
+        "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/"
+      }
+    ],
+    "blocks": [
+      "Production ML systems often depend on data produced by other systems. Sculley and colleagues described how these dependencies and changes in the surrounding system create maintenance problems that model code alone does not reveal. A field can retain its name while its meaning or availability changes.",
+      "Our two-clock example makes one such dependency explicit. Event time describes the measurement; availability time describes when our service could use it. These invented timestamps are a teaching contract, not a guarantee that every database preserves the history needed to reconstruct them."
+    ]
+  },
+  "design-pipeline-capacity": {
+    "title": "Put Numbers Against the Boxes in a Design",
+    "sources": [
+      {
+        "title": "Google SRE Workbook: Non-Abstract Large System Design",
+        "url": "https://sre.google/workbook/non-abstract-design/"
+      }
+    ],
+    "blocks": [
+      "A diagram can connect services without showing whether any of them can handle the proposed workload. Google’s Non-Abstract Large System Design approach develops concrete resource estimates from a system’s requirements, then revises the design as those estimates expose constraints.",
+      "Our image service is a small invented example of that process. We will use ideal stage capacities first. Those estimates help choose what to measure, but contention and scheduling overhead mean a real benchmark can disagree."
+    ]
+  },
+  "design-queues-and-bursts": {
+    "title": "Waiting Work Can Become Another Source of Failure",
+    "sources": [
+      {
+        "title": "Google SRE Book: Addressing Cascading Failures",
+        "url": "https://sre.google/sre-book/addressing-cascading-failures/"
+      }
+    ],
+    "blocks": [
+      "Google’s account of cascading failures describes how overload can create growing queues, consume resources, and trigger timeouts or retries that make the overload worse. Requests waiting for service are still part of the running system.",
+      "Our queue has no timeout or retry yet. That simplification lets us see the accumulation itself. The example uses discrete intervals and invented traffic; it is not a measured latency model of a production server."
+    ]
+  },
+  "design-memory-budget": {
+    "title": "Small Devices Made the Whole Inference Engine Matter",
+    "sources": [
+      {
+        "title": "Lin and colleagues: MCUNet (2020)",
+        "url": "https://arxiv.org/abs/2007.10319"
+      }
+    ],
+    "blocks": [
+      "MCUNet examined neural-network inference on microcontrollers with tight memory and compute limits. Its design combined choices about the network with an inference engine suited to those limits. A useful model had to fit the way the device actually executed it.",
+      "Our budget is much simpler. We count parameter storage, an estimated peak activation cost per example, and fixed runtime memory. We are not reproducing MCUNet’s engine or claiming that this linear estimate describes every network."
+    ]
+  },
+  "design-edge-or-cloud": {
+    "title": "Communication Belongs in the Design",
+    "sources": [
+      {
+        "title": "Satyanarayanan: The Emergence of Edge Computing (2017)",
+        "url": "https://elijah.cs.cmu.edu/DOCS/satya-edge2016.pdf"
+      }
+    ],
+    "blocks": [
+      "Satyanarayanan’s discussion of edge computing describes the role of computation close to data sources when latency and bandwidth make distant processing difficult. The location of computation changes how much information has to travel and how long a response takes.",
+      "Our inspection example compares a local estimate with a simplified remote path. It does not claim that local computation always wins. A larger remote model may be more useful, and many systems divide work between the device and a server."
+    ]
+  },
+  "design-feasible-tradeoffs": {
+    "title": "A Trade Study Needs Criteria Before a Winner",
+    "sources": [
+      {
+        "title": "NASA Systems Engineering Handbook: Decision Analysis",
+        "url": "https://www.nasa.gov/reference/6-0-crosscutting-technical-management/"
+      }
+    ],
+    "blocks": [
+      "NASA’s discussion of decision analysis describes evaluating alternatives against criteria, documenting assumptions, and examining uncertainty in the comparison. A list of candidate designs does not choose its own priorities; those priorities must come from the problem being solved.",
+      "We will use a small table of invented ML evaluation results. Hard limits determine which rows are feasible. Among the remaining rows, we will identify choices that are worse on every reported objective before asking a person to make a trade-off."
+    ]
+  },
+  "design-sensitive-assumptions": {
+    "title": "Measurements Need an Account of Their Uncertainty",
+    "sources": [
+      {
+        "title": "NIST/SEMATECH: Uncertainty Budgets and Sensitivity Coefficients",
+        "url": "https://www.itl.nist.gov/div898/handbook/mpc/section5/mpc56.htm"
+      }
+    ],
+    "blocks": [
+      "Metrology deals with results calculated from measurements that are themselves uncertain. NIST’s handbook describes uncertainty budgets and sensitivity coefficients for tracking how inputs affect a result. Reporting only the final number can conceal which measurement contributes most to its uncertainty.",
+      "We will borrow the question about sensitivity, using a simple design comparison. Our scenarios are chosen alternatives for an uncertain cost. They are not a confidence interval, and we will not assign probabilities to them without evidence."
+    ]
+  },
+  "design-prototype-experiments": {
+    "title": "One Change at a Time Can Miss an Interaction",
+    "sources": [
+      {
+        "title": "NIST/SEMATECH: Choosing an Experimental Design",
+        "url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri3.htm"
+      }
+    ],
+    "blocks": [
+      "Experimental design gives engineers ways to learn from planned changes to a process. NIST’s handbook describes factorial designs, which include combinations of factor levels. Those combinations let us investigate whether the effect of one factor depends on another.",
+      "Our prototype varies batch size and parameter format. We will calculate a difference of differences in illustrative timing measurements. This is a descriptive contrast, not a complete statistical experiment or a fitted significance test."
+    ]
+  },
+  "design-fallbacks": {
+    "title": "A Busy Service Needs a Defined Reduced Behaviour",
+    "sources": [
+      {
+        "title": "Google SRE Book: Handling Overload",
+        "url": "https://sre.google/sre-book/handling-overload/"
+      }
+    ],
+    "blocks": [
+      "Google’s discussion of overload describes controlling work when a service cannot fulfil every request normally. Admission decisions and degraded responses can prevent excess work from overwhelming the remaining capacity. The useful behaviour depends on which work the service can safely defer or simplify.",
+      "For our inspection example, an unusable sensor record routes to review. That is an illustrative policy chosen for this lesson. A real inspection process would need to establish who reviews the case, how soon, and what happens if that route is also unavailable."
+    ]
+  },
+  "design-inspection-review": {
+    "title": "Meeting a Specification and Solving the Problem Need Different Checks",
+    "sources": [
+      {
+        "title": "NASA Systems Engineering Handbook: Product Realization",
+        "url": "https://www.nasa.gov/reference/5-0-product-realization/"
+      }
+    ],
+    "blocks": [
+      "NASA’s product-realisation guidance distinguishes verification against specified requirements from validation against intended use and stakeholder expectations. Both matter: a system can satisfy a written specification that does not adequately describe the real need.",
+      "Our capstone verifies two numerical requirements on invented inspection and workload fixtures. It then asks what evidence would validate the service for the maintenance team. Passing the arithmetic is useful, but it cannot demonstrate fewer real breakdowns or an acceptable review workload."
+    ]
   }
 }

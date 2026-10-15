@@ -870,6 +870,13 @@ const existingCurriculum: Part[] = [
 ];
 
 const topicIntroductions: Record<string, string> = {
+  "Decisions Before Models": "A prediction helps only if someone can use it. Begin with the inspection decision, identify its limits, and compare a learned model with a rule we can already run.",
+  "The Information We Can Use": "A record in today's database may have arrived too late for yesterday's decision. Define what each input means and when the service could actually use it.",
+  "Throughput and Waiting": "Requests pass through several stages, and unfinished work carries forward. Follow that work to find the limiting stage and see what a burst does to the queue.",
+  "Memory and Communication": "A model needs space to run, and a remote model needs time to receive its inputs. Account for those costs before choosing a device or moving computation to a server.",
+  "Requirements and Trade-offs": "Some limits must hold; other qualities are preferences. Keep that distinction visible while comparing candidates and investigating assumptions that could change the choice.",
+  "Evidence Before Release": "A prototype should answer a question we still have about the design. Plan the comparison and define what the service does when its normal prediction route is unavailable.",
+  "Bring the Design Together": "Return to the inspection team's needs. Connect each requirement to a test, keep failures understandable, and identify what a real trial still has to establish.",
   "Predicting the Next Observation": "Tomorrow's value is unavailable when we make today's forecast. Begin with a simple prediction, then arrange earlier observations into inputs without borrowing the answer.",
   "Patterns That Repeat or Move": "A series can repeat, drift, or react to recent observations. We will separate those behaviours before choosing a rule for updating a forecast.",
   "Fitting and Testing Forecasts": "A useful forecast must work with the information available at its origin. Fit a small model, then recreate that boundary on successive later days.",
@@ -959,4 +966,8 @@ export const CURRICULUM: Part[] = [
   newSection("Causal Inference and Experiments", "Knowing which plants grew well does not tell us which intervention helped them. We will examine how treatment groups were formed, design a randomised comparison, and state the assumptions needed to learn from observational records. The calculations will keep those assumptions visible."),
   newSection("Deploying and Maintaining Models", "A model needs to keep behaving as intended after it leaves a training script. Botie will save the full prediction procedure, check incoming records, preserve model versions, and inspect later performance. We will also work through what a useful rollback must restore."),
   newSection("Complete Projects", "Bring the pieces together around a question Botie needs to answer. Each small project includes a baseline, a repeatable procedure, held-out evaluation, and cases where the method fails. The datasets are small enough to inspect, so the reasoning stays visible as the work becomes more complete."),
+  newSection("Define the ML Problem", "A model can produce a prediction without helping anyone make a better decision. We will start with Botie's inspection team, work out what they can act on, and decide what a learned model would need to improve. The information available at decision time will become part of the design."),
+  newSection("Model the System Before Building It", "A prediction service needs more than a fast model. Images must be prepared, requests can arrive together, and devices have limited memory. We will calculate where the work goes, then compare local and remote inference using the same task."),
+  newSection("Compare Designs Under Constraints", "The fastest candidate may miss too many faults, while the most accurate one may respond too late. We will identify which designs meet the requirements, examine the remaining trade-offs, and find the assumptions that could change our choice."),
+  newSection("Test the Design and Plan for Failure", "A promising estimate needs evidence. Botie will compare prototype changes, route unusable inputs to a defined fallback, and bring the inspection service through a design review. Each passing test will have a clear meaning and a clear limit."),
 ];

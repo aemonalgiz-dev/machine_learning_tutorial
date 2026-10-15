@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { buildById } from "../lib/builds/catalog";
 import { TOOLS } from "../lib/builds/tools";
 import { assemble, evaluate, plug } from "../lib/builds/engine";
+import { openFullWorkshop, showEarlierWorkshop, openLessonNotes } from "./helpers/open-workshop";
 
 test("the bookkeeping construction handles different customer counts and prices", () => {
   const build = buildById["linear-algebra"], graph = assemble(build.recipe, TOOLS);
@@ -17,7 +18,8 @@ test("the matrix walkthrough connects editable purchases, prices, row calculatio
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   await page.goto("/lab/linear-algebra");
-  await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Get to know the tools/ }).click();
+  await openLessonNotes(page);
+  await page.getByRole("button", { name: "Look inside the tools", exact: true }).click();
   const tutorial = page.getByRole("region", { name: "From purchases to a matrix" });
   const calculation = tutorial.getByTestId("matrix-row-calculation");
   await expect(calculation).toHaveText("Bread: 1 × 2 = 2\nMilk: 2 × 3 = 6\n\n2 + 6 = 8 coins");
@@ -60,8 +62,7 @@ test("a learner builds customer rows, catches reversed columns, and inspects the
       connections: [{ from: "piece-1", to: "output", port: 0 }],
     }));
   });
-  await page.goto("/lab/linear-algebra");
-  await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+  await openFullWorkshop(page, "linear-algebra");
   await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
   await expect(page.locator("[data-piece]")).toHaveCount(1);
   for (const name of ["Loaves for each customer", "Milk bottles for each customer", "Prices: bread, then milk", "Collect two results", "Swap rows and columns", "Matrix times vector"]) {
@@ -88,7 +89,7 @@ test("a learner builds customer rows, catches reversed columns, and inspects the
   const oldDraft = await page.evaluate(() => JSON.parse(localStorage.getItem("fitlab-construction-v1:linear-algebra")!));
   expect(oldDraft.pieces).toHaveLength(2);
   await page.reload();
-  await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: /Build your solution/ }).click();
+  await showEarlierWorkshop(page);
   await expect(page.locator("[data-piece]")).toHaveCount(7);
   expect(errors).toEqual([]);
 });

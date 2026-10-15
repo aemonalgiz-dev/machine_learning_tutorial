@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLearnerField, useLearnerRecord } from "@/lib/learner-state";
+import { useProgressAccount } from "@/lib/progress";
 import { missionById, labLessonById, passed, format, type Values, type Control, type Result, type Scene } from "@/lib/labs";
 import { Botie, BotieSays } from "@/components/site/Botie";
 import styles from "./MissionLab.module.css";
@@ -11,15 +13,24 @@ const clone = (values: Values): Values => Object.fromEntries(Object.entries(valu
 type Trial = { result: Result; cursor: number; done: boolean };
 
 export function MissionLab({ id }: { id: string }) {
+  const account=useProgressAccount();
+  return <Mission key={`${id}:${account??"guest"}`} id={id}/>;
+}
+
+function Mission({id}:{id:string}) {
   const mission = missionById[id];
-  const [values, setValues] = useState<Values>(() => clone(mission.initial));
-  const [batch, setBatch] = useState(0);
-  const [trial, setTrial] = useState<Trial | null>(null);
-  const [attempts, setAttempts] = useState(0);
-  const [hint, setHint] = useState(false);
-  const [solution, setSolution] = useState(false);
-  const [inspected, setInspected] = useState(0);
-  const [motion, setMotion] = useState(true);
+  const saved=useLearnerRecord(`mission:${id}:v1`,()=>({values:clone(mission.initial),batch:0,attempts:0,hint:false,solution:false,inspected:0,motion:true,lastResult:null as Result|null}));
+  const [values,setValues]=useLearnerField(saved, "values");
+  const [batch,setBatch]=useLearnerField(saved, "batch");
+  const [attempts,setAttempts]=useLearnerField(saved, "attempts");
+  const [hint,setHint]=useLearnerField(saved, "hint");
+  const [solution,setSolution]=useLearnerField(saved, "solution");
+  const [inspected,setInspected]=useLearnerField(saved, "inspected");
+  const [motion,setMotion]=useLearnerField(saved, "motion");
+  const [lastResult,setLastResult]=useLearnerField(saved, "lastResult");
+  const [activeTrial,setActiveTrial]=useState<Trial|null>(null);
+  const trial=activeTrial??(lastResult?{result:lastResult,cursor:lastResult.readings.length,done:true}:null);
+  const setTrial=(next:Trial|null)=>{setActiveTrial(next);if(!next)setLastResult(null);};
   const controlsRef = useRef<HTMLDivElement>(null);
   const result = mission.run(values, batch);
   const readings = (trial?.result ?? result).readings;
@@ -34,10 +45,13 @@ export function MissionLab({ id }: { id: string }) {
   const lesson = labLessonById[id];
 
   useEffect(() => {
-    if (!trial || trial.done) return;
-    const timer = setTimeout(() => setTrial(t => t ? { ...t, cursor: t.cursor + 1, done: t.cursor + 1 >= total } : null), motion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 280 : 25);
+    if (!activeTrial || activeTrial.done) return;
+    const timer = setTimeout(() => {
+      const next={...activeTrial,cursor:activeTrial.cursor+1,done:activeTrial.cursor+1>=total};
+      setActiveTrial(next);if(next.done)setLastResult(next.result);
+    }, motion && !window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 280 : 25);
     return () => clearTimeout(timer);
-  }, [trial, total, motion]);
+  }, [activeTrial, total, motion, setLastResult]);
 
   function change(key: string, value: Values[string]) { setValues(v => ({ ...v, [key]: value })); setTrial(null); }
   function reset() { setValues(clone(mission.initial)); setTrial(null); setInspected(0); }

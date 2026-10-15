@@ -10036,5 +10036,1505 @@
         "image": 9
       }
     }
+  },
+  {
+    "id": "design-from-decisions",
+    "title": "Schedule the pump inspections",
+    "problem": "Botie has proposed inspections, but the team needs to know how many minutes they require.",
+    "challenge": "Build a calculation that multiplies each inspection decision by its duration and adds the assigned minutes. Test all shifts.",
+    "sources": {
+      "decisions": "Inspection decisions, 1 = inspect",
+      "minutes": "Inspection duration per pump (minutes)"
+    },
+    "cases": [
+      {
+        "name": "Two assignments",
+        "data": {
+          "decisions": [
+            1,
+            0,
+            1
+          ],
+          "minutes": [
+            20,
+            40,
+            30
+          ]
+        },
+        "expected": 50
+      },
+      {
+        "name": "No assignments",
+        "data": {
+          "decisions": [
+            0,
+            0,
+            0
+          ],
+          "minutes": [
+            20,
+            40,
+            30
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "A longer shift",
+        "data": {
+          "decisions": [
+            1,
+            1,
+            0,
+            1
+          ],
+          "minutes": [
+            15,
+            35,
+            20,
+            25
+          ]
+        },
+        "expected": 75
+      }
+    ],
+    "recipe": {
+      "op": "total",
+      "inputs": [
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "decisions"
+            },
+            {
+              "source": "minutes"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each connected pair refers to the same pump. Multiplication counts its time only when an inspection is scheduled.",
+    "limitation": "This checks workload, not whether an inspection prevents a fault. Durations are invented fixed estimates.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "The duration list includes pumps we are deferring. What should their contribution to scheduled minutes be?",
+      "Multiply each duration by its 0-or-1 decision, then collect the assigned minutes with Add a list. A dot product would perform the same calculation."
+    ]
+  },
+  {
+    "id": "design-without-a-model",
+    "title": "Cost the inspection policy",
+    "problem": "Botie needs a comparison that charges for inspections and missed faults on the same pump records.",
+    "challenge": "Construct the per-pump loss, then add it. A miss occurs when a fault label is 1 and the inspection decision is 0.",
+    "sources": {
+      "labels": "Confirmed faults, 1 = faulty",
+      "decisions": "Inspection decisions",
+      "inspection": "Cost per inspection",
+      "miss": "Cost per missed fault"
+    },
+    "cases": [
+      {
+        "name": "Heat rule",
+        "data": {
+          "labels": [
+            1,
+            0,
+            1,
+            0
+          ],
+          "decisions": [
+            1,
+            1,
+            0,
+            0
+          ],
+          "inspection": 3,
+          "miss": 20
+        },
+        "expected": 26
+      },
+      {
+        "name": "Candidate model",
+        "data": {
+          "labels": [
+            1,
+            0,
+            1,
+            0
+          ],
+          "decisions": [
+            1,
+            0,
+            1,
+            1
+          ],
+          "inspection": 3,
+          "miss": 20
+        },
+        "expected": 9
+      },
+      {
+        "name": "Different costs",
+        "data": {
+          "labels": [
+            1,
+            0,
+            1
+          ],
+          "decisions": [
+            0,
+            1,
+            0
+          ],
+          "inspection": 5,
+          "miss": 12
+        },
+        "expected": 29
+      }
+    ],
+    "recipe": {
+      "op": "total",
+      "inputs": [
+        {
+          "op": "add",
+          "inputs": [
+            {
+              "op": "multiply",
+              "inputs": [
+                {
+                  "source": "decisions"
+                },
+                {
+                  "source": "inspection"
+                }
+              ]
+            },
+            {
+              "op": "multiply",
+              "inputs": [
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "source": "labels"
+                    },
+                    {
+                      "op": "subtract",
+                      "inputs": [
+                        {
+                          "op": "constant",
+                          "settings": {
+                            "value": 1
+                          },
+                          "inputs": []
+                        },
+                        {
+                          "source": "decisions"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "source": "miss"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The two terms represent different consequences. Adding them makes the cost assumptions visible.",
+    "limitation": "Fault labels are supplied for all pumps. This omits uncertain inspection effectiveness, upkeep, and limited capacity.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "Keep inspection cost and missed-fault cost on separate branches until each is calculated.",
+      "Subtract each decision from 1. Multiplying that result by the fault labels marks only faulty pumps we deferred.",
+      "Multiply each branch by its cost, add the contributions, and total the list. An inspection still costs something when the pump is healthy."
+    ]
+  },
+  {
+    "id": "design-information-boundaries",
+    "title": "Keep future records out of the inspection decision",
+    "problem": "Botie needs to reconstruct which pump readings existed in the service at a chosen time.",
+    "challenge": "Use two threshold comparisons and combine their masks. Output 1 only when both event and availability timestamps are at or before the decision time.",
+    "sources": {
+      "event": "Event time per reading",
+      "arrival": "Availability time per reading",
+      "cutoff": "Decision time"
+    },
+    "cases": [
+      {
+        "name": "Delayed sensor",
+        "data": {
+          "event": [
+            8,
+            8,
+            11
+          ],
+          "arrival": [
+            9,
+            12,
+            11
+          ],
+          "cutoff": 10
+        },
+        "expected": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "At the boundary",
+        "data": {
+          "event": [
+            5,
+            6
+          ],
+          "arrival": [
+            6,
+            6
+          ],
+          "cutoff": 6
+        },
+        "expected": [
+          1,
+          1
+        ]
+      },
+      {
+        "name": "Nothing yet",
+        "data": {
+          "event": [
+            2,
+            3
+          ],
+          "arrival": [
+            4,
+            5
+          ],
+          "cutoff": 1
+        },
+        "expected": [
+          0,
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "multiply",
+      "inputs": [
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "cutoff"
+            },
+            {
+              "source": "event"
+            }
+          ]
+        },
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "cutoff"
+            },
+            {
+              "source": "arrival"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The comparisons preserve each record’s position, so multiplying joins the two conditions for that same record.",
+    "limitation": "This assumes a common clock and trustworthy timestamp history. Freshness, permissions, and measurement quality need additional checks.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "An early event can still arrive late. Check both timestamps against the decision time.",
+      "Threshold gate checks whether its first input is at least its second. Put decision time first and the timestamps second.",
+      "Multiply the two masks. A record needs both flags to be 1."
+    ]
+  },
+  {
+    "id": "design-pipeline-capacity",
+    "title": "Find the image service bottleneck",
+    "problem": "Botie has worker counts and measured per-worker rates for preparation, inference, and storage.",
+    "challenge": "Calculate stage capacities and connect the smallest capacity to Result. Do not add capacities from stages every request must visit.",
+    "sources": {
+      "workers": "Worker count by stage",
+      "rates": "Requests/s per worker by stage"
+    },
+    "cases": [
+      {
+        "name": "Storage limit",
+        "data": {
+          "workers": [
+            2,
+            1,
+            2
+          ],
+          "rates": [
+            6,
+            20,
+            5
+          ]
+        },
+        "expected": 10
+      },
+      {
+        "name": "More storage",
+        "data": {
+          "workers": [
+            2,
+            1,
+            3
+          ],
+          "rates": [
+            6,
+            20,
+            5
+          ]
+        },
+        "expected": 12
+      },
+      {
+        "name": "Preparation upgrade",
+        "data": {
+          "workers": [
+            3,
+            1,
+            3
+          ],
+          "rates": [
+            6,
+            20,
+            5
+          ]
+        },
+        "expected": 15
+      }
+    ],
+    "recipe": {
+      "op": "minimum",
+      "inputs": [
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "workers"
+            },
+            {
+              "source": "rates"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The limiting stage changes as the design changes. Both arrays preserve the same stage order.",
+    "limitation": "This ideal bound omits shared-resource contention, variable request work, and queueing delays.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "A stage has a worker count and a rate per worker. First find the rate for the whole stage.",
+      "Multiply the aligned lists, then use Smallest value. Adding rates would pretend a request can skip the other stages."
+    ]
+  },
+  {
+    "id": "design-queues-and-bursts",
+    "title": "Find the worst queue during the upload burst",
+    "problem": "Botie needs room for unfinished image requests, including work carried from earlier intervals.",
+    "challenge": "Connect arrivals and service capacities to Queue over time, then find the largest backlog in the returned trace.",
+    "sources": {
+      "arrivals": "Requests arriving per interval",
+      "capacity": "Requests that can finish per interval"
+    },
+    "cases": [
+      {
+        "name": "Short burst",
+        "data": {
+          "arrivals": [
+            2,
+            7,
+            1
+          ],
+          "capacity": [
+            4,
+            4,
+            4
+          ]
+        },
+        "expected": 3
+      },
+      {
+        "name": "Worker outage",
+        "data": {
+          "arrivals": [
+            3,
+            8,
+            2,
+            0
+          ],
+          "capacity": [
+            4,
+            4,
+            0,
+            6
+          ]
+        },
+        "expected": 6
+      },
+      {
+        "name": "Quiet start cannot store capacity",
+        "data": {
+          "arrivals": [
+            0,
+            8
+          ],
+          "capacity": [
+            5,
+            3
+          ]
+        },
+        "expected": 5
+      }
+    ],
+    "recipe": {
+      "op": "maximum",
+      "inputs": [
+        {
+          "op": "designQueue",
+          "inputs": [
+            {
+              "source": "arrivals"
+            },
+            {
+              "source": "capacity"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "The queue component preserves unfinished work between intervals. Largest value finds the worst boundary backlog rather than only the final state.",
+    "limitation": "This counts fixed-size requests in discrete intervals. It does not measure individual latency or implement queue limits and retries.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "The queue must remember unfinished requests from the preceding interval. Queue over time performs that recurrence.",
+      "Connect arrivals and service capacities to their named ports. The output is a backlog for every interval; find its Largest value."
+    ]
+  },
+  {
+    "id": "design-memory-budget",
+    "title": "Budget the inspection device memory",
+    "problem": "Botie must leave room for the model, its intermediate values, and the runtime.",
+    "challenge": "Calculate total bytes from the supplied allocations, then subtract that total from the memory limit. Keep negative headroom visible.",
+    "sources": {
+      "parameters": "Parameter count",
+      "width": "Bytes per parameter",
+      "batch": "Batch size",
+      "activation": "Activation bytes per example",
+      "runtime": "Fixed runtime bytes",
+      "limit": "Memory limit in bytes"
+    },
+    "cases": [
+      {
+        "name": "Room for two",
+        "data": {
+          "parameters": 10,
+          "width": 4,
+          "batch": 2,
+          "activation": 8,
+          "runtime": 12,
+          "limit": 100
+        },
+        "expected": 32
+      },
+      {
+        "name": "Too large a batch",
+        "data": {
+          "parameters": 10,
+          "width": 4,
+          "batch": 8,
+          "activation": 8,
+          "runtime": 12,
+          "limit": 100
+        },
+        "expected": -16
+      },
+      {
+        "name": "Smaller parameter format",
+        "data": {
+          "parameters": 10,
+          "width": 1,
+          "batch": 8,
+          "activation": 8,
+          "runtime": 12,
+          "limit": 100
+        },
+        "expected": 14
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "source": "limit"
+        },
+        {
+          "op": "add",
+          "inputs": [
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "source": "parameters"
+                    },
+                    {
+                      "source": "width"
+                    }
+                  ]
+                },
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "source": "batch"
+                    },
+                    {
+                      "source": "activation"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "source": "runtime"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each multiplication converts a count into bytes. Adding compatible allocations gives a total we can compare with the limit.",
+    "limitation": "The model assumes linear activation scaling and fixed runtime overhead. Actual peak memory and quantised-model quality need measurement.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "Give parameters and activations separate branches. Each needs a count multiplied by bytes per item.",
+      "Add parameter bytes, batch activation bytes, and fixed runtime bytes. All three allocations use the same unit.",
+      "Subtract the total from the memory limit. Keep a negative answer when the batch is too large."
+    ]
+  },
+  {
+    "id": "design-edge-or-cloud",
+    "title": "Compare local and remote inspection time",
+    "problem": "Botie needs a prediction before an inspected part moves on. The server is faster at inference but requires communication.",
+    "challenge": "Divide payload bytes by effective bandwidth, add network overhead and remote computation, then subtract local computation time.",
+    "sources": {
+      "payload": "Image payload in bytes",
+      "bandwidth": "Effective upload bytes per second",
+      "overhead": "Fixed network overhead in seconds",
+      "remote": "Remote computation seconds",
+      "local": "Local computation seconds"
+    },
+    "cases": [
+      {
+        "name": "Large image",
+        "data": {
+          "payload": 600000,
+          "bandwidth": 3000000,
+          "overhead": 0.04,
+          "remote": 0.03,
+          "local": 0.12
+        },
+        "expected": 0.15
+      },
+      {
+        "name": "Small crop",
+        "data": {
+          "payload": 60000,
+          "bandwidth": 3000000,
+          "overhead": 0.04,
+          "remote": 0.03,
+          "local": 0.12
+        },
+        "expected": -0.03
+      },
+      {
+        "name": "Slower link",
+        "data": {
+          "payload": 60000,
+          "bandwidth": 300000,
+          "overhead": 0.04,
+          "remote": 0.03,
+          "local": 0.12
+        },
+        "expected": 0.15
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "add",
+          "inputs": [
+            {
+              "op": "add",
+              "inputs": [
+                {
+                  "op": "divide",
+                  "inputs": [
+                    {
+                      "source": "payload"
+                    },
+                    {
+                      "source": "bandwidth"
+                    }
+                  ]
+                },
+                {
+                  "source": "overhead"
+                }
+              ]
+            },
+            {
+              "source": "remote"
+            }
+          ]
+        },
+        {
+          "source": "local"
+        }
+      ]
+    },
+    "why": "The sign tells us which estimated path is faster. Changing the payload or link can reverse that comparison.",
+    "limitation": "Shared preparation is excluded equally. Server queueing, response payload, outages, energy, and prediction quality need further evidence.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "The upload term converts bytes into seconds. Which input is bytes per second?",
+      "Divide payload by effective bandwidth, then add network overhead and remote compute time.",
+      "Subtract local time last. A positive answer means this remote estimate takes longer."
+    ]
+  },
+  {
+    "id": "design-feasible-tradeoffs",
+    "title": "Keep only acceptable inspection models",
+    "problem": "Botie has latency and miss measurements for candidates evaluated under the same conditions.",
+    "challenge": "Build one comparison per hard limit, then combine them. Return 1 for a candidate only when both requirements pass.",
+    "sources": {
+      "latency": "Latency statistic by candidate (ms)",
+      "misses": "Misses on the same faulty-part set",
+      "deadline": "Maximum latency (ms)",
+      "allowed": "Maximum miss count"
+    },
+    "cases": [
+      {
+        "name": "Two feasible candidates",
+        "data": {
+          "latency": [
+            60,
+            90,
+            120,
+            80
+          ],
+          "misses": [
+            5,
+            3,
+            1,
+            4
+          ],
+          "deadline": 100,
+          "allowed": 4
+        },
+        "expected": [
+          0,
+          1,
+          0,
+          1
+        ]
+      },
+      {
+        "name": "Tighter miss limit",
+        "data": {
+          "latency": [
+            60,
+            90,
+            120,
+            80
+          ],
+          "misses": [
+            5,
+            3,
+            1,
+            4
+          ],
+          "deadline": 100,
+          "allowed": 2
+        },
+        "expected": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "Boundary counts as passing",
+        "data": {
+          "latency": [
+            100,
+            90
+          ],
+          "misses": [
+            4,
+            5
+          ],
+          "deadline": 100,
+          "allowed": 4
+        },
+        "expected": [
+          1,
+          0
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "multiply",
+      "inputs": [
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "deadline"
+            },
+            {
+              "source": "latency"
+            }
+          ]
+        },
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "allowed"
+            },
+            {
+              "source": "misses"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Multiplying binary checks requires both conditions for the same candidate. No favourable metric can cancel a failed hard requirement.",
+    "limitation": "These sample measurements do not establish future guarantees. Compare uncertainty, operating conditions, and any omitted requirements.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "Each candidate must pass both limits. Keep a separate comparison for latency and misses.",
+      "Put each maximum in the first input of a Threshold gate and the measurements in the second. Multiply the two masks."
+    ]
+  },
+  {
+    "id": "design-sensitive-assumptions",
+    "title": "Find the assumptions under which the model helps",
+    "problem": "Botie has an estimated reduction in misses and an increase in inspections. The consequence of a miss is still uncertain.",
+    "challenge": "Calculate avoided miss loss for every supplied cost scenario, then subtract the added inspection cost. Keep the full list of savings.",
+    "sources": {
+      "avoided": "Estimated misses avoided",
+      "extra": "Additional inspections",
+      "inspection": "Cost per inspection",
+      "missCosts": "Miss cost scenarios"
+    },
+    "cases": [
+      {
+        "name": "Decision changes across scenarios",
+        "data": {
+          "avoided": 2,
+          "extra": 5,
+          "inspection": 4,
+          "missCosts": [
+            5,
+            10,
+            20
+          ]
+        },
+        "expected": [
+          -10,
+          0,
+          20
+        ]
+      },
+      {
+        "name": "Higher inspection burden",
+        "data": {
+          "avoided": 2,
+          "extra": 10,
+          "inspection": 4,
+          "missCosts": [
+            5,
+            10,
+            20
+          ]
+        },
+        "expected": [
+          -30,
+          -20,
+          0
+        ]
+      },
+      {
+        "name": "No avoided misses",
+        "data": {
+          "avoided": 0,
+          "extra": 3,
+          "inspection": 4,
+          "missCosts": [
+            5,
+            10,
+            20
+          ]
+        },
+        "expected": [
+          -12,
+          -12,
+          -12
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "avoided"
+            },
+            {
+              "source": "missCosts"
+            }
+          ]
+        },
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "extra"
+            },
+            {
+              "source": "inspection"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "One input remains a list of scenarios, so the calculation returns one conclusion per assumption instead of hiding the range.",
+    "limitation": "These are conditional estimates, not confidence bounds. Policy effects, upkeep, and relationships between uncertain inputs need separate evidence.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "Avoided misses produce a benefit; additional inspections create a cost. Calculate them separately.",
+      "Multiply avoided misses by the list of miss-cost scenarios, then subtract extra inspections times inspection cost. Leave the result as a list so we can compare assumptions."
+    ]
+  },
+  {
+    "id": "design-prototype-experiments",
+    "title": "Separate the two prototype changes",
+    "problem": "Botie measured all combinations of batch size and parameter format. He needs to see whether the format effect depends on batch size.",
+    "challenge": "Use Choose an entry to read times in the supplied order: small/original, small/smaller, large/original, large/smaller. Subtract within each batch, then subtract the small-batch effect from the large-batch effect.",
+    "sources": {
+      "times": "Batch durations: small/original, small/smaller, large/original, large/smaller (ms)"
+    },
+    "cases": [
+      {
+        "name": "Format helps more at a large batch",
+        "data": {
+          "times": [
+            40,
+            30,
+            80,
+            40
+          ]
+        },
+        "expected": -30
+      },
+      {
+        "name": "Equal absolute effects",
+        "data": {
+          "times": [
+            20,
+            15,
+            60,
+            55
+          ]
+        },
+        "expected": 0
+      },
+      {
+        "name": "Format helps less at a large batch",
+        "data": {
+          "times": [
+            20,
+            10,
+            50,
+            45
+          ]
+        },
+        "expected": 5
+      }
+    ],
+    "recipe": {
+      "op": "subtract",
+      "inputs": [
+        {
+          "op": "subtract",
+          "inputs": [
+            {
+              "op": "index",
+              "inputs": [
+                {
+                  "source": "times"
+                },
+                {
+                  "op": "constant",
+                  "inputs": [],
+                  "settings": {
+                    "value": 3
+                  }
+                }
+              ]
+            },
+            {
+              "op": "index",
+              "inputs": [
+                {
+                  "source": "times"
+                },
+                {
+                  "op": "constant",
+                  "inputs": [],
+                  "settings": {
+                    "value": 2
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "subtract",
+          "inputs": [
+            {
+              "op": "index",
+              "inputs": [
+                {
+                  "source": "times"
+                },
+                {
+                  "op": "constant",
+                  "inputs": [],
+                  "settings": {
+                    "value": 1
+                  }
+                }
+              ]
+            },
+            {
+              "op": "index",
+              "inputs": [
+                {
+                  "source": "times"
+                },
+                {
+                  "op": "constant",
+                  "inputs": [],
+                  "settings": {
+                    "value": 0
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Every subtraction holds one factor fixed before comparing the effects across the other factor.",
+    "limitation": "These are descriptive contrasts from invented timings. Repetition, measurement controls, and task-quality checks are still needed.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "Choose an entry uses zero-based positions. The small-batch times are positions 0 and 1; the large-batch times are 2 and 3.",
+      "For each batch size, subtract original-format time from smaller-format time.",
+      "Subtract the small-batch effect from the large-batch effect. Check the sign on the case where the effects are equal."
+    ]
+  },
+  {
+    "id": "design-fallbacks",
+    "title": "Route unusable pump records to review",
+    "problem": "Botie should use a model decision only when its record is valid and recent enough. Every other case needs the specified fallback action.",
+    "challenge": "Compare ages with the maximum, combine that mask with validity, and use Choose by a mask to select model or fallback actions. Codes are −1 for review, 0 for defer, and 1 for inspect.",
+    "sources": {
+      "valid": "Record validity flags",
+      "ages": "Record ages in minutes",
+      "maximum": "Maximum age in minutes",
+      "primary": "Model action codes",
+      "fallback": "Review action codes"
+    },
+    "cases": [
+      {
+        "name": "Stale and invalid readings",
+        "data": {
+          "valid": [
+            1,
+            1,
+            0
+          ],
+          "ages": [
+            2,
+            9,
+            1
+          ],
+          "maximum": 5,
+          "primary": [
+            1,
+            0,
+            1
+          ],
+          "fallback": [
+            -1,
+            -1,
+            -1
+          ]
+        },
+        "expected": [
+          1,
+          -1,
+          -1
+        ]
+      },
+      {
+        "name": "Exactly at the limit",
+        "data": {
+          "valid": [
+            1,
+            1
+          ],
+          "ages": [
+            5,
+            1
+          ],
+          "maximum": 5,
+          "primary": [
+            0,
+            1
+          ],
+          "fallback": [
+            -1,
+            -1
+          ]
+        },
+        "expected": [
+          0,
+          1
+        ]
+      },
+      {
+        "name": "No usable records",
+        "data": {
+          "valid": [
+            0,
+            0
+          ],
+          "ages": [
+            0,
+            0
+          ],
+          "maximum": 5,
+          "primary": [
+            0,
+            1
+          ],
+          "fallback": [
+            -1,
+            -1
+          ]
+        },
+        "expected": [
+          -1,
+          -1
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "designSelect",
+      "inputs": [
+        {
+          "op": "multiply",
+          "inputs": [
+            {
+              "source": "valid"
+            },
+            {
+              "op": "gate",
+              "inputs": [
+                {
+                  "source": "maximum"
+                },
+                {
+                  "source": "ages"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "primary"
+        },
+        {
+          "source": "fallback"
+        }
+      ]
+    },
+    "why": "The mask enforces preconditions before choosing the action. The review code remains distinguishable from an ordinary prediction.",
+    "limitation": "The review team needs its own capacity and response policy. This routing calculation does not prove that manual review is effective or timely.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "A fresh record can still be invalid. Form a use-model mask that requires both conditions.",
+      "Threshold gate can compare maximum age against each record age. Multiply its output by validity.",
+      "Choose by a mask takes the use-model mask, proposed model actions, and review actions in that order. A zero must select review, not silently defer."
+    ]
+  },
+  {
+    "id": "design-inspection-review",
+    "title": "Review Botie’s inspection service",
+    "problem": "Botie needs to satisfy a fault-miss requirement and a queue budget. The fault fixture and arrival trace measure different properties.",
+    "challenge": "Count missed faults using labels and decisions. Separately replay the queue and find its maximum. Compare each quantity with its own limit, then return 1 only when both checks pass.",
+    "sources": {
+      "labels": "Fault labels in evaluation order",
+      "decisions": "Inspection decisions in evaluation order",
+      "missLimit": "Maximum missed faults",
+      "arrivals": "Request arrivals per interval",
+      "capacity": "Service capacities per interval",
+      "queueLimit": "Maximum permitted backlog"
+    },
+    "cases": [
+      {
+        "name": "Both boundary checks pass",
+        "data": {
+          "labels": [
+            1,
+            0,
+            1,
+            1
+          ],
+          "decisions": [
+            1,
+            0,
+            0,
+            1
+          ],
+          "missLimit": 1,
+          "arrivals": [
+            2,
+            7,
+            1
+          ],
+          "capacity": [
+            4,
+            4,
+            4
+          ],
+          "queueLimit": 3
+        },
+        "expected": 1
+      },
+      {
+        "name": "Busy shift fails capacity",
+        "data": {
+          "labels": [
+            1,
+            0,
+            1
+          ],
+          "decisions": [
+            1,
+            0,
+            1
+          ],
+          "missLimit": 1,
+          "arrivals": [
+            2,
+            9,
+            1
+          ],
+          "capacity": [
+            4,
+            4,
+            4
+          ],
+          "queueLimit": 3
+        },
+        "expected": 0
+      },
+      {
+        "name": "Quiet but inaccurate",
+        "data": {
+          "labels": [
+            1,
+            0,
+            1
+          ],
+          "decisions": [
+            0,
+            0,
+            0
+          ],
+          "missLimit": 1,
+          "arrivals": [
+            1,
+            1
+          ],
+          "capacity": [
+            4,
+            4
+          ],
+          "queueLimit": 3
+        },
+        "expected": 0
+      },
+      {
+        "name": "More service capacity repairs overload",
+        "data": {
+          "labels": [
+            1,
+            0,
+            1
+          ],
+          "decisions": [
+            1,
+            0,
+            1
+          ],
+          "missLimit": 1,
+          "arrivals": [
+            2,
+            9,
+            1
+          ],
+          "capacity": [
+            6,
+            6,
+            6
+          ],
+          "queueLimit": 3
+        },
+        "expected": 1
+      }
+    ],
+    "recipe": {
+      "op": "multiply",
+      "inputs": [
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "missLimit"
+            },
+            {
+              "op": "total",
+              "inputs": [
+                {
+                  "op": "multiply",
+                  "inputs": [
+                    {
+                      "source": "labels"
+                    },
+                    {
+                      "op": "subtract",
+                      "inputs": [
+                        {
+                          "op": "constant",
+                          "inputs": [],
+                          "settings": {
+                            "value": 1
+                          }
+                        },
+                        {
+                          "source": "decisions"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "op": "gate",
+          "inputs": [
+            {
+              "source": "queueLimit"
+            },
+            {
+              "op": "maximum",
+              "inputs": [
+                {
+                  "op": "designQueue",
+                  "inputs": [
+                    {
+                      "source": "arrivals"
+                    },
+                    {
+                      "source": "capacity"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Separate branches preserve the meaning of each requirement. The final AND passes only after both measured quantities meet their limits.",
+    "limitation": "This verifies two toy requirements. Field usefulness, inspection capacity, label coverage, memory, response deadlines, and fallback behaviour still need their own evidence.",
+    "extras": [
+      "constant",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "mean",
+      "total",
+      "count",
+      "transpose"
+    ],
+    "draftVersion": 1,
+    "hints": [
+      "The fault fixture and load trace are separate branches. Start by deciding which inputs belong to each requirement.",
+      "Count labels times one minus decisions for missed faults. Separately feed arrivals and capacities through Queue over time and Largest value.",
+      "Compare each result with its own limit, then multiply the two pass flags. Try the busy-shift and quiet-but-inaccurate cases to check both branches."
+    ]
   }
 ]
