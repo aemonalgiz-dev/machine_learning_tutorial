@@ -4,6 +4,9 @@ import { FOUNDATION_TOOLS } from "./foundation-tools";
 import { GAP_TOOLS } from "./gap-tools";
 import { PATH_TOOLS } from "./path-tools";
 import { DESIGN_TOOLS } from "./design-tools";
+import { agentFoundationTools } from "./agent-foundation-tools";
+import { agentFrameworkTools } from "./agent-framework-tools";
+import { agentObservabilityTools } from "./agent-observability-tools";
 export function scalar(x: Data): number { if (typeof x !== "number") throw Error("This input needs one number. Inspect the connected machine to see what it produces."); return x; }
 export function vector(x: Data): number[] { if (!Array.isArray(x) || !x.every(v => typeof v === "number")) throw Error("This input needs a list of numbers."); return x as number[]; }
 export function matrix(x: Data): number[][] { if (!Array.isArray(x) || !x.length) throw Error("This input needs rows of numbers."); const rows = x.map(vector); if (rows.some(r => r.length !== rows[0].length)) throw Error("Each row must have the same number of values."); return rows; }
@@ -28,6 +31,9 @@ export const TOOLS: Record<string, Tool> = {
   ...GAP_TOOLS,
   ...PATH_TOOLS,
   ...DESIGN_TOOLS,
+  ...agentFoundationTools,
+  ...agentFrameworkTools,
+  ...agentObservabilityTools,
   constant: define("Set a constant", "Supplies a number that stays the same for every example. Use it when the rule needs a fixed rate, threshold or offset.", [], (_, s) => Number(s.value), [numeric("value", "Number", 0, -10000, 10000, .1)]),
   add: define("Add", "Combines contributions. Two equally sized lists are added position by position.", ["First contribution", "Second contribution"], ([a,b]) => zip(a,b,(x,y)=>x+y)),
   subtract: define("Subtract", "Finds what remains after removing a reference value. The order of the inputs matters.", ["Starting value", "Value to remove"], ([a,b]) => zip(a,b,(x,y)=>x-y)),

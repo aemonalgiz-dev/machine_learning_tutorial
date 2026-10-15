@@ -1,5 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { NextConfig } from "next";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { verifiedImageRuntime } from "./scripts/native-image-runtime.mjs";
 
 const nextConfig: NextConfig = {
   // The salt behind the anonymous visitor key in app/site-activity/route.ts.
@@ -56,6 +58,11 @@ const nextConfig: NextConfig = {
     serverSourceMaps: false,
   },
 
+  async redirects() {
+    // Resolve this old workshop address before first-visit page generation.
+    return [{ source: "/lab/neurons-and-activations", destination: "/lab/neuron", permanent: false }];
+  },
+
   async rewrites() {
     return [
       {
@@ -66,4 +73,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default async function config(phase: string): Promise<NextConfig> {
+  if (phase !== PHASE_PRODUCTION_BUILD) return nextConfig;
+  const nativeImages = await verifiedImageRuntime();
+  console.log(`Native image test passed: ${nativeImages.runtime}. Retaining ${nativeImages.keptPackages.join(", ")}.`);
+  return {
+    ...nextConfig,
+    outputFileTracingIncludes: { "/*": nativeImages.includes },
+    outputFileTracingExcludes: {
+      "/*": nativeImages.excludes,
+      // The Next server's own trace is separate from individual route traces.
+      "next-server": nativeImages.excludes,
+    },
+  };
+}

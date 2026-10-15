@@ -201,6 +201,25 @@ old homepage fragments are forwarded to their new section destinations.
 
 ## Modern-model lessons
 
+The Agents section at `/sections/agents` follows a maintenance assistant from
+prompt design and tool contracts through Pydantic AI, LangChain, LangGraph,
+human approval and MCP. Observability and evaluation lessons cover trace
+structure, Langfuse, dataset design, model judges and release comparisons,
+with OpenTelemetry, Phoenix and promptfoo references where they are useful.
+
+Author these lessons in `scripts/curriculum/agents-*.mjs`. Their workshop
+operations, journey plans and fresh cases live in the corresponding agent
+modules under `lib/builds/`. The workshops replay explicitly invented records;
+they do not call a language model. Browser Python challenges exercise the
+underlying contracts using deterministic fixtures and additional test cases.
+
+Provider-dependent SDK examples use `parts[].references`, with setup steps,
+an official documentation link and a checked date. These render as references
+to run in the reader's own environment, separately from executable browser
+examples in `parts[].examples`. Never put credentials or invented model
+outputs in a reference. After edits, regenerate curriculum artifacts and run
+the Agents contracts, workshop journey contracts, and browser Python checks.
+
 The curriculum includes Large Language Models, Generative Models, and Adapting
 and Evaluating Modern Models. Thirteen lessons cover transformer blocks,
 next-token learning, generation, sampling, autoencoders, VAEs, GANs, diffusion,
@@ -274,7 +293,33 @@ Never record a failing Python program as a reference output.
 generated server pages, browser assets, public files, manifests and additional
 traced runtime dependencies once each. It excludes `.next/dev`, build caches
 and unused packages. Amplify's final packaged artifact remains the authoritative
-size; its Linux dependencies may differ from a local Windows build.
+size; its Linux dependencies may differ from a local Windows build. The report
+also lists the traced bytes per runtime package, making duplicate native image
+libraries visible in Amplify's build log. Sizes use MiB (1,048,576 bytes), with
+decimal MB also shown. The reported Amplify hard limit is 220 MiB (230,686,720
+bytes). Our postbuild check uses a lower 200 MiB budget to leave room for
+Amplify's packaging. Missing traced files also fail the check rather than
+producing an incomplete size estimate.
+
+During a production build, a real PNG resize and WebP conversion verifies
+Sharp's native image library. Only after that passes does Next's file tracing
+exclude binaries for other architectures, the other Linux C library, and the
+WASM fallback. The selected native binding and its matching libvips package
+remain in the traces, including shared libraries loaded by the OS. This keeps
+the homepage's image optimization working. A postbuild check adds those assets
+to Next's global server trace as well as its individual route traces and
+rejects a global trace that still contains excluded Sharp variants.
+Detection follows the build host's
+OS, CPU and libc; build on the same platform as the deployment runtime. An
+unsupported or broken native runtime stops the build instead of discarding
+its fallback. `npm run check:images` repeats the image check, and
+`npm run test:deployment` checks native selection and size accounting.
+
+The dynamic workshop route generates and caches each workshop on its first
+visit instead of storing every workshop's HTML and RSC copies in the build.
+The first request therefore renders on the server; subsequent requests can
+use the cached page. Lesson pages remain prerendered. This changes packaging,
+not the lesson data or the learner's saved workshop constructions.
 
 The shared course navigation is imported by the client navigation components.
 Keep it out of root-layout props: passing the whole table there serializes it
@@ -293,10 +338,18 @@ local estimate.
 
 ## Validation
 
+After a production build, `npm run test:production` starts a temporary server on
+port 3100. It checks the Agents lesson routes, workshop caching and interaction,
+legacy redirects, missing pages, and a real banner request through the image
+optimizer. `npm run test:deployment` checks native-library selection and the
+deployment-size accounting without starting a server.
+
 ```bash
 npm run lint
 npx tsc --noEmit
 npm run build
+npm run test:deployment
+npm run test:production
 npm run test:runner
 npm run test:practice
 npx playwright install chromium

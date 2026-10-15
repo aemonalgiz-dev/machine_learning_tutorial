@@ -23,6 +23,9 @@ import designProblem from "./curriculum/design-problem.mjs";
 import designResources from "./curriculum/design-resources.mjs";
 import designComparisons from "./curriculum/design-comparisons.mjs";
 import designEvidence from "./curriculum/design-evidence.mjs";
+import agentFoundations from "./curriculum/agents-foundations.mjs";
+import agentFrameworks from "./curriculum/agents-frameworks.mjs";
+import agentObservability from "./curriculum/agents-observability.mjs";
 import { readingVoice } from "./curriculum/reading-voice.mjs";
 import { readingExtensions } from "./curriculum/reading-extensions.mjs";
 import { deepenProbability } from "./curriculum/depth-probability.mjs";
@@ -32,7 +35,7 @@ import { applyDepthSupplements, depthSupplements } from "./curriculum/depth/inde
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const paths = [...forecasting, ...reinforcement, ...probabilistic, ...optimisation, ...recommendations, ...anomalies, ...graphs, ...causal, ...deployment, ...projects];
-const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths, ...designProblem, ...designResources, ...designComparisons, ...designEvidence];
+const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths, ...designProblem, ...designResources, ...designComparisons, ...designEvidence, ...agentFoundations, ...agentFrameworks, ...agentObservability];
 const lessons = [...numpy, ...data, ...evaluation, ...gaps].map(lesson => ({ ...lesson, reading: lesson.reading ?? readingVoice[lesson.id],
   intuition: [...lesson.intuition, ...(readingExtensions[lesson.id] ? [readingExtensions[lesson.id]] : [])] }));
 // Existing quiz bookmarks keep working as the preceding explanation grows.
@@ -69,9 +72,14 @@ for (const lesson of lessons) {
   if (JSON.stringify(lesson).includes("\u2014")) throw Error(`${lesson.id}: remove the em dash.`);
   if (lesson.history.blocks.length < 2 || !lesson.history.sources.length || !lesson.parts.length || !lesson.practice.length || !lesson.quiz.length || !lesson.intuition.length || lesson.build.cases.length < 2) throw Error(`${lesson.id}: incomplete lesson.`);
   for (const part of lesson.parts) if (!part.title?.trim() || !part.paragraphs.some(text=>text.trim())) throw Error(`${lesson.id}: an explanation needs a title and authored content.`);
+  if (lesson.technicalStart && !lesson.parts.some(part => part.title === lesson.technicalStart)) throw Error(`${lesson.id}: technicalStart must name an existing explanation.`);
   for (const checkpoint of lesson.checkpoints ?? []) if (!lesson.parts.some(part=>part.title===checkpoint.after) || !checkpoint.questions.length) throw Error(`${lesson.id}: put each checkpoint after an existing explanation.`);
   for (const entry of lesson.history.sources) if (new URL(entry.url).protocol !== "https:") throw Error(`${lesson.id}: use a primary HTTPS source.`);
   for (const exercise of lesson.practice) if (!exercise.solution || !exercise.output || !exercise.hints.length) throw Error(`${lesson.id}: incomplete programming challenge.`);
+  for (const part of lesson.parts) for (const reference of part.references ?? []) {
+    if (!reference.title || !reference.code || !reference.description?.length || !reference.setup?.length || !reference.interpretation?.length) throw Error(`${lesson.id}: explain how to run and interpret the framework reference.`);
+    if (!["python", "yaml", "json", "bash"].includes(reference.language) || !/^\d{4}-\d{2}-\d{2}$/.test(reference.checkedOn) || new URL(reference.source.url).protocol !== "https:") throw Error(`${lesson.id}: framework reference needs a language, checked date and HTTPS documentation.`);
+  }
   for (const part of lesson.parts) for (const example of part.examples ?? []) {
     if (!example.title || !example.code || !example.output || !example.paragraphs.length || !example.interpretation.length) throw Error(`${lesson.id}: incomplete worked example.`);
     if (lesson.practice.some(exercise => exercise.solution.trim() === example.code.trim())) throw Error(`${lesson.id}: the explanation must not publish the practice program verbatim.`);

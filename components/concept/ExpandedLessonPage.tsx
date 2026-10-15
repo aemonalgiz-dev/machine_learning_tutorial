@@ -7,6 +7,7 @@ import { story, step, strips } from "@/lib/intuition/types";
 import { expandedLessonById } from "@/lib/lessons";
 import { buildById } from "@/lib/builds/catalog";
 import { GaussianProcessExperiment } from "../widgets/GaussianProcessExperiment";
+import { FrameworkReference } from "./FrameworkReference";
 
 export function ExpandedLessonPage({ id }: { id: string }) {
   const lesson = expandedLessonById[id];
@@ -14,7 +15,7 @@ export function ExpandedLessonPage({ id }: { id: string }) {
     item.scene ?? strips("An invented example for this lesson.", item.rows))), lesson.reading.connectionTitle, [lesson.build.why]),
     exampleNote: lesson.reading.exampleNote };
   return <ConceptPage lessonId={lesson.id} title={lesson.title} tagline={lesson.blurb}
-    openingTitle={lesson.openingTitle} intuition={intuition} technicalStart={(lesson.parts[1] ?? lesson.parts[0]).title}
+    openingTitle={lesson.openingTitle} intuition={intuition} technicalStart={lesson.technicalStart ?? (lesson.parts[1] ?? lesson.parts[0]).title}
     prerequisites={<>{lesson.prerequisites.map((item, i) => <span key={item.href}>{i > 0 && ", "}<Link href={item.href}>{item.title}</Link></span>)}.</>}
     playgroundTitle={lesson.reading.experimentTitle}
     playgroundIntro={lesson.reading.experimentIntro}
@@ -31,6 +32,7 @@ export function ExpandedLessonPage({ id }: { id: string }) {
           <ProgramOutput output={example.output} />
           {example.interpretation.map(text => <p key={text}>{text}</p>)}
         </div>)}
+        {part.references?.map(reference => <FrameworkReference key={reference.title} reference={reference} />)}
         {index === lesson.parts.length - 1 && lesson.appliedIn?.length && <aside className="mt-8 rounded-lg border border-line bg-surface p-4 text-sm">
           <p className="font-semibold text-foreground">Continue with {lesson.appliedIn.map((item, i) => <span key={item.href}>{i > 0 && ", "}<Link className="text-accent underline underline-offset-4" href={item.href}>{item.title}</Link></span>)}</p>
         </aside>}

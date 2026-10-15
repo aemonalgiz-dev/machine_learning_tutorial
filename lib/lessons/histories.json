@@ -1474,5 +1474,300 @@
       "NASA’s product-realisation guidance distinguishes verification against specified requirements from validation against intended use and stakeholder expectations. Both matter: a system can satisfy a written specification that does not adequately describe the real need.",
       "Our capstone verifies two numerical requirements on invented inspection and workload fixtures. It then asks what evidence would validate the service for the maintenance team. Passing the arithmetic is useful, but it cannot demonstrate fewer real breakdowns or an acceptable review workload."
     ]
+  },
+  "agent-prompts": {
+    "title": "Examples Became Part of the Request",
+    "sources": [
+      {
+        "title": "Brown and colleagues: Language Models are Few-Shot Learners (2020)",
+        "url": "https://arxiv.org/abs/2005.14165"
+      },
+      {
+        "title": "Anthropic: Building effective agents (2024)",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents"
+      }
+    ],
+    "blocks": [
+      "Adapting a language model to a task once commonly meant collecting labelled examples and updating its parameters. Brown and colleagues investigated a different setting in GPT-3: give the model a task and a small number of demonstrations in its input, then test it without task-specific parameter updates. The examples helped specify the requested behaviour, although success varied across tasks.",
+      "That distinction matters here. Writing a prompt changes the input to an existing model; it does not train the model in this lesson. An agent adds software that can let the model select another action after seeing a result. Anthropic’s 2024 engineering article distinguishes this from a workflow whose route is already prescribed in code. We will use that distinction, while remembering that the word agent is used more broadly elsewhere."
+    ]
+  },
+  "agent-structured-outputs": {
+    "title": "Programs Needed a Shared Description of Valid Data",
+    "sources": [
+      {
+        "title": "JSON Schema: object validation",
+        "url": "https://json-schema.org/understanding-json-schema/reference/object"
+      }
+    ],
+    "blocks": [
+      "Programs exchanging JSON need more agreement than “send some JSON.” A schema can specify property names and value types so both sides can detect an incompatible record. JSON Schema distinguishes defining a property from requiring that property, and allows extra properties unless the schema restricts them.",
+      "A generated answer has the same interface problem. We will build a small explicit validator and keep its result separate from an asset lookup. This is a teaching subset of validation, not an implementation of the full JSON Schema standard."
+    ]
+  },
+  "agent-tool-contracts": {
+    "title": "A Missing Response Does Not Mean a Missing Action",
+    "sources": [
+      {
+        "title": "AWS Builders’ Library: Making retries safe with idempotent APIs",
+        "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+      },
+      {
+        "title": "Yao and colleagues: ReAct (2022)",
+        "url": "https://arxiv.org/abs/2210.03629"
+      }
+    ],
+    "blocks": [
+      "Distributed services faced uncertain outcomes before language models began selecting tools. The AWS Builders’ Library describes using a caller-provided request identifier to recognise a retry and avoid repeating a side effect. It also discusses the case where an identifier is reused with different parameters, which should not silently become the same request.",
+      "ReAct studied language-model interactions that interleave reasoning and actions, allowing observations to affect subsequent steps. Once a proposed action reaches a real service, ordinary service guarantees still matter. Our workshop separates a model’s candidate request from the application checks that decide whether it can proceed."
+    ]
+  },
+  "agent-context": {
+    "title": "A Model Could Read Retrieved Material at Answer Time",
+    "sources": [
+      {
+        "title": "Lewis and colleagues: Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (2020)",
+        "url": "https://arxiv.org/abs/2005.11401"
+      }
+    ],
+    "blocks": [
+      "A model’s parameters are an awkward place to keep knowledge that needs checking or updating. Lewis and colleagues studied generation that conditions on retrieved passages, combining a retrieval component with a sequence-to-sequence model. Documents could provide information at answer time instead of requiring every fact to be recovered from model parameters.",
+      "Our workshop isolates a later application problem: given ranked candidate passages, which may enter this request and which fit? It does not reproduce the paper’s learned retrieval or training procedure. That separation lets us inspect permission and budgeting mistakes without disguising a deterministic list operation as semantic search."
+    ]
+  },
+  "agent-loops": {
+    "title": "An Observation Could Change the Next Action",
+    "sources": [
+      {
+        "title": "Yao and colleagues: ReAct (2022)",
+        "url": "https://arxiv.org/abs/2210.03629"
+      },
+      {
+        "title": "Anthropic: Building effective agents (2024)",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents"
+      }
+    ],
+    "blocks": [
+      "A language model answering from its initial input cannot inspect a tool result that has not arrived yet. ReAct explored sequences that interleave reasoning and actions, letting observations affect the next step. This supplied a concrete way to combine language-based task handling with information gathered during execution.",
+      "Our controller is smaller than a full agent implementation. It consumes supplied proposals and results so we can inspect termination behaviour. The workshop does not run a language model or reveal its private reasoning. It shows the operational decisions an application must make around whatever model supplies the proposals."
+    ]
+  },
+  "agent-pydantic-ai": {
+    "title": "Making a Model Response Fit an Ordinary Python Application",
+    "sources": [
+      {
+        "title": "Pydantic AI v1 announcement",
+        "url": "https://pydantic.dev/articles/pydantic-ai-v1"
+      },
+      {
+        "title": "Dependencies",
+        "url": "https://ai.pydantic.dev/dependencies/"
+      },
+      {
+        "title": "Function tools",
+        "url": "https://ai.pydantic.dev/tools/"
+      },
+      {
+        "title": "Output validation",
+        "url": "https://ai.pydantic.dev/output/"
+      }
+    ],
+    "blocks": [
+      "Application developers needed model responses that could be checked and passed to other code. The Pydantic team approached that problem through Python types, dependency injection and output validation. Its September 2025 v1 announcement describes those engineering concerns; the reference here uses the current documented interfaces.",
+      "The useful idea is familiar from the earlier lessons: make each boundary explicit. A request receives the manual data it may read, a tool exposes an operation, and the final answer must fit a declared structure. Our invented pump-manual example adds a citation check. It does not turn a well-formed sentence into a verified maintenance instruction."
+    ]
+  },
+  "agent-langchain": {
+    "title": "When Every Application Was Rebuilding the Same Loop",
+    "sources": [
+      {
+        "title": "LangChain and LangGraph v1",
+        "url": "https://www.langchain.com/blog/langchain-langgraph-1dot0"
+      },
+      {
+        "title": "Agents",
+        "url": "https://docs.langchain.com/oss/python/langchain/agents"
+      },
+      {
+        "title": "Tools",
+        "url": "https://docs.langchain.com/oss/python/langchain/tools"
+      },
+      {
+        "title": "Middleware",
+        "url": "https://docs.langchain.com/oss/python/langchain/middleware/overview"
+      },
+      {
+        "title": "Prebuilt middleware",
+        "url": "https://docs.langchain.com/oss/python/langchain/middleware/built-in"
+      }
+    ],
+    "blocks": [
+      "Agent applications repeatedly need to send messages, execute requested tools, and return the results to a model. LangChain’s v1 release organised a higher-level agent interface around create_agent, built on the LangGraph runtime. Middleware gives applications places to intervene in that repeated execution.",
+      "Our maintenance assistant makes the reason concrete. A missing manual should produce a bounded unsuccessful search. We will not infer a hard operational limit from a sentence asking the model to stop; we will enforce it in the program that executes calls."
+    ]
+  },
+  "agent-langgraph": {
+    "title": "A Useful Workflow Sometimes Needs to Go Around Again",
+    "sources": [
+      {
+        "title": "LangGraph announcement, January 2024",
+        "url": "https://www.langchain.com/blog/langgraph"
+      },
+      {
+        "title": "Graph API",
+        "url": "https://docs.langchain.com/oss/python/langgraph/graph-api"
+      },
+      {
+        "title": "Persistence",
+        "url": "https://docs.langchain.com/oss/python/langgraph/persistence"
+      },
+      {
+        "title": "Interrupts",
+        "url": "https://docs.langchain.com/oss/python/langgraph/interrupts"
+      }
+    ],
+    "blocks": [
+      "A fixed sequence of language-model calls can work until an early step returns insufficient evidence. The application then needs a route back to retrieval, or a pause for a person. LangGraph’s January 2024 introduction described cycles and explicit state machines as a way to control those paths.",
+      "For Botie, the state contains the evidence gathered for one maintenance request. A node returns an update, and the application decides how that update changes what was already stored. The workshop builds that merge operation on small invented records before the reference code introduces a paused graph."
+    ]
+  },
+  "agent-human-approval": {
+    "title": "Permission Has to Belong to an Operation",
+    "sources": [
+      {
+        "title": "Saltzer and Schroeder: The Protection of Information in Computer Systems",
+        "url": "https://web.mit.edu/Saltzer/www/publications/protection/"
+      },
+      {
+        "title": "LangGraph interrupts",
+        "url": "https://docs.langchain.com/oss/python/langgraph/interrupts"
+      }
+    ],
+    "blocks": [
+      "Long before language-model agents, shared computer systems needed to control who could read or change an object. Saltzer and Schroeder’s 1975 account describes protection mechanisms and distinguishes authentication from authorisation. Their discussion also includes requirements for human judgement before granting access.",
+      "An inspection assistant adds generated proposals to that old problem. It still needs a trusted component that grants access to a particular operation. Our approval record is a teaching design for binding a decision to a proposal. It is not a claim that a language model, a checkbox or a checkpoint supplies that authority automatically."
+    ]
+  },
+  "agent-mcp": {
+    "title": "A Common Interface for Data Kept in Different Systems",
+    "sources": [
+      {
+        "title": "Anthropic: Introducing MCP, November 2024",
+        "url": "https://www.anthropic.com/news/model-context-protocol"
+      },
+      {
+        "title": "MCP architecture",
+        "url": "https://modelcontextprotocol.io/docs/learn/architecture"
+      },
+      {
+        "title": "Server concepts",
+        "url": "https://modelcontextprotocol.io/docs/learn/server-concepts"
+      },
+      {
+        "title": "Official Python SDK",
+        "url": "https://py.sdk.modelcontextprotocol.io/"
+      },
+      {
+        "title": "MCP trust assumptions",
+        "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md"
+      }
+    ],
+    "blocks": [
+      "Assistants could generate text but often lacked a consistent connection to the systems holding a user’s documents and tools. Anthropic introduced MCP in November 2024 to standardise those integrations. A service can describe its capabilities through one protocol instead of requiring a separate custom interface for every assistant.",
+      "Our invented maintenance service uses that idea to expose manual content. Sharing a protocol does not settle whether a server is trustworthy, which technician may read a record, or whether a proposed action needs approval. Those decisions remain in the host application and the service that owns the data."
+    ]
+  },
+  "agent-tracing": {
+    "title": "Following a Request Across Machines",
+    "sources": [
+      {
+        "title": "Google Research: Dapper (2010)",
+        "url": "https://research.google/pubs/dapper-a-large-scale-distributed-systems-tracing-infrastructure/"
+      },
+      {
+        "title": "OpenTelemetry: traces and context propagation",
+        "url": "https://opentelemetry.io/docs/concepts/context-propagation/"
+      }
+    ],
+    "blocks": [
+      "A slow response was already difficult to explain in distributed services before language-model agents. A request could cross many machines, while each machine kept only its own local record. Google’s 2010 Dapper paper described a tracing system that connected work across those boundaries using related spans.",
+      "OpenTelemetry supplies shared instrumentation and propagation conventions for this kind of record. Our assistant has the same practical need: connect a manual search and a model call to the request that caused them. The invented timings below illustrate that relationship; they are not measurements from a deployed assistant."
+    ]
+  },
+  "agent-langfuse": {
+    "title": "The Answer and Its Test Used to Live Apart",
+    "sources": [
+      {
+        "title": "Langfuse observation model",
+        "url": "https://langfuse.com/docs/observability/best-practices"
+      },
+      {
+        "title": "Langfuse experiments data model",
+        "url": "https://langfuse.com/docs/evaluation/experiments/data-model"
+      }
+    ],
+    "blocks": [
+      "Once teams compare prompt variants, a plain request log leaves out an important question: which variant produced the answer that received a particular judgement? Langfuse’s documented data model connects observations inside a trace and lets experiments connect dataset items with recorded executions. Scores can then refer to the work being judged.",
+      "This is an implementation of evidence we already need, rather than a new definition of correctness. In our maintenance example, identifying the run lets us inspect its retrieved manual, the answer and the evaluator when a score looks suspicious."
+    ]
+  },
+  "agent-evaluation-datasets": {
+    "title": "Testing an Interaction Instead of One Answer",
+    "sources": [
+      {
+        "title": "AgentBench (2023)",
+        "url": "https://arxiv.org/abs/2308.03688"
+      },
+      {
+        "title": "HELM: Holistic Evaluation of Language Models (2022)",
+        "url": "https://arxiv.org/abs/2211.09110"
+      },
+      {
+        "title": "Langfuse dataset experiments",
+        "url": "https://langfuse.com/docs/evaluation/experiments/experiments-via-sdk"
+      }
+    ],
+    "blocks": [
+      "Benchmarks built around isolated answers leave out much of an agent’s work. AgentBench evaluated language models acting through interactive environments, making sequences of decisions part of the task. HELM separately emphasised evaluating models across scenarios and multiple metrics rather than reducing capability to one favourable number.",
+      "Our maintenance tests borrow that question about behaviour: what did the system do in the environment it was given? The small cases here are invented regression fixtures, not a reproduction of either benchmark and not evidence about a particular model’s capability."
+    ]
+  },
+  "agent-model-judges": {
+    "title": "When Exact Answers Were Too Narrow",
+    "sources": [
+      {
+        "title": "Zheng et al.: Judging LLM-as-a-Judge (2023)",
+        "url": "https://arxiv.org/abs/2306.05685"
+      },
+      {
+        "title": "Phoenix evaluation overview",
+        "url": "https://arize.com/docs/phoenix/evaluation/llm-evals/evaluator-traces"
+      }
+    ],
+    "blocks": [
+      "Open-ended assistant answers made evaluation harder because several phrasings could be acceptable. The 2023 MT-Bench and Chatbot Arena study investigated model judges and compared their decisions with human preferences. It also studied problems such as sensitivity to answer position, verbosity and the judge’s own tendencies.",
+      "That work gives us a reason to test a judge rather than simply trust its score. Our maintenance task is narrower than a general preference contest: does the answer preserve what this supplied manual requires? A study on conversational preference does not establish reliability on that domain-specific question."
+    ]
+  },
+  "agent-release-checks": {
+    "title": "Make a Repeated Experiment Part of the Change",
+    "sources": [
+      {
+        "title": "promptfoo CI/CD evaluation integration",
+        "url": "https://www.promptfoo.dev/docs/integrations/ci-cd/"
+      },
+      {
+        "title": "HELM multi-metric evaluation",
+        "url": "https://arxiv.org/abs/2211.09110"
+      },
+      {
+        "title": "Phoenix tracing setup",
+        "url": "https://arize.com/docs/phoenix/tracing/how-to-tracing/setup-tracing/setup-using-phoenix-otel"
+      }
+    ],
+    "blocks": [
+      "Software regression tests preserve known requirements while an implementation changes. Model-based systems add variation in generated outputs, so the regression process also needs fixed cases, identified model and prompt versions, and judgements whose limits are understood. Tools such as promptfoo make these comparisons repeatable from a command line and within a continuous-integration job.",
+      "Our maintenance release policy combines evidence from the preceding lessons. It is an authored teaching policy, not a universal threshold prescribed by a framework. The important step is deciding the policy before seeing which candidate it favours."
+    ]
   }
 }

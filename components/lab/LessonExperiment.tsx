@@ -12,8 +12,10 @@ import { ActionSequence, ForecastSequence } from "./SequentialExperiment";
 function ValueEditor({ value, label, change }: { value: Data; label: string; change: (value: Data) => void }) {
   if (Array.isArray(value)) return <div className="flex max-w-full flex-wrap gap-2">{value.map((item, i) => <div key={i} className="min-w-0 rounded border border-line p-2"><span className="mb-1 block text-xs text-muted">{i + 1}</span><ValueEditor value={item} label={`${label}, entry ${i + 1}`} change={next => change(value.map((old, at) => at === i ? next : old))} /></div>)}</div>;
   if (typeof value === "number" || value === null) return <input aria-label={label} type="number" step="any" value={value ?? ""} placeholder="Missing" className="min-h-11 w-24 max-w-full rounded border border-line bg-background px-2 font-mono text-sm" onChange={event => change(event.target.value === "" ? null : Number(event.target.value))} />;
+  if (typeof value === "boolean") return <label className="inline-flex min-h-11 items-center gap-3 text-sm"><input aria-label={label} type="checkbox" checked={value} onChange={event => change(event.target.checked)} className="size-5 accent-amber-400" />{value ? "True" : "False"}</label>;
+  if (typeof value === "string" && (value.length > 72 || value.includes("\n"))) return <textarea aria-label={label} value={value} rows={4} className="min-h-24 w-full min-w-0 rounded border border-line bg-background p-3 text-sm" onChange={event => change(event.target.value)} />;
   if (typeof value === "string") return <input aria-label={label} value={value} className="min-h-11 w-32 max-w-full rounded border border-line bg-background px-2 text-sm" onChange={event => change(event.target.value)} />;
-  return <WorkshopValue value={value} />;
+  return <div className="min-w-0 space-y-3">{Object.entries(value).map(([key, entry]) => <div key={key} className="min-w-0"><p className="mb-1 break-words font-mono text-xs text-muted">{key}</p><ValueEditor value={entry} label={`${label}, ${key}`} change={next => change({ ...value, [key]: next })} /></div>)}</div>;
 }
 
 export function LessonExperiment({ build, outputLabel }: { build: Build; outputLabel: string }) {

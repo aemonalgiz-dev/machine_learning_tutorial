@@ -99,6 +99,21 @@ export const expandedLessonIds = [
   "design-sensitive-assumptions",
   "design-prototype-experiments",
   "design-fallbacks",
-  "design-inspection-review"
+  "design-inspection-review",
+  "agent-prompts",
+  "agent-structured-outputs",
+  "agent-tool-contracts",
+  "agent-context",
+  "agent-loops",
+  "agent-pydantic-ai",
+  "agent-langchain",
+  "agent-langgraph",
+  "agent-human-approval",
+  "agent-mcp",
+  "agent-tracing",
+  "agent-langfuse",
+  "agent-evaluation-datasets",
+  "agent-model-judges",
+  "agent-release-checks"
 ] as const;
 export type ExpandedLessonId = typeof expandedLessonIds[number];

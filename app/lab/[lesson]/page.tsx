@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { labLessonById, labLessons } from "@/lib/labs";
+import { notFound } from "next/navigation";
+import { labLessonById } from "@/lib/labs";
 import { WorkshopJourney } from "@/components/lab/WorkshopJourney";
 import { buildById } from "@/lib/builds/catalog";
 import { journeyFor } from "@/lib/builds/journey";
 
-export function generateStaticParams() { return labLessons.filter(l => l.id !== "neurons-and-activations").map(l => ({ lesson: l.id })); }
+// Generate and cache each workshop on its first visit. Shipping a separate
+// HTML/RSC snapshot for every floor adds tens of MiB to Amplify's artifact.
+// Workshop controls and saved learner state still run in the browser.
+export const dynamic = "force-static";
+export const dynamicParams = true;
+export function generateStaticParams() { return []; }
 export async function generateMetadata({ params }: { params: Promise<{ lesson: string }> }): Promise<Metadata> {
   const { lesson } = await params;
-  const mission = buildById[lesson];
+  const mission = Object.hasOwn(buildById, lesson) ? buildById[lesson] : undefined;
   return { title: lesson === "simple-linear-regression" ? "Predict delivery times with Botie | FitLab" : mission ? `${mission.title} | Botie's workshop | FitLab` : "Workshop | FitLab", description: mission?.challenge };
 }
 export default async function LabPage({ params }: { params: Promise<{ lesson: string }> }) {
   const { lesson: id } = await params;
-  if (id === "neurons-and-activations") redirect("/lab/neuron");
+  if (!Object.hasOwn(buildById, id) || !Object.hasOwn(labLessonById, id)) notFound();
   const mission = buildById[id], lesson = labLessonById[id];
   if (!mission || !lesson) notFound();
   return <article className="mx-auto max-w-7xl px-4 py-5 sm:px-6">

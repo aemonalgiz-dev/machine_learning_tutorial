@@ -13,7 +13,7 @@ const ids = ["conditional-probability", "likelihood", "naive-bayes", "support-ve
 const run = (key: string, ...inputs: Data[]) => TOOLS[key].run(inputs, {});
 
 test("gap lessons are complete and join existing topics in prerequisite order", () => {
-  expect(lessonOrder).toHaveLength(208);
+  expect(lessonOrder).toHaveLength(223);
   for (const section of CURRICULUM) expect(new Set(section.topics.map(topic => topic.heading)).size).toBe(section.topics.length);
   for (const id of ids) {
     const lesson = expandedLessonById[id];

@@ -698,5 +698,110 @@
     "section": "Test the Design and Plan for Failure",
     "topic": "Bring the Design Together",
     "blurb": "Bring the requirements back to the complete service. Check fault misses and queue capacity separately, then identify what the prototype still has not demonstrated."
+  },
+  {
+    "id": "agent-prompts",
+    "title": "How Do We Give an Agent a Job It Can Follow?",
+    "section": "Agents",
+    "topic": "Giving the Model a Clear Job",
+    "blurb": "A technician wants help with a noisy pump. Begin prompt engineering with that job and its evidence, then test whether a clearer request produces a useful answer."
+  },
+  {
+    "id": "agent-structured-outputs",
+    "title": "Can Another Program Use Botie’s Answer?",
+    "section": "Agents",
+    "topic": "Giving the Model a Clear Job",
+    "blurb": "A technician can read a paragraph, but an application needs agreed fields. Check the response structure without confusing a valid record with a correct diagnosis."
+  },
+  {
+    "id": "agent-tool-contracts",
+    "title": "When May Botie Turn a Suggestion into an Action?",
+    "section": "Agents",
+    "topic": "Letting the Model Use Tools",
+    "blurb": "Booking an inspection changes somebody’s work. Give the tool a precise interface, check the caller’s permission, and keep a retried request from creating a second job."
+  },
+  {
+    "id": "agent-context",
+    "title": "Which Records Should Botie Bring into the Conversation?",
+    "section": "Agents",
+    "topic": "Letting the Model Use Tools",
+    "blurb": "The manual collection is larger than one request can hold. Select permitted evidence, leave room for the reply, and keep each excerpt attached to its source."
+  },
+  {
+    "id": "agent-loops",
+    "title": "What Should Botie Do After a Tool Replies?",
+    "section": "Agents",
+    "topic": "Letting the Model Use Tools",
+    "blurb": "One search may reveal that a second search is needed. Follow the observations through an agent loop, then give that loop explicit ways to finish or ask for help."
+  },
+  {
+    "id": "agent-pydantic-ai",
+    "title": "Give Botie a Typed Job with Pydantic AI",
+    "section": "Agents",
+    "topic": "Building with Agent Frameworks",
+    "blurb": "Botie can read a manual, but the application still needs a usable answer and real citation IDs. Give the agent its dependencies and check what comes back."
+  },
+  {
+    "id": "agent-langchain",
+    "title": "Put Limits Around a LangChain Agent",
+    "section": "Agents",
+    "topic": "Building with Agent Frameworks",
+    "blurb": "Botie keeps looking for a manual that does not exist. Use an agent runtime with explicit tool access and limits, then inspect the messages that explain its decisions."
+  },
+  {
+    "id": "agent-langgraph",
+    "title": "Resume Botie’s Work with LangGraph",
+    "section": "Agents",
+    "topic": "Building with Agent Frameworks",
+    "blurb": "The technician returns after a pause. Preserve the right request’s evidence, merge updates deliberately, and resume a review without repeating an external action."
+  },
+  {
+    "id": "agent-human-approval",
+    "title": "Ask Before Botie Creates the Inspection Job",
+    "section": "Agents",
+    "topic": "State and Permissions",
+    "blurb": "A technician approves one inspection, then the proposal changes. Bind the decision to what was reviewed and check it again where the job is created."
+  },
+  {
+    "id": "agent-mcp",
+    "title": "Connect Botie to Tools with MCP",
+    "section": "Agents",
+    "topic": "State and Permissions",
+    "blurb": "Several assistants need the same maintenance tools. Share an interface while keeping server identity, permissions and returned content visible."
+  },
+  {
+    "id": "agent-tracing",
+    "title": "Why Did Botie Take So Long?",
+    "section": "Agents",
+    "topic": "Seeing What Happened",
+    "blurb": "An answer arrives late, but the text cannot tell us where the time went. Follow one maintenance request through retrieval, tool calls and the final response."
+  },
+  {
+    "id": "agent-langfuse",
+    "title": "Can We Find the Run Behind This Score?",
+    "section": "Agents",
+    "topic": "Seeing What Happened",
+    "blurb": "A dashboard says answers improved. Connect scores to their requests and prompt versions so we can see which answers were actually checked."
+  },
+  {
+    "id": "agent-evaluation-datasets",
+    "title": "What Would Count as Doing the Job?",
+    "section": "Agents",
+    "topic": "Evaluating the Whole Agent",
+    "blurb": "A plausible answer can still come from an unacceptable sequence of actions. Build maintenance cases that check the answer, permitted tools and failure behaviour."
+  },
+  {
+    "id": "agent-model-judges",
+    "title": "Who Checks the Model That Checks Botie?",
+    "section": "Agents",
+    "topic": "Evaluating the Whole Agent",
+    "blurb": "Some answers need interpretation rather than an exact comparison. Give a judge a clear rubric, then test its judgements against evidence and human review."
+  },
+  {
+    "id": "agent-release-checks",
+    "title": "Is This Version Ready for the Next Shift?",
+    "section": "Agents",
+    "topic": "Evaluating the Whole Agent",
+    "blurb": "A new agent can improve average answers while introducing an unacceptable failure. Compare the same cases and keep critical behaviour and operating budgets visible."
   }
 ]

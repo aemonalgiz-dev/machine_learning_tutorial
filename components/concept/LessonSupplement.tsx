@@ -3,6 +3,7 @@ import type { ExpandedLesson } from '@/lib/lessons/types';
 import type { ConceptSection } from './ConceptPage';
 import { Equation } from './Equation';
 import { PythonCode, ProgramOutput } from './PythonCode';
+import { FrameworkReference } from './FrameworkReference';
 
 type Supplement = Pick<ExpandedLesson, 'parts' | 'practice'> & { checkpoint?: NonNullable<ExpandedLesson['checkpoints']>[number] };
 const byId = supplements as Record<string, Supplement>;
@@ -27,6 +28,7 @@ export function addLessonSupplement(id: string, sections: ConceptSection[]): Con
       <ProgramOutput output={example.output} />
       {example.interpretation.map(text => <p key={text}>{text}</p>)}
     </div>)}
+    {part.references?.map(reference => <FrameworkReference key={reference.title} reference={reference} />)}
   </> }, ...(extra.checkpoint?.after === part.title ? [{ title: extra.checkpoint.title, quiz: extra.checkpoint.questions }] : [])]));
   return result;
 }

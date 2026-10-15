@@ -5,6 +5,17 @@ import type { QuizQuestion } from "../quizzes";
 import type { ExpandedLessonId } from "./ids";
 import type { Scene } from "../intuition/types";
 
+export interface FrameworkReference {
+  title: string;
+  description: string[];
+  language: "python" | "yaml" | "json" | "bash";
+  code: string;
+  setup: string[];
+  interpretation: string[];
+  source: { title: string; url: string };
+  checkedOn: string;
+}
+
 export interface ExpandedLesson {
   id: ExpandedLessonId;
   title: string;
@@ -13,6 +24,7 @@ export interface ExpandedLesson {
   blurb: string;
   openingTitle: string;
   opening: string[];
+  technicalStart?: string;
   reading: {
     experimentTitle: string;
     experimentIntro: string;
@@ -31,6 +43,7 @@ export interface ExpandedLesson {
     paragraphs: string[];
     calculation?: string;
     interpretation: string[];
+    references?: FrameworkReference[];
     examples?: {
       title: string;
       paragraphs: string[];

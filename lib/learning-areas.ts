@@ -28,7 +28,7 @@ export const LEARNING_AREAS: LearningArea[] = [
       { id: "problems", title: "Working with particular kinds of problems", sections: ["Computer Vision with Neural Networks", "Natural Language Processing", "Time Series and Forecasting", "Recommendations and Ranking", "Graphs and Relational Learning", "Anomaly Detection"] },
       { id: "generating", title: "Generating and adapting models", sections: ["Large Language Models", "Generative Models", "Adapting and Evaluating Modern Models"] },
       { id: "decisions", title: "Learning through decisions and experiments", sections: ["Reinforcement Learning", "Causal Inference and Experiments"] },
-      { id: "practice", title: "Putting models to work", sections: ["Deploying and Maintaining Models", "Complete Projects"] },
+      { id: "practice", title: "Putting models to work", sections: ["Deploying and Maintaining Models", "Agents", "Complete Projects"] },
     ],
   },
   {
