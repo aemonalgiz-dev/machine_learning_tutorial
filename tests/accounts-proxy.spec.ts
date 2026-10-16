@@ -1,7 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { createHash } from "node:crypto";
 import { createServer } from "node:http";
 import { NextRequest } from "next/server";
 import { GET, PUT, POST } from "../app/account-api/[...path]/route";
+import { sign } from "../lib/aws-request-signing";
 
 test("production refuses an HTTP account backend before forwarding session cookies", async () => {
   const environment = process.env as Record<string, string | undefined>;
@@ -135,4 +137,123 @@ test("proxy preserves OAuth redirects and distinct cookies; limits request bodie
     if (previous === undefined) delete process.env.OOP_ML_ACCOUNTS_URL;
     else process.env.OOP_ML_ACCOUNTS_URL = previous;
   }
+});
+
+const LAMBDA_URL = "https://abc123.lambda-url.us-east-2.on.aws";
+const SIGNING_ENVIRONMENT = { AWS_ACCESS_KEY_ID: "ASIAPROXYTEST", AWS_SECRET_ACCESS_KEY: "proxy-test-secret", AWS_SESSION_TOKEN: "proxy-test-session" };
+const ACCOUNT_ENVIRONMENT = [
+  "OOP_ML_ACCOUNTS_URL", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "AWS_CONTAINER_CREDENTIALS_FULL_URI",
+  "AWS_CONTAINER_CREDENTIALS_RELATIVE_URI", "AWS_CONTAINER_AUTHORIZATION_TOKEN", "AWS_CONTAINER_AUTHORIZATION_TOKEN_FILE",
+];
+type Forwarded = { url: URL; method: string; headers: Headers; body?: Uint8Array };
+
+async function throughProxy(environment: Record<string, string>, upstream: () => Response, run: (sent: Forwarded[], logged: string[]) => Promise<void>) {
+  const previous = ACCOUNT_ENVIRONMENT.map(name => [name, process.env[name]] as const);
+  const originalFetch = globalThis.fetch, originalError = console.error;
+  const sent: Forwarded[] = [], logged: string[] = [];
+  for (const name of ACCOUNT_ENVIRONMENT) delete process.env[name];
+  Object.assign(process.env, environment);
+  globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+    sent.push({ url: new URL(String(input)), method: init?.method ?? "GET", headers: new Headers(init?.headers), body: init?.body as Uint8Array | undefined });
+    return upstream();
+  };
+  console.error = (...values: unknown[]) => { logged.push(values.join(" ")); };
+  try {
+    await run(sent, logged);
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalError;
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+}
+
+function resignedAuthorization(forwarded: Forwarded) {
+  const header = (name: string) => forwarded.headers.get(name) ?? "";
+  return sign({
+    method: forwarded.method, path: forwarded.url.pathname, query: forwarded.url.searchParams,
+    headers: ["host", "x-amz-content-sha256", "x-amz-date", "x-amz-security-token"].map(name => [name, name === "host" ? forwarded.url.host : header(name)]),
+    payloadHash: header("x-amz-content-sha256"), credentials: { accessKeyId: "ASIAPROXYTEST", secretAccessKey: "proxy-test-secret" },
+    region: "us-east-2", service: "lambda", amzDate: header("x-amz-date"),
+  }).authorization;
+}
+
+test("a Lambda function URL backend receives signed requests in canonical form", async () => {
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: LAMBDA_URL, ...SIGNING_ENVIRONMENT }, () => new Response(null, { status: 302, headers: { Location: "/account" } }), async sent => {
+    const session = await GET(new NextRequest("http://localhost:3000/account-api/session", {
+      headers: { Cookie: "fitlab_session=signed", Origin: "http://localhost:3000", Authorization: "must-not-forward" },
+    }), { params: Promise.resolve({ path: ["session"] }) });
+    expect(session.status).toBe(302);
+    const body = '{"completed":["linear-regression"]}';
+    await PUT(new NextRequest("http://localhost:3000/account-api/progress", {
+      method: "PUT", body, headers: { Cookie: "fitlab_session=signed", "Content-Type": "application/json", "X-FitLab-Account": "1" },
+    }), { params: Promise.resolve({ path: ["progress"] }) });
+    await GET(new NextRequest("http://localhost:3000/account-api/auth/callback?state=s+t&code=abc&Code=Z"), { params: Promise.resolve({ path: ["auth", "callback"] }) });
+    expect(sent.map(entry => entry.url.href)).toEqual([
+      `${LAMBDA_URL}/session`, `${LAMBDA_URL}/progress`, `${LAMBDA_URL}/auth/callback?Code=Z&code=abc&state=s%20t`,
+    ]);
+    for (const forwarded of sent) {
+      const date = forwarded.headers.get("x-amz-date") ?? "";
+      expect(date).toMatch(/^\d{8}T\d{6}Z$/);
+      expect(forwarded.headers.get("x-amz-security-token")).toBe("proxy-test-session");
+      expect(forwarded.headers.get("authorization")).toMatch(new RegExp(`^AWS4-HMAC-SHA256 Credential=ASIAPROXYTEST/${date.slice(0, 8)}/us-east-2/lambda/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token, Signature=[0-9a-f]{64}$`));
+      expect(forwarded.headers.get("authorization")).toBe(resignedAuthorization(forwarded));
+    }
+    expect(sent[0].headers.get("x-amz-content-sha256")).toBe(createHash("sha256").update("").digest("hex"));
+    expect(sent[0].headers.get("cookie")).toBe("fitlab_session=signed");
+    expect(sent[0].headers.get("origin")).toBe("http://localhost:3000");
+    expect(new TextDecoder().decode(sent[1].body)).toBe(body);
+    expect(sent[1].headers.get("x-amz-content-sha256")).toBe(createHash("sha256").update(body).digest("hex"));
+    expect(sent[1].headers.get("cookie")).toBe("fitlab_session=signed");
+    expect(sent[1].headers.get("x-fitlab-account")).toBe("1");
+  });
+});
+
+test("without AWS credentials a Lambda backend is unavailable and never contacted", async () => {
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: LAMBDA_URL }, () => new Response(null), async (sent, logged) => {
+    const session = await GET(new NextRequest("http://localhost:3000/account-api/session"), { params: Promise.resolve({ path: ["session"] }) });
+    expect(session.status).toBe(503);
+    const login = await GET(new NextRequest("http://localhost:3000/account-api/auth/login"), { params: Promise.resolve({ path: ["auth", "login"] }) });
+    expect(login.status).toBe(303);
+    expect(login.headers.get("location")).toBe("/account?error=sign-in-unavailable");
+    expect(sent).toHaveLength(0);
+    expect(logged).toEqual(Array(2).fill("fitlab-accounts-proxy: no AWS credentials in the server runtime"));
+  });
+});
+
+test("Lambda's own 403 makes accounts unavailable; the backend's 403 passes through", async () => {
+  const refusal = () => Response.json({ Message: "Forbidden" }, { status: 403, headers: { "x-amzn-ErrorType": "AccessDeniedException" } });
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: LAMBDA_URL, ...SIGNING_ENVIRONMENT }, refusal, async (sent, logged) => {
+    const session = await GET(new NextRequest("http://localhost:3000/account-api/session"), { params: Promise.resolve({ path: ["session"] }) });
+    expect(session.status).toBe(503);
+    const progress = await PUT(new NextRequest("http://localhost:3000/account-api/progress", { method: "PUT", body: "{}" }), { params: Promise.resolve({ path: ["progress"] }) });
+    expect(progress.status).toBe(503);
+    const login = await GET(new NextRequest("http://localhost:3000/account-api/auth/login"), { params: Promise.resolve({ path: ["auth", "login"] }) });
+    expect(login.status).toBe(303);
+    expect(login.headers.get("location")).toBe("/account?error=sign-in-unavailable");
+    expect(sent).toHaveLength(3);
+    expect(logged).toEqual(Array(3).fill("fitlab-accounts-proxy: Lambda refused the request with 403 AccessDeniedException"));
+  });
+  const originRefusal = () => Response.json({ detail: "Origin not allowed" }, { status: 403 });
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: LAMBDA_URL, ...SIGNING_ENVIRONMENT }, originRefusal, async (_sent, logged) => {
+    const session = await GET(new NextRequest("http://localhost:3000/account-api/session"), { params: Promise.resolve({ path: ["session"] }) });
+    expect(session.status).toBe(403);
+    expect(await session.json()).toEqual({ detail: "Origin not allowed" });
+    expect(logged).toHaveLength(0);
+  });
+});
+
+test("a backend that is not a Lambda function URL is called unsigned, with its query as given", async () => {
+  const upstream = () => Response.json({ detail: "refused" }, { status: 403, headers: { "x-amzn-ErrorType": "AccessDeniedException" } });
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: "https://accounts.example.test", ...SIGNING_ENVIRONMENT }, upstream, async sent => {
+    const session = await GET(new NextRequest("http://localhost:3000/account-api/session?b=2&a=1", {
+      headers: { Cookie: "fitlab_session=plain" },
+    }), { params: Promise.resolve({ path: ["session"] }) });
+    expect(session.status).toBe(403);
+    expect(sent[0].url.href).toBe("https://accounts.example.test/session?b=2&a=1");
+    expect(sent[0].headers.get("cookie")).toBe("fitlab_session=plain");
+    for (const name of ["authorization", "x-amz-date", "x-amz-content-sha256", "x-amz-security-token"]) expect(sent[0].headers.get(name)).toBeNull();
+  });
 });

@@ -98,7 +98,7 @@ test.describe("real account backend through the website proxy", () => {
       expect(authorize.searchParams.get("code_challenge")).toMatch(/^[\w-]{43}$/);
       expect(authorize.searchParams.get("nonce")).toBeTruthy();
       expect(authorize.searchParams.get("state")).toBeTruthy();
-      expect(authorize.searchParams.get("prompt")).toBe(registration ? null : "login");
+      expect(authorize.searchParams.get("prompt")).toBe("login");
       expect(login.headers.getSetCookie().some(cookie => cookie.startsWith("fitlab_oauth=") && /HttpOnly/i.test(cookie))).toBe(true);
       return authorize;
     }
