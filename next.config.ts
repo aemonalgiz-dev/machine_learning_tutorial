@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   // server bundle and never shipped to a browser.
   env: {
     FITLAB_INSIGHTS_SALT: process.env.FITLAB_INSIGHTS_SALT ?? randomBytes(32).toString("hex"),
+    // The compute API's address, for app/backend/[...path]/route.ts. Amplify
+    // gives its environment variables to the build and not to the running
+    // server, so it is fixed here at build, as the rewrite that route replaced
+    // fixed it. Empty means the local API on port 8000.
+    OOP_ML_API_URL: process.env.OOP_ML_API_URL ?? "",
   },
 
   // Production source maps are unnecessary for serving lessons and add about
@@ -35,41 +40,13 @@ const nextConfig: NextConfig = {
     .map((origin) => origin.trim())
     .filter(Boolean),
 
-  // Serve the compute API from this site's own origin, under /backend.
-  //
-  // The widgets fetch from the browser, so when the site is reached through a
-  // tunnel or any other host, "localhost:8000" means the visitor's machine
-  // rather than the one running the API. Proxying through the site fixes that
-  // and removes the cross-origin question with it, since the browser now only
-  // ever talks to one origin. Set NEXT_PUBLIC_API_BASE_URL to /backend to use
-  // it; unset, the site still calls the API directly, which is what a local
-  // developer wants.
-  // How long the /backend proxy waits for an answer before giving up.
-  //
-  // The default is 30 seconds, and a few pages train several small networks
-  // on their first visit after the API starts. Asked for together while cold
-  // they can take longer than that, the proxy answers 500 while the API is
-  // still working, and the widget reports a failure for a page that is fine.
-  // The API warms those answers as it starts, so this only matters in the
-  // first minute or two, but that is exactly when a visitor arrives after a
-  // deploy.
   experimental: {
-    proxyTimeout: 120_000,
     serverSourceMaps: false,
   },
 
   async redirects() {
     // Resolve this old workshop address before first-visit page generation.
     return [{ source: "/lab/neurons-and-activations", destination: "/lab/neuron", permanent: false }];
-  },
-
-  async rewrites() {
-    return [
-      {
-        source: "/backend/:path*",
-        destination: `${process.env.OOP_ML_API_URL ?? "http://localhost:8000"}/:path*`,
-      },
-    ];
   },
 };
 
