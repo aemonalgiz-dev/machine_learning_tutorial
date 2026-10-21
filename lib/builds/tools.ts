@@ -12,6 +12,7 @@ import { agentReliabilityTools } from "./agent-reliability-tools";
 import { agentAssuranceTools } from "./agent-assurance-tools";
 import { agentIterationTools } from "./agent-iteration-tools";
 import { modelEvaluationTools } from "./model-evaluation-tools";
+import { agentSafetyTools } from "./agent-safety-tools";
 import { sqlFoundationTools } from "./sql-foundation-tools";
 import { sqlAnalysisTools } from "./sql-analysis-tools";
 import { sqlSystemTools } from "./sql-system-tools";
@@ -50,6 +51,7 @@ export const TOOLS: Record<string, Tool> = {
   ...agentAssuranceTools,
   ...agentIterationTools,
   ...modelEvaluationTools,
+  ...agentSafetyTools,
   ...sqlFoundationTools,
   ...sqlAnalysisTools,
   ...sqlSystemTools,

@@ -13,6 +13,7 @@ import { WorkshopValue } from "./WorkshopValue";
 import { MatrixVectorCalculation } from "./MatrixVectorCalculation";
 import { WorkshopPiece } from "./WorkshopPiece";
 import { WorkshopInputs } from "./WorkshopInputs";
+import { WorkshopTestBadge } from "./WorkshopTestBadge";
 import { constructionHints, experimentPrompt, resultFeedback } from "@/lib/builds/coaching";
 import { testConstruction, validConstructionForBuild, workshopRecordKey, type WorkshopOutcome } from "@/lib/builds/workshop-session";
 
@@ -138,6 +139,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
   const expandButton=useRef<HTMLButtonElement>(null);
   const detailsButton=useRef<HTMLButtonElement>(null);
   const detailsPanel=useRef<HTMLDivElement>(null);
+  const resultsPanel=useRef<HTMLDetailsElement>(null);
   const expandedHints=useRef<HTMLDetailsElement>(null);
   const inlineScroll=useRef({left:0,top:0});
   const pageScroll=useRef({left:0,top:0});
@@ -189,16 +191,25 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
     setExpanded(!expanded);
   }
   function closeDetails(){setDetailsOpen(false);detailsButton.current?.focus({preventScroll:true});}
-  function revealDetails(target:"feedback"|"hint"){
+  function revealDetails(target:"feedback"|"hint"|"results"){
     setDetailsOpen(true);
     requestAnimationFrame(()=>{
       const panel=detailsPanel.current;
       if(panel){
         panel.focus({preventScroll:true});
         panel.scrollTo({top:target==="hint"?Math.max(0,(expandedHints.current?.offsetTop??0)-64):0});
+        if(target==="results") focusResults();
       }
     });
   }
+  function focusResults(){
+    const panel=resultsPanel.current;
+    if(!panel)return;
+    panel.open=true;
+    panel.querySelector("summary")?.focus({preventScroll:true});
+    panel.scrollIntoView({block:"nearest"});
+  }
+  function showResults(){if(expanded)revealDetails("results");else focusResults();}
 
   const moving=useRef<{id:string;dx:number;dy:number;startX:number;startY:number}|null>(null);
   const wiring=useRef<{id:string;startX:number;startY:number;moved:boolean}|null>(null);
@@ -213,9 +224,13 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
   const visible=invalid||!customValid?new Map<string,Trace["steps"][number]>():run?new Map(trace?.steps.slice(0,run.step+1).map(s=>[s.id,s])??[]):preview.signals;
   const selectedPiece=selectedWire?undefined:graph.pieces.find(p=>p.id===(selected??step?.id));
   const inspectedSignal=selectedPiece?visible.get(selectedPiece.id):step;
-  const passed=Object.values(results).filter(Boolean).length;
-  const failed=Object.keys(results).length-passed;
+  const checkedResults=invalid?{}:results;
+  const passed=Object.values(checkedResults).filter(Boolean).length;
+  const failed=Object.keys(checkedResults).length-passed;
+  const notRun=build.cases.length-passed-failed;
   const complete=passed===build.cases.length;
+  const activeResult=customData||invalid||run&&!run.done?undefined:results[run?.cases[run.index]??caseIndex];
+  const resultHeading=invalid?"Finish the input to test again":customData?"Your experiment is ungraded":run&&!run.done?"Following this example":complete?"All examples passed":failed?`${failed} ${failed===1?"example failed":"examples failed"}`:passed?"Test the remaining examples":"Ready to test";
   const choices=[...new Set([...Object.keys(build.sources).map(s=>`source:${s}`),...expressionTools(build.recipe).filter(s=>!s.startsWith("source:")),...(build.extras??[])])];
   const filteredChoices=choices.filter(key=>(key.startsWith("source:")?build.sources[key.slice(7)]:`${TOOLS[key].title} ${TOOLS[key].why}`).toLowerCase().includes(toolQuery.toLowerCase().trim()));
   const nodes=useMemo(()=>graph.pieces.map(p=>({...p,...(dragged?.id===p.id?dragged:{}),...(geometry[p.id]??{width:NODE_WIDTH,height:estimatedHeight(p,TOOLS),inputs:[]})})),[graph.pieces,dragged,geometry]);
@@ -462,7 +477,17 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
         {!compact&&<button className={button} disabled={busy||invalid} onClick={()=>start(true,true)}>Test all examples</button>}
         <button className={button} disabled={busy||!undo.length} onClick={()=>restore("undo")}>Undo</button>
         {run&&<button className={button} onClick={()=>setRun(null)}>{busy?"Stop":"Back to live values"}</button>}
-      </div><button ref={expandButton} className={button} onClick={toggleExpanded}>{expanded?"Return to lesson":"Expand floor"}</button><div className={`${styles.runStatus} flex min-h-11 flex-col justify-center gap-1`}><p role="status" data-testid="construction-counter" className="font-mono text-xs">{passed} passed · {failed} failed · {build.cases.length-Object.keys(results).length} not run</p>{hasFeedback&&(expanded||embeddedBrief)&&<button className="text-left text-xs text-accent underline underline-offset-4" onClick={()=>{if(expanded){setShowTask(false);revealDetails("feedback");}else feedbackPanel.current?.scrollIntoView({block:"nearest"});}}>Read Botie&apos;s feedback</button>}</div></div>
+      </div><button ref={expandButton} className={button} onClick={toggleExpanded}>{expanded?"Return to lesson":"Expand floor"}</button></div>
+      <div className={styles.testSummary} data-result={customData||invalid||run&&!run.done?"pending":failed?"fail":complete?"pass":"pending"} data-testid="workshop-test-summary">
+        <div role="status" aria-atomic="true" className={styles.testStatus}>
+          <strong className={styles.testHeading}>{resultHeading}</strong>
+          <div>{customData&&<span className="mr-2 text-xs text-muted">Lesson examples:</span>}<span data-testid="construction-counter" className={styles.testCounts}><WorkshopTestBadge result={true} muted={!passed}>{passed} passed</WorkshopTestBadge>{" · "}<WorkshopTestBadge result={false} muted={!failed}>{failed} failed</WorkshopTestBadge>{" · "}<WorkshopTestBadge>{notRun} not run</WorkshopTestBadge></span></div>
+        </div>
+        <div className={styles.resultActions}>
+          {passed+failed>0&&<button className={button} onClick={showResults}>{failed?"See failed examples":"See results"}</button>}
+          {hasFeedback&&(expanded||embeddedBrief)&&<button className="min-h-10 text-left text-xs text-accent underline underline-offset-4" onClick={()=>{if(expanded){setShowTask(false);revealDetails("feedback");}else feedbackPanel.current?.scrollIntoView({block:"nearest"});}}>Read Botie&apos;s feedback</button>}
+        </div>
+      </div>
       {!expanded&&!guide&&hintsShown>0&&<details className={styles.hints} open><summary>Hints from Botie</summary><BotieSays className={styles.compactCoach} mood="thinking"><ol aria-label="Workshop hints from Botie" className="list-decimal space-y-3 pl-5">{hints.slice(0,hintsShown).map(hint=><li key={hint}>{hint}</li>)}</ol></BotieSays></details>}
       <div className={styles.floorActions}><button type="button" aria-expanded={toolsOpen} className="min-h-10 text-sm text-accent" onClick={()=>setToolsOpen(!toolsOpen)}>{toolsOpen?"Hide tools":"Show tools"}</button>{expanded&&<><button className="min-h-10 text-sm text-accent" onClick={fitConstruction}>Fit construction</button>{zoomControl}</>}{!guide&&hintsShown<hints.length&&<button className="min-h-10 text-sm text-accent" onClick={()=>{setHintsShown(n=>n+1);if(expanded)revealDetails("hint");}}>{hintsShown?"Ask Botie for another hint":"Ask Botie for a hint"}</button>}{expanded&&<button ref={detailsButton} aria-expanded={detailsOpen} aria-controls={detailsId} className="min-h-10 text-sm font-semibold text-accent" onClick={()=>detailsOpen?closeDetails():revealDetails("feedback")}>Workshop details</button>}</div>
       {invalid&&<p role="status" className="border-b border-line px-4 py-2 text-sm text-accent">Finish entering the highlighted number before running the construction.</p>}
@@ -493,6 +518,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
                 return from?title(from,build):undefined;
               });
               return <WorkshopPiece key={`${piece.id}:${fieldRevision}`} piece={{...piece,...(dragged?.id===piece.id?dragged:{})}} name={title(piece,build)} labels={labels} connections={connections}
+                testResult={piece.tool==="output"?activeResult:undefined}
                 settings={TOOLS[piece.tool]?.settings??[]} value={!customValid||invalid?undefined:signal?signal.output:source?data[piece.tool.slice(7)]:piece.tool==="constant"?piece.settings.value:undefined} hasSignal={Boolean(signal)}
                 busy={busy} selected={selected===piece.id} active={step?.id===piece.id} error={trace?.error?.id===piece.id||!run&&preview.issues.get(piece.id)?.id===piece.id&&preview.issues.get(piece.id)?.port===undefined} missingPort={trace?.error?.id===piece.id?trace.error.port:undefined}
                 armed={socket?.id===piece.id&&socket.output===true} connecting={Boolean(socket&&socket.id!==piece.id)} targetPort={hoveredInput?.id===piece.id?hoveredInput.port:undefined}
@@ -534,7 +560,30 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
       {(selectedPiece||selectedWire||inspectedSignal)&&<div className="border-t border-line bg-surface p-4" aria-label="Construction inspector"><div className="flex flex-wrap justify-between gap-3"><h4 className="text-sm font-semibold">{selectedWire?"Selected connection":selectedPiece?title(selectedPiece,build):"Look inside a machine"}</h4>{selectedWire&&<button disabled={busy} className="text-sm text-accent underline" onClick={removeSelection}>Remove this connection</button>}{selectedPiece&&selectedPiece.id!=="output"&&<div className="flex flex-wrap gap-4"><button disabled={busy||invalid} className="text-sm text-accent underline" onClick={()=>add(selectedPiece.tool,undefined,undefined,selectedPiece.settings)}>Duplicate this piece</button><button disabled={busy} className="text-sm text-accent underline" onClick={()=>removePiece(selectedPiece.id)}>Remove this piece</button></div>}</div><p className="mt-2 text-xs leading-6 text-muted">{selectedWire?"This wire carries one piece's output into another piece's input. Press Delete or use Remove this connection. Undo restores it.":selectedPiece?selectedPiece.tool==="output"?"The tests compare the arriving value with the requested result for this example.":selectedPiece.tool.startsWith("source:")?"This source reads the selected example. The same connection will carry a different value when you select another example.":TOOLS[selectedPiece.tool].why:"Select a machine's name to see its purpose. As soon as its inputs are ready, you can inspect the calculation here."}</p>{inspectedSignal&&<dl className="mt-3 grid max-h-60 gap-3 overflow-auto sm:grid-cols-2">{inspectedSignal.inputs.map((value,i)=><div key={i} className="min-w-0"><dt className="mb-2 text-xs text-muted">{selectedPiece?inputs(selectedPiece)[i]:`Input ${i+1}`}</dt><dd><WorkshopValue value={value}/></dd></div>)}<div className="min-w-0"><dt className="mb-2 text-xs text-accent">Output</dt><dd><WorkshopValue value={inspectedSignal.output}/></dd></div></dl>}{(trace?.error||!run&&inspectedIssue)&&<p role="status" className="mt-2 text-sm text-accent">{(trace?.error??inspectedIssue)?.message}</p>}</div>}
       {selectedPiece?.tool==="matvec"&&inspectedSignal&&<div className="min-w-0 border-t border-line p-4"><MatrixVectorCalculation key={selectedPiece.id} matrix={inspectedSignal.inputs[0] as number[][]} vector={inspectedSignal.inputs[1] as number[]} purchases={build.id==="linear-algebra"}/></div>}
     {(!embeddedBrief||expanded)&&<details className="m-4 rounded-xl border border-line p-4"><summary className="cursor-pointer text-sm font-semibold">Context for this challenge</summary><p className="my-3 text-sm leading-7">{build.challenge}</p><p className="my-3 text-sm leading-7 text-muted" data-testid="construction-context">{build.problem}</p>{openingCoach&&openingCoach!==build.challenge&&<p className="mb-3 text-sm leading-7">{openingCoach}</p>}{briefing}</details>}
-    <details className="m-4 rounded-xl border border-line bg-surface p-4" open={failed>0}><summary className="cursor-pointer text-sm font-semibold">Examples and results</summary><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{build.cases.map((sample,i)=><div key={sample.name} className={`min-w-0 rounded-xl border p-3 text-left ${(run?.cases[run.index]??caseIndex)===i?"border-accent-fill bg-accent-soft":"border-line bg-raised"}`}><button disabled={busy} aria-pressed={(run?.cases[run.index]??caseIndex)===i} aria-label={sample.name} className="w-full text-left" onClick={()=>{resetExperiment();setCaseIndex(i);const result=tested[i];if(result){setRun({traces:[result],cases:[i],index:0,step:result.steps.length-1,playing:false,done:true});if(result.error){setSelected(result.error.id);focusPiece(result.error.id);}}}}><span className="flex justify-between gap-3 text-sm font-semibold">{sample.name}<span>{results[i]===undefined?"Not tested":results[i]?"✓ Passed":"× Failed"}</span></span></button><dl className="mt-3 space-y-2 text-xs">{Object.entries(sample.data).map(([key,value])=><div key={key}><dt className="text-muted">{build.sources[key]}</dt><dd className="mt-1"><WorkshopValue value={value}/></dd></div>)}{(!withholdExpectedUntilTest||tested[i])&&<div><dt className="text-accent">Required result</dt><dd className="mt-1"><WorkshopValue value={sample.expected}/></dd></div>}{tested[i]&&<div><dt className="text-accent">Your construction produced</dt><dd className="mt-1">{tested[i].error?<p className="leading-5">{tested[i].error?.message}</p>:<WorkshopValue value={tested[i].output!}/>}</dd></div>}</dl></div>)}</div></details>
+    <details ref={resultsPanel} className="m-4 rounded-xl border border-line bg-surface p-4" open={failed>0}>
+      <summary className="cursor-pointer text-sm font-semibold">Examples and results</summary>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{build.cases.map((sample,i)=><div key={sample.name}
+        className={styles.exampleResult} data-testid="workshop-example-result"
+        data-result={checkedResults[i]===undefined?"pending":checkedResults[i]?"pass":"fail"}>
+        <button disabled={busy} aria-pressed={(run?.cases[run.index]??caseIndex)===i} aria-label={sample.name} className={styles.exampleResultButton}
+          onClick={()=>{
+            resetExperiment();setCaseIndex(i);
+            const result=tested[i];
+            if(result){
+              setRun({traces:[result],cases:[i],index:0,step:result.steps.length-1,playing:false,done:true});
+              if(result.error){setSelected(result.error.id);focusPiece(result.error.id);}
+            }
+          }}>
+          <span>{sample.name}</span><WorkshopTestBadge result={checkedResults[i]}/>
+          {(run?.cases[run.index]??caseIndex)===i&&<span className="text-xs font-normal text-muted">Shown on the floor</span>}
+        </button>
+        <dl className="mt-3 space-y-2 text-xs">
+          {Object.entries(sample.data).map(([key,value])=><div key={key}><dt className="text-muted">{build.sources[key]}</dt><dd className="mt-1"><WorkshopValue value={value}/></dd></div>)}
+          {(!withholdExpectedUntilTest||tested[i])&&<div><dt className="font-semibold">Required result</dt><dd className="mt-1"><WorkshopValue value={sample.expected}/></dd></div>}
+          {tested[i]&&<div><dt className="font-semibold">Your construction produced</dt><dd className="mt-1">{tested[i].error?<p className="leading-5">{tested[i].error?.message}</p>:<WorkshopValue value={tested[i].output!}/>}</dd></div>}
+        </dl>
+      </div>)}</div>
+    </details>
     </div>
     </div>
     </div>

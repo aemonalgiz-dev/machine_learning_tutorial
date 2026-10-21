@@ -6,6 +6,7 @@ import numpy from "./curriculum/numpy.mjs";
 import data from "./curriculum/data.mjs";
 import evaluation from "./curriculum/evaluation.mjs";
 import modelEvaluation from "./curriculum/model-evaluation.mjs";
+import agentSafety from "./curriculum/agent-safety.mjs";
 import probability from "./curriculum/probability-gaps.mjs";
 import classical from "./curriculum/classical-gaps.mjs";
 import vision from "./curriculum/vision-gaps.mjs";
@@ -69,7 +70,7 @@ const agents = [
     'agent-release-checks': 'Deciding Whether to Release',
   })[lesson.id] ?? lesson.topic })),
 ];
-const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths, ...designProblem, ...designResources, ...designComparisons, ...designEvidence, ...agents];
+const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths, ...designProblem, ...designResources, ...designComparisons, ...designEvidence, ...agents, ...agentSafety];
 const sqlLessons = [...sqlFoundations, ...sqlAnalysis, ...sqlSystems];
 const databaseLessons = [...sqlLessons, ...nosqlFoundationLessons, ...nosqlSystemLessons, ...graphDatabaseLessons];
 const lessons = [...numpy, ...databaseLessons, ...data, ...evaluation, ...modelEvaluation, ...gaps].map(lesson => ({ ...lesson, reading: lesson.reading ?? readingVoice[lesson.id],

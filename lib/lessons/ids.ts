@@ -204,6 +204,15 @@ export const expandedLessonIds = [
   "agent-release-checks",
   "agent-adversarial-evaluations",
   "agent-incident-response",
-  "agent-iteration-project"
+  "agent-iteration-project",
+  "agent-guardrail-boundaries",
+  "agent-guardrail-coding",
+  "agent-guardrail-sandbox",
+  "agent-guardrail-supply-chain",
+  "agent-guardrail-mcp-trust",
+  "agent-guardrail-mcp-auth",
+  "agent-guardrail-application-actions",
+  "agent-guardrail-memory-delegation",
+  "agent-guardrail-release-lab"
 ] as const;
 export type ExpandedLessonId = typeof expandedLessonIds[number];

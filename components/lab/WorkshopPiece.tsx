@@ -3,6 +3,7 @@
 import { useId, useState, type PointerEvent, type KeyboardEvent } from "react";
 import type { Data, Piece, Tool } from "@/lib/builds/engine";
 import { WorkshopValue } from "./WorkshopValue";
+import { WorkshopTestBadge } from "./WorkshopTestBadge";
 import styles from "./BuildWorkshop.module.css";
 
 type Setting = NonNullable<Tool["settings"]>[number];
@@ -36,11 +37,12 @@ function SettingField({ setting, value, name, disabled, onChange, onValidity }: 
   </div>;
 }
 
-export function WorkshopPiece({ piece, name, labels, connections, settings, value, hasSignal, busy, selected, active, error, missingPort,
+export function WorkshopPiece({ piece, name, labels, connections, settings, value, hasSignal, busy, selected, active, error, missingPort, testResult,
   armed, targetPort, connecting, onSelect, onBodySelect, onMove, onMoveKey, onOutput, onOutputKey, onInput, onSetting, onValidity }: {
   piece: Piece; name: string; labels: string[]; connections: (string | undefined)[]; settings: Setting[];
   value: Data | undefined; hasSignal: boolean; busy: boolean; selected: boolean; active: boolean; error: boolean; missingPort?: number;
   armed: boolean; targetPort?: number; connecting: boolean;
+  testResult?: boolean;
   onSelect: () => void; onBodySelect: () => void; onMove: (event: PointerEvent<HTMLButtonElement>) => void;
   onMoveKey: (event: KeyboardEvent<HTMLButtonElement>) => void;
   onOutput: (event: PointerEvent<HTMLButtonElement>) => void; onOutputKey: () => void;
@@ -50,11 +52,13 @@ export function WorkshopPiece({ piece, name, labels, connections, settings, valu
   const id = useId();
   const source = piece.tool.startsWith("source:"), result = piece.tool === "output";
   return <div data-piece={piece.id} role="group" aria-label={`${name} machine`}
+    data-result={testResult===undefined?undefined:testResult?"pass":"fail"}
     className={`${styles.machine} ${source ? styles.source : ""} ${result ? styles.outputMachine : ""} ${selected ? styles.selected : ""} ${active ? styles.active : ""} ${error ? styles.error : ""}`}
     style={{ left: piece.x, top: piece.y }} onClick={e => { if (!(e.target as Element).closest("button,input,select,textarea,label")) onBodySelect(); }}>
     <button className={styles.handle} aria-label={`Inspect or move ${name}`} onPointerDown={onMove} onFocus={onSelect} onClick={onSelect} onKeyDown={onMoveKey}>
       <span>{name}</span><span className={styles.grip} aria-hidden="true">⠿</span>
     </button>
+    {result&&testResult!==undefined&&<div className={styles.pieceTestResult}><WorkshopTestBadge result={testResult}/><span>This example</span></div>}
     {labels.length > 0 && <div className={styles.inputs}>
       {labels.map((label, i) => <button key={label} disabled={busy} data-input-piece={piece.id} data-input-port={i}
         aria-label={`${name} input ${i + 1}: ${label}`}

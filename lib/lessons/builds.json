@@ -28332,5 +28332,1237 @@
     "limitation": "These are invented, recorded examples. The browser runs your construction without calling a language model. Passing them checks the surrounding program, not the quality of a live model.",
     "extras": [],
     "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-boundaries",
+    "title": "Put a control before each effect",
+    "problem": "Botie can read a record and proposes publishing an answer. Publishing has additional requirements.",
+    "challenge": "Find each effect’s requirements, retain missing controls, and route each action. Unknown effects must hold.",
+    "sources": {
+      "events": "Proposed effects",
+      "policy": "Application-owned control policy",
+      "installed": "Installed control names"
+    },
+    "cases": [
+      {
+        "name": "Reading works; publishing is missing checks",
+        "data": {
+          "events": [
+            {
+              "id": "read-7",
+              "effect": "read"
+            },
+            {
+              "id": "publish-7",
+              "effect": "publish"
+            }
+          ],
+          "policy": {
+            "read": [
+              "object-access"
+            ],
+            "publish": [
+              "approval",
+              "output-check"
+            ]
+          },
+          "installed": [
+            "object-access"
+          ]
+        },
+        "expected": [
+          {
+            "id": "read-7",
+            "route": "ready"
+          },
+          {
+            "id": "publish-7",
+            "route": "hold"
+          }
+        ]
+      },
+      {
+        "name": "Approval still leaves output checking absent",
+        "data": {
+          "events": [
+            {
+              "id": "read-7",
+              "effect": "read"
+            },
+            {
+              "id": "publish-7",
+              "effect": "publish"
+            }
+          ],
+          "policy": {
+            "read": [
+              "object-access"
+            ],
+            "publish": [
+              "approval",
+              "output-check"
+            ]
+          },
+          "installed": [
+            "object-access",
+            "approval"
+          ]
+        },
+        "expected": [
+          {
+            "id": "read-7",
+            "route": "ready"
+          },
+          {
+            "id": "publish-7",
+            "route": "hold"
+          }
+        ]
+      },
+      {
+        "name": "Both publishing requirements are present",
+        "data": {
+          "events": [
+            {
+              "id": "read-7",
+              "effect": "read"
+            },
+            {
+              "id": "publish-7",
+              "effect": "publish"
+            }
+          ],
+          "policy": {
+            "read": [
+              "object-access"
+            ],
+            "publish": [
+              "approval",
+              "output-check"
+            ]
+          },
+          "installed": [
+            "object-access",
+            "approval",
+            "output-check"
+          ]
+        },
+        "expected": [
+          {
+            "id": "read-7",
+            "route": "ready"
+          },
+          {
+            "id": "publish-7",
+            "route": "ready"
+          }
+        ]
+      }
+    ],
+    "recipe": {
+      "op": "sgRoutes",
+      "inputs": [
+        {
+          "op": "sgMissing",
+          "inputs": [
+            {
+              "op": "sgRequired",
+              "inputs": [
+                {
+                  "source": "events"
+                },
+                {
+                  "source": "policy"
+                }
+              ]
+            },
+            {
+              "source": "installed"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Each action keeps its own missing requirements. The read can proceed while publishing waits.",
+    "hints": [
+      "Start with the effect-to-control lookup.",
+      "Compare required controls with installed names before choosing routes."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-coding",
+    "title": "Keep the repair inside its reviewed scope",
+    "problem": "The parser task approves src/date.py. A green test result should not conceal a changed verification file.",
+    "challenge": "Extract every touched path, compare it with approved paths, and combine that result with independent tests.",
+    "sources": {
+      "patch": "Proposed patch entries",
+      "allowed": "Approved paths",
+      "tests": "Independent tests passed?"
+    },
+    "cases": [
+      {
+        "name": "Only the parser changes",
+        "data": {
+          "patch": [
+            {
+              "kind": "edit",
+              "path": "src/date.py"
+            }
+          ],
+          "allowed": [
+            "src/date.py"
+          ],
+          "tests": true
+        },
+        "expected": "ready for review"
+      },
+      {
+        "name": "The assertion is deleted too",
+        "data": {
+          "patch": [
+            {
+              "kind": "edit",
+              "path": "src/date.py"
+            },
+            {
+              "kind": "delete",
+              "path": "tests/required.py"
+            }
+          ],
+          "allowed": [
+            "src/date.py"
+          ],
+          "tests": true
+        },
+        "expected": "hold patch"
+      },
+      {
+        "name": "The scoped repair still fails tests",
+        "data": {
+          "patch": [
+            {
+              "kind": "edit",
+              "path": "src/date.py"
+            }
+          ],
+          "allowed": [
+            "src/date.py"
+          ],
+          "tests": false
+        },
+        "expected": "hold patch"
+      }
+    ],
+    "recipe": {
+      "op": "sgPatchDecision",
+      "inputs": [
+        {
+          "op": "sgOutside",
+          "inputs": [
+            {
+              "op": "sgPatchPaths",
+              "inputs": [
+                {
+                  "source": "patch"
+                }
+              ]
+            },
+            {
+              "source": "allowed"
+            }
+          ]
+        },
+        {
+          "source": "tests"
+        }
+      ]
+    },
+    "why": "Scope and test behaviour remain separate requirements. Neither can compensate for the other.",
+    "hints": [
+      "Extract the complete path set first.",
+      "Pass the outside-scope list and the independent test Boolean to the review decision."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-sandbox",
+    "title": "Audit the parser test environment",
+    "problem": "The offline parser job should have scratch space but no ambient credentials or network.",
+    "challenge": "Inspect writable mounts and execution privileges on separate branches, combine findings and return the profile route.",
+    "sources": {
+      "profile": "Execution profile",
+      "writable": "Approved writable paths"
+    },
+    "cases": [
+      {
+        "name": "A minimal offline worker",
+        "data": {
+          "profile": {
+            "mounts": [
+              {
+                "path": "/scratch",
+                "mode": "rw"
+              }
+            ],
+            "credentials": [],
+            "network": "none",
+            "privileged": false,
+            "timeout": 30
+          },
+          "writable": [
+            "/scratch"
+          ]
+        },
+        "expected": {
+          "route": "test isolation",
+          "issues": []
+        }
+      },
+      {
+        "name": "A helpful home mount exposes writable files",
+        "data": {
+          "profile": {
+            "mounts": [
+              {
+                "path": "/scratch",
+                "mode": "rw"
+              },
+              {
+                "path": "/home",
+                "mode": "rw"
+              }
+            ],
+            "credentials": [],
+            "network": "none",
+            "privileged": false,
+            "timeout": 30
+          },
+          "writable": [
+            "/scratch"
+          ]
+        },
+        "expected": {
+          "route": "hold profile",
+          "issues": [
+            "writable mount: /home"
+          ]
+        }
+      },
+      {
+        "name": "The runner inherits a cloud credential",
+        "data": {
+          "profile": {
+            "mounts": [
+              {
+                "path": "/scratch",
+                "mode": "rw"
+              }
+            ],
+            "credentials": [
+              "cloud-token"
+            ],
+            "network": "none",
+            "privileged": false,
+            "timeout": 30
+          },
+          "writable": [
+            "/scratch"
+          ]
+        },
+        "expected": {
+          "route": "hold profile",
+          "issues": [
+            "credentials exposed"
+          ]
+        }
+      }
+    ],
+    "recipe": {
+      "op": "sgProfileVerdict",
+      "inputs": [
+        {
+          "op": "sgCombineIssues",
+          "inputs": [
+            {
+              "op": "sgMountAudit",
+              "inputs": [
+                {
+                  "source": "profile"
+                },
+                {
+                  "source": "writable"
+                }
+              ]
+            },
+            {
+              "op": "sgRuntimeAudit",
+              "inputs": [
+                {
+                  "source": "profile"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Both branches retain their findings. A clean fixture proceeds to a runtime test, not straight to production.",
+    "hints": [
+      "Give the mount checker the approved writable list.",
+      "Join findings before asking whether the profile is ready for isolation testing."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-supply-chain",
+    "title": "Keep release evidence attached to its build",
+    "problem": "The candidate is r2/a2. Some reports refer to an earlier artifact or omit a required result.",
+    "challenge": "Check evidence identity and required results independently, then decide whether the candidate can reach release review.",
+    "sources": {
+      "candidate": "Current candidate",
+      "evidence": "Verified build evidence",
+      "required": "Required check names"
+    },
+    "cases": [
+      {
+        "name": "The candidate has complete evidence",
+        "data": {
+          "candidate": {
+            "revision": "r2",
+            "artifact": "a2"
+          },
+          "evidence": {
+            "revision": "r2",
+            "artifact": "a2",
+            "trustedRunner": true,
+            "checks": {
+              "tests": "pass",
+              "dependencies": "pass"
+            }
+          },
+          "required": [
+            "tests",
+            "dependencies"
+          ]
+        },
+        "expected": "ready for release review"
+      },
+      {
+        "name": "The passing report predates the patch",
+        "data": {
+          "candidate": {
+            "revision": "r2",
+            "artifact": "a2"
+          },
+          "evidence": {
+            "revision": "r1",
+            "artifact": "a1",
+            "trustedRunner": true,
+            "checks": {
+              "tests": "pass",
+              "dependencies": "pass"
+            }
+          },
+          "required": [
+            "tests",
+            "dependencies"
+          ]
+        },
+        "expected": "hold release"
+      },
+      {
+        "name": "Dependency checking was skipped",
+        "data": {
+          "candidate": {
+            "revision": "r2",
+            "artifact": "a2"
+          },
+          "evidence": {
+            "revision": "r2",
+            "artifact": "a2",
+            "trustedRunner": true,
+            "checks": {
+              "tests": "pass",
+              "dependencies": "skipped"
+            }
+          },
+          "required": [
+            "tests",
+            "dependencies"
+          ]
+        },
+        "expected": "hold release"
+      }
+    ],
+    "recipe": {
+      "op": "sgReleaseDecision",
+      "inputs": [
+        {
+          "op": "sgEvidenceMatch",
+          "inputs": [
+            {
+              "source": "candidate"
+            },
+            {
+              "source": "evidence"
+            }
+          ]
+        },
+        {
+          "op": "sgChecksMissing",
+          "inputs": [
+            {
+              "source": "evidence"
+            },
+            {
+              "source": "required"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Neither matching identity nor passing checks can stand in for the other.",
+    "hints": [
+      "Keep the candidate-to-evidence comparison separate from the check list.",
+      "A missing or skipped required check belongs in the unsatisfied list."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-mcp-trust",
+    "title": "Keep an MCP capability attached to its review",
+    "problem": "The host trusts a configured manuals server and a particular tool manifest.",
+    "challenge": "Match the configured server, compare reviewed metadata, then expose only the matching capability.",
+    "sources": {
+      "offered": "Discovered tool",
+      "reviewed": "Reviewed manifest",
+      "server": "Configured server ID"
+    },
+    "cases": [
+      {
+        "name": "The reviewed tool is unchanged",
+        "data": {
+          "offered": {
+            "server": "manuals",
+            "name": "read_manual",
+            "schemaDigest": "schema-1",
+            "descriptionDigest": "description-1"
+          },
+          "reviewed": {
+            "server": "manuals",
+            "name": "read_manual",
+            "schemaDigest": "schema-1",
+            "descriptionDigest": "description-1"
+          },
+          "server": "manuals"
+        },
+        "expected": "available for authorised calls"
+      },
+      {
+        "name": "The description now requests more context",
+        "data": {
+          "offered": {
+            "server": "manuals",
+            "name": "read_manual",
+            "schemaDigest": "schema-1",
+            "descriptionDigest": "description-2"
+          },
+          "reviewed": {
+            "server": "manuals",
+            "name": "read_manual",
+            "schemaDigest": "schema-1",
+            "descriptionDigest": "description-1"
+          },
+          "server": "manuals"
+        },
+        "expected": "hold discovery"
+      },
+      {
+        "name": "Another server advertises the same name",
+        "data": {
+          "offered": {
+            "server": "public-search",
+            "name": "read_manual",
+            "schemaDigest": "schema-1",
+            "descriptionDigest": "description-1"
+          },
+          "reviewed": {
+            "server": "manuals",
+            "name": "read_manual",
+            "schemaDigest": "schema-1",
+            "descriptionDigest": "description-1"
+          },
+          "server": "manuals"
+        },
+        "expected": "hold discovery"
+      }
+    ],
+    "recipe": {
+      "op": "sgToolDecision",
+      "inputs": [
+        {
+          "op": "sgServerIdentity",
+          "inputs": [
+            {
+              "source": "offered"
+            },
+            {
+              "source": "server"
+            }
+          ]
+        },
+        {
+          "op": "sgManifestMatch",
+          "inputs": [
+            {
+              "source": "offered"
+            },
+            {
+              "source": "reviewed"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Identity and metadata must match before per-call policy is even considered.",
+    "hints": [
+      "Compare the host-configured identity independently.",
+      "A changed description must fail the manifest branch even when the tool name matches."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-mcp-auth",
+    "title": "Keep a credential at its intended service",
+    "problem": "The manuals API requires a current verified token and the manual:read scope.",
+    "challenge": "Validate the fixture claims against the server policy, check scope separately, and continue only to object checks when both pass.",
+    "sources": {
+      "claims": "Verified claims or null",
+      "policy": "Server-owned policy",
+      "now": "Current time"
+    },
+    "cases": [
+      {
+        "name": "The read credential is current",
+        "data": {
+          "claims": {
+            "issuer": "company-id",
+            "audiences": [
+              "manuals-api"
+            ],
+            "subject": "user-7",
+            "expires": 100,
+            "scopes": [
+              "manual:read"
+            ]
+          },
+          "policy": {
+            "issuer": "company-id",
+            "audience": "manuals-api",
+            "requiredScope": "manual:read"
+          },
+          "now": 50
+        },
+        "expected": "continue to object checks"
+      },
+      {
+        "name": "A search token reaches the manuals server",
+        "data": {
+          "claims": {
+            "issuer": "company-id",
+            "audiences": [
+              "search-api"
+            ],
+            "subject": "user-7",
+            "expires": 100,
+            "scopes": [
+              "manual:read"
+            ]
+          },
+          "policy": {
+            "issuer": "company-id",
+            "audience": "manuals-api",
+            "requiredScope": "manual:read"
+          },
+          "now": 50
+        },
+        "expected": "deny request"
+      },
+      {
+        "name": "The token has expired",
+        "data": {
+          "claims": {
+            "issuer": "company-id",
+            "audiences": [
+              "manuals-api"
+            ],
+            "subject": "user-7",
+            "expires": 100,
+            "scopes": [
+              "manual:read"
+            ]
+          },
+          "policy": {
+            "issuer": "company-id",
+            "audience": "manuals-api",
+            "requiredScope": "manual:read"
+          },
+          "now": 100
+        },
+        "expected": "deny request"
+      },
+      {
+        "name": "Only list scope was granted",
+        "data": {
+          "claims": {
+            "issuer": "company-id",
+            "audiences": [
+              "manuals-api"
+            ],
+            "subject": "user-7",
+            "expires": 100,
+            "scopes": [
+              "manual:list"
+            ]
+          },
+          "policy": {
+            "issuer": "company-id",
+            "audience": "manuals-api",
+            "requiredScope": "manual:read"
+          },
+          "now": 50
+        },
+        "expected": "deny request"
+      }
+    ],
+    "recipe": {
+      "op": "sgAuthRoute",
+      "inputs": [
+        {
+          "op": "sgTokenBoundary",
+          "inputs": [
+            {
+              "source": "claims"
+            },
+            {
+              "source": "policy"
+            },
+            {
+              "source": "now"
+            }
+          ]
+        },
+        {
+          "op": "sgScopeBoundary",
+          "inputs": [
+            {
+              "source": "claims"
+            },
+            {
+              "source": "policy"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "Both branches are required, and object permissions still follow.",
+    "hints": [
+      "The token branch checks recipient and lifetime.",
+      "Scope does not replace the token check or the later object check."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-application-actions",
+    "title": "Keep approval attached to the actual write",
+    "problem": "Botie’s inspection proposal may be stale, altered or already applied.",
+    "challenge": "Check the reviewed arguments and object version on separate branches. Use the receiver ledger to distinguish replay from a new write.",
+    "sources": {
+      "proposal": "Proposed action",
+      "approval": "Server approval record",
+      "stored": "Stored object",
+      "ledger": "Receiver ledger",
+      "now": "Current time"
+    },
+    "cases": [
+      {
+        "name": "The approved state is still current",
+        "data": {
+          "proposal": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "scheduled"
+          },
+          "approval": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "scheduled",
+            "approved": true,
+            "expires": 100
+          },
+          "stored": {
+            "id": "job-7",
+            "version": 2
+          },
+          "ledger": [],
+          "now": 50
+        },
+        "expected": "apply once atomically"
+      },
+      {
+        "name": "The job changed during review",
+        "data": {
+          "proposal": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "scheduled"
+          },
+          "approval": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "scheduled",
+            "approved": true,
+            "expires": 100
+          },
+          "stored": {
+            "id": "job-7",
+            "version": 3
+          },
+          "ledger": [],
+          "now": 50
+        },
+        "expected": "refresh and review"
+      },
+      {
+        "name": "The first write succeeded before its reply was lost",
+        "data": {
+          "proposal": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "scheduled"
+          },
+          "approval": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "scheduled",
+            "approved": true,
+            "expires": 100
+          },
+          "stored": {
+            "id": "job-7",
+            "version": 3
+          },
+          "ledger": [
+            {
+              "id": "action-7",
+              "record": "job-7",
+              "version": 2,
+              "newValue": "scheduled"
+            }
+          ],
+          "now": 50
+        },
+        "expected": "already applied"
+      },
+      {
+        "name": "The proposed status changed after approval",
+        "data": {
+          "proposal": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "cancelled"
+          },
+          "approval": {
+            "id": "action-7",
+            "record": "job-7",
+            "version": 2,
+            "newValue": "scheduled",
+            "approved": true,
+            "expires": 100
+          },
+          "stored": {
+            "id": "job-7",
+            "version": 2
+          },
+          "ledger": [],
+          "now": 50
+        },
+        "expected": "hold for approval"
+      }
+    ],
+    "recipe": {
+      "op": "sgActionRoute",
+      "inputs": [
+        {
+          "op": "sgApprovalBinding",
+          "inputs": [
+            {
+              "source": "proposal"
+            },
+            {
+              "source": "approval"
+            },
+            {
+              "source": "now"
+            }
+          ]
+        },
+        {
+          "op": "sgVersionMatches",
+          "inputs": [
+            {
+              "source": "proposal"
+            },
+            {
+              "source": "stored"
+            }
+          ]
+        },
+        {
+          "source": "proposal"
+        },
+        {
+          "source": "ledger"
+        }
+      ]
+    },
+    "why": "A receipt, an approval and a version comparison answer different questions.",
+    "hints": [
+      "Compare proposal fields with the review record before choosing the effect route.",
+      "A matching receipt explains a completed action even when the object version advanced."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-memory-delegation",
+    "title": "Prepare only the context this child may use",
+    "problem": "The child needs north’s current notes and only tools within the parent’s grants.",
+    "challenge": "Filter memory by tenant, review and time. On another branch narrow requested tools to parent grants, then combine the two outputs.",
+    "sources": {
+      "memory": "Stored memory records",
+      "tenant": "Authenticated tenant",
+      "now": "Current time",
+      "parent": "Parent tool grants",
+      "requested": "Requested child tools"
+    },
+    "cases": [
+      {
+        "name": "A foreign note and excess tool request arrive together",
+        "data": {
+          "memory": [
+            {
+              "id": "north-note",
+              "tenant": "north",
+              "reviewed": true,
+              "expires": 100
+            },
+            {
+              "id": "south-note",
+              "tenant": "south",
+              "reviewed": true,
+              "expires": 100
+            }
+          ],
+          "tenant": "north",
+          "now": 50,
+          "parent": [
+            "read_manual"
+          ],
+          "requested": [
+            "read_manual",
+            "export_records"
+          ]
+        },
+        "expected": {
+          "memory": [
+            "north-note"
+          ],
+          "tools": [
+            "read_manual"
+          ]
+        }
+      },
+      {
+        "name": "The local note has expired",
+        "data": {
+          "memory": [
+            {
+              "id": "north-note",
+              "tenant": "north",
+              "reviewed": true,
+              "expires": 100
+            },
+            {
+              "id": "south-note",
+              "tenant": "south",
+              "reviewed": true,
+              "expires": 100
+            }
+          ],
+          "tenant": "north",
+          "now": 100,
+          "parent": [
+            "read_manual"
+          ],
+          "requested": [
+            "read_manual"
+          ]
+        },
+        "expected": {
+          "memory": [],
+          "tools": [
+            "read_manual"
+          ]
+        }
+      },
+      {
+        "name": "The parent’s read grant is revoked",
+        "data": {
+          "memory": [
+            {
+              "id": "north-note",
+              "tenant": "north",
+              "reviewed": true,
+              "expires": 100
+            },
+            {
+              "id": "south-note",
+              "tenant": "south",
+              "reviewed": true,
+              "expires": 100
+            }
+          ],
+          "tenant": "north",
+          "now": 50,
+          "parent": [],
+          "requested": [
+            "read_manual"
+          ]
+        },
+        "expected": {
+          "memory": [
+            "north-note"
+          ],
+          "tools": []
+        }
+      }
+    ],
+    "recipe": {
+      "op": "sgBundleContext",
+      "inputs": [
+        {
+          "op": "sgMemoryFilter",
+          "inputs": [
+            {
+              "source": "memory"
+            },
+            {
+              "source": "tenant"
+            },
+            {
+              "source": "now"
+            }
+          ]
+        },
+        {
+          "op": "sgGrantedIntersection",
+          "inputs": [
+            {
+              "source": "parent"
+            },
+            {
+              "source": "requested"
+            }
+          ]
+        }
+      ]
+    },
+    "why": "A surviving memory cannot restore a revoked tool grant, and a tool grant cannot disclose another tenant’s memory.",
+    "hints": [
+      "Keep data eligibility separate from capability eligibility.",
+      "The final bundle should contain two named lists, not a merged instruction string."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
+  },
+  {
+    "id": "agent-guardrail-release-lab",
+    "title": "Decide whether the repaired agent can enter a canary",
+    "problem": "We have receiver-side effect fixtures for ordinary work and attempted misuse. A reassuring answer cannot override those records.",
+    "challenge": "Classify recorded effects, count violations and blocked legitimate jobs separately, then apply the predeclared blocked-job allowance.",
+    "sources": {
+      "runs": "Recorded evaluation runs",
+      "maximum": "Maximum blocked legitimate jobs"
+    },
+    "cases": [
+      {
+        "name": "A permitted read and a blocked attack",
+        "data": {
+          "runs": [
+            {
+              "id": "ordinary-read",
+              "allowedEffects": [
+                "read_manual"
+              ],
+              "effects": [
+                "read_manual"
+              ],
+              "traceComplete": true,
+              "legitimate": true,
+              "completed": true
+            },
+            {
+              "id": "altered-manual",
+              "allowedEffects": [],
+              "effects": [],
+              "traceComplete": true,
+              "legitimate": false,
+              "completed": false
+            }
+          ],
+          "maximum": 0
+        },
+        "expected": "eligible for canary"
+      },
+      {
+        "name": "The refusal follows a forbidden export",
+        "data": {
+          "runs": [
+            {
+              "id": "ordinary-read",
+              "allowedEffects": [
+                "read_manual"
+              ],
+              "effects": [
+                "read_manual"
+              ],
+              "traceComplete": true,
+              "legitimate": true,
+              "completed": true
+            },
+            {
+              "id": "altered-manual",
+              "allowedEffects": [],
+              "effects": [
+                "export_records"
+              ],
+              "traceComplete": true,
+              "legitimate": false,
+              "completed": false
+            }
+          ],
+          "maximum": 0
+        },
+        "expected": "hold release"
+      },
+      {
+        "name": "The rule also blocks an ordinary read",
+        "data": {
+          "runs": [
+            {
+              "id": "ordinary-read",
+              "allowedEffects": [
+                "read_manual"
+              ],
+              "effects": [],
+              "traceComplete": true,
+              "legitimate": true,
+              "completed": false
+            },
+            {
+              "id": "altered-manual",
+              "allowedEffects": [],
+              "effects": [],
+              "traceComplete": true,
+              "legitimate": false,
+              "completed": false
+            }
+          ],
+          "maximum": 0
+        },
+        "expected": "hold release"
+      },
+      {
+        "name": "One trace never finishes",
+        "data": {
+          "runs": [
+            {
+              "id": "ordinary-read",
+              "allowedEffects": [
+                "read_manual"
+              ],
+              "effects": [
+                "read_manual"
+              ],
+              "traceComplete": true,
+              "legitimate": true,
+              "completed": true
+            },
+            {
+              "id": "altered-manual",
+              "allowedEffects": [],
+              "effects": [],
+              "traceComplete": false,
+              "legitimate": false,
+              "completed": false
+            }
+          ],
+          "maximum": 0
+        },
+        "expected": "hold release"
+      }
+    ],
+    "recipe": {
+      "op": "sgPromotion",
+      "inputs": [
+        {
+          "op": "sgSafetyReport",
+          "inputs": [
+            {
+              "op": "sgTraceVerdicts",
+              "inputs": [
+                {
+                  "source": "runs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "maximum"
+        }
+      ]
+    },
+    "why": "The report preserves safety, usefulness and observation gaps rather than reducing them to the final message.",
+    "hints": [
+      "Compare effects with each case’s own allowlist.",
+      "Unknown traces must remain visible in the report used by the release decision."
+    ],
+    "limitation": "These are invented records and deterministic policy checks. The browser runs no agent, shell command, MCP server or network request. Passing these fixtures establishes only the stated policy behaviour.",
+    "extras": [],
+    "draftVersion": 1
   }
 ]

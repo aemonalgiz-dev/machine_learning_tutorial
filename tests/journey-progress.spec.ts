@@ -118,7 +118,7 @@ test("journey contract: existing workshop saves distinguish a construction from 
 });
 
 test("journey contract: every published lesson has an accessible workshop and the guide remains separate", () => {
-  expect(labLessons).toHaveLength(313);
+  expect(labLessons).toHaveLength(322);
   const routes = labLessons.map(lesson => labHref(lesson.id));
   expect(new Set(routes).size).toBe(labLessons.length);
   for (const lesson of labLessons) {

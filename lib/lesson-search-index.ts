@@ -3,6 +3,15 @@ import { courseSectionHref } from "./course-navigation";
 import type { SearchEntry } from "./lesson-search";
 
 const additionalTerms: Record<string, string> = {
+  "/concepts/agent-guardrail-boundaries": "agent guardrails threat model invariants trust boundaries prompt injection enforcement fail closed",
+  "/concepts/agent-guardrail-coding": "agentic programming coding agents repository instructions prompt injection diff patch tests protected branches",
+  "/concepts/agent-guardrail-sandbox": "agent sandbox code execution container isolation filesystem network egress credentials resource limits",
+  "/concepts/agent-guardrail-supply-chain": "agent supply chain dependency packages CI CD provenance SLSA artifact digest lockfile release evidence",
+  "/concepts/agent-guardrail-mcp-trust": "MCP server security tools discovery poisoning metadata manifest readOnlyHint local stdio remote HTTP",
+  "/concepts/agent-guardrail-mcp-auth": "MCP OAuth authorization authentication audience issuer scopes JWT token passthrough confused deputy SSRF session",
+  "/concepts/agent-guardrail-application-actions": "agent applications guardrails approvals PydanticAI Pydantic AI LangChain human in loop transactions TOCTOU idempotency",
+  "/concepts/agent-guardrail-memory-delegation": "agent memory poisoning multi agent delegation least privilege tenant isolation revocation context",
+  "/concepts/agent-guardrail-release-lab": "agent guardrail evaluation red teaming safety usefulness canary release Langfuse receiver effects incidents",
   "/concepts/model-residual-analysis": "model evaluation regression residuals signed error bias MAE MSE RMSE diagnosis",
   "/concepts/model-precision-recall": "classification precision recall PR curve average precision AP ROC class imbalance threshold prevalence",
   "/concepts/model-evaluation-slices": "model evaluation slices subgroup disaggregated errors macro micro weighted metrics fairness sample size",

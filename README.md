@@ -241,6 +241,22 @@ examples in `parts[].examples`. Never put credentials or invented model
 outputs in a reference. After edits, regenerate curriculum artifacts and run
 the Agents contracts, workshop journey contracts, and browser Python checks.
 
+Agent Guardrails and Secure Development at
+`/sections/agent-guardrails-and-secure-development` extends that path with nine
+lessons on effect boundaries, coding-agent patches, execution sandboxes, release
+provenance, MCP discovery and authorisation, approved application actions,
+memory and delegation, and end-to-end safety evaluations. Each has a Botie
+construction, a changed scenario, an independent fresh case and a runnable
+Python policy challenge. The lessons distinguish these fixture checks from
+real authentication, sandboxing and transactional guarantees.
+
+Author this section in `scripts/curriculum/agent-safety*.mjs`; its operations,
+journeys and fresh cases live in the matching `lib/builds/` modules. Run
+`tests/agent-safety.spec.ts`, the navigation and journey contracts, and both
+`node scripts/check-practice.mjs agent-guardrail-` and
+`node scripts/check-lesson-examples.mjs agent-guardrail-`. The production suite
+also covers the new section and dynamically generated lesson/workshop routes.
+
 The curriculum includes Large Language Models, Generative Models, and Adapting
 and Evaluating Modern Models. Thirteen lessons cover transformer blocks,
 next-token learning, generation, sampling, autoencoders, VAEs, GANs, diffusion,

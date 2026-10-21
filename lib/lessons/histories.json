@@ -3412,5 +3412,170 @@
       "Behavioural tests make a discovered mistake repeatable. Experiment datasets then let a team run candidate versions against stored tasks and expectations. Langfuse supports datasets for this kind of comparison; the useful practice is retaining the case, configuration and observed result together.",
       "Our project follows that practice with small visible records. The tools help us organise evidence, but the expected outcome still has to come from the task. A stored score with no clear acceptance rule is difficult to use when the assistant changes."
     ]
+  },
+  "agent-guardrail-boundaries": {
+    "title": "Software Needed Boundaries Before It Could Choose Its Own Steps",
+    "sources": [
+      {
+        "title": "NIST Secure Software Development Framework, February 2022",
+        "url": "https://csrc.nist.gov/pubs/sp/800/218/final"
+      },
+      {
+        "title": "OWASP agent security",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html"
+      }
+    ],
+    "blocks": [
+      "Software teams have long needed a way to turn a security concern into a development requirement they can check. NIST’s 2022 SSDF organises practices for preparing development work, protecting software and responding to vulnerabilities. That problem remains when a model writes part of the program or chooses which operation to request.",
+      "An agent adds a controller whose proposals depend on text and changing context. We can still describe a forbidden consequence precisely: no record from another tenant may be returned, and no public post may be created without its required authorisation. Those statements give us something more useful to test than whether the agent sounded careful."
+    ]
+  },
+  "agent-guardrail-coding": {
+    "title": "Generated Code Still Has to Survive Independent Review",
+    "sources": [
+      {
+        "title": "OWASP secure coding with AI",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Secure_Coding_with_AI_Cheat_Sheet.html"
+      },
+      {
+        "title": "GitHub secure use of Actions",
+        "url": "https://docs.github.com/en/actions/reference/security/secure-use"
+      }
+    ],
+    "blocks": [
+      "Code review and regression testing developed to catch changes whose consequences were wider than the author intended. AI-assisted development changes how quickly a proposed patch can be produced; it leaves the need for evidence about that patch intact.",
+      "Modern coding assistants also consume material inside the development environment. OWASP’s secure-coding guidance addresses the resulting trust concerns. For our parser, the practical question is who controls the task, who can change the tests, and which identity may eventually merge the result."
+    ]
+  },
+  "agent-guardrail-sandbox": {
+    "title": "A Process Needed Limits on More Than Its Files",
+    "sources": [
+      {
+        "title": "Docker Engine security",
+        "url": "https://docs.docker.com/engine/security/"
+      },
+      {
+        "title": "Python subprocess security considerations",
+        "url": "https://docs.python.org/3/library/subprocess.html#security-considerations"
+      }
+    ],
+    "blocks": [
+      "Operating systems developed process and resource isolation so one program would not freely interfere with another. Container runtimes combine mechanisms such as namespaces and control groups, while their configuration determines which host resources remain exposed.",
+      "Generated code makes the reason for isolation easy to see: we need to observe what a program does before trusting it. The isolation mechanism and its configuration are part of that experiment. A container with a privileged host mount can invalidate the boundary we thought we had created."
+    ]
+  },
+  "agent-guardrail-supply-chain": {
+    "title": "A Build Needed a Traceable Origin",
+    "sources": [
+      {
+        "title": "SLSA provenance",
+        "url": "https://slsa.dev/spec/v1.2/provenance"
+      },
+      {
+        "title": "GitHub Actions secure use",
+        "url": "https://docs.github.com/en/actions/reference/security/secure-use"
+      }
+    ],
+    "blocks": [
+      "Software supply chains grew beyond a single source tree. Builds consume dependencies and configuration, then produce artifacts that may be copied through several systems. SLSA uses provenance to describe where an artifact came from and how it was produced.",
+      "For an agent-assisted change, that helps us ask a precise question: does the evidence describe this artifact? Provenance can establish origin under a trusted verification policy. It does not establish that the source code is correct or that the package has no vulnerabilities."
+    ]
+  },
+  "agent-guardrail-mcp-trust": {
+    "title": "A Shared Tool Interface Made Discovery Useful",
+    "sources": [
+      {
+        "title": "MCP tools specification, 2025-11-25",
+        "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools"
+      },
+      {
+        "title": "MCP security best practices",
+        "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices"
+      }
+    ],
+    "blocks": [
+      "MCP standardised an interface through which a host can discover capabilities from different servers. That reduces the need to invent a separate conversation format for every tool integration. The interface describes capabilities; it does not decide which organisations or installed programs your application should trust.",
+      "The 2025-11-25 specification includes tool metadata and change notifications. A host therefore needs to account for discovery as an ongoing process. Our example treats changed metadata as a new review event because a description can influence the next model proposal even when the tool’s short name stays the same."
+    ]
+  },
+  "agent-guardrail-mcp-auth": {
+    "title": "Delegation Needed a Destination",
+    "sources": [
+      {
+        "title": "MCP HTTP authorisation, 2025-11-25",
+        "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization"
+      },
+      {
+        "title": "JWT best current practices, RFC 8725",
+        "url": "https://www.rfc-editor.org/rfc/rfc8725.html"
+      },
+      {
+        "title": "OAuth security best current practice, RFC 9700",
+        "url": "https://www.rfc-editor.org/rfc/rfc9700.html"
+      }
+    ],
+    "blocks": [
+      "OAuth addressed delegated access: an application could receive limited authority without handling the resource owner’s password for every service. Experience with real deployments exposed ways credentials could be replayed or accepted in the wrong context. RFC 8725 and RFC 9700 document guidance for those classes of mistake.",
+      "MCP’s HTTP authorisation design uses established authorisation mechanisms and resource binding. Our exercise begins after a trusted validator has checked a token, then asks whether its claims belong at this server. It deliberately leaves cryptography to maintained implementations."
+    ]
+  },
+  "agent-guardrail-application-actions": {
+    "title": "Transaction Review Had to Describe the Actual Transaction",
+    "sources": [
+      {
+        "title": "OWASP transaction authorisation",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Transaction_Authorization_Cheat_Sheet.html"
+      },
+      {
+        "title": "Pydantic AI deferred tools",
+        "url": "https://pydantic.dev/docs/ai/tools-toolsets/deferred-tools/"
+      },
+      {
+        "title": "LangChain human-in-the-loop middleware",
+        "url": "https://docs.langchain.com/oss/python/langchain/human-in-the-loop"
+      }
+    ],
+    "blocks": [
+      "Transaction systems needed people to approve the operation they were actually about to perform. A generic confirmation could be misleading when important fields changed between review and execution. Transaction-authorisation guidance therefore treats the reviewed operation and its server-side enforcement as connected parts of one flow.",
+      "Agent frameworks provide ways to pause a proposed tool call and resume after review. That mechanism is useful, but the surrounding application still owns identity, current permission and the transaction. A resumed model conversation is not itself evidence that the reviewed customer and payload remain unchanged."
+    ]
+  },
+  "agent-guardrail-memory-delegation": {
+    "title": "Saving Context Also Saved Its Trust Problem",
+    "sources": [
+      {
+        "title": "OWASP agent security",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html"
+      },
+      {
+        "title": "MCP security best practices",
+        "url": "https://modelcontextprotocol.io/docs/2025-11-25/tutorials/security/security_best_practices"
+      }
+    ],
+    "blocks": [
+      "Applications used stored state and worker queues long before language-model agents. Persistent state let later work continue without asking for every detail again. It also required ownership, expiry and access rules so one job could not read another job’s private state.",
+      "Agent memory introduces a further concern: stored prose can influence later decisions. A summary can preserve an injected instruction while losing the source label that would help someone recognise it. Delegation therefore needs explicit data provenance and current grants, rather than trust inherited from a friendly agent name."
+    ]
+  },
+  "agent-guardrail-release-lab": {
+    "title": "An Evaluation Needed to Observe Actions",
+    "sources": [
+      {
+        "title": "OWASP agent security",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/AI_Agent_Security_Cheat_Sheet.html"
+      },
+      {
+        "title": "NIST Secure Software Development Framework",
+        "url": "https://csrc.nist.gov/pubs/sp/800/218/final"
+      },
+      {
+        "title": "Langfuse evaluation documentation",
+        "url": "https://langfuse.com/docs/evaluation/overview"
+      }
+    ],
+    "blocks": [
+      "A text-only evaluation can compare an answer with a reference. A tool-using application can also change state before producing that answer, so the observation has to include the actions and their consequences. Traces and receiver records make those intermediate events available for investigation.",
+      "Evaluation systems such as Langfuse organise datasets, experiments and scores. They help retain comparisons across revisions, while the application still has to define an appropriate oracle for its permissions and effects. Our release exercise uses explicit allowed-effect records instead of asking a language model to decide whether an unauthorised write was acceptable."
+    ]
   }
 }

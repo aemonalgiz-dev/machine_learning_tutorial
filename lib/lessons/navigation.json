@@ -1433,5 +1433,68 @@
     "section": "Prompting, Evaluation and Iteration",
     "topic": "A Repair From Failure to Fresh Evidence",
     "blurb": "Follow a stale-manual failure through a test, a repair and a fresh evaluation. Keep unsupported answers and unapproved actions out of the release decision."
+  },
+  {
+    "id": "agent-guardrail-boundaries",
+    "title": "What Should Botie Be Unable to Do?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Deciding Where Authority Belongs",
+    "blurb": "A helpful agent can still propose the wrong operation. Start with the effects we need to prevent, then put a control where each effect would happen."
+  },
+  {
+    "id": "agent-guardrail-coding",
+    "title": "Can Botie Fix the Bug Without Rewriting the Rules?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Working Safely with a Coding Agent",
+    "blurb": "The requested fix belongs in one function. The proposed patch also weakens its test. Review the actual changed files and keep verification outside the patch’s control."
+  },
+  {
+    "id": "agent-guardrail-sandbox",
+    "title": "Where Should Botie Run Code He Has Just Written?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Working Safely with a Coding Agent",
+    "blurb": "A test runner executes repository code. Give it a deliberately small environment, then verify the filesystem, network and resource limits that environment really enforces."
+  },
+  {
+    "id": "agent-guardrail-supply-chain",
+    "title": "Are We Releasing the Code We Actually Checked?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Working Safely with a Coding Agent",
+    "blurb": "Botie adds a dependency and rebuilds the project. Bind the review and independent checks to the exact revision and artifact that will be released."
+  },
+  {
+    "id": "agent-guardrail-mcp-trust",
+    "title": "What Did We Actually Trust When We Connected the MCP Server?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Connecting MCP Servers Deliberately",
+    "blurb": "A familiar tool name returns with a different description. Keep server identity, reviewed capabilities and individual calls separate as the connection changes."
+  },
+  {
+    "id": "agent-guardrail-mcp-auth",
+    "title": "A Valid Token for Which Service?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Connecting MCP Servers Deliberately",
+    "blurb": "A token can be authentic and still belong to another API. Follow delegated authority from the caller to the MCP server without borrowing another service’s credentials."
+  },
+  {
+    "id": "agent-guardrail-application-actions",
+    "title": "What Exactly Did the Person Approve?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Protecting Applications and Shared State",
+    "blurb": "A reviewed action resumes after its target changes. Keep the approval, current object version and receiver’s action ledger together before allowing another write."
+  },
+  {
+    "id": "agent-guardrail-memory-delegation",
+    "title": "What Should Botie Pass to Another Agent?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Protecting Applications and Shared State",
+    "blurb": "A saved note and a delegated tool list can carry authority into a later run. Filter memory before use and restrict the child to the parent’s current grants."
+  },
+  {
+    "id": "agent-guardrail-release-lab",
+    "title": "Can the Repaired Agent Survive a Different Shift?",
+    "section": "Agent Guardrails and Secure Development",
+    "topic": "Testing the Whole Boundary",
+    "blurb": "A refusal can arrive after an unauthorised tool call. Compare recorded effects with the intended policy, preserve blocked legitimate work and decide what evidence supports a limited release."
   }
 ]

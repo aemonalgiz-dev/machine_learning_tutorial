@@ -9,6 +9,7 @@ import { agentReliabilityJourneys } from "./agent-reliability";
 import { agentAssuranceJourneys } from "./agent-assurance";
 import { agentIterationJourneys } from "./agent-iteration";
 import { modelEvaluationJourneys } from "./model-evaluation";
+import { agentSafetyJourneys } from "./agent-safety";
 import { sqlFoundationJourneys } from "./sql-foundations";
 import { sqlAnalysisJourneys } from "./sql-analysis";
 import { sqlSystemJourneys } from "./sql-systems";
@@ -24,6 +25,7 @@ export const journeyPlans: Record<string, JourneyPlan> = {
   ...agentGuardrailJourneys, ...agentReliabilityJourneys, ...agentAssuranceJourneys,
   ...agentIterationJourneys,
   ...modelEvaluationJourneys,
+  ...agentSafetyJourneys,
   ...sqlFoundationJourneys, ...sqlAnalysisJourneys, ...sqlSystemJourneys,
   ...NOSQL_FOUNDATION_JOURNEYS, ...NOSQL_SYSTEM_JOURNEYS, ...GRAPH_DATABASE_JOURNEYS,
 };

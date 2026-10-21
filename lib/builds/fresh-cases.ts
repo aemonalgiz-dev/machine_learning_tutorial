@@ -9,6 +9,7 @@ import { agentReliabilityFreshCases } from "./journey-fresh/agent-reliability";
 import { agentAssuranceFreshCases } from "./journey-fresh/agent-assurance";
 import { agentIterationFreshCases } from "./journey-fresh/agent-iteration";
 import { modelEvaluationFreshCases } from "./journey-fresh/model-evaluation";
+import { agentSafetyFreshCases } from "./journey-fresh/agent-safety";
 import { sqlFoundationFreshCases } from "./journey-fresh/sql-foundations";
 import { sqlAnalysisFreshCases } from "./journey-fresh/sql-analysis";
 import { sqlSystemFreshCases } from "./journey-fresh/sql-systems";
@@ -23,6 +24,7 @@ export const freshJourneyCases: Record<string, FreshJourneyCase> = {
   ...agentGuardrailFreshCases, ...agentReliabilityFreshCases, ...agentAssuranceFreshCases,
   ...agentIterationFreshCases,
   ...modelEvaluationFreshCases,
+  ...agentSafetyFreshCases,
   ...sqlFoundationFreshCases, ...sqlAnalysisFreshCases, ...sqlSystemFreshCases,
   ...NOSQL_FOUNDATION_FRESH, ...NOSQL_SYSTEM_FRESH, ...GRAPH_DATABASE_FRESH,
 };

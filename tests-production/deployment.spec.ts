@@ -5,7 +5,7 @@ import { openFullWorkshop } from "../tests/helpers/open-workshop";
 
 test("published agent, model evaluation and database lessons survive the production build", async ({ request }) => {
   test.setTimeout(180_000);
-  for (const lesson of expandedLessons.filter(lesson => ["Agents", "Prompting, Evaluation and Iteration", "Evaluating and Improving Models", "SQL", "NoSQL", "Graph Databases"].includes(lesson.section))) {
+  for (const lesson of expandedLessons.filter(lesson => ["Agents", "Prompting, Evaluation and Iteration", "Agent Guardrails and Secure Development", "Evaluating and Improving Models", "SQL", "NoSQL", "Graph Databases"].includes(lesson.section))) {
     const response = await request.get(`/concepts/${lesson.id}`);
     expect(response.status(), lesson.id).toBe(200);
     expect(await response.text(), lesson.id).toContain(lesson.id);
@@ -13,7 +13,7 @@ test("published agent, model evaluation and database lessons survive the product
 });
 
 test("authored lesson pages cache on first visit and unknown lesson IDs stay missing", async ({ request }) => {
-  for (const id of ["agent-prompts", "sql-tables", "nosql-documents", "graph-pattern-matching"]) {
+  for (const id of ["agent-prompts", "agent-guardrail-coding", "sql-tables", "nosql-documents", "graph-pattern-matching"]) {
     const first = await request.get(`/concepts/${id}`);
     expect(first.status(), id).toBe(200);
     expect(await first.text(), id).toContain("Botie");
@@ -27,7 +27,8 @@ test("authored lesson pages cache on first visit and unknown lesson IDs stay mis
 });
 
 test("workshops generate and cache, while old and invalid addresses retain their behavior", async ({ request }) => {
-  for (const id of ["linear-algebra", "agent-langfuse", "agent-prompts", "agent-authorization", "agent-resource-budgets", "sql-left-joins", "sql-transactions", "nosql-conflicts", "graph-traversal-cycles"]) {
+  const guardrailWorkshops = expandedLessons.filter(lesson => lesson.section === "Agent Guardrails and Secure Development").map(lesson => lesson.id);
+  for (const id of ["linear-algebra", "agent-langfuse", "agent-prompts", "agent-authorization", "agent-resource-budgets", "sql-left-joins", "sql-transactions", "nosql-conflicts", "graph-traversal-cycles", ...guardrailWorkshops]) {
     const first = await request.get(`/lab/${id}`);
     expect(first.status(), id).toBe(200);
     expect(await first.text()).toContain("Full workspace and earlier draft");

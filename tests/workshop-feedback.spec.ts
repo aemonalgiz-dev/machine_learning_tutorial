@@ -41,7 +41,8 @@ test("an expanded floor keeps the problem and example data reachable without lea
   await examples.locator(":scope > summary").click();
   await expect(examples.getByText("Required result", { exact: true }).first()).toBeVisible();
   const firstCase = examples.getByRole("button").first();
-  await expect(firstCase).toContainText("Deaths recorded each week");
+  await expect(firstCase).toContainText(statistics.cases[0].name);
+  await expect(examples.getByText("Deaths recorded each week", { exact: true }).first()).toBeVisible();
   await firstCase.click();
   await expect(firstCase).toHaveAttribute("aria-pressed", "true");
   await workshop.getByRole("button", { name: "Workshop details", exact: true }).click();

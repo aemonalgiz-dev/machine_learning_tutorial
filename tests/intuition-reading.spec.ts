@@ -9,7 +9,7 @@ const lessons = { ...lessonIntuitions, ...Object.fromEntries(expandedLessons.map
   story(lesson.opening, lesson.intuition.map(item => step(item.title, item.explanation, item.scene ?? strips("An invented example for this lesson.", item.rows))), "Connection", [])])) };
 
 test("all guided examples use readable relationships with complete labels and finite geometry", () => {
-  expect(Object.keys(lessons)).toHaveLength(312);
+  expect(Object.keys(lessons)).toHaveLength(321);
   let count = 0;
   const check = (scene: Scene) => {
     expect(scene.kind).not.toBe("strips");
@@ -33,7 +33,7 @@ test("all guided examples use readable relationships with complete labels and fi
     check(item.scene);
     if (item.alternative) check(item.alternative.scene);
   }
-  expect(count).toBe(893);
+  expect(count).toBe(910);
 });
 
 test("the forecast boundary advances without leaking its target and scores aligned days", () => {
