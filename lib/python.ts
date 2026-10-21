@@ -5,6 +5,7 @@ export interface PythonResult {
   elapsed: number;
   tests: PythonTestResult[];
   artifacts?: { filename: string; content: string }[];
+  table?: { columns: string[]; rows: (string | number | null)[][] } | null;
 }
 
 export interface PythonTestResult {

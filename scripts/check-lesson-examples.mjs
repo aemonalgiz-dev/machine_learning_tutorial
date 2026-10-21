@@ -42,12 +42,17 @@ def check_lesson_example(code):
     return json.dumps({"output": output.getvalue(), "warnings": warnings.getvalue(), "error": error})
 `);
 const run = python.globals.get("check_lesson_example");
+python.runPython(await readFile(path.join(root, "public/python/sql_runner.py"), "utf8"));
+const runSql = python.globals.get("run_course_sql");
 let failures = 0;
 let quizFailures = 0;
 try {
   for (const example of examples) {
-    const result = JSON.parse(run(example.code));
-    const passed = !result.error && !result.warnings && result.output.trimEnd() === example.output.trimEnd();
+    const sqlResult = example.language === "sql" ? JSON.parse(runSql(example.code, example.setup)) : undefined;
+    const result = sqlResult ? { output: sqlResult.stdout, warnings: sqlResult.stderr, error: sqlResult.error } : JSON.parse(run(example.code));
+    const passed = !result.error && !result.warnings && (example.language === "sql"
+      ? JSON.stringify(JSON.parse(result.output)) === JSON.stringify(JSON.parse(example.output))
+      : result.output.trimEnd() === example.output.trimEnd());
     console.log(`${passed ? "PASS" : "FAIL"} ${example.lesson}: ${example.title}`);
     if (!passed) {
       failures++;
@@ -61,7 +66,7 @@ try {
       console.error(`FAIL quiz setup ${setup.lesson}: ${setup.title}\n${result.error || result.warnings}`);
     }
   }
-} finally { run.destroy(); }
-console.log(`${examples.length - failures}/${examples.length} worked examples match their displayed output in browser Python.`);
+} finally { run.destroy(); runSql.destroy(); }
+console.log(`${examples.length - failures}/${examples.length} worked examples match their displayed output in the browser runtime.`);
 console.log(`${quizSetups.length - quizFailures}/${quizSetups.length} question setups execute independently without errors.`);
 process.exitCode = failures || quizFailures ? 1 : 0;

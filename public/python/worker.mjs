@@ -2,6 +2,8 @@ import { loadPyodide } from "./runtime/pyodide.mjs";
 
 let runtime;
 let sdkLoaded = false;
+let numpyLoaded = false;
+let sqlLoaded = false;
 let occupied = false;
 const packageBaseUrl = "https://cdn.jsdelivr.net/pyodide/v314.0.7/full/";
 
@@ -11,18 +13,25 @@ async function resource(url) {
   return response;
 }
 
-async function prepare(id, source) {
+async function prepare(id, source, sql) {
   const status = (message) => self.postMessage({ type: "status", id, message });
   if (!runtime) {
-    status("Loading Python. The first run takes a little longer.");
+    status(sql ? "Loading the SQL workspace. The first run takes a little longer." : "Loading Python. The first run takes a little longer.");
     runtime = await loadPyodide({ indexURL: new URL("./runtime/", import.meta.url).href, packageBaseUrl });
     runtime.setStdin({ stdin: () => null });
+    runtime.runPython(await (await resource("/python/runner.py")).text());
+  }
+  if (!sql && !numpyLoaded) {
     status("Loading NumPy. You can keep editing while it downloads.");
     await runtime.loadPackage("numpy");
     runtime.runPython("import numpy");
-    runtime.runPython(await (await resource("/python/runner.py")).text());
+    numpyLoaded = true;
   }
-  if (!sdkLoaded && /(?:from|import)\s+oop_ml\b/.test(source)) {
+  if (sql && !sqlLoaded) {
+    runtime.runPython(await (await resource("/python/sql_runner.py")).text());
+    sqlLoaded = true;
+  }
+  if (!sql && !sdkLoaded && /(?:from|import)\s+oop_ml\b/.test(source)) {
     status("Loading oop_ml and its dependencies for this challenge.");
     await runtime.loadPackage(["scipy", "pydantic"]);
     const manifest = await (await resource("/python/sdk-manifest.json")).json();
@@ -37,22 +46,23 @@ async function prepare(id, source) {
 }
 
 self.onmessage = async (event) => {
-  const { id, source, expected, tests, exports } = event.data;
+  const { id, source, expected, tests, exports, sql } = event.data;
   if (occupied || typeof id !== "number" || typeof source !== "string") return;
   occupied = true;
   try {
-    const python = await prepare(id, source);
+    const python = await prepare(id, source, sql);
     self.postMessage({ type: "running", id });
-    const run = python.globals.get("run_course_code");
+    const run = python.globals.get(sql ? "run_course_sql" : "run_course_code");
     try {
       const result = JSON.parse(run.callKwargs(source, {
         ...(typeof expected === "string" ? { expected_output: expected } : {}),
         specifications: JSON.stringify(tests ?? []),
         exports: JSON.stringify(exports ?? []),
+        ...(sql ? { setup_sql: sql.setup } : {}),
       }));
       self.postMessage({ type: "result", id, result });
     } finally { run.destroy(); }
   } catch (error) {
-    self.postMessage({ type: "error", id, message: `Python could not run this time. ${error.message ?? String(error)}` });
+    self.postMessage({ type: "error", id, message: `${sql ? "SQL" : "Python"} could not run this time. ${error.message ?? String(error)}` });
   } finally { occupied = false; }
 };

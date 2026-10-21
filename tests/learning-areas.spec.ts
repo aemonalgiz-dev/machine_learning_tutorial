@@ -41,14 +41,19 @@ test("navigation contract: search ranks exact titles and respects area and empty
   expect(searchLessons(searchEntries, "", "mathematics-and-programming").every(entry => entry.areaId === "mathematics-and-programming")).toBe(true);
   expect(searchLessons(searchEntries, "attention", "first-principles-design")).toEqual([]);
   expect(searchLessons(searchEntries, "no-such-subject-xyz")).toEqual([]);
-  expect(learningAreaSections(LEARNING_AREAS[2])).toHaveLength(4);
+  expect(learningAreaSections(LEARNING_AREAS.find(area => area.id === "first-principles-design")!)).toHaveLength(4);
+  const databases = LEARNING_AREAS.find(area => area.id === "databases")!;
+  expect(learningAreaSections(databases).map(section => section.title)).toEqual(["SQL", "NoSQL", "Graph Databases"]);
+  expect(lessonLocations["/concepts/sql-tables"].areaHref).toBe("/learn/databases");
+  expect(lessonLocations["/concepts/sql-tables"].previous).toBeUndefined();
+  expect(searchLessons(searchEntries, "", "mathematics-and-programming").some(entry => entry.href === "/concepts/sql-tables")).toBe(false);
   expect(searchLessons(searchEntries, "inspection", "first-principles-design").some(entry => entry.href === "/concepts/design-inspection-review")).toBe(true);
 });
 
 test("homepage leads to learning areas, and old section links still work", async ({ page }) => {
   await page.goto("/");
   const areas = page.getByRole("navigation", { name: "Learning areas", exact: true });
-  await expect(areas.getByRole("link")).toHaveCount(3);
+  await expect(areas.getByRole("link")).toHaveCount(4);
   await expect(areas.getByRole("link").first()).toContainText("Mathematics and Programming");
   await areas.getByRole("link", { name: /^Machine Learning/ }).click();
   await page.getByRole("link", { name: /^Start with a Prediction/ }).click();

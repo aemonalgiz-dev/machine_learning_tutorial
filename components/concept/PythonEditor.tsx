@@ -7,6 +7,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
 import { HighlightStyle, indentUnit, syntaxHighlighting } from "@codemirror/language";
 import { python } from "@codemirror/lang-python";
+import { sql, SQLite } from "@codemirror/lang-sql";
 import { tags } from "@lezer/highlight";
 
 const courseHighlighting = syntaxHighlighting(HighlightStyle.define([
@@ -32,13 +33,14 @@ const courseTheme = EditorView.theme({
 });
 
 export default function PythonEditor({
-  value, onChange, onRun, onCheck, label,
+  value, onChange, onRun, onCheck, label, language = "python",
 }: {
   value: string;
   onChange: (value: string) => void;
   onRun: () => void;
   onCheck: () => void;
   label: string;
+  language?: "python" | "sql";
 }) {
   const parent = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
@@ -55,7 +57,7 @@ export default function PythonEditor({
       state: EditorState.create({
         doc: startingValue.current,
         extensions: [
-          basicSetup, python(), indentUnit.of("    "), courseTheme, courseHighlighting,
+          basicSetup, language === "sql" ? sql({ dialect: SQLite }) : python(), indentUnit.of(language === "sql" ? "  " : "    "), courseTheme, courseHighlighting,
           EditorView.contentAttributes.of({ "aria-label": label, "aria-describedby": helpId, spellcheck: "false" }),
           keymap.of([
             { key: "Mod-Enter", run: () => { actions.current.onRun(); return true; } },
@@ -70,7 +72,7 @@ export default function PythonEditor({
     });
     view.current = editor;
     return () => { view.current = null; editor.destroy(); };
-  }, [helpId, label]);
+  }, [helpId, label, language]);
 
   useEffect(() => {
     const editor = view.current;

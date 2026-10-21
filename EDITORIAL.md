@@ -3,7 +3,8 @@
 ## Learning areas and navigation
 
 The homepage links to learning areas. Each area contains sections, and each
-section contains lessons. Mathematics and Programming appears first. Keep
+section contains lessons. Mathematics and Programming appears first. Databases
+is a separate learning area for SQL, NoSQL and graph databases. Keep
 section and lesson URLs stable when changing their place in the navigation.
 Register each section once in `lib/learning-areas.ts`; other areas should link
 to shared prerequisites instead of copying their lessons. Subject groups help
@@ -181,6 +182,20 @@ existing fragment IDs when changing section titles.
   When a challenge asks for a reusable procedure, declare the function's inputs,
   outputs and failure behaviour, then test it on additional inputs. Do not use
   printed example results alone to establish that a function generalises.
+- SQL lessons use an SQL editor and a fresh in-memory SQLite database for each
+  run. Show the starting tables beside the question and display query results
+  as a table. Explain the dialect used, and separate PostgreSQL examples from
+  queries the browser can execute. Test query behaviour on changed records as
+  well as the displayed example. A Python test harness may verify the results,
+  but readers should write SQL when SQL is the operation being taught.
+- NoSQL and graph lessons distinguish local teaching models from database
+  services. Use runnable Python to expose record operations, traversal and
+  distributed-state reasoning. Give MongoDB, Redis, Cassandra, DynamoDB, Cypher
+  and SPARQL examples their real syntax, documented behaviour and explicit
+  setup requirements. Do not present a homemade subset parser as one of those
+  databases. State which guarantees an offline model cannot establish. Graph
+  diagrams show relationship direction and type; a record table remains
+  available when the underlying properties matter.
 - Do not target a fixed number of pages, intuition stages or challenges. Keep
   the reading controls consistent while giving each idea the space it needs.
   A topic is ready when the learner can explain its components, carry out a

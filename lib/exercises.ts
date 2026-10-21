@@ -25,6 +25,8 @@ export interface NumberCheck {
 }
 
 export interface Exercise {
+  language?: "python" | "sql";
+  sql?: { setup: string; tables?: SqlTable[]; expectedTable?: SqlTable };
   title: string;
   // Override when turning an imperative title into a question would be awkward.
   question?: string;
@@ -40,6 +42,13 @@ export interface Exercise {
   // Additional behaviour checks run against the learner's functions.
   tests?: { name: string; code: string }[];
   exports?: { variable: string; filename: string }[];
+}
+
+export interface SqlTable {
+  name?: string;
+  columns: string[];
+  rows: (string | number | null)[][];
+  truncated?: boolean;
 }
 
 export const exercise = (

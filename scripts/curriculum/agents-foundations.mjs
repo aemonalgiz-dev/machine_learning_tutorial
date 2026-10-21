@@ -26,10 +26,11 @@ const browserNote = 'The browser runs ordinary Python against invented records. 
 
 const lessons = [lesson({
   id:'agent-prompts',title:'How Do We Give an Agent a Job It Can Follow?',topic:'Giving the Model a Clear Job',
+  appliedIn:[before('a manual that tries to change the job','agent-prompt-injection')],
   blurb:'A technician wants help with a noisy pump. Begin prompt engineering with that job and its evidence, then test whether a clearer request produces a useful answer.',
   openingTitle:'“Help with This Pump” Leaves Quite a Lot Unsaid',
   opening:["A technician sends Botie a service ticket: the pump has become noisy, and the next shift starts soon. Should Botie explain the manual, suggest an inspection, or book a technician? Each would be a plausible response to ‘help’, but they involve different information and different permissions.","Let's begin by giving the system a job we can actually check. Through this section, Botie will help maintenance technicians read their manuals and prepare inspection requests. We will build the surrounding software with supplied examples so we can see precisely what each part does."],
-  prerequisites:[before('What a token is','what-a-token-is')],
+  prerequisites:[before('The pieces of an agent','agent-introduction'),before('What a token is','what-a-token-is')],
   history:history('Examples Became Part of the Request',[source('Brown and colleagues: Language Models are Few-Shot Learners (2020)','https://arxiv.org/abs/2005.14165'),source('Anthropic: Building effective agents (2024)','https://www.anthropic.com/engineering/building-effective-agents')],
     'Adapting a language model to a task once commonly meant collecting labelled examples and updating its parameters. Brown and colleagues investigated a different setting in GPT-3: give the model a task and a small number of demonstrations in its input, then test it without task-specific parameter updates. The examples helped specify the requested behaviour, although success varied across tasks.',
     'That distinction matters here. Writing a prompt changes the input to an existing model; it does not train the model in this lesson. An agent adds software that can let the model select another action after seeing a result. Anthropic’s 2024 engineering article distinguishes this from a workflow whose route is already prescribed in code. We will use that distinction, while remembering that the word agent is used more broadly elsewhere.'),
@@ -57,6 +58,7 @@ const lessons = [lesson({
   ],promptRecipe,'The wires show which text becomes an instruction and which stays inside the data message. Changing manual text must never change the role of a message.','This checks request construction, not model obedience. JSON labels do not prevent prompt injection; later server-side tool checks enforce permissions.'),extras:['agentText'],hints:['First join the two application-owned text blocks, then attach the system role.','Use a separate Label a value as JSON for question and manual. The field-name settings must match those names.','Pair the system message first and the user message second. A malicious manual still belongs inside user content.']},
 }),lesson({
   id:'agent-structured-outputs',title:'Can Another Program Use Botie’s Answer?',topic:'Giving the Model a Clear Job',
+  appliedIn:[before('checking what a well-formed answer would actually do','agent-output-guardrails')],
   blurb:'A technician can read a paragraph, but an application needs agreed fields. Check the response structure without confusing a valid record with a correct diagnosis.',
   openingTitle:'The Answer Looks Sensible. Which Part Is the Asset ID?',
   opening:['Botie replies, “P-2 probably needs its seal checked.” A technician can understand the sentence. A program that sorts inspection suggestions now has to guess where the asset ID ends and the recommendation begins. Another response might use an entirely different sentence.','We can ask for named fields and validate them before the next component uses them. This solves a problem about the shape of the answer. Whether a seal inspection is justified still depends on the evidence.'],
@@ -83,6 +85,7 @@ const lessons = [lesson({
 
 lessons.push(lesson({
   id:'agent-tool-contracts',title:'When May Botie Turn a Suggestion into an Action?',topic:'Letting the Model Use Tools',
+  appliedIn:[before('permissions across customer records','agent-authorization'),before('recovering an inspection request after a timeout','agent-retries-and-effects')],
   blurb:'Booking an inspection changes somebody’s work. Give the tool a precise interface, check the caller’s permission, and keep a retried request from creating a second job.',
   openingTitle:'One Proposed Inspection Becomes Two Appointments',
   opening:['A technician approves an inspection for P-2. Botie sends the request, but the connection drops before the response arrives. Did the service create the appointment? Sending the request again might repair the missing response, or it might book the same inspection twice.','We need to define what a tool call means before wiring it into an agent. Its inputs need validation, the caller needs permission, and retries need a way to refer to the same intended action.'],
@@ -118,6 +121,7 @@ lessons.push(lesson({
 
 lessons.push(lesson({
   id:'agent-context',title:'Which Records Should Botie Bring into the Conversation?',topic:'Letting the Model Use Tools',
+  appliedIn:[before('deciding which data may leave the service','agent-data-boundaries')],
   blurb:'The manual collection is larger than one request can hold. Select permitted evidence, leave room for the reply, and keep each excerpt attached to its source.',
   openingTitle:'The Relevant Page Is Buried in a Room Full of Manuals',
   opening:['A technician asks about a seal on P-2. Botie has maintenance manuals for several sites, years of service tickets, and a limited amount of text it can send in one model request. Copying everything would include irrelevant records and perhaps records this technician is not allowed to read.','We need to choose what enters the conversation. This means finding useful material, respecting permissions, and preserving enough of its identity to check the eventual answer.'],
@@ -151,6 +155,7 @@ lessons.push(lesson({
 
 lessons.push(lesson({
   id:'agent-loops',title:'What Should Botie Do After a Tool Replies?',topic:'Letting the Model Use Tools',
+  appliedIn:[before('choosing between a workflow and an agent','agent-or-workflow'),before('sharing a budget across concurrent work','agent-resource-budgets')],
   blurb:'One search may reveal that a second search is needed. Follow the observations through an agent loop, then give that loop explicit ways to finish or ask for help.',
   openingTitle:'The Manual Search Returns the Wrong Version',
   opening:['Botie searches for an inspection interval and finds a manual for an older pump. The excerpt is readable and the source is real, but it does not settle the technician’s question. A useful next step might be another search using the exact model number.','This is where selecting a next action can help. The model receives the search result and proposes what to do next. We still need a program that validates the proposal, records what happened, and stops when further attempts are no longer justified.'],

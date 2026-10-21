@@ -199,7 +199,7 @@ export function LessonJourney({ data }: { data: JourneyData }) {
       <textarea id={`explanation-${build.id}`} className="mt-3 min-h-32 w-full rounded-lg border border-line bg-background p-4 text-sm leading-7" value={state.explanation} onChange={event => saved.set(previous => ({ ...previous, explanation: event.target.value }))} />
       <p className="mt-4 text-sm leading-7">{plan.reflection.carryForward}</p>
       <p className="mt-3 text-sm leading-7 text-muted">{build.limitation}</p>
-      <a href={`${data.lesson.href}#practice`} className={`${primary} mt-5`}>Work through the Python challenges →</a>
+      <a href={`${data.lesson.href}#practice`} className={`${primary} mt-5`}>Work through the {data.lesson.section === "SQL" ? "SQL" : "Python"} challenges →</a>
     </details>
     {data.next && <a href={data.next.href} className="mt-6 block rounded-xl border border-line bg-surface p-5 hover:border-accent-fill"><span className="text-xs text-muted">Continue the course</span><span className="mt-2 block font-semibold text-accent">{data.next.title} →</span></a>}
     </>}

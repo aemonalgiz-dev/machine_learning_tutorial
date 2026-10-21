@@ -8,6 +8,7 @@ import { expandedLessonById } from "@/lib/lessons";
 import { buildById } from "@/lib/builds/catalog";
 import { GaussianProcessExperiment } from "../widgets/GaussianProcessExperiment";
 import { FrameworkReference } from "./FrameworkReference";
+import { SqlData } from "./SqlData";
 
 export function ExpandedLessonPage({ id }: { id: string }) {
   const lesson = expandedLessonById[id];
@@ -28,8 +29,12 @@ export function ExpandedLessonPage({ id }: { id: string }) {
         {part.examples?.map(example => <div key={example.title} className="my-8 min-w-0 space-y-4" data-worked-example>
           <h3 className="mb-3 text-lg font-semibold text-foreground">{example.title}</h3>
           {example.paragraphs.map(text => <p key={text}>{text}</p>)}
-          <PythonCode source={example.code} />
-          <ProgramOutput output={example.output} />
+          {example.language === "sql" && <>
+            <SqlData tables={example.tables ?? []} />
+            <details><summary className="cursor-pointer text-sm text-accent">Database setup for this example</summary><PythonCode source={example.setup ?? ''} language="sql" /></details>
+          </>}
+          <PythonCode source={example.code} language={example.language} />
+          {example.resultTable ? <SqlData tables={[example.resultTable]} label="Worked query result" /> : <ProgramOutput output={example.output} />}
           {example.interpretation.map(text => <p key={text}>{text}</p>)}
         </div>)}
         {part.references?.map(reference => <FrameworkReference key={reference.title} reference={reference} />)}
@@ -38,6 +43,6 @@ export function ExpandedLessonPage({ id }: { id: string }) {
         </aside>}
       </> }, ...(lesson.checkpoints ?? []).filter(checkpoint=>checkpoint.after===part.title).map(checkpoint=>({title:checkpoint.title,quiz:checkpoint.questions}))]),
       { title: `Questions on Parts 1 to ${lesson.parts.length}`, id: lesson.quizId, quiz: lesson.quiz },
-      { title: lesson.reading.practiceTitle, id: "practice-work-through-the-problem-with-numpy", practice: lesson.practice },
+      { title: lesson.reading.practiceTitle, id: lesson.section === "SQL" ? "practice-write-the-query" : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy", practice: lesson.practice },
     ]} />;
 }

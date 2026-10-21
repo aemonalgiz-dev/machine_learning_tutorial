@@ -41,7 +41,7 @@ export function usePython(active: boolean) {
     return () => stop();
   }, [active, stop]);
 
-  const run = useCallback((source: string, expected?: string, tests?: Exercise["tests"], exports?: Exercise["exports"]): Promise<PythonResult> => {
+  const run = useCallback((source: string, expected?: string, tests?: Exercise["tests"], exports?: Exercise["exports"], sql?: Exercise["sql"]): Promise<PythonResult> => {
     if (pending.current) return Promise.resolve(failure("A program is already running."));
     if (source.length > 100_000) return Promise.resolve(failure("Keep this example below 100,000 characters."));
     return new Promise((resolve) => {
@@ -49,10 +49,10 @@ export function usePython(active: boolean) {
       try {
         worker.current ??= new Worker("/python/worker.mjs", { type: "module" });
         const currentWorker = worker.current;
-        const timer = setTimeout(() => stop("Python could not finish loading. Check your connection, then try Run again."), LOADING_LIMIT_MS);
+        const timer = setTimeout(() => stop("The code runtime could not finish loading. Check your connection, then try Run again."), LOADING_LIMIT_MS);
         pending.current = { timer, resolve };
         setBusy(true);
-        setStatus("Preparing Python for your code...");
+        setStatus(sql ? "Preparing SQLite for your query..." : "Preparing Python for your code...");
         currentWorker.onmessage = (event: MessageEvent<PythonMessage>) => {
           if (worker.current !== currentWorker || event.data.id !== id || !pending.current) return;
           const message = event.data;
@@ -66,9 +66,9 @@ export function usePython(active: boolean) {
         };
         currentWorker.onerror = (event) => {
           event.preventDefault();
-          if (worker.current === currentWorker) stop("The Python worker could not start or stopped unexpectedly. Try Run again to reload it.");
+          if (worker.current === currentWorker) stop("The code worker could not start or stopped unexpectedly. Try Run again to reload it.");
         };
-        currentWorker.postMessage({ id, source, expected, tests, exports });
+        currentWorker.postMessage({ id, source, expected, tests, exports, sql });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         worker.current?.terminate();

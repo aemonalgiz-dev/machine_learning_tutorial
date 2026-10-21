@@ -8,8 +8,15 @@ import { TOOLS } from "@/lib/builds/tools";
 import { WorkshopValue } from "./WorkshopValue";
 import { PixelGrid } from "./PixelGrid";
 import { ActionSequence, ForecastSequence } from "./SequentialExperiment";
+import { graphDisplay } from "@/lib/builds/graph-display";
+import { NetworkDiagram } from "../concept/NetworkDiagram";
 
 function ValueEditor({ value, label, change }: { value: Data; label: string; change: (value: Data) => void }) {
+  const network = graphDisplay(value);
+  if (value && typeof value === "object" && !Array.isArray(value) && Array.isArray(value.nodes) && Array.isArray(value.edges)) return <div className="min-w-0 space-y-3">
+    <div>{network ? <NetworkDiagram scene={network} /> : <p role="status" className="rounded-lg border border-line p-3 text-sm text-muted">Keep editing the records below. The diagram needs unique node IDs and relationships with existing endpoints. It displays up to 12 nodes and 24 relationships.</p>}</div>
+    <details className="rounded-lg border border-line p-3"><summary className="cursor-pointer text-sm text-accent">Edit the node and relationship records</summary><div className="mt-4 max-h-96 space-y-4 overflow-auto">{Object.entries(value).map(([key, entry]) => <div key={key}><p className="mb-2 text-sm font-semibold">{key}</p><ValueEditor value={entry} label={`${label}, ${key}`} change={next => change({ ...value, [key]: next })} /></div>)}</div></details>
+  </div>;
   if (Array.isArray(value)) return <div className="flex max-w-full flex-wrap gap-2">{value.map((item, i) => <div key={i} className="min-w-0 rounded border border-line p-2"><span className="mb-1 block text-xs text-muted">{i + 1}</span><ValueEditor value={item} label={`${label}, entry ${i + 1}`} change={next => change(value.map((old, at) => at === i ? next : old))} /></div>)}</div>;
   if (typeof value === "number" || value === null) return <input aria-label={label} type="number" step="any" value={value ?? ""} placeholder="Missing" className="min-h-11 w-24 max-w-full rounded border border-line bg-background px-2 font-mono text-sm" onChange={event => change(event.target.value === "" ? null : Number(event.target.value))} />;
   if (typeof value === "boolean") return <label className="inline-flex min-h-11 items-center gap-3 text-sm"><input aria-label={label} type="checkbox" checked={value} onChange={event => change(event.target.checked)} className="size-5 accent-amber-400" />{value ? "True" : "False"}</label>;

@@ -1,4 +1,5 @@
 import type { ReadingScene as Demonstration, Strip } from "@/lib/intuition/types";
+import { NetworkDiagram } from "./NetworkDiagram";
 
 function Items({ row }: { row: Strip }) {
   if (row.items.length === 1) return <span className={`break-words ${row.active?.includes(0) ? "font-semibold text-accent" : ""}`}>{row.active?.includes(0) && <span className="sr-only">Highlighted: </span>}{row.items[0]}</span>;
@@ -109,14 +110,6 @@ export function ReadingScene({ scene }: { scene: Demonstration }) {
   }
 
   if (scene.kind === "network") {
-    const positions = scene.nodes.map((_, i) => ({ x: i % 2 === 0 ? 85 : 275, y: 48 + i * 94 }));
-    return <svg viewBox={`0 0 370 ${scene.nodes.length * 94}`} role="img" aria-label={scene.caption} className="mx-auto w-full max-w-md">
-      {scene.edges.map(([from,to], i) => <line key={i} x1={positions[from].x} y1={positions[from].y} x2={positions[to].x} y2={positions[to].y} className="stroke-teal-500" strokeWidth="3"><title>{`${scene.nodes[from].label} connected to ${scene.nodes[to].label}`}</title></line>)}
-      {scene.nodes.map((node,i)=><g key={i}>
-        <rect x={positions[i].x-62} y={positions[i].y-25} width="124" height="50" rx="12" className="fill-background stroke-accent" strokeWidth="2" />
-        <text x={positions[i].x} y={positions[i].y+5} textAnchor="middle" fontSize="15" className="fill-foreground">{node.label}</text>
-        {node.value && <text x={positions[i].x} y={positions[i].y+51} textAnchor="middle" fontSize="13" className="fill-foreground">{node.value}</text>}
-      </g>)}
-    </svg>;
+    return <NetworkDiagram scene={scene} />;
   }
 }

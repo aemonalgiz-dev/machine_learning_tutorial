@@ -235,7 +235,7 @@ export function SectionNavigator({
           >
             {kind !== "prose" && (
               <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-accent-soft px-2.5 py-0.5 font-mono text-xs text-accent">
-                {kind === "quiz" ? "Check yourself" : kind === "game" ? "Try it with Botie" : "Write and run Python"}
+                {kind === "quiz" ? "Check yourself" : kind === "game" ? "Try it with Botie" : entry.practice?.every(problem => problem.language === "sql") ? "Write and run SQL" : "Write and run Python"}
               </p>
             )}
             <h2

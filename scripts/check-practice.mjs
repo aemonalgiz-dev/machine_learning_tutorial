@@ -14,7 +14,9 @@ await python.loadPackage(["numpy", "scipy", "pydantic"]);
 python.unpackArchive(new Uint8Array(await readFile(path.join(websiteRoot, "public/python/oop-ml.zip"))), "zip", { extractDir: "/home/pyodide/course-sdk" });
 python.runPython('import sys\nsys.path.insert(0, "/home/pyodide/course-sdk")\nimport oop_ml');
 python.runPython(await readFile(path.join(websiteRoot, "public/python/runner.py"), "utf8"));
+python.runPython(await readFile(path.join(websiteRoot, "public/python/sql_runner.py"), "utf8"));
 const run = python.globals.get("run_course_code");
+const runSql = python.globals.get("run_course_sql");
 const report = [];
 const record = process.argv.includes("--record");
 const filter = process.argv.slice(2).find((argument) => !argument.startsWith("--"));
@@ -26,7 +28,9 @@ for (const lesson of await collectExercises()) {
   if (process.argv.includes("--expanded") && !lesson.expanded) continue;
   for (const exercise of lesson.exercises) {
     const expected = record ? exercise.output : browserOutput(exercise, fixtures);
-    const result = JSON.parse(run(exercise.solution, expected, JSON.stringify(exercise.tests ?? []), JSON.stringify(exercise.exports ?? [])));
+    const result = JSON.parse(exercise.language === "sql"
+      ? runSql(exercise.solution, exercise.sql.setup, expected, JSON.stringify(exercise.tests ?? []))
+      : run(exercise.solution, expected, JSON.stringify(exercise.tests ?? []), JSON.stringify(exercise.exports ?? [])));
     const comparison = { passed: result.tests.every((test) => test.status === "passed") };
     if (record && !result.error && result.stdout.trimEnd() !== exercise.output.trimEnd()) {
       outputs[exercise.title] = { signature: exerciseSignature(exercise), output: result.stdout.trimEnd() };
@@ -37,11 +41,12 @@ for (const lesson of await collectExercises()) {
   }
 }
 run.destroy();
+runSql.destroy();
 if (record && report.every((entry) => !entry.error)) {
   const manifest = JSON.parse(await readFile(path.join(websiteRoot, "public/python/sdk-manifest.json"), "utf8"));
   await writeFile(path.join(websiteRoot, "lib/practice-fixtures.json"), JSON.stringify({ runtime: "314.0.7", sdk: manifest.sha256, outputs }, null, 2) + "\n");
   console.log(`Recorded ${Object.keys(outputs).length} browser-specific outputs. Run the checks again to validate them.`);
 }
 const failures = report.filter((result) => result.error || !result.passed);
-console.log(`${report.length - failures.length}/${report.length} reference solutions passed in browser Python.`);
+console.log(`${report.length - failures.length}/${report.length} reference solutions passed in the browser runtime.`);
 process.exitCode = (record ? report.some((entry) => entry.error) : failures.length > 0) ? 1 : 0;

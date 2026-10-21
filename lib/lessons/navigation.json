@@ -98,6 +98,468 @@
     "blurb": "A printed table is not a complete experiment record. We will save arrays with their shapes and types, keep related arrays together, and check what survives when a report moves through a text file."
   },
   {
+    "id": "sql-tables",
+    "title": "What Does One Row Actually Describe?",
+    "section": "SQL",
+    "topic": "Reading the Records",
+    "blurb": "Botie has an asset list and a stack of inspection notes. Decide what belongs on each row before asking the database a question."
+  },
+  {
+    "id": "sql-select",
+    "title": "Which Columns Answer the Question?",
+    "section": "SQL",
+    "topic": "Reading the Records",
+    "blurb": "A report needs the kinds of equipment at each site. Choose the relevant fields and decide exactly which repeated rows should disappear."
+  },
+  {
+    "id": "sql-where",
+    "title": "Which Inspection Records Need Our Attention?",
+    "section": "SQL",
+    "topic": "Reading the Records",
+    "blurb": "Translate a maintenance question into conditions on individual rows, and make the grouping of those conditions explicit."
+  },
+  {
+    "id": "sql-order-limit",
+    "title": "Which Two Visits Took the Longest?",
+    "section": "SQL",
+    "topic": "Reading the Records",
+    "blurb": "Build a reproducible top list, including what happens when two records have the same value."
+  },
+  {
+    "id": "sql-null",
+    "title": "Was the Visit Instant, or Is Its Duration Missing?",
+    "section": "SQL",
+    "topic": "Missing Values and Decisions",
+    "blurb": "Keep an unknown measurement distinct from zero, and follow SQL’s true, false and unknown conditions."
+  },
+  {
+    "id": "sql-case",
+    "title": "What Should Botie Label Each Reading?",
+    "section": "SQL",
+    "topic": "Missing Values and Decisions",
+    "blurb": "Express a row-level decision with CASE while keeping unknown measurements visible and using fallbacks deliberately."
+  },
+  {
+    "id": "sql-aggregates",
+    "title": "How Much Inspection Time Did We Actually Record?",
+    "section": "SQL",
+    "topic": "Summarising Maintenance Work",
+    "blurb": "Turn visit rows into a summary without confusing the number of visits with the number of known durations."
+  },
+  {
+    "id": "sql-group-by",
+    "title": "How Much Work Belongs to Each Asset?",
+    "section": "SQL",
+    "topic": "Summarising Maintenance Work",
+    "blurb": "Form a separate group for each asset, then calculate summaries without mixing visits from different equipment."
+  },
+  {
+    "id": "sql-having",
+    "title": "Which Assets Keep Returning with the Same Finding?",
+    "section": "SQL",
+    "topic": "Summarising Maintenance Work",
+    "blurb": "Filter individual inspections before grouping, then filter the groups according to the evidence they contain."
+  },
+  {
+    "id": "sql-inner-joins",
+    "title": "Which Site Does Each Inspection Belong To?",
+    "section": "SQL",
+    "topic": "Connecting Tables Without Changing the Question",
+    "blurb": "Connect inspection facts to the asset register by a declared key, then inspect the row pairs the join actually produces."
+  },
+  {
+    "id": "sql-left-joins",
+    "title": "Which Assets Have No Matching Inspection?",
+    "section": "SQL",
+    "topic": "Connecting Tables Without Changing the Question",
+    "blurb": "Keep the whole asset register while attaching whatever qualifying inspection evidence exists."
+  },
+  {
+    "id": "sql-join-grain",
+    "title": "Why Did Joining Readings Double the Inspection Total?",
+    "section": "SQL",
+    "topic": "Connecting Tables Without Changing the Question",
+    "blurb": "Trace a many-to-many multiplication, then summarise each event stream at the intended grain before combining it."
+  },
+  {
+    "id": "sql-subqueries",
+    "title": "Which Inspections Took Longer Than the Usual Visit?",
+    "section": "SQL",
+    "topic": "Queries Built from Queries",
+    "blurb": "Use one query’s result inside another without losing track of whether that result is one value, several rows, or a value belonging to the current asset."
+  },
+  {
+    "id": "sql-exists",
+    "title": "Which Pumps Still Have No Completed Visit?",
+    "section": "SQL",
+    "topic": "Queries Built from Queries",
+    "blurb": "Ask whether a related row exists, keep the outer row’s identity, and avoid treating an unknown key as evidence that every candidate is present."
+  },
+  {
+    "id": "sql-set-operations",
+    "title": "Which Pumps Appear on Either List but Are Still Unfinished?",
+    "section": "SQL",
+    "topic": "Queries Built from Queries",
+    "blurb": "Combine, compare and subtract query results while keeping duplicate policy, column meaning and final ordering explicit."
+  },
+  {
+    "id": "sql-ctes",
+    "title": "Can We Read the Query in the Order We Explain the Job?",
+    "section": "SQL",
+    "topic": "Queries Built from Queries",
+    "blurb": "Use common table expressions to name meaningful query stages while keeping grain, scope and execution assumptions explicit."
+  },
+  {
+    "id": "sql-recursive-ctes",
+    "title": "How Far Does the Failed Supply Line Reach?",
+    "section": "SQL",
+    "topic": "Queries Built from Queries",
+    "blurb": "Follow a hierarchy or dependency graph using an anchor, a repeated join and explicit safeguards against cycles and excessive traversal."
+  },
+  {
+    "id": "sql-window-functions",
+    "title": "Keep Every Reading While Looking at Its Neighbours",
+    "section": "SQL",
+    "topic": "Analysing Change Across Rows",
+    "blurb": "Partition and order individual records for row numbers, ranks and previous-reading comparisons without collapsing them into groups."
+  },
+  {
+    "id": "sql-window-frames",
+    "title": "Which Readings Belong in This Rolling Total?",
+    "section": "SQL",
+    "topic": "Analysing Change Across Rows",
+    "blurb": "Choose ROWS, peer groups and time ranges deliberately so rolling calculations include the observations the question actually describes."
+  },
+  {
+    "id": "sql-dates",
+    "title": "Where Did the Quiet Day Go?",
+    "section": "SQL",
+    "topic": "Preparing Records for Analysis",
+    "blurb": "Define UTC timestamps, half-open reporting intervals and a calendar spine so missing days do not disappear or midnight events get counted twice."
+  },
+  {
+    "id": "sql-text",
+    "title": "Why Did a Pump Search Return the Wrong Equipment?",
+    "section": "SQL",
+    "topic": "Preparing Records for Analysis",
+    "blurb": "Clean and compare text under an explicit identifier policy, with literal pattern characters, NULL handling and honest Unicode limits."
+  },
+  {
+    "id": "sql-json",
+    "title": "Is That Temperature a Number or Just Text?",
+    "section": "SQL",
+    "topic": "Preparing Records for Analysis",
+    "blurb": "Extract structured payloads with explicit JSON validity and type checks while preserving the distinction between missing, null, text and numeric data."
+  },
+  {
+    "id": "sql-feature-tables",
+    "title": "What Could the Model Have Known at That Moment?",
+    "section": "SQL",
+    "topic": "Features from Historical Data",
+    "blurb": "Build one feature row per historical decision using event time, availability time and explicit label boundaries, without leaking later evidence into the inputs."
+  },
+  {
+    "id": "sql-schema-design",
+    "title": "What Does One Equipment Record Promise?",
+    "section": "SQL",
+    "topic": "Designing Reliable Tables",
+    "blurb": "A column called cost can hold cents, pounds or an unexplained string. Give the maintenance team a table whose identities and units mean the same thing on every row."
+  },
+  {
+    "id": "sql-constraints",
+    "title": "Can a Job Refer to a Pump We Have Never Recorded?",
+    "section": "SQL",
+    "topic": "Designing Reliable Tables",
+    "blurb": "A row can have the right types and still contain an impossible reference. Put identity, domain and relationship rules at the database boundary."
+  },
+  {
+    "id": "sql-normalization",
+    "title": "Why Must a Pump Move Be Edited on Every Job?",
+    "section": "SQL",
+    "topic": "Designing Reliable Tables",
+    "blurb": "Repeated asset details make updates disagree. Find which identity determines each fact and give that fact one deliberate home."
+  },
+  {
+    "id": "sql-insert-update-delete",
+    "title": "Change the Requested Jobs Without Rewriting the Rest",
+    "section": "SQL",
+    "topic": "Changing Shared Data",
+    "blurb": "New inspections arrive, existing ones change, and cancelled drafts leave the queue. Give each write a precise target and preserve newer information."
+  },
+  {
+    "id": "sql-transactions",
+    "title": "Move Spare Parts Without Losing Half the Transfer",
+    "section": "SQL",
+    "topic": "Changing Shared Data",
+    "blurb": "A transfer changes two stock balances and its audit record. Make those changes one unit of work, and learn what a rollback can actually undo."
+  },
+  {
+    "id": "sql-concurrency",
+    "title": "What If Someone Changes the Job While Botie Is Reading It?",
+    "section": "SQL",
+    "topic": "Changing Shared Data",
+    "blurb": "Two valid edits can overwrite each other. Make stale assumptions visible, and distinguish version checks from the database’s isolation guarantees."
+  },
+  {
+    "id": "sql-indexes",
+    "title": "Find One Pump’s Readings Without Checking Every Pump",
+    "section": "SQL",
+    "topic": "Making Queries Practical",
+    "blurb": "The reading table keeps growing. Arrange useful lookup keys so the database can find a small candidate region, then account for the cost of maintaining that structure."
+  },
+  {
+    "id": "sql-query-plans",
+    "title": "Why Does a Short Query Repeat So Much Work?",
+    "section": "SQL",
+    "topic": "Making Queries Practical",
+    "blurb": "A compact query can scan the same table repeatedly. Read the access plan, preserve the answer, and compare work on data that resembles the real job."
+  },
+  {
+    "id": "sql-parameters-permissions",
+    "title": "Let a Search Value Stay a Value",
+    "section": "SQL",
+    "topic": "Making Queries Practical",
+    "blurb": "A search box should select an asset, not rewrite the query or change whose records are visible. Keep values, query structure and permissions at separate boundaries."
+  },
+  {
+    "id": "sql-data-quality",
+    "title": "Which Sensor Records Should Reach the Training Table?",
+    "section": "SQL",
+    "topic": "Keeping Learning Data Trustworthy",
+    "blurb": "A query can run successfully over duplicate identities, missing readings and impossible timestamps. Turn the dataset’s assumptions into visible checks before building model features."
+  },
+  {
+    "id": "sql-incremental-pipelines",
+    "title": "Pick Up New Changes Without Losing Late Readings",
+    "section": "SQL",
+    "topic": "Keeping Learning Data Trustworthy",
+    "blurb": "Repeated full imports become expensive, but a naive timestamp filter misses corrections and deletions. Track source change position, merge versions and commit the checkpoint with the result."
+  },
+  {
+    "id": "nosql-data-models",
+    "title": "Which Records Does the Technician Need Together?",
+    "section": "NoSQL",
+    "topic": "Choosing the Shape of the Records",
+    "blurb": "A pump screen, a recent-reading lookup and a site report ask different questions of the same records. Start with those requests before choosing how to store the data."
+  },
+  {
+    "id": "nosql-key-value",
+    "title": "Which P1 Did the Lookup Mean?",
+    "section": "NoSQL",
+    "topic": "Choosing the Shape of the Records",
+    "blurb": "Two sites use the same short asset ID. Build keys that preserve the full identity, and distinguish a missing entry from a stored zero."
+  },
+  {
+    "id": "nosql-cache-expiry",
+    "title": "How Long Should Botie Trust the Saved Reading?",
+    "section": "NoSQL",
+    "topic": "Choosing the Shape of the Records",
+    "blurb": "A cache can answer quickly while showing an old reading. Follow its expiry boundary and the load a cold cache sends back to the source."
+  },
+  {
+    "id": "nosql-documents",
+    "title": "Can One Record Describe the Pump and Its Sensor?",
+    "section": "NoSQL",
+    "topic": "Keeping Related Records Together",
+    "blurb": "Read a nested maintenance record field by field. Keep missing data separate from null, preserve measurement types, and decide which rules every document must follow."
+  },
+  {
+    "id": "nosql-embedding-references",
+    "title": "Should Every Pump Keep a Copy of the Supplier’s Phone Number?",
+    "section": "NoSQL",
+    "topic": "Keeping Related Records Together",
+    "blurb": "A copied contact becomes stale when the supplier changes its number. Separate facts owned by a pump from shared current facts and intentional historical snapshots."
+  },
+  {
+    "id": "nosql-document-queries",
+    "title": "Did the High Value Belong to the Temperature Sensor?",
+    "section": "NoSQL",
+    "topic": "Working Inside Documents",
+    "blurb": "An array contains several readings. Keep the sensor kind and its value attached to the same member while filtering documents."
+  },
+  {
+    "id": "nosql-document-updates",
+    "title": "Can Botie Save a Change Without Erasing Somebody Else’s?",
+    "section": "NoSQL",
+    "topic": "Working Inside Documents",
+    "blurb": "A technician saves an old copy after another editor has changed the pump. Keep unrelated fields intact and bind the write to the version that was actually reviewed."
+  },
+  {
+    "id": "nosql-document-indexes",
+    "title": "Can We Find North’s Hot Pumps Without Reading Every Document?",
+    "section": "NoSQL",
+    "topic": "Finding and Summarising Documents",
+    "blurb": "Use a site index to narrow the candidates, then keep the temperature condition. Inspect what an index saves and which work it leaves behind."
+  },
+  {
+    "id": "nosql-aggregation-pipelines",
+    "title": "How Much Urgent Work Was Hidden Inside the Pump Documents?",
+    "section": "NoSQL",
+    "topic": "Finding and Summarising Documents",
+    "blurb": "Follow documents through filtering, array expansion and grouping. Keep track of what one row represents so the site total counts visits exactly once."
+  },
+  {
+    "id": "nosql-partition-keys",
+    "title": "Why Is One Storage Key Doing All the Work?",
+    "section": "NoSQL",
+    "topic": "Partitioning for the Questions We Ask",
+    "blurb": "The maintenance service has plenty of records but most requests land on one tenant. Choose a key from the work the service actually performs, then inspect the traffic it concentrates."
+  },
+  {
+    "id": "nosql-wide-column",
+    "title": "Keep One Asset’s History Together Without Growing Forever",
+    "section": "NoSQL",
+    "topic": "Partitioning for the Questions We Ask",
+    "blurb": "A technician wants a time range for one pump. Give that request a bounded partition and an ordering that makes the required records reachable."
+  },
+  {
+    "id": "nosql-replication-consistency",
+    "title": "Why Did the Repair Disappear When Botie Read It Back?",
+    "section": "NoSQL",
+    "topic": "Reading and Writing Replicated Records",
+    "blurb": "Copies can disagree while an update is travelling. Define what a particular read must guarantee before deciding which replica may answer it."
+  },
+  {
+    "id": "nosql-conditional-writes",
+    "title": "Two Technicians Cannot Both Reserve the Last Kit",
+    "section": "NoSQL",
+    "topic": "Reading and Writing Replicated Records",
+    "blurb": "A successful read does not reserve the stock it showed. Put the expected version and remaining-stock rule inside the actual write."
+  },
+  {
+    "id": "nosql-conflicts",
+    "title": "How Can Two Offline Teams Keep Both Inspection Counts?",
+    "section": "NoSQL",
+    "topic": "Reading and Writing Replicated Records",
+    "blurb": "Choosing the last arriving total can lose someone’s work. Give each replica an owned contribution and derive a merge whose repeated delivery does not inflate the count."
+  },
+  {
+    "id": "nosql-streams-projections",
+    "title": "Why Does the Dashboard Still Count a Job That Was Closed?",
+    "section": "NoSQL",
+    "topic": "Keeping Derived Data Repairable",
+    "blurb": "A source record changes while a dashboard keeps its own count. Build a projection from versioned job images and make repeats, moves and deletions visible."
+  },
+  {
+    "id": "nosql-schema-evolution",
+    "title": "The New Sensor Sends a Different Document",
+    "section": "NoSQL",
+    "topic": "Keeping Derived Data Repairable",
+    "blurb": "Some readers still expect temp_c while a new device sends a value and a unit. Introduce an explicit representation version and a reader that can explain both."
+  },
+  {
+    "id": "nosql-recovery",
+    "title": "The Bad Update Reached Every Replica. What Can We Restore?",
+    "section": "NoSQL",
+    "topic": "Keeping Derived Data Repairable",
+    "blurb": "Replication faithfully copies a mistake too. Recover a known snapshot through a complete log interval, then verify the recovered service before switching readers."
+  },
+  {
+    "id": "nosql-ml-records",
+    "title": "A Fast Feature Lookup Still Has to Mean the Right Thing",
+    "section": "NoSQL",
+    "topic": "Serving Model Data",
+    "blurb": "A model needs the right entity, feature definition and available measurements in a fixed order. Use a serving document for that contract while keeping historical training evidence separately."
+  },
+  {
+    "id": "graph-database-models",
+    "title": "Which Equipment Depends on This Supply?",
+    "section": "Graph Databases",
+    "topic": "Representing Connected Records",
+    "blurb": "Represent equipment and its directed dependencies as nodes and relationships before choosing how to query the connections."
+  },
+  {
+    "id": "graph-database-identity",
+    "title": "Are These Two Pumps Actually the Same Pump?",
+    "section": "Graph Databases",
+    "topic": "Representing Connected Records",
+    "blurb": "Separate durable identity from names, qualify external IDs by their source and detect collisions before merging records."
+  },
+  {
+    "id": "graph-pattern-matching",
+    "title": "Who Inspected This Pump?",
+    "section": "Graph Databases",
+    "topic": "Asking Questions of a Graph",
+    "blurb": "Match a connected pattern and preserve variable bindings across steps instead of accidentally combining unrelated records."
+  },
+  {
+    "id": "graph-filtering-aggregation",
+    "title": "How Many Inspections Were Actually Completed?",
+    "section": "Graph Databases",
+    "topic": "Asking Questions of a Graph",
+    "blurb": "Filter bound properties and aggregate at the intended grain, distinguishing paths, relationships and distinct inspection identities."
+  },
+  {
+    "id": "graph-optional-patterns",
+    "title": "Keep the Pumps That Have No Completed Inspection",
+    "section": "Graph Databases",
+    "topic": "Asking Questions of a Graph",
+    "blurb": "Use optional graph patterns without losing the starting population or mistaking an unmatched placeholder for a real inspection."
+  },
+  {
+    "id": "graph-traversal-cycles",
+    "title": "Follow a Dependency Without Following It Forever",
+    "section": "Graph Databases",
+    "topic": "Following Connections",
+    "blurb": "Separate reachability from path enumeration, handle cycles explicitly and interpret bounded traversal results without promising complete discovery."
+  },
+  {
+    "id": "graph-shortest-paths",
+    "title": "The Route with Fewer Stops Takes Longer",
+    "section": "Graph Databases",
+    "topic": "Following Connections",
+    "blurb": "Distinguish minimum-hop paths from minimum-cost paths and implement Dijkstra’s nonnegative-cost frontier with explicit unreachable and tie semantics."
+  },
+  {
+    "id": "graph-constraints-indexes",
+    "title": "Which Rules Must Every Asset Write Preserve?",
+    "section": "Graph Databases",
+    "topic": "Maintaining a Graph",
+    "blurb": "Separate key presence, uniqueness and lookup performance, then audit existing data before installing graph constraints."
+  },
+  {
+    "id": "graph-safe-updates",
+    "title": "The Graph Changed While the Approval Was Waiting",
+    "section": "Graph Databases",
+    "topic": "Maintaining a Graph",
+    "blurb": "Treat approvals and snapshot checks as preparation, then use authorised, parameterised transactions with explicit conflict and retry behaviour."
+  },
+  {
+    "id": "graph-imports",
+    "title": "A Replayed Import Must Not Create Another Relationship",
+    "section": "Graph Databases",
+    "topic": "Maintaining a Graph",
+    "blurb": "Stage graph imports by stable identity, distinguish exact replays from conflicts and preserve rejected records instead of silently losing relationships."
+  },
+  {
+    "id": "graph-query-performance",
+    "title": "Why Did One More Hop Make the Query So Expensive?",
+    "section": "Graph Databases",
+    "topic": "Maintaining a Graph",
+    "blurb": "Read query plans, reason about candidate expansion and compare access paths without confusing a toy operation count with measured database performance."
+  },
+  {
+    "id": "graph-rdf-sparql",
+    "title": "Can Two Teams Describe the Same Resource?",
+    "section": "Graph Databases",
+    "topic": "Shared Meaning and Evidence",
+    "blurb": "Distinguish resource identifiers from literals, read RDF statements and build SPARQL patterns without confusing RDF with the property-graph model."
+  },
+  {
+    "id": "graph-provenance",
+    "title": "Where Did This Maintenance Claim Come From?",
+    "section": "Graph Databases",
+    "topic": "Shared Meaning and Evidence",
+    "blurb": "Represent claims and their sources, retain contradictions and apply explicit time boundaries before using graph evidence."
+  },
+  {
+    "id": "graph-ml-retrieval",
+    "title": "Which Connected Records Can the Assistant Use?",
+    "section": "Graph Databases",
+    "topic": "Graphs in ML Systems",
+    "blurb": "Build bounded graph retrieval with access and time boundaries, then preserve evidence and measure whether the added context actually helps."
+  },
+  {
     "id": "record-quality",
     "title": "What Does One Row Represent?",
     "section": "Data Preparation",
@@ -187,6 +649,69 @@
     "section": "Choosing and Checking a Model",
     "topic": "Know the Limits of the Result",
     "blurb": "One average hides how it might change if different observations had been collected. Resampling the observed data gives us a way to study that dependence under explicit assumptions."
+  },
+  {
+    "id": "model-residual-analysis",
+    "title": "What Are the Errors Trying to Tell Us?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Find the Mistakes Behind the Score",
+    "blurb": "The temperature errors average to zero, but the greenhouse is still too hot some mornings. Keep each mistake beside the reading that produced it and work out what the average concealed."
+  },
+  {
+    "id": "model-precision-recall",
+    "title": "Which Alerts Deserve an Inspection?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Find the Mistakes Behind the Score",
+    "blurb": "A fault detector can look accurate while missing almost every fault. Follow the alerts and the faults separately, then choose a threshold the inspection team can actually use."
+  },
+  {
+    "id": "model-evaluation-slices",
+    "title": "Better for Which Cases?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Find the Mistakes Behind the Score",
+    "blurb": "Most readings come from the day shift. A model can improve its overall score while getting worse at night. Keep group sizes beside group errors before calling that a repair."
+  },
+  {
+    "id": "model-paired-comparisons",
+    "title": "Did the Revision Help on the Same Cases?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Compare Revisions Fairly",
+    "blurb": "A lower score on an easier dataset tells us little about a revision. Match the cases, inspect their gains and regressions, then resample the paired observations to explore uncertainty."
+  },
+  {
+    "id": "model-nested-validation",
+    "title": "Who Checks the Model-Choosing Process?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Compare Revisions Fairly",
+    "blurb": "Trying enough settings can produce an attractive validation score by chance. Put the search inside a separate assessment so the result includes the cost of choosing."
+  },
+  {
+    "id": "model-data-audits",
+    "title": "Is the Model Wrong, or Is the Record Wrong?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Repair the Evidence and the Behaviour",
+    "blurb": "A suspicious label deserves a closer look. Use out-of-fold disagreements to organise review while preserving original records and the boundary around the final assessment."
+  },
+  {
+    "id": "model-selective-prediction",
+    "title": "When Should the Model Ask for Help?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Repair the Evidence and the Behaviour",
+    "blurb": "Sending uncertain cases to a person changes both the error rate and the workload. Measure what the model handles and what it leaves for the review team."
+  },
+  {
+    "id": "model-behaviour-tests",
+    "title": "Should This Change the Prediction?",
+    "section": "Evaluating and Improving Models",
+    "topic": "Repair the Evidence and the Behaviour",
+    "blurb": "The same measurement can arrive in different units or a different batch. State the behaviour that should survive those changes, then test the actual prediction pipeline."
+  },
+  {
+    "id": "model-iteration-project",
+    "title": "Repair the Night-Shift Model Without Breaking the Day Shift",
+    "section": "Evaluating and Improving Models",
+    "topic": "Build and Check a Model Revision",
+    "blurb": "Diagnose a missing condition, fit a revised predictor and compare it with the baseline. Botie then checks whether the overall gain survives group and runtime requirements on a fresh shift."
   },
   {
     "id": "conditional-probability",
@@ -700,6 +1225,13 @@
     "blurb": "Bring the requirements back to the complete service. Check fault misses and queue capacity separately, then identify what the prototype still has not demonstrated."
   },
   {
+    "id": "agent-introduction",
+    "title": "What Makes This an Agent?",
+    "section": "Agents",
+    "topic": "From an Answer to an Action",
+    "blurb": "Botie can describe a pump, but the technician needs its actual manual. Follow the software that lets a model ask for information and use what comes back."
+  },
+  {
     "id": "agent-prompts",
     "title": "How Do We Give an Agent a Job It Can Follow?",
     "section": "Agents",
@@ -733,6 +1265,13 @@
     "section": "Agents",
     "topic": "Letting the Model Use Tools",
     "blurb": "One search may reveal that a second search is needed. Follow the observations through an agent loop, then give that loop explicit ways to finish or ask for help."
+  },
+  {
+    "id": "agent-or-workflow",
+    "title": "Does Botie Need to Choose the Next Step?",
+    "section": "Agents",
+    "topic": "Choosing How Much Autonomy to Give",
+    "blurb": "A request to find a maintenance record and an investigation of an unfamiliar fault ask different things of the program. Compare what fixed steps can do before giving a model more decisions."
   },
   {
     "id": "agent-pydantic-ai",
@@ -770,38 +1309,129 @@
     "blurb": "Several assistants need the same maintenance tools. Share an interface while keeping server identity, permissions and returned content visible."
   },
   {
+    "id": "agent-prompt-injection",
+    "title": "What If the Manual Starts Giving Botie Orders?",
+    "section": "Agents",
+    "topic": "Guardrails at the Point of Action",
+    "blurb": "A retrieved maintenance note tells Botie to export records. Trace where that instruction came from, then keep the application’s permissions intact even when a screening model misses it."
+  },
+  {
+    "id": "agent-authorization",
+    "title": "Whose Pump Is Botie Allowed to Inspect?",
+    "section": "Agents",
+    "topic": "Guardrails at the Point of Action",
+    "blurb": "The tool name is allowed, but its arguments point at another customer’s asset. Build the service-side checks that connect the caller, operation and stored record."
+  },
+  {
+    "id": "agent-data-boundaries",
+    "title": "How Much of the Maintenance Record Does Botie Need?",
+    "section": "Agents",
+    "topic": "Guardrails at the Point of Action",
+    "blurb": "A manual lookup needs an asset and a symptom, but the original record also contains private contact details. Build the smaller payload and control where it can go."
+  },
+  {
+    "id": "agent-output-guardrails",
+    "title": "Can We Safely Use the Answer Botie Returned?",
+    "section": "Agents",
+    "topic": "Guardrails at the Point of Action",
+    "blurb": "A response can be valid JSON and still name the wrong pump or contain unwanted markup. Check its structure, its relationship to the request, and the context that will consume it."
+  },
+  {
+    "id": "agent-retries-and-effects",
+    "title": "Did Botie Create the Inspection, or Did the Reply Get Lost?",
+    "section": "Agents",
+    "topic": "Keeping an Agent Run Under Control",
+    "blurb": "A request times out after Botie submits an inspection. Work out what the service may already have done before sending another request."
+  },
+  {
+    "id": "agent-resource-budgets",
+    "title": "Can Two of Botie’s Calls Spend the Same Remaining Budget?",
+    "section": "Agents",
+    "topic": "Keeping an Agent Run Under Control",
+    "blurb": "Two proposed lookups each appear affordable until they start together. Reserve shared resources before dispatch and keep the whole run within its operating limits."
+  },
+  {
+    "id": "agent-prompt-examples",
+    "title": "Which Examples Should We Put in the Prompt?",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Teaching the Task Through Examples",
+    "blurb": "Botie keeps making an inspection sound mandatory. Show what a supported answer looks like, then check that the examples teach the distinction we intended."
+  },
+  {
     "id": "agent-tracing",
     "title": "Why Did Botie Take So Long?",
-    "section": "Agents",
+    "section": "Prompting, Evaluation and Iteration",
     "topic": "Seeing What Happened",
     "blurb": "An answer arrives late, but the text cannot tell us where the time went. Follow one maintenance request through retrieval, tool calls and the final response."
   },
   {
     "id": "agent-langfuse",
     "title": "Can We Find the Run Behind This Score?",
-    "section": "Agents",
+    "section": "Prompting, Evaluation and Iteration",
     "topic": "Seeing What Happened",
     "blurb": "A dashboard says answers improved. Connect scores to their requests and prompt versions so we can see which answers were actually checked."
   },
   {
     "id": "agent-evaluation-datasets",
     "title": "What Would Count as Doing the Job?",
-    "section": "Agents",
-    "topic": "Evaluating the Whole Agent",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Building Evaluation Cases",
     "blurb": "A plausible answer can still come from an unacceptable sequence of actions. Build maintenance cases that check the answer, permitted tools and failure behaviour."
+  },
+  {
+    "id": "agent-framework-tests",
+    "title": "What Can We Test Without Calling a Model?",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Testing the Program Around the Model",
+    "blurb": "An agent framework can run our tools, but a test model and a real model answer different questions. Build contract checks before spending time on live evaluations."
   },
   {
     "id": "agent-model-judges",
     "title": "Who Checks the Model That Checks Botie?",
-    "section": "Agents",
-    "topic": "Evaluating the Whole Agent",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Reviewing Answer Quality",
     "blurb": "Some answers need interpretation rather than an exact comparison. Give a judge a clear rubric, then test its judgements against evidence and human review."
+  },
+  {
+    "id": "agent-error-analysis",
+    "title": "Where Did the Answer First Go Wrong?",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Finding a Change Worth Making",
+    "blurb": "Several answers are wrong, but they did not fail for the same reason. Inspect the evidence and tool results before rewriting the prompt."
+  },
+  {
+    "id": "agent-ablation-experiments",
+    "title": "Did the New Examples Cause the Improvement?",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Finding a Change Worth Making",
+    "blurb": "A candidate improves after we change its model and prompt. Separate the changes, pair the task results, and inspect what became worse."
   },
   {
     "id": "agent-release-checks",
     "title": "Is This Version Ready for the Next Shift?",
-    "section": "Agents",
-    "topic": "Evaluating the Whole Agent",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Deciding Whether to Release",
     "blurb": "A new agent can improve average answers while introducing an unacceptable failure. Compare the same cases and keep critical behaviour and operating budgets visible."
+  },
+  {
+    "id": "agent-adversarial-evaluations",
+    "title": "Can We Make Botie Cross the Boundary?",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Testing and Operating the Boundaries",
+    "blurb": "A guardrail passes our friendly examples. Try to break a specific boundary, inspect the actual effects, and check whether ordinary maintenance questions still work."
+  },
+  {
+    "id": "agent-incident-response",
+    "title": "What Happens When the New Shift Finds a Failure?",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "Testing and Operating the Boundaries",
+    "blurb": "The released assistant attempts an unapproved job. Stop further effects, account for work already in flight, and turn the failure into evidence for a careful restart."
+  },
+  {
+    "id": "agent-iteration-project",
+    "title": "Repair Botie’s Maintenance Assistant",
+    "section": "Prompting, Evaluation and Iteration",
+    "topic": "A Repair From Failure to Fresh Evidence",
+    "blurb": "Follow a stale-manual failure through a test, a repair and a fresh evaluation. Keep unsupported answers and unapproved actions out of the release decision."
   }
 ]

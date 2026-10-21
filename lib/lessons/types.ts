@@ -1,5 +1,5 @@
 import type { Build } from "../builds/engine";
-import type { Exercise } from "../exercises";
+import type { Exercise, SqlTable } from "../exercises";
 import type { LessonHistory } from "../history/types";
 import type { QuizQuestion } from "../quizzes";
 import type { ExpandedLessonId } from "./ids";
@@ -8,7 +8,7 @@ import type { Scene } from "../intuition/types";
 export interface FrameworkReference {
   title: string;
   description: string[];
-  language: "python" | "yaml" | "json" | "bash";
+  language: "python" | "yaml" | "json" | "bash" | "sql" | "cypher" | "sparql";
   code: string;
   setup: string[];
   interpretation: string[];
@@ -45,6 +45,10 @@ export interface ExpandedLesson {
     interpretation: string[];
     references?: FrameworkReference[];
     examples?: {
+      language?: "python" | "sql";
+      setup?: string;
+      tables?: SqlTable[];
+      resultTable?: SqlTable;
       title: string;
       paragraphs: string[];
       code: string;

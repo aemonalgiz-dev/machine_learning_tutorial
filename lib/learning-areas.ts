@@ -13,9 +13,20 @@ export const LEARNING_AREAS: LearningArea[] = [
   {
     id: "mathematics-and-programming",
     title: "Mathematics and Programming",
-    description: "Work through the mathematics and learn to calculate with Python and NumPy. Start here, or return when a lesson needs something unfamiliar.",
-    introduction: "Before a calculation can tell us anything useful, we need to understand what the numbers represent. We will start with small examples, work through the mathematics, and learn how to express those calculations in Python. You can follow these sections in order or come back to a particular idea when you need it.",
+    description: "Work through the mathematics and calculate with Python and NumPy. Start here, or return when a lesson needs something unfamiliar.",
+    introduction: "Before a calculation can tell us anything useful, we need to understand what the numbers represent. We will start with small examples and learn how to express calculations in Python. You can follow these sections in order or return to a particular idea when you need it.",
     groups: [{ id: "foundations", title: "Build the foundations", sections: ["Introductory Mathematics", "Python and NumPy"] }],
+  },
+  {
+    id: "databases",
+    title: "Databases",
+    description: "Our data often lives across years of records. How do we organise those records, find the ones we need, and keep them reliable as they change? Work through SQL, NoSQL and graph databases with Botie.",
+    introduction: "Suppose a maintenance team has years of inspection records. Before we can train a model, we need to know which machine each reading belongs to and what was known at the time. Start with tables and SQL. Then consider an inspection with its own nested details, readings arriving at several sites, or a fault that spreads through connected equipment. Those questions give us reasons to try other ways of storing and querying the records. We will keep asking what each choice makes easier and what we must now manage ourselves.",
+    groups: [
+      { id: "relational-databases", title: "Working with relational databases", sections: ["SQL"] },
+      { id: "nosql-databases", title: "Storing records around how we use them", sections: ["NoSQL"] },
+      { id: "graph-databases", title: "Asking questions about connections", sections: ["Graph Databases"] },
+    ],
   },
   {
     id: "machine-learning",
@@ -23,12 +34,13 @@ export const LEARNING_AREAS: LearningArea[] = [
     description: "How does a model learn from examples? Begin with a prediction, then build the methods with Botie and work through them in Python.",
     introduction: "Suppose we have measurements from people we know and want to predict something about a person we haven't measured. How would we find a useful rule? We will begin there, then work through the problems that led people to develop other methods. Each section gives you a way to inspect what those methods actually do.",
     groups: [
-      { id: "getting-started", title: "Getting started", sections: ["Start with a Prediction", "Data Preparation", "Choosing and Checking a Model"] },
+      { id: "getting-started", title: "Getting started", sections: ["Start with a Prediction", "Data Preparation", "Choosing and Checking a Model", "Evaluating and Improving Models"] },
       { id: "methods", title: "Understanding the methods", sections: ["Classical Machine Learning", "Probabilistic Models and Uncertainty", "Neural Networks", "Optimisation and Training"] },
       { id: "problems", title: "Working with particular kinds of problems", sections: ["Computer Vision with Neural Networks", "Natural Language Processing", "Time Series and Forecasting", "Recommendations and Ranking", "Graphs and Relational Learning", "Anomaly Detection"] },
       { id: "generating", title: "Generating and adapting models", sections: ["Large Language Models", "Generative Models", "Adapting and Evaluating Modern Models"] },
       { id: "decisions", title: "Learning through decisions and experiments", sections: ["Reinforcement Learning", "Causal Inference and Experiments"] },
-      { id: "practice", title: "Putting models to work", sections: ["Deploying and Maintaining Models", "Agents", "Complete Projects"] },
+      { id: "agents", title: "Building and improving agents", sections: ["Agents", "Prompting, Evaluation and Iteration"] },
+      { id: "practice", title: "Putting models to work", sections: ["Deploying and Maintaining Models", "Complete Projects"] },
     ],
   },
   {

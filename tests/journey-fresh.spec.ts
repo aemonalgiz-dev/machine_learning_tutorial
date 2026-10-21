@@ -8,6 +8,17 @@ import { applicationFreshCases } from "../lib/builds/journey-fresh/applications"
 import { agentFoundationFreshCases } from "../lib/builds/journey-fresh/agent-foundations";
 import { agentFrameworkFreshCases } from "../lib/builds/journey-fresh/agent-frameworks";
 import { agentObservabilityFreshCases } from "../lib/builds/journey-fresh/agent-observability";
+import { agentGuardrailFreshCases } from "../lib/builds/journey-fresh/agent-guardrails";
+import { agentReliabilityFreshCases } from "../lib/builds/journey-fresh/agent-reliability";
+import { agentIterationFreshCases } from "../lib/builds/journey-fresh/agent-iteration";
+import { modelEvaluationFreshCases } from "../lib/builds/journey-fresh/model-evaluation";
+import { agentAssuranceFreshCases } from "../lib/builds/journey-fresh/agent-assurance";
+import { sqlFoundationFreshCases } from "../lib/builds/journey-fresh/sql-foundations";
+import { sqlAnalysisFreshCases } from "../lib/builds/journey-fresh/sql-analysis";
+import { sqlSystemFreshCases } from "../lib/builds/journey-fresh/sql-systems";
+import { NOSQL_FOUNDATION_FRESH } from "../lib/builds/journey-fresh/nosql-foundations";
+import { NOSQL_SYSTEM_FRESH } from "../lib/builds/journey-fresh/nosql-systems";
+import { GRAPH_DATABASE_FRESH } from "../lib/builds/journey-fresh/graph-databases";
 import { freshJourneyBuild } from "../lib/builds/journey-fresh";
 import { assemble, constant, evaluate, same, type Data } from "../lib/builds/engine";
 import { TOOLS } from "../lib/builds/tools";
@@ -21,7 +32,7 @@ function finite(data: Data): boolean {
 }
 
 test("every lesson has a separately authored follow-up with new inputs and an explicit objective", () => {
-  const keys = [foundationFreshCases, modelFreshCases, applicationFreshCases, agentFoundationFreshCases, agentFrameworkFreshCases, agentObservabilityFreshCases].flatMap(Object.keys);
+  const keys = [foundationFreshCases, modelFreshCases, applicationFreshCases, agentFoundationFreshCases, agentFrameworkFreshCases, agentObservabilityFreshCases, agentGuardrailFreshCases, agentReliabilityFreshCases, agentAssuranceFreshCases, agentIterationFreshCases, modelEvaluationFreshCases, sqlFoundationFreshCases, sqlAnalysisFreshCases, sqlSystemFreshCases, NOSQL_FOUNDATION_FRESH, NOSQL_SYSTEM_FRESH, GRAPH_DATABASE_FRESH].flatMap(Object.keys);
   expect(keys.length).toBe(new Set(keys).size);
   expect(keys.sort()).toEqual(labLessons.map(lesson => lesson.id).sort());
   for (const lesson of labLessons) {

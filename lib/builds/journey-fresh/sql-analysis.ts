@@ -1,0 +1,85 @@
+import type { FreshJourneyCase } from '../journey-fresh';
+
+export const sqlAnalysisFreshCases: Record<string, FreshJourneyCase> = {
+  'sql-subqueries': {
+    name: 'A different shift has two visits above its own mean',
+    prompt: 'The recorded minutes are 5, 10, 35, 70 and NULL. Recalculate the mean from known values and return inspections strictly above it, in inspection-ID order.',
+    data: { visits: [{ inspection_id: 12, minutes: 5 }, { inspection_id: 10, minutes: 70 }, { inspection_id: 11, minutes: 35 }, { inspection_id: 14, minutes: 10 }, { inspection_id: 13, minutes: null }] },
+    expected: [{ inspection_id: 10, minutes: 70 }, { inspection_id: 11, minutes: 35 }],
+    why: 'The known-value mean is 30. A copied forty-minute threshold would incorrectly drop the 35-minute visit.',
+  },
+  'sql-exists': {
+    name: 'A new registry includes an open visit and an unattributed completion',
+    prompt: 'P2 is complete, P4 has only open work, and P6 has no visit. A NULL-ID completion cannot stand in for either missing match. Report the awaiting IDs in order.',
+    data: { assets: [{ asset_id: 'P6' }, { asset_id: 'P2' }, { asset_id: 'P4' }], visits: [{ asset_id: 'P2', status: 'closed' }, { asset_id: 'P2', status: 'closed' }, { asset_id: 'P4', status: 'open' }, { asset_id: null, status: 'closed' }] },
+    expected: [{ asset_id: 'P4' }, { asset_id: 'P6' }],
+    why: 'The existence decision stays attached to each registered asset and qualifying status, independent of repeated or unknown visit IDs.',
+  },
+  'sql-set-operations': {
+    name: 'Completed work removes one shared report from a new batch',
+    prompt: 'Combine the known asset IDs, subtract completed IDs and retain one unfinished assignment per asset. The request list repeats P4; completed also contains a pump absent from either report.',
+    data: { alerts: [{ asset_id: 'P6' }, { asset_id: 'P2' }, { asset_id: null }], requests: [{ asset_id: 'P2' }, { asset_id: 'P4' }, { asset_id: 'P4' }], completed: [{ asset_id: 'P2' }, { asset_id: 'P9' }] },
+    expected: [{ asset_id: 'P4' }, { asset_id: 'P6' }],
+    why: 'Subtraction does not add unrelated completed assets, and duplicate candidate reports still produce one assignment.',
+  },
+  'sql-ctes': {
+    name: 'The budget changes and one total is exactly on it',
+    prompt: 'The threshold is now 30 completed minutes. P2 has 12 and 23 closed minutes, P4 has exactly 30, and P6 has only a large open estimate. Report strictly qualifying totals.',
+    data: { threshold: 30, jobs: [{ asset_id: 'P4', status: 'closed', minutes: 30 }, { asset_id: 'P2', status: 'closed', minutes: 12 }, { asset_id: 'P6', status: 'open', minutes: 900 }, { asset_id: 'P2', status: 'closed', minutes: 23 }] },
+    expected: [{ asset_id: 'P2', total_minutes: 35 }],
+    why: 'The input threshold changes, but the sequence remains closed-job selection, per-asset aggregation, then a strict total comparison.',
+  },
+  'sql-recursive-ctes': {
+    name: 'A new root has two routes and a cycle',
+    prompt: 'Begin at node 10 with maximum depth 3. Two routes reach 13, and 13 points back to 10. Keep each reached node once with its minimum depth.',
+    data: { root: 10, max_depth: 3, edges: [{ parent_id: 10, child_id: 11 }, { parent_id: 10, child_id: 12 }, { parent_id: 11, child_id: 13 }, { parent_id: 12, child_id: 13 }, { parent_id: 13, child_id: 10 }, { parent_id: 13, child_id: 14 }] },
+    expected: [{ node_id: 10, depth: 0 }, { node_id: 11, depth: 1 }, { node_id: 12, depth: 1 }, { node_id: 13, depth: 2 }, { node_id: 14, depth: 3 }],
+    why: 'The repeated route is combined only in the final node report, while each path’s cycle guard prevents a return to the root.',
+  },
+  'sql-window-functions': {
+    name: 'New assets arrive out of order with a tied missing winner',
+    prompt: 'Choose the latest row per asset by measured_at descending and reading_id descending. P4’s latest timestamp ties, and the larger reading ID has a NULL value. Keep that winning record.',
+    data: { readings: [{ reading_id: 10, asset_id: 'P4', measured_at: '2026-03-01 09:00:00', value: 18 }, { reading_id: 20, asset_id: 'P2', measured_at: '2026-03-01 08:00:00', value: 5 }, { reading_id: 11, asset_id: 'P4', measured_at: '2026-03-01 09:00:00', value: null }, { reading_id: 19, asset_id: 'P2', measured_at: '2026-03-01 10:00:00', value: 8 }] },
+    expected: [{ asset_id: 'P2', reading_id: 19, value: 8 }, { asset_id: 'P4', reading_id: 11, value: null }],
+    why: 'Timestamp order precedes the ID tie break. Neither file order nor largest ID globally determines the latest observation.',
+  },
+  'sql-window-frames': {
+    name: 'Interleaved pumps have irregular observations',
+    prompt: 'Use one preceding row per asset. Sort the input by asset, time and event ID first. A long gap does not remove the previous observation from a ROWS frame.',
+    data: { preceding: 1, usage: [{ event_id: 9, asset_id: 'P4', measured_at: '2026-03-20 08:00:00', amount: 8 }, { event_id: 5, asset_id: 'P2', measured_at: '2026-03-01 08:00:00', amount: 3 }, { event_id: 8, asset_id: 'P4', measured_at: '2026-03-01 08:00:00', amount: null }, { event_id: 6, asset_id: 'P2', measured_at: '2026-03-01 08:00:00', amount: 4 }] },
+    expected: [{ event_id: 5, asset_id: 'P2', recent_total: 3 }, { event_id: 6, asset_id: 'P2', recent_total: 7 }, { event_id: 8, asset_id: 'P4', recent_total: null }, { event_id: 9, asset_id: 'P4', recent_total: 8 }],
+    why: 'The frame resets by pump and follows the deterministic row order, while the all-unknown first P4 frame remains NULL.',
+  },
+  'sql-dates': {
+    name: 'A new calendar includes quiet days and an outside event',
+    prompt: 'Report March 1 through 3 in calendar order. An event on March 4 must not add an extra report day. March 1 and March 3 remain visible despite having no events.',
+    data: { calendar: [{ day: '2026-03-03' }, { day: '2026-03-01' }, { day: '2026-03-02' }], events: [{ occurred_at: '2026-03-02 00:00:00' }, { occurred_at: '2026-03-02 23:59:59' }, { occurred_at: '2026-03-04 00:00:00' }] },
+    expected: [{ day: '2026-03-01', n: 0 }, { day: '2026-03-02', n: 2 }, { day: '2026-03-03', n: 0 }],
+    why: 'Calendar membership defines the output population. Grouping observed event days alone would both omit quiet days and include an unrequested day.',
+  },
+  'sql-text': {
+    name: 'The technician searches valve_ rather than pump_',
+    prompt: 'Apply the same ASCII cleanup, then use the supplied literal valve_ prefix. Keep both separate matching records and reject valveX4 and NULL.',
+    data: { prefix: 'valve_', codes: [{ record_id: 12, code: ' VALVE_4 ' }, { record_id: 10, code: 'valveX4' }, { record_id: 13, code: null }, { record_id: 11, code: 'valve_4' }] },
+    expected: [{ record_id: 11, normalised: 'valve_4' }, { record_id: 12, normalised: 'valve_4' }],
+    why: 'The operation reads the requested prefix as input instead of hard-coding the first lesson’s equipment family.',
+  },
+  'sql-json': {
+    name: 'A mixed new batch contains a real zero and several lookalikes',
+    prompt: 'Keep finite numeric temperature properties only. The boolean false, string "5.5", array and malformed text do not satisfy that type contract.',
+    data: { telemetry: [{ record_id: 12, payload: '{"temperature":5.5}' }, { record_id: 10, payload: '{"temperature":0}' }, { record_id: 11, payload: '{"temperature":false}' }, { record_id: 13, payload: '{"temperature":"5.5"}' }, { record_id: 14, payload: '[5.5]' }, { record_id: 15, payload: '{' }] },
+    expected: [{ record_id: 10, temperature: 0 }, { record_id: 12, temperature: 5.5 }],
+    why: 'A type check admits zero and a real fraction while a separate NULL filter rejects unavailable extractions.',
+  },
+  'sql-feature-tables': {
+    name: 'New cutoffs reveal a late upload and an empty decision',
+    prompt: 'Use a two-hour lookback for decisions at noon and 14:00 on P2, plus a noon decision on P4. The 11:00 P2 value is uploaded at 13:00. The 12:00 P2 value is available at 12:00. Apply both time rules separately for each decision.',
+    data: {
+      hours: 2,
+      decisions: [{ decision_id: 'E3', asset_id: 'P4', cutoff: '2026-03-01 12:00:00' }, { decision_id: 'E2', asset_id: 'P2', cutoff: '2026-03-01 14:00:00' }, { decision_id: 'E1', asset_id: 'P2', cutoff: '2026-03-01 12:00:00' }],
+      events: [{ asset_id: 'P2', event_at: '2026-03-01 10:00:00', available_at: '2026-03-01 10:01:00', value: 6 }, { asset_id: 'P2', event_at: '2026-03-01 11:00:00', available_at: '2026-03-01 13:00:00', value: 30 }, { asset_id: 'P2', event_at: '2026-03-01 12:00:00', available_at: '2026-03-01 12:00:00', value: 14 }, { asset_id: 'P4', event_at: '2026-03-01 11:00:00', available_at: '2026-03-01 13:00:00', value: 90 }],
+    },
+    expected: [{ decision_id: 'E1', feature_mean: 6, n: 1 }, { decision_id: 'E2', feature_mean: 14, n: 1 }, { decision_id: 'E3', feature_mean: null, n: 0 }],
+    why: 'The late 11:00 event misses E1’s availability boundary and E2’s shorter lookback. The noon event is excluded at noon but included at 14:00. E3 remains despite having no eligible evidence.',
+  },
+};

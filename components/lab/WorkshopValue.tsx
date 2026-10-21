@@ -1,7 +1,14 @@
 import { show,type Data } from "@/lib/builds/engine";
+import { graphDisplay } from "@/lib/builds/graph-display";
+import { NetworkDiagram } from "../concept/NetworkDiagram";
 
 /** Keep small collections visible as individual values rather than JSON syntax. */
 export function WorkshopValue({value}:{value:Data}) {
+  const graph = graphDisplay(value);
+  if (graph) return <div className="min-w-0 rounded-lg border border-line bg-background p-2">
+    <NetworkDiagram scene={graph} />
+    <details className="mt-3 text-xs"><summary className="cursor-pointer text-muted">Inspect the node and relationship records</summary><pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-words font-mono text-accent">{JSON.stringify(value, null, 2)}</pre></details>
+  </div>;
   if(Array.isArray(value)&&value.length>0&&value.length<=12&&value.every(row=>Array.isArray(row)&&row.length>0&&row.length<=12&&row.every(item=>typeof item==="number"))) {
     const rows=value as number[][];
     if(rows.every(row=>row.length===rows[0].length))return <div className="max-w-full overflow-auto rounded-lg border border-line bg-background p-2"><table className="border-separate border-spacing-1 font-mono text-xs" aria-label={`${rows.length} rows by ${rows[0].length} columns`}><tbody>{rows.map((row,i)=><tr key={i}>{row.map((item,j)=><td key={j} className="min-w-9 rounded bg-raised px-2 py-2 text-center text-accent">{show(item)}</td>)}</tr>)}</tbody></table></div>;

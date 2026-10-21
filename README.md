@@ -201,11 +201,32 @@ old homepage fragments are forwarded to their new section destinations.
 
 ## Modern-model lessons
 
-The Agents section at `/sections/agents` follows a maintenance assistant from
-prompt design and tool contracts through Pydantic AI, LangChain, LangGraph,
-human approval and MCP. Observability and evaluation lessons cover trace
-structure, Langfuse, dataset design, model judges and release comparisons,
-with OpenTelemetry, Phoenix and promptfoo references where they are useful.
+The section at `/sections/evaluating-and-improving-models` follows Choosing and
+Checking a Model. Its nine lessons cover residual diagnosis, precision-recall,
+evaluation slices, paired comparisons, nested validation, label audits,
+selective prediction, behavioural tests and a model revision project. Each
+lesson includes a sourced history, visible examples, quiz data, a compositional
+Botie workshop and a tested NumPy challenge. The project fits baseline and
+candidate least-squares models, including a check against evaluation-label
+leakage. Workshop fixtures are explicitly recorded teaching data, not claims
+about measured deployment performance.
+
+Author these lessons in `scripts/curriculum/model-evaluation*.mjs`; their
+operations, journeys and independent follow-up cases live in the corresponding
+`lib/builds/` modules. Check them with `tests/model-evaluation.spec.ts`,
+`node scripts/check-practice.mjs model-`, and
+`node scripts/check-lesson-examples.mjs model-`.
+
+The Agents section at `/sections/agents` has 18 lessons introducing the model,
+controller, tools and state before prompt design and framework code. The path
+covers Pydantic AI, LangChain, LangGraph, human approval, MCP and enforced
+guardrails. Its companion section, Prompting, Evaluation and Iteration at
+`/sections/prompting-evaluation-and-iteration`, has 12 lessons covering
+demonstration selection, traces, Langfuse, evaluation datasets, framework
+tests, model judges, failure diagnosis and controlled revisions. It ends with
+a maintenance-assistant repair project. OpenTelemetry, Phoenix and promptfoo
+references appear where they help with the task. Earlier lesson URLs remain
+unchanged when lessons move between these sections.
 
 Author these lessons in `scripts/curriculum/agents-*.mjs`. Their workshop
 operations, journey plans and fresh cases live in the corresponding agent
@@ -315,10 +336,14 @@ unsupported or broken native runtime stops the build instead of discarding
 its fallback. `npm run check:images` repeats the image check, and
 `npm run test:deployment` checks native selection and size accounting.
 
-The dynamic workshop route generates and caches each workshop on its first
-visit instead of storing every workshop's HTML and RSC copies in the build.
+The dynamic workshop and authored lesson routes generate and cache each page on its first
+visit instead of storing every page's HTML and RSC copies in the build.
 The first request therefore renders on the server; subsequent requests can
-use the cached page. Lesson pages remain prerendered. This changes packaging,
+use the cached page. Handwritten lesson routes remain prerendered. The allowed
+lesson IDs still come from the published curriculum, and unknown IDs return
+404. This uses first-visit static generation without a manual cache-purge API.
+Production tests verify repeated requests receive the cached HTML and that the
+interactive exercises still work after hydration. This changes packaging,
 not the lesson data or the learner's saved workshop constructions.
 
 The shared course navigation is imported by the client navigation components.
@@ -339,9 +364,10 @@ local estimate.
 ## Validation
 
 After a production build, `npm run test:production` starts a temporary server on
-port 3100. It checks the Agents lesson routes, workshop caching and interaction,
-legacy redirects, missing pages, and a real banner request through the image
-optimizer. `npm run test:deployment` checks native-library selection and the
+port 3100. It checks the Agents and database lesson routes, first-visit page
+caching, workshop interaction, Python and SQL test feedback, legacy redirects,
+missing pages, and a real banner request through the image optimizer.
+`npm run test:deployment` checks native-library selection and the
 deployment-size accounting without starting a server.
 
 ```bash

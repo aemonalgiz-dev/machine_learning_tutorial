@@ -7,6 +7,17 @@ import { DESIGN_TOOLS } from "./design-tools";
 import { agentFoundationTools } from "./agent-foundation-tools";
 import { agentFrameworkTools } from "./agent-framework-tools";
 import { agentObservabilityTools } from "./agent-observability-tools";
+import { agentGuardrailTools } from "./agent-guardrail-tools";
+import { agentReliabilityTools } from "./agent-reliability-tools";
+import { agentAssuranceTools } from "./agent-assurance-tools";
+import { agentIterationTools } from "./agent-iteration-tools";
+import { modelEvaluationTools } from "./model-evaluation-tools";
+import { sqlFoundationTools } from "./sql-foundation-tools";
+import { sqlAnalysisTools } from "./sql-analysis-tools";
+import { sqlSystemTools } from "./sql-system-tools";
+import { NOSQL_FOUNDATION_TOOLS } from "./nosql-foundation-tools";
+import { NOSQL_SYSTEM_TOOLS } from "./nosql-system-tools";
+import { GRAPH_DATABASE_TOOLS } from "./graph-database-tools";
 export function scalar(x: Data): number { if (typeof x !== "number") throw Error("This input needs one number. Inspect the connected machine to see what it produces."); return x; }
 export function vector(x: Data): number[] { if (!Array.isArray(x) || !x.every(v => typeof v === "number")) throw Error("This input needs a list of numbers."); return x as number[]; }
 export function matrix(x: Data): number[][] { if (!Array.isArray(x) || !x.length) throw Error("This input needs rows of numbers."); const rows = x.map(vector); if (rows.some(r => r.length !== rows[0].length)) throw Error("Each row must have the same number of values."); return rows; }
@@ -34,6 +45,17 @@ export const TOOLS: Record<string, Tool> = {
   ...agentFoundationTools,
   ...agentFrameworkTools,
   ...agentObservabilityTools,
+  ...agentGuardrailTools,
+  ...agentReliabilityTools,
+  ...agentAssuranceTools,
+  ...agentIterationTools,
+  ...modelEvaluationTools,
+  ...sqlFoundationTools,
+  ...sqlAnalysisTools,
+  ...sqlSystemTools,
+  ...NOSQL_FOUNDATION_TOOLS,
+  ...NOSQL_SYSTEM_TOOLS,
+  ...GRAPH_DATABASE_TOOLS,
   constant: define("Set a constant", "Supplies a number that stays the same for every example. Use it when the rule needs a fixed rate, threshold or offset.", [], (_, s) => Number(s.value), [numeric("value", "Number", 0, -10000, 10000, .1)]),
   add: define("Add", "Combines contributions. Two equally sized lists are added position by position.", ["First contribution", "Second contribution"], ([a,b]) => zip(a,b,(x,y)=>x+y)),
   subtract: define("Subtract", "Finds what remains after removing a reference value. The order of the inputs matters.", ["Starting value", "Value to remove"], ([a,b]) => zip(a,b,(x,y)=>x-y)),

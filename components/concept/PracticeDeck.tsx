@@ -10,6 +10,7 @@ import { usePython } from "@/lib/use-python";
 import type { PythonResult } from "@/lib/python";
 import { ProgramOutput, PythonCode } from "./PythonCode";
 import { BotieSays } from "@/components/site/Botie";
+import { SqlData } from "./SqlData";
 
 const PythonEditor = dynamic(() => import("./PythonEditor"), {
   ssr: false,
@@ -35,7 +36,7 @@ export function PracticeDeck(props: PracticeProps) {
 
 function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
   const account = useProgressAccount();
-  const key = `practice:${lesson}:${fingerprint(exercises.map(problem => [problem.title, problem.starter, problem.output]))}`;
+  const key = `practice:${lesson}:${fingerprint(exercises.map(problem => problem.language === 'sql' ? [problem.title, problem.starter, problem.output, problem.sql?.setup] : [problem.title, problem.starter, problem.output]))}`;
   const work = useLearnerRecord(key, () => ({ card: 0, attempts: exercises.map((problem): Attempt => ({
     code: problem.starter, solved: false, hintsShown: 0, solutionShown: false,
   })) }), raw => {
@@ -62,6 +63,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
   const mounted = useRef(true);
   const { run, stop, busy, status } = usePython(true);
   const current = exercises[card];
+  const isSql = current.language === "sql";
   const attempt = attempts[card];
   const completed = attempts.filter((entry) => entry.solved).length;
   const allFinished = completed === exercises.length;
@@ -89,10 +91,10 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
     const index = card;
     const source = latest.current[index].code;
     update(index, { result: undefined });
-    const execution = await run(source, check ? exercises[index].output : undefined, check ? exercises[index].tests : undefined, exercises[index].exports);
+    const execution = await run(source, check ? exercises[index].output : undefined, check ? exercises[index].tests : undefined, exercises[index].exports, exercises[index].sql);
     if (!mounted.current) return;
     const passed = !execution.error && execution.tests.length > 0 && execution.tests.every((test) => test.status === "passed");
-    const comparison = { passed, message: passed ? "Every test passed. Your program produced the requested results." : "The test results below show what to work on next." };
+    const comparison = { passed, message: passed ? "Every test passed. Your code produced the requested results." : "The test results below show what to work on next." };
     if (check && !execution.error && !comparison.passed) setExpectedShown(true);
     update(index, {
       result: { execution, source, checked: check, ...comparison },
@@ -136,15 +138,16 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
             <div className="mt-4 space-y-3 leading-7 text-foreground">
               {current.task.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             </div>
-            <p className="mt-4 text-sm text-muted">Complete the code in the editor, then run it to see what your program does. When you are ready, run the tests to check its output against the challenge.</p>
+            <p className="mt-4 text-sm text-muted">{isSql ? "Write your SQL in the editor. Run it to see the result table, then run the tests to check your query. Each run starts from the tables below." : "Complete the code in the editor, then run it to see what your program does. When you are ready, run the tests to check its output against the challenge."}</p>
+            {isSql && <SqlData tables={current.sql?.tables ?? []} label="Challenge tables" />}
           </div>
 
           <details className="mt-3 rounded-lg border border-line bg-surface px-4 py-3" open={expectedShown || undefined}
             onToggle={(event) => setExpectedShown(event.currentTarget.open)}>
             <summary className="cursor-pointer text-sm font-medium text-foreground">Expected results and what the tests check</summary>
-            <p className="mt-3 text-sm leading-6 text-muted">The tests check that your program finishes and prints the requested results in order. Spacing can differ, and numbers are checked to the precision shown. {current.tests?.length ? "They also call your functions on further inputs. Each check below describes the behaviour it expects; different implementations can pass." : "These checks verify the printed results."}</p>
+            <p className="mt-3 text-sm leading-6 text-muted">{isSql ? "The tests compare the returned values in column and row order, then check the behaviour described below. Additional checks test whether the query still works when the data changes or whether the database enforces the requested rules. Different queries can pass." : <>The tests check that your program finishes and prints the requested results in order. Spacing can differ, and numbers are checked to the precision shown. {current.tests?.length ? "They also call your functions on further inputs. Each check below describes the behaviour it expects; different implementations can pass." : "These checks verify the printed results."}</>}</p>
             {current.tests?.length ? <ul className="mt-3 list-disc space-y-2 pl-5 text-sm">{current.tests.map(test=><li key={test.name}>{test.name}</li>)}</ul> : null}
-            <ProgramOutput output={current.output} />
+            {isSql && current.sql?.expectedTable ? <SqlData tables={[current.sql.expectedTable]} label="Expected query result" /> : <ProgramOutput output={current.output} />}
             {current.browserNote && <p className="text-sm leading-6 text-muted">{current.browserNote}</p>}
           </details>
 
@@ -175,7 +178,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
           </div>
           {attempt.solutionShown && <div className="mt-3">
             <p className="text-sm leading-6 text-muted">One way to solve it. Read through the steps, then try them in your own code and run the tests to check the result.</p>
-            <PythonCode source={current.solution} label="Worked solution" />
+            <PythonCode source={current.solution} label="Worked solution" language={current.language} />
             <Quiet disabled={busy} onClick={() => update(card, { code: current.solution, result: undefined })}>Replace editor with this solution</Quiet>
           </div>}
         </div>
@@ -183,10 +186,10 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
         <div className="min-w-0" role="group" aria-label="Code and results">
           <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-raised px-4 py-2.5">
-              <span className="font-mono text-xs text-foreground">solution.py</span>
-              <span className="font-mono text-xs text-muted">{/(?:from|import)\s+oop_ml\b/.test(attempt.code) ? "NumPy + oop_ml" : "Python + NumPy"}</span>
+              <span className="font-mono text-xs text-foreground">{isSql ? "solution.sql" : "solution.py"}</span>
+              <span className="font-mono text-xs text-muted">{isSql ? "SQLite · fresh database each run" : /(?:from|import)\s+oop_ml\b/.test(current.solution) ? "NumPy + oop_ml" : /(?:from|import)\s+numpy\b/.test(current.solution) ? "Python + NumPy" : "Python · standard library"}</span>
             </div>
-            <PythonEditor key={current.title} label={`Python solution for ${current.title}`} value={attempt.code}
+            <PythonEditor key={current.title} language={current.language} label={`${isSql ? 'SQL' : 'Python'} solution for ${current.title}`} value={attempt.code}
               onChange={(code) => update(card, { code })} onRun={() => void execute(false)} onCheck={() => void execute(true)} />
             <div className="flex flex-wrap items-center gap-3 border-t border-line bg-raised p-3">
               <Solid disabled={busy || !attempt.code.trim()} onClick={() => void execute(false)}>Run code</Solid>
@@ -206,7 +209,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
             {busy ? <p className="mt-3 text-sm text-muted">{status}</p> : result ? (
               <>
                 {stale && <p className="mt-3 text-sm text-muted">You have edited the code since this run. Run it again to see the new result.</p>}
-                <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-words font-mono text-[13px] leading-6 text-foreground">{result.execution.stdout || (result.execution.error ? "" : "Your program finished without printing anything.")}</pre>
+                {isSql && result.execution.table ? <SqlData tables={[result.execution.table]} label="SQL result" /> : <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-words font-mono text-[13px] leading-6 text-foreground">{result.execution.stdout || (result.execution.error ? "" : "Your program finished without printing anything.")}</pre>}
                 {result.execution.stderr && <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted">{result.execution.stderr}</pre>}
                 {result.execution.artifacts?.map(file=><button key={file.filename} className="mt-3 block min-h-11 text-sm text-accent underline" onClick={()=>{const url=URL.createObjectURL(new Blob([file.content],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download=file.filename;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}>Download {file.filename}</button>)}
                 {result.execution.error ? <pre className="mt-3 max-h-80 overflow-auto whitespace-pre-wrap break-words font-mono text-xs leading-6 text-rose-700 dark:text-rose-300">{result.execution.error}</pre> : result.checked && (
@@ -217,7 +220,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
                   </div>
                 )}
               </>
-            ) : <p className="mt-3 text-sm text-muted">Your printed results and any Python errors will appear here.</p>}
+            ) : <p className="mt-3 text-sm text-muted">{isSql ? "Your result table and any SQL errors will appear here." : "Your printed results and any Python errors will appear here."}</p>}
           </div>
 
           {result?.checked && result.execution.tests.length > 0 && (
@@ -251,19 +254,19 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
         {card < exercises.length - 1 ? <Solid onClick={() => changeCard(card + 1)}>Next challenge →</Solid>
           : <p className="text-sm text-muted">{allFinished ? "The tests have passed for each exercise in this set." : "You can revisit any exercise using the numbers above."}</p>}
       </div>
-      <p className="mt-5 text-xs leading-5 text-muted">Python runs in your browser. Its first run downloads the libraries it needs. Each run starts with fresh variables; Stop ends a running program.</p>
-      <div className="mt-4"><PracticeSetup usesSdk={/(?:from|import)\s+oop_ml\b/.test(current.solution)} /></div>
+      <p className="mt-5 text-xs leading-5 text-muted">{isSql ? "SQL runs against SQLite in your browser. Each run rebuilds the lesson database, so experiments cannot change later attempts. Stop ends a running query." : "Python runs in your browser. Its first run downloads the libraries it needs. Each run starts with fresh variables; Stop ends a running program."}</p>
+      <div className="mt-4">{isSql ? <details className="rounded-lg border border-line bg-surface px-4 py-3"><summary className="cursor-pointer text-sm font-semibold">Database setup and using your own editor</summary><p className="mt-3 text-sm leading-6 text-muted">Create a temporary SQLite database with this setup, then run your query. The browser uses SQLite 3.39. SQL written for PostgreSQL or another database may need changes.</p><PythonCode source={current.sql?.setup ?? ''} language="sql" /></details> : <PracticeSetup usesSdk={/(?:from|import)\s+oop_ml\b/.test(current.solution)} usesNumpy={/(?:from|import)\s+numpy\b/.test(current.solution)} />}</div>
     </div>
   );
 }
 
-export function PracticeSetup({ usesSdk }: { usesSdk: boolean }) {
+export function PracticeSetup({ usesSdk, usesNumpy = true }: { usesSdk: boolean; usesNumpy?: boolean }) {
   return (
     <details className="rounded-lg border border-line bg-surface px-4 py-3">
       <summary className="cursor-pointer text-sm font-semibold text-foreground">Prefer your own editor?</summary>
       <div className="mt-3 space-y-3 border-t border-line pt-3 text-sm text-foreground">
-        <p>The same script runs on your machine. Install {usesSdk ? "oop_ml" : "NumPy"}, then save your code as a Python file and run it.</p>
-        <PythonCode source={usesSdk ? SETUP_COMMANDS : NUMPY_SETUP_COMMANDS} label="Terminal" />
+        <p>{usesSdk || usesNumpy ? <>The same script runs on your machine. Install {usesSdk ? "oop_ml" : "NumPy"}, then save your code as a Python file and run it.</> : "This exercise uses Python's standard library. Save your code as solution.py and run it with Python."}</p>
+        <PythonCode source={usesSdk ? SETUP_COMMANDS : usesNumpy ? NUMPY_SETUP_COMMANDS : "python solution.py"} label="Terminal" />
         <p className="text-muted">Use Python 3.11 or later.{usesSdk && " The optional PyTorch and scikit-learn backends are not needed for this challenge."}</p>
       </div>
     </details>

@@ -13,7 +13,7 @@ export type ReadingScene =
   | { kind: "table"; caption: string; columns: string[]; records: { label: string; cells: string[]; active?: number[] }[]; rowHeading: string }
   | { kind: "timeline"; caption: string; unit: string; days: { label: string; value?: number; role: "known" | "target" | "later" }[]; prediction?: { label: string; value: number }; calculation?: string }
   | { kind: "numberline"; caption: string; rows: { label: string; values: number[] }[]; reference?: number; referenceLabel?: string }
-  | { kind: "network"; caption: string; nodes: { label: string; value?: string }[]; edges: [number, number][]; directed?: boolean }
+  | { kind: "network"; caption: string; nodes: { label: string; value?: string; details?: string[] }[]; edges: [number, number][]; edgeLabels?: string[]; directed?: boolean }
   | { kind: "sequence"; caption: string; rows: Strip[]; positionLabel: string }
   | { kind: "calculation"; caption: string; lines: string[] };
 

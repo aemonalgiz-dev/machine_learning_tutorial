@@ -249,6 +249,1229 @@
       "NumPy's NPY format records an array's dtype and shape with its values. NPZ archives collect named arrays, while text readers and writers serve simpler interchange needs. These formats preserve stored data, not the scientific meaning we forget to record."
     ]
   },
+  "sql-tables": {
+    "title": "Queries Should Survive a Change in Storage",
+    "sources": [
+      {
+        "title": "Codd’s relational model, 1970",
+        "url": "https://research.ibm.com/publications/a-relational-model-of-data-for-large-shared-data-banks"
+      },
+      {
+        "title": "SQLite value types and affinity",
+        "url": "https://www.sqlite.org/datatype3.html"
+      }
+    ],
+    "blocks": [
+      "Programs once depended heavily on the paths used to find stored records. Codd’s 1970 relational model proposed describing data through relations so applications could depend less on its physical arrangement.",
+      "Our maintenance tables use that separation: an asset ID identifies a pump without telling us which disk page holds it. The invented records illustrate the idea; SQL tables also permit duplicates unless constraints or queries remove them."
+    ]
+  },
+  "sql-select": {
+    "title": "Choose a Result Without Writing a Storage Walk",
+    "sources": [
+      {
+        "title": "SEQUEL, 1974",
+        "url": "https://research.ibm.com/publications/sequel-a-struciured-english-query-language"
+      },
+      {
+        "title": "Result columns and DISTINCT",
+        "url": "https://www.postgresql.org/docs/current/queries-select-lists.html"
+      }
+    ],
+    "blocks": [
+      "Chamberlin and Boyce’s 1974 SEQUEL paper described composing operations on tables to express a query. The user specified the desired information without writing a record-navigation program.",
+      "Selecting fields and eliminating repeated result rows remain separate choices in SQL. That distinction lets the maintenance register support both an asset list and a site-category report."
+    ]
+  },
+  "sql-where": {
+    "title": "Describe the Condition Instead of the Search Procedure",
+    "sources": [
+      {
+        "title": "SEQUEL table operations",
+        "url": "https://research.ibm.com/publications/sequel-a-struciured-english-query-language"
+      },
+      {
+        "title": "SQLite expressions and precedence",
+        "url": "https://www.sqlite.org/lang_expr.html"
+      },
+      {
+        "title": "SQL comparisons",
+        "url": "https://www.postgresql.org/docs/current/functions-comparison.html"
+      }
+    ],
+    "blocks": [
+      "Relational query languages made a condition on a table part of the request. SEQUEL’s composable table operations helped readers express which records they wanted while leaving the search strategy to the database.",
+      "A maintenance rule can therefore be reviewed independently of whether the engine scans rows or uses an index. The examples here use simple invented records so we can inspect each decision ourselves."
+    ]
+  },
+  "sql-order-limit": {
+    "title": "Storage Independence Also Removed an Accidental Order",
+    "sources": [
+      {
+        "title": "System R architecture, 1976",
+        "url": "https://research.ibm.com/publications/system-r-relational-approach-to-database-management"
+      },
+      {
+        "title": "ORDER BY",
+        "url": "https://www.postgresql.org/docs/current/queries-order.html"
+      },
+      {
+        "title": "LIMIT and OFFSET",
+        "url": "https://www.postgresql.org/docs/current/queries-limit.html"
+      }
+    ],
+    "blocks": [
+      "Relational systems separate the logical result from the physical access path. System R explored how a high-level relational interface could work over changing storage choices.",
+      "The consequence for a shortlist is practical: order must be requested as part of the query. A scan order that looked stable is not a ranking rule. Our example supplies a tie breaker so the selected visits are reproducible."
+    ]
+  },
+  "sql-null": {
+    "title": "Database Implementations Had to Agree About Missing Values",
+    "sources": [
+      {
+        "title": "SQLite’s 2002 NULL comparison tests",
+        "url": "https://www.sqlite.org/nulls.html"
+      },
+      {
+        "title": "Comparison predicates",
+        "url": "https://www.postgresql.org/docs/current/functions-comparison.html"
+      }
+    ],
+    "blocks": [
+      "An absent value complicates ordinary comparisons: we cannot determine whether an unknown duration equals ten. SQLite’s NULL documentation describes compatibility tests performed in 2002 to compare how other SQL engines handled these cases.",
+      "The resulting behaviours include distinctions between equality predicates, grouping and duplicate removal. We study those operations explicitly instead of treating NULL as a special number."
+    ]
+  },
+  "sql-case": {
+    "title": "A Query Result Can Include a Decision",
+    "sources": [
+      {
+        "title": "SQL conditional expressions",
+        "url": "https://www.postgresql.org/docs/current/functions-conditional.html"
+      },
+      {
+        "title": "SQLite CASE evaluation",
+        "url": "https://www.sqlite.org/lang_expr.html"
+      }
+    ],
+    "blocks": [
+      "SQL developed beyond selecting stored columns to include expressions that derive values inside a result. Conditional expressions let applications describe row-level decisions close to the data that determines them.",
+      "CASE does not update the sensor record. It adds a computed label to the result, which means the policy can be inspected and changed without overwriting the observed temperature."
+    ]
+  },
+  "sql-aggregates": {
+    "title": "A Report Needed Fewer Rows Than the Log",
+    "sources": [
+      {
+        "title": "SQLite aggregate functions",
+        "url": "https://www.sqlite.org/lang_aggfunc.html"
+      },
+      {
+        "title": "Aggregate query examples",
+        "url": "https://www.postgresql.org/docs/current/tutorial-agg.html"
+      }
+    ],
+    "blocks": [
+      "Database query languages had to support reports that combined many stored records into a small result. Aggregate functions make the reduction explicit so the query can state what is counted or combined.",
+      "SQLite documents its aggregate treatment of missing and empty inputs. The maintenance example uses those rules to distinguish visits that exist from durations that were actually measured."
+    ]
+  },
+  "sql-group-by": {
+    "title": "One Summary Was Not Enough for a Comparative Report",
+    "sources": [
+      {
+        "title": "Grouping and aggregates",
+        "url": "https://www.postgresql.org/docs/current/tutorial-agg.html"
+      },
+      {
+        "title": "SQLite GROUP BY semantics",
+        "url": "https://www.sqlite.org/lang_select.html"
+      }
+    ],
+    "blocks": [
+      "Reporting queries needed subtotals for departments, products and other categories rather than a single database-wide value. SQL grouping describes the shared values that define each subtotal.",
+      "The maintenance version is concrete: place every P1 visit in one collection and every P2 visit in another. Aggregate each collection independently. This is a query result grouping, not a change to how the records must be stored."
+    ]
+  },
+  "sql-having": {
+    "title": "Reports Needed Conditions on Subtotals",
+    "sources": [
+      {
+        "title": "WHERE versus HAVING",
+        "url": "https://www.postgresql.org/docs/current/tutorial-agg.html"
+      },
+      {
+        "title": "Grouped table expressions",
+        "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+      }
+    ],
+    "blocks": [
+      "Once query languages could return grouped totals, users also needed to select groups by those totals: customers with repeated purchases, departments above a budget, or assets with recurring findings.",
+      "WHERE applies to the input rows and HAVING applies to the groups. The distinction follows the different information available at those stages. A row’s finding is known before grouping; the number of qualifying visits in its group is known after grouping."
+    ]
+  },
+  "sql-inner-joins": {
+    "title": "Separate Facts Could Be Recombined by Their Values",
+    "sources": [
+      {
+        "title": "Codd’s relational model",
+        "url": "https://research.ibm.com/publications/a-relational-model-of-data-for-large-shared-data-banks"
+      },
+      {
+        "title": "Join examples",
+        "url": "https://www.postgresql.org/docs/current/tutorial-join.html"
+      }
+    ],
+    "blocks": [
+      "The relational model allowed related facts to live in separate relations and be combined through matching values. This reduced the need for applications to navigate a particular chain of stored records.",
+      "Our asset-to-visit match uses the asset ID on both sides. This is a teaching example of an equijoin, where the relationship is equality of the chosen keys, rather than a claim that every join uses equality."
+    ]
+  },
+  "sql-left-joins": {
+    "title": "A Match-Only Query Could Hide Missing Evidence",
+    "sources": [
+      {
+        "title": "Outer join examples",
+        "url": "https://www.postgresql.org/docs/current/tutorial-join.html"
+      },
+      {
+        "title": "Outer join conditions and WHERE",
+        "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+      }
+    ],
+    "blocks": [
+      "Reporting from related tables raises a second question beyond finding matches: which items have none? Outer joins extend a matching result with rows that preserve selected unmatched records.",
+      "The left side defines the population to retain. In this lesson that population is the asset register, so the absence of inspection evidence remains visible instead of removing the asset from the report."
+    ]
+  },
+  "sql-join-grain": {
+    "title": "Correct Matching Can Still Change What a Row Means",
+    "sources": [
+      {
+        "title": "Join result semantics",
+        "url": "https://www.postgresql.org/docs/current/queries-table-expressions.html"
+      },
+      {
+        "title": "Relational query operations",
+        "url": "https://research.ibm.com/publications/a-relational-model-of-data-for-large-shared-data-banks"
+      },
+      {
+        "title": "Aggregate semantics",
+        "url": "https://www.sqlite.org/lang_aggfunc.html"
+      }
+    ],
+    "blocks": [
+      "Relational operations compose, so a result from one operation can become the input to another. That power also makes it necessary to track the meaning and multiplicity of intermediate rows. SQL’s join semantics emit matching pairs, including every permitted combination.",
+      "A database cannot infer that a later SUM was meant to count each inspection only once. Our repair explicitly produces asset-level summaries before joining them. This follows from the required report grain rather than a special rule about maintenance data."
+    ]
+  },
+  "sql-subqueries": {
+    "title": "A Query Could Supply Another Query’s Input",
+    "sources": [
+      {
+        "title": "SQLite subquery expressions",
+        "url": "https://sqlite.org/lang_expr.html"
+      },
+      {
+        "title": "PostgreSQL subquery expressions",
+        "url": "https://www.postgresql.org/docs/current/functions-subquery.html"
+      }
+    ],
+    "blocks": [
+      "Once a question depends on a quantity calculated from stored records, a query language needs a way to compose those operations. SQL subqueries put a SELECT inside another statement. Modern SQLite and PostgreSQL document both independent subqueries and correlated ones whose values depend on an outer row.",
+      "Our inspection average is a small example of that composition. It keeps the calculation with the comparison, while leaving us responsible for the shape of the inner result and the meaning of missing values."
+    ]
+  },
+  "sql-exists": {
+    "title": "Finding Absence Without Manufacturing More Rows",
+    "sources": [
+      {
+        "title": "PostgreSQL EXISTS and NOT IN semantics",
+        "url": "https://www.postgresql.org/docs/current/functions-subquery.html"
+      },
+      {
+        "title": "SQLite EXISTS expressions",
+        "url": "https://sqlite.org/lang_expr.html"
+      }
+    ],
+    "blocks": [
+      "Relational queries often need to express that a related fact is present or absent. SQL’s EXISTS expression answers that question from the presence of rows, while NOT EXISTS reverses it. This keeps the result at the outer table’s grain instead of producing one row for every matching pair.",
+      "The distinction is useful for a maintenance log that can contain several visits per pump. We care whether any completed visit exists, not how many matching copies a join could produce."
+    ]
+  },
+  "sql-set-operations": {
+    "title": "Combining Results Needed a Duplicate Policy",
+    "sources": [
+      {
+        "title": "SQLite compound SELECT statements",
+        "url": "https://sqlite.org/lang_select.html"
+      },
+      {
+        "title": "PostgreSQL combining queries",
+        "url": "https://www.postgresql.org/docs/current/queries-union.html"
+      }
+    ],
+    "blocks": [
+      "SQL result combinations draw on set operations, but ordinary query results may contain repeated rows. SQL therefore distinguishes UNION, which removes duplicate result rows, from UNION ALL, which retains them. INTERSECT and EXCEPT describe common rows and rows left after subtraction.",
+      "That choice matters at the maintenance desk. Repeated alerts can be useful events in one report and unwanted repeated pump assignments in another. We need to choose the result’s meaning before deciding whether two equal rows should collapse."
+    ]
+  },
+  "sql-ctes": {
+    "title": "Names Made Intermediate Relations Easier to Review",
+    "sources": [
+      {
+        "title": "SQLite release 3.8.3, February 2014",
+        "url": "https://sqlite.org/releaselog/3_8_3.html"
+      },
+      {
+        "title": "SQLite WITH documentation",
+        "url": "https://sqlite.org/lang_with.html"
+      },
+      {
+        "title": "PostgreSQL WITH queries",
+        "url": "https://www.postgresql.org/docs/current/queries-with.html"
+      }
+    ],
+    "blocks": [
+      "Nested queries let one operation use another’s result, but deeply nested expressions can be awkward to inspect. Common table expressions give those intermediate relations names inside one statement. SQLite added CTE support in its February 2014 release.",
+      "This is a language feature for expressing dependencies. Naming closed_jobs does not permanently create a table or promise a particular execution strategy. Its value for our report is that the next stage clearly receives completed work rather than every job in the system."
+    ]
+  },
+  "sql-recursive-ctes": {
+    "title": "Repeated Relationships Needed More Than a Fixed Join",
+    "sources": [
+      {
+        "title": "SQLite WITH and recursive query examples",
+        "url": "https://sqlite.org/lang_with.html"
+      },
+      {
+        "title": "PostgreSQL recursive queries and cycle detection",
+        "url": "https://www.postgresql.org/docs/current/queries-with.html"
+      }
+    ],
+    "blocks": [
+      "A parts list, reporting hierarchy or network can contain an unknown number of levels. Recursive CTEs let a query start from a known row and repeatedly follow a relationship. The database documents describe that repeated expansion explicitly, including examples where a cycle would otherwise keep producing work.",
+      "The maintenance question is the same one: which records can we reach from this starting point? Our path guard rejects a return to a node already on the current path. A separate depth limit bounds how far this particular report is allowed to explore."
+    ]
+  },
+  "sql-window-functions": {
+    "title": "Analytical Queries Needed to Keep Their Detail",
+    "sources": [
+      {
+        "title": "SQLite release 3.25.0, September 2018",
+        "url": "https://sqlite.org/releaselog/3_25_0.html"
+      },
+      {
+        "title": "PostgreSQL window-function tutorial",
+        "url": "https://www.postgresql.org/docs/current/tutorial-window.html"
+      }
+    ],
+    "blocks": [
+      "Ordinary aggregation answers questions about groups by producing fewer rows. Analytical reports often need a group calculation beside the original rows instead. Window functions provide that arrangement. SQLite added window-function support in September 2018.",
+      "For the technician, this means a reading can retain its timestamp and identity while receiving a position within its pump’s history. That position is meaningful only after we define the partition and its ordering."
+    ]
+  },
+  "sql-window-frames": {
+    "title": "An Ordered Group Still Needed a Boundary",
+    "sources": [
+      {
+        "title": "SQLite window frame specifications",
+        "url": "https://sqlite.org/windowfunctions.html"
+      },
+      {
+        "title": "PostgreSQL window-function tutorial",
+        "url": "https://www.postgresql.org/docs/current/tutorial-window.html"
+      }
+    ],
+    "blocks": [
+      "Adding an order to an analytical calculation makes questions such as “so far” possible, but it leaves another choice: how many neighbouring rows should contribute? Window frames make that boundary part of the query. Default frame rules can include all peers sharing the current ordering value.",
+      "That explains our apparent jump. If timestamp alone defines peers, both records at that timestamp can enter a cumulative frame together. A physical-row frame and a complete ordering express a different, equally deliberate calculation."
+    ]
+  },
+  "sql-dates": {
+    "title": "Event Logs and Calendars Answer Different Questions",
+    "sources": [
+      {
+        "title": "SQLite date and time functions",
+        "url": "https://sqlite.org/lang_datefunc.html"
+      }
+    ],
+    "blocks": [
+      "Time values have to represent both instants and calendar conventions. SQLite supports date calculations over defined text and numeric representations rather than a dedicated date/time storage type. That makes a consistent representation an application responsibility.",
+      "A daily report needs more than a timestamp function. It needs a set of expected days. Joining a calendar to an event log preserves days that have no matching event, just as an asset register preserves pumps that have no visit."
+    ]
+  },
+  "sql-text": {
+    "title": "Matching Text Required Rules Beyond Its Appearance",
+    "sources": [
+      {
+        "title": "SQLite core text functions",
+        "url": "https://sqlite.org/lang_corefunc.html"
+      },
+      {
+        "title": "SQLite LIKE and expression rules",
+        "url": "https://sqlite.org/lang_expr.html"
+      }
+    ],
+    "blocks": [
+      "Text processing in SQL includes both exact comparisons and pattern matching. Those operations developed different conventions: a pattern can reserve characters to stand for something else, while comparison rules decide which text values count as equal.",
+      "For imported identifiers, the useful lesson is to name the convention. We use ordinary surrounding spaces, ASCII letter case and a literal underscore. That limited rule is easy to demonstrate and test without pretending it solves every language’s text behaviour."
+    ]
+  },
+  "sql-json": {
+    "title": "Structured Messages Entered Relational Queries",
+    "sources": [
+      {
+        "title": "SQLite JSON functions and their inclusion since 3.38.0",
+        "url": "https://sqlite.org/json1.html"
+      }
+    ],
+    "blocks": [
+      "Services commonly exchange structured messages as JSON, while analysis often happens in relational tables. Database JSON functions let queries inspect those messages without first flattening every property into a permanent column. SQLite made its JSON functions built in by default in version 3.38.0 in February 2022.",
+      "That convenience does not erase the payload’s types. A numeric property, a text property and an absent property still mean different things. Our report uses that distinction before it allows a value into a temperature calculation."
+    ]
+  },
+  "sql-feature-tables": {
+    "title": "Training Data Needed a Memory of What Was Available",
+    "sources": [
+      {
+        "title": "Feast point-in-time joins and created-timestamp filtering",
+        "url": "https://docs.feast.dev/getting-started/concepts/point-in-time-joins"
+      }
+    ],
+    "blocks": [
+      "Feature-store systems address the problem of joining historical features to the time of each training example. Feast documents point-in-time retrieval relative to each entity timestamp, including a bounded lookback. Its current documentation also distinguishes event time from when a value became available.",
+      "That distinction explains our late upload. Filtering event time alone cannot exclude data that arrived after the decision. This lesson expresses both boundaries directly in SQL so their meaning remains visible regardless of the feature-store framework used later."
+    ]
+  },
+  "sql-schema-design": {
+    "title": "Keeping the Meaning of a Record Separate from Its Storage",
+    "sources": [
+      {
+        "title": "Codd’s 1970 relational model paper",
+        "url": "https://research.ibm.com/publications/a-relational-model-of-data-for-large-shared-data-banks"
+      },
+      {
+        "title": "SQLite type affinity",
+        "url": "https://www.sqlite.org/datatype3.html"
+      },
+      {
+        "title": "STRICT tables",
+        "url": "https://www.sqlite.org/stricttables.html"
+      }
+    ],
+    "blocks": [
+      "Codd’s 1970 paper argued for a relational description of data that did not make users depend on physical storage arrangements. A logical table needs a stable interpretation even when the database changes how it stores its rows. Our equipment register uses that distinction: an asset identity should survive a new sort order or index.",
+      "SQLite later made a deliberate choice to support flexible value typing. Its STRICT table option, introduced in version 3.37.0 in 2021, provides stronger type enforcement for applications that want it. The browser exercises use SQLite 3.39-compatible syntax and make those dialect choices explicit."
+    ]
+  },
+  "sql-constraints": {
+    "title": "Preserving Relationships Across Several Writers",
+    "sources": [
+      {
+        "title": "Codd’s 1970 relational model paper",
+        "url": "https://research.ibm.com/publications/a-relational-model-of-data-for-large-shared-data-banks"
+      },
+      {
+        "title": "Foreign-key enforcement in SQLite",
+        "url": "https://www.sqlite.org/foreignkeys.html"
+      },
+      {
+        "title": "SQL constraints",
+        "url": "https://www.postgresql.org/docs/current/ddl-constraints.html"
+      }
+    ],
+    "blocks": [
+      "Relational tables let records be connected through values instead of application-specific pointers. That independence makes relationship rules important: any writer can otherwise introduce a child record whose parent is absent. Foreign keys put that relationship check in the database.",
+      "SQLite’s documentation records foreign-key enforcement beginning in version 3.6.19 in 2009. It must be enabled for each connection in the configuration used here. The browser runner enables it before executing your statements. Merely seeing REFERENCES in a schema is insufficient evidence that a particular connection enforces it."
+    ]
+  },
+  "sql-normalization": {
+    "title": "Reducing Facts That Have to Be Updated Together",
+    "sources": [
+      {
+        "title": "Codd’s 1970 relational model paper",
+        "url": "https://research.ibm.com/publications/a-relational-model-of-data-for-large-shared-data-banks"
+      },
+      {
+        "title": "IBM: Relational design considerations",
+        "url": "https://research.ibm.com/publications/considerations-in-developing-a-design-tool-for-a-relational-dbms"
+      }
+    ],
+    "blocks": [
+      "Relational design made it possible to describe data independently of a file’s arrangement. It also raised a design problem: several table layouts can represent the same apparent facts while behaving differently under updates. Work on dependencies and normal forms addressed those redundancies.",
+      "Our repeated pump-site example shows an update anomaly directly. Splitting the records helps only if the decomposition preserves the facts and supports the rules the application must enforce. A smaller table is not automatically a better design."
+    ]
+  },
+  "sql-insert-update-delete": {
+    "title": "Describing a Set of Rows to Change",
+    "sources": [
+      {
+        "title": "Chamberlin and Boyce: SEQUEL, 1974",
+        "url": "https://research.ibm.com/publications/sequel-a-struciured-english-query-language"
+      },
+      {
+        "title": "SQLite UPSERT",
+        "url": "https://www.sqlite.org/lang_upsert.html"
+      },
+      {
+        "title": "SQLite conflict behaviour",
+        "url": "https://www.sqlite.org/lang_conflict.html"
+      }
+    ],
+    "blocks": [
+      "The early SEQUEL work described composable operations over tabular data. That set-oriented approach also means an update can target many records at once. The useful question becomes which rows satisfy the write’s predicate.",
+      "Modern dialects add ways to handle duplicate identities during insertion. SQLite’s UPSERT follows PostgreSQL-style ON CONFLICT syntax, with its own details. Our revision rule is an application policy layered on that mechanism; the database does not know which imported status is newer unless we specify it."
+    ]
+  },
+  "sql-transactions": {
+    "title": "Making a Business Operation Survive a Failure",
+    "sources": [
+      {
+        "title": "Jim Gray: The Transaction Concept, 1981",
+        "url": "https://www.cs.utexas.edu/~dahlin/Classes/GradOS/papers/Gray81.pdf"
+      },
+      {
+        "title": "SQLite transactions",
+        "url": "https://www.sqlite.org/lang_transaction.html"
+      },
+      {
+        "title": "SQLite savepoints",
+        "url": "https://www.sqlite.org/lang_savepoint.html"
+      }
+    ],
+    "blocks": [
+      "Transaction-processing research addressed operations whose meaning spanned several low-level writes. Jim Gray’s 1981 paper described the transaction concept and its limitations. The problem was practical: interruptions should not leave half of an intended database operation visible as a completed result.",
+      "Our spare-parts transfer is an invented example of that boundary. It updates database records only. Sending a delivery truck or an email involves another system whose effects are not automatically reversed by a SQL rollback."
+    ]
+  },
+  "sql-concurrency": {
+    "title": "Coordinating Readers and Writers Without Losing Work",
+    "sources": [
+      {
+        "title": "SQLite isolation",
+        "url": "https://www.sqlite.org/isolation.html"
+      },
+      {
+        "title": "SQLite file locking",
+        "url": "https://www.sqlite.org/lockingv3.html"
+      },
+      {
+        "title": "PostgreSQL transaction isolation",
+        "url": "https://www.postgresql.org/docs/current/transaction-iso.html"
+      }
+    ],
+    "blocks": [
+      "Shared databases needed to coordinate transactions whose operations overlapped. Locking and multi-version approaches provide different ways to control which state a transaction can observe and change. These mechanisms developed to support concurrent applications, long before a model could issue SQL.",
+      "SQLite and PostgreSQL expose different concurrency models. SQLite serialises writers, while WAL mode lets readers keep an earlier snapshot as a writer commits. PostgreSQL offers several isolation levels with their own anomaly and retry rules. Our one-connection exercise illustrates an optimistic version predicate, not either engine’s full scheduler."
+    ]
+  },
+  "sql-indexes": {
+    "title": "Letting the Database Choose an Access Path",
+    "sources": [
+      {
+        "title": "Selinger and colleagues: Access path selection, 1979",
+        "url": "https://research.ibm.com/publications/access-path-selection-in-a-relational-database-management-system"
+      },
+      {
+        "title": "SQLite query planning",
+        "url": "https://www.sqlite.org/queryplanner.html"
+      },
+      {
+        "title": "PostgreSQL multicolumn indexes",
+        "url": "https://www.postgresql.org/docs/current/indexes-multicolumn.html"
+      }
+    ],
+    "blocks": [
+      "SQL lets a caller describe desired records without specifying their physical traversal. System R’s 1979 access-path paper described choosing routes for queries, including joins. Indexes provide candidate routes that the optimiser can compare with reading a table.",
+      "Our pump-and-time example gives a physical intuition: equal leading keys occupy a region of an ordered index. The widget lays out records directly; it does not implement database pages, B-tree balancing or disk I/O."
+    ]
+  },
+  "sql-query-plans": {
+    "title": "Choosing Work from a Declarative Request",
+    "sources": [
+      {
+        "title": "System R access-path selection, 1979",
+        "url": "https://research.ibm.com/publications/access-path-selection-in-a-relational-database-management-system"
+      },
+      {
+        "title": "SQLite EXPLAIN QUERY PLAN",
+        "url": "https://www.sqlite.org/eqp.html"
+      },
+      {
+        "title": "PostgreSQL EXPLAIN",
+        "url": "https://www.postgresql.org/docs/current/sql-explain.html"
+      },
+      {
+        "title": "SQLite ANALYZE",
+        "url": "https://www.sqlite.org/lang_analyze.html"
+      }
+    ],
+    "blocks": [
+      "The System R work showed how a database could choose access paths for a declarative request instead of requiring the caller to prescribe every step. That freedom creates several possible plans for the same logical result. Estimating their costs depends on what the engine knows about the data.",
+      "EXPLAIN facilities make some of those choices visible. Their formats and meanings are engine-specific, and SQLite warns that its query-plan output can change. We will inspect plan structure without treating exact display text as an application API."
+    ]
+  },
+  "sql-parameters-permissions": {
+    "title": "Separating Query Structure from Supplied Data",
+    "sources": [
+      {
+        "title": "Python sqlite3 parameter substitution",
+        "url": "https://docs.python.org/3/library/sqlite3.html"
+      },
+      {
+        "title": "PostgreSQL privileges",
+        "url": "https://www.postgresql.org/docs/current/ddl-priv.html"
+      },
+      {
+        "title": "PostgreSQL row security",
+        "url": "https://www.postgresql.org/docs/current/ddl-rowsecurity.html"
+      }
+    ],
+    "blocks": [
+      "Database applications needed to reuse a query while supplying different values. Driver parameter interfaces separate those values from SQL structure. That same boundary prevents a value containing SQL punctuation from being reinterpreted as part of the query when used correctly.",
+      "Database access control developed alongside shared data systems because syntactically valid queries can still access the wrong records. Parameter binding and authorisation solve different problems. Botie’s maintenance search needs both, even though our isolated browser database has no production users or server roles."
+    ]
+  },
+  "sql-data-quality": {
+    "title": "Checking the Facts Before Combining Them",
+    "sources": [
+      {
+        "title": "Codd’s 1970 relational model paper",
+        "url": "https://research.ibm.com/publications/a-relational-model-of-data-for-large-shared-data-banks"
+      },
+      {
+        "title": "Database constraints",
+        "url": "https://www.postgresql.org/docs/current/ddl-constraints.html"
+      },
+      {
+        "title": "TensorFlow Data Validation: Detecting schema and distribution problems",
+        "url": "https://www.tensorflow.org/tfx/data_validation/get_started"
+      }
+    ],
+    "blocks": [
+      "Relational constraints supplied ways to keep declared identities and relationships consistent. Analytical pipelines also receive raw data that must be inspected before it is admitted to those curated tables. A staging area makes it possible to report failed records rather than losing the evidence at the first rejected insert.",
+      "Machine-learning data tools later added schema and distribution comparisons to that practice. Our SQL audit addresses selected deterministic rules for invented sensor records. It cannot establish that labels are correct or that a dataset represents the population a model will encounter."
+    ]
+  },
+  "sql-incremental-pipelines": {
+    "title": "Remembering a Change Position Instead of Recopying Everything",
+    "sources": [
+      {
+        "title": "PostgreSQL logical decoding concepts",
+        "url": "https://www.postgresql.org/docs/current/logicaldecoding-explanation.html"
+      },
+      {
+        "title": "SQLite UPSERT",
+        "url": "https://www.sqlite.org/lang_upsert.html"
+      },
+      {
+        "title": "SQLite transactions",
+        "url": "https://www.sqlite.org/lang_transaction.html"
+      }
+    ],
+    "blocks": [
+      "Databases maintain change information to recover and coordinate writes. Change-data-capture systems can expose committed changes to downstream consumers instead of forcing every consumer to recopy the full source. PostgreSQL logical decoding is one documented implementation with its own restart, retention and delivery responsibilities.",
+      "A consumer still needs a recoverable position and a replay policy. Our source supplies a strictly increasing ingestion sequence and per-record versions. These are explicit teaching contracts; an arbitrary timestamp column does not automatically provide the same guarantees."
+    ]
+  },
+  "nosql-data-models": {
+    "title": "A Shopping Cart Had to Survive a Busy Service",
+    "sources": [
+      {
+        "title": "Amazon Dynamo, SOSP 2007",
+        "url": "https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf"
+      },
+      {
+        "title": "MongoDB data modelling",
+        "url": "https://www.mongodb.com/docs/manual/data-modeling/"
+      }
+    ],
+    "blocks": [
+      "Amazon’s 2007 Dynamo paper describes services such as shopping carts that needed highly available reads and writes. Its interface retrieved an object by a key. Concentrating on that access pattern let the designers make different tradeoffs from a system intended to answer arbitrary relational queries. Dynamo is a particular distributed design; its choices do not define every database called NoSQL.",
+      "Our invented maintenance service is much smaller, but we can ask the same first question: what operation must remain practical? The pump screen supplies an asset ID and wants its visits. Grouping visits under that identity makes the requested association visible. We still have to decide how writes keep the grouping current."
+    ]
+  },
+  "nosql-key-value": {
+    "title": "Small Operations Around Explicit Keys",
+    "sources": [
+      {
+        "title": "Redis project history",
+        "url": "https://redis.io/blog/welcome-back-to-redis-antirez/"
+      },
+      {
+        "title": "Redis strings",
+        "url": "https://redis.io/docs/latest/develop/data-types/strings/"
+      },
+      {
+        "title": "Redis SET",
+        "url": "https://redis.io/docs/latest/commands/set/"
+      }
+    ],
+    "blocks": [
+      "Redis began in 2009 under Salvatore Sanfilippo. Its string commands illustrate a small interaction: set a value under a key, then retrieve that key. A server can implement that interface without interpreting the application meaning of a pump name.",
+      "That division gives the application responsibility for a naming convention. Our site and asset pair is an invented example. The key must carry enough identity before a key-value service can return the intended record."
+    ]
+  },
+  "nosql-cache-expiry": {
+    "title": "A Helpful Copy Can Become a Dependency",
+    "sources": [
+      {
+        "title": "AWS Builders’ Library: caching challenges and strategies",
+        "url": "https://aws.amazon.com/builders-library/caching-challenges-and-strategies/"
+      },
+      {
+        "title": "Redis EXPIRE",
+        "url": "https://redis.io/docs/latest/commands/expire/"
+      },
+      {
+        "title": "Redis design manifesto",
+        "url": "https://oldblog.antirez.com/post/redis-manifesto.html"
+      }
+    ],
+    "blocks": [
+      "Amazon’s published caching experience describes a recurring operational problem: a service becomes accustomed to the reduced source load of a warm cache, then a cold or unavailable cache exposes the source to many more requests. Caching changes the operating conditions of the service.",
+      "Redis makes expiry an explicit property of a key. A timeout gives a copy a limited lifetime; the application still chooses a lifetime appropriate to its data. Our workshop isolates the decision at that boundary. It cannot establish whether a source can absorb refresh traffic."
+    ]
+  },
+  "nosql-documents": {
+    "title": "Keeping Object Structure in the Stored Record",
+    "sources": [
+      {
+        "title": "MongoDB documentation snapshot, April 2010",
+        "url": "https://downloads.mongodb.org/docs/mongodb-docs-2010-04-25.pdf"
+      },
+      {
+        "title": "BSON types",
+        "url": "https://www.mongodb.com/docs/manual/reference/bson-types/"
+      },
+      {
+        "title": "Schema validation",
+        "url": "https://www.mongodb.com/docs/manual/core/schema-validation/"
+      }
+    ],
+    "blocks": [
+      "MongoDB’s April 2010 manual already describes JSON-style objects and BSON storage. This offered applications a way to retain nested fields instead of flattening every object into one row shape. The historical manual records that design; it is not a claim that MongoDB invented structured records.",
+      "For our maintenance screen, a sensor object keeps a reading beside its unit. The remaining question is whether every writer supplies the fields the reader expects. Flexible document shapes make a shared contract more useful, not less necessary."
+    ]
+  },
+  "nosql-embedding-references": {
+    "title": "A Document Boundary Also Became an Update Boundary",
+    "sources": [
+      {
+        "title": "MongoDB documentation, April 2010",
+        "url": "https://downloads.mongodb.org/docs/mongodb-docs-2010-04-25.pdf"
+      },
+      {
+        "title": "Embedding and referencing guidance",
+        "url": "https://www.mongodb.com/docs/manual/data-modeling/best-practices/"
+      },
+      {
+        "title": "Avoid unbounded arrays",
+        "url": "https://www.mongodb.com/docs/manual/data-modeling/design-antipatterns/unbounded-arrays/"
+      }
+    ],
+    "blocks": [
+      "MongoDB’s early manual described embedded objects and references resolved through additional reads. The document model made locality a modelling decision: related information could travel together, while independently maintained objects could keep their own identities.",
+      "The maintenance example puts that decision under pressure. A pump’s installed sensor configuration belongs with the pump. A supplier’s current phone number is shared. A purchase-time supplier name may be a historical snapshot that should remain unchanged. Their relationships look similar on a screen but require different update rules."
+    ]
+  },
+  "nosql-document-queries": {
+    "title": "Queries Followed Fields Inside the Document",
+    "sources": [
+      {
+        "title": "Early MongoDB document query documentation",
+        "url": "https://downloads.mongodb.org/docs/mongodb-docs-2010-04-25.pdf"
+      },
+      {
+        "title": "MongoDB $elemMatch",
+        "url": "https://www.mongodb.com/docs/manual/reference/operator/query/elemmatch/"
+      },
+      {
+        "title": "MongoDB find",
+        "url": "https://www.mongodb.com/docs/manual/reference/method/db.collection.find/"
+      }
+    ],
+    "blocks": [
+      "The early MongoDB manual describes reaching into objects through field paths. That let applications ask about nested content rather than fetching every document by ID and inspecting it themselves. Arrays introduced another question: which member must satisfy a combination of conditions?",
+      "MongoDB’s $elemMatch expresses that at least one array member must satisfy all of its listed criteria. Our workshop makes the same binding visible by expanding each reading with its parent identity, applying both conditions to that row, and then returning each matching asset once."
+    ]
+  },
+  "nosql-document-updates": {
+    "title": "Updating an Object Required More Than Replacing Its Copy",
+    "sources": [
+      {
+        "title": "MongoDB early update documentation",
+        "url": "https://downloads.mongodb.org/docs/mongodb-docs-2010-04-25.pdf"
+      },
+      {
+        "title": "MongoDB single-document atomicity",
+        "url": "https://www.mongodb.com/docs/manual/core/write-operations-atomicity/"
+      },
+      {
+        "title": "PyMongo updates",
+        "url": "https://www.mongodb.com/docs/languages/python/pymongo-driver/current/crud/update/"
+      }
+    ],
+    "blocks": [
+      "MongoDB’s early interface included field-level update operators as well as document replacement. That distinction let a caller change a specified part of an object without resending every field. It addressed the practical difference between altering a value and replacing an entire stored record.",
+      "Current MongoDB documentation describes atomic single-document writes and recommends including an expected current value in a write filter when concurrent updates must be coordinated. Our version check is a teaching example of that condition. The Python function exposes the rule but does not implement concurrent database access."
+    ]
+  },
+  "nosql-document-indexes": {
+    "title": "Document Queries Still Needed Access Paths",
+    "sources": [
+      {
+        "title": "MongoDB index documentation, 2010",
+        "url": "https://downloads.mongodb.org/docs/mongodb-docs-2010-04-25.pdf"
+      },
+      {
+        "title": "Compound indexes",
+        "url": "https://www.mongodb.com/docs/manual/core/indexes/index-types/index-compound/"
+      },
+      {
+        "title": "Explain query execution",
+        "url": "https://www.mongodb.com/docs/manual/reference/method/db.collection.explain/"
+      }
+    ],
+    "blocks": [
+      "MongoDB’s early documentation included indexes alongside document queries. Storing a flexible object did not remove the older database problem of finding a small result without scanning every stored record. A secondary structure could organise selected field values for repeated reads.",
+      "Our teaching index groups documents by site. It exposes candidate reduction without claiming to reproduce MongoDB’s B-tree implementation or planner. We then examine a real compound index as a server-side way to support the site and temperature conditions together."
+    ]
+  },
+  "nosql-aggregation-pipelines": {
+    "title": "Document Applications Needed Reporting Operations Too",
+    "sources": [
+      {
+        "title": "MongoDB 2.2 announcement, August 2012",
+        "url": "https://www.mongodb.com/company/newsroom/press-releases/mongodb-22-delivers-improved-analytics-and-faster-performance"
+      },
+      {
+        "title": "Aggregation pipeline",
+        "url": "https://www.mongodb.com/docs/manual/core/aggregation-pipeline/"
+      },
+      {
+        "title": "$unwind",
+        "url": "https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/"
+      },
+      {
+        "title": "$group",
+        "url": "https://www.mongodb.com/docs/manual/reference/operator/aggregation/group/"
+      }
+    ],
+    "blocks": [
+      "MongoDB’s August 2012 release announcement introduced its aggregation framework for reporting and analysis over stored documents. Applications needed more than retrieving one object: they needed to select records, reshape them and combine values into reports.",
+      "A pipeline expresses those changes as ordered stages. That makes our maintenance report readable as a sequence of record transformations. It also makes a mistake inspectable: after expanding an array, the rows represent visits, so repeating a pump-level quantity on each row can inflate a later sum."
+    ]
+  },
+  "nosql-partition-keys": {
+    "title": "Distributing Work Without Losing the Lookup Address",
+    "sources": [
+      {
+        "title": "Dynamo: Amazon’s highly available key-value store (2007)",
+        "url": "https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf"
+      },
+      {
+        "title": "DynamoDB partition-key design",
+        "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-partition-key-design.html"
+      }
+    ],
+    "blocks": [
+      "The 2007 Dynamo paper described a key-value service designed around availability requirements at Amazon. Partitioning assigned parts of the key space to storage nodes so growth did not require every node to hold every primary record. Its hashing and replication design are a documented historical example, not the algorithm implemented by our widget.",
+      "The useful intuition is an address: a request carries a key that tells the system where to look. Requests with the same address still converge on the same logical item or grouping. A large number of possible keys does not help if almost every request uses one of them."
+    ]
+  },
+  "nosql-wide-column": {
+    "title": "Keeping Nearby Records Together for a Known Query",
+    "sources": [
+      {
+        "title": "Bigtable: A distributed storage system for structured data (2006)",
+        "url": "https://research.google/pubs/bigtable-a-distributed-storage-system-for-structured-data/"
+      },
+      {
+        "title": "Apache Cassandra: Logical data modeling",
+        "url": "https://cassandra.apache.org/doc/latest/cassandra/developing/data-modeling/data-modeling_logical.html"
+      }
+    ],
+    "blocks": [
+      "Google’s 2006 Bigtable paper described a sorted map for large structured datasets, with rows, column families and timestamped values. Cassandra later combined ideas from systems including Bigtable and Dynamo, while developing its own storage and consistency behaviour. These names do not identify one interchangeable database model.",
+      "For our maintenance example, locality is the useful idea: store the records needed by one bounded query together, and order them by the field the query ranges over. Cassandra’s partition and clustering columns express those different jobs explicitly."
+    ]
+  },
+  "nosql-replication-consistency": {
+    "title": "Keeping a Service Usable When Copies Cannot Communicate",
+    "sources": [
+      {
+        "title": "Dynamo: Amazon’s highly available key-value store (2007)",
+        "url": "https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf"
+      },
+      {
+        "title": "Gilbert and Lynch: Perspectives on the CAP theorem",
+        "url": "https://groups.csail.mit.edu/tds/papers/Gilbert/Brewer2.pdf"
+      },
+      {
+        "title": "DynamoDB read consistency",
+        "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html"
+      },
+      {
+        "title": "Apache Cassandra consistency mechanisms",
+        "url": "https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html"
+      }
+    ],
+    "blocks": [
+      "Dynamo made explicit choices about accepting operations and reconciling versions when replicas were unavailable. Gilbert and Lynch’s work on CAP explains why a replicated read/write service cannot guarantee both linearizable responses and a response to every request at a non-failing node under an arbitrary network partition.",
+      "A disconnected replica cannot discover which remote write completed. Returning its local value can preserve a response while violating the stronger read contract. Waiting or rejecting the operation preserves that contract at the expense of CAP availability for that request. This is a failure-time constraint, not a rule that every database must always choose two letters."
+    ]
+  },
+  "nosql-conditional-writes": {
+    "title": "Testing the Precondition at the Write Boundary",
+    "sources": [
+      {
+        "title": "DynamoDB condition expressions",
+        "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html"
+      },
+      {
+        "title": "MongoDB atomicity and transactions",
+        "url": "https://www.mongodb.com/docs/manual/core/write-operations-atomicity/"
+      }
+    ],
+    "blocks": [
+      "A read followed by an unconditional write leaves a gap in which another writer can change the record. Conditional updates address that gap by making the check part of the write operation. DynamoDB condition expressions and MongoDB update filters are concrete database interfaces for this idea.",
+      "This is the same concurrency problem encountered in the SQL versioned update. The syntax changes, while the reasoning stays useful: the application states which existing state would make its proposed action valid, and the database checks that condition atomically within the operation’s supported scope."
+    ]
+  },
+  "nosql-conflicts": {
+    "title": "Choosing Merge Rules That Fit the Operation",
+    "sources": [
+      {
+        "title": "Dynamo: Amazon’s highly available key-value store (2007)",
+        "url": "https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf"
+      },
+      {
+        "title": "Redis Active-Active application semantics",
+        "url": "https://redis.io/docs/latest/operate/rc/databases/active-active/develop/"
+      },
+      {
+        "title": "Preguiça, Baquero and Shapiro: Conflict-free replicated data types (2018)",
+        "url": "https://arxiv.org/abs/1805.06358"
+      }
+    ],
+    "blocks": [
+      "Dynamo described preserving divergent object versions so application logic could reconcile them. Later conflict-free replicated data type research examined data structures with precisely defined merge rules that converge under stated delivery assumptions. Redis Active-Active is one product family that uses CRDT ideas; this does not mean every Redis deployment has those semantics.",
+      "Our counter is a teaching instance of a state-based grow-only counter. We derive its merge from ownership and monotonic updates. It is suitable for accumulated inspections under those assumptions, not for every mutable document or bounded stock balance."
+    ]
+  },
+  "nosql-streams-projections": {
+    "title": "Letting a Committed Change Feed Another Read View",
+    "sources": [
+      {
+        "title": "DynamoDB change data capture",
+        "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html"
+      },
+      {
+        "title": "MongoDB change streams",
+        "url": "https://www.mongodb.com/docs/manual/changeStreams/"
+      }
+    ],
+    "blocks": [
+      "Database logs and change notifications allow downstream systems to follow committed changes instead of repeatedly scanning a source for differences. DynamoDB Streams and MongoDB change streams expose such changes through different APIs and retention contracts. They are examples of the mechanism, not interchangeable delivery protocols.",
+      "A stream can close the application’s source-write/notification gap when its guarantees match the design. It still leaves the consumer responsible for applying changes, recovering its position and handling its own side effects. Our local projection focuses on those applied-state semantics."
+    ]
+  },
+  "nosql-schema-evolution": {
+    "title": "Letting Old and New Records Coexist During a Change",
+    "sources": [
+      {
+        "title": "MongoDB schema versioning",
+        "url": "https://www.mongodb.com/docs/manual/data-modeling/design-patterns/data-versioning/schema-versioning/"
+      },
+      {
+        "title": "MongoDB schema validation",
+        "url": "https://www.mongodb.com/docs/manual/core/schema-validation/"
+      }
+    ],
+    "blocks": [
+      "Document databases permit records with different shapes, which can make a gradual rollout possible. MongoDB’s schema-versioning pattern documents an explicit version field and readers that understand the relevant shapes. The ability to store both versions is a mechanism; compatibility still has to be implemented.",
+      "The maintenance problem is a units change as well as a field move. An adapter can connect both representations to the same interpreted measurement while keeping their original meaning visible. Guessing from whichever field happens to exist would hide malformed or future records."
+    ]
+  },
+  "nosql-recovery": {
+    "title": "Retaining an Earlier State After the Current Copies Change",
+    "sources": [
+      {
+        "title": "DynamoDB restore to a new table",
+        "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/pointintimerecovery_restores.html"
+      },
+      {
+        "title": "Apache Cassandra backups",
+        "url": "https://cassandra.apache.org/doc/latest/cassandra/managing/operating/backups.html"
+      }
+    ],
+    "blocks": [
+      "Database backup mechanisms preserve earlier data so operational mistakes and storage failures need not destroy the only recoverable state. Different products expose different units: Cassandra documents snapshots and incremental backups; DynamoDB provides managed backup and point-in-time restore mechanisms. Neither is reproduced by our local dictionary.",
+      "The useful recovery idea is a boundary. A snapshot establishes a known earlier state; a valid replay interval brings that state to a chosen later point. The target must fall inside the history the backup system can actually recover."
+    ]
+  },
+  "nosql-ml-records": {
+    "title": "Separating Fast Current Lookups from Reproducible Training History",
+    "sources": [
+      {
+        "title": "Amazon SageMaker online feature store",
+        "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store-storage-configurations-online-store.html"
+      },
+      {
+        "title": "Amazon SageMaker offline feature store",
+        "url": "https://docs.aws.amazon.com/sagemaker/latest/dg/feature-store-storage-configurations-offline-store.html"
+      },
+      {
+        "title": "DynamoDB read consistency",
+        "url": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html"
+      }
+    ],
+    "blocks": [
+      "Feature-store systems separate concerns that otherwise get mixed into one table: serving inputs quickly by entity and retaining information for training or analysis. SageMaker documents online and offline storage modes with distinct update and history behaviour. They are one implementation of this separation, not a requirement that every model use a specialised store.",
+      "Our maintenance system already has historical SQL feature logic. Here we decide what a current serving lookup must return and which checks belong between that lookup and the model. The storage format is useful only if it preserves the feature contract."
+    ]
+  },
+  "graph-database-models": {
+    "title": "Relationships Became Part of the Stored Model",
+    "sources": [
+      {
+        "title": "Neo4j property graph concepts",
+        "url": "https://neo4j.com/docs/getting-started/appendix/graphdb-concepts/"
+      },
+      {
+        "title": "Cypher authors on the historical data-model problem",
+        "url": "https://homepages.inf.ed.ac.uk/pguaglia/papers/sigmod18.pdf"
+      }
+    ],
+    "blocks": [
+      "The Cypher authors describe Neo4j’s early data-model work in a media asset management system around 2000. Its changing structures, relationships and access-control views made variable-length connection queries useful. This is one documented route into modern property graphs, rather than a claim that Neo4j invented graphs. A property graph gives entities nodes and stores typed relationships with properties of their own.",
+      "This changes how we express a dependency question. The relationship is a stored fact we can follow from a known starting asset. It does not make every query faster, and relational tables can represent the same facts with keys and joins."
+    ]
+  },
+  "graph-database-identity": {
+    "title": "A Graph Needed Stable References Beyond Display Names",
+    "sources": [
+      {
+        "title": "RDF identity and shared resource descriptions, W3C 1999",
+        "url": "https://www.w3.org/press-releases/1999/rdf/"
+      },
+      {
+        "title": "Neo4j graph concepts",
+        "url": "https://neo4j.com/docs/getting-started/appendix/graphdb-concepts/"
+      },
+      {
+        "title": "Neo4j MERGE semantics",
+        "url": "https://neo4j.com/docs/cypher-manual/current/clauses/merge/"
+      }
+    ],
+    "blocks": [
+      "Sharing descriptions between systems made identity a practical problem for early web metadata. W3C’s 1999 RDF recommendation addressed exchangeable resource descriptions, where common references matter more than a displayed name. Our property-graph import has a related problem at a smaller scale: local pump IDs need enough scope to refer to the intended entity. The mechanisms differ, but neither model can safely equate entities from matching display text alone.",
+      "A source-qualified equipment code makes the scope visible. It prevents an import from treating identical local names as global identifiers, while allowing a later display-name change on the same entity."
+    ]
+  },
+  "graph-pattern-matching": {
+    "title": "A Query Could Describe the Connected Shape It Wanted",
+    "sources": [
+      {
+        "title": "Francis and colleagues, Cypher language paper, 2018",
+        "url": "https://homepages.inf.ed.ac.uk/pguaglia/papers/sigmod18.pdf"
+      },
+      {
+        "title": "Cypher MATCH",
+        "url": "https://neo4j.com/docs/cypher-manual/current/clauses/match/"
+      }
+    ],
+    "blocks": [
+      "Cypher developed inside Neo4j as a declarative property-graph language. Its 2018 language paper explains pattern matching as producing rows of variable bindings: each row records which entities satisfy a connected pattern.",
+      "That is why the inspection variable matters. Once a row binds it to I1, the technician relationship must extend from I1. The drawing-like syntax makes this connection visible while leaving physical execution to the database."
+    ]
+  },
+  "graph-filtering-aggregation": {
+    "title": "Graph Matches Still Produce Rows That Need a Grain",
+    "sources": [
+      {
+        "title": "Cypher aggregation functions",
+        "url": "https://neo4j.com/docs/cypher-manual/current/functions/aggregating/"
+      },
+      {
+        "title": "Cypher WITH",
+        "url": "https://neo4j.com/docs/cypher-manual/current/clauses/with/"
+      }
+    ],
+    "blocks": [
+      "Pattern matching can produce many binding rows from one starting node. Cypher combines those rows using aggregate functions and explicit intermediate stages such as WITH. The result depends on what is counted and which bindings remain as grouping keys.",
+      "Our duplicate link shows the practical consequence. The graph can contain two matched relationships while representing one inspection entity. Counting the entity once requires an identity-based duplicate policy."
+    ]
+  },
+  "graph-optional-patterns": {
+    "title": "Absence Became a Result Worth Preserving",
+    "sources": [
+      {
+        "title": "Cypher OPTIONAL MATCH",
+        "url": "https://neo4j.com/docs/cypher-manual/current/clauses/optional-match/"
+      }
+    ],
+    "blocks": [
+      "Cypher OPTIONAL MATCH extends pattern matching with NULL bindings when the requested pattern has no match. This resembles an outer join: existing input rows can survive without a related record.",
+      "That behaviour lets an asset register define the report population. A missing completed inspection is then visible as absence, instead of causing the asset itself to disappear."
+    ]
+  },
+  "graph-traversal-cycles": {
+    "title": "Unknown-Length Connections Needed Repeated Expansion",
+    "sources": [
+      {
+        "title": "Cypher authors on variable-length traversal needs",
+        "url": "https://homepages.inf.ed.ac.uk/pguaglia/papers/sigmod18.pdf"
+      },
+      {
+        "title": "Cypher variable-length paths",
+        "url": "https://neo4j.com/docs/cypher-manual/current/patterns/variable-length-paths/"
+      }
+    ],
+    "blocks": [
+      "The early Neo4j use case described by the Cypher authors included access through variable-length relationships. A fixed sequence of joins or pattern segments cannot express every unknown chain length conveniently. Graph query languages therefore provide bounded or variable-length path matching.",
+      "The repeated step does not decide the answer’s grain. A list of reachable nodes, every distinct path and the shortest path are different questions. Our teaching traversal collects nodes once, which gives the visited set a clear purpose."
+    ]
+  },
+  "graph-shortest-paths": {
+    "title": "Shortest Routes Needed a Cost-Aware Search",
+    "sources": [
+      {
+        "title": "Dijkstra, A note on two problems in connexion with graphs, 1959",
+        "url": "https://ir.cwi.nl/pub/9256"
+      },
+      {
+        "title": "Dijkstra source-target implementation and assumptions",
+        "url": "https://neo4j.com/docs/graph-data-science/current/algorithms/dijkstra-source-target/"
+      }
+    ],
+    "blocks": [
+      "Dijkstra’s 1959 paper described a procedure for finding the shortest route between nodes in a weighted graph. The useful step is to separate tentative distances from settled ones: with nonnegative lengths, the least tentative distance cannot later be improved by taking a detour through a more expensive unsettled node.",
+      "Dijkstra’s shortest-path method is used to find minimum accumulated cost in graphs with suitable nonnegative weights. Neo4j’s Graph Data Science documentation exposes that method separately from simple hop-count path matching. The algorithm keeps the cheapest unsettled distance visible rather than committing to the first route discovered.",
+      "For our cart, that distinction allows a route with an extra stop to win. The Python exercise implements a small nonnegative-weight version so we can inspect why the earlier expensive route is replaced."
+    ]
+  },
+  "graph-constraints-indexes": {
+    "title": "Flexible Records Still Needed Shared Invariants",
+    "sources": [
+      {
+        "title": "Neo4j constraint creation and backing indexes",
+        "url": "https://neo4j.com/docs/cypher-manual/current/schema/constraints/create-constraints/"
+      },
+      {
+        "title": "Cypher 2018 language and schema facilities",
+        "url": "https://homepages.inf.ed.ac.uk/pguaglia/papers/sigmod18.pdf"
+      }
+    ],
+    "blocks": [
+      "Property graphs let applications evolve node properties without requiring every category to have an identical record shape. As those graphs became application databases, shared write rules remained necessary. The Cypher language paper includes schema-definition capabilities alongside queries and updates; current Neo4j constraints make selected identity and property requirements enforceable.",
+      "The purpose here is narrower than making every node identical. All Asset nodes need an unambiguous application identity, while different kinds of equipment can still have different optional properties."
+    ]
+  },
+  "graph-safe-updates": {
+    "title": "Connected Updates Needed a Transaction Boundary",
+    "sources": [
+      {
+        "title": "Neo4j Python driver transactions",
+        "url": "https://neo4j.com/docs/python-manual/current/transactions/"
+      },
+      {
+        "title": "Cypher MERGE",
+        "url": "https://neo4j.com/docs/cypher-manual/current/clauses/merge/"
+      }
+    ],
+    "blocks": [
+      "A graph update can change an entity and several attached relationships together. Transaction support provides a boundary within which the database either commits the unit of work or rolls it back. Modern Neo4j drivers also retry selected transient failures, which makes the behaviour of the transaction function part of the application’s correctness.",
+      "The maintenance approval adds another boundary: a person approves a particular action against particular evidence. Rechecking that evidence at commit time prevents an old approval from silently becoming authority for a materially different state."
+    ]
+  },
+  "graph-imports": {
+    "title": "Bulk Data Exchange Had to Survive Partial Progress",
+    "sources": [
+      {
+        "title": "Neo4j LOAD CSV",
+        "url": "https://neo4j.com/docs/cypher-manual/current/clauses/load-csv/"
+      },
+      {
+        "title": "Neo4j MERGE",
+        "url": "https://neo4j.com/docs/cypher-manual/current/clauses/merge/"
+      }
+    ],
+    "blocks": [
+      "Graph loaders need to resolve source identities to stored nodes before creating their relationships. Neo4j’s documented import workflows combine row-oriented input with matching and merge operations, while transaction batching changes the unit of rollback.",
+      "The operational problem is older than any one loader: a response can be lost after work commits. Stable source identities and a recorded checkpoint make replay a question of recognising prior work rather than assuming every arrival is new."
+    ]
+  },
+  "graph-query-performance": {
+    "title": "Declarative Graph Queries Needed Physical Execution Plans",
+    "sources": [
+      {
+        "title": "Cypher 2018 discussion of query planning",
+        "url": "https://homepages.inf.ed.ac.uk/pguaglia/papers/sigmod18.pdf"
+      },
+      {
+        "title": "Neo4j understanding query plans",
+        "url": "https://neo4j.com/docs/cypher-manual/current/planning-and-tuning/execution-plans/"
+      }
+    ],
+    "blocks": [
+      "A declarative pattern describes the answer, leaving the database to choose how to find it. The Cypher authors describe Neo4j’s cost-based planning and physical execution operators. This separation lets equivalent logical queries use different access paths.",
+      "For our maintenance graph, locating one asset before expanding relationships can avoid unrelated work. The improvement is a claim to verify in a real plan, because cardinality estimates, indexes and graph degree all affect execution."
+    ]
+  },
+  "graph-rdf-sparql": {
+    "title": "Web Resources Needed Descriptions That Could Travel",
+    "sources": [
+      {
+        "title": "W3C announces RDF Recommendation, 1999",
+        "url": "https://www.w3.org/press-releases/1999/rdf/"
+      },
+      {
+        "title": "RDF 1.1 Concepts, 2014",
+        "url": "https://www.w3.org/TR/2014/REC-rdf11-concepts-20140225/"
+      },
+      {
+        "title": "SPARQL 1.1 Query Recommendation, 2013",
+        "url": "https://www.w3.org/TR/sparql11-query/"
+      }
+    ],
+    "blocks": [
+      "W3C’s 1999 RDF recommendation addressed machine-readable descriptions of Web resources. Shared identifiers and statement structure let descriptions from different applications be combined without agreeing on one table layout. The later RDF 1.1 and SPARQL 1.1 recommendations specify the graph model and its query language.",
+      "That helps our two maintenance teams state which resource a claim concerns. Agreement on identifiers and predicates still requires modelling work. Publishing a statement in RDF does not establish that it is correct."
+    ]
+  },
+  "graph-provenance": {
+    "title": "Derived Results Needed a Traceable History",
+    "sources": [
+      {
+        "title": "W3C PROV-O Recommendation, 2013",
+        "url": "https://www.w3.org/TR/prov-o/"
+      }
+    ],
+    "blocks": [
+      "W3C’s 2013 PROV recommendations gave applications a shared way to describe the entities and activities involved in producing information, including who was responsible. A chart could be linked to the dataset and transformation that produced it rather than circulating without that history.",
+      "Our maintenance claims have the same need on a smaller scale. A recorded source helps us inspect a disagreement or withdraw a superseded claim. Provenance explains how information arrived; it is not a certificate of truth."
+    ]
+  },
+  "graph-ml-retrieval": {
+    "title": "Some Questions Needed Connections Across Retrieved Passages",
+    "sources": [
+      {
+        "title": "Edge and colleagues, GraphRAG paper, 2024",
+        "url": "https://arxiv.org/abs/2404.16130"
+      },
+      {
+        "title": "Microsoft GraphRAG documentation",
+        "url": "https://microsoft.github.io/graphrag/"
+      }
+    ],
+    "blocks": [
+      "The 2024 GraphRAG paper studied questions that require a broad view of a document collection. Its method builds an entity graph and community summaries to support query-focused summarisation. It addresses a different failure from simply finding a nearby text passage.",
+      "Our maintenance example uses a smaller local retrieval mechanism: start from a known asset and follow approved dependency types to related manuals. It is not a reproduction of that paper’s community-summary pipeline. The common motivation is that useful evidence may be connected across records."
+    ]
+  },
   "missing-measurements": {
     "title": "The Missing Observation Has a Story Too",
     "sources": [
@@ -436,6 +1659,135 @@
     "blocks": [
       "Statisticians often need the uncertainty of an estimate even when a convenient formula is unavailable. Repeating the entire real-world data collection may be impractical.",
       "Efron's 1979 bootstrap paper developed a computational approach based on resampling the observed data. Our invented greenhouse readings show how replacement and repeated estimates work. Three displayed resamples make the mechanism inspectable; they are far too few to justify a useful confidence interval."
+    ]
+  },
+  "model-residual-analysis": {
+    "title": "Checking What a Fitted Equation Left Behind",
+    "sources": [
+      {
+        "title": "NIST: Are the model residuals well-behaved?",
+        "url": "https://www.itl.nist.gov/div898/handbook/pri/section2/pri24.htm"
+      }
+    ],
+    "blocks": [
+      "Fitting a regression equation leaves a difference at each observation. Statistical model checking examines those differences because a fitted average can conceal a systematic pattern. The NIST engineering handbook documents checks involving residual plots and model assumptions.",
+      "Our greenhouse readings are invented. We use the same diagnostic idea: keep the part the prediction failed to explain, then ask whether it changes with temperature, time or another recorded condition."
+    ]
+  },
+  "model-precision-recall": {
+    "title": "Finding Relevant Items in a Much Larger Collection",
+    "sources": [
+      {
+        "title": "Scikit-learn: precision-recall and average precision",
+        "url": "https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html"
+      }
+    ],
+    "blocks": [
+      "Precision and recall are established measures in information retrieval: returning many documents is only useful if the relevant ones are among them, and a short clean list can still omit most relevant documents. The same counting problem appears in a rare-fault detector.",
+      "Modern classification libraries expose these measures over many score thresholds. Our pump example keeps the underlying counts visible so a curve cannot hide the inspection workload."
+    ]
+  },
+  "model-evaluation-slices": {
+    "title": "A Model Report Needs to Say Who Was Measured",
+    "sources": [
+      {
+        "title": "Mitchell and colleagues: Model Cards for Model Reporting, 2019",
+        "url": "https://arxiv.org/abs/1810.03993"
+      }
+    ],
+    "blocks": [
+      "A single reported score can hide differences across populations and operating conditions. Model Cards proposed structured documentation of intended uses, evaluation conditions and disaggregated performance. That documented reporting proposal helps us ask where a model’s evidence actually applies.",
+      "We will use shifts in an invented greenhouse. The calculation is small enough to inspect, while the reporting question also applies to devices, locations and carefully defined population groups."
+    ]
+  },
+  "model-paired-comparisons": {
+    "title": "Preserving the Comparison When We Resample",
+    "sources": [
+      {
+        "title": "SciPy: paired bootstrap resampling",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html"
+      },
+      {
+        "title": "Cawley and Talbot: selection bias in performance evaluation, 2010",
+        "url": "https://www.jmlr.org/papers/v11/cawley10a.html"
+      }
+    ],
+    "blocks": [
+      "Comparing learning procedures requires separating a method change from variation in the evaluation data. Cawley and Talbot examined how selection itself can overfit an estimated performance criterion. A favourable comparison becomes harder to interpret when it was selected from many attempts.",
+      "Here we begin with a simpler fixed comparison. Both frozen models see the same cases. We keep each pair together when resampling so the uncertainty calculation still describes their difference on shared observations."
+    ]
+  },
+  "model-nested-validation": {
+    "title": "The Search Can Overfit Too",
+    "sources": [
+      {
+        "title": "Cawley and Talbot: On Over-fitting in Model Selection, 2010",
+        "url": "https://www.jmlr.org/papers/v11/cawley10a.html"
+      },
+      {
+        "title": "Scikit-learn: nested versus non-nested cross-validation",
+        "url": "https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html"
+      }
+    ],
+    "blocks": [
+      "Model fitting was already understood as a source of overfitting, but the criterion used to choose a fitted model also varies with the sample. Cawley and Talbot examined how optimising that noisy criterion can bias the reported result.",
+      "Nested cross-validation separates the search from an outer assessment. The outside observations ask whether the entire inner choosing procedure produces useful predictions on data it did not use."
+    ]
+  },
+  "model-data-audits": {
+    "title": "Looking for Problems in the Labels",
+    "sources": [
+      {
+        "title": "Northcutt, Jiang and Chuang: Confident Learning",
+        "url": "https://arxiv.org/abs/1911.00068"
+      }
+    ],
+    "blocks": [
+      "Datasets are often treated as a fixed answer key even though their labels may contain mistakes. Confident Learning developed methods for estimating label uncertainty and identifying likely label issues using predicted probabilities under stated assumptions.",
+      "Our review queue is a simpler teaching rule, not an implementation of Confident Learning. It flags strong disagreements for investigation. The original observation and an independent review remain the evidence for any correction."
+    ]
+  },
+  "model-selective-prediction": {
+    "title": "Allowing a Classifier to Decline a Decision",
+    "sources": [
+      {
+        "title": "Geifman and El-Yaniv: Selective Classification for Deep Neural Networks, 2017",
+        "url": "https://arxiv.org/abs/1705.08500"
+      }
+    ],
+    "blocks": [
+      "Selective classification studies predictions with a reject option: the system can decline some cases and trade coverage for lower error on accepted cases. Geifman and El-Yaniv developed a method for deep networks with risk control under their stated procedure.",
+      "Our threshold exercise measures empirical coverage and error on supplied cases. It does not implement that paper’s guarantee. The useful intuition is that refusing a case changes the population whose errors we report."
+    ]
+  },
+  "model-behaviour-tests": {
+    "title": "Testing Behaviour That a Single Score Misses",
+    "sources": [
+      {
+        "title": "Ribeiro and colleagues: Beyond Accuracy, CheckList, 2020",
+        "url": "https://arxiv.org/abs/2005.04118"
+      }
+    ],
+    "blocks": [
+      "A held-out average can miss a specific behaviour that users rely on. CheckList applied behavioural testing ideas to language models, including tests of capabilities and expected responses to input changes.",
+      "We use that testing perspective for a temperature service. Our unit and batching checks are examples of declared relationships between inputs and outputs, not a claim to implement the CheckList software or certify robustness."
+    ]
+  },
+  "model-iteration-project": {
+    "title": "A Fitted Equation Needs an Evaluation Record",
+    "sources": [
+      {
+        "title": "NumPy: least-squares fitting with linalg.lstsq",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html"
+      },
+      {
+        "title": "Mitchell and colleagues: Model Cards for Model Reporting",
+        "url": "https://arxiv.org/abs/1810.03993"
+      }
+    ],
+    "blocks": [
+      "Least-squares fitting provides coefficients that minimise squared training discrepancies for a specified linear model. It does not decide whether the inputs are appropriate or whether a revised model is useful for its intended population.",
+      "This project brings fitting together with explicit evaluation and reporting. The greenhouse is invented, and the small exact training relation makes the mechanics visible. We still keep the distinction between fitting a relation and collecting enough evidence to use it."
     ]
   },
   "conditional-probability": {
@@ -1475,6 +2827,19 @@
       "Our capstone verifies two numerical requirements on invented inspection and workload fixtures. It then asks what evidence would validate the service for the maintenance team. Passing the arithmetic is useful, but it cannot demonstrate fewer real breakdowns or an acceptable review workload."
     ]
   },
+  "agent-introduction": {
+    "title": "Giving a Language Model a Way to Check",
+    "sources": [
+      {
+        "title": "ReAct: Synergizing Reasoning and Acting in Language Models, 2022",
+        "url": "https://arxiv.org/abs/2210.03629"
+      }
+    ],
+    "blocks": [
+      "ReAct, introduced in 2022, explored interleaving language-model reasoning and actions with observations from an environment. A lookup could supply evidence for the next step instead of leaving the model to continue from its initial information. It was one contribution to language-model agents, not the invention of agents as a whole.",
+      "That gives us a useful place to begin: a proposed action is a request to software, and the result becomes new information. We can inspect those boundaries without asking the reader to trust an answer just because it sounds confident."
+    ]
+  },
   "agent-prompts": {
     "title": "Examples Became Part of the Request",
     "sources": [
@@ -1550,6 +2915,23 @@
     "blocks": [
       "A language model answering from its initial input cannot inspect a tool result that has not arrived yet. ReAct explored sequences that interleave reasoning and actions, letting observations affect the next step. This supplied a concrete way to combine language-based task handling with information gathered during execution.",
       "Our controller is smaller than a full agent implementation. It consumes supplied proposals and results so we can inspect termination behaviour. The workshop does not run a language model or reveal its private reasoning. It shows the operational decisions an application must make around whatever model supplies the proposals."
+    ]
+  },
+  "agent-or-workflow": {
+    "title": "Separating a Predetermined Route from a Model’s Choice",
+    "sources": [
+      {
+        "title": "Anthropic: Building effective agents, December 2024",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents"
+      },
+      {
+        "title": "Anthropic: How we built our multi-agent research system",
+        "url": "https://www.anthropic.com/engineering/multi-agent-research-system"
+      }
+    ],
+    "blocks": [
+      "Once language models could call tools, developers could give them control over a sequence of operations. That raised a practical question: which decisions should remain in ordinary application code? Anthropic’s December 2024 engineering article distinguished predefined workflows from systems in which a model chooses its next operations. It described patterns used in applications, rather than claiming to have invented workflows or software agents.",
+      "Think about the maintenance desk. Retrieving a known record already has a route. Investigating a poorly described fault may require looking at a result before deciding what to inspect next. Our examples use invented measurements to make that design choice visible. They are not benchmark results for any provider or framework."
     ]
   },
   "agent-pydantic-ai": {
@@ -1670,11 +3052,170 @@
       {
         "title": "MCP trust assumptions",
         "url": "https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md"
+      },
+      {
+        "title": "MCP authorisation, protocol 2026-07-28",
+        "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization"
+      },
+      {
+        "title": "MCP security practices",
+        "url": "https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices"
       }
     ],
     "blocks": [
       "Assistants could generate text but often lacked a consistent connection to the systems holding a user’s documents and tools. Anthropic introduced MCP in November 2024 to standardise those integrations. A service can describe its capabilities through one protocol instead of requiring a separate custom interface for every assistant.",
       "Our invented maintenance service uses that idea to expose manual content. Sharing a protocol does not settle whether a server is trustworthy, which technician may read a record, or whether a proposed action needs approval. Those decisions remain in the host application and the service that owns the data."
+    ]
+  },
+  "agent-prompt-injection": {
+    "title": "When Retrieved Text Became Part of the Instruction Problem",
+    "sources": [
+      {
+        "title": "NIST adversarial machine learning taxonomy, 2025",
+        "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-2e2025.pdf"
+      },
+      {
+        "title": "OWASP prompt injection prevention",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html"
+      },
+      {
+        "title": "NeMo Guardrails: programmable rails, 2023 paper",
+        "url": "https://arxiv.org/abs/2310.10501"
+      }
+    ],
+    "blocks": [
+      "Retrieval and tool use let assistants answer from material their developers had never seen. That also gave outside authors a route into the model’s context. NIST’s 2025 taxonomy distinguishes direct injection through a submitted prompt from indirect injection carried by an external resource. The distinction describes the route into the system, not whether a particular attack succeeds.",
+      "NVIDIA’s 2023 NeMo Guardrails paper describes programmable checks around an LLM conversation. These checks made the stages of a conversation explicit enough to apply different policies. Our maintenance example studies one of those boundaries: a proposed action must remain within application-issued grants even if the model or a screening step is mistaken."
+    ]
+  },
+  "agent-authorization": {
+    "title": "Permission Had to Follow the Object Being Accessed",
+    "sources": [
+      {
+        "title": "Saltzer and Schroeder, 1975",
+        "url": "https://www.cs.virginia.edu/~evans/cs551/saltzer/"
+      },
+      {
+        "title": "OWASP authorisation guidance",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+      },
+      {
+        "title": "NeMo tool security guidance",
+        "url": "https://docs.nvidia.com/nemo/guardrails/resources/guidelines"
+      }
+    ],
+    "blocks": [
+      "Shared computers had to keep one user’s programs from freely using another user’s files. Saltzer and Schroeder’s 1975 paper describes design principles including least privilege, fail-safe defaults and complete mediation. The recurring problem is deciding whether a particular operation on a particular object is allowed.",
+      "An agent introduces a new way to propose that operation, but the service still has the same responsibility. In our invented workshop, the model proposes an asset operation while application-owned records establish the caller’s tenant and grants."
+    ]
+  },
+  "agent-data-boundaries": {
+    "title": "Managing Data Meant Following It Beyond the Database",
+    "sources": [
+      {
+        "title": "NIST Privacy Framework, January 2020",
+        "url": "https://www.nist.gov/privacy-framework/privacy-framework"
+      },
+      {
+        "title": "Presidio identification and anonymisation modules",
+        "url": "https://presidio.dataprivacystack.org/"
+      },
+      {
+        "title": "OWASP server-side request forgery prevention",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html"
+      },
+      {
+        "title": "NeMo security guidance",
+        "url": "https://docs.nvidia.com/nemo/guardrails/resources/guidelines"
+      }
+    ],
+    "blocks": [
+      "Keeping a database private does not settle what happens when an application copies its contents to another system. NIST’s January 2020 Privacy Framework organised privacy risk around data processing and the organisations involved in it. That gives us a useful question for an agent: which information leaves each boundary, for what purpose, and under whose controls?",
+      "Tools such as Presidio address a narrower part of that problem by identifying and transforming sensitive entities in text and other data. Its documentation explicitly warns that automated detection cannot find every sensitive item. Our workshop begins earlier, with a new record containing only the fields this lookup needs."
+    ]
+  },
+  "agent-output-guardrails": {
+    "title": "A Correct String Can Become an Instruction to Another Program",
+    "sources": [
+      {
+        "title": "OWASP cross-site scripting prevention",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html"
+      },
+      {
+        "title": "Python HTML escaping",
+        "url": "https://docs.python.org/3/library/html.html"
+      },
+      {
+        "title": "Pydantic strict mode",
+        "url": "https://pydantic.dev/docs/validation/latest/concepts/strict_mode/"
+      },
+      {
+        "title": "Guardrails AI validators",
+        "url": "https://guardrailsai.com/guardrails/docs/concepts/validators"
+      }
+    ],
+    "blocks": [
+      "Web applications have long had to distinguish text supplied by a user from markup interpreted by a browser. Cross-site scripting demonstrates what happens when that distinction is lost. Generated text introduces another source of untrusted content; the consuming browser still applies its own parsing rules.",
+      "Typed validation libraries help applications reject malformed records, while guardrail libraries organise additional checks and their failure actions. Our teaching example keeps the questions visible: are the fields usable, do their identifiers match this request, and will the display treat the content as text? These checks leave the correctness of the inspection advice for a separate review."
+    ]
+  },
+  "agent-retries-and-effects": {
+    "title": "A Lost Reply Was a Problem Before Models Called Tools",
+    "sources": [
+      {
+        "title": "Amazon Builders’ Library: Making retries safe with idempotent APIs",
+        "url": "https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/"
+      },
+      {
+        "title": "Amazon Builders’ Library: Timeouts, retries, and backoff with jitter",
+        "url": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/"
+      },
+      {
+        "title": "Stripe API: Idempotent requests",
+        "url": "https://docs.stripe.com/api/idempotent_requests"
+      },
+      {
+        "title": "gRPC: Deadlines",
+        "url": "https://grpc.io/docs/guides/deadlines/"
+      }
+    ],
+    "blocks": [
+      "Distributed services have long faced the problem of a request whose effect succeeds while its reply is lost. Amazon’s Builders’ Library describes how client request identifiers let a service recognise repeated intent; its idempotent API article was announced in January 2021. An agent calling a work-order service inherits this same communication problem.",
+      "The practical idea is to give the intended inspection a stable identity. A repeated delivery of that operation can then recover its earlier result within the receiving service’s documented contract. Our receipt ledger is a teaching model. It does not implement a distributed transaction or promise that every request eventually succeeds."
+    ]
+  },
+  "agent-resource-budgets": {
+    "title": "An Agent Run Inherits the Resource Problems of a Service",
+    "sources": [
+      {
+        "title": "Microsoft Azure Architecture Center: Circuit Breaker pattern",
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker"
+      },
+      {
+        "title": "gRPC: Deadlines and cancellation",
+        "url": "https://grpc.io/docs/guides/deadlines/"
+      },
+      {
+        "title": "Pydantic AI: Usage limits and cancellation",
+        "url": "https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits"
+      }
+    ],
+    "blocks": [
+      "Services already needed ways to stop failed dependencies from consuming every available worker. Circuit breakers record a dependency’s health and temporarily prevent new calls when repeated failures make more work unhelpful. The pattern belongs to distributed-service design; adding a model-controlled loop makes its resource consequences easier to overlook.",
+      "A model can propose more work than the application can afford to execute. Current agent libraries expose run limits, but their counters and enforcement moments differ. Our lesson uses an explicit reservation ledger so the reader can inspect what was spent, what is still in flight, and what another call would require."
+    ]
+  },
+  "agent-prompt-examples": {
+    "title": "Showing a Task Inside the Input",
+    "sources": [
+      {
+        "title": "Language Models are Few-Shot Learners, 2020",
+        "url": "https://arxiv.org/abs/2005.14165"
+      }
+    ],
+    "blocks": [
+      "The 2020 GPT-3 paper studied tasks presented through instructions and a small number of demonstrations in the model’s input. In that setting, adapting to the task did not require gradient updates during inference. This made the contents of the prompt part of how the task was specified.",
+      "For our maintenance desk, that means we can show a supported answer and a request for clarification side by side. It does not guarantee that a model will infer the intended rule. We still have to test what it does with unfamiliar questions."
     ]
   },
   "agent-tracing": {
@@ -1732,6 +3273,23 @@
       "Our maintenance tests borrow that question about behaviour: what did the system do in the environment it was given? The small cases here are invented regression fixtures, not a reproduction of either benchmark and not evidence about a particular model’s capability."
     ]
   },
+  "agent-framework-tests": {
+    "title": "A Test Double Gives Us Control Over One Boundary",
+    "sources": [
+      {
+        "title": "Pydantic AI testing guide",
+        "url": "https://pydantic.dev/docs/ai/guides/testing/"
+      },
+      {
+        "title": "LangChain testing guide",
+        "url": "https://docs.langchain.com/oss/python/langchain/test"
+      }
+    ],
+    "blocks": [
+      "Agent frameworks inherit a familiar software-testing problem: a dependency may be slow, costly or variable when we need a reproducible failure. Pydantic AI provides TestModel and FunctionModel so tests can replace model behaviour. LangChain documents unit tests using mock models alongside tests that call real providers.",
+      "The useful idea is control. Supply a known response at the model boundary and check the application’s reaction. Replacing that boundary deliberately removes evidence about the real model, so integration tests and task evaluations still have work to do."
+    ]
+  },
   "agent-model-judges": {
     "title": "When Exact Answers Were Too Narrow",
     "sources": [
@@ -1747,6 +3305,32 @@
     "blocks": [
       "Open-ended assistant answers made evaluation harder because several phrasings could be acceptable. The 2023 MT-Bench and Chatbot Arena study investigated model judges and compared their decisions with human preferences. It also studied problems such as sensitivity to answer position, verbosity and the judge’s own tendencies.",
       "That work gives us a reason to test a judge rather than simply trust its score. Our maintenance task is narrower than a general preference contest: does the answer preserve what this supplied manual requires? A study on conversational preference does not establish reliability on that domain-specific question."
+    ]
+  },
+  "agent-error-analysis": {
+    "title": "An Average Score Cannot Tell Us What to Repair",
+    "sources": [
+      {
+        "title": "Beyond Accuracy: Behavioral Testing of NLP Models with CheckList, 2020",
+        "url": "https://arxiv.org/abs/2005.04118"
+      }
+    ],
+    "blocks": [
+      "CheckList, published in 2020, proposed behavioural tests for language systems rather than relying only on aggregate accuracy. Tests could target a capability and probe how behaviour changed when the input changed.",
+      "That is useful for our desk because “wrong answer” covers several mechanisms. We can test whether the right manual is retrieved, whether the answer uses it correctly, and whether an approved call reaches the correct service. Each failure gives us a narrower question to investigate."
+    ]
+  },
+  "agent-ablation-experiments": {
+    "title": "Design the Comparison Around the Question",
+    "sources": [
+      {
+        "title": "NIST/SEMATECH: Choosing an experimental design",
+        "url": "https://www.itl.nist.gov/div898/handbook/pri/section3/pri3.htm"
+      }
+    ],
+    "blocks": [
+      "Experimental design asks how observations can answer a particular question about a process. The NIST/SEMATECH handbook describes choosing a design around the objectives and factors being studied. Agent development has the same difficulty when several parts of a system change together.",
+      "An ablation removes or changes a component so we can investigate its contribution. Here the component is the demonstration set. Holding the recorded model, tools, dataset and evaluator fixed makes the comparison more informative, although repeated model runs and uncontrolled service changes can still introduce variation."
     ]
   },
   "agent-release-checks": {
@@ -1768,6 +3352,65 @@
     "blocks": [
       "Software regression tests preserve known requirements while an implementation changes. Model-based systems add variation in generated outputs, so the regression process also needs fixed cases, identified model and prompt versions, and judgements whose limits are understood. Tools such as promptfoo make these comparisons repeatable from a command line and within a continuous-integration job.",
       "Our maintenance release policy combines evidence from the preceding lessons. It is an authored teaching policy, not a universal threshold prescribed by a framework. The important step is deciding the policy before seeing which candidate it favours."
+    ]
+  },
+  "agent-adversarial-evaluations": {
+    "title": "Friendly Test Cases Leave Some Questions Unasked",
+    "sources": [
+      {
+        "title": "NIST Generative AI Profile, 2024",
+        "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.600-1.pdf"
+      },
+      {
+        "title": "promptfoo red-team configuration",
+        "url": "https://www.promptfoo.dev/docs/red-team/configuration/"
+      },
+      {
+        "title": "promptfoo custom policy checks",
+        "url": "https://www.promptfoo.dev/docs/red-team/plugins/policy/"
+      }
+    ],
+    "blocks": [
+      "Once a model participates in actions and data access, ordinary accuracy examples leave gaps. A test writer needs to deliberately search for ways the application can violate a boundary. NIST’s 2024 Generative AI Profile includes adversarial testing among its measurement activities. It treats testing as part of continuing risk management, rather than a one-time certificate.",
+      "Current tools such as promptfoo can generate inputs aimed at a stated policy and apply different attack strategies. Our maintenance example begins with the policy and observed result, so we can understand what such a tool would have to measure. The attempts and outcomes below are invented records, not findings from a live assistant."
+    ]
+  },
+  "agent-incident-response": {
+    "title": "Someone Has to Stop the Effects While Others Investigate",
+    "sources": [
+      {
+        "title": "Google Site Reliability Workbook: incident response, 2018",
+        "url": "https://sre.google/workbook/incident-response/"
+      },
+      {
+        "title": "Google Site Reliability Workbook: canarying releases, 2018",
+        "url": "https://sre.google/workbook/canarying-releases/"
+      },
+      {
+        "title": "NIST SP 800-61 Revision 3, April 2025",
+        "url": "https://csrc.nist.gov/pubs/sp/800/61/r3/final"
+      }
+    ],
+    "blocks": [
+      "Operational incidents often need investigation and coordination at the same time. Google’s 2018 Site Reliability Workbook describes agreed incident roles and working records so the people repairing a service are not also left guessing who is coordinating the response. Its canarying guidance limits initial exposure while comparing a candidate with the existing service.",
+      "NIST’s 2025 revision of SP 800-61 places preparation, detection, response and recovery within continuing cybersecurity risk management. We will apply those ideas to an agent with queued tool actions. Its action history matters because replacing the model or prompt cannot undo an effect that has already reached another system."
+    ]
+  },
+  "agent-iteration-project": {
+    "title": "Keeping a Repair From Becoming a New Failure",
+    "sources": [
+      {
+        "title": "CheckList behavioural testing",
+        "url": "https://arxiv.org/abs/2005.04118"
+      },
+      {
+        "title": "Langfuse evaluation datasets",
+        "url": "https://langfuse.com/docs/evaluation/experiments/datasets"
+      }
+    ],
+    "blocks": [
+      "Behavioural tests make a discovered mistake repeatable. Experiment datasets then let a team run candidate versions against stored tasks and expectations. Langfuse supports datasets for this kind of comparison; the useful practice is retaining the case, configuration and observed result together.",
+      "Our project follows that practice with small visible records. The tools help us organise evidence, but the expected outcome still has to come from the task. A stored score with no clear acceptance rule is difficult to use when the assistant changes."
     ]
   }
 }

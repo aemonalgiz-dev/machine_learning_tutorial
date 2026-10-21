@@ -52,10 +52,12 @@ export function PythonCode({
   source,
   label,
   copyable = true,
+  language = "python",
 }: {
   source: string;
   label?: string;
   copyable?: boolean;
+  language?: "python" | "sql";
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -79,7 +81,7 @@ export function PythonCode({
     <div className="my-3 overflow-hidden rounded-lg border border-line bg-surface">
       {(label || copyable) && (
         <div className="flex items-center justify-between gap-3 border-b border-line bg-raised px-3 py-1.5">
-          <span className="font-mono text-xs text-muted">{label ?? "Python"}</span>
+          <span className="font-mono text-xs text-muted">{label ?? (language === "sql" ? "SQL · SQLite" : "Python")}</span>
           {copyable && (
             <button
               type="button"
@@ -94,7 +96,7 @@ export function PythonCode({
       )}
       <pre className="max-h-96 overflow-auto px-4 py-3 font-mono text-[13px] leading-6 text-foreground">
         <code>
-          {tokenise(source).map((token, index) =>
+          {language === "sql" ? source : tokenise(source).map((token, index) =>
             token.kind === "plain" ? (
               token.text
             ) : (

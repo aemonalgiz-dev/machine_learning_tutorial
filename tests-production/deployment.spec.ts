@@ -3,16 +3,31 @@ import { expandedLessons } from "../lib/lessons";
 import { buildById } from "../lib/builds/catalog";
 import { openFullWorkshop } from "../tests/helpers/open-workshop";
 
-test("published Agents lessons survive the production build", async ({ request }) => {
-  for (const lesson of expandedLessons.filter(lesson => lesson.section === "Agents")) {
+test("published agent, model evaluation and database lessons survive the production build", async ({ request }) => {
+  test.setTimeout(180_000);
+  for (const lesson of expandedLessons.filter(lesson => ["Agents", "Prompting, Evaluation and Iteration", "Evaluating and Improving Models", "SQL", "NoSQL", "Graph Databases"].includes(lesson.section))) {
     const response = await request.get(`/concepts/${lesson.id}`);
     expect(response.status(), lesson.id).toBe(200);
     expect(await response.text(), lesson.id).toContain(lesson.id);
   }
 });
 
+test("authored lesson pages cache on first visit and unknown lesson IDs stay missing", async ({ request }) => {
+  for (const id of ["agent-prompts", "sql-tables", "nosql-documents", "graph-pattern-matching"]) {
+    const first = await request.get(`/concepts/${id}`);
+    expect(first.status(), id).toBe(200);
+    expect(await first.text(), id).toContain("Botie");
+    const repeated = await request.get(`/concepts/${id}`);
+    expect(repeated.status(), id).toBe(200);
+    expect(repeated.headers()["x-nextjs-cache"], id).toBe("HIT");
+  }
+  for (const id of ["does-not-exist", "constructor", "__proto__"]) {
+    expect((await request.get(`/concepts/${id}`)).status(), id).toBe(404);
+  }
+});
+
 test("workshops generate and cache, while old and invalid addresses retain their behavior", async ({ request }) => {
-  for (const id of ["linear-algebra", "agent-langfuse", "agent-prompts"]) {
+  for (const id of ["linear-algebra", "agent-langfuse", "agent-prompts", "agent-authorization", "agent-resource-budgets", "sql-left-joins", "sql-transactions", "nosql-conflicts", "graph-traversal-cycles"]) {
     const first = await request.get(`/lab/${id}`);
     expect(first.status(), id).toBe(200);
     expect(await first.text()).toContain("Full workspace and earlier draft");
