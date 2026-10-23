@@ -14,7 +14,7 @@ test("production refuses an HTTP account backend before forwarding session cooki
   environment.OOP_ML_ACCOUNTS_URL = "http://localhost:8001";
   globalThis.fetch = async () => { contacted = true; throw new Error("Unexpected HTTP request"); };
   try {
-    const response = await GET(new NextRequest("https://fitlab.example/account-api/session", {
+    const response = await GET(new NextRequest("https://perceptronlab.example/account-api/session", {
       headers: { Cookie: "fitlab_session=must-stay-here" },
     }), { params: Promise.resolve({ path: ["session"] }) });
     expect(response.status).toBe(503);

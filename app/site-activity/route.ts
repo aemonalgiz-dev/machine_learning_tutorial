@@ -1,6 +1,6 @@
 // Receives reading activity from instrumentation-client.ts and writes it as one
 // log line per event. Amplify sends this server's output to the CloudWatch log
-// group the FitLab dashboard queries, so the log line is the whole record.
+// group the Perceptron Lab dashboard queries, so the log line is the whole record.
 // app/privacy/page.tsx tells readers what is kept, and must change with this.
 //
 // What is kept is deliberately small: the path without its query, the

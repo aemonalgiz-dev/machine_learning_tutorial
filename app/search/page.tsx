@@ -5,7 +5,7 @@ import { LessonSearch } from "@/components/course/LessonSearch";
 import { LEARNING_AREAS } from "@/lib/learning-areas";
 import { searchEntries } from "@/lib/lesson-search-index";
 
-export const metadata: Metadata = { title: "Find a lesson | FitLab", description: "Search FitLab lessons and sections by subject." };
+export const metadata: Metadata = { title: "Find a lesson | Perceptron Lab", description: "Search Perceptron Lab lessons and sections by subject." };
 export default function SearchPage() {
   return <div className="mx-auto max-w-4xl px-6 py-12">
     <Link href="/#course" className="text-sm text-muted hover:text-foreground">← All learning areas</Link>

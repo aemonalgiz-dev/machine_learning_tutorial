@@ -9,7 +9,7 @@ const READER = {
   Cookie: "__Host-fitlab_session=session-must-stay-here; __Host-fitlab_oauth=oauth-must-stay-here",
   Authorization: "Bearer authorization-must-stay-here",
   Origin: "https://origin-must-stay-here.example",
-  Referer: "https://fitlab.example/concepts/referer-must-stay-here",
+  Referer: "https://perceptronlab.example/concepts/referer-must-stay-here",
   "X-FitLab-Account": "account-must-stay-here",
   "X-Forwarded-For": "203.0.113.7, forwarded-must-stay-here",
 };
@@ -81,7 +81,7 @@ test("the compute API's Set-Cookie and other headers never come back to the read
     response.writeHead(refusal ? 422 : 200, {
       "Content-Type": "application/json",
       "Cache-Control": "public, max-age=60",
-      "Set-Cookie": ["__Host-fitlab_session=overwritten; Path=/; Secure; HttpOnly", "tracker=1; Domain=fitlab.dev; Path=/"],
+      "Set-Cookie": ["__Host-fitlab_session=overwritten; Path=/; Secure; HttpOnly", "tracker=1; Domain=perceptronlab.dev; Path=/"],
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Credentials": "true",
       "X-Amzn-RequestId": "request-id",

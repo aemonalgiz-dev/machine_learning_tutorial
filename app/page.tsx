@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Botie } from "@/components/site/Botie";
@@ -6,27 +7,33 @@ import { LegacyCourseLinks } from "@/components/course/LegacyCourseLinks";
 import { legacyCourseDestinations } from "@/lib/course-navigation";
 import { LEARNING_AREAS, learningAreaHref, learningAreaSections } from "@/lib/learning-areas";
 import { JourneyResume } from "@/components/site/JourneyResume";
+import { SITE_NAME, SITE_ORIGIN, SITE_TITLE, SITE_SOCIAL } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: SITE_ORIGIN },
+  openGraph: { ...SITE_SOCIAL, url: SITE_ORIGIN },
+};
 
 export default function Home() {
   return (
     <div className="mx-auto w-full max-w-5xl px-6 pb-12 pt-6 sm:pb-20 sm:pt-8">
       <LegacyCourseLinks destinations={legacyCourseDestinations} />
       <header className="mb-10">
-        <h1 className="sr-only">FitLab: Machine Learning for Everyone</h1>
-        <div role="img" aria-label="FitLab. Machine Learning for Everyone. A fitted line, a matrix, and a neural network connect the ideas in the course." className="relative mb-6 overflow-hidden rounded-2xl border border-line bg-[#060d15] shadow-sm">
+        <h1 className="sr-only">{SITE_TITLE}</h1>
+        <div role="img" aria-label="Perceptron Lab. Machine Learning for Everyone. A fitted line, a matrix, and a neural network connect the ideas in the course." className="relative mb-6 overflow-hidden rounded-2xl border border-line bg-[#060d15] shadow-sm">
           <div aria-hidden="true" className="relative hidden h-64 sm:block lg:h-[300px]">
             {/* Crop the artwork's extra left margin to center its title and diagrams together. */}
             <div className="absolute inset-y-0 right-0 w-[120%]">
-              <Image src="/branding/fitlab-banner.png" alt="" fill sizes="(min-width: 1024px) 1172px, calc(120vw - 57.6px)" loading="eager" fetchPriority="high" className="object-cover object-[right_40%]" />
+              <Image src="/branding/perceptron-lab-banner.png" alt="" fill sizes="(min-width: 1024px) 1172px, calc(120vw - 57.6px)" loading="eager" fetchPriority="high" className="object-cover object-[right_40%]" />
             </div>
           </div>
           <div aria-hidden="true" className="relative min-h-52 sm:hidden">
             <div className="absolute inset-y-0 right-0 w-[46%] max-w-60">
-              <Image src="/branding/fitlab-banner.png" alt="" fill sizes="560px" loading="eager" className="object-cover object-right" />
+              <Image src="/branding/perceptron-lab-banner.png" alt="" fill sizes="560px" loading="eager" className="object-cover object-right" />
               <div className="absolute inset-0 bg-gradient-to-r from-[#060d15] via-[#060d15]/20 to-transparent" />
             </div>
-            <div className="relative max-w-[75%] px-6 py-9">
-              <p className="text-5xl font-bold tracking-tight text-[#ffbc24]">FitLab</p>
+            <div className="relative max-w-[75%] px-5 py-9">
+              <p className="text-[clamp(1.75rem,7vw,2.5rem)] font-bold leading-tight tracking-tight text-[#ffbc24]">{SITE_NAME}</p>
               <p className="mt-3 max-w-48 text-base leading-6 text-[#f5eee3]">Machine Learning for Everyone</p>
             </div>
           </div>

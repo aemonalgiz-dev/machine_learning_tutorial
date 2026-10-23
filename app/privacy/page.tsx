@@ -7,8 +7,8 @@ import { ACTIVITY_RETENTION_DAYS } from "@/lib/activity";
 import { REPOSITORY } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Privacy · FitLab",
-  description: "What FitLab records about reading, why, how long it is kept, and how to switch it off.",
+  title: "Privacy · Perceptron Lab",
+  description: "What Perceptron Lab records about reading, why, how long it is kept, and how to switch it off.",
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       <header>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">Privacy</h1>
         <p className="mt-4 text-lg text-muted">
-          FitLab has no advertising and no tracking cookies, and I don&rsquo;t sell or share anything about the people
+          Perceptron Lab has no advertising and no tracking cookies, and I don&rsquo;t sell or share anything about the people
           who read it. This page says what the site does record and why.
         </p>
       </header>

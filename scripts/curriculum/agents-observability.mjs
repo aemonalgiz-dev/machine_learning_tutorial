@@ -82,7 +82,7 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExpor
 provider = TracerProvider()
 provider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))
 trace.set_tracer_provider(provider)
-tracer = trace.get_tracer("fitlab.maintenance")
+tracer = trace.get_tracer("perceptronlab.maintenance")
 
 with tracer.start_as_current_span("maintenance-request"):
     with tracer.start_as_current_span("manual-lookup") as lookup:
@@ -358,7 +358,7 @@ tests:
     withReference(p('Use Phoenix to inspect the same execution evidence', 'If the team uses Phoenix, we can send manual spans to its collector and inspect the request there. Its evaluation tooling can attach deterministic or model-derived judgements to recorded work. The evaluation design still needs the same case identities and rubric definitions.\n\nThis setup records one local lookup span with an explicit manual revision. Keep the example in a separate process from another globally configured tracing provider so the destination is unambiguous.', null, 'An alternative viewer changes where we inspect the evidence. It does not change what a critical approval failure means.'), reference('Record a maintenance lookup in Phoenix', 'This sends one measured local operation to a running Phoenix collector. It is independent of the earlier Langfuse setup.', `from phoenix.otel import register
 
 provider = register(project_name="maintenance-evaluation", auto_instrument=False)
-tracer = provider.get_tracer("fitlab.maintenance")
+tracer = provider.get_tracer("perceptronlab.maintenance")
 with tracer.start_as_current_span("manual-lookup") as span:
     manual = {"P7": "r4"}.get("P7")
     span.set_attribute("manual.found", manual is not None)

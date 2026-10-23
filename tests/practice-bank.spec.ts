@@ -50,7 +50,7 @@ test("practice API verifies the backend session before serving definitions",asyn
   process.env.OOP_ML_ACCOUNTS_URL="https://accounts.example.test";
   let status=200,body:unknown={enabled:true,user:null},cookie="";
   globalThis.fetch=async(_url,init)=>{cookie=new Headers(init?.headers).get("cookie")??"";return Response.json(body,{status});};
-  const request=(id?:string)=>new NextRequest("https://fitlab.example/practice-api/activity/sensor-mean--01--code",{headers:{cookie:"fitlab_session=opaque",...(id?{"X-FitLab-Account":id}:{})}});
+  const request=(id?:string)=>new NextRequest("https://perceptronlab.example/practice-api/activity/sensor-mean--01--code",{headers:{cookie:"fitlab_session=opaque",...(id?{"X-FitLab-Account":id}:{})}});
   const context={params:Promise.resolve({path:["activity","sensor-mean--01--code"]})};
   try{
     let response=await GET(request("forged"),context);expect(response.status).toBe(401);expect(await response.text()).not.toContain("def solve");

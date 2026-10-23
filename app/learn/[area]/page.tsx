@@ -12,7 +12,7 @@ export function generateStaticParams() { return LEARNING_AREAS.map(area => ({ ar
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const area = findLearningArea((await params).area);
   if (!area) notFound();
-  return { title: `${area.title} | FitLab`, description: area.description };
+  return { title: `${area.title} | Perceptron Lab`, description: area.description };
 }
 
 export default async function LearningAreaPage({ params }: Props) {

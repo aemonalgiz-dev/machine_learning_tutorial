@@ -49,7 +49,7 @@ test("workshops generate and cache, while old and invalid addresses retain their
 });
 
 test("the retained image runtime serves an optimized banner", async ({ request }) => {
-  const response = await request.get("/_next/image?url=%2Fbranding%2Ffitlab-banner.png&w=640&q=75", {
+  const response = await request.get("/_next/image?url=%2Fbranding%2Fperceptron-lab-banner.png&w=640&q=75", {
     headers: { Accept: "image/webp" },
   });
   expect(response.status()).toBe(200);

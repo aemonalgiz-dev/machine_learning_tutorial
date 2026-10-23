@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { AccountSync } from "@/components/site/AccountSync";
 import { SupportMessage } from "@/components/site/SupportMessage";
 import { Botie } from "@/components/site/Botie";
-import { REPOSITORY } from "@/lib/site";
+import { REPOSITORY, SITE_NAME, SITE_ORIGIN, SITE_TITLE, SITE_DESCRIPTION, SITE_SOCIAL } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,9 +21,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FitLab: Machine Learning for Everyone",
-  description:
-    "Machine learning explained through the problems each method was developed to solve, with interactive examples and Python challenges to work through the ideas yourself.",
+  metadataBase: new URL(SITE_ORIGIN),
+  applicationName: SITE_NAME,
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: SITE_SOCIAL,
+  twitter: { card: "summary_large_image" },
 };
 
 // Restores a reader's choice of the light theme before the page paints. The
@@ -52,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               className="flex items-center gap-2 font-mono text-base font-bold tracking-tight text-foreground"
             >
               <Botie size={32} decorative />
-              FitLab
+              {SITE_NAME}
             </Link>
             <div className="order-3 flex w-full flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted sm:order-none sm:w-auto">
               <Link href="/#course" className="transition hover:text-foreground">

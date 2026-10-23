@@ -48,7 +48,7 @@ export default function AccountPage() {
           <button className={button} onClick={() => { void syncProgress(); }} disabled={account.sync === "saving" || busy}>Sync now</button>
           <button className={button} onClick={() => {
             const url = URL.createObjectURL(new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), progress, work: exportLearnerWork() }, null, 2)], { type: "application/json" }));
-            const link = document.createElement("a"); link.href = url; link.download = "fitlab-saved-work.json"; link.click();
+            const link = document.createElement("a"); link.href = url; link.download = "perceptron-lab-saved-work.json"; link.click();
             setTimeout(() => URL.revokeObjectURL(url), 1000);
           }}>Download saved work</button>
           <button className={button} disabled={busy} onClick={async () => {

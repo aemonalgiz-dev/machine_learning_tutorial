@@ -30479,7 +30479,7 @@
               "url": "https://www.mongodb.com/docs/languages/python/pymongo-driver/current/crud/update/"
             },
             "language": "python",
-            "code": "from pymongo import MongoClient\ncollection = MongoClient(\"mongodb://localhost:27017\").fitlab_demo.assets\nresult = collection.update_one(\n    {\"_id\": \"P1\", \"version\": 4},\n    {\"$set\": {\"status\": \"inspect\"}, \"$inc\": {\"version\": 1}},\n)\nprint(result.matched_count)",
+            "code": "from pymongo import MongoClient\ncollection = MongoClient(\"mongodb://localhost:27017\").perceptron_lab_demo.assets\nresult = collection.update_one(\n    {\"_id\": \"P1\", \"version\": 4},\n    {\"$set\": {\"status\": \"inspect\"}, \"$inc\": {\"version\": 1}},\n)\nprint(result.matched_count)",
             "checkedOn": "2026-10-16",
             "description": [
               "This is real PyMongo syntax for one conditional update, not browser simulation code."
@@ -41393,7 +41393,7 @@
             "ex:dependsOn",
             "ex:dependsOn"
           ],
-          "caption": "Here ex: abbreviates https://fitlab.example/. Changing the abbreviation while retaining the same full IRI does not change the resource."
+          "caption": "Here ex: abbreviates https://perceptronlab.example/. Changing the abbreviation while retaining the same full IRI does not change the resource."
         }
       }
     ],
@@ -41423,7 +41423,7 @@
             "paragraphs": [
               "The characters match, but the object categories differ."
             ],
-            "code": "objects=[{'kind':'iri','value':'https://fitlab.example/S1'},{'kind':'literal','value':'https://fitlab.example/S1'}]\nprint([o['kind'] for o in objects])",
+            "code": "objects=[{'kind':'iri','value':'https://perceptronlab.example/S1'},{'kind':'literal','value':'https://perceptronlab.example/S1'}]\nprint([o['kind'] for o in objects])",
             "output": "['iri', 'literal']",
             "interpretation": [
               "Selecting a resource relationship must check the kind as well as the characters."
@@ -41446,10 +41446,10 @@
             "description": [
               "Run this against an RDF store or SPARQL engine containing the Turtle fixture below."
             ],
-            "code": "PREFIX ex: <https://fitlab.example/>\nSELECT DISTINCT ?asset\nWHERE { ?asset ex:dependsOn ex:S1 . }\nORDER BY ?asset",
+            "code": "PREFIX ex: <https://perceptronlab.example/>\nSELECT DISTINCT ?asset\nWHERE { ?asset ex:dependsOn ex:S1 . }\nORDER BY ?asset",
             "language": "sparql",
             "setup": [
-              "Load this complete Turtle into a disposable dataset: @prefix ex: <https://fitlab.example/> . ex:P7 ex:dependsOn ex:S1 . ex:P8 ex:dependsOn ex:S1 . ex:P9 ex:dependsOn \"https://fitlab.example/S1\" . ex:P7 ex:near ex:S2 .",
+              "Load this complete Turtle into a disposable dataset: @prefix ex: <https://perceptronlab.example/> . ex:P7 ex:dependsOn ex:S1 . ex:P8 ex:dependsOn ex:S1 . ex:P9 ex:dependsOn \"https://perceptronlab.example/S1\" . ex:P7 ex:near ex:S2 .",
               "The expected resources are ex:P7 and ex:P8. Bind external values using your chosen RDF client’s supported RDF-term/query-binding mechanism; do not concatenate unchecked query fragments."
             ],
             "interpretation": [
@@ -41529,28 +41529,28 @@
           "Implement subjects(triples,predicate,target). Keep only records with kind equal to iri and matching p and o, then return sorted distinct s values. Inputs use expanded identifiers, not prefixes.",
           "Use Python’s standard library on the supplied term records. This exercise does not execute SPARQL or contact an RDF store."
         ],
-        "starter": "def subjects(triples, predicate, target):\n    # Work through the record relationships here.\n    return None\n\nprint(subjects([{\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P8\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P9\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/near\", \"o\": \"https://fitlab.example/S2\", \"kind\": \"iri\"}], 'https://fitlab.example/dependsOn', 'https://fitlab.example/S1'))",
-        "solution": "def subjects(triples, predicate, target):\n    return sorted({t['s'] for t in triples if t['kind']=='iri' and t['p']==predicate and t['o']==target})\n\nprint(subjects([{\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P8\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P9\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/near\", \"o\": \"https://fitlab.example/S2\", \"kind\": \"iri\"}], 'https://fitlab.example/dependsOn', 'https://fitlab.example/S1'))",
-        "output": "['https://fitlab.example/P7', 'https://fitlab.example/P8']",
+        "starter": "def subjects(triples, predicate, target):\n    # Work through the record relationships here.\n    return None\n\nprint(subjects([{\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P8\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P9\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/near\", \"o\": \"https://perceptronlab.example/S2\", \"kind\": \"iri\"}], 'https://perceptronlab.example/dependsOn', 'https://perceptronlab.example/S1'))",
+        "solution": "def subjects(triples, predicate, target):\n    return sorted({t['s'] for t in triples if t['kind']=='iri' and t['p']==predicate and t['o']==target})\n\nprint(subjects([{\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P8\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P9\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/near\", \"o\": \"https://perceptronlab.example/S2\", \"kind\": \"iri\"}], 'https://perceptronlab.example/dependsOn', 'https://perceptronlab.example/S1'))",
+        "output": "['https://perceptronlab.example/P7', 'https://perceptronlab.example/P8']",
         "hints": [
           "An IRI-shaped literal still fails the kind condition."
         ],
         "tests": [
           {
             "name": "Resource subjects and duplicate statements",
-            "code": "assert subjects([{\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P8\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P9\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/near\", \"o\": \"https://fitlab.example/S2\", \"kind\": \"iri\"}], 'https://fitlab.example/dependsOn', 'https://fitlab.example/S1') == [\"https://fitlab.example/P7\", \"https://fitlab.example/P8\"]"
+            "code": "assert subjects([{\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P8\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P9\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/near\", \"o\": \"https://perceptronlab.example/S2\", \"kind\": \"iri\"}], 'https://perceptronlab.example/dependsOn', 'https://perceptronlab.example/S1') == [\"https://perceptronlab.example/P7\", \"https://perceptronlab.example/P8\"]"
           },
           {
             "name": "A different predicate",
-            "code": "assert subjects([{\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P8\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P9\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/near\", \"o\": \"https://fitlab.example/S2\", \"kind\": \"iri\"}], 'https://fitlab.example/near', 'https://fitlab.example/S2') == [\"https://fitlab.example/P7\"]"
+            "code": "assert subjects([{\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P8\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P9\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/near\", \"o\": \"https://perceptronlab.example/S2\", \"kind\": \"iri\"}], 'https://perceptronlab.example/near', 'https://perceptronlab.example/S2') == [\"https://perceptronlab.example/P7\"]"
           },
           {
             "name": "Only literal objects",
-            "code": "assert subjects([{\"s\": \"https://fitlab.example/P9\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"literal\"}], 'https://fitlab.example/dependsOn', 'https://fitlab.example/S1') == []"
+            "code": "assert subjects([{\"s\": \"https://perceptronlab.example/P9\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"literal\"}], 'https://perceptronlab.example/dependsOn', 'https://perceptronlab.example/S1') == []"
           },
           {
             "name": "Unknown resource",
-            "code": "assert subjects([{\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P8\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://fitlab.example/P9\", \"p\": \"https://fitlab.example/dependsOn\", \"o\": \"https://fitlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://fitlab.example/P7\", \"p\": \"https://fitlab.example/near\", \"o\": \"https://fitlab.example/S2\", \"kind\": \"iri\"}], 'https://fitlab.example/dependsOn', 'https://fitlab.example/missing') == []"
+            "code": "assert subjects([{\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P8\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"iri\"}, {\"s\": \"https://perceptronlab.example/P9\", \"p\": \"https://perceptronlab.example/dependsOn\", \"o\": \"https://perceptronlab.example/S1\", \"kind\": \"literal\"}, {\"s\": \"https://perceptronlab.example/P7\", \"p\": \"https://perceptronlab.example/near\", \"o\": \"https://perceptronlab.example/S2\", \"kind\": \"iri\"}], 'https://perceptronlab.example/dependsOn', 'https://perceptronlab.example/missing') == []"
           }
         ]
       }
@@ -41569,41 +41569,41 @@
           "data": {
             "triples": [
               {
-                "s": "https://fitlab.example/P7",
-                "p": "https://fitlab.example/dependsOn",
-                "o": "https://fitlab.example/S1",
+                "s": "https://perceptronlab.example/P7",
+                "p": "https://perceptronlab.example/dependsOn",
+                "o": "https://perceptronlab.example/S1",
                 "kind": "iri"
               },
               {
-                "s": "https://fitlab.example/P8",
-                "p": "https://fitlab.example/dependsOn",
-                "o": "https://fitlab.example/S1",
+                "s": "https://perceptronlab.example/P8",
+                "p": "https://perceptronlab.example/dependsOn",
+                "o": "https://perceptronlab.example/S1",
                 "kind": "iri"
               },
               {
-                "s": "https://fitlab.example/P7",
-                "p": "https://fitlab.example/dependsOn",
-                "o": "https://fitlab.example/S1",
+                "s": "https://perceptronlab.example/P7",
+                "p": "https://perceptronlab.example/dependsOn",
+                "o": "https://perceptronlab.example/S1",
                 "kind": "iri"
               },
               {
-                "s": "https://fitlab.example/P9",
-                "p": "https://fitlab.example/dependsOn",
-                "o": "https://fitlab.example/S1",
+                "s": "https://perceptronlab.example/P9",
+                "p": "https://perceptronlab.example/dependsOn",
+                "o": "https://perceptronlab.example/S1",
                 "kind": "literal"
               },
               {
-                "s": "https://fitlab.example/P7",
-                "p": "https://fitlab.example/near",
-                "o": "https://fitlab.example/S2",
+                "s": "https://perceptronlab.example/P7",
+                "p": "https://perceptronlab.example/near",
+                "o": "https://perceptronlab.example/S2",
                 "kind": "iri"
               }
             ],
-            "target": "https://fitlab.example/S1"
+            "target": "https://perceptronlab.example/S1"
           },
           "expected": [
-            "https://fitlab.example/P7",
-            "https://fitlab.example/P8"
+            "https://perceptronlab.example/P7",
+            "https://perceptronlab.example/P8"
           ]
         },
         {
@@ -41611,13 +41611,13 @@
           "data": {
             "triples": [
               {
-                "s": "https://fitlab.example/P9",
-                "p": "https://fitlab.example/dependsOn",
-                "o": "https://fitlab.example/S1",
+                "s": "https://perceptronlab.example/P9",
+                "p": "https://perceptronlab.example/dependsOn",
+                "o": "https://perceptronlab.example/S1",
                 "kind": "literal"
               }
             ],
-            "target": "https://fitlab.example/S1"
+            "target": "https://perceptronlab.example/S1"
           },
           "expected": []
         },
@@ -41626,22 +41626,22 @@
           "data": {
             "triples": [
               {
-                "s": "https://fitlab.example/P4",
-                "p": "https://fitlab.example/dependsOn",
-                "o": "https://fitlab.example/S2",
+                "s": "https://perceptronlab.example/P4",
+                "p": "https://perceptronlab.example/dependsOn",
+                "o": "https://perceptronlab.example/S2",
                 "kind": "iri"
               },
               {
-                "s": "https://fitlab.example/P7",
-                "p": "https://fitlab.example/near",
-                "o": "https://fitlab.example/S2",
+                "s": "https://perceptronlab.example/P7",
+                "p": "https://perceptronlab.example/near",
+                "o": "https://perceptronlab.example/S2",
                 "kind": "iri"
               }
             ],
-            "target": "https://fitlab.example/S2"
+            "target": "https://perceptronlab.example/S2"
           },
           "expected": [
-            "https://fitlab.example/P4"
+            "https://perceptronlab.example/P4"
           ]
         }
       ],
@@ -41669,7 +41669,7 @@
                   }
                 ],
                 "settings": {
-                  "type": "https://fitlab.example/dependsOn"
+                  "type": "https://perceptronlab.example/dependsOn"
                 }
               },
               {
@@ -41713,7 +41713,7 @@
             "because": "Matching respects RDF terms. The literal text is not the resource IRI.",
             "given": {
               "description": "Use the information below.",
-              "data": "The data contains ex:P7 ex:dependsOn ex:S1 and ex:P9 ex:dependsOn \"https://fitlab.example/S1\". The second object is a literal."
+              "data": "The data contains ex:P7 ex:dependsOn ex:S1 and ex:P9 ex:dependsOn \"https://perceptronlab.example/S1\". The second object is a literal."
             }
           },
           {
@@ -86328,11 +86328,11 @@
             "description": [
               "This is a server-side reference recipe, separate from the offline Python challenge below."
             ],
-            "code": "import os\nfrom dataclasses import dataclass\nfrom pydantic import BaseModel, ConfigDict, Field\nfrom pydantic_ai import Agent, RunContext, ModelRetry\n\n@dataclass\nclass Manuals:\n    excerpts: dict[str, str]\n\nclass Answer(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\", strict=True)\n    answer: str = Field(min_length=1)\n    citations: list[str] = Field(min_length=1)\n\nagent = Agent(\n    os.environ[\"FITLAB_AGENT_MODEL\"],\n    deps_type=Manuals,\n    output_type=Answer,\n    instructions=\"Read the supplied manual with read_manual. Cite its IDs. \"\n                 \"Describe the manual; do not schedule work.\",\n)\n\n@agent.tool\ndef read_manual(ctx: RunContext[Manuals]) -> dict[str, str]:\n    \"\"\"Read the manual excerpts available to this request.\"\"\"\n    return ctx.deps.excerpts\n\n@agent.output_validator\ndef check_citations(ctx: RunContext[Manuals], answer: Answer) -> Answer:\n    if not answer.answer.strip():\n        raise ModelRetry(\"Answer text cannot be blank.\")\n    if any(key not in ctx.deps.excerpts for key in answer.citations):\n        raise ModelRetry(\"Cite only IDs returned by read_manual.\")\n    return answer\n\nresult = agent.run_sync(\n    \"What should a technician check when pump P7 vibrates?\",\n    deps=Manuals({\"manual-7\": \"Inspect the mounting and coupling.\"}),\n)\nprint(result.output.model_dump())",
+            "code": "import os\nfrom dataclasses import dataclass\nfrom pydantic import BaseModel, ConfigDict, Field\nfrom pydantic_ai import Agent, RunContext, ModelRetry\n\n@dataclass\nclass Manuals:\n    excerpts: dict[str, str]\n\nclass Answer(BaseModel):\n    model_config = ConfigDict(extra=\"forbid\", strict=True)\n    answer: str = Field(min_length=1)\n    citations: list[str] = Field(min_length=1)\n\nagent = Agent(\n    os.environ[\"PERCEPTRON_LAB_AGENT_MODEL\"],\n    deps_type=Manuals,\n    output_type=Answer,\n    instructions=\"Read the supplied manual with read_manual. Cite its IDs. \"\n                 \"Describe the manual; do not schedule work.\",\n)\n\n@agent.tool\ndef read_manual(ctx: RunContext[Manuals]) -> dict[str, str]:\n    \"\"\"Read the manual excerpts available to this request.\"\"\"\n    return ctx.deps.excerpts\n\n@agent.output_validator\ndef check_citations(ctx: RunContext[Manuals], answer: Answer) -> Answer:\n    if not answer.answer.strip():\n        raise ModelRetry(\"Answer text cannot be blank.\")\n    if any(key not in ctx.deps.excerpts for key in answer.citations):\n        raise ModelRetry(\"Cite only IDs returned by read_manual.\")\n    return answer\n\nresult = agent.run_sync(\n    \"What should a technician check when pump P7 vibrates?\",\n    deps=Manuals({\"manual-7\": \"Inspect the mounting and coupling.\"}),\n)\nprint(result.output.model_dump())",
             "language": "python",
             "setup": [
               "Create a Python environment and install pydantic-ai and pydantic. Resolve compatible versions, then record them in your project lockfile.",
-              "Set FITLAB_AGENT_MODEL to a provider-qualified model available to you. Configure that provider’s credential in the server environment, for example OPENAI_API_KEY for an OpenAI-backed model. Never enter credentials into the browser worksheet.",
+              "Set PERCEPTRON_LAB_AGENT_MODEL to a provider-qualified model available to you. Configure that provider’s credential in the server environment, for example OPENAI_API_KEY for an OpenAI-backed model. Never enter credentials into the browser worksheet.",
               "Running this script makes a provider request and can incur charges. The generated wording varies; no output transcript is promised here."
             ],
             "interpretation": [
@@ -86775,11 +86775,11 @@
             "description": [
               "This reference is for your own Python service environment. The browser exercise uses no external provider."
             ],
-            "code": "import os\nfrom langchain.agents import create_agent\nfrom langchain.tools import tool\nfrom langchain.agents.middleware import (\n    ModelCallLimitMiddleware, ToolCallLimitMiddleware,\n)\n\n@tool\ndef read_manual(asset: str) -> dict:\n    \"\"\"Read the invented inspection excerpt for a pump asset.\"\"\"\n    manuals = {\"P7\": {\"id\": \"manual-7\", \"text\": \"Inspect the mounting.\"}}\n    return manuals.get(asset, {\"error\": \"No excerpt for this asset\"})\n\nagent = create_agent(\n    model=os.environ[\"FITLAB_AGENT_MODEL\"],\n    tools=[read_manual],\n    system_prompt=\"Answer from the manual and cite its ID. \"\n                  \"If no excerpt exists, say so. Do not schedule work.\",\n    middleware=[\n        ModelCallLimitMiddleware(run_limit=4, exit_behavior=\"error\"),\n        ToolCallLimitMiddleware(run_limit=2, exit_behavior=\"error\"),\n    ],\n)\nstate = agent.invoke({\"messages\": [\n    {\"role\": \"user\", \"content\": \"What should I inspect on P7?\"}\n]})\nprint(state[\"messages\"][-1].content)",
+            "code": "import os\nfrom langchain.agents import create_agent\nfrom langchain.tools import tool\nfrom langchain.agents.middleware import (\n    ModelCallLimitMiddleware, ToolCallLimitMiddleware,\n)\n\n@tool\ndef read_manual(asset: str) -> dict:\n    \"\"\"Read the invented inspection excerpt for a pump asset.\"\"\"\n    manuals = {\"P7\": {\"id\": \"manual-7\", \"text\": \"Inspect the mounting.\"}}\n    return manuals.get(asset, {\"error\": \"No excerpt for this asset\"})\n\nagent = create_agent(\n    model=os.environ[\"PERCEPTRON_LAB_AGENT_MODEL\"],\n    tools=[read_manual],\n    system_prompt=\"Answer from the manual and cite its ID. \"\n                  \"If no excerpt exists, say so. Do not schedule work.\",\n    middleware=[\n        ModelCallLimitMiddleware(run_limit=4, exit_behavior=\"error\"),\n        ToolCallLimitMiddleware(run_limit=2, exit_behavior=\"error\"),\n    ],\n)\nstate = agent.invoke({\"messages\": [\n    {\"role\": \"user\", \"content\": \"What should I inspect on P7?\"}\n]})\nprint(state[\"messages\"][-1].content)",
             "language": "python",
             "setup": [
               "Install a compatible LangChain 1.x release and your model integration, such as langchain-openai for an OpenAI-backed model. Record resolved versions in a lockfile.",
-              "Set FITLAB_AGENT_MODEL to a provider-qualified identifier your integration accepts, and configure its credential on the server. Provider requests may incur charges.",
+              "Set PERCEPTRON_LAB_AGENT_MODEL to a provider-qualified identifier your integration accepts, and configure its credential on the server. Provider requests may incur charges.",
               "Run the script as a local Python program with invented data. Add application exception handling before exposing it as a service."
             ],
             "interpretation": [
@@ -88096,7 +88096,7 @@
             "description": [
               "This is a standalone service reference using the official MCP Python SDK. Its test stays inside one Python process."
             ],
-            "code": "import anyio\nfrom mcp import Client\nfrom mcp.server import MCPServer\n\nmcp = MCPServer(\"FitLab invented manuals\")\nMANUALS = {\"P7\": \"Inspect the mounting and coupling.\"}\n\n@mcp.tool()\ndef read_manual(asset: str) -> dict:\n    \"\"\"Read the invented excerpt for a named pump.\"\"\"\n    if asset not in MANUALS:\n        return {\"found\": False, \"asset\": asset}\n    return {\"found\": True, \"asset\": asset, \"text\": MANUALS[asset]}\n\n@mcp.resource(\"manual://P7\")\ndef p7_manual() -> str:\n    \"\"\"The invented P7 manual excerpt.\"\"\"\n    return MANUALS[\"P7\"]\n\n@mcp.prompt()\ndef inspection_question(asset: str) -> str:\n    \"\"\"Ask which inspection the supplied manual supports.\"\"\"\n    return f\"Read the manual for {asset} and identify its inspection checks.\"\n\nasync def main():\n    # In-process transport for a local test, with no model or network call.\n    async with Client(mcp) as client:\n        listed = await client.list_tools()\n        assert \"read_manual\" in [tool.name for tool in listed.tools]\n        result = await client.call_tool(\"read_manual\", {\"asset\": \"P7\"})\n        assert not result.is_error\n        print(result.structured_content)\n\nif __name__ == \"__main__\":\n    anyio.run(main)",
+            "code": "import anyio\nfrom mcp import Client\nfrom mcp.server import MCPServer\n\nmcp = MCPServer(\"Perceptron Lab invented manuals\")\nMANUALS = {\"P7\": \"Inspect the mounting and coupling.\"}\n\n@mcp.tool()\ndef read_manual(asset: str) -> dict:\n    \"\"\"Read the invented excerpt for a named pump.\"\"\"\n    if asset not in MANUALS:\n        return {\"found\": False, \"asset\": asset}\n    return {\"found\": True, \"asset\": asset, \"text\": MANUALS[asset]}\n\n@mcp.resource(\"manual://P7\")\ndef p7_manual() -> str:\n    \"\"\"The invented P7 manual excerpt.\"\"\"\n    return MANUALS[\"P7\"]\n\n@mcp.prompt()\ndef inspection_question(asset: str) -> str:\n    \"\"\"Ask which inspection the supplied manual supports.\"\"\"\n    return f\"Read the manual for {asset} and identify its inspection checks.\"\n\nasync def main():\n    # In-process transport for a local test, with no model or network call.\n    async with Client(mcp) as client:\n        listed = await client.list_tools()\n        assert \"read_manual\" in [tool.name for tool in listed.tools]\n        result = await client.call_tool(\"read_manual\", {\"asset\": \"P7\"})\n        assert not result.is_error\n        print(result.structured_content)\n\nif __name__ == \"__main__\":\n    anyio.run(main)",
             "language": "python",
             "setup": [
               "Use Python 3.11 or later in a separate environment. Install mcp>=2,<3 and anyio, then record resolved versions in a lockfile.",
@@ -92158,7 +92158,7 @@
             "description": [
               "Run as a separate Python script. The SDK prints spans with generated identifiers and measured timestamps, so there is no fixed output to copy."
             ],
-            "code": "from opentelemetry import trace\nfrom opentelemetry.sdk.trace import TracerProvider\nfrom opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter\n\nprovider = TracerProvider()\nprovider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))\ntrace.set_tracer_provider(provider)\ntracer = trace.get_tracer(\"fitlab.maintenance\")\n\nwith tracer.start_as_current_span(\"maintenance-request\"):\n    with tracer.start_as_current_span(\"manual-lookup\") as lookup:\n        manual = {\"P7\": \"Request inspection before restart.\"}.get(\"P7\")\n        lookup.set_attribute(\"manual.found\", manual is not None)\n\nprovider.shutdown()",
+            "code": "from opentelemetry import trace\nfrom opentelemetry.sdk.trace import TracerProvider\nfrom opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter\n\nprovider = TracerProvider()\nprovider.add_span_processor(SimpleSpanProcessor(ConsoleSpanExporter()))\ntrace.set_tracer_provider(provider)\ntracer = trace.get_tracer(\"perceptronlab.maintenance\")\n\nwith tracer.start_as_current_span(\"maintenance-request\"):\n    with tracer.start_as_current_span(\"manual-lookup\") as lookup:\n        manual = {\"P7\": \"Request inspection before restart.\"}.get(\"P7\")\n        lookup.set_attribute(\"manual.found\", manual is not None)\n\nprovider.shutdown()",
             "language": "python",
             "setup": [
               "Install opentelemetry-api and opentelemetry-sdk in your own Python environment.",
@@ -95878,7 +95878,7 @@
             "description": [
               "This sends one measured local operation to a running Phoenix collector. It is independent of the earlier Langfuse setup."
             ],
-            "code": "from phoenix.otel import register\n\nprovider = register(project_name=\"maintenance-evaluation\", auto_instrument=False)\ntracer = provider.get_tracer(\"fitlab.maintenance\")\nwith tracer.start_as_current_span(\"manual-lookup\") as span:\n    manual = {\"P7\": \"r4\"}.get(\"P7\")\n    span.set_attribute(\"manual.found\", manual is not None)\n    span.set_attribute(\"manual.revision\", manual or \"missing\")\nprovider.shutdown()",
+            "code": "from phoenix.otel import register\n\nprovider = register(project_name=\"maintenance-evaluation\", auto_instrument=False)\ntracer = provider.get_tracer(\"perceptronlab.maintenance\")\nwith tracer.start_as_current_span(\"manual-lookup\") as span:\n    manual = {\"P7\": \"r4\"}.get(\"P7\")\n    span.set_attribute(\"manual.found\", manual is not None)\n    span.set_attribute(\"manual.revision\", manual or \"missing\")\nprovider.shutdown()",
             "language": "python",
             "setup": [
               "Install arize-phoenix-otel in your own Python environment.",

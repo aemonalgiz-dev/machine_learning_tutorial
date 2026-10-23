@@ -219,18 +219,18 @@ export const GRAPH_DATABASE_FRESH: Record<string, FreshJourneyCase> = {
   },
   "graph-rdf-sparql": {
     name: "A familiar local name belongs to another vocabulary",
-    prompt: "Find resources depending on S8 using https://fitlab.example/dependsOn. R2 has that resource link twice. R3 uses https://vendor.example/dependsOn, R4 uses a literal that looks like the S8 IRI, and R5 has the requested resource link. Predict the distinct subject IRIs.",
+    prompt: "Find resources depending on S8 using https://perceptronlab.example/dependsOn. R2 has that resource link twice. R3 uses https://vendor.example/dependsOn, R4 uses a literal that looks like the S8 IRI, and R5 has the requested resource link. Predict the distinct subject IRIs.",
     data: {
       triples: [
-        { s: "https://fitlab.example/R2", p: "https://fitlab.example/dependsOn", o: "https://fitlab.example/S8", kind: "iri" },
-        { s: "https://fitlab.example/R3", p: "https://vendor.example/dependsOn", o: "https://fitlab.example/S8", kind: "iri" },
-        { s: "https://fitlab.example/R4", p: "https://fitlab.example/dependsOn", o: "https://fitlab.example/S8", kind: "literal" },
-        { s: "https://fitlab.example/R2", p: "https://fitlab.example/dependsOn", o: "https://fitlab.example/S8", kind: "iri" },
-        { s: "https://fitlab.example/R5", p: "https://fitlab.example/dependsOn", o: "https://fitlab.example/S8", kind: "iri" },
+        { s: "https://perceptronlab.example/R2", p: "https://perceptronlab.example/dependsOn", o: "https://perceptronlab.example/S8", kind: "iri" },
+        { s: "https://perceptronlab.example/R3", p: "https://vendor.example/dependsOn", o: "https://perceptronlab.example/S8", kind: "iri" },
+        { s: "https://perceptronlab.example/R4", p: "https://perceptronlab.example/dependsOn", o: "https://perceptronlab.example/S8", kind: "literal" },
+        { s: "https://perceptronlab.example/R2", p: "https://perceptronlab.example/dependsOn", o: "https://perceptronlab.example/S8", kind: "iri" },
+        { s: "https://perceptronlab.example/R5", p: "https://perceptronlab.example/dependsOn", o: "https://perceptronlab.example/S8", kind: "iri" },
       ],
-      target: "https://fitlab.example/S8",
+      target: "https://perceptronlab.example/S8",
     },
-    expected: ["https://fitlab.example/R2", "https://fitlab.example/R5"],
+    expected: ["https://perceptronlab.example/R2", "https://perceptronlab.example/R5"],
     why: "The expanded predicate IRI identifies the relation, so matching its local spelling alone would admit the vendor predicate incorrectly. The literal does not become a resource link, and a repeated triple contributes no new subject.",
   },
   "graph-provenance": {

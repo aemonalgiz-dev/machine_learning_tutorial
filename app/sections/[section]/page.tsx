@@ -27,7 +27,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const part = findCourseSection((await params).section);
   if (!part) notFound();
-  return { title: `${part.title} · FitLab`, description: part.intro };
+  return { title: `${part.title} · Perceptron Lab`, description: part.intro };
 }
 
 export default async function CourseSectionPage({ params }: Props) {

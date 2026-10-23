@@ -15,7 +15,7 @@ export function generateStaticParams() { return []; }
 export async function generateMetadata({ params }: { params: Promise<{ lesson: string }> }): Promise<Metadata> {
   const { lesson } = await params;
   const mission = Object.hasOwn(buildById, lesson) ? buildById[lesson] : undefined;
-  return { title: lesson === "simple-linear-regression" ? "Predict delivery times with Botie | FitLab" : mission ? `${mission.title} | Botie's workshop | FitLab` : "Workshop | FitLab", description: mission?.challenge };
+  return { title: lesson === "simple-linear-regression" ? "Predict delivery times with Botie | Perceptron Lab" : mission ? `${mission.title} | Botie's workshop | Perceptron Lab` : "Workshop | Perceptron Lab", description: mission?.challenge };
 }
 export default async function LabPage({ params }: { params: Promise<{ lesson: string }> }) {
   const { lesson: id } = await params;

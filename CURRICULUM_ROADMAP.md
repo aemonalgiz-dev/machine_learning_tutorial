@@ -1,4 +1,4 @@
-# FitLab curriculum expansion
+# Perceptron Lab curriculum expansion
 
 This is the editorial plan, not a list of published lessons. The public course
 counts only working lesson routes. A section is ready to appear when its lessons

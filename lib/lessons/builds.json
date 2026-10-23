@@ -11181,41 +11181,41 @@
         "data": {
           "triples": [
             {
-              "s": "https://fitlab.example/P7",
-              "p": "https://fitlab.example/dependsOn",
-              "o": "https://fitlab.example/S1",
+              "s": "https://perceptronlab.example/P7",
+              "p": "https://perceptronlab.example/dependsOn",
+              "o": "https://perceptronlab.example/S1",
               "kind": "iri"
             },
             {
-              "s": "https://fitlab.example/P8",
-              "p": "https://fitlab.example/dependsOn",
-              "o": "https://fitlab.example/S1",
+              "s": "https://perceptronlab.example/P8",
+              "p": "https://perceptronlab.example/dependsOn",
+              "o": "https://perceptronlab.example/S1",
               "kind": "iri"
             },
             {
-              "s": "https://fitlab.example/P7",
-              "p": "https://fitlab.example/dependsOn",
-              "o": "https://fitlab.example/S1",
+              "s": "https://perceptronlab.example/P7",
+              "p": "https://perceptronlab.example/dependsOn",
+              "o": "https://perceptronlab.example/S1",
               "kind": "iri"
             },
             {
-              "s": "https://fitlab.example/P9",
-              "p": "https://fitlab.example/dependsOn",
-              "o": "https://fitlab.example/S1",
+              "s": "https://perceptronlab.example/P9",
+              "p": "https://perceptronlab.example/dependsOn",
+              "o": "https://perceptronlab.example/S1",
               "kind": "literal"
             },
             {
-              "s": "https://fitlab.example/P7",
-              "p": "https://fitlab.example/near",
-              "o": "https://fitlab.example/S2",
+              "s": "https://perceptronlab.example/P7",
+              "p": "https://perceptronlab.example/near",
+              "o": "https://perceptronlab.example/S2",
               "kind": "iri"
             }
           ],
-          "target": "https://fitlab.example/S1"
+          "target": "https://perceptronlab.example/S1"
         },
         "expected": [
-          "https://fitlab.example/P7",
-          "https://fitlab.example/P8"
+          "https://perceptronlab.example/P7",
+          "https://perceptronlab.example/P8"
         ]
       },
       {
@@ -11223,13 +11223,13 @@
         "data": {
           "triples": [
             {
-              "s": "https://fitlab.example/P9",
-              "p": "https://fitlab.example/dependsOn",
-              "o": "https://fitlab.example/S1",
+              "s": "https://perceptronlab.example/P9",
+              "p": "https://perceptronlab.example/dependsOn",
+              "o": "https://perceptronlab.example/S1",
               "kind": "literal"
             }
           ],
-          "target": "https://fitlab.example/S1"
+          "target": "https://perceptronlab.example/S1"
         },
         "expected": []
       },
@@ -11238,22 +11238,22 @@
         "data": {
           "triples": [
             {
-              "s": "https://fitlab.example/P4",
-              "p": "https://fitlab.example/dependsOn",
-              "o": "https://fitlab.example/S2",
+              "s": "https://perceptronlab.example/P4",
+              "p": "https://perceptronlab.example/dependsOn",
+              "o": "https://perceptronlab.example/S2",
               "kind": "iri"
             },
             {
-              "s": "https://fitlab.example/P7",
-              "p": "https://fitlab.example/near",
-              "o": "https://fitlab.example/S2",
+              "s": "https://perceptronlab.example/P7",
+              "p": "https://perceptronlab.example/near",
+              "o": "https://perceptronlab.example/S2",
               "kind": "iri"
             }
           ],
-          "target": "https://fitlab.example/S2"
+          "target": "https://perceptronlab.example/S2"
         },
         "expected": [
-          "https://fitlab.example/P4"
+          "https://perceptronlab.example/P4"
         ]
       }
     ],
@@ -11281,7 +11281,7 @@
                 }
               ],
               "settings": {
-                "type": "https://fitlab.example/dependsOn"
+                "type": "https://perceptronlab.example/dependsOn"
               }
             },
             {

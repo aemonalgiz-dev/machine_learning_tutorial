@@ -1,7 +1,27 @@
-# oop_ml teaching website
+# Perceptron Lab
 
 An interactive course in machine learning, built around examples that the
 [`oop_ml`](../) library computes through its [API](../api).
+
+The public site is `https://perceptronlab.dev`. Shared branding and social
+preview settings live in `lib/site.ts`.
+
+## Brand and domain deployment
+
+Deploy this website with `perceptronlab.dev` connected to Amplify and its DNS
+and certificate ready. Set the existing account backend's `FITLAB_SITE_ORIGIN`
+to `https://perceptronlab.dev`, and update its existing Cognito app client's
+callback to `https://perceptronlab.dev/account-api/auth/callback` and logout URL
+to `https://perceptronlab.dev/account`. Keep the existing user pool and account
+database. Update the login logo and verification email using the files in
+`../backend/infra/`; changing these files locally does not update Cognito.
+
+Existing storage keys, session cookies, account headers and deployment variable
+names retain their previous identifiers for compatibility. They are not public
+branding. Browser storage belongs to its origin, so guest drafts do not
+automatically transfer to a different domain. Readers can import guest work
+into their account on the existing domain before moving, or download a backup
+from the account page. Account work stays in the same backend database.
 
 The default reading path begins with an everyday problem, introduces the parts
 needed to understand it, works through an example, and then develops the
@@ -124,7 +144,7 @@ Use `.env.development.local` for this local address. Next.js also reads
 Open `/account` and choose **Create account** or **Sign in**. Registration opens
 Cognito's signup page using the same authorization-code flow as sign-in,
 including state, nonce and PKCE. Cognito handles the password and email
-verification. FitLab creates its account after a verified callback, then
+verification. Perceptron Lab creates its account after a verified callback, then
 returns the learner to `/account` to sync their work.
 
 The Cognito app client must enable the authorization-code grant and the
@@ -134,9 +154,9 @@ and configure its email verification and delivery. Register the exact URLs:
 | Environment | Callback | Sign-out |
 | --- | --- | --- |
 | Local | `http://localhost:3000/account-api/auth/callback` | `http://localhost:3000/account` |
-| Production | `https://fitlab.dev/account-api/auth/callback` | `https://fitlab.dev/account` |
+| Production | `https://perceptronlab.dev/account-api/auth/callback` | `https://perceptronlab.dev/account` |
 
-Use the deployed hostname if it differs from `fitlab.dev`, and configure a
+Use the deployed hostname if it differs from `perceptronlab.dev`, and configure a
 separate development app client when keeping local access separate. The
 backend's site origin determines the callback; browser-supplied URLs cannot
 override it. Cognito's signup endpoint and its parameters are described in
@@ -150,7 +170,7 @@ URL unset or empty keeps guest learning available.
 Run `npm run check:backend -- --site http://localhost:3000` with the services
 running to check backend health, its session response, and the website's
 account proxy. For production configuration, use
-`npm run check:backend -- --production --site https://fitlab.dev`. Run
+`npm run check:backend -- --production --site https://perceptronlab.dev`. Run
 `npm run test:backend` for the runtime configuration, proxy and backend
 integration contracts. The real-service tests require the private backend
 checkout and its development dependencies. Set `FITLAB_BACKEND_PATH` and
@@ -164,8 +184,8 @@ For Amplify, deploy and configure the backend first. Set
 `OOP_ML_ACCOUNTS_URL` in the website app's Amplify environment variables to the
 backend's HTTPS service URL, without credentials, a query or a fragment. Set
 the backend's `FITLAB_SITE_ORIGIN` to the exact website origin, for example
-`https://fitlab.dev`, and register
-`https://fitlab.dev/account-api/auth/callback` with the identity provider.
+`https://perceptronlab.dev`, and register
+`https://perceptronlab.dev/account-api/auth/callback` with the identity provider.
 Keep the backend's database URL, session secret and OIDC credentials in the
 backend deployment only.
 

@@ -12,7 +12,7 @@ export function generateStaticParams() { return []; }
 export async function generateMetadata({ params }: { params: Promise<{ lesson: string }> }): Promise<Metadata> {
   const { lesson } = await params;
   const page = Object.hasOwn(expandedLessonById, lesson) ? expandedLessonById[lesson] : undefined;
-  return page ? { title: `${page.title} · FitLab`, description: page.blurb } : {};
+  return page ? { title: `${page.title} · Perceptron Lab`, description: page.blurb } : {};
 }
 export default async function Page({ params }: { params: Promise<{ lesson: string }> }) {
   const { lesson } = await params;

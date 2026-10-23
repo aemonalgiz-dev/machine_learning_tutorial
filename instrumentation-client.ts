@@ -45,7 +45,7 @@ function shouldCount(): boolean {
     if (browser.webdriver) return false;
     if (typeof globalThis.crypto?.randomUUID !== "function") return false;
     if (location.protocol !== "https:") return false;
-    return location.hostname === "fitlab.dev" || location.hostname === "www.fitlab.dev";
+    return location.hostname === "perceptronlab.dev" || location.hostname === "www.perceptronlab.dev";
   } catch {
     return false;
   }
