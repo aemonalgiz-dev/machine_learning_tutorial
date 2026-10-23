@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PracticeReturn } from "@/components/practice/PracticeReturn";
 import { useState, useSyncExternalStore } from "react";
 import { refreshAccount, signOut, syncProgress, useAccount } from "@/lib/accounts";
 import { finishedCount, guestProgress, importGuestProgress, lessonFinished, lessonStarted, useProgress } from "@/lib/progress";
@@ -32,6 +33,8 @@ export default function AccountPage() {
   const syncLabel = conflicts.length ? "Some work has changes on another device. Choose which version to keep below." : { idle: "Ready to sync", saving: "Saving your work…", saved: "All work synced", error: "Your work has not synced yet. Keep this tab open. Sync will retry when the connection returns." }[account.sync];
 
   return <div className="mx-auto max-w-3xl space-y-8 px-6 py-12">
+    <PracticeReturn />
+    <Link href="/practice" className="inline-block text-accent underline underline-offset-4">Open the account practice library →</Link>
     <div className="space-y-3">
       <h1 className="text-3xl font-semibold">Your learning progress</h1>
       <p className="text-muted">Keep your quiz answers, Python drafts, Botie workshops, experiments, and course progress together across devices.</p>

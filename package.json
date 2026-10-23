@@ -7,6 +7,7 @@
     "curriculum:check": "node scripts/build-curriculum.mjs --check",
     "prepare:python": "node scripts/prepare-python.mjs",
     "test:practice": "node scripts/check-practice.mjs",
+    "test:practice-bank": "node scripts/check-practice-bank.mjs",
     "test:lesson-examples": "node scripts/check-lesson-examples.mjs",
     "record:practice": "node scripts/check-practice.mjs --record",
     "prerecord:practice": "npm run prepare:python",

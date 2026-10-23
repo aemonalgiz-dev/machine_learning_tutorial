@@ -166,7 +166,7 @@ test("an edit made during an upload stays pending and saves after the first resp
   let release:()=>void=()=>{};
   const gate=new Promise<void>(resolve=>{release=resolve;});
   let waiting=false;
-  await context.route("**/account-api/learner-state",async route=>{
+  await context.route("**/account-api/learner-state*",async route=>{
     const request=route.request();
     if(request.method()==="PUT" && JSON.stringify(request.postDataJSON().value).includes("First prediction")) {
       waiting=true; await gate;
@@ -180,4 +180,34 @@ test("an edit made during an upload stays pending and saves after the first resp
   await expect.poll(()=>JSON.stringify(remote.records.alice)).toContain("Second prediction while saving");
   await page.reload(); await openExperiment(page);
   await expect(page.getByLabel("My prediction",{exact:true})).toHaveValue("Second prediction while saving");
+});
+
+test("saved work loads every page before reporting sync complete", async ({page,context})=>{
+  const remote=service();await connect(context,remote);
+  const record=(key:string,value:unknown):SavedRecord=>({key,value,revision:1,mutationId:"00000000-0000-4000-8000-000000000001"});
+  const paths:string[]=[];
+  await context.route("**/account-api/learner-state?*",async route=>{
+    const url=new URL(route.request().url());paths.push(url.search);
+    expect(route.request().headers()["x-fitlab-account"]).toBe("alice");
+    expect(url.searchParams.get("limit")).toBe("128");
+    const after=url.searchParams.get("after");
+    if(!after)return route.fulfill({json:{records:[record("bank:last:v1",{id:"sensor-mean--01--quiz",title:"Practice"})],nextCursor:"bank:last:v1"}});
+    expect(after).toBe("bank:last:v1");
+    return route.fulfill({json:{records:[record("preferences:theme","light")],nextCursor:null}});
+  });
+  await ready(page);
+  expect(paths).toHaveLength(2);
+  const saved=await page.evaluate(()=>Object.fromEntries(Object.keys(localStorage).filter(k=>k.startsWith("fitlab.learning.v1:alice:")).map(k=>[k,JSON.parse(localStorage.getItem(k)!)])));
+  expect(saved["fitlab.learning.v1:alice:preferences:theme"].value).toBe("light");
+  expect(saved["fitlab.learning.v1:alice:bank:last:v1"].value.id).toBe("sensor-mean--01--quiz");
+});
+
+test("repeated page cursors stop sync instead of looping or uploading partial state",async({page,context})=>{
+  const remote=service();await connect(context,remote);let pages=0;
+  await context.route("**/account-api/learner-state?*",route=>{
+    pages++;return route.fulfill({json:{records:[],nextCursor:"bank:last:v1"}});
+  });
+  await page.goto("/account");
+  await expect(page.getByText(/Sync will retry/)).toBeVisible();
+  expect(pages).toBe(2);expect(remote.writes).toHaveLength(0);
 });

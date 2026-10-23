@@ -43,6 +43,8 @@ export interface BuildWorkshopProps {
   /** Separate drafts for a component trial, full build or fresh variation. */
   recordId?: string;
   allowSolution?: boolean;
+  /** Keep undo snapshots in this visit rather than syncing every old graph. */
+  sessionHistory?: boolean;
   /** Context beside the objective, such as a named intermediate calculation. */
   briefing?: ReactNode;
   openingCoach?: string;
@@ -69,7 +71,7 @@ export function BuildWorkshop(props: BuildWorkshopProps) {
   return <Workshop key={`${props.recordId ?? props.build.id}:v${props.build.draftVersion ?? 1}:${account ?? "guest"}:seed-${Boolean(props.initialGraph)}`} {...props}/>;
 }
 
-function Workshop({build, guide=false, compact=false, embeddedBrief=false, initialGraph, initialSupported=false, initialCaseIndex=0, recordId, allowSolution=true, briefing, openingCoach, continuation=false, reusable, onReuse, onAssistance, onOutcome, onActivity, onFreshAttempt, withholdExpectedUntilTest=false}: BuildWorkshopProps) {
+function Workshop({build, guide=false, compact=false, embeddedBrief=false, initialGraph, initialSupported=false, initialCaseIndex=0, recordId, allowSolution=true, sessionHistory=false, briefing, openingCoach, continuation=false, reusable, onReuse, onAssistance, onOutcome, onActivity, onFreshAttempt, withholdExpectedUntilTest=false}: BuildWorkshopProps) {
   const account = useProgressAccount();
   const storageKey=`fitlab-construction-v1:${build.id}${build.draftVersion?`:revision-${build.draftVersion}`:""}`;
   const key = workshopRecordKey(build, recordId);
@@ -99,8 +101,12 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
     if (usesSeed) saveDraft(previous => previous === seed.draft ? { ...previous, carriedSupport: seed.supported } : previous);
   }, [usesSeed, seed, saveDraft]);
   const [graph,setGraph]=useLearnerField(saved, "graph");
-  const [undo,setUndo]=useLearnerField(saved, "undo");
-  const [redo,setRedo]=useLearnerField(saved, "redo");
+  const savedUndo=useLearnerField(saved, "undo");
+  const savedRedo=useLearnerField(saved, "redo");
+  const localUndo=useState<Construction[]>([]);
+  const localRedo=useState<Construction[]>([]);
+  const [undo,setUndo]=sessionHistory?localUndo:savedUndo;
+  const [redo,setRedo]=sessionHistory?localRedo:savedRedo;
   const [socket,setSocket]=useState<Socket|null>(null);
   const [wireEnd,setWireEnd]=useState<Point|null>(null);
   const [hoveredInput,setHoveredInput]=useState<Socket|null>(null);

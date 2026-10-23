@@ -145,21 +145,30 @@ export function listenForLearnerStorage() {
 
 export async function syncLearnerState(account: string, active: () => boolean, request: (path: string, init?: RequestInit) => Promise<Response>) {
   const headers = { "Content-Type": "application/json", "X-FitLab-Account": account };
-  const response = await request("learner-state", { headers });
-  if (!response.ok) throw new Error("Could not load saved work");
-  const result = await response.json();
-  if (!active()) return;
-  if (!Array.isArray(result.records) || !result.records.every(validRecord)) throw new Error("Invalid saved work");
-  for (const remote of result.records as SavedRecord[]) {
-    const local = read(remote.key, account);
-    if (!local?.dirty) {
-      if (!same(local, { ...remote, dirty: false })) save({ ...remote, dirty: false }, account);
-    } else if (same(local.value, remote.value)) {
-      save({ ...remote, dirty: false }, account);
-    } else if (remote.revision !== local.revision) {
-      save({ ...local, conflict: remote }, account);
+  let cursor: string | null = null;
+  const visited = new Set<string>();
+  do {
+    if (!active()) return;
+    const response = await request("learner-state?limit=128" + (cursor ? "&after=" + encodeURIComponent(cursor) : ""), { headers });
+    if (!response.ok) throw new Error("Could not load saved work");
+    const result = await response.json();
+    if (!active()) return;
+    if (!Array.isArray(result.records) || !result.records.every(validRecord)) throw new Error("Invalid saved work");
+    for (const remote of result.records as SavedRecord[]) {
+      const local = read(remote.key, account);
+      if (!local?.dirty) {
+        if (!same(local, { ...remote, dirty: false })) save({ ...remote, dirty: false }, account);
+      } else if (same(local.value, remote.value)) {
+        save({ ...remote, dirty: false }, account);
+      } else if (remote.revision !== local.revision) {
+        save({ ...local, conflict: remote }, account);
+      }
     }
-  }
+    const next = result.nextCursor ?? null;
+    if (next !== null && (typeof next !== "string" || !/^[a-z][A-Za-z0-9:./_-]{0,511}$/.test(next) || visited.has(next) || visited.size >= 256)) throw new Error("Invalid saved-work page cursor");
+    if (next !== null) visited.add(next);
+    cursor = next;
+  } while (cursor !== null);
   for (const pending of entries(account)) {
     if (!active()) return;
     const local = read(pending.key, account)!;

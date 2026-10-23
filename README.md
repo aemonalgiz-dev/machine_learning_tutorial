@@ -40,6 +40,51 @@ For a fresh local checkout, copy that example to `.env.development.local`.
 
 ## Accounts and saved work
 
+### Additional practice library
+
+`/practice` adds 3,456 account-only activities: 48 problem families with 24
+reproducible datasets each, available as a quiz, a programming challenge and a
+Botie workshop. These are variations of the same problems, not 3,456 separate
+lessons. Topics cover mathematics, predictive models, language and images,
+sequential decisions, databases, and agent policy checks. The original course
+and its exercises remain accessible without an account.
+
+Definitions live in `lib/practice-bank/`. The client fetches one activity at a
+time from `/practice-api`; that route verifies the backend's opaque session
+cookie and the current account before returning content. Definitions are not
+included in public HTML or client bundles. Responses are private and uncached.
+The library uses the existing account setup and does not add a subscription.
+
+The bank uses the same Python/SQLite runtimes, quiz feedback and workshop
+engine as the course. Reference programs must pass four behavioral tests;
+workshop constructions must calculate the expected results on four batches.
+Quizzes include their input data and plausible misconceptions. Author a new
+problem with its own explanation, constraints, independent answer function,
+reusable solution and construction. Vary sizes, ordering and boundary cases
+where those affect the method. Do not increase the count by copying a page.
+
+Code, quiz attempts and current constructions use distinct account-scoped
+saved-work keys. Bank workshop undo/redo stays in the current visit instead of
+syncing dozens of full construction snapshots per case. The backend now supports
+paginated saved-work reads (128 records per request, about 1 MiB per page),
+8,192 records and 32 MiB per account. Deploy the backend changes to apply those
+limits; older backends still return their original unpaginated response.
+
+Validate the full bank with:
+
+```bash
+npm run test:practice-bank
+npx playwright test tests/practice-bank.spec.ts tests/practice-bank-browser.spec.ts tests/learner-persistence.spec.ts tests/accounts.spec.ts tests/accounts-proxy.spec.ts
+```
+
+The first command runs every reference program through the actual browser
+Python/SQLite runners. Its package download uses the existing `.practice-checks`
+cache. The second covers construction calculations, server-side gating,
+sign-in return paths, browser execution and saved-work isolation. The bank
+does not generate thousands of static pages or add a second Python runtime.
+
+### Backend connection
+
 The compute API and account backend are separate services. The compute API
 fits the numerical examples. The private [`../backend`](../backend) service
 handles sign-in and stores learner work in its database. The website forwards

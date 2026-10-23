@@ -174,7 +174,7 @@ test("a response from the previous account cannot enter the new account cache", 
   await page.route("**/account-api/session", route => route.fulfill({ json: {
     enabled: true, user: { id: user, name: user, email: null },
   } }));
-  await page.route("**/account-api/learner-state", route => route.fulfill({ json: { records: [] } }));
+  await page.route("**/account-api/learner-state*", route => route.fulfill({ json: { records: [] } }));
   await page.route("**/account-api/progress", async route => {
     const owner = route.request().headers()["x-fitlab-account"];
     if (owner === "alice") {

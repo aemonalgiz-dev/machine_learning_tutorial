@@ -37,7 +37,9 @@ export function zip(a: Data, b: Data, fn: (x: number, y: number) => number): Dat
 }
 const define = (title: string, why: string, inputs: string[], run: Tool["run"], settings?: Tool["settings"]): Tool => ({ title, why, inputs, run, settings });
 const numeric = (key: string, label: string, initial = 0, min = -10, max = 10, step = .5) => ({ key, label, initial, min, max, step });
+import { practiceTools } from "./practice-tools";
 export const TOOLS: Record<string, Tool> = {
+  ...practiceTools,
   ...EXTRA_TOOLS,
   ...FOUNDATION_TOOLS,
   ...GAP_TOOLS,

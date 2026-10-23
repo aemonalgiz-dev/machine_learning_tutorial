@@ -62,6 +62,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 Workshops
               </Link>
               <Link href="/search" className="inline-flex min-h-9 items-center transition hover:text-foreground">Search</Link>
+              <Link href="/practice" className="inline-flex min-h-9 items-center transition hover:text-foreground">Practice</Link>
               <Link href="/about" className="inline-flex min-h-9 items-center transition hover:text-foreground">About</Link>
             </div>
             <div className="ml-auto flex items-center gap-3">

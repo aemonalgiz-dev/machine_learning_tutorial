@@ -15,6 +15,14 @@ when adding or moving sections.
 
 ## Writing the lessons
 
+Additional account practice belongs in `/practice`, separate from the existing
+free course and Botie journey. The author requested an account gate for these
+extra quizzes, programming challenges and workshops. Describe generated cases
+as variations of an authored problem, not as separately written lessons. Each
+case must supply its data, and the programming and construction checks must
+include changed inputs. A larger count is useful only when learners still have
+a clear problem, an explanation of mistakes, and a way to test their reasoning.
+
 The site teaches novice and technical readers in the author's direct,
 example-led voice. These rules reflect the author's stated preferences.
 
