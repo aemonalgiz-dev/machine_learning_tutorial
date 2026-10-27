@@ -1,0 +1,479 @@
+{
+  "software-feature-contracts": {
+    "name": "Three model features arrive out of order",
+    "prompt": "Botie now receives c, a and b, while the model expects a, b and c. Predict the weighted sum before connecting the new record.",
+    "data": {
+      "names": [
+        "c",
+        "a",
+        "b"
+      ],
+      "values": [
+        4,
+        2,
+        3
+      ],
+      "required": [
+        "a",
+        "b",
+        "c"
+      ],
+      "weights": [
+        1,
+        10,
+        100
+      ]
+    },
+    "expected": 432,
+    "why": "The adapter must use the supplied schema rather than a hard-coded reversal of two fields."
+  },
+  "software-fitted-state": {
+    "name": "Negative readings on a new device",
+    "prompt": "The fitted device saw negative readings. Predict the transformed request without centring it on its own mean.",
+    "data": {
+      "training": [
+        -6,
+        -2
+      ],
+      "request": [
+        -4,
+        2
+      ]
+    },
+    "expected": [
+      0,
+      6
+    ],
+    "why": "The reference may be negative. Its ownership matters more than the sign of the measurements."
+  },
+  "software-retrieval-shortlists": {
+    "name": "The best scores are both negative",
+    "prompt": "All three similarities are below zero, and two passages tie. Predict the shortlist using relative order rather than a positive-score assumption.",
+    "data": {
+      "ids": [
+        "X",
+        "Y",
+        "Z"
+      ],
+      "scores": [
+        -1,
+        -2,
+        -1
+      ],
+      "k": 2
+    },
+    "expected": [
+      "X",
+      "Z"
+    ],
+    "why": "Negative scores still have an ordering; equal scores must preserve the incoming positions."
+  },
+  "software-workflow-dependencies": {
+    "name": "A job has no prerequisites",
+    "prompt": "One waiting job needs no prior result, another needs the second prerequisite, and the last needs both. Predict readiness after only the first completes.",
+    "data": {
+      "dependencies": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "done": [
+        1,
+        0
+      ],
+      "required": [
+        0,
+        1,
+        2
+      ]
+    },
+    "expected": [
+      1,
+      0,
+      0
+    ],
+    "why": "A zero-dependency row is ready immediately, while unrelated completion still cannot satisfy another row."
+  },
+  "data-partition-statistics": {
+    "name": "Three workers, including an empty one",
+    "prompt": "Botie receives three partition reports. Keep the empty worker from changing either the denominator or the weighting of the other records.",
+    "data": {
+      "sums": [
+        -6,
+        0,
+        18
+      ],
+      "counts": [
+        2,
+        0,
+        4
+      ]
+    },
+    "expected": 2,
+    "why": "The summary must retain counts across additional partitions, empty inputs and negative readings."
+  },
+  "data-asof-features": {
+    "name": "A feature arrives exactly at the cutoff",
+    "prompt": "The inclusive policy permits equality. Predict the surviving values when one record arrives at the decision and another arrives a moment later.",
+    "data": {
+      "events": [
+        4,
+        5,
+        3
+      ],
+      "available": [
+        5,
+        6,
+        4
+      ],
+      "values": [
+        40,
+        50,
+        30
+      ],
+      "cutoff": 5
+    },
+    "expected": [
+      40,
+      30
+    ],
+    "why": "Boundary equality must be deliberate, while an earlier event still cannot excuse a late arrival."
+  },
+  "data-contract-quarantine": {
+    "name": "Valid boundary readings surround one failure",
+    "prompt": "Both interval endpoints are valid. Predict the accepted sequence and rejected count without sorting or changing the original readings.",
+    "data": {
+      "values": [
+        10,
+        11,
+        0,
+        5
+      ],
+      "low": 0,
+      "high": 10
+    },
+    "expected": [
+      [
+        10,
+        0,
+        5
+      ],
+      1
+    ],
+    "why": "The mask must preserve record order and accept both boundaries while reporting the excluded row."
+  },
+  "data-stream-windows": {
+    "name": "Out-of-order events meet two boundaries",
+    "prompt": "The input is not sorted. Predict which readings belong to [0,5), keeping their original order and excluding the event at 5.",
+    "data": {
+      "events": [
+        5,
+        -1,
+        0,
+        4
+      ],
+      "values": [
+        50,
+        -10,
+        0,
+        40
+      ],
+      "start": 0,
+      "end": 5
+    },
+    "expected": [
+      0,
+      40
+    ],
+    "why": "Membership must follow timestamps and the declared interval, independent of arrival order."
+  },
+  "data-artifact-lineage": {
+    "name": "Both dependencies changed together",
+    "prompt": "The requested dataset and transformation versions have both moved on. Predict reuse without assuming only one dependency can fail at a time.",
+    "data": {
+      "storedData": "d2",
+      "data": "d3",
+      "storedCode": "c4",
+      "code": "c5"
+    },
+    "expected": false,
+    "why": "The combined check must preserve simultaneous mismatches rather than treating a single changed field as the only possible case."
+  },
+  "systems-inference-batching": {
+    "name": "A partial batch leaves on its delay limit",
+    "prompt": "Two images arrive at 2 and 7 ms, dispatch at 9, and finish after 4 ms of execution. Predict both latencies before changing the waiting policy.",
+    "data": {
+      "arrivals": [
+        2,
+        7
+      ],
+      "dispatch": 9,
+      "duration": 4
+    },
+    "expected": [
+      11,
+      6
+    ],
+    "why": "A partial batch still has a common completion and distinct per-request waits."
+  },
+  "systems-agent-deadlines": {
+    "name": "The run is already overdue",
+    "prompt": "The overall budget is 500 ms, elapsed time is 600 ms, and 50 ms was reserved for the response. Predict the new-call allowance.",
+    "data": {
+      "budget": 500,
+      "elapsed": 600,
+      "reserve": 50
+    },
+    "expected": 0,
+    "why": "An overdue run must not turn a negative remainder into a fresh positive timeout."
+  },
+  "systems-kv-cache-memory": {
+    "name": "Several sequences end while a new one grows",
+    "prompt": "Two sequences are now empty and one retains 12 tokens. Predict dense cache bytes without charging for completed sequences.",
+    "data": {
+      "lengths": [
+        0,
+        12,
+        0
+      ],
+      "bytesPerToken": 48
+    },
+    "expected": 576,
+    "why": "Admission estimates must use current retained tokens rather than a fixed number of conversations."
+  },
+  "systems-context-cache": {
+    "name": "The context matches but the question changes",
+    "prompt": "The same team uses the same evidence snapshot, but asks a new question. Predict reuse before checking either comparison branch.",
+    "data": {
+      "storedQuestion": "why?",
+      "question": "when?",
+      "storedContext": {
+        "tenant": "A",
+        "evidence": "v2"
+      },
+      "context": {
+        "tenant": "A",
+        "evidence": "v2"
+      }
+    },
+    "expected": false,
+    "why": "Context equality alone is insufficient; the actual question remains a required dependency."
+  },
+  "robot-perception-frames": {
+    "name": "A clockwise camera observes another point",
+    "prompt": "The camera-to-robot rotation is now clockwise and the offset is negative on one axis. Predict the robot-frame point before applying the two operations.",
+    "data": {
+      "rotation": [
+        [
+          0,
+          1
+        ],
+        [
+          -1,
+          0
+        ]
+      ],
+      "point": [
+        3,
+        2
+      ],
+      "translation": [
+        -1,
+        4
+      ]
+    },
+    "expected": [
+      1,
+      1
+    ],
+    "why": "Changed rotation direction and offset expose memorised coordinates and incorrect operation order."
+  },
+  "robot-observation-latency": {
+    "name": "Motion on both axes during a shorter delay",
+    "prompt": "The part now moves in two directions. Predict its displacement over half a second, keeping the two coordinates distinct.",
+    "data": {
+      "position": [
+        2,
+        3
+      ],
+      "velocity": [
+        -2,
+        4
+      ],
+      "age": 0.5
+    },
+    "expected": [
+      1,
+      5
+    ],
+    "why": "The same update must handle vector motion and signs rather than a hard-coded conveyor axis."
+  },
+  "robot-feedback-corrections": {
+    "name": "Correct from the other side of the target",
+    "prompt": "Botie begins beyond the target. Predict the next position with a half-second update and verify that the command points back toward the target.",
+    "data": {
+      "target": 2,
+      "position": 6,
+      "gain": 1,
+      "dt": 0.5
+    },
+    "expected": 4,
+    "why": "The sign of the measured error must control direction; a fixed positive movement is not feedback."
+  },
+  "robot-actuator-windup": {
+    "name": "A smaller timestep changes the stored correction",
+    "prompt": "The command request still saturates, but the update interval is now half a second. Predict both the applied command and the next integral contribution.",
+    "data": {
+      "error": 5,
+      "J": 1,
+      "kp": 2,
+      "ki": 1,
+      "kaw": 0.5,
+      "dt": 0.5,
+      "low": -3,
+      "high": 3
+    },
+    "expected": [
+      3,
+      1.5
+    ],
+    "why": "The instantaneous clipped command stays the same while the time-integrated memory update shrinks."
+  },
+  "security-retrieval-authority": {
+    "name": "The requester changes tenant",
+    "prompt": "The same candidates are now evaluated for tenant B, and one B document lacks a grant. Predict which IDs remain without reusing the previous caller’s mask.",
+    "data": {
+      "ids": [
+        "a",
+        "b",
+        "c"
+      ],
+      "tenants": [
+        "A",
+        "B",
+        "B"
+      ],
+      "tenant": "B",
+      "grants": [
+        1,
+        1,
+        0
+      ]
+    },
+    "expected": [
+      "b"
+    ],
+    "why": "Authorisation belongs to the current request and current grants, not a cached global relevance result."
+  },
+  "security-private-aggregates": {
+    "name": "A narrower public range with four people",
+    "prompt": "The declared bounds are now [1,5] and four people contribute [0,2,4,10]. Predict both outputs using those bounds rather than the observed minimum and maximum.",
+    "data": {
+      "values": [
+        0,
+        2,
+        4,
+        10
+      ],
+      "low": 1,
+      "high": 5
+    },
+    "expected": [
+      3,
+      1
+    ],
+    "why": "The sensitivity depends on the public range and fixed number of people, even when observations fall outside both bounds."
+  },
+  "security-model-artifacts": {
+    "name": "The loader passes while every digest fails",
+    "prompt": "Both candidates have approved loading formats but fail trusted byte verification. Predict the allowed IDs without treating format approval as provenance.",
+    "data": {
+      "ids": [
+        "x",
+        "y"
+      ],
+      "verified": [
+        0,
+        0
+      ],
+      "loader": [
+        1,
+        1
+      ]
+    },
+    "expected": [],
+    "why": "An acceptable loader does not repair an artifact whose bytes differ from the trusted expectation."
+  },
+  "simulation-time-steps": {
+    "name": "A different ambient temperature and a shorter step",
+    "prompt": "The pump is now at 40, ambient is 10, the rate is 0.2 and timestep is 0.5. Predict one Euler update without reusing the old cooling difference.",
+    "data": {
+      "temperature": 40,
+      "ambient": 10,
+      "rate": 0.2,
+      "dt": 0.5
+    },
+    "expected": 37,
+    "why": "The update must respond to the current excess temperature, rate and physical interval."
+  },
+  "simulation-paired-trials": {
+    "name": "A candidate loses on most of the new shifts",
+    "prompt": "The candidate reduces cost on one shift but raises it on two. Predict the mean gain and decide which individual changes you would inspect next.",
+    "data": {
+      "baseline": [
+        5,
+        10,
+        15
+      ],
+      "candidate": [
+        4,
+        12,
+        18
+      ]
+    },
+    "expected": -1.3333333333333333,
+    "why": "A paired comparison must retain negative gains and cannot assume a candidate is always an improvement."
+  },
+  "simulation-system-identification": {
+    "name": "A different command scale tests the fitted rule",
+    "prompt": "The commands are [2,4] and responses [3,6]. Predict the estimated gain while keeping the units and through-origin model unchanged.",
+    "data": {
+      "command": [
+        2,
+        4
+      ],
+      "response": [
+        3,
+        6
+      ]
+    },
+    "expected": 1.5,
+    "why": "The estimator must respond to the command scale rather than averaging the response values."
+  },
+  "simulation-transfer-checks": {
+    "name": "Two moderate failures replace one extreme failure",
+    "prompt": "The new costs are [7,9,9,3]. Predict mean and worst tested cost, then consider how the failure count differs from the earlier single difficult condition.",
+    "data": {
+      "costs": [
+        7,
+        9,
+        9,
+        3
+      ]
+    },
+    "expected": [
+      7,
+      9
+    ],
+    "why": "A lower maximum can coexist with more failing conditions; preserve per-condition evidence beyond both summary values."
+  }
+}

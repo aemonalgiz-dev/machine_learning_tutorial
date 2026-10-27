@@ -53,7 +53,7 @@ test("navigation contract: search ranks exact titles and respects area and empty
 test("homepage leads to learning areas, and old section links still work", async ({ page }) => {
   await page.goto("/");
   const areas = page.getByRole("navigation", { name: "Learning areas", exact: true });
-  await expect(areas.getByRole("link")).toHaveCount(4);
+  await expect(areas.getByRole("link")).toHaveCount(LEARNING_AREAS.length);
   await expect(areas.getByRole("link").first()).toContainText("Mathematics and Programming");
   await areas.getByRole("link", { name: /^Machine Learning/ }).click();
   await page.getByRole("link", { name: /^Start with a Prediction/ }).click();

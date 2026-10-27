@@ -870,6 +870,17 @@ const existingCurriculum: Part[] = [
 ];
 
 const topicIntroductions: Record<string, string> = {
+  'Keeping prediction code dependable': 'A prediction depends on more than the saved weights. Keep feature meanings and learned preprocessing state intact as requests change.',
+  'Structures for agent workloads': 'An agent needs the right evidence identities, while a training workflow needs the right dependency order. Choose structures that preserve those relationships.',
+  'Building the training table': 'Files and timestamps can quietly change what a training row represents. Keep observation counts and historical knowledge visible while combining records.',
+  'Repairing a changing pipeline': 'A producer changes its output, an old event arrives late, or a cached artifact belongs to yesterday. Decide what can continue and what needs a repair.',
+  'Latency under real workloads': 'Requests arrive at different times and tool calls share one deadline. Follow the elapsed time that the caller actually experiences.',
+  'Memory and reuse': 'Stored conversation state consumes memory, while cached answers depend on their original context. Work out what may be retained and reused.',
+  'Making predictions usable for motion': 'A detected location has a coordinate frame and a capture time. Give both a place in the calculation before treating the prediction as a current position.',
+  'Closing the action loop': 'The result of one action changes the next error. Use that feedback, then account for an actuator that cannot apply the requested command.',
+  'Boundaries around learning systems': 'Check the evidence an agent may read, the influence of a person on a report, and the behaviour allowed when loading an artifact. Each boundary needs its own evidence.',
+  'Learning from a numerical world': 'A simulator supplies approximations and sampled conditions. Inspect both before attributing an improvement to the learned policy.',
+  'Checking a simulator against observations': 'Fit unknown relationships from measurements, then keep changed operating conditions visible when assessing what transfers.',
   "Find the Mistakes Behind the Score": "An average can hide the mistakes we most need to understand. Keep predictions beside their observations, follow the inspection queue, and ask which conditions the model struggles with.",
   "Compare Revisions Fairly": "A lower score may reflect easier cases or repeated searching. Compare revisions on shared observations and keep the model-choosing process inside its own assessment boundary.",
   "Repair the Evidence and the Behaviour": "Some failures begin in the records or the input adapter. Others need a person to review them. Work out which part needs repair, then test the change without hiding the remaining work.",
@@ -1032,4 +1043,10 @@ export const CURRICULUM: Part[] = [
   newSection("Model the System Before Building It", "A prediction service needs more than a fast model. Images must be prepared, requests can arrive together, and devices have limited memory. We will calculate where the work goes, then compare local and remote inference using the same task."),
   newSection("Compare Designs Under Constraints", "The fastest candidate may miss too many faults, while the most accurate one may respond too late. We will identify which designs meet the requirements, examine the remaining trade-offs, and find the assumptions that could change our choice."),
   newSection("Test the Design and Plan for Failure", "A promising estimate needs evidence. Botie will compare prototype changes, route unusable inputs to a defined fallback, and bring the inspection service through a design review. Each passing test will have a clear meaning and a clear limit."),
+  newSection("Software for Models and Agents", "The model worked in a notebook. Why does it change when the API reorders fields, another request joins the batch, or a job reads an old artifact? Build the software boundaries around those failures, then use data structures to keep retrieved evidence and workflow dependencies intact."),
+  newSection("Data Pipelines for Learning", "A training table is the result of decisions about records. Follow Botie from unequal input files to historical features, rejected sensor batches and late events. Keep enough history to explain which data actually produced a model."),
+  newSection("Serving Models and Agent Runs", "A model that fits and an agent that answers once still have to handle concurrent requests. Measure what users wait for, carry deadlines through tool calls, and account for conversation memory. Then decide when a cached answer really belongs to the next request."),
+  newSection("From Learned Perception to Control", "A detector's output is not yet a useful motion command. Give its coordinates a frame and a timestamp, then follow Botie through repeated corrections. When the actuator cannot do what the controller asks, repair the controller's memory as well as its output."),
+  newSection("Protecting ML Data and Artifacts", "A relevant document may belong to another customer, an anonymous statistic may still expose someone's contribution, and a model file may execute code when loaded. Put the checks around those concrete effects and make clear what each check can establish."),
+  newSection("Simulating and Learning System Behaviour", "Botie can learn from simulated experiences, but we first need to know what that simulator is doing. Inspect numerical time steps, compare policies on shared scenarios, fit unknown physical parameters and test conditions that the original model did not handle."),
 ];

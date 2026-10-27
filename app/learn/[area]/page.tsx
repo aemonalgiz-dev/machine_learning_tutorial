@@ -28,7 +28,7 @@ export default async function LearningAreaPage({ params }: Props) {
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{area.title}</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-muted">{area.introduction}</p>
         {firstLesson && <div className="mt-6 flex flex-wrap items-center gap-4">
-          <Link href={labHref(firstLesson.split("/").pop()!)} className="rounded-lg bg-accent-fill px-5 py-3 text-sm font-semibold text-accent-ink hover:brightness-110">{area.id === "machine-learning" ? "Build a prediction with Botie" : area.id === "first-principles-design" ? "Work through the first decision" : area.id === "databases" ? "Explore the records with Botie" : "Start the mathematics with Botie"} →</Link>
+          <Link href={labHref(firstLesson.split("/").pop()!)} className="rounded-lg bg-accent-fill px-5 py-3 text-sm font-semibold text-accent-ink hover:brightness-110">{area.workshopStart} →</Link>
           <Link href={firstLesson} className="py-3 text-sm text-accent hover:underline">Read the first lesson</Link>
           <Link href="#sections" className="py-3 text-sm text-accent hover:underline">Browse the sections</Link>
         </div>}

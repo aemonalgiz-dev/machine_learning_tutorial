@@ -1496,5 +1496,173 @@
     "section": "Agent Guardrails and Secure Development",
     "topic": "Testing the Whole Boundary",
     "blurb": "A refusal can arrive after an unauthorised tool call. Compare recorded effects with the intended policy, preserve blocked legitimate work and decide what evidence supports a limited release."
+  },
+  {
+    "id": "software-feature-contracts",
+    "title": "The Right Numbers in the Wrong Columns",
+    "section": "Software for Models and Agents",
+    "topic": "Keeping prediction code dependable",
+    "blurb": "An API changes its field order. Keep the trained model attached to what each feature means."
+  },
+  {
+    "id": "software-fitted-state",
+    "title": "A Fitted Object Should Remember Its Training",
+    "section": "Software for Models and Agents",
+    "topic": "Keeping prediction code dependable",
+    "blurb": "Separate fitting from prediction so a new request cannot quietly redefine the model’s reference."
+  },
+  {
+    "id": "software-retrieval-shortlists",
+    "title": "Keep the Useful Candidates Without Losing Their IDs",
+    "section": "Software for Models and Agents",
+    "topic": "Structures for agent workloads",
+    "blurb": "Use indices and a bounded heap to select retrieval candidates while preserving ties and identities."
+  },
+  {
+    "id": "software-workflow-dependencies",
+    "title": "Which Jobs Can Start Before the Model Is Ready?",
+    "section": "Software for Models and Agents",
+    "topic": "Structures for agent workloads",
+    "blurb": "Represent a training workflow as dependencies, detect cycles, and separate readiness from completion."
+  },
+  {
+    "id": "data-partition-statistics",
+    "title": "One Training Dataset, Several Unequal Files",
+    "section": "Data Pipelines for Learning",
+    "topic": "Building the training table",
+    "blurb": "Merge sufficient statistics instead of averaging the averages of unequal partitions."
+  },
+  {
+    "id": "data-asof-features",
+    "title": "Rebuild What the Model Could Have Known",
+    "section": "Data Pipelines for Learning",
+    "topic": "Building the training table",
+    "blurb": "Choose the latest eligible feature using both event time and availability time."
+  },
+  {
+    "id": "data-contract-quarantine",
+    "title": "Stop a Broken Sensor Batch Before It Reaches Training",
+    "section": "Data Pipelines for Learning",
+    "topic": "Repairing a changing pipeline",
+    "blurb": "Separate row validation from batch acceptance and preserve rejected evidence for investigation."
+  },
+  {
+    "id": "data-stream-windows",
+    "title": "The Reading Happened Before the Window Closed",
+    "section": "Data Pipelines for Learning",
+    "topic": "Repairing a changing pipeline",
+    "blurb": "Assign event-time windows and make late-data policy explicit before updating an online feature."
+  },
+  {
+    "id": "data-artifact-lineage",
+    "title": "Which Inputs Produced This Model?",
+    "section": "Data Pipelines for Learning",
+    "topic": "Repairing a changing pipeline",
+    "blurb": "Bind reusable artifacts to input versions and code versions so a changed dataset invalidates the right work."
+  },
+  {
+    "id": "systems-inference-batching",
+    "title": "Faster Batches Can Still Make a User Wait",
+    "section": "Serving Models and Agent Runs",
+    "topic": "Latency under real workloads",
+    "blurb": "Compare throughput with request latency before choosing an inference batch policy."
+  },
+  {
+    "id": "systems-agent-deadlines",
+    "title": "A Tool Call Cannot Spend the Whole Deadline Again",
+    "section": "Serving Models and Agent Runs",
+    "topic": "Latency under real workloads",
+    "blurb": "Propagate remaining time through an agent’s tool calls and preserve an explicit response margin."
+  },
+  {
+    "id": "systems-kv-cache-memory",
+    "title": "The Model Fits Until the Conversations Grow",
+    "section": "Serving Models and Agent Runs",
+    "topic": "Memory and reuse",
+    "blurb": "Account for transformer key/value cache growth separately from model weights."
+  },
+  {
+    "id": "systems-context-cache",
+    "title": "A Cached Agent Answer Belongs to a Particular Context",
+    "section": "Serving Models and Agent Runs",
+    "topic": "Memory and reuse",
+    "blurb": "Separate response reuse from semantic similarity by preserving tenant, evidence and model identity."
+  },
+  {
+    "id": "robot-perception-frames",
+    "title": "The Detector Found the Object. Where Is It for the Robot?",
+    "section": "From Learned Perception to Control",
+    "topic": "Making predictions usable for motion",
+    "blurb": "Transform a learned location from camera coordinates into the robot’s coordinate frame."
+  },
+  {
+    "id": "robot-observation-latency",
+    "title": "A Correct Detection Can Already Be Out of Date",
+    "section": "From Learned Perception to Control",
+    "topic": "Making predictions usable for motion",
+    "blurb": "Propagate a timestamped position estimate under an explicit motion assumption and reject stale observations."
+  },
+  {
+    "id": "robot-feedback-corrections",
+    "title": "Measure Again Before Choosing the Next Move",
+    "section": "From Learned Perception to Control",
+    "topic": "Closing the action loop",
+    "blurb": "Use feedback to correct position errors and inspect how gain and timestep affect a simple closed loop."
+  },
+  {
+    "id": "robot-actuator-windup",
+    "title": "Remember What the Actuator Could Actually Do",
+    "section": "From Learned Perception to Control",
+    "topic": "Closing the action loop",
+    "blurb": "Add integral correction, then handle saturation with an explicit anti-windup update."
+  },
+  {
+    "id": "security-retrieval-authority",
+    "title": "Relevant Evidence Is Not Necessarily Permitted Evidence",
+    "section": "Protecting ML Data and Artifacts",
+    "topic": "Boundaries around learning systems",
+    "blurb": "Filter retrieval candidates by trusted authority before ranking what the agent may read."
+  },
+  {
+    "id": "security-private-aggregates",
+    "title": "How Much Could One Person Change This Statistic?",
+    "section": "Protecting ML Data and Artifacts",
+    "topic": "Boundaries around learning systems",
+    "blurb": "Derive bounded-mean sensitivity before discussing noise and privacy accounting."
+  },
+  {
+    "id": "security-model-artifacts",
+    "title": "A Model File Is Part of the Software Supply Chain",
+    "section": "Protecting ML Data and Artifacts",
+    "topic": "Boundaries around learning systems",
+    "blurb": "Verify bytes against trusted provenance and choose a constrained loading format before using a downloaded model."
+  },
+  {
+    "id": "simulation-time-steps",
+    "title": "The Simulator Invented an Oscillation",
+    "section": "Simulating and Learning System Behaviour",
+    "topic": "Learning from a numerical world",
+    "blurb": "Follow Euler integration and distinguish a numerical timestep failure from physical behaviour."
+  },
+  {
+    "id": "simulation-paired-trials",
+    "title": "Give Two Policies the Same Simulated Shift",
+    "section": "Simulating and Learning System Behaviour",
+    "topic": "Learning from a numerical world",
+    "blurb": "Compare policies on shared random scenarios and report uncertainty in their paired differences."
+  },
+  {
+    "id": "simulation-system-identification",
+    "title": "Learn the Unknown Part of a Physical Model",
+    "section": "Simulating and Learning System Behaviour",
+    "topic": "Checking a simulator against observations",
+    "blurb": "Estimate a system gain from measured commands and responses, then inspect identifiability and model mismatch."
+  },
+  {
+    "id": "simulation-transfer-checks",
+    "title": "The Policy Works in One Simulator Setting",
+    "section": "Simulating and Learning System Behaviour",
+    "topic": "Checking a simulator against observations",
+    "blurb": "Evaluate a learned policy across changed physical conditions and keep the worst tested condition visible."
   }
 ]

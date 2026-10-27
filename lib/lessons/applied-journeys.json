@@ -1,0 +1,814 @@
+{
+  "software-feature-contracts": {
+    "premise": "The response changed order while the fitted coefficients stayed put.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Repair the model input boundary",
+      "start": "Build a name-to-position branch, gather the readings, and connect the coefficients last.",
+      "outcome": "A transport change no longer changes feature meaning."
+    },
+    "investigation": {
+      "title": "The response arrives backwards",
+      "question": "The values reverse with their names. Should the prediction change?",
+      "outcome": "Try the metadata field without assigning it a weight.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; gather according to the saved schema",
+          "feedback": "The model sees the same temperature and vibration after the adapter.",
+          "correct": true
+        },
+        {
+          "label": "Yes; coefficients follow incoming positions",
+          "feedback": "Those positions belong to the transport format, not the trained model."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "numpy-arrays",
+        "skill": "Address values deliberately",
+        "why": "The array now has an external schema whose meaning must survive reordering."
+      }
+    ],
+    "reflection": {
+      "prompt": "What should happen if temperature changes units?",
+      "carryForward": "Store units and order with the fitted artifact."
+    }
+  },
+  "software-fitted-state": {
+    "premise": "An extreme neighbour changes a reading that the model already knew how to process.",
+    "order": "build-first",
+    "construction": {
+      "title": "Separate training from serving",
+      "start": "Connect the training mean to the reference input, then route all request values through subtraction.",
+      "outcome": "The model reference survives a change in request grouping."
+    },
+    "investigation": {
+      "title": "Another request joins the batch",
+      "question": "The second request is 100. What should happen to the centred value for 7?",
+      "outcome": "Compare the first entry across both runs; it must stay 3.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "software-feature-contracts",
+        "skill": "Preserve feature meaning",
+        "why": "After preserving names, we preserve the fitted reference those names depend on."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which attributes would a scaler need beyond this mean?",
+      "carryForward": "Save every learned preprocessing value with the model version."
+    }
+  },
+  "software-retrieval-shortlists": {
+    "premise": "A sorted score list is useless if Botie can no longer find its passages.",
+    "order": "build-first",
+    "construction": {
+      "title": "Preserve identities through ranking",
+      "start": "Rank the score positions, then use them to gather IDs without sorting the ID list.",
+      "outcome": "Each selected ID still belongs to the score that earned its position."
+    },
+    "investigation": {
+      "title": "Two manuals tie for the remaining slots",
+      "question": "Which IDs survive when B and C both score 0.9?",
+      "outcome": "Keep B before C according to the declared stable tie rule.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "software-feature-contracts",
+        "skill": "Use positions without losing names",
+        "why": "The same gather operation now follows ranked evidence rather than a feature schema."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which test would expose a mismatch between IDs and scores?",
+      "carryForward": "Keep record identity attached through every sorting and filtering step."
+    }
+  },
+  "software-workflow-dependencies": {
+    "premise": "A job consumed stale features because the scheduler confused an existing file with this run’s completion.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Calculate readiness from the declared graph",
+      "start": "Count completed dependencies separately for each waiting job and compare with its required count.",
+      "outcome": "Unrelated completions cannot release a dependent task."
+    },
+    "investigation": {
+      "title": "Fitting finishes without the required preparation",
+      "question": "The completion vector is [0,1]. May either of these waiting rows run?",
+      "outcome": "Complete both prerequisites and verify that both rows become ready.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Neither; both require the first prerequisite",
+          "feedback": "The first column is still incomplete in every row.",
+          "correct": true
+        },
+        {
+          "label": "Both; one finished job is enough",
+          "feedback": "Each row names its own requirements rather than a global count."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "software-fitted-state",
+        "skill": "Assign state to the correct lifetime",
+        "why": "The fitted object now belongs to a run whose inputs must be ready before construction."
+      }
+    ],
+    "reflection": {
+      "prompt": "What identifies the exact feature artifact a fitting task consumed?",
+      "carryForward": "Record run identity and artifact identity beside completion status."
+    }
+  },
+  "data-partition-statistics": {
+    "premise": "A storage change should not reweight the training population.",
+    "order": "build-first",
+    "construction": {
+      "title": "Combine the worker reports",
+      "start": "Keep sum and count on separate branches until their final division.",
+      "outcome": "The merged mean agrees with reading all records together."
+    },
+    "investigation": {
+      "title": "One worker receives only a single hot reading",
+      "question": "Predict the result for sums [30,90] and counts [3,1].",
+      "outcome": "Compare with averaging 10 and 90; that would give the small file too much influence.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "statistics",
+        "skill": "Build a mean from sum and count",
+        "why": "The same quantities now cross worker boundaries rather than one local list."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which identifier prevents a retried partition from being added twice?",
+      "carryForward": "A merge needs both mathematical validity and unique input contributions."
+    }
+  },
+  "data-asof-features": {
+    "premise": "A correction from tomorrow makes yesterday’s training example look better than it could have been.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Reconstruct the eligible records",
+      "start": "Keep event and availability comparisons separate until you combine their masks.",
+      "outcome": "Only values known at the decision reach the selection stage."
+    },
+    "investigation": {
+      "title": "A newer event arrived after the decision",
+      "question": "Should value 30 displace value 20 at time 10?",
+      "outcome": "Inspect the remaining values before choosing the latest event.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; it was only available at 12",
+          "feedback": "The model running at 10 could not consume a later correction.",
+          "correct": true
+        },
+        {
+          "label": "Yes; its event is newer",
+          "feedback": "Event order alone ignores when the version reached the service."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "design-information-boundaries",
+        "skill": "Separate event and arrival time",
+        "why": "The two-clock eligibility rule now feeds historical feature retrieval."
+      }
+    ],
+    "reflection": {
+      "prompt": "What history would you need to reproduce a corrected feature next month?",
+      "carryForward": "Preserve feature versions and their actual availability times."
+    }
+  },
+  "data-contract-quarantine": {
+    "premise": "Botie’s cleaning step removes the night shift without raising a failure.",
+    "order": "build-first",
+    "construction": {
+      "title": "Report what cleaning removed",
+      "start": "Build the range mask, use it to select values, and count its rejected complement.",
+      "outcome": "A small accepted file can no longer conceal a large rejection."
+    },
+    "investigation": {
+      "title": "The firmware batch arrives",
+      "question": "For [20,-3,120], predict both the accepted list and rejected count.",
+      "outcome": "Use the count to decide whether the producer needs investigation.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "data-partition-statistics",
+        "skill": "Keep counts with summaries",
+        "why": "The count now describes discarded observations as well as retained ones."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which group-level report would reveal the missing night shift?",
+      "carryForward": "A training release must inspect what preparation excluded."
+    }
+  },
+  "data-stream-windows": {
+    "premise": "A delayed sensor backlog should not become evidence of the present condition.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Build the event-time boundary",
+      "start": "Keep the lower comparison inclusive and the upper comparison strict before selecting readings.",
+      "outcome": "Every boundary event has exactly one adjacent window."
+    },
+    "investigation": {
+      "title": "An event lands exactly on the upper boundary",
+      "question": "Should value 100 at event 20 enter the [10,20) result?",
+      "outcome": "Run the old-backlog case and inspect which event survives.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; it belongs to the next window",
+          "feedback": "Excluding the upper bound prevents overlap between adjacent windows.",
+          "correct": true
+        },
+        {
+          "label": "Yes; all threshold gates are inclusive",
+          "feedback": "This boundary needs a strict comparison rather than the same gate at both ends."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "data-asof-features",
+        "skill": "Preserve the two clocks",
+        "why": "Window membership uses event time while feature availability still follows arrival and revision."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which version would a decision made before the late packet use?",
+      "carryForward": "Version emitted features and retain their availability timestamps."
+    }
+  },
+  "data-artifact-lineage": {
+    "premise": "The jobs ran in the right order but reused features from an older dataset.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Check the cache’s dependencies",
+      "start": "Compare the input and code identities on separate branches, then require both checks.",
+      "outcome": "A successful prior run is reusable only for compatible dependencies."
+    },
+    "investigation": {
+      "title": "The file was replaced in place",
+      "question": "The code is unchanged but the input version is d2. Should the d1 artifact be reused?",
+      "outcome": "Change only the code next and verify the same invalidation rule.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; input identity changed",
+          "feedback": "The previous calculation belongs to a different dataset.",
+          "correct": true
+        },
+        {
+          "label": "Yes; the job name stayed the same",
+          "feedback": "A job name identifies a procedure, not every input version it has processed."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "software-workflow-dependencies",
+        "skill": "Keep outputs attached to a run",
+        "why": "Readiness now carries an explicit identity for the artifact it releases."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which configuration setting could change a feature without changing the code?",
+      "carryForward": "Include behaviour-changing configuration in artifact identity."
+    }
+  },
+  "systems-inference-batching": {
+    "premise": "Botie’s batch throughput improves while the earliest user waits longer.",
+    "order": "build-first",
+    "construction": {
+      "title": "Put waiting back into the latency report",
+      "start": "Connect dispatch and execution to a common completion, then subtract the arrival vector.",
+      "outcome": "The report follows each user rather than dividing a shared duration."
+    },
+    "investigation": {
+      "title": "The third image delays dispatch",
+      "question": "Predict the three latencies when the batch waits until time 6.",
+      "outcome": "Inspect the first request before deciding whether the larger batch helps the service objective.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "design-queues-and-bursts",
+        "skill": "Account for waiting work",
+        "why": "Queueing time now belongs to individual requests in a shared inference batch."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which traffic pattern would make a full-batch-only policy unusable?",
+      "carryForward": "Benchmark the arrival process as well as the model invocation."
+    }
+  },
+  "systems-agent-deadlines": {
+    "premise": "Every service used a reasonable timeout, but the sequence exceeded its overall deadline.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Carry the budget through the run",
+      "start": "Subtract elapsed work and reserve before connecting the allowance to the next step.",
+      "outcome": "Later calls cannot spend time that earlier calls already consumed."
+    },
+    "investigation": {
+      "title": "The response reserve has already started",
+      "question": "After 950 ms of a 1000 ms budget with a 100 ms reserve, may another ordinary tool call start?",
+      "outcome": "Try a larger overall budget without changing elapsed time.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; its available allowance is zero",
+          "feedback": "The remaining total time is already smaller than the reserved response time.",
+          "correct": true
+        },
+        {
+          "label": "Yes; give it the original second",
+          "feedback": "That resets the whole budget and recreates the overrun."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "systems-inference-batching",
+        "skill": "Measure complete elapsed latency",
+        "why": "The end-to-end clock now constrains a sequence of agent operations."
+      }
+    ],
+    "reflection": {
+      "prompt": "What would a timeout after a successful write leave uncertain?",
+      "carryForward": "Track effect identity and reconcile uncertain outcomes separately from timing."
+    }
+  },
+  "systems-kv-cache-memory": {
+    "premise": "The parameter budget passed, then a long conversation exhausted the remaining memory.",
+    "order": "build-first",
+    "construction": {
+      "title": "Account for cached tokens",
+      "start": "Add the retained sequence lengths, then connect the storage needed per token.",
+      "outcome": "The estimate grows when conversations grow, even with fixed weights."
+    },
+    "investigation": {
+      "title": "The second conversation reaches fifty tokens",
+      "question": "Predict the new byte count before admitting another request.",
+      "outcome": "Check how much one long sequence contributes to the sum.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "design-memory-budget",
+        "skill": "Separate persistent and request-dependent allocations",
+        "why": "Cached attention state is another allocation whose lifetime differs from model weights."
+      }
+    ],
+    "reflection": {
+      "prompt": "How much future generation would an admission policy reserve?",
+      "carryForward": "Measure peak allocation and enforce a declared generation bound."
+    }
+  },
+  "systems-context-cache": {
+    "premise": "An answer cached for one team reaches another because the wording matched.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Include the context in reuse",
+      "start": "Compare the question and context records on independent branches, then require both.",
+      "outcome": "A matching question cannot override a context mismatch."
+    },
+    "investigation": {
+      "title": "Another team asks the same question",
+      "question": "Should the team-A cached response be reused for team B?",
+      "outcome": "Change the manual version and inspect the same boundary again.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; its authority context differs",
+          "feedback": "Shared wording does not establish permission to use the same evidence.",
+          "correct": true
+        },
+        {
+          "label": "Yes; the question is identical",
+          "feedback": "The answer’s dependencies extend beyond its text."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "data-artifact-lineage",
+        "skill": "Name the inputs that produced an artifact",
+        "why": "A cached response is another artifact whose dependencies must be explicit."
+      }
+    ],
+    "reflection": {
+      "prompt": "What should a permission revocation do to already cached answers?",
+      "carryForward": "Recheck current authority and expire or invalidate affected entries."
+    }
+  },
+  "robot-perception-frames": {
+    "premise": "The detector’s coordinates were correct for the camera but wrong for Botie’s planner.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Connect the coordinate frames",
+      "start": "Rotate the point first, then add the destination-frame offset.",
+      "outcome": "The same observed point can be expressed in the planner’s frame."
+    },
+    "investigation": {
+      "title": "The camera rotates on its mount",
+      "question": "Should simply adding [1,3] still produce the correct robot point?",
+      "outcome": "Check the backwards-facing case for sign errors.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; the point’s directions changed too",
+          "feedback": "The rotation must act on camera coordinates before adding the robot-frame offset.",
+          "correct": true
+        },
+        {
+          "label": "Yes; only the origin matters",
+          "feedback": "A sideways camera has different axes as well as a displaced origin."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "linear-algebra",
+        "skill": "Apply a matrix to a vector",
+        "why": "The matrix now has a physical meaning: expressing coordinates in a different frame."
+      }
+    ],
+    "reflection": {
+      "prompt": "What additional input is needed when the camera mount moves?",
+      "carryForward": "Associate each measurement with its frame and capture time."
+    }
+  },
+  "robot-observation-latency": {
+    "premise": "The coordinate adapter works, but the object moves while Botie waits for inference.",
+    "order": "build-first",
+    "construction": {
+      "title": "Add a motion prediction after the frame adapter",
+      "start": "Use velocity and elapsed time to calculate displacement in the same frame as the position.",
+      "outcome": "A captured location becomes a time-qualified prediction."
+    },
+    "investigation": {
+      "title": "The image is four tenths of a second old",
+      "question": "Predict the position for velocity [0.5,0] before running the propagation.",
+      "outcome": "Compare against the unchanged old coordinate to see the latency error.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "robot-perception-frames",
+        "skill": "Use one coordinate frame",
+        "why": "Position and velocity must agree on directions before a time update makes sense."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which unobserved acceleration would invalidate this update?",
+      "carryForward": "Carry age and uncertainty with a predicted position."
+    }
+  },
+  "robot-feedback-corrections": {
+    "premise": "A single predicted move leaves an error that the next action must measure.",
+    "order": "build-first",
+    "construction": {
+      "title": "Close the correction loop",
+      "start": "Calculate target minus position, scale the correction, and update the position.",
+      "outcome": "A new measured position changes the next command."
+    },
+    "investigation": {
+      "title": "The gain increases to 1.5",
+      "question": "Will the next position stop short, land on target, or pass it? Predict the value.",
+      "outcome": "The answer is 12, so the next correction must reverse direction.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "robot-observation-latency",
+        "skill": "Use a time-qualified position estimate",
+        "why": "Feedback depends on a measurement whose frame and age are understood."
+      }
+    ],
+    "reflection": {
+      "prompt": "What happens when gain times timestep exceeds two in this plant?",
+      "carryForward": "Evaluate the trajectory and peaks, not only one prediction."
+    }
+  },
+  "robot-actuator-windup": {
+    "premise": "The proportional loop now needs memory, and that memory grows while the motor is unable to comply.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Feed actuator limits back to memory",
+      "start": "Keep requested and clipped commands on separate branches, then use their difference in the integral update.",
+      "outcome": "The next stored contribution reflects the applied command."
+    },
+    "investigation": {
+      "title": "The request exceeds the actuator limit",
+      "question": "Will clipping 11 to 3 alone prevent the integral state from growing?",
+      "outcome": "Reverse the error and verify that the correction reverses too.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; update the memory using the mismatch",
+          "feedback": "The stored state otherwise continues to integrate the unreachable demand.",
+          "correct": true
+        },
+        {
+          "label": "Yes; the output is already bounded",
+          "feedback": "A bounded output can conceal an unbounded internal request."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "robot-feedback-corrections",
+        "skill": "Build an error-driven command",
+        "why": "The earlier proportional branch now combines with state and a physical limit."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which recovery trajectory would reveal excessive stored demand?",
+      "carryForward": "Test the return from saturation and keep actuator limits in the loop."
+    }
+  },
+  "security-retrieval-authority": {
+    "premise": "The most relevant manual is private to another tenant.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Place permission before evidence consumption",
+      "start": "Combine tenant membership and the resolved document grant before selecting IDs.",
+      "outcome": "Only authorised evidence can enter a later ranking or prompt."
+    },
+    "investigation": {
+      "title": "A high score crosses a customer boundary",
+      "question": "May a strong match override a failed tenant check?",
+      "outcome": "Try a same-tenant record whose document grant is revoked.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; the service must exclude it",
+          "feedback": "Relevance provides no authority to access another customer’s record.",
+          "correct": true
+        },
+        {
+          "label": "Yes; it helps answer accurately",
+          "feedback": "An accurate answer can still disclose information without permission."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "software-retrieval-shortlists",
+        "skill": "Keep candidate identities through selection",
+        "why": "The candidate set must now be authorised before its final shortlist is formed."
+      }
+    ],
+    "reflection": {
+      "prompt": "Where else could a forbidden title leak after the body is filtered?",
+      "carryForward": "Apply the data boundary to logs, caches and citations too."
+    }
+  },
+  "security-private-aggregates": {
+    "premise": "A nameless report still lets one extreme contribution move the result substantially.",
+    "order": "build-first",
+    "construction": {
+      "title": "Calculate influence before adding any noise",
+      "start": "Clip values on the mean branch and use the public range and count on the sensitivity branch.",
+      "outcome": "The influence bound remains visible separately from the statistic."
+    },
+    "investigation": {
+      "title": "One contribution jumps to one hundred",
+      "question": "Predict both clipped mean and sensitivity for [2,4,100].",
+      "outcome": "The observed extreme changes the clipped mean, while the sensitivity still follows the declared range.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "statistics",
+        "skill": "Keep the mean’s denominator explicit",
+        "why": "The denominator now participates in a precisely stated influence bound."
+      }
+    ],
+    "reflection": {
+      "prompt": "Why would one hundred rows from one person break this interpretation?",
+      "carryForward": "State the protected unit and account for repeated releases."
+    }
+  },
+  "security-model-artifacts": {
+    "premise": "A downloaded file is data to the transport but may be executable behaviour to its loader.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Put verification before loading",
+      "start": "Combine trusted byte verification with loader-policy acceptance before selecting artifact IDs.",
+      "outcome": "The selected path requires both provenance evidence and an acceptable loading method."
+    },
+    "investigation": {
+      "title": "A trusted digest meets an unsafe loader",
+      "question": "May artifact C load merely because its digest matches?",
+      "outcome": "Try the case where every digest matches but no loader is approved.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; its loader policy still fails",
+          "feedback": "Matching approved bytes does not by itself permit the chosen execution behaviour.",
+          "correct": true
+        },
+        {
+          "label": "Yes; every matching file is safe",
+          "feedback": "A digest proves equality with expected bytes, not harmlessness."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "data-artifact-lineage",
+        "skill": "Bind artifacts to immutable identities",
+        "why": "We now distinguish identifying an artifact from trusting its origin and loading behaviour."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which review becomes stale when the loader version changes?",
+      "carryForward": "Bind release evidence to the artifact and its execution environment."
+    }
+  },
+  "simulation-time-steps": {
+    "premise": "A larger timestep makes a simple cooling simulator generate impossible-looking training trajectories.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Expose the numerical update",
+      "start": "Build the cooling rate from excess temperature, multiply by elapsed step, and update state.",
+      "outcome": "The source of the overshoot is visible in the arithmetic."
+    },
+    "investigation": {
+      "title": "The timestep triples",
+      "question": "Does the value below ambient establish a new physical effect?",
+      "outcome": "Return to a shorter step before training a surrogate on the trajectory.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; the coarse Euler step overshoots",
+          "feedback": "The exact model approaches ambient without this crossing from above.",
+          "correct": true
+        },
+        {
+          "label": "Yes; the simulator is always ground truth",
+          "feedback": "A numerical approximation can create behaviour absent from the model it approximates."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "calculus",
+        "skill": "Interpret a derivative as a local rate",
+        "why": "We now use that local rate to construct a finite numerical update."
+      }
+    ],
+    "reflection": {
+      "prompt": "What comparison separates numerical error from a wrong cooling law?",
+      "carryForward": "Check timestep convergence separately from validation against measured equipment."
+    }
+  },
+  "simulation-paired-trials": {
+    "premise": "An easier simulated shift made a candidate look better before its policy changed.",
+    "order": "build-first",
+    "construction": {
+      "title": "Pair the policy outcomes",
+      "start": "Subtract costs on aligned scenarios before taking a mean.",
+      "outcome": "The comparison describes changes on shared conditions."
+    },
+    "investigation": {
+      "title": "The unusual shift becomes more expensive",
+      "question": "Predict mean gain while keeping the negative gain for the unusual shift.",
+      "outcome": "Inspect the regression before deciding whether the average meets the policy requirements.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "model-paired-comparisons",
+        "skill": "Preserve paired losses",
+        "why": "The same comparison now follows complete simulated shifts rather than individual static predictions."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which randomness can genuinely be shared when actions change the future?",
+      "carryForward": "State the coupling and reserve fresh scenarios for assessment."
+    }
+  },
+  "simulation-system-identification": {
+    "premise": "The simulator’s structure is plausible, but its gain does not match the measured conveyor.",
+    "order": "build-first",
+    "construction": {
+      "title": "Estimate the unknown parameter",
+      "start": "Keep command-response agreement and command energy on separate dot-product branches.",
+      "outcome": "The fitted value is tied to measured excitation rather than a guessed constant."
+    },
+    "investigation": {
+      "title": "One response changes from four to five",
+      "question": "Predict the fitted gain for commands [1,2] and responses [2,5].",
+      "outcome": "The fit becomes 2.4; it does not match both observations exactly.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "simulation-time-steps",
+        "skill": "State the dynamics being approximated",
+        "why": "We now learn a parameter inside a declared system model."
+      },
+      {
+        "lessonId": "simple-linear-regression",
+        "skill": "Fit a relationship from paired measurements",
+        "why": "The fit is restricted to a physically motivated through-origin form."
+      }
+    ],
+    "reflection": {
+      "prompt": "What residual pattern would suggest a delay instead of a wrong gain?",
+      "carryForward": "Use failed predictions to question model structure as well as parameter values."
+    }
+  },
+  "simulation-transfer-checks": {
+    "premise": "A policy trained on default conditions fails when friction changes.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Keep the difficult condition visible",
+      "start": "Build separate mean and maximum branches before comparing with the declared requirement.",
+      "outcome": "Average improvement cannot erase the worst observed condition."
+    },
+    "investigation": {
+      "title": "One condition becomes much harder",
+      "question": "Does a mean below eight allow us to ignore the cost of twelve?",
+      "outcome": "Preserve the failure for development, then test the repaired policy on a new condition.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; inspect the independent condition requirement",
+          "feedback": "The low-friction case fails even if an aggregate seems acceptable.",
+          "correct": true
+        },
+        {
+          "label": "Yes; the mean is the whole deployment",
+          "feedback": "The deployment weighting and hard requirements must be justified separately."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "simulation-system-identification",
+        "skill": "Question transfer beyond fitted conditions",
+        "why": "The learned system parameter may change when the operating condition changes."
+      },
+      {
+        "lessonId": "simulation-paired-trials",
+        "skill": "Compare policies on shared scenarios",
+        "why": "Repeated scenario evidence helps separate a condition failure from sampling variation."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which real-world mechanism is missing from the simulator entirely?",
+      "carryForward": "Validate the simulator and reserve fresh conditions before claiming transfer."
+    }
+  }
+}

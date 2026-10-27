@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { existsSync } from 'node:fs';
 import numpy from "./curriculum/numpy.mjs";
+import appliedPaths, { appliedJourneys, appliedFreshCases } from './curriculum/applied-paths.mjs';
 import data from "./curriculum/data.mjs";
 import evaluation from "./curriculum/evaluation.mjs";
 import modelEvaluation from "./curriculum/model-evaluation.mjs";
@@ -70,7 +71,7 @@ const agents = [
     'agent-release-checks': 'Deciding Whether to Release',
   })[lesson.id] ?? lesson.topic })),
 ];
-const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths, ...designProblem, ...designResources, ...designComparisons, ...designEvidence, ...agents, ...agentSafety];
+const gaps = [...probability, ...classical, ...vision, ...neuralVision, ...paths, ...designProblem, ...designResources, ...designComparisons, ...designEvidence, ...agents, ...agentSafety, ...appliedPaths];
 const sqlLessons = [...sqlFoundations, ...sqlAnalysis, ...sqlSystems];
 const databaseLessons = [...sqlLessons, ...nosqlFoundationLessons, ...nosqlSystemLessons, ...graphDatabaseLessons];
 const lessons = [...numpy, ...databaseLessons, ...data, ...evaluation, ...modelEvaluation, ...gaps].map(lesson => ({ ...lesson, reading: lesson.reading ?? readingVoice[lesson.id],
@@ -182,6 +183,8 @@ if (navigationIds.size !== navigation.length || navigationIds.size !== ids.size 
 // never imports every lesson's prose, Python solutions, and quiz explanations.
 const json = value => JSON.stringify(value, null, 2) + "\n";
 const outputs = new Map([
+  ["applied-journeys.json", json(appliedJourneys)],
+  ["applied-fresh.json", json(appliedFreshCases)],
   ["supplements.json", json(Object.fromEntries(Object.entries(depthSupplements).filter(([id]) => !ids.has(id))))],
   ["published.json", json(lessons)],
   ["navigation.json", json(navigation.map(({ id, title, section, topic, blurb }) => ({ id, title, section, topic, blurb })))],

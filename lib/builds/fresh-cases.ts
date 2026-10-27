@@ -17,8 +17,10 @@ import { NOSQL_FOUNDATION_FRESH } from "./journey-fresh/nosql-foundations";
 import { NOSQL_SYSTEM_FRESH } from "./journey-fresh/nosql-systems";
 import { GRAPH_DATABASE_FRESH } from "./journey-fresh/graph-databases";
 import type { FreshJourneyCase } from "./journey-fresh";
+import appliedFreshCases from '../lessons/applied-fresh.json';
 
 export const freshJourneyCases: Record<string, FreshJourneyCase> = {
+  ...appliedFreshCases as Record<string, FreshJourneyCase>,
   ...foundationFreshCases, ...modelFreshCases, ...applicationFreshCases,
   ...agentFoundationFreshCases, ...agentFrameworkFreshCases, ...agentObservabilityFreshCases,
   ...agentGuardrailFreshCases, ...agentReliabilityFreshCases, ...agentAssuranceFreshCases,

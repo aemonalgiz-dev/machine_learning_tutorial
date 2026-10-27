@@ -3577,5 +3577,317 @@
       "A text-only evaluation can compare an answer with a reference. A tool-using application can also change state before producing that answer, so the observation has to include the actions and their consequences. Traces and receiver records make those intermediate events available for investigation.",
       "Evaluation systems such as Langfuse organise datasets, experiments and scores. They help retain comparisons across revisions, while the application still has to define an appropriate oracle for its permissions and effects. Our release exercise uses explicit allowed-effect records instead of asking a language model to decide whether an unauthorised write was acceptable."
     ]
+  },
+  "software-feature-contracts": {
+    "title": "A Model Can Depend on More Than Its Code",
+    "sources": [
+      {
+        "title": "Sculley and colleagues: Hidden Technical Debt in Machine Learning Systems (2015)",
+        "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/"
+      }
+    ],
+    "blocks": [
+      "The 2015 technical debt paper describes dependencies in ML systems that are easy to overlook when attention stays on the learning algorithm. Upstream data changes can alter a model without changing its source code.",
+      "Our pump example makes one such dependency visible. A schema names the fields and their meaning; an adapter turns an accepted record into the model’s expected representation. This is a small software contract, with a failure we can reproduce."
+    ]
+  },
+  "software-fitted-state": {
+    "title": "Fit Once, Apply the Same Preparation",
+    "sources": [
+      {
+        "title": "scikit-learn: common pitfalls",
+        "url": "https://scikit-learn.org/stable/common_pitfalls.html"
+      }
+    ],
+    "blocks": [
+      "scikit-learn’s guidance separates learning a transformation from applying it to unseen data. Inconsistent preprocessing changes the representation a fitted model receives.",
+      "An object with a fit method and a transform method gives those actions different names. The design helps only if transform actually preserves fitted state. A method name is not a guarantee; we can test its behaviour."
+    ]
+  },
+  "software-retrieval-shortlists": {
+    "title": "Keeping the Current Best Candidate Close",
+    "sources": [
+      {
+        "title": "Python: heap queue algorithms",
+        "url": "https://docs.python.org/3/library/heapq.html"
+      }
+    ],
+    "blocks": [
+      "A heap maintains a partial ordering with its smallest entry at the root. Python’s heapq documents priority queues and bounded selection as uses of that structure. The whole collection does not have to be fully sorted after every arrival.",
+      "For retrieval, a heap of the best k candidates can keep its weakest retained candidate at the root. A stronger arrival replaces it. The data structure reduces selection work; it does not make the retrieval scores more trustworthy."
+    ]
+  },
+  "software-workflow-dependencies": {
+    "title": "Dependencies Outlive a Single Script",
+    "sources": [
+      {
+        "title": "Apache Airflow: DAGs",
+        "url": "https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html"
+      }
+    ],
+    "blocks": [
+      "Workflow orchestrators represent tasks and dependencies so work can be scheduled and failures handled explicitly. Airflow calls this structure a directed acyclic graph, or DAG. A dependency says which task results must precede another task.",
+      "For an ML run, the graph must also refer to the intended dataset and model versions. The small dependency matrix here explains readiness; it is not a replacement for an orchestrator or an artifact store."
+    ]
+  },
+  "data-partition-statistics": {
+    "title": "Move Summaries Instead of Every Row",
+    "sources": [
+      {
+        "title": "Apache Arrow columnar format",
+        "url": "https://arrow.apache.org/docs/format/Columnar.html"
+      }
+    ],
+    "blocks": [
+      "Columnar formats arrange values from the same field together, making analytical scans easier to perform. Arrow documents a common in-memory representation that different tools can exchange. That addresses representation; distributing a calculation still requires a summary that can be merged correctly.",
+      "Our invented training files demonstrate why a mean alone is insufficient. Keeping counts lets a small partition remain small when the summaries are combined."
+    ]
+  },
+  "data-asof-features": {
+    "title": "Historical Retrieval Needs a Time Boundary",
+    "sources": [
+      {
+        "title": "Feast: point-in-time joins",
+        "url": "https://docs.feast.dev/getting-started/concepts/point-in-time-joins"
+      }
+    ],
+    "blocks": [
+      "Feature stores provide historical retrieval so training rows can use features associated with their own timestamps. Feast describes searching backward from each entity timestamp within a feature’s time-to-live.",
+      "Event-time selection alone may not reconstruct what a service knew. Our lesson explicitly adds an availability timestamp, then selects among records that pass both cutoffs. That extra rule is part of our contract; it should not be assumed to come automatically from any product labelled point-in-time."
+    ]
+  },
+  "data-contract-quarantine": {
+    "title": "Checking Data Before Fitting",
+    "sources": [
+      {
+        "title": "TensorFlow Data Validation: anomalies",
+        "url": "https://www.tensorflow.org/tfx/data_validation/get_started"
+      }
+    ],
+    "blocks": [
+      "TensorFlow Data Validation compares incoming data statistics with a schema and reports anomalies. The practical motivation is that a training pipeline can execute normally on a dataset whose meaning or distribution changed.",
+      "Our example keeps the rule deliberately small: a numeric interval and a rejection-rate limit. A real contract also records types, units and identities, and a monitoring policy needs to distinguish legitimate change from producer errors."
+    ]
+  },
+  "data-stream-windows": {
+    "title": "Streaming Systems Cannot Wait for an End of File",
+    "sources": [
+      {
+        "title": "Apache Beam programming guide",
+        "url": "https://beam.apache.org/documentation/programming-guide/"
+      }
+    ],
+    "blocks": [
+      "Beam separates event time from processing time and uses watermarks as estimates of event-time progress. Triggers control when results are emitted, while late-data policy determines what happens to records behind that progress estimate.",
+      "We will inspect one fixed event-time window. The browser exercise does not implement Beam: it makes window membership and a late arrival visible before an actual streaming system adds state, triggers and recovery."
+    ]
+  },
+  "data-artifact-lineage": {
+    "title": "Track a Run’s Inputs and Outputs",
+    "sources": [
+      {
+        "title": "OpenLineage specification",
+        "url": "https://github.com/OpenLineage/OpenLineage/blob/main/spec/OpenLineage.md"
+      }
+    ],
+    "blocks": [
+      "OpenLineage describes datasets, jobs and runs, with metadata attached through facets. The separation lets a system describe both a reusable job and a particular execution of that job.",
+      "We use a smaller manifest to follow a prepared feature artifact. Its identity includes input content, code and configuration. Matching a filename or a successful run status cannot establish those dependencies."
+    ]
+  },
+  "systems-inference-batching": {
+    "title": "Batching Trades Waiting for Shared Computation",
+    "sources": [
+      {
+        "title": "NVIDIA Triton: dynamic batching",
+        "url": "https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/batcher.html"
+      }
+    ],
+    "blocks": [
+      "Triton’s dynamic batcher combines requests for stateless models and can delay dispatch to form a batch. Its configuration exposes the trade-off between batch size and queue delay.",
+      "Our fixture follows requests already assigned to one batch. It isolates the latency calculation before adding a scheduler, variable tensor shapes or competing model instances."
+    ]
+  },
+  "systems-agent-deadlines": {
+    "title": "A Deadline Follows the Request",
+    "sources": [
+      {
+        "title": "gRPC: deadlines",
+        "url": "https://grpc.io/docs/guides/deadlines/"
+      }
+    ],
+    "blocks": [
+      "gRPC documents deadlines and propagating them to downstream work. A caller that no longer needs a result should not leave unlimited work consuming resources behind it.",
+      "The arithmetic here uses elapsed durations on one clock. Actual cancellation is cooperative: application work and external effects need their own handling even after a request is cancelled."
+    ]
+  },
+  "systems-kv-cache-memory": {
+    "title": "Reusing Attention State Consumes Memory",
+    "sources": [
+      {
+        "title": "Kwon and colleagues: PagedAttention (2023)",
+        "url": "https://arxiv.org/abs/2309.06180"
+      }
+    ],
+    "blocks": [
+      "The PagedAttention paper addresses memory management for language-model serving, where key/value caches grow and vary across requests. Its design reduces waste from allocation and sharing decisions.",
+      "Our lesson calculates the logical tensor storage before allocator overhead. A real server’s measured memory also depends on layout, temporary tensors and its serving implementation."
+    ]
+  },
+  "systems-context-cache": {
+    "title": "A Cache Entry Needs a Reuse Contract",
+    "sources": [
+      {
+        "title": "HTTP Semantics and Caching: RFC 9111",
+        "url": "https://www.rfc-editor.org/rfc/rfc9111.html"
+      }
+    ],
+    "blocks": [
+      "HTTP caching rules distinguish cache keys, freshness and constraints on reusing responses, including requests carrying authorisation. The broader systems problem is deciding when a prior result is applicable to a new request.",
+      "An agent response adds dependencies such as retrieved evidence and model configuration. Our cache-key exercise is an application-level model; it does not claim that HTTP cache headers alone enforce agent permissions."
+    ]
+  },
+  "robot-perception-frames": {
+    "title": "Geometry Connects Separate Sensors",
+    "sources": [
+      {
+        "title": "Dellaert and Hutchinson: Introduction to Robotics and Perception",
+        "url": "https://www.roboticsbook.org/S64_driving_perception.html"
+      }
+    ],
+    "blocks": [
+      "Robotics combines observations with estimates of motion and position. The robotics text’s discussion of localisation and mapping shows why measurements must be related through explicit geometry before they can describe one environment.",
+      "Our exercise isolates a known rigid transform. It assumes calibration is already available, so it does not estimate camera pose or solve localisation. It makes the interface between a learned detector and the rest of the robot visible."
+    ]
+  },
+  "robot-observation-latency": {
+    "title": "State Estimation Connects Measurements Across Time",
+    "sources": [
+      {
+        "title": "Robotics and Perception: motion models",
+        "url": "https://www.roboticsbook.org/S42_logistics_actions.html"
+      }
+    ],
+    "blocks": [
+      "Robotic motion models describe how state changes between observations. They allow a system to predict forward when sensors and actions occur at different times.",
+      "Here we use constant velocity over a short interval. It is a teaching approximation for a conveyor, not a general tracking system or a guarantee that a moving target will remain on that path."
+    ]
+  },
+  "robot-feedback-corrections": {
+    "title": "Feedback Uses the Result of the Last Action",
+    "sources": [
+      {
+        "title": "Åström and Murray: PID Control",
+        "url": "https://www.cds.caltech.edu/~murray/FBS/Chapter_10_-_PID_Control.html"
+      }
+    ],
+    "blocks": [
+      "Feedback control compares a measured output with a desired value and changes the input accordingly. Proportional action is one part of the PID family described by Åström and Murray.",
+      "A learned perception model can supply a measurement or target, while a controller handles repeated correction. The distinction matters: improving a detector’s static accuracy does not automatically establish the stability of the complete action loop."
+    ]
+  },
+  "robot-actuator-windup": {
+    "title": "Integral Action Needs to Know About Saturation",
+    "sources": [
+      {
+        "title": "Åström and Murray: PID Control",
+        "url": "https://www.cds.caltech.edu/~murray/FBS/Chapter_10_-_PID_Control.html"
+      }
+    ],
+    "blocks": [
+      "Åström and Murray describe integral windup when actuator saturation prevents the requested input from being applied. Anti-windup methods use that mismatch to limit or correct the controller’s stored integral contribution.",
+      "We implement one discrete back-calculation step for a PI controller. The derivative part of PID is discussed separately from this exercise so its noise and timing behaviour are not hidden inside the same formula."
+    ]
+  },
+  "security-retrieval-authority": {
+    "title": "Authorisation Is a Service Responsibility",
+    "sources": [
+      {
+        "title": "OWASP: Authorization Cheat Sheet",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
+      }
+    ],
+    "blocks": [
+      "OWASP’s authorisation guidance recommends denying by default and validating permissions on every request. Those principles apply when the requester is an agent application as well as when a person clicks a button.",
+      "Retrieval adds an easily confused signal: similarity. Our example deliberately gives the forbidden passage the highest relevance, so the permission decision cannot hide behind a conveniently low score."
+    ]
+  },
+  "security-private-aggregates": {
+    "title": "A Privacy Claim Needs a Neighbouring-Dataset Definition",
+    "sources": [
+      {
+        "title": "OpenDP: differential privacy",
+        "url": "https://docs.opendp.org/en/stable/api/user-guide/framework-api/dp-with-opendp.html"
+      }
+    ],
+    "blocks": [
+      "OpenDP describes privacy in terms of transformations, stability and randomised measurements. Bounding contributions is important because unbounded inputs can give one individual unbounded influence over an aggregate.",
+      "Our exercise uses a fixed public count and replace-one adjacency: neighbouring datasets differ in one bounded contribution. Other adjacency definitions or multiple rows per person change the sensitivity calculation."
+    ]
+  },
+  "security-model-artifacts": {
+    "title": "Object Reconstruction Can Execute Behaviour",
+    "sources": [
+      {
+        "title": "Python: pickle security warning",
+        "url": "https://docs.python.org/3/library/pickle.html"
+      }
+    ],
+    "blocks": [
+      "Python’s pickle documentation warns that malicious pickle data can execute code during unpickling. The format reconstructs Python objects, which is more powerful than simply reading a table of numbers.",
+      "ML artifacts may contain weights, preprocessing objects and custom code. Our exercise checks raw bytes against a digest obtained through a trusted channel, without deserialising the artifact. A separate loader policy remains necessary."
+    ]
+  },
+  "simulation-time-steps": {
+    "title": "Approximate a Changing State by Following Its Rate",
+    "sources": [
+      {
+        "title": "SciPy: solve_ivp",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html"
+      }
+    ],
+    "blocks": [
+      "Numerical initial-value solvers approximate a state from an initial condition and a rule for its derivative. SciPy exposes several methods with different accuracy and stiffness properties rather than treating one step rule as suitable for every problem.",
+      "We begin with explicit Euler so every arithmetic operation is visible. It uses the derivative at the start of the interval throughout that step. This makes a useful teaching method and also makes its approximation error easy to expose."
+    ]
+  },
+  "simulation-paired-trials": {
+    "title": "Simulation Is an Experiment with a Random Input",
+    "sources": [
+      {
+        "title": "NumPy: random Generator",
+        "url": "https://numpy.org/doc/stable/reference/random/generator.html"
+      }
+    ],
+    "blocks": [
+      "A random generator lets a simulation sample conditions and reproduce a development run from controlled random state. Reproducibility is useful when changing a policy because an accidental change in sampled conditions can obscure the comparison.",
+      "Pairing policies on shared scenarios is often called using common random numbers. It reduces comparison variance when the paired outcomes move together, but that benefit depends on the system; it is not guaranteed for every coupling."
+    ]
+  },
+  "simulation-system-identification": {
+    "title": "Learning Can Begin with a Physical Model",
+    "sources": [
+      {
+        "title": "Robotics and Perception: system identification",
+        "url": "https://www.roboticsbook.org/S46_logistics_learning.html"
+      }
+    ],
+    "blocks": [
+      "The robotics text introduces learning parameters of motion models from observations. This connects physical assumptions with statistical estimation: a model can have a known form while some of its parameters remain unknown.",
+      "We estimate one gain through the origin using least squares. That restriction is deliberate. An offset, delay or nonlinear saturation would require a richer model and different evidence."
+    ]
+  },
+  "simulation-transfer-checks": {
+    "title": "Variation Can Help a Model Cross the Reality Gap",
+    "sources": [
+      {
+        "title": "Tobin and colleagues: Domain Randomization (2017)",
+        "url": "https://arxiv.org/abs/1703.06907"
+      }
+    ],
+    "blocks": [
+      "Tobin and colleagues varied rendering conditions when training a visual model in simulation and studied transfer to real images for robotic object localisation. The work addresses dependence on a simulator’s particular appearance.",
+      "We apply the broader experimental idea to a deliberately small policy-cost table. Varying dynamics or appearance must follow plausible assumptions for the task. Randomisation does not guarantee transfer to every real condition."
+    ]
   }
 }

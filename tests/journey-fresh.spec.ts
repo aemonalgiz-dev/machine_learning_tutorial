@@ -2,6 +2,8 @@ import { test, expect } from "@playwright/test";
 import { labLessons } from "../lib/labs";
 import { buildById } from "../lib/builds/catalog";
 import { freshJourneyCases } from "../lib/builds/fresh-cases";
+import appliedFreshCases from '../lib/lessons/applied-fresh.json';
+import { agentSafetyFreshCases } from '../lib/builds/journey-fresh/agent-safety';
 import { foundationFreshCases } from "../lib/builds/journey-fresh/foundations";
 import { modelFreshCases } from "../lib/builds/journey-fresh/models";
 import { applicationFreshCases } from "../lib/builds/journey-fresh/applications";
@@ -33,6 +35,7 @@ function finite(data: Data): boolean {
 
 test("every lesson has a separately authored follow-up with new inputs and an explicit objective", () => {
   const keys = [foundationFreshCases, modelFreshCases, applicationFreshCases, agentFoundationFreshCases, agentFrameworkFreshCases, agentObservabilityFreshCases, agentGuardrailFreshCases, agentReliabilityFreshCases, agentAssuranceFreshCases, agentIterationFreshCases, modelEvaluationFreshCases, sqlFoundationFreshCases, sqlAnalysisFreshCases, sqlSystemFreshCases, NOSQL_FOUNDATION_FRESH, NOSQL_SYSTEM_FRESH, GRAPH_DATABASE_FRESH].flatMap(Object.keys);
+  keys.push(...Object.keys(appliedFreshCases), ...Object.keys(agentSafetyFreshCases));
   expect(keys.length).toBe(new Set(keys).size);
   expect(keys.sort()).toEqual(labLessons.map(lesson => lesson.id).sort());
   for (const lesson of labLessons) {

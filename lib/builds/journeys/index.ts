@@ -17,9 +17,11 @@ import { NOSQL_FOUNDATION_JOURNEYS } from "./nosql-foundations";
 import { NOSQL_SYSTEM_JOURNEYS } from "./nosql-systems";
 import { GRAPH_DATABASE_JOURNEYS } from "./graph-databases";
 import type { JourneyPlan } from "../journey-plan";
+import appliedJourneys from '../../lessons/applied-journeys.json';
 
 /** Missing authorship is a build error, not a request to manufacture a template. */
 export const journeyPlans: Record<string, JourneyPlan> = {
+  ...appliedJourneys as Record<string, JourneyPlan>,
   ...foundationJourneys, ...modelJourneys, ...applicationJourneys,
   ...agentFoundationJourneys, ...agentFrameworkJourneys, ...agentObservabilityJourneys,
   ...agentGuardrailJourneys, ...agentReliabilityJourneys, ...agentAssuranceJourneys,
