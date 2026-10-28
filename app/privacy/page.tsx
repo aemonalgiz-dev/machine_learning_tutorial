@@ -57,6 +57,21 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">Signing In with Google</h2>
+        <p>
+          If you choose Google sign-in, Google shares a stable account identifier, your email address and basic
+          profile information with Amazon Cognito, which handles sign-in for this site. Our account service stores
+          Cognito&rsquo;s identifier for your account, a display name and your email address when Cognito confirms it
+          is verified. These records connect you to your saved work when you return.
+        </p>
+        <p>
+          This sign-in requests only basic identity, email and profile permissions. It does not give the site access
+          to your Gmail messages or Google Drive files. Google explains how it handles information in its{" "}
+          <a href="https://policies.google.com/privacy" className="text-accent underline-offset-4 hover:underline">privacy policy</a>.
+        </p>
+      </section>
+
+      <section className="space-y-3">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">Paying for Extra Practice</h2>
         <p>
           If you choose a paid Practice membership, Stripe handles checkout and billing. You enter your payment
