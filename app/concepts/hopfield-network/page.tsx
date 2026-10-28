@@ -352,13 +352,16 @@ export default function HopfieldNetworkPage() {
             several(
               "Which of these hold for the storage rule?",
               [
-                "The weight between two cells is read from those two cells and nothing else",
-                "Storage is one shot, so there is nothing for a fit to converge to",
-                "Dividing by the number of cells changes no answer, since the update reads only the sign of a sum",
-                "Every weight touching cell 4 of the four-cell example is zero, so that cell can never be repaired",
-              ],
+                              "The weight between two cells is read from those two cells and nothing else",
+                              "Storage is one shot, so there is nothing for a fit to converge to",
+                              "Dividing by the number of cells changes no answer, since the update reads only the sign of a sum",
+                              "Every weight touching cell 4 of the four-cell example is zero, so that cell can never be repaired",
+                            ],
               [0, 1, 2, 3],
               "All four hold. A synapse reads the two neurons it joins, which is Hebb’s proposal and the whole of the rule, and it fires once rather than iterating, so a fit reporting passes would describe an event that did not happen. The division by the cell count is a choice of units that turns each sum into an average and scales every energy alike. The two four-cell patterns agree everywhere but cell 4, so their votes about it cancel exactly and the network holds no opinion there.",
+              {
+                "description": "Store A = (+1, +1, −1, −1) and B = (+1, +1, −1, +1).\nFor i ≠ j, use wᵢⱼ = sum over stored patterns p of pᵢpⱼ / 4. Set the diagonal to zero. Recall reads only the sign of each weighted sum; a zero sum leaves the cell unchanged. Storage computes the matrix directly without iterative fitting."
+              },
             ),
         ],
         },
@@ -563,13 +566,17 @@ export default function HopfieldNetworkPage() {
             several(
               "The three shapes are added cell by cell and the sign kept, giving a state with six lit cells. Which of these hold for it?",
               [
-                "No cell wants to move, so it is a fixed point",
-                "Its energy of −7.84 sits above the shapes, which are at −11.2, −11.2 and −11.04",
-                "It shares 20 cells with the cross, so it is the cross",
-                "The smallest sum any of its cells reads is 0.16, against 0.72 for the least sure cell of the T",
-              ],
+                              "No cell wants to move, so it is a fixed point",
+                              "Its energy of −7.84 sits above the shapes, which are at −11.2, −11.2 and −11.04",
+                              "It shares 20 cells with the cross, so it is the cross",
+                              "The smallest sum any of its cells reads is 0.16, against 0.72 for the least sure cell of the T",
+                            ],
               [0, 1, 3],
               "It is a minimum like any other, only shallower while the load is light, and it shares 18, 18 and 20 cells with the three shapes, so it equals none of them. Being both higher and shallower is why a probe has to start nearer the mixture than any shape to fall into it. The network cannot tell a caller which kind of rest it found, since it kept no copy of what it stored.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "25-cell three-shape memory; majority-sign mixture has 6 lit cells.\nCells whose update would change: 0\nMixture energy: −7.84\nStored-shape energies: −11.20 / −11.20 / −11.04\nCells agreeing with the three shapes: 18 / 18 / 20, out of 25\nSmallest sign-aligned field magnitude: mixture 0.16; T 0.72"
+              },
             ),
             trueFalse(
               "Under six shapes the T is still a fixed point, although the scrambled T no longer comes back to it.",
@@ -858,13 +865,16 @@ export default function HopfieldNetworkPage() {
             several(
               "Which of these does the implementation accept without raising?",
               [
-                "Six patterns stored on four cells, a load of 1.5",
-                "A weight matrix with a non-zero diagonal, handed over directly",
-                "A pattern holding a 0",
-                "A weight matrix that is not symmetric",
-              ],
+                              "Six patterns stored on four cells, a load of 1.5",
+                              "A weight matrix with a non-zero diagonal, handed over directly",
+                              "A pattern holding a 0",
+                              "A weight matrix that is not symmetric",
+                            ],
               [0, 1],
               "More patterns than cells fits and nothing warns, because the load is a number a caller can read and the failure is an erosion the fit cannot detect, with 5 of the 6 patterns still fixed points. A matrix with a self connection is accepted on purpose and reported as self-connected, so that what a self connection does can be shown rather than forbidden. A 0 is not a state the network can be in, and without symmetry the settling argument does not hold, so those two are refused.",
+              {
+                "description": "This implementation requires pattern entries −1 or +1 and a symmetric weight matrix. Directly supplied matrices may have diagonal self-connections. It reports memory load but imposes no upper bound on the number of stored patterns."
+              },
             ),
         ],
         },
@@ -873,7 +883,10 @@ export default function HopfieldNetworkPage() {
           practice: [
             exercise(
               "Store the four cells and repair the probe",
-              ["Store the two four-cell patterns of Part 2 with the library, read the weight matrix and the load off the fitted network, and then hand it the probe of Part 3, which is A with its first cell flipped.", "The hand calculation gave the first row as 0, 0.5, −0.5 and 0, a load of 0.5, a sum of +1 at cell 1, and an energy that falls from 0.5 to −1.5. The library takes the same route, so every one of those should come back, along with the second pass that moves nothing."],
+              [
+  "Fit the supplied two four-cell bipolar patterns, then recall the supplied probe formed by flipping the first cell of A.",
+  "Print weight matrix, memory load, the specified cell’s weighted input, probe energy, each recall pass’s changes/energy, stopping reason and whether the final pattern equals A."
+],
               `from oop_ml import BipolarPattern, Feature, HopfieldNetwork
 
 patterns = [[1, 1, -1, -1], [1, 1, -1, 1]]
@@ -923,11 +936,17 @@ pass 1 moved 1, energy -1.50
 pass 2 moved 0, energy -1.50
 stopped because settled
 rests in A True`,
-              { hints: ["A Feature here is one cell, holding the value that cell takes in each stored pattern, so two patterns over four cells make four features of two values each. The list comprehension at the top has already turned the patterns round.", "fit takes the list of cells and answers the network itself. The matrix is network.weights.values, and the load is network.load.", "network.weights.weighted_sums_for(probe) answers one sum per cell, so cell 1 is the entry at position 0.", "recall_walk answers a walk that can be looped over, one pass at a time. Each pass has pass_number, n_units_changed and energy_after, and the walk itself has initial_energy, stopped_because and result."], check: numberCheck("What energy does the repaired state rest at?", -1.5, 0.005, "Three pairs of cells carry a weight, and in A every one of them agrees with the sign of its weight, so the energy is minus three halves. The probe started at 0.5, and the single flip dropped it by twice the +1 that cell 1 read. The second pass moved nothing, which is how the walk knew it had settled.") },
+              { hints: [
+  "Use the fixed sequential update settings so later cells can see earlier changes in the same pass.",
+  "A settled result means no cell changed on a pass; compare it explicitly with the intended stored pattern."
+], check: numberCheck("What energy does the repaired state rest at?", -1.5, 0.005, "The repaired pattern has energy -1.5. Recall also verifies that the settled state equals A; low energy alone would not identify the intended memory."), question: "Can the stored pairwise weights repair a one-cell error?" },
             ),
             exercise(
               "Put the diagonal back",
-              ["Part 2 says a self weight leaves the landscape alone and breaks the update. Take the four-cell matrix the network formed, put a self weight of 0, 0.5, 1.0 and 2.0 on its diagonal in turn, and ask each matrix what cell 1 reads at the damaged probe and what the probe’s energy is.", "The lesson gives the sums as +1, +0.5, 0 and −1, and the energy at a self weight of 1.0 as −1.5. Find the energy at 2.0, which the lesson does not quote, and notice that nothing refuses a matrix whose diagonal is not zero."],
+              [
+  "Take the fitted four-cell weight matrix and set its diagonal to 0, 0.5, 1 and 2 in separate experiments. Use the same damaged probe each time.",
+  "Print whether self-connections exist, the specified cell’s weighted input and willingness to change, plus probe energy. This deliberately bypasses the zero-diagonal condition used by the standard recall guarantee."
+],
               `from oop_ml import BipolarPattern, Feature, HebbianWeights, HopfieldNetwork
 
 patterns = [[1, 1, -1, -1], [1, 1, -1, 1]]
@@ -977,11 +996,17 @@ self weight 1.0, self connected True
 self weight 2.0, self connected True
   cell 1 reads -1.00, wants to move False
   energy at the probe -3.50`,
-              { hints: ["values is a list of four rows, so the diagonal entry of row number position is values[position][position].", "HebbianWeights takes the matrix and then the cell names, and network.weights.unit_names already holds the names in the right order.", "The container has the same weighted_sums_for and energy_of the network’s own weights have, and has_self_connections reports a diagonal that is not zero.", "A cell wants to move when its value and its sum have opposite signs, which is when their product is below zero. A sum of exactly zero leaves the cell as it is."], check: numberCheck("What is the probe’s energy at a self weight of 2.0?", -3.5, 0.005, "Every cell’s value squares to one, so a self weight adds minus a half of itself for each cell, which on four cells is −2 at a self weight of 1.0 and −4 at 2.0. The probe’s 0.5 becomes −3.5 and every other state moves by the same −4, so the landscape keeps its order. What changed is cell 1, which now reads −1, agrees with its own damage, and has stopped wanting to move.") },
+              { hints: [
+  "Keep off-diagonal weights fixed.",
+  "Bipolar values have constant squared magnitude, so a diagonal term shifts all state energies equally while still entering an individual update."
+], check: numberCheck("What is the probe’s energy at a self weight of 2.0?", -3.5, 0.005, "The probe energy is -3.5. The diagonal shifts every bipolar state’s energy by the same constant while altering individual update sums."), question: "Can self-connections change update decisions without changing energy ranking?" },
             ),
             exercise(
               "Scramble the T, then store one shape more",
-              ["Part 3 flipped cells 6, 8, 9, 24 and 25 of the T and watched all five come back under three shapes, and Part 5 went straight to six shapes, where they do not. Try the step in between. Recall the same probe under the three shapes and then with the square stored as well, under each of twelve visiting orders, seeds 0 to 11.", "Under three shapes the T is a fixed point at −11.2, as the lesson has it. Look at what one more shape does to the T itself, and then at how many of the twelve orders still bring it back."],
+              [
+  "Use the supplied damaged T under the three-pattern store and then a store also containing the square. For each test whether the intact T is fixed and report its energy.",
+  "Recall the same probe with seeds zero through eleven and count exact T recoveries. Keep the damage and update procedure fixed while changing the stored set."
+],
               `from oop_ml import BipolarPattern, Feature, HopfieldNetwork
 
 SHAPES = {
@@ -1046,11 +1071,17 @@ for stored in (["T", "L", "cross"], ["T", "L", "cross", "square"]):
 4 shapes stored, load 0.16
   the T is a fixed point True, at -10.72
   visiting orders that bring the T back 8`,
-              { hints: ["The seed is the network’s random_seed and it fixes the order the cells are visited in, so each seed needs a network of its own. Storing draws nothing, so the twelve networks hold the same weights.", "recall answers the settled state, and two states compare with ==, so network.recall(probe) == the_t is the test.", "is_fixed_point and energy_of are both asked of the network and both take a state. The load is a property of the fitted network."], check: numberCheck("With the square stored as well, how many of the twelve visiting orders bring the T back?", 8, 0, "Under three shapes all twelve orders bring the T back. With the square stored the load is 0.16 and the T is still a fixed point, at −10.72, yet the same five flips come back under only 8 of the 12 orders. Three of the other four orders end in the square and one in a state nobody stored. The fourth shape has added its votes to every cell’s sum, so the order of the visits now decides where the walk ends. That is the erosion Part 5 describes at six shapes, already under way at four.") },
+              { hints: [
+  "A fixed-point test begins with the intact T; recovery begins with the damaged probe.",
+  "Compare final patterns with T, rather than assuming every settled result is the intended memory."
+], check: numberCheck("With the square stored as well, how many of the twelve visiting orders bring the T back?", 8, 0, "Eight visiting orders recover T after the square is added. An intact fixed point can remain stored while its damaged probe falls into another attraction region."), question: "Does remaining a fixed point guarantee recovery from a damaged pattern?" },
             ),
             exercise(
               "Run both rules on the two cells",
-              ["Part 7 stores the single pattern (+1, −1) on two cells and hands the network (+1, +1). Run that probe under the all-at-once rule with a pass limit of six, and then one cell at a time under each seed from 0 to 7.", "The lesson says the first loops between two states at an energy of 0.5 until the limit stops it, and that the second rests in a memory at −0.5 chosen by whichever cell the seed visits first. Print enough to see both, and count the seeds that rest in (−1, +1)."],
+              [
+  "Store the supplied two-cell pattern and recall the [+1,+1] probe. First use simultaneous updates with a six-pass limit, printing every state, changed-cell count, energy and stopping reason.",
+  "Then run sequential recall with seeds zero through seven. Print each final state/energy/reason and count results equal to the stored pattern’s negation."
+],
               `from oop_ml import BipolarPattern, Feature, HopfieldNetwork, UpdateRule
 
 cells = [Feature("cell_1", [1]), Feature("cell_2", [-1])]
@@ -1103,7 +1134,10 @@ one at a time
   seed 6 rests in [1, -1] at -0.50, settled
   seed 7 rests in [-1, 1] at -0.50, settled
 seeds resting in the stored pattern reversed 4`,
-              { hints: ["The rule is a choice made at construction, update_rule=UpdateRule.SYNCHRONOUS, beside max_passes. Leaving it out gives one cell at a time.", "One stored pattern means each cell’s feature holds a single value, which is why the two features are lists of one.", "Each pass of a walk carries state_after, whose values are the cells as numbers, and the walk’s result is the state it ended in. walk.energies holds the energy after each pass, so its last entry is where the walk rested.", "stopped_because is one of two exits, and its value is the plain wording of it. Settled and the pass limit mean opposite things about the state that came back."], check: numberCheck("How many of the eight seeds rest in (−1, +1)?", 4, 0, "Seeds 0, 1, 2 and 7 give (−1, +1), the stored pattern reversed, and seeds 3 to 6 give (+1, −1), as Part 7 lists them. Whichever cell is visited first reads −0.5 and flips, and the other then reads +0.5 with the value it already has and stays. Both rests are memories at −0.5, since a pattern and its negation share an energy, and the probe sits one flip from each. All at once never gets there. Both cells move on every one of the six passes and the energy is 0.5 throughout.") },
+              { hints: [
+  "Simultaneous updates use the previous full state for both cells; sequential updates can use the just-changed neighbour.",
+  "A symmetric bipolar memory also gives its negated pattern the same energy. Settling therefore need not choose the originally named orientation."
+], check: numberCheck("How many of the eight seeds rest in (−1, +1)?", 4, 0, "Four seeds settle in the stored pattern’s negation. Sequential order determines the first flip, while the simultaneous update keeps oscillating in this probe."), question: "Why can simultaneous updates loop while sequential updates settle?" },
             ),
           ],
         },

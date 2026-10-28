@@ -55,16 +55,10 @@ export default function MorfessorPage() {
 <>
               <SubSection title="1. Twelve words whose joints nobody disputes">
                 <p>
-                  Every page in this section carries the same sentence, and this
-                  one carries a very small corpus beside it, because the
-                  argument needs words we can already agree about. Three verbs
-                  in four forms each, walk and talk and play, with the bare stem
-                  and the three endings s, ed and ing, twelve words in all,
-                  each occurring three times. These familiar forms give us an
-                  intuitive linguistic reference: walking contains the stem
-                  walk and the ending ing. We can compare learned pieces with
-                  that reference while remembering that a compression
-                  objective is not itself a test of grammatical correctness.
+                  We can recognise walk inside walking before calculating any score. Will a method that rewards a short description of the training data choose that same split? Those are different questions, and a small corpus lets us compare their answers.
+                </p>
+                <p>
+                  Use walk, talk and play, each in its bare form and with s, ed and ing endings. That gives twelve words, each occurring three times. The familiar forms supply a linguistic reference; the compression calculation must still earn its own choices.
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <p>
@@ -1197,7 +1191,11 @@ export default function MorfessorPage() {
           practice: [
             exercise(
               "Fit the twelve forms and read the six pieces",
-              ["Build the corpus of Part 1, the twelve inflected forms three times each, and fit the shortest-description search to it with the seed the page uses. Print the description length it reached, how many passes it took and whether it converged, then the pieces it settled on with their counts, the number of references they make, and how the word walking was cut.", "Part 4 says the description goes from 301.0812 to 185.4634 in two passes, that the pieces are walk, talk and play used 12 times each with s, ed and ing used 9 times each, and that 63 references replace the 36 whole words."],
+              [
+  "The starter lists twelve inflected forms, each occurring three times. Fit the description-length learner with random_seed=0 and inspect whether it can reuse their repeated parts.",
+  "Print the fitted description length in nats, passes run and convergence flag. Then print each learned piece with its count, the total piece references used to encode the corpus, and walking’s segmentation.",
+  "Description length includes both the stored piece inventory and its use in the corpus. A smaller number is preferred under this teaching objective; it is not a judgement of grammatical correctness."
+],
               `from oop_ml import MorfessorBaseline
 
 forms = ["walk", "walks", "walked", "walking", "talk", "talks", "talked", "talking",
@@ -1224,11 +1222,21 @@ print(f"walking is cut as {model.segmentations['walking'].morphs}")`,
 6 pieces: play 12, talk 12, walk 12, ed 9, ing 9, s 9
 63 references replace 36 whole words
 walking is cut as ('walk', 'ing')`,
-              { hints: ["The corpus goes to fit, as with every tokenizer here, and a list holding one string of the twelve words three times each is a corpus. The seed fixes the visiting order; the page uses 0, and on this corpus every seed tried reaches the same six pieces.", "cost, epochs_run and converged are properties of the fitted model. morphs is the list of pieces, each with a text and a count, and total on it is how many references the corpus is written in.", "segmentations is indexed by training word and answers how that word was cut, so the pieces of walking are model.segmentations['walking'].morphs."], check: numberCheck("What description length, in nats, does the fit report?", 185.4634, 0.0005, "That is the middle bar of Part 2, the three stems and three endings, which the search reaches in its first pass. The second pass finds nothing and exists only so the stopping rule can see that the total stopped moving. The 63 references are the nine occurrences of a bare stem at one reference each plus the twenty-seven inflected occurrences at two each, which is 9 plus 54.") },
+              {
+question: "Which reusable stems and endings does the small corpus support?",
+ hints: [
+  "Fit the supplied corpus. Read cost, epochs_run and converged from the model.",
+  "model.morphs supplies text and count for each piece, and its total counts references including repeated occurrences.",
+  "model.segmentations[\"walking\"].morphs retrieves the stored training-word segmentation."
+], check: numberCheck("What description length, in nats, does the fit report?", 185.4634, 0.0005, "The fitted cost is 185.4634 nats. The chosen inventory reuses stems and endings on this corpus. A later pass with no improvement establishes the stopping condition for this search.") },
             ),
             exercise(
               "Repeat the corpus and watch the search stall",
-              ["Part 5 says the same twelve forms written five times each instead of three leave every word whole, and that multiplying the text half of the cost by a half recovers the six pieces. Fit the forms at three, four and five repeats at the plain weight of one, and at five repeats with the weight at a half, and print for each the number of pieces, the description length and the passes run.", "The page prints the totals at three repeats and at five, and at five with the weight at a half. It says the cut is still worth taking at four repeats, where the best move is worth 0.3771 nats, but never prints what that fit costs."],
+              [
+  "Keep the twelve forms fixed, but change how often they appear. Fit corpora with three, four and five repeats per form at corpus_weight=1.0. Also fit five repeats at corpus_weight=0.5.",
+  "For each setting print the learned-piece count, description length to four decimal places and passes run. Compare which fits retain whole words and which reuse stems and endings.",
+  "Changing corpus_weight changes the objective being minimised. It is a separate intervention from changing the corpus counts, so label both settings in the report."
+],
               `from oop_ml import MorfessorBaseline
 
 forms = ["walk", "walks", "walked", "walking", "talk", "talks", "talked", "talking",
@@ -1253,11 +1261,21 @@ for repeats, weight in [(3, 1.0), (4, 1.0), (5, 1.0), (5, 0.5)]:
 4 times each at weight 1.0: 6 pieces, cost 224.3765, 3 passes
 5 times each at weight 1.0: 12 pieces, cost 367.2274, 1 passes
 5 times each at weight 0.5: 6 pieces, cost 169.4115, 2 passes`,
-              { hints: ["The repeat count is only how many times each form is written into the corpus string, so the same loop over the forms with a different range builds every corpus.", "corpus_weight is a field of the constructor, and one is the plain two-part code. Half is the setting Part 5 lands on.", "A fit that found no cut reports as many pieces as there are distinct words, twelve, and one pass, since the first pass changed nothing and the stopping rule noticed."], check: numberCheck("What description length, in nats, does the fit at four repeats report?", 224.3765, 0.0005, "At four repeats the trade still pays, so the fit reaches the same six pieces as at three and reports the two-part code of that list over 84 references. At five the best available cut costs 1.7333 nats rather than saving anything, so the search stops at the twelve whole words and 367.2274, and only the weight at a half, which minimises a different quantity, brings the six pieces back at 169.4115.") },
+              {
+question: "Can repeating the same forms change a description-length search?",
+ hints: [
+  "Build a fresh corpus and model for each repeat-count/weight pair.",
+  "Read the fitted piece count rather than assuming the same segmentation survives repetition.",
+  "A fit that makes no improvement in its first pass can stop with the original whole-word inventory."
+], check: numberCheck("What description length, in nats, does the fit at four repeats report?", 224.3765, 0.0005, "At four repeats the fitted cost is 224.3765 nats and the model retains six pieces. The five-repeat search behaves differently, showing how corpus counts and the weighted objective affect this local search.") },
             ),
             exercise(
               "Read words the corpus never held",
-              ["Part 4 says a fitted list reads a word it never saw by taking the cheapest cut into known pieces, with a character no piece covers allowed through on its own at a price above any reading made of known pieces. Fit the twelve forms at three repeats and ask the model for the best cut of walkings, stalking, splay and jumping, printing the pieces and the price of each.", "The page quotes 5.5500 for walkings and 121.9537 for jumping, and says stalking and splay are read with the ending s in front of a stem. Confirm the second route to the same number by pricing the cut the search chose piece by piece."],
+              [
+  "Fit the twelve-form corpus with three repeats per form. Ask for the cheapest segmentation of walkings, stalking, splay and jumping, which were not supplied as training words.",
+  "For each word print the chosen pieces and cost to four decimal places. Price that same piece sequence independently with cost_of_segmentation and print the result beside the search cost.",
+  "The teaching model can pass an uncovered character through with a penalty. Its known pieces can also occur in unfamiliar positions, so a cheap segmentation need not be a grammatical analysis."
+],
               `from oop_ml import MorfessorBaseline
 
 forms = ["walk", "walks", "walked", "walking", "talk", "talks", "talked", "talking",
@@ -1284,11 +1302,21 @@ for word in ["walkings", "stalking", "splay", "jumping"]:
 stalking: ('s', 'talk', 'ing') costs 5.5500, priced piece by piece 5.5500
 splay: ('s', 'play') costs 3.6041, priced piece by piece 3.6041
 jumping: ('j', 'u', 'm', 'p', 'ing') costs 121.9537, priced piece by piece 121.9537`,
-              { hints: ["best_segmentation takes one word and answers an object with morphs and cost. It has to be a single word, since the search runs over the positions inside it.", "cost_of_segmentation takes a sequence of pieces and prices it, a known piece at its reference cost and an unknown single character at the penalty. Handing it the morphs the search chose should give the search's own number back."], check: numberCheck("What does the model charge to read jumping, in nats?", 121.9537, 0.0005, "Only ing is a known piece, so j, u, m and p each go through on their own at the penalty, which is the length of the word times the logarithm of the number of references, plus one. The penalty is set above any reading made entirely of known pieces so that a known reading always wins where one exists, and the four unknown characters are what the large number is reporting. splay costs 3.6041 by the same arithmetic, two known pieces and nothing else, which is why nothing stops the ending s from being read in front of a stem.") },
+              {
+question: "How does a learned piece inventory handle an unfamiliar word?",
+ hints: [
+  "best_segmentation(word) returns morphs and cost for a single word.",
+  "Pass that result’s morphs to cost_of_segmentation. It should reproduce the reported search score.",
+  "Inspect which pieces are known before interpreting a large cost. An unfamiliar single character uses the fallback penalty."
+], check: numberCheck("What does the model charge to read jumping, in nats?", 121.9537, 0.0005, "Jumping costs 121.9537 nats in this fit. Ing is known, while its other characters use the fallback penalty. By contrast, a low-cost reuse of known pieces does not guarantee a sensible morphological reading.") },
             ),
             exercise(
               "Fit the two-word corpus, and the four prefixed words",
-              ["Part 2 priced walk and walks by hand, 20.8317 left whole and 14.8378 split into walk and s. Fit the search to that corpus and see whether it finds the split. Then fit it to undo, untie, redo and retie ten times each, where Part 7 says the criterion prefers the whole words at 111.7806 to the prefixes and roots at 148.5946.", "Print, for each fit, the description length to four places and the pieces with their counts. The second fit should leave all four words whole, which is the criterion disagreeing with the morphology rather than the search failing to find it."],
+              [
+  "Fit two supplied corpora with the same description-length learner: walk and walks once each, then undo, untie, redo and retie ten times each.",
+  "For each corpus print the fitted cost to four decimal places and its learned pieces with counts. Compare the two-word fit’s reuse of walk with the prefixed corpus’s decision to keep complete words.",
+  "A stem-and-affix interpretation is not built into the cost. Judge the result against the stated storage objective before treating it as an analysis of English."
+],
               `from oop_ml import MorfessorBaseline
 
 two_words = ["walk walks"]
@@ -1309,7 +1337,12 @@ for label, corpus in [("two words", two_words), ("four prefixed words", prefixed
     print(f"{label}: cost {model.cost:.4f} with pieces {pieces}")`,
               `two words: cost 14.8378 with pieces s 1, walk 2
 four prefixed words: cost 111.7806 with pieces redo 10, retie 10, undo 10, untie 10`,
-              { hints: ["Both corpora are lists of one string. The first holds the two words once each, and the second holds the four prefixed words ten times each.", "The two-word fit should land on walk used twice and s used once at 14.8378, which is the split Part 2 priced by hand, and the prefixed fit should leave all four words whole at 111.7806."], check: numberCheck("What description length, in nats, does the two-word fit report?", 14.8378, 0.0005, "The split costs 0.5232 more in the text and 0.6931 more in the counts and saves 7.2103 on the spelling, because walk stops being written down twice, so the search takes it and reports the 14.8378 that Part 2 worked by hand. On the prefixed words the same arithmetic goes the other way, since un, re, do and tie save 20.7956 on the spelling but double the references, and the fit reports 111.7806 with every word whole.") },
+              {
+question: "When does the objective prefer whole words over familiar-looking parts?",
+ hints: [
+  "Each corpus is a list containing one string. Fit a fresh model for each.",
+  "Inspect the fitted pieces rather than assuming that a linguistically plausible split must reduce the objective."
+], check: numberCheck("What description length, in nats, does the two-word fit report?", 14.8378, 0.0005, "The two-word fit costs 14.8378 nats and reuses walk. The prefixed corpus keeps whole words under the same objective, so the two outcomes illustrate what that objective rewards on different counts.") },
             ),
           ],
         },

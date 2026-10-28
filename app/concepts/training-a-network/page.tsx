@@ -524,13 +524,17 @@ export default function TrainingANetworkPage() {
             several(
               "Which of these are signatures of a step size that is too large, as measured on this chain under log-loss?",
               [
-                "The loss rises about as often as it falls, on 100 of the 199 consecutive readings at a rate of 20",
-                "The best loss the walk ever reached, 0.591843 at epoch 127, is far below the 13.216754 it finished at",
-                "The loss falls on every epoch, by a tiny amount each time",
-                "Every number in the chain stops being a number within a few epochs",
-              ],
+                              "The loss rises about as often as it falls, on 100 of the 199 consecutive readings at a rate of 20",
+                              "The best loss the walk ever reached, 0.591843 at epoch 127, is far below the 13.216754 it finished at",
+                              "The loss falls on every epoch, by a tiny amount each time",
+                              "Every number in the chain stops being a number within a few epochs",
+                            ],
               [0, 1],
-              "Both numbers have to be watched, since the final loss alone hides the second fact. A loss that falls on every epoch by a tiny amount is the signature of a rate that is too small, which looks like a working loop that simply needs more time, and sometimes is one. Every number ceasing to be a number is what squared error does on this chain, not what a large rate does under log-loss. The recipe the measurements suggest is to start too large deliberately and divide by three or ten until the loss falls on nearly every epoch, then take one more division as a margin.",
+              "The run repeatedly loses progress, and its final reading is much worse than its best. Those are reasons to reduce the step size here. A slowly falling loss is compatible with steps that are too small, but can have other causes. Nonfinite values occurred under a different squared-error run, so they are not required for an excessive step size to be harmful.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Same chain, log-loss, step size 20, 200 readings:\nloss increases: 100 of 199 consecutive comparisons\nlowest recorded loss: 0.591843 at epoch 127\nlast recorded loss: 13.216754\nall weights remain finite during this log-loss run"
+              },
             ),
         ],
         },
@@ -870,12 +874,16 @@ export default function TrainingANetworkPage() {
               "Which of these hold about what a small batch costs here?",
               [
                 "Sixty times the steps cost thirty-seven times the time rather than sixty",
-                "The work around a step, building the blocks and walking the chain, is the same whatever the batch holds",
-                "The same measurement on a large network on a graphics card comes out very differently",
-                "A step on one row costs a sixtieth of a step on sixty rows",
+                "This implementation has per-step overhead that is not proportional to the number of rows",
+                "The same timing ratio need not hold for a large network on a GPU",
+                "A step on one row costs a sixtieth of a step on sixty rows"
               ],
               [0, 1, 2],
-              "The arithmetic inside a step is proportional to the rows and the surrounding work is not, and at this size the surrounding work is most of the cost. If a step on one row cost a sixtieth of a step on sixty rows, the batch size would be nearly free and the smallest would always win. How much a batch size costs is a fact about the machine it runs on, so it has to be measured there.",
+              "Single-row steps are not sixty times faster, because they still pay per-step overhead. The 3,600-step run takes about 37 times the total time of the 60-step run on this machine. Larger matrix operations, accelerator utilisation and framework overhead can give another setup different ratios.",
+              {
+                "description": "This is one measurement on the lesson’s small CPU network. Total time and fixed overhead are specific to this implementation and machine.",
+                "data": "rows per step | steps in all | milliseconds a step | milliseconds in all\n1 | 3600 | 0.153 | 552\n5 | 720 | 0.162 | 116\n15 | 240 | 0.174 | 42\n30 | 120 | 0.213 | 26\n60 | 60 | 0.248 | 15"
+              },
             ),
             trueFalse(
               "The loss a run reports after an epoch belongs to the chain as it stood before that epoch’s step.",
@@ -1422,13 +1430,17 @@ export default function TrainingANetworkPage() {
             several(
               "Which of these hold of what a seed fixes on this chain?",
               [
-                "Two identical requests, in batches of ten, land on 0.05945412 and 0.05945412, the same to the last bit",
-                "Changing only the order the rows are visited in changes nothing whatever when the run takes the whole crowd in one batch",
-                "Four draws of the starting numbers under the identical loop end up somewhere different each time",
-                "A seed that makes a run reproducible also makes it representative",
-              ],
+                              "Two identical requests, in batches of ten, land on 0.05945412 and 0.05945412, the same to the last bit",
+                              "Changing only the order the rows are visited in changes nothing whatever when the run takes the whole crowd in one batch",
+                              "Four draws of the starting numbers under the identical loop end up somewhere different each time",
+                              "A seed that makes a run reproducible also makes it representative",
+                            ],
               [0, 1, 2],
               "Both full-batch runs produce 0.53659416 in this experiment. With batches of ten, changing row order gives a final loss of 0.05903582 because it changes the intermediate updates. Initialization matters too: three of four starting draws classify every person correctly, while the fourth reaches 0.9667 with a loss about half again as large as the best. A fixed seed repeats one run; it does not show that the run represents all plausible starts. Floating-point reduction order can also matter in other full-batch implementations.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Same starting weights, batches of 10, final loss:\nidentical requests: 0.05945412 and 0.05945412\nchanged row-order seed only: 0.05903582\n\nFull batch of 60, two row-order seeds: 0.53659416 and 0.53659416\nFour initial-weight draws under the same loop give different final fits.\nThese are this experiment’s observations, not bitwise guarantees for all implementations."
+              },
             ),
             choice(
               "Why must a layer that silences a random share of its units be carried through the step rather than rebuilt from its settings?",
@@ -1459,7 +1471,7 @@ export default function TrainingANetworkPage() {
           practice: [
             exercise(
               "Take one step from the untrained chain",
-              ["Draw the sixty people and the untrained chain exactly as the page does, both from fixed seeds, then take exactly one step at a rate of 0.5 and measure the loss again.", "Part 1 follows the first hidden unit’s weight on the first measurement from 0.345584, with a slope of 0.028119, to 0.331525, and says the loss on all sixty people fell from 0.727078 to 0.717923 while the largest slope anywhere was 0.084723. Read every one of those off the library."],
+              ["The backpropagation challenge inspected a fixed network. Here the supplied seeds create the sixty labelled people and the initial trainable network reproducibly. Calculate one backward pass and apply one update at learning rate 0.5.","Print the first hidden connection's old weight, gradient and updated weight, together with the largest gradient and losses before and after the update. Measure the updated network again rather than treating the old loss as its new loss."],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
 
@@ -1517,11 +1529,11 @@ first hidden weight before 0.345584
 its slope 0.028119
 first hidden weight after 0.331525
 largest slope anywhere 0.084723`,
-              { hints: ["The starting weights are drawn with a spread of the square root of two over the fan-in, which is 1 for the two measurements and the root of a third for the six hidden units, in the order the neurons are built. The seed of 1 is what makes the page’s numbers quotable.", "backward_pass measures the loss on its way forward and answers one gradient per layer, so the loss before the step is on the backward pass itself and the hidden layer’s slopes are at position 0.", "stepped_by hands back a new chain. Measuring the loss after the step means running a second backward pass on that chain, or a forward pass and the loss, and reading its loss."], check: numberCheck("What is the loss on all sixty people after one step at 0.5?", 0.717923, 1e-05, "The loss fell from 0.727078 to 0.717923, a drop of 0.009155 against the 0.009775 the slope promised. One step of a loop that will run two hundred times moved the loss by nine thousandths, by changing every one of the twenty-five numbers by a few hundredths at most.") },
+              { hints: ["The starting weights are drawn with a spread of the square root of two over the fan-in, which is 1 for the two measurements and the root of a third for the six hidden units, in the order the neurons are built. The seed of 1 is what makes the page’s numbers quotable.", "backward_pass measures the loss on its way forward and answers one gradient per layer, so the loss before the step is on the backward pass itself and the hidden layer’s slopes are at position 0.", "stepped_by hands back a new chain. Measuring the loss after the step means running a second backward pass on that chain, or a forward pass and the loss, and reading its loss."], check: numberCheck("What is the loss on all sixty people after one step at 0.5?", 0.717923, 1e-05, "The measured loss decreases after this update on the supplied batch. The gradient described the local behaviour before the step; a finite step need not produce exactly its linear prediction of the loss change. Subsequent updates must recalculate derivatives at the new parameters."), question: "What changes after the first supervised update of this network?" },
             ),
             exercise(
               "Run two hundred epochs and read the curve",
-              ["Write the loop of Part 7 around the step, two hundred epochs at a rate of 0.5 with every epoch reading all sixty people, and record the loss the backward pass measured at each epoch.", "Part 4 quotes the readings at epochs 1, 50, 100 and 200 as 0.7271, 0.5893, 0.3604 and 0.1354, and says the chain the run finishes with stands at 0.134309, one step past its last reading. Confirm those, then report the first epoch at which the reading falls below 0.2, which the lesson does not quote."],
+              ["Repeat the supervised update for 200 epochs at learning rate 0.5, using all sixty people in every epoch. Save the loss from each backward pass before applying that epoch's update.","Print the requested sampled epochs, the final network's separately measured loss, and the first recorded epoch below the supplied threshold. The last recorded pre-update loss and the final post-update loss describe different parameter states."],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
 
@@ -1582,11 +1594,11 @@ loss reported at epoch 100 0.3604
 loss reported at epoch 200 0.1354
 loss of the finished chain 0.134309
 first reading below 0.2 at epoch 159`,
-              { hints: ["The loop is two lines inside a counter, a backward pass and a step, and the stepped chain replaces the old one each time round.", "The loss on a backward pass belongs to the chain as it stood before that step, so the last reading of two hundred is not the loss of the chain you finish with. One more backward pass on the finished chain gives that.", "enumerate with start=1 numbers the readings by epoch, and next with a generator finds the first one that satisfies the condition."], check: numberCheck("At which epoch does the reported loss first fall below 0.2?", 159, 0.5, "The reading is 0.217060 at epoch 150 and the run only reaches 0.1354 at epoch 200, so the crossing comes late in the run, at epoch 159. Every person is called correctly from epoch 180, so the loss is still falling at a healthy rate well after the accuracy has nothing left to gain, which is Part 4’s point.") },
+              { hints: ["The loop is two lines inside a counter, a backward pass and a step, and the stepped chain replaces the old one each time round.", "The loss on a backward pass belongs to the chain as it stood before that step, so the last reading of two hundred is not the loss of the chain you finish with. One more backward pass on the finished chain gives that.", "enumerate with start=1 numbers the readings by epoch, and next with a generator finds the first one that satisfies the condition."], check: numberCheck("At which epoch does the reported loss first fall below 0.2?", 159, 0.5, "The first threshold crossing is an observation about this seeded run. The recorded loss is measured before each update, so its epoch numbering must stay aligned with that convention. A perfect classification accuracy can coexist with further changes in probability-based loss."), question: "How do repeated full-batch updates change the recorded training loss?" },
             ),
             exercise(
               "Watch a rate of twenty thrash",
-              ["Run the same chain from the same starting numbers for two hundred epochs at a rate of 20, and count how many of the 199 consecutive readings went up rather than down.", "Part 2 says the loss rises on 100 of the 199 readings, touches 0.591843 at epoch 127 and finishes at 13.216754, and that nothing ever stops being a number. Confirm that, then print the loss of the chain the run actually finishes with, which the lesson leaves out."],
+              ["Reset to the same seeded network and data, then repeat the 200-epoch loop with learning rate 20. Count how many consecutive pre-update loss readings increase.","Print the rise count, the best recorded loss and its epoch, the last recorded loss, and a separate loss measurement on the final updated network. Check whether the arithmetic remains finite as well as whether the run is useful."],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
 
@@ -1645,11 +1657,11 @@ print(f"loss of the finished chain {network.backward_pass(rows, targets, loss).l
 lowest reading 0.591843 at epoch 127
 last reading 13.216754
 loss of the finished chain 4.683362`,
-              { hints: ["Only the rate changes from the previous problem. The chain, the people and the loop are the same.", "zip the readings against themselves shifted by one to compare each reading with the next, and count the pairs where the later one is larger.", "The last reading belongs to the chain before its final step, so the finished chain’s loss is a separate measurement and here it is a very different number."], check: numberCheck("On how many of the 199 consecutive readings did the loss rise?", 100, 0.5, "About as often as it fell, which is the signature of a step too large under log-loss. The best reading of 0.591843 at epoch 127 is real progress from 0.727078 and the run finishes at 13.216754, eighteen times worse than the untrained chain, and the final step then lands the chain somewhere else again, which is why the finished chain’s loss differs from the last reading.") },
+              { hints: ["Only the rate changes from the previous problem. The chain, the people and the loop are the same.", "zip the readings against themselves shifted by one to compare each reading with the next, and count the pairs where the later one is larger.", "The last reading belongs to the chain before its final step, so the finished chain’s loss is a separate measurement and here it is a very different number."], check: numberCheck("On how many of the 199 consecutive readings did the loss rise?", 100, 0.5, "Frequent rises and a poor final state show that this large rate behaves badly in this deterministic full-batch experiment. Finite numbers alone do not establish successful optimisation. The final post-update measurement can differ substantially from the last stored pre-update reading."), question: "What happens when the same network takes much larger updates?" },
             ),
             exercise(
               "Hold forty-six people back and watch two curves",
-              ["Train on fourteen of the sixty people, seven from each group, with three of their labels flipped, using a chain of eight hidden units at a rate of 1.0 for six hundred epochs, and measure the loss on the other forty-six after every epoch without ever stepping on them.", "Part 5 says the training loss falls from 0.7210 to 0.0757, that the held-out loss is lowest at epoch 73, where it reads 0.5354 and the training loss stands at 0.3070, and that it then climbs to 1.6472. Find the epoch the walk should have stopped at."],
+              ["Fit the supplied eight-hidden-unit network using only the fourteen training people and their deliberately corrupted labels. After each epoch, also measure loss on the other forty-six people without applying an update from their gradients.","Record the training and held-out losses with their epoch numbers and find the epoch with the smallest held-out loss. Because these observations choose when to stop, they are a validation set; a final independent performance claim would require another untouched test set."],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy, DenseLayer, HyperbolicTangent, Identity, LayerStack, Neuron
 
@@ -1722,7 +1734,7 @@ print(f"held-out loss at the end {history[-1][2]:.4f}")`,
               `training loss from 0.7210 to 0.0757
 held-out loss lowest 0.5354 at epoch 73, training loss there 0.3070
 held-out loss at the end 1.6472`,
-              { hints: ["The split draws half the training rows from each group so that a fourteen-person set cannot miss a group entirely, and the flipped labels are drawn from a second seed. Both are already in the starter.", "A backward pass on the held-out rows measures their loss without anything being stepped on them, as long as you never hand its result to stepped_by.", "min with a key picks the record with the lowest held-out loss, and that record carries the epoch and the training loss alongside it."], check: numberCheck("At which epoch is the held-out loss lowest?", 73, 0.5, "The held-out loss reaches 0.5354 at epoch 73 and rises on every one of the 527 epochs after it, while the training loss stands at 0.3070 there and keeps falling on every epoch to 0.0757. Nothing about the training loss announces epoch 73, which is why early stopping needs a second set of people rather than a cleverer reading of the first.") },
+              { hints: ["The starter fixes the split and label changes. Only training gradients should reach stepped_by.","Measuring a backward pass on validation data is harmless to the parameters if you do not apply it. Selecting an epoch using its loss still makes that data part of model selection.","Keep each epoch and both losses in one record. Choose the lowest validation loss and report the training loss recorded at that same epoch."], check: numberCheck("At which epoch is the held-out loss lowest?", 73, 0.5, "The minimum validation loss identifies the stopping point preferred by this split and seeded run. The training loss alone does not identify it. Repeatedly selecting from this same validation trajectory means the reported minimum is model-selection evidence, rather than a final untouched test result."), question: "When does continued fitting stop helping the held-out validation group?" },
             ),
           ],
         },

@@ -50,7 +50,7 @@ matrix("feature-scaling", [2], ["Centre or lower endpoint", "Spread or upper end
 matrix("feature-scaling", [3], ["Preparation", "Prediction model"], "When");
 align("logistic-regression", [3], [], "Fixed probability estimate", 0);
 matrix("judging-a-classifier", [1], ["Model flags the case", "Model leaves it alone"], "Known answer");
-matrix("multiple-polynomial-regression", [1], ["Height", "Waist"], "Person");
+matrix("multiple-polynomial-regression", [1], ["Height (cm)", "Age (years)"], "Person");
 matrix("bagging", [1], ordinal("Position", 4), "Sample");
 align("feature-importance", [2], ordinal("Row", 3), "Record receiving the value");
 matrix("grid-search", [1], ordinal("Evaluation", 3), "Candidate");

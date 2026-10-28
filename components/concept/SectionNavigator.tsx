@@ -1,12 +1,7 @@
 "use client";
 
-// One section at a time, with arrows and a section list at the top of the page.
-//
-// The sections used to render as a stack of collapsible details elements, so a
-// reader met the whole lesson at once and scrolled past what they did not want.
-// Here a single section is on screen and the controls above it move to any
-// other, which keeps a long derivation from burying the one part the reader
-// came for.
+// One page at a time. The footer moves within the lesson, then to neighbouring
+// lessons at either end. Its contents menu still allows readers to jump ahead.
 //
 // The address bar holds which section is showing, rather than a piece of state
 // kept beside it. A pasted link, the arrows, the section list and the browser's
@@ -35,10 +30,11 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useSyncExternalStore,
 } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { QuizDeck, RevisitLink } from "./QuizDeck";
 import { PracticeDeck } from "./PracticeDeck";
 import { declareRequired, markFinished, useProgressAccount } from "@/lib/progress";
@@ -46,6 +42,8 @@ import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
 import { LessonGame } from "@/components/lab/LessonGame";
 import type { JourneyData } from "@/lib/builds/journey";
+import { lessonLocations } from "@/lib/course-navigation";
+import { LessonFooter, type LessonDestination } from "@/components/course/LessonFooter";
 
 export interface NavigableSection {
   title: string;
@@ -81,10 +79,8 @@ const readHash = () => window.location.hash.replace(/^#/, "");
 // from its own link has, so the two agree and hydration finds what it rendered.
 const noHash = () => "";
 
-// Restoring the scroll position has to happen before the browser paints, or the
-// reader sees the page jump and come back. There is no layout to measure on the
-// server, and the effect only ever matters after a click, so the server gets the
-// ordinary effect and never warns about the layout one.
+// Move to the new heading before painting so a footer click does not leave the
+// reader at the bottom of the next page.
 const useBeforePaint = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // The parts a quiz says it covers, read off its title. "Parts 3 to 5" names a
@@ -121,9 +117,10 @@ export function SectionNavigator({
   initial?: number;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const settled = useRef(false);
-  const keepScroll = useRef<number | null>(null);
+  const shownPage = useRef<number | null>(null);
   const lesson = usePathname() ?? "";
+  const router = useRouter();
+  const location = lessonLocations[lesson.replace(/\/$/, "")];
   const accountId = useProgressAccount();
 
   const rawHash = useSyncExternalStore(subscribeToHash, readHash, noHash);
@@ -137,59 +134,66 @@ export function SectionNavigator({
 
   // A fragment naming a section selects it. Anything else, including the empty
   // fragment of the bare lesson URL, falls back to the section it starts on.
-  const named = hash === "practice" ? sections.findIndex(section => kindOf(section) === "practice") : sections.findIndex((section) => section.id === hash);
+  const named = hash === "last-page" ? sections.length - 1 : hash === "practice" ? sections.findIndex(section => kindOf(section) === "practice") : sections.findIndex((section) => section.id === hash);
   const current = named >= 0 ? named : Math.min(Math.max(initial, 0), sections.length - 1);
+
+  const previous = useMemo<LessonDestination | undefined>(() => current > 0
+    ? { title: sections[current - 1].title, href: `#${sections[current - 1].id}`, kind: "page" }
+    : location?.previous
+      ? { ...location.previous, href: `${location.previous.href}#last-page`, kind: "lesson" }
+      : location ? { title: location.areaTitle, href: location.areaHref, kind: "area" } : undefined, [current, sections, location]);
+  const next = useMemo<LessonDestination | undefined>(() => current < sections.length - 1
+    ? { title: sections[current + 1].title, href: `#${sections[current + 1].id}`, kind: "page" }
+    : location?.next
+      ? { ...location.next, kind: "lesson" }
+      : location ? { title: location.areaTitle, href: location.areaHref, kind: "area" } : undefined, [current, sections, location]);
 
   const goTo = useCallback(
     (index: number) => {
       const clamped = Math.min(Math.max(index, 0), sections.length - 1);
       if (clamped === current) return;
-      keepScroll.current = window.scrollY;
       // pushState gives back a section rather than the page before the lesson,
       // and raises popstate itself because pushState alone notifies nobody.
-      window.history.pushState(null, "", `#${sections[clamped].id}`);
+      window.history.pushState(window.history.state, "", `#${sections[clamped].id}`);
       window.dispatchEvent(new PopStateEvent("popstate"));
     },
     [current, sections],
   );
 
-  // Sections differ in height, so a move can leave the page shorter than the
-  // reader's scroll position, which a browser answers by clamping that position
-  // to the new bottom. Putting it back before anything is painted is what keeps
-  // the page still.
+  // A previous-lesson link opens its last page without having to ship every
+  // lesson's page list. Replace the alias with that page's permanent bookmark.
   useBeforePaint(() => {
-    if (keepScroll.current === null) return;
-    const previous = keepScroll.current;
-    keepScroll.current = null;
-    window.scrollTo(0, previous);
-  }, [current]);
+    if (hash !== "last-page" || !sections.length) return;
+    window.history.replaceState(window.history.state, "", `#${sections[sections.length - 1].id}`);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }, [hash, sections]);
 
-  // Moving between sections deliberately does not scroll. Focus moves to the
-  // new heading, with scrolling suppressed, so a reader on a keyboard or a
-  // screen reader is told the content changed without the page moving
-  // underneath anyone else. The first render is skipped so that opening a
-  // lesson does not take focus away from the document.
-  useEffect(() => {
-    if (!settled.current) {
-      settled.current = true;
-      return;
-    }
+  useBeforePaint(() => {
+    const before = shownPage.current;
+    shownPage.current = current;
+    if (before === null || before === current) return;
     headingRef.current?.focus({ preventScroll: true });
+    headingRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
   }, [current]);
 
   // Arrow keys, but not while the reader is inside a widget's own controls,
   // where left and right mean something to the control rather than the page.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
       const target = event.target as HTMLElement | null;
-      if (target?.closest("input, select, textarea, [contenteditable], svg")) return;
-      if (event.key === "ArrowLeft") goTo(current - 1);
-      if (event.key === "ArrowRight") goTo(current + 1);
+      if (target?.closest("input, select, textarea, button, a, summary, [contenteditable], [role='slider'], [role='tablist'], [role='grid'], svg")) return;
+      const direction = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
+      if (!direction) return;
+      const destination = direction < 0 ? previous : next;
+      if (!destination) return;
+      event.preventDefault();
+      if (destination.kind === "page") goTo(current + direction);
+      else router.push(destination.href);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [current, goTo]);
+  }, [current, goTo, previous, next, router]);
 
   // How much of this lesson there is to finish, told to the record once the
   // page is open. A store write rather than React state, which is why it can
@@ -203,19 +207,7 @@ export function SectionNavigator({
 
   return (
     <div className="min-w-0">
-      <Controls sections={sections} current={current} onGo={goTo} />
-
-      {/*
-        Every section stays rendered and only one is displayed. Unmounting the
-        others saved their widgets from fitting models that were not on screen,
-        but it also meant the section being moved to had no height yet, because
-        those widgets produce their content after mounting. The document was
-        therefore briefly shorter than the reader's scroll position, the browser
-        clamped that position to the new bottom, and the page jumped to the top
-        on the way to a section that a moment later was tall enough to have held
-        it. Keeping them rendered makes a move instant and the height known,
-        which is what lets the page stay still.
-      */}
+      {/* Keep each page mounted so navigating back preserves its widget state. */}
       {sections.map((entry, index) => {
         const kind = kindOf(entry);
         const revisit: RevisitLink[] =
@@ -241,7 +233,7 @@ export function SectionNavigator({
             <h2
               ref={index === current ? headingRef : undefined}
               tabIndex={-1}
-              className="mb-4 scroll-mt-6 text-2xl font-semibold tracking-tight text-foreground outline-none"
+              className="mb-4 scroll-mt-36 text-2xl font-semibold tracking-tight text-foreground outline-none sm:scroll-mt-24"
             >
               {entry.title}
             </h2>
@@ -273,134 +265,35 @@ export function SectionNavigator({
           </section>
         );
       })}
+      <LessonFooter previous={previous} next={next} current={current} total={sections.length} onGo={goTo}
+        contents={<PageMenu sections={sections} current={current} onGo={goTo} />} />
     </div>
   );
 }
 
-function Controls({
-  sections,
-  current,
-  onGo,
-}: {
+function PageMenu({ sections, current, onGo }: {
   sections: NavigableSection[];
   current: number;
   onGo: (index: number) => void;
 }) {
-  const first = current === 0;
-  const last = current === sections.length - 1;
-  const coding = sections.findIndex((entry) => kindOf(entry) === "practice");
-  const workshop = sections.findIndex((entry) => kindOf(entry) === "game");
-
-  return (
-    <div className="mx-auto max-w-[45rem] border-t border-line py-4">
-      <div className="flex items-center gap-3">
-        <ArrowButton
-          direction="back"
-          disabled={first}
-          label={first ? "No earlier section" : `Previous section, ${sections[current - 1].title}`}
-          onClick={() => onGo(current - 1)}
-        />
-
-        <label className="flex min-w-0 flex-1 items-center gap-2 text-sm text-muted">
-          <span className="sr-only">Choose a section</span>
-          <select
-            value={current}
-            onChange={(event) => onGo(Number(event.target.value))}
-            className="h-11 min-w-0 flex-1 truncate rounded-md border border-line bg-surface px-3 text-sm font-medium text-foreground"
-          >
-            {sections.map((entry, index) => {
-              const kind = kindOf(entry);
-              // A practice section is titled "Practice. ..." already, and a
-              // quiz "Questions on ...", so the prefix is only added where the
-              // title does not already say what the section is.
-              const word = kind === "quiz" ? "Quiz" : kind === "practice" ? "Practice" : "";
-              const prefix =
-                word && !entry.title.toLowerCase().startsWith(word.toLowerCase())
-                  ? `${word} · `
-                  : "";
-              return (
-                <option key={entry.id} value={index}>
-                  {prefix}
-                  {entry.title}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-
-        <span className="w-[7ch] shrink-0 whitespace-nowrap text-center font-mono text-xs tabular-nums text-muted">
-          {current + 1} / {sections.length}
-        </span>
-
-        <ArrowButton
-          direction="forward"
-          disabled={last}
-          label={last ? "No later section" : `Next section, ${sections[current + 1].title}`}
-          onClick={() => onGo(current + 1)}
-        />
-      </div>
-
-      {/* One segment a section, filled as far as the reader has come. */}
-      <ol className="mt-3 flex gap-1" aria-hidden="true">
-        {sections.map((entry, index) => (
-          <li
-            key={entry.id}
-            className={
-              "h-1 flex-1 rounded-full transition-colors " +
-              (index === current
-                ? "bg-accent-fill"
-                : index < current
-                  ? "bg-accent-fill/50"
-                  : "bg-line")
-            }
-          />
-        ))}
-      </ol>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
-        <p className="hidden font-mono sm:block">The arrow keys move between sections too.</p>
-        {workshop >= 0 && workshop !== current && <button type="button" onClick={() => onGo(workshop)} className="font-semibold text-accent underline underline-offset-4">Try Botie&apos;s workshop →</button>}
-        {coding >= 0 && coding !== current && <button type="button" onClick={() => onGo(coding)} className="font-semibold text-accent underline underline-offset-4">Go to the coding challenges →</button>}
-        {coding === current && <button type="button" onClick={() => onGo(0)} className="font-semibold text-accent underline underline-offset-4">Revisit the explanation</button>}
-      </div>
+  const coding = sections.findIndex(entry => kindOf(entry) === "practice");
+  const workshop = sections.findIndex(entry => kindOf(entry) === "game");
+  return <div className="space-y-3 pb-3 pt-2">
+    <label className="block text-sm text-muted">
+      Jump to a page
+      <select value={current} onChange={event => onGo(Number(event.target.value))}
+        className="mt-2 h-11 w-full min-w-0 truncate rounded-md border border-line bg-surface px-3 text-sm text-foreground">
+        {sections.map((entry, index) => {
+          const kind = kindOf(entry);
+          const word = kind === "quiz" ? "Quiz" : kind === "practice" ? "Practice" : "";
+          const prefix = word && !entry.title.toLowerCase().startsWith(word.toLowerCase()) ? `${word} · ` : "";
+          return <option key={entry.id} value={index}>{prefix}{entry.title}</option>;
+        })}
+      </select>
+    </label>
+    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+      {workshop >= 0 && workshop !== current && <button type="button" onClick={() => onGo(workshop)} className="text-accent underline underline-offset-4">Botie&apos;s workshop</button>}
+      {coding >= 0 && coding !== current && <button type="button" onClick={() => onGo(coding)} className="text-accent underline underline-offset-4">Coding challenges</button>}
     </div>
-  );
-}
-
-function ArrowButton({
-  direction,
-  disabled,
-  label,
-  onClick,
-}: {
-  direction: "back" | "forward";
-  disabled: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
-      title={label}
-      className="flex size-11 shrink-0 items-center justify-center rounded-md border border-line bg-surface text-foreground transition hover:bg-raised disabled:opacity-40 disabled:hover:bg-surface"
-    >
-      <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" className="size-5 shrink-0">
-        {direction === "back" ? (
-          <path
-            fillRule="evenodd"
-            d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
-            clipRule="evenodd"
-          />
-        ) : (
-          <path
-            fillRule="evenodd"
-            d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-            clipRule="evenodd"
-          />
-        )}
-      </svg>
-    </button>
-  );
+  </div>;
 }

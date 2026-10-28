@@ -260,6 +260,7 @@
         "title": "Can masked attention handle every permitted query row?",
         "question": "Can masked attention handle every permitted query row?",
         "task": [
+          "The workshop produced a weighted mixture for one query. Here the compatibility scores are already supplied, and several queries may allow different keys. Make the normalisation and value mixing reusable without letting an excluded key receive a share.",
           "Write masked_attention(scores, values, allowed). scores is a finite (queries, keys) table; values is a finite (keys, features) table; allowed is a Boolean table matching scores. Every query must allow at least one key, and both tables must have positive dimensions.",
           "Apply stable softmax only over allowed keys and return the weighted value table. Preserve inputs and raise ValueError for invalid layouts, non-Boolean masks or an all-masked query. Print the demonstration output rounded to four places."
         ],
@@ -267,8 +268,8 @@
         "solution": "import numpy as np\n\ndef masked_attention(scores, values, allowed):\n    scores = np.asarray(scores, dtype=float)\n    values = np.asarray(values, dtype=float)\n    allowed = np.asarray(allowed)\n    if scores.ndim != 2 or values.ndim != 2 or min(scores.shape) < 1 or min(values.shape) < 1 or scores.shape[1] != values.shape[0] or allowed.shape != scores.shape or allowed.dtype != bool:\n        raise ValueError('Incompatible attention inputs')\n    if not np.isfinite(scores).all() or not np.isfinite(values).all() or not allowed.any(axis=1).all():\n        raise ValueError('Invalid score or all-masked query')\n    masked = np.where(allowed,scores,-np.inf)\n    weight = np.exp(masked-masked.max(axis=1,keepdims=True))\n    weight /= weight.sum(axis=1,keepdims=True)\n    return weight@values\n\nprint(np.round(masked_attention([[0,0,9],[1,2,3]], [[2,0],[0,6],[8,8]], [[True,True,False],[False,False,True]]),4).tolist())",
         "output": "[[1.0, 3.0], [8.0, 8.0]]",
         "hints": [
-          "Exclude unavailable scores before finding the row maximum.",
-          "Normalise on the key axis, then multiply by values."
+          "Exclude forbidden scores before choosing a row maximum. An all-masked query needs an error, rather than a fabricated probability distribution.",
+          "Normalise each query over its allowed keys, then multiply by the value table. The output keeps one row per query and one column per value feature."
         ],
         "tests": [
           {
@@ -417,6 +418,7 @@
         "title": "Can you fit the token transitions without crossing documents?",
         "question": "Can you fit the token transitions without crossing documents?",
         "task": [
+          "A simple next-token model can count which token follows the current one. Build that table from several documents while keeping their boundaries intact, then use smoothing so an unseen transition still has positive probability.",
           "Write bigram_table(documents, vocabulary_size, smoothing). documents is a sequence of one-dimensional integer token sequences; token IDs must be in range. vocabulary_size is a positive integer and smoothing is finite and positive. Empty documents are valid.",
           "Start every transition count at smoothing, count adjacent pairs within each document only, and return a row-normalised probability table. Raise ValueError for invalid IDs or settings. Print the demonstration probabilities rounded to four places."
         ],
@@ -424,8 +426,8 @@
         "solution": "import numpy as np\n\ndef bigram_table(documents, vocabulary_size, smoothing):\n    if isinstance(vocabulary_size,bool) or not isinstance(vocabulary_size,(int,np.integer)) or vocabulary_size < 1 or not np.isfinite(smoothing) or smoothing <= 0:\n        raise ValueError('Invalid vocabulary or smoothing')\n    count = np.full((vocabulary_size,vocabulary_size), float(smoothing))\n    for document in documents:\n        ids = np.asarray(document)\n        if ids.ndim != 1 or (ids.size and (not np.issubdtype(ids.dtype,np.integer) or np.any(ids<0) or np.any(ids>=vocabulary_size))):\n            raise ValueError('Invalid token IDs')\n        if ids.size > 1:\n            np.add.at(count,(ids[:-1],ids[1:]),1)\n    return count/count.sum(axis=1,keepdims=True)\n\nprint(np.round(bigram_table([[0,1,1],[1,2]],3,1),4).tolist())",
         "output": "[[0.25, 0.5, 0.25], [0.2, 0.4, 0.4], [0.3333, 0.3333, 0.3333]]",
         "hints": [
-          "Count pairs separately inside each document.",
-          "Repeated transitions must accumulate, including repeated self-transitions."
+          "Count adjacent pairs separately inside each document. A document's final token must not gain a transition to another document's first token.",
+          "Repeated pairs, including self-transitions, add repeated counts. Add smoothing to the whole table and normalise each source-token row separately."
         ],
         "tests": [
           {
@@ -747,6 +749,7 @@
         "title": "Can you score only the intended response targets?",
         "question": "Can you score only the intended response targets?",
         "task": [
+          "The earlier response mask decided which tokens should teach the model. Now calculate the loss only for those selected targets. The targets and mask are already aligned with the logit rows in this function; do not shift them again.",
           "Write response_loss(logits, targets, mask). logits has shape (positions, vocabulary), targets is an integer vector with one valid ID per position, and mask is a Boolean vector selecting scored targets. Require finite logits, compatible nonempty dimensions and at least one selected target.",
           "Return the mean negative log probability over selected positions, using stable log normalisation. Raise ValueError for invalid inputs. Print the demonstration loss with four decimal places."
         ],
@@ -754,8 +757,8 @@
         "solution": "import numpy as np\n\ndef response_loss(logits, targets, mask):\n    logits = np.asarray(logits, dtype=float)\n    targets, mask = np.asarray(targets), np.asarray(mask)\n    if logits.ndim != 2 or min(logits.shape) < 1 or targets.shape != (len(logits),) or mask.shape != targets.shape or mask.dtype != bool or not np.issubdtype(targets.dtype,np.integer):\n        raise ValueError('Incompatible target layout')\n    if not np.isfinite(logits).all() or np.any(targets<0) or np.any(targets>=logits.shape[1]) or not mask.any():\n        raise ValueError('Invalid target or empty objective')\n    shifted = logits-logits.max(axis=1,keepdims=True)\n    log_probability = shifted-np.log(np.exp(shifted).sum(axis=1,keepdims=True))\n    return float(-log_probability[np.arange(len(targets)),targets][mask].mean())\n\nprint(f'{response_loss([[1000.,1000.],[0.,np.log(3.)]],[0,1],[False,True]):.4f}')",
         "output": "0.2877",
         "hints": [
-          "Subtract each row maximum before exponentiating.",
-          "Gather target log probabilities, select by the shifted-target mask, then average."
+          "Use a stable log normaliser for each logit row. The target ID chooses one log probability from that row.",
+          "Apply the already aligned Boolean target mask before averaging. Count selected positions, rather than all positions, in the denominator."
         ],
         "tests": [
           {
@@ -853,6 +856,7 @@
         "title": "Can you differentiate both adapter factors?",
         "question": "Can you differentiate both adapter factors?",
         "task": [
+          "The workshop ran the adapter forward through its two factors. Use the chain rule from backpropagation to find how each factor affects a supplied loss. Both derivatives must use the same original factors before either is updated.",
           "Write adapter_gradients(X, A, B, upstream, scale). The row-input adapter is scale * X @ A @ B. X has shape (batch, inputs), A is (inputs, rank), B is (rank, outputs), and upstream is the derivative of the scalar loss with respect to the adapter output.",
           "Return dA and dB without changing inputs. Require finite two-dimensional compatible arrays with positive dimensions and a finite scale; raise ValueError otherwise. Do not average the gradients again: upstream already carries the loss convention. Print both demonstration gradients."
         ],
@@ -860,8 +864,8 @@
         "solution": "import numpy as np\n\ndef adapter_gradients(X, A, B, upstream, scale):\n    X,A,B,upstream = [np.asarray(v,dtype=float) for v in [X,A,B,upstream]]\n    if any(v.ndim != 2 or min(v.shape) < 1 or not np.isfinite(v).all() for v in [X,A,B,upstream]) or X.shape[1] != A.shape[0] or A.shape[1] != B.shape[0] or upstream.shape != (X.shape[0],B.shape[1]) or not np.isfinite(scale):\n        raise ValueError('Incompatible adapter inputs')\n    return scale*X.T@(upstream@B.T), scale*(X@A).T@upstream\n\ndA,dB = adapter_gradients([[1,2]],[[1],[1]],[[2]],[[3]],.5)\nprint(dA.tolist())\nprint(dB.tolist())",
         "output": "[[3.0], [6.0]]\n[[4.5]]",
         "hints": [
-          "Differentiate the final matrix product first.",
-          "Use the old A and B for both gradients."
+          "Differentiate the final product first, then propagate through the earlier factor. Preserve matrix multiplication order and include the supplied scale in both derivatives.",
+          "Return the two gradient arrays as (dA, dB), with the shapes of A and B. Do not divide by batch size again because upstream already includes the scalar loss's reduction convention."
         ],
         "tests": [
           {

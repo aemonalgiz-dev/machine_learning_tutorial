@@ -126,28 +126,10 @@ export default function CodebookQuantisationPage() {
               </SubSection>
 
               <SubSection title="3. The contract, asked of something that was never text">
-                <p>
-                  A model reads whole numbers and nothing else, and that is as
-                  true of a model reading a picture as of one reading a
-                  sentence. The{" "}
-                  <Link href="/concepts/what-a-token-is" className={link}>
+                <p>This lesson chooses an interface that represents each image patch by a whole-number ID, much as a text tokenizer identifies a piece of text. That is one possible representation. Image models also routinely read floating-point pixel values or vectors directly. For our discrete interface, we must decide what a piece is, which ID it receives, what the decoder returns, and how much the reconstruction differs from the input. The <Link href="/concepts/what-a-token-is" className={link}>
                     vocabulary page
-                  </Link>{" "}
-                  sets out what has to be settled
-                  before a stream of numbers means anything, which is what the
-                  pieces are, how they are found, what happens at a piece the
-                  table has never seen, and whether the round trip is exact.
-                  Those four questions do not stop applying when the pieces
-                  stop being writing.
-                </p>
-                <p>
-                  What changes is the answer to the last of them. A character
-                  vocabulary that has met every character in a text reproduces
-                  that text exactly, so the round trip loses nothing and the
-                  fourth question has a clean yes. Here the answer is no, always,
-                  and the interesting part is that it is a number rather than a
-                  yes or a no, which is what the middle of this page measures.
-                </p>
+                  </Link> explains the corresponding decisions for text.</p>
+                <p>A text vocabulary can reproduce the original characters when its encoding is reversible and covers the input. A codebook instead replaces each patch with a representative vector. This usually changes some values. An exact match to an entry can still reconstruct exactly, so loss is not inevitable for every input. We will measure the reconstruction error rather than assume that every replacement is equally damaging.</p>
                 <KeepInMind>
                   The same four questions, and only the fourth answers
                   differently. A vocabulary of vectors cannot promise an exact
@@ -156,15 +138,7 @@ export default function CodebookQuantisationPage() {
               </SubSection>
 
               <SubSection title="4. Why the brightnesses cannot be the vocabulary">
-                <p>
-                  The obvious thing to try first is to skip the vocabulary
-                  altogether and let the pieces be their own numbers. It fails
-                  for a reason that has nothing to do with this picture. A
-                  vocabulary is a finite list, and every number in it names one
-                  entry, so a scheme that hands the pieces over as they are is
-                  claiming there is a finite list of pieces to name. A
-                  brightness is a real number, so there is no such list.
-                </p>
+                <p>We could keep the raw brightness values, and many image models do. Here we want a compact discrete alphabet of patch representatives. Enumerating every possible patch is usually a poor way to build that alphabet: even a finite pixel format can have far more possible patches than we want entries. A learned codebook spends its entries on representative patches instead. The small rounded example below lets us count the difference.</p>
                 <>
                   <p>
                     Rounding brightness to two decimal places still leaves 101 possible
@@ -502,10 +476,14 @@ export default function CodebookQuantisationPage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             trueFalse(
-              "Rounding every brightness to two decimal places does make the list of possible pieces finite, and the objection to enumerating it is that it is the wrong list rather than an endless one.",
-              true,
-              "Two decimal places leave 101 values per pixel and so 10,201 possible two-pixel pieces, which is finite. The photograph uses fifty-three of them, so enumerating the grid spends almost the whole table on combinations this picture never produces, and the size of that grid is set by the sensor rather than by the picture. At sixteen pixels a piece the same grid runs to about 1.17 × 10³² possibilities.",
-            ),
+  "For this bounded two-pixel representation, rounding brightness to two decimals gives a finite grid; enumerating it still spends entries on combinations the picture may not contain.",
+  true,
+  "Two decimal places leave 101 values per pixel and so 10,201 possible two-pixel pieces, which is finite. The photograph uses fifty-three of them, so enumerating the grid spends almost the whole table on combinations this picture never produces, and the size of that grid is set by the sensor rather than by the picture. At sixteen pixels a piece the same grid runs to about 1.17 × 10³² possibilities.",
+  {
+    "description": "Use two-pixel pieces and include both brightness endpoints.",
+    "data": "Each pixel brightness lies in [0,1]. Rounded values are 0.00,0.01,...,1.00. A piece has exactly two coordinates."
+  },
+),
             choice(
               "The vector (2, 0) sits 4 away in squared distance from entry 0 at (0, 0) and 4 away from entry 1 at (4, 0). What settles the number it gets?",
               [
@@ -518,27 +496,35 @@ export default function CodebookQuantisationPage() {
               "The rule says nearest and there are two of those, so a convention has to decide, and the one taken here is the earlier position in the table. Writing the same three entries down with (4, 0) first sends the tied vector to the other entry while every other answer and the total cost stay where they were. Two implementations should be expected to disagree on ties unless both have written the rule down.",
             ),
             choice(
-              "The photograph’s 128 pieces against a table of sixteen entries give 0.000418. What is that number?",
-              [
-                "The largest squared gap any single piece had to travel",
-                "The mean squared distance from a piece to the entry it became",
-                "The share of pieces that came back unchanged",
-                "The squared gaps summed over all 128 pieces",
-              ],
-              1,
-              "The rounding error takes each piece, subtracts the entry it became, squares coordinate by coordinate, and averages over the pieces. The furthest any piece travelled is a separate figure, a squared gap of 0.00243, and the typical miss read back in brightness is 0.0145.",
-            ),
+  "The calculation below returns 0.000418. What does that value measure?",
+  [
+                  "The largest squared gap any single piece had to travel",
+                  "The mean squared distance from a piece to the entry it became",
+                  "The share of pieces that came back unchanged",
+                  "The squared gaps summed over all 128 pieces",
+                ],
+  1,
+  "The rounding error takes each piece, subtracts the entry it became, squares coordinate by coordinate, and averages over the pieces. The furthest any piece travelled is a separate figure, a squared gap of 0.00243, and the typical miss read back in brightness is 0.0145.",
+  {
+    "description": "codes contains the selected nearest entry for each piece.",
+    "code": "reconstructed = codebook[codes]\nsquared_distance = ((pieces - reconstructed)**2).sum(axis=1)\nreported_error = squared_distance.mean()"
+  },
+),
             several(
-              "Which of these hold of the relationship between a codebook and the centres k-means finds?",
-              [
-                "Cluster k becomes entry k, and a lookup is the assign step run on one row",
-                "Inertia is the rounding error before it is divided by the number of pieces",
-                "The two are an analogy, since a codebook is fitted by a different procedure",
-                "The warning that a grouping belongs to the rows it was fitted on transfers unchanged",
-              ],
-              [0, 1, 3],
-              "They are the same object rather than two things that resemble each other, which is why the speech units a model like HuBERT reads need no separate machinery. The warning transfers and lands harder here, because a grouping is usually inspected by somebody before it is used while a table of codes is read straight into a model with no way of reporting a poor match.",
-            ),
+  "Which statements hold for this codebook fitted by k-means?",
+  [
+                  "Cluster k becomes entry k, and a lookup is the assign step run on one row",
+                  "Inertia is the rounding error before it is divided by the number of pieces",
+                  "The two are an analogy, since a codebook is fitted by a different procedure",
+                  "The warning that a grouping belongs to the rows it was fitted on transfers unchanged",
+                ],
+  [0, 1, 3],
+  "They are the same object rather than two things that resemble each other, which is why the speech units a model like HuBERT reads need no separate machinery. The warning transfers and lands harder here, because a grouping is usually inspected by somebody before it is used while a table of codes is read straight into a model with no way of reporting a poor match.",
+  {
+    "description": "The fitting and lookup use squared Euclidean distance.",
+    "data": "The codebook stores the k-means centres in their fitted order. A piece receives the index of its nearest centre. Distortion is mean squared Euclidean distance per piece; inertia is the corresponding sum."
+  },
+),
         ],
         },
         {
@@ -634,9 +620,7 @@ export default function CodebookQuantisationPage() {
               </SubSection>
 
               <SubSection title="17. Where the curve stops">
-                <p>
-                  The curve cannot go on forever, and where it stops is decided by the collection rather than by the method. The photograph has 53 different pieces, so a table of 53 entries can hold one of each and reproduce it exactly, and the rounding error at that size comes out at 4.6 × 10⁻³³, which is zero to every bit the arithmetic keeps.
-                </p>
+                <p>For this photograph, there are 53 distinct two-pixel patches. A table containing each distinct patch would allow exact reconstruction of these inputs. The fitted 53-entry table gives a measured squared reconstruction error of about 4.6 × 10⁻³³, a negligible numerical residue at this scale. That is very close to zero, but it is a representable nonzero result, not bitwise equality.</p>
                 <p>
                   Asking for 54 is asking for an entry that has nothing of its own to be, and the result is two entries at one point, which is two numbers meaning one thing.
                 </p>
@@ -753,42 +737,54 @@ export default function CodebookQuantisationPage() {
           title: "Questions on Parts 4 and 5",
           quiz: [
             choice(
-              "The speckled square’s error falls by factors of 1.74 to 2.63 per doubling and the photograph’s by 4.57 to 7.96. What accounts for the gap?",
-              [
-                "The speckled square is quantised in fewer pieces, so each doubling has less to work with",
-                "The photograph's pieces lie close to one line, so they occupy fewer coordinates than they are written with",
-                "The photograph's tables were fitted from more starting draws",
-                "The speckled square is noisier, so its error cannot be measured as precisely",
-              ],
-              1,
-              "The standard result has the best achievable error falling as the table size to the power minus two over the number of coordinates filled, so two coordinates predict a factor of two per doubling and one coordinate predicts four. The speckled square genuinely fills its square and measures around two. The photograph’s spread along the diagonal is 163.6 times its perpendicular spread, and several of its measured factors sit near four. Both pictures are the same 128 pieces at the same table sizes, so the count of pieces cannot be the cause.",
-            ),
+  "What explains the difference between these two recorded quantisation experiments?",
+  [
+                  "The speckled square is quantised in fewer pieces, so each doubling has less to work with",
+                  "The photograph's pieces lie close to one line, so they occupy fewer coordinates than they are written with",
+                  "The photograph's tables were fitted from more starting draws",
+                  "The speckled square is noisier, so its error cannot be measured as precisely",
+                ],
+  1,
+  "The standard result has the best achievable error falling as the table size to the power minus two over the number of coordinates filled, so two coordinates predict a factor of two per doubling and one coordinate predicts four. The speckled square genuinely fills its square and measures around two. The photograph’s spread along the diagonal is 163.6 times its perpendicular spread, and several of its measured factors sit near four. Both pictures are the same 128 pieces at the same table sizes, so the count of pieces cannot be the cause.",
+  {
+    "description": "Both use 128 two-coordinate pieces, matching codebook sizes and the same fitting budget.",
+    "data": "Speckled-square pieces fill a two-dimensional square.\nPhotograph pieces concentrate near a diagonal line; variance along that line is 163.6 times the perpendicular variance.\nMeasured error-reduction factors per doubling: speckled square 1.74-2.63; photograph 4.57-7.96."
+  },
+),
             trueFalse(
-              "A sharp corner in the error curve marks the number of parts the collection has, and is a fact about the picture rather than about the method.",
+              "In this invented four-tone poster, a large error reduction when the table reaches four entries is consistent with its four repeated tones; it does not establish that every error curve reveals a true number of clusters.",
               true,
               "The poster’s error falls by 69.81 from two entries to four and then by only 1.76 from four to eight, because the poster has four tones and the fourth entry is the one that finishes the job. Nothing about the method changed between the poster and the photograph, and the photograph and the speckled square give smooth curves, where no table size is distinguished and the size is a budget rather than a discovery.",
             ),
             trueFalse(
-              "Asking for more entries than the collection has different pieces gives a table that degrades gracefully.",
+              "Asking for more entries than there are distinct observed patches guarantees that every entry represents a different observed patch.",
               false,
-              "The photograph has 53 different pieces, and at 53 entries the error comes out at 4.6 × 10⁻³³, which is zero to every bit the arithmetic keeps. Asking for 54 is asking for an entry with nothing of its own to be, and the result is two entries at one point, which is two numbers meaning one thing. The printed chart hits the same wall at eight entries, where three of them already win nothing.",
+              "With more entries than distinct observed patches, entries cannot all represent different observed patches. They may duplicate one another or remain unused, depending on the fit. In this experiment, the photograph's 53-entry reconstruction error is about 4.6 × 10⁻³³, a negligible but nonzero numerical residue. A large codebook does not guarantee useful distinct assignments.",
             ),
             choice(
-              "The photograph’s table of sixteen entries is put to the printed chart instead. What happens?",
-              [
-                "The error rises to 0.104290 and 11 of the 16 entries are never asked for",
-                "The lookup refuses, because the chart's pieces fall outside the table",
-                "The error rises a little, since both are pictures of the same size",
-                "The chart's hard edges survive, because an unmatched piece keeps its own value",
-              ],
-              0,
-              "That is 249.5 times worse than the 0.000418 the table manages on the picture it was chosen from. Every entry sits in the narrow band near the diagonal where the photograph's pieces were, so the chart’s piece (0.90, 0.05) is given number 13, and 13 means (0.4286, 0.4771), which is mid grey twice over. A hard edge comes back as a flat patch.",
-            ),
+  "What happens when this saved photograph codebook is applied to the chart?",
+  [
+                  "The error rises to 0.104290 and 11 of the 16 entries are never asked for",
+                  "The lookup refuses, because the chart's pieces fall outside the table",
+                  "The error rises a little, since both are pictures of the same size",
+                  "The chart's hard edges survive, because an unmatched piece keeps its own value",
+                ],
+  0,
+  "That is 249.5 times worse than the 0.000418 the table manages on the picture it was chosen from. Every entry sits in the narrow band near the diagonal where the photograph's pieces were, so the chart’s piece (0.90, 0.05) is given number 13, and 13 means (0.4286, 0.4771), which is mid grey twice over. A hard edge comes back as a flat patch.",
+  {
+    "description": "Keep the same saved 16-entry codebook; only the evaluation image changes.",
+    "data": "Evaluation image | Mean squared distance | Entries used\nOriginal photograph | 0.000418 | 16 of 16\nPrinted chart | 0.104290 | 5 of 16"
+  },
+),
             trueFalse(
-              "A model reading the numbers can tell an excellent match from a hopeless one.",
-              false,
-              "The chart’s piece (0.05, 0.05) lands on entry 11 at a squared gap of 0.001 and its piece (0.90, 0.05) lands on entry 13 at 0.404696, four hundred times as large, and what goes downstream is the number 11 and the number 13 and nothing else. Carrying the gap alongside the number is possible and is a different scheme, one that is no longer sending whole numbers. So the rounding error has to be measured by whoever chose the table and cannot be noticed later.",
-            ),
+  "A downstream model receiving only these entry IDs can tell which input pieces were close matches and which were far from their chosen entry.",
+  false,
+  "The chart’s piece (0.05, 0.05) lands on entry 11 at a squared gap of 0.001 and its piece (0.90, 0.05) lands on entry 13 at 0.404696, four hundred times as large, and what goes downstream is the number 11 and the number 13 and nothing else. Carrying the gap alongside the number is possible and is a different scheme, one that is no longer sending whole numbers. So the rounding error has to be measured by whoever chose the table and cannot be noticed later.",
+  {
+    "description": "The downstream interface carries no source vectors, reconstruction distances or confidence values.",
+    "data": "Quantiser output per piece: one codebook index only."
+  },
+),
         ],
         },
         {
@@ -1045,26 +1041,34 @@ export default function CodebookQuantisationPage() {
           title: "Questions on Parts 6 and 7",
           quiz: [
             trueFalse(
-              "On the photograph, every table up to 32 entries chosen from all 128 pieces has every entry in use, and entries nobody asks for appear only when the pieces being quantised are not the pieces the table was chosen from.",
-              true,
-              "Fitted on the collection it will quantise, the procedure leaves none of them. Fitting on the top 64 pieces leaves the unseen half asking for only ten of sixteen, and a table fitted on the whole photograph and put to the printed chart has 27 of 32 never asked for. A table larger than the collection needs is the other thing a reader might blame, and on this photograph it is not the cause.",
-            ),
+  "In these reported runs, the whole-photograph tables use every entry when evaluated on their fitting pieces; the displayed unused entries occur after the evaluated pieces change.",
+  true,
+  "The supplied report distinguishes fitting pieces from later evaluation pieces. Its whole-photograph fits use every entry on that same photograph through size 32, while the two changed evaluation collections leave entries unused. This is a finding about these runs, not a theorem that every fitted codebook always uses every entry.",
+  {
+    "description": "These are the reported runs for this fixture, not a guarantee for every fit.",
+    "data": "Fit/evaluation data | Entry use\nWhole photograph / same photograph, sizes through 32 | every entry used\nTop 64 photograph pieces / unseen half, size 16 | 10 used\nWhole photograph / printed chart, size 32 | 5 used"
+  },
+),
             trueFalse(
               "Six starting draws at eight entries reached 0.0018756 and 0.0018772, which shows the fitting procedure finds the best table.",
               false,
               "Lloyd’s procedure finds a local answer, and which one it finds depends on where it started. Agreement to the sixth decimal place is a fact about this collection, whose pieces lie along a line, rather than a guarantee. On a collection with several genuinely different good tables the spread would be real.",
             ),
             trueFalse(
-              "A table of one entry leaves the rounding error at the whole spread of the collection, which on the photograph is 0.113862.",
-              true,
-              "The single entry is the mean of the pieces, so the error is precisely the mean squared distance from the pieces to their own mean. The number costs zero bits, because it could not have been anything else, and the numbers therefore carry none of the collection. That end of the trade and the 53-entry end bracket the entire method.",
-            ),
+  "For a one-entry codebook fitted by squared error, the entry is the mean piece and the distortion equals the mean squared distance from the pieces to that mean.",
+  true,
+  "The single entry is the mean of the pieces, so the error is precisely the mean squared distance from the pieces to their own mean. The number costs zero bits, because it could not have been anything else, and the numbers therefore carry none of the collection. That end of the trade and the 53-entry end bracket the entire method.",
+),
             choice(
-              "Measuring nearest by the sum of the coordinate gaps rather than by the straight line, on the photograph’s 128 pieces against eight entries, changes how many assignments?",
-              ["None", "One", "About a third", "All of them, since the table was fitted under the straight line"],
-              1,
-              "The piece (0.13, 0.30) is nearer entry 5 by the straight line and nearer entry 1 by the sum of the gaps, and it is the only one that changes hands. One in 128 is a small effect and it is not zero. The sharper constraint is that the straight line is the measure the fitting step lowers, so changing the rule at lookup time alone leaves the two halves of the method aiming at different quantities.",
-            ),
+  "How many of these six assignments change when lookup switches from squared Euclidean distance to Manhattan distance?",
+  ["None", "One", "About a third", "All of them, since the table was fitted under the straight line"],
+  1,
+  "The first five pieces keep their nearest entry under both rules. For [0.8,0.025], squared Euclidean distance prefers entry 1 while Manhattan distance prefers entry 0. Changing the lookup distance can therefore change some assignments without changing all of them. If the table was fitted using squared Euclidean error, a different lookup metric also changes the criterion used after fitting.",
+  {
+    "description": "Use the same fixed two-entry codebook for both lookups. Compare matching coordinates; do not refit the entries.",
+    "data": "Codebook:\nentry 0 = [0,0]\nentry 1 = [1,0.75]\nSix two-pixel brightness pieces:\n[0,0]\n[0.25,0]\n[0,0.25]\n[1,0.75]\n[0.75,0.75]\n[0.8,0.025]\nSquared Euclidean distance: sum((piece-entry)**2)\nManhattan distance: sum(abs(piece-entry))\nBreak a tie using the earlier entry."
+  },
+),
             several(
               "Which of these inputs leave the nearest-entry rule with no answer at all, rather than with an answer that has to be read with care?",
               [
@@ -1083,7 +1087,10 @@ export default function CodebookQuantisationPage() {
           practice: [
             exercise(
               "Four vectors against three entries",
-              ["Build the table of section 6, with entries at (0, 0), (4, 0) and (0, 3), and quantise the four vectors (1, 0), (3, 1), (1, 2) and (2, 0) against it. Print the number each vector gets, the vector each one comes back as, and the rounding error. Then write the same three entries down with (4, 0) first and print the numbers again.", "Section 6 arrived at the numbers 0, 1, 2 and 0, and section 11 at a rounding error of 2.25. Reordering the entries should move exactly one of the four numbers, the tied one, and leave the error where it was."],
+              [
+  "Construct entries (0,0), (4,0) and (0,3), then quantise the four supplied vectors against them. Print IDs, each reconstructed vector and mean squared Euclidean distortion.",
+  "Reorder the entries with (4,0) first and print IDs and distortion again. Separate an ID’s table position from the physical entry it identifies; an equal-distance tie chooses the first entry."
+],
               `from oop_ml import Codebook, CodebookQuantizer
 
 entries = [[0.0, 0.0], [4.0, 0.0], [0.0, 3.0]]
@@ -1119,11 +1126,17 @@ print(f"rounding error again {again.distortion:.2f}")`,
 rounding error 2.25
 ids with (4, 0) first (1, 0, 2, 0)
 rounding error again 2.25`,
-              { hints: ["Codebook takes the list of entries, and the entry at position i owns the number i. CodebookQuantizer takes that codebook as its one field, passed by keyword.", "quantize takes the vectors as rows and answers one object carrying three things: ids, reconstruction and distortion. Those are the three names to read.", "The tie rule is the lower position, so the second table sends (2, 0) to whichever position (0, 0) now occupies, and nothing else moves."], check: numberCheck("What rounding error do the four vectors report?", 2.25, 0.005, "The squared gaps are 1, 2, 2 and 4, as section 11 works them, and the rounding error is their mean. Reordering the entries changes which number the tied vector (2, 0) is given and not how far it travelled, so the error stays at 2.25 while one id changes.") },
+              { hints: [
+  "Compare squared distances to every entry for each input.",
+  "Reordering renumbers moved entries. For the tied input, inspect the reconstructed vector as well as its numeric ID."
+], check: numberCheck("What rounding error do the four vectors report?", 2.25, 0.005, "The mean squared Euclidean distortion is 2.25. Reordering changes two numeric IDs here; the tied input keeps ID zero while choosing a different equally distant entry."), question: "Which entry represents each vector, and how does table order affect a tie?" },
             ),
             exercise(
               "Choose the photograph’s table of sixteen",
-              ["Build the photograph of Part 1 and cut it into its 128 pieces of two side-by-side pixels. Choose a table of sixteen entries from those pieces the way Part 6 says, as the centres a grouping settles on, quantise the pieces against it, and print the rounding error, how many of the sixteen entries are ever used, the largest squared gap any piece travelled, and how many pieces the busiest entry holds.", "Section 12 arrived at a rounding error of 0.000418, every entry in use, and a worst squared gap of 0.00243. The busiest entry’s count is not on the page, so it is the number to run for."],
+              [
+  "Build the supplied photograph and its 128 two-pixel pieces. Fit the sixteen-centre grouping with the supplied settings and use those centres as the codebook.",
+  "Print distinct source-piece count, distortion, used entries, largest squared reconstruction distance and the busiest entry’s piece count. Count entry usage from assigned IDs."
+],
               `from collections import Counter
 
 import numpy as np
@@ -1170,11 +1183,17 @@ rounding error 0.000418
 entries in use 16 of 16
 largest squared gap 0.00243
 busiest entry holds 17 pieces`,
-              { hints: ["Feature takes a name and a column of values, and the grouping is fitted on a list of two of them, one per coordinate, exactly as the k-means page fits its own rows.", "Codebook.from_centroids takes the fitted grouping’s centroids and makes cluster k into entry k, which is section 8 as a single call.", "A piece’s squared gap is the squared difference between the piece and its reconstruction, summed over its two coordinates. Subtracting the two blocks, squaring and summing along each row gives one number per piece.", "A Counter over the ids answers both questions at once: its length is how many entries were used, and most_common(1) is the busiest entry with its count."], check: numberCheck("How many pieces does the busiest of the sixteen entries hold?", 17, 0.5, "Sixteen entries sharing 128 pieces evenly would hold eight each, and the busiest holds seventeen, because the pieces lie in a narrow band along the diagonal and the entries are placed where the pieces fell rather than at equal spacing. The same count read from the other end is section 22’s check, since an entry holding zero pieces is capacity paid for and never received.") },
+              { hints: [
+  "Keep the same two-pixel layout for fitting and quantising.",
+  "A Counter over result IDs gives both used-entry count and largest occupancy."
+], check: numberCheck("How many pieces does the busiest of the sixteen entries hold?", 17, 0.5, "The busiest entry represents seventeen pieces. The learned centres follow the piece distribution rather than assigning equal occupancy to every code."), question: "How evenly does a learned codebook represent the photograph’s pixel pairs?" },
             ),
             exercise(
               "Put the photograph’s table to the printed chart",
-              ["Build the printed chart of Part 1 beside the photograph, choose the photograph’s table of sixteen entries as before, and quantise the chart’s pieces against it. Print the chart’s rounding error, how many times worse it is than the photograph’s own under the same table, and how many of the sixteen entries the chart never asks for.", "Section 19 arrived at 0.104290, 249.5 times worse, with 11 entries never used. Section 20 reads the worst-matched piece together with its number, so print that piece, the number it was given and its squared gap as well."],
+              [
+  "Fit the same sixteen-entry codebook from photograph pieces, then apply it unchanged to the supplied chart pieces.",
+  "Print chart distortion, its ratio to photograph distortion and unused entries. Find the chart piece with greatest squared reconstruction distance and print that piece, its ID and distance."
+],
               `import numpy as np
 from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans
 
@@ -1227,11 +1246,17 @@ times worse than at home 249.5
 entries never asked for 11 of 16
 worst piece [0.9, 0.05] became number 13
 its squared gap 0.404696`,
-              { hints: ["The quantizer is already built, so the chart needs no fit of its own. One more call to quantize, with the chart’s pieces, is the whole of the lookup.", "The ids are a tuple with one entry per piece, so the distinct numbers produced are a set of it, and the entries never asked for are the sixteen less that set’s size.", "The worst piece is the row where the squared gap is largest, which argmax over the per-piece gaps finds, and the same position indexes the ids."], check: numberCheck("How many times worse is the chart’s rounding error than the photograph’s own under the same table?", 249.5, 0.1, "The sixteen entries all sit in the narrow band near the diagonal where the photograph’s pieces were, and the chart’s pieces include (0.90, 0.05), a bright pixel beside a dark one, which no entry has any reason to be near. That piece is given number 13 at a squared gap of 0.404696, and 11 of the 16 entries are never asked for, so the table is paying four bits a piece for numbers that could have been said in three.") },
+              { hints: [
+  "Do not refit on the chart; the mismatch is what this experiment measures.",
+  "Calculate each piece’s squared distance to its assigned reconstruction before finding the worst one."
+], check: numberCheck("How many times worse is the chart’s rounding error than the photograph’s own under the same table?", 249.5, 0.1, "The chart distortion is about 249.5 times the photograph distortion. The same codebook poorly covers patterns that were uncommon in the fitting photograph."), question: "What happens when a photograph-trained codebook represents a printed chart?" },
             ),
             exercise(
               "Ask for a table the photograph cannot supply",
-              ["Section 17 says the photograph admits a table of 53 entries and not one of 54. Fit the grouping at 53 entries, build the codebook and print its rounding error, then do the same at 54 and see which step refuses.", "The grouping itself may settle on 54 centres without complaint. Catch the library’s own error wherever it is raised, print the name of its class and its message, and notice which of the two steps raised it."],
+              [
+  "Group the photograph pieces into fifty-three centres, then fifty-four, using the supplied settings. For each, report whether grouping fitted and then attempt codebook construction and quantisation.",
+  "Print distortion if construction succeeds. Otherwise catch the library error and print its class and message, keeping the failed stage visible."
+],
               `import numpy as np
 from oop_ml import Codebook, CodebookQuantizer, Feature, KMeans, MLLibError
 
@@ -1272,7 +1297,10 @@ for n_entries in (53, 54):
   rounding error 4.6e-33
 54 entries: the grouping fitted
   NonUniqueTokensError: codes 37 and 53 are the same vector, which would be two ids for one point`,
-              { hints: ["Put the try around the codebook step on its own. If the grouping fits and the codebook refuses, that tells you which half of the method has the rule that 54 breaks.", "Two entries at the same point is the case section 25 calls undefined as a vocabulary, since one vector at two positions would be two numbers meaning one thing, and that is what the refusal says in its own words."] },
+              { hints: [
+  "The clustering routine and the codebook enforce different contracts.",
+  "An empty or repeated cluster centre may be accepted by grouping yet create duplicate codebook vectors."
+], question: "Can a codebook contain more distinct entries than this photograph supplies?" },
             ),
           ],
         },

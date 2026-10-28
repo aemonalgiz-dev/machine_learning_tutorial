@@ -562,13 +562,16 @@ export default function LossFunctionsPage() {
             choice(
               "Every loss on the page adds the individual prices and divides by the number of rows. What does the division buy?",
               [
-                "It keeps a batch of forty comparable with a batch of four, since otherwise the loss and the slope would double whenever the batch did",
+                "It makes duplicating a batch leave the mean loss and mean gradient unchanged",
                 "It keeps the loss between zero and one, so runs on different data can be compared",
                 "It removes the sign from each miss, which is what makes the prices add up",
-                "It makes the loss independent of how many quantities the network answers per person",
+                "It makes the loss independent of how many quantities the network answers per person"
               ],
               0,
-              "The mean of a batch is unchanged when the batch is duplicated, which is the point. The four cost (8 + 8 + 32 + 32) / 4 = 20 under squared error, and the four twice over cost 160 / 8 = 20. The division is by rows and not by every number in the block, so a network answering two quantities per person is scored as twice the cost of one answering one.",
+              "Duplicating every row doubles the total loss and its total parameter gradient, while also doubling the row count. Their means therefore stay the same. Changing which observations are in a batch can still change both means. Dividing by rows also does not divide out the number of outputs per row.",
+              {
+                "description": "Keep each row’s loss definition fixed. Sum its loss contributions and divide by the number of rows. When testing batch-size effects here, duplicate the same rows rather than replace them with different observations."
+              },
             ),
             trueFalse(
               "A library that leaves the half out of squared error reports values twice as large and gradients twice as steep.",
@@ -578,13 +581,16 @@ export default function LossFunctionsPage() {
             several(
               "The slope-0.6 line misses the four height and weight measurements by four, four, eight and eight kilograms. Which of these hold of the pulls?",
               [
-                "Under squared error the eight-kilogram misses pull twice as hard as the four-kilogram ones",
-                "Under absolute error all four pull by a quarter, whatever their miss",
-                "Under Huber with a knee of 5 kilograms the eight-kilogram misses pull by 1.25, which is the knee over the row count",
-                "With the knee set to 1 kilogram none of the four is inside it, and every pull is a quarter",
-              ],
+                              "Under squared error the eight-kilogram misses pull twice as hard as the four-kilogram ones",
+                              "Under absolute error all four pull by a quarter, whatever their miss",
+                              "Under Huber with a knee of 5 kilograms the eight-kilogram misses pull by 1.25, which is the knee over the row count",
+                              "With the knee set to 1 kilogram none of the four is inside it, and every pull is a quarter",
+                            ],
               [0, 1, 2, 3],
               "All four hold. The gradients are (−1, 1, 2, −2) under squared error, a quarter in size everywhere under absolute error, and (−1, 1, 1.25, −1.25) under Huber at a knee of 5, where the two large misses are capped at 5 / 4. A knee of 1 kilogram is smaller than every miss, so the batch costs 5.5 and Huber is absolute error wearing a different name, which is why a knee has to be chosen against the size of the misses it will meet.",
+              {
+                "description": "There are four rows. Residual r means prediction minus observation. Use the following per-row losses and average over rows:\nsquared: r² / 2\nabsolute: |r|\nHuber with knee δ: r²/2 when |r| ≤ δ, otherwise δ(|r| − δ/2)\nHere “pull” means the magnitude of the derivative with respect to that row’s prediction."
+              },
             ),
             trueFalse(
               "Once binary cross-entropy’s value has hit its ceiling of 36.0437, a confidently wrong row has stopped being pushed.",
@@ -594,13 +600,16 @@ export default function LossFunctionsPage() {
             several(
               "Which of these hold of softmax cross-entropy as the page measures it?",
               [
-                "Adding a hundred to every score leaves the probabilities, the price and the pulls unchanged to the last digit",
+                "Adding a common constant to all scores leaves the mathematical probabilities, loss and gradients unchanged",
                 "The pulls on one row sum to zero",
-                "With two classes and the second score held at zero it is the sigmoid loss exactly",
-                "It caps its price at the same 36.0437 as binary cross-entropy",
+                "With two classes and the second score held at zero, its formula agrees with sigmoid cross-entropy away from clipping",
+                "It caps its price at the same 36.0437 as binary cross-entropy"
               ],
               [0, 1, 2],
-              "The softmax only ever reads the gaps between scores, never their level, which is why the row maximum is subtracted before anything is exponentiated. The true class is pushed up by one less its probability and each wrong class pushed down by its own, so the pulls cancel. The two losses agree on value, gradient and probability everywhere except the clip, where the softmax floors at the smallest positive double and reports 40.0 against the sigmoid’s 36.0437.",
+              "Softmax depends on score differences, so a shared additive constant has no effect in exact arithmetic. Floating-point calculations can introduce small rounding differences. Its gradient row sums to zero. With one of two scores fixed at zero, the ordinary unclipped formula agrees with sigmoid cross-entropy; at extreme scores the SDK’s different clipping rules can make the reported losses differ.",
+              {
+                "description": "Use finite scores and an exclusive-class target. The lesson’s softmax loss subtracts the row maximum before exponentiation and floors logged probabilities at the smallest positive float. Its separate binary loss clips probabilities at ε and 1 − ε, giving a maximum loss about 36.0437."
+              },
             ),
         ],
         },
@@ -1040,15 +1049,19 @@ export default function LossFunctionsPage() {
               "The factor is the probability times one less the probability, and far out it is tiny, so the pairing pulls least on the rows that most need pulling. A network trained under it can spend a long time being confidently wrong about the same people. At the halfway guess it is milder rather than broken, costing 0.125 and pulling by 0.125, a quarter of what cross-entropy pulls.",
             ),
             several(
-              "Which of these hold of what Part 5 measured?",
+              "Which conclusions agree with these outlier and label-noise measurements?",
               [
-                "With one weight mistyped as 27.5, the squared-error guess at 176 centimetres fell by about three kilograms",
-                "After four hundred steps absolute error was still stepping, where squared error and Huber had stopped",
-                "Relabelling the 178-centimetre adult as a child made that one row 79 percent of the batch’s loss",
-                "Under the two robust losses the mistyped row stopped being most of the cost",
-              ],
+                              "With one weight mistyped as 27.5, the squared-error guess at 176 centimetres fell by about three kilograms",
+                              "After four hundred steps absolute error was still stepping, where squared error and Huber had stopped",
+                              "Relabelling the 178-centimetre adult as a child made that one row 79 percent of the batch’s loss",
+                              "Under the two robust losses the mistyped row stopped being most of the cost",
+                            ],
               [0, 1, 2],
               "The squared-error line guesses 69.82 kilograms at 176 centimetres where it guessed 72.79, while absolute error moved by a hundredth of a kilogram. Squared error and Huber end with 8 parts in a quadrillion of slope left, and absolute error is still at 0.125 with the outlier, because a sign never shrinks as the guess gets close. The relabelled row costs 5.2055 and lifts the mean loss from 0.0854 to 0.4104. The mistyped row is most of the cost under all three rules, and what the robust rules cap is its say, 6 and 48 percent of the pull against 89.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Prediction at height 176 cm:\nclean squared-error fit: 72.79 kg\nfit after one weight is mistyped as 27.5 kg: 69.82 kg\n\nAfter 400 optimisation steps:\nabsolute-error slope magnitude: 0.125\nsquared/Huber slope magnitude: about 8e-15\n\nRelabelled 178-cm adult as child:\nthat row’s loss: 5.2055; 79% of the batch loss\n\nloss | value over 16 rows | the mistyped row's share of the cost | its share of the pull\nsquared error | 64.18 | 0.9987 | 0.892\nabsolute error | 3.17 | 0.892 | 0.0625, which is one sixteenth\nHuber, knee 5 kg | 13.46 | 0.994 | 0.478"
+              },
             ),
             trueFalse(
               "On the sixteen people the height rule called everyone correctly at scales of 2.5, 5 and 10, while its loss ran from 0.0290 to 0.1910.",
@@ -1067,7 +1080,7 @@ export default function LossFunctionsPage() {
           practice: [
             exercise(
               "Price the four height and weight measurements three ways",
-              ["The line of slope 0.6 through the mean point is weight = 0.6 × height − 34, and it guesses 74, 62, 71 and 65 kilograms for the four height and weight measurements. Score those guesses against the measured weights under SquaredError, AbsoluteError and HuberError with a threshold of 5, and print each loss’s value and its four gradients.", "Part 2 worked these by hand as 20, 6 and 17.75, with gradients (−1, 1, 2, −2), a quarter in size everywhere, and (−1, 1, 1.25, −1.25). Then score the same four under Huber at knees of 1, 6 and 50 kilograms. Section 6 gives 5.5 for the first and section 22 says the last would be squared error. The knee of 6 is not on the page."],
+              ["The predictions and measured weights are supplied as aligned blocks. Measure them with SquaredError, AbsoluteError and HuberError at threshold 5, printing each loss value and its gradient with respect to the predictions.","Then repeat HuberError with thresholds 1, 6 and 50. The threshold is in kilograms, like each residual. Compare how widening it changes which of these particular errors lie in the quadratic region. Keep the output order and precision shown by the required results."],
               `import numpy as np
 from oop_ml import AbsoluteError, HuberError, SquaredError
 
@@ -1101,11 +1114,11 @@ Huber, knee 5  value 17.7500, gradients [-1.0, 1.0, 1.25, -1.25]
 Huber, knee 1 value 5.5000
 Huber, knee 6 value 19.0000
 Huber, knee 50 value 20.0000`,
-              { hints: ["A loss is built with no arguments, apart from HuberError, which takes its threshold. Its measure takes the outputs and the truths as two blocks of the same shape, one row per person and one column here.", "measure answers one object carrying both the value and the gradient, which is section 3’s rule that a caller cannot get one without the other. The gradient has the outputs’ shape, and ravel flattens it to four numbers.", "The threshold is in the target’s own units, kilograms here, so HuberError(threshold=6.0) puts the two four-kilogram misses inside the knee and the two eight-kilogram ones outside it."], check: numberCheck("What does Huber charge the four height and weight measurements at a knee of 6 kilograms?", 19.0, 0.0005, "The four-kilogram misses are inside the knee and cost 8 each, as under squared error. The eight-kilogram misses are outside it and cost 6 × (8 − 6 / 2) = 30 each, so the batch costs (8 + 8 + 30 + 30) / 4 = 19. Widen the knee to 50 and every miss is inside it, which gives squared error’s 20. Narrow it to 1 and none is, which gives 5.5.") },
+              { hints: ["A loss is built with no arguments, apart from HuberError, which takes its threshold. Its measure takes the outputs and the truths as two blocks of the same shape, one row per person and one column here.", "measure answers one object carrying both the value and the gradient, which is section 3’s rule that a caller cannot get one without the other. The gradient has the outputs’ shape, and ravel flattens it to four numbers.", "The threshold is in the target’s own units, kilograms here, so HuberError(threshold=6.0) puts the two four-kilogram misses inside the knee and the two eight-kilogram ones outside it."], check: numberCheck("What does Huber charge the four height and weight measurements at a knee of 6 kilograms?", 19.0, 0.0005, "At threshold six, the smaller residuals use Huber’s quadratic region and the larger residuals use its linear region. The reported value is the mean over the four examples. A threshold large enough to include all these residuals reproduces this SDK’s half-squared-error values on this batch."), question: "How do the three losses respond to the same weight-prediction errors?" },
             ),
             exercise(
               "Score one row of three class scores",
-              ["Section 11 scores a row of 1, 2 and 3 for child, teenager and adult. For each of the three classes in turn taken as the true one, build the one-hot truth, measure the row under SoftmaxCrossEntropy, and print the price, the three pulls and what the pulls sum to.", "With adult true the lesson gives a price of 0.4076 and pulls of 0.0900, 0.2447 and −0.3348, and with child true a price of 2.4076. It never scores the row with teenager true. Finish by adding a hundred to every score with adult true and printing the price again."],
+              ["The row contains raw scores for child, teenager and adult, in that order. Treat each class as the true class in turn, build its one-hot target and measure SoftmaxCrossEntropy. A one-hot target has one at the true class and zero at the others.","Print the loss, the gradient for each score and the sum of those gradients. Finally add the same constant to every score with adult as the target and measure again. The loss accepts raw scores and performs softmax internally."],
               `import numpy as np
 from oop_ml import SoftmaxCrossEntropy
 
@@ -1136,11 +1149,11 @@ print(f"adult true with 100 added to every score, price {shifted.value:.4f}")`,
 teenager true, price 1.4076, pulls [0.09, -0.7553, 0.6652], sum -1.1e-16
 adult    true, price 0.4076, pulls [0.09, 0.2447, -0.3348], sum -1.1e-16
 adult true with 100 added to every score, price 0.4076`,
-              { hints: ["SoftmaxCrossEntropy.one_hot takes a list with one class position per row and the number of classes, and answers a block with a one in the true column and zeros elsewhere. Child is position 0 and adult is position 2.", "The loss applies the softmax itself, so hand it the raw scores and not probabilities. measure answers the value and a gradient with one pull per class score.", "The pull on each score is that class’s probability minus its truth, so you can read the three probabilities back off the pulls by adding one to the pull on the true class."], check: numberCheck("What is the price of the row when teenager is the true class, to four places?", 1.4076, 0.0005, "The softmax gives the three classes 0.0900, 0.2447 and 0.6652 whichever one is true, and the price is the negative logarithm of the probability on the true one, here 0.2447. The three prices are 2.4076, 1.4076 and 0.4076, exactly one apart, because the scores are one apart and the price of a class is the logarithm of the sum less that class’s own score.") },
+              { hints: ["SoftmaxCrossEntropy.one_hot takes a list with one class position per row and the number of classes, and answers a block with a one in the true column and zeros elsewhere. Child is position 0 and adult is position 2.", "The loss applies the softmax itself, so hand it the raw scores and not probabilities. measure answers the value and a gradient with one pull per class score.", "The pull on each score is that class’s probability minus its truth, so you can read the three probabilities back off the pulls by adding one to the pull on the true class."], check: numberCheck("What is the price of the row when teenager is the true class, to four places?", 1.4076, 0.0005, "The probability distribution is fixed by the score row. Choosing another true class changes which probability the negative logarithm scores. Adding a common constant to every score preserves their softmax probabilities and therefore preserves the loss for an unchanged target."), question: "How does the same score row change loss when the true class changes?" },
             ),
             exercise(
               "Walk one line down each loss with a mistyped weight",
-              ["The sixteen rows below are the ideal fifteen and the person at 176 centimetres entered a second time with 27.5 kilograms. Section 18 walks one linear neuron down each loss for four hundred steps at a rate of 0.1, from a flat line at the mean weight, on heights standardised to zero mean and unit spread and weights measured from their mean. Do the same with a one-neuron DenseLayer in a LayerStack.", "For each loss print the slope and intercept in kilograms per centimetre and kilograms, the guess at 176 centimetres, and the largest slope left in the neuron after the last step. Section 18 gives 0.7464 and −61.55 guessing 69.82 for squared error, 0.7908 and −66.75 guessing 72.44 for Huber, and 0.7983 and −67.72 guessing 72.78 for absolute error, and section 19 says absolute error is still stepping by 0.125."],
+              ["The starter contains fifteen clean observations plus a duplicated person's height with a mistyped weight. Fit the supplied one-neuron network independently under each loss, using the same initialisation and training schedule.","Print the slope and intercept converted back to centimetres and kilograms, the predicted weight at 176 cm, and the largest remaining parameter gradient. Keep that gradient distinct from a parameter update: the learning rate scales it when an update is applied."],
               `import numpy as np
 from oop_ml import AbsoluteError, DenseLayer, HuberError, Identity, LayerStack, Neuron, SquaredError
 
@@ -1180,11 +1193,11 @@ for name, loss in losses:
               `squared error  slope 0.7464, intercept -61.55, guess at 176 cm 69.82, slope left 0.0000
 absolute error slope 0.7983, intercept -67.72, guess at 176 cm 72.78, slope left 0.1250
 Huber, knee 5  slope 0.7908, intercept -66.75, guess at 176 cm 72.44, slope left 0.0000`,
-              { hints: ["backward_pass takes the inputs, the targets and the loss and answers the gradients, and stepped_by takes that and a learning rate and answers a new stack. Nothing is changed in place, so the loop reassigns the line each time.", "The stack holds one layer, at position 0. Its weight_matrix is one by one and its bias_vector has one entry, and both are in standardised units until you convert them.", "A backward pass reports largest_movement, the biggest slope anywhere in the network. A walk that has settled reports something near zero there, and one still stepping reports the size of its step."], check: numberCheck("What does the Huber line guess for the person at 176 centimetres, to two places?", 72.44, 0.005, "The clean fifteen put that person at about 72.79 kilograms under every loss. One mistyped row pulls the squared-error guess down to 69.82, because nothing caps how hard a miss of 45 kilograms pulls. Huber caps that row’s pull at the knee over the row count, 5 / 16, so its line gives up only a third of a kilogram, and it still settles, with no slope left, where absolute error is left stepping by 0.125.") },
+              { hints: ["Calculate a backward pass, then reassign the new stack returned by stepped_by. Neither object updates itself just because a gradient was measured.","The learned scalar weight uses standardised height. Convert it using the saved height spread, and account for both saved means when recovering the raw intercept.","largest_movement reports a gradient magnitude in this API. Multiplying by the learning rate would give the corresponding largest update magnitude."], check: numberCheck("What does the Huber line guess for the person at 176 centimetres, to two places?", 72.44, 0.005, "Huber limits the influence of a sufficiently large residual, while half-squared error continues increasing that influence with residual size. The reported prediction shows the consequence on this particular corrupted sample. Compare both the fitted line and the remaining gradients before calling an optimisation run settled."), question: "How much does one mistyped weight move the line fitted under each loss?" },
             ),
             exercise(
               "Relabel one adult and watch the loss, not the accuracy",
-              ["The sixteen people of section 20 are scored by the rule score = (height − 152) / scale, and BinaryCrossEntropy applies the sigmoid itself. For scales of 2.5, 5 and 10, print the mean loss and the accuracy under the true labels, then the mean loss and the accuracy with the 178-centimetre adult relabelled as a child.", "Section 21 gives the three clean losses as 0.0290, 0.0854 and 0.1910 at an accuracy of 1.0, and section 20 gives 0.4104 for the relabelled batch at a scale of 5. The relabelled losses at the other two scales are not on the page. Before running, decide which scale the wrong label will hurt most."],
+              ["Use the supplied height-based raw scores with BinaryCrossEntropy at each of the three scales. Measure the same scores against the original labels and again after one adult is relabelled as a child. The score rule and changed label are already in the starter.","For each scale, print mean loss and classification accuracy for both label sets. Predict which confidence scale will be most affected before checking the results. Feed raw scores to this loss because it applies sigmoid internally."],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy
 
@@ -1220,7 +1233,7 @@ for scale in (2.5, 5.0, 10.0):
               `scale  2.5: loss 0.0290 at accuracy 1.0000, relabelled loss 0.6790 at accuracy 0.9375
 scale  5.0: loss 0.0854 at accuracy 1.0000, relabelled loss 0.4104 at accuracy 0.9375
 scale 10.0: loss 0.1910 at accuracy 1.0000, relabelled loss 0.3535 at accuracy 0.9375`,
-              { hints: ["BinaryCrossEntropy takes raw scores, so hand it the scores as they are, a block of sixteen rows and one column, beside labels of the same shape. Passing probabilities would apply the sigmoid twice.", "measure answers an object with a value, the mean loss over the sixteen rows. The same scores are measured twice, once against each block of labels.", "A sigmoid is above one half exactly where its score is above zero, so the rule calls someone an adult when their score is at least zero, and accuracy is the mean of where that agrees with the label."], check: numberCheck("What is the mean loss at a scale of 2.5 with the 178-centimetre adult relabelled as a child, to four places?", 0.679, 0.0005, "At a scale of 2.5 that person’s score is (178 − 152) / 2.5 = 10.4, and a confidently wrong answer costs roughly its raw score, so the one row costs about 10.4 and a sixteenth of that lands on a batch whose clean loss was 0.0290. The sharpest rule had the lowest clean loss and pays the most for the wrong label, while the accuracy reads 15 of 16 at every scale. The loss measures how confidently the model disagrees with a label, and accuracy only counts that it does.") },
+              { hints: ["BinaryCrossEntropy takes raw scores, so hand it the scores as they are, a block of sixteen rows and one column, beside labels of the same shape. Passing probabilities would apply the sigmoid twice.", "measure answers an object with a value, the mean loss over the sixteen rows. The same scores are measured twice, once against each block of labels.", "A sigmoid is above one half exactly where its score is above zero, so the rule calls someone an adult when their score is at least zero, and accuracy is the mean of where that agrees with the label."], check: numberCheck("What is the mean loss at a scale of 2.5 with the 178-centimetre adult relabelled as a child, to four places?", 0.679, 0.0005, "The sharpest score rule assigns the relabelled example a very small probability of its recorded outcome. That produces a larger loss even though accuracy counts it as just one wrong decision at every scale. The loss reflects confidence as well as agreement with the supplied labels."), question: "Which confidence scale is most affected by changing one recorded label?" },
             ),
           ],
         },

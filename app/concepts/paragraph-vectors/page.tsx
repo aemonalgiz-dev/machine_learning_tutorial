@@ -716,11 +716,14 @@ export default function ParagraphVectorsPage() {
                 <InAModel>
                   This is the shape of an overfitting curve with none of the
                   apparatus of one, and there is nothing held out to detect it
-                  with. The objective being minimised falls monotonically with
-                  passes, since that is what descent does, and the quantity anybody
+                  with. In this recorded run the fitting objective keeps falling,
+                  while the quantity anybody
                   actually wanted turns and comes back down, which is the same
                   disagreement the word2vec page finds between the cost of a
-                  training pair and the separation of two word lists.
+                  training pair and the separation of two word lists. Descent
+                  does not guarantee a decrease after every finite update,
+                  especially with sampled training signals. Check the measured
+                  curve and the held-out behaviour separately.
                 </InAModel>
                 <KeepInMind>
                   One default cannot serve both arrangements here. Twenty passes is
@@ -766,11 +769,15 @@ export default function ParagraphVectorsPage() {
               "Under the bag of words, running more passes on a held-out text keeps improving its cosine to its own subject.",
               false,
               "Twenty passes give 0.8565 against 0.1420 and two hundred give 0.7665 against 0.0924, so the distance to the wrong subject keeps improving while the distance to the right one gets worse, and four hundred passes leave the text at 0.6954. The row is becoming a better description of its own eight particular words, which is exactly what it was asked to do.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Held-out cooking text, distributed bag of words:\npasses  cosine toward cooking  cosine toward sailing\n20      0.8565                 0.1420\n200     0.7665                 0.0924\n400     0.6954                 not needed here\nThe trained word and output tables are held fixed while the document row is inferred."
+              },
             ),
             trueFalse(
               "Watching the objective fall is enough to catch that inference has run too long.",
               false,
-              "The objective being minimised falls monotonically with passes, since that is what descent does, while the quantity anybody actually wanted turns and comes back down. There is nothing held out to detect it with, which is the same disagreement the word2vec page finds between the cost of a training pair and the separation of two word lists.",
+              "In this recorded run the fitting objective keeps falling while the useful subject comparison gets worse. That illustrates a difference between fitting the prediction task and obtaining the representation we wanted. It does not establish that descent always lowers the objective after every finite or sampled update. The word2vec example likewise compares its training objective with a separate measure of the learned representation.",
             ),
         ],
         },
@@ -1108,15 +1115,19 @@ export default function ParagraphVectorsPage() {
           title: "Questions on Parts 5 and 6",
           quiz: [
             choice(
-              "Which comparison does the page use to judge the three ways of placing a text, and which one wins it?",
+              "If clean separation means the least-similar same-subject pair still exceeds the most-similar cross-subject pair, which comparison and winner follow?",
               [
-                "The margin between the least alike pair inside a subject and the most alike pair across the two, which averaging wins at +0.8383",
-                "The mean similarity inside a subject, which distributed memory wins at 0.8974",
-                "The cost in positions, which the bag of words wins",
-                "The cosine of the held-out text to its own subject, which distributed memory wins",
-              ],
+                              "The margin between the least alike pair inside a subject and the most alike pair across the two, which averaging wins at +0.8383",
+                              "The mean similarity inside a subject, which distributed memory wins at 0.8974",
+                              "The cost in positions, which the bag of words wins",
+                              "The cosine of the held-out text to its own subject, which distributed memory wins",
+                            ],
               0,
               "A mean similarity inside a subject can be raised simply by making everything more alike. On the margin the two fitted methods come out at −0.0840 and −0.0442, so their groups overlap, where averaging’s two groups are cleanly apart.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "                         least within  greatest across\ndistributed memory       0.6364        0.7204\ndistributed bag of words 0.4552        0.4994\naveraged word vectors    0.9935        0.1552\n\nDistributed memory’s mean within-cooking cosine is 0.8974.\nThe strict separation margin is least within minus greatest across."
+              },
             ),
             choice(
               "The same eight words were inferred in two arrangements and, as a control, from two starting draws. Where did the order move the answer more than the draw did?",
@@ -1143,13 +1154,16 @@ export default function ParagraphVectorsPage() {
             several(
               "Which of these make a held-out position something other than a function of the text alone?",
               [
-                "The starting draw, since two draws agree only to 0.6076 at twenty passes",
-                "The number of passes, which the caller picks",
-                "The word table, which the descent goes on adjusting while it places the text",
-                "The order of the text’s own words, which both arrangements read",
-              ],
+                              "The starting draw, since two draws agree only to 0.6076 at twenty passes",
+                              "The number of passes, which the caller picks",
+                              "The word table, which the descent goes on adjusting while it places the text",
+                              "The order of the text’s own words, which both arrangements read",
+                            ],
               [0, 1],
-              "The definition names a unique answer only if the quantity has a unique minimum and the search is run until it gets there. Neither holds, since the objective is not convex in the row and the caller stops the search, so the position depends on the text, the draw and the pass count. More passes narrow the spread without closing it, with two draws agreeing to 0.9823 at two hundred. The word table and the output table are frozen while a text is placed, and the bag of words reads no order at all, answering 0.9996 and 0.9998 across two arrangements.",
+              "A finite optimisation run can depend on its initial row and the number of passes. The measured starting-draw comparison demonstrates that dependence here. The word table is frozen during inference, and the bag-of-words variant cannot use word order. None of this requires assuming that every document-inference objective is non-convex.",
+              {
+                "description": "Infer a new document row while keeping the learned word and output tables frozen. The caller chooses a starting draw and a finite pass budget. In distributed memory, two starting draws give inferred-vector cosine 0.6076 at 20 passes and 0.9823 at 200. Distributed bag of words discards the order of words."
+              },
             ),
             trueFalse(
               "A text of entirely unknown words comes back from this method with a position of ordinary length.",
@@ -1163,7 +1177,10 @@ export default function ParagraphVectorsPage() {
           practice: [
             exercise(
               "Fit the thirty documents under both arrangements",
-              ["The starter draws the collection of Part 1, fifteen cooking documents and then fifteen sailing ones, eight words each. Fit ParagraphVectors to it under each arrangement at a width of eight, a window of three, thirty passes, a step size of 0.1, seed 0 and a minimum count of 1.", "For each fit print the mean cosine between two cooking documents, between two sailing documents, and between one of each, to four places. Compare the last figure with the other two and not with zero."],
+              [
+  "Fit the supplied thirty documents with DISTRIBUTED_MEMORY and DISTRIBUTED_BAG_OF_WORDS using the stated width eight, window three, thirty passes, rate 0.1, seed zero and minimum count one.",
+  "For each print mean cosine among cooking-document pairs, among sailing-document pairs and across topics. The first fifteen documents are cooking."
+],
               `from itertools import combinations
 from statistics import mean
 
@@ -1219,11 +1236,17 @@ for architecture in ParagraphArchitecture:
   two cooking 0.8974   two sailing 0.8696   one of each 0.2811
 DISTRIBUTED_BAG_OF_WORDS
   two cooking 0.7763   two sailing 0.8078   one of each 0.1445`,
-              { hints: ["ParagraphArchitecture has two members, DISTRIBUTED_MEMORY and DISTRIBUTED_BAG_OF_WORDS, and looping over the enum visits both.", "After fit, model.document_vectors holds one row per training document, and its similarity(first, second) takes two positions in the collection.", "The cooking documents are positions 0 to 14 and the sailing ones 15 to 29. combinations(range(15), 2) gives every cooking pair once."], check: numberCheck("Under distributed memory, what is the mean cosine between a cooking document and a sailing one, to four places?", 0.2811, 5e-05, "It is positive because every document is trained against one shared table of output rows, so every position picks up a component pointing the same way. The figure to read is the gap to the 0.8974 and 0.8696 inside a subject, and no fit was told which document belonged to which list.") },
+              { hints: [
+  "Use each distinct same-topic pair once; exclude self-pairs.",
+  "Compare cross-topic similarity with both within-topic means rather than assuming its useful reference must be zero."
+], check: numberCheck("Under distributed memory, what is the mean cosine between a cooking document and a sailing one, to four places?", 0.2811, 5e-05, "The distributed-memory cross-topic mean is 0.2811. Its significance comes from comparison with the two within-topic means, not from closeness to zero alone."), question: "Do the two paragraph-vector objectives separate the supplied document topics?" },
             ),
             exercise(
               "Give the held-out cooking text twenty passes, then two hundred",
-              ["Part 4 says the published twenty passes file the held-out cooking text under sailing. The number of passes a new text is given is the inference_epochs field. Fit distributed memory, the default arrangement, once with twenty and once with two hundred, and place butter garlic onion simmer broth whisk flour ladle with each.", "Print the mean cosine from the inferred position to the fifteen cooking documents and to the fifteen sailing ones, to four places, and the positions of the five documents it comes out nearest. Positions 15 and above are sailing documents."],
+              [
+  "Use distributed memory with the supplied settings and compare inference_epochs=20 with 200 on the held-out cooking text.",
+  "For each print mean cosine to the fifteen cooking and fifteen sailing training documents and the zero-based indices of its five nearest documents. Indices from fifteen onward refer to sailing documents."
+],
               `import numpy as np
 from oop_ml import ParagraphVectors, cosine_similarity
 
@@ -1276,11 +1299,17 @@ for passes in (20, 200):
     print(f"{passes:3d} passes: to cooking {to_cooking:.4f}   to sailing {to_sailing:.4f}   nearest {nearest}")`,
               ` 20 passes: to cooking 0.4786   to sailing 0.7608   nearest [26, 28, 22, 16, 23]
 200 passes: to cooking 0.9081   to sailing 0.1405   nearest [10, 1, 3, 9, 0]`,
-              { hints: ["model.infer_vector(text) runs the descent for a text the fit never saw and answers its position as an array of eight numbers.", "model.document_vectors.vectors is the fitted table, thirty rows of eight. cosine_similarity(first, second) compares two arrays.", "model.document_vectors.similar_to_vector(vector, 5) answers the positions of the five nearest fitted documents."], check: numberCheck("At twenty passes, what is the mean cosine from the held-out cooking text to the cooking documents, to four places?", 0.4786, 5e-05, "Against 0.7608 to the sailing documents, so the text is in the wrong half and all five of its nearest documents are sailing ones. A new row starts at a short random draw and takes only its share of each step beside word rows nearly six times as long as a document’s, so twenty passes have not carried it far enough. Two hundred give 0.9081 against 0.1405.") },
+              { hints: [
+  "Training a document table and optimising a vector for new text are separate procedures.",
+  "Keep the source collection/settings fixed while changing the new-text inference budget."
+], check: numberCheck("At twenty passes, what is the mean cosine from the held-out cooking text to the cooking documents, to four places?", 0.4786, 5e-05, "At twenty inference passes the cooking-reference mean is 0.4786, lower than its sailing-reference mean. The new-text optimisation budget affects this placement."), question: "Can too few inference steps misplace an otherwise familiar-topic paragraph?" },
             ),
             exercise(
               "Place the sailing text, and see what twenty passes was reading",
-              ["The lesson follows the cooking text and never quotes the other held-out text, anchor tide rudder harbour keel gust mooring mainsail. Place both texts at twenty passes and at two hundred under distributed memory, and print the same two means and five nearest documents for each.", "Look at the twenty-pass rows first. Before deciding the sailing text was placed correctly there, compare its five nearest documents with the cooking text’s."],
+              [
+  "Infer both supplied cooking and sailing probes at twenty and two hundred inference passes under the stated distributed-memory setup.",
+  "For every probe/budget pair print both topic mean cosines and five nearest document indices. Compare the actual neighbour lists as well as whether their labels appear plausible."
+],
               `import numpy as np
 from oop_ml import ParagraphVectors, cosine_similarity
 
@@ -1340,7 +1369,10 @@ for passes in (20, 200):
  20 passes, sailing text: to cooking 0.3339   to sailing 0.6671   nearest [26, 28, 22, 16, 23]
 200 passes, cooking text: to cooking 0.9081   to sailing 0.1405   nearest [10, 1, 3, 9, 0]
 200 passes, sailing text: to cooking 0.2827   to sailing 0.9025   nearest [16, 20, 19, 28, 22]`,
-              { hints: ["Nothing new is needed from the library. The inner loop is the body of the second problem run once per text.", "Fit once per pass count, outside the inner loop, since both texts are placed against the same frozen tables."], check: numberCheck("At two hundred passes, what is the mean cosine from the held-out sailing text to the sailing documents, to four places?", 0.9025, 5e-05, "At twenty passes the sailing text reads 0.6671 to its own half, which looks right, but its five nearest documents are the very five the cooking text had, and both texts began from the same starting draw. Part 5 reached the same finding with its control, that at twenty passes the descent has not gone far enough for anything but the starting point to matter. By two hundred passes each text sits with its own subject, 0.9025 here beside the cooking text’s 0.9081.") },
+              { hints: [
+  "A correctly labelled topic on one probe can hide a common initial placement shared by unrelated probes.",
+  "Use the document-index/topic mapping from the supplied collection for both probes."
+], check: numberCheck("At two hundred passes, what is the mean cosine from the held-out sailing text to the sailing documents, to four places?", 0.9025, 5e-05, "With two hundred passes, the sailing-reference mean is 0.9025. Comparing both probes reveals whether their neighbours reflect text content rather than a shared early inference state."), question: "Do two different new texts really get different neighbours after short inference?" },
             ),
           ],
         },

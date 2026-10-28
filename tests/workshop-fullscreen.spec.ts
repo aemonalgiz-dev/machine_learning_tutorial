@@ -1,3 +1,4 @@
+import { mockAccountBackend, accountBackendFor, waitForAccountReady } from "./helpers/account-backend";
 import { expect, test, type Locator } from "@playwright/test";
 import { assemble } from "../lib/builds/engine";
 import { DELIVERY_PREDICTOR_BUILD } from "../lib/builds/regression-journey";
@@ -10,8 +11,10 @@ const bounds = async (locator: Locator) => {
 };
 const floorScroll = (floor: Locator) => floor.evaluate(element => ({ left: element.scrollLeft, top: element.scrollTop }));
 
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
 test("expanded desktop workspace reaches every edge and gives its height to the floor and toolbox", async ({ page }) => {
-  await page.goto("/lab/statistics");
+  await page.goto("/lab/statistics"); await waitForAccountReady(page);
   const workshop = page.getByTestId("construction-workshop");
   const expand = workshop.getByRole("button", { name: "Expand floor", exact: true });
   await expand.scrollIntoViewIfNeeded();
@@ -67,18 +70,14 @@ test("expanding and opening details preserve the learner's layout, zoom, scroll 
       : piece.tool === "add" ? { x: 1200, y: 220 }
       : { x: 2400, y: 1600 }
   ) }));
-  await page.addInitScript(savedGraph => {
-    const key = "workshop:regression-delivery-rule:v1";
-    const value = { graph: savedGraph, attemptId: "fullscreen-fixture", undo: [], redo: [], caseIndex: 0, results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0, example: false, animate: false, zoom: .75 };
-    localStorage.setItem(`fitlab.learning.v1:guest:${key}`, JSON.stringify({ key, value, revision: 0, mutationId: "fullscreen-fixture", dirty: true }));
-  }, graph);
-  await page.goto("/lab/simple-linear-regression");
+  accountBackendFor(page).seed("workshop:regression-delivery-rule:v1", { graph, attemptId: "fullscreen-fixture", undo: [], redo: [], caseIndex: 0, results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0, example: false, animate: false, zoom: .75 });
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   const workshop = page.getByTestId("construction-workshop").filter({ visible: true });
   const floor = workshop.getByLabel("Construction floor", { exact: true });
   await floor.evaluate(element => { element.scrollLeft = 123; element.scrollTop = 117; });
   const originalScroll = await floorScroll(floor);
   const scale = await workshop.getByTestId("construction-floor").evaluate(element => getComputedStyle(element).transform);
-  const savedGraph = () => page.evaluate(() => JSON.parse(localStorage.getItem("fitlab.learning.v1:guest:workshop:regression-delivery-rule:v1")!).value.graph);
+  const savedGraph = () => accountBackendFor(page).value<{ graph: typeof graph }>("workshop:regression-delivery-rule:v1")!.graph;
   expect(await savedGraph()).toEqual(graph);
   await workshop.getByRole("button", { name: "Expand floor", exact: true }).click();
   expect(await floorScroll(floor)).toEqual(originalScroll);
@@ -100,7 +99,7 @@ test("expanding and opening details preserve the learner's layout, zoom, scroll 
 
 test("a narrow expanded workspace keeps the drawer usable without widening or shifting the canvas", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/lab/statistics");
+  await page.goto("/lab/statistics"); await waitForAccountReady(page);
   const workshop = page.getByTestId("construction-workshop");
   await workshop.getByRole("button", { name: "Expand floor", exact: true }).click();
   const fullscreen = page.getByRole("dialog", { name: "Expanded workshop", exact: true });
@@ -130,7 +129,7 @@ test("a narrow expanded workspace keeps the drawer usable without widening or sh
 });
 
 test("a constructed customer-billing matrix has room to inspect in the expanded workspace", async ({ page }, testInfo) => {
-  await page.goto("/lab/linear-algebra");
+  await page.goto("/lab/linear-algebra"); await waitForAccountReady(page);
   await page.getByRole("navigation", { name: "Journey stages", exact: true }).getByRole("button", { name: "Apply one price list to every customer", exact: true }).click();
   const workshop = page.getByTestId("construction-workshop");
   await workshop.locator("summary", { hasText: /^Stuck\? Inspect a worked construction$/ }).click();

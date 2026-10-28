@@ -1,9 +1,15 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
 import type { Construction } from "../lib/builds/engine";
-import { openFullWorkshop } from "./helpers/open-workshop";
+import { openFullWorkshop, showEarlierWorkshop } from "./helpers/open-workshop";
+import { mockAccountBackend, waitForAccountReady } from "./helpers/account-backend";
+import { workshopRecord } from "./helpers/workshop-record";
 
-async function open(page: Page) {
-  await openFullWorkshop(page, "workshop-guide");
+async function open(page: Page, signedIn = false) {
+  if (signedIn) {
+    await page.goto("/lab/workshop-guide");
+    await waitForAccountReady(page);
+    await showEarlierWorkshop(page);
+  } else await openFullWorkshop(page, "workshop-guide");
   await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
 }
 async function point(locator: Locator) {
@@ -108,8 +114,8 @@ for (const direction of ["forward", "backward", "vertical"] as const) {
         { id: "output", tool: "output", x: direction === "forward" ? 950 : 32, y: direction === "vertical" ? 650 : 100, settings: {} },
       ], connections: [{ from: "source", to: "output", port: 0 }],
     };
-    await page.addInitScript(data => localStorage.setItem("fitlab-construction-v1:workshop-guide", JSON.stringify(data)), graph);
-    await open(page);
+    await mockAccountBackend(page, { records: [{ key: "workshop:workshop-guide:v1", value: workshopRecord(graph) }] });
+    await open(page, true);
     await expect(page.getByTestId("connection-path")).toHaveCount(1);
     await page.getByRole("button", { name: "Fit construction", exact: true }).click();
     await page.getByLabel("Construction floor", {exact:true}).scrollIntoViewIfNeeded();

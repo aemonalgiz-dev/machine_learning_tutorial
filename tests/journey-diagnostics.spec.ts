@@ -5,6 +5,21 @@ import { journeyFor } from "../lib/builds/journey";
 import { assemble, constant, op, source, same } from "../lib/builds/engine";
 import { TOOLS } from "../lib/builds/tools";
 import { inspectJourneyChange } from "../lib/builds/journey-diagnostics";
+import { validConstructionForBuild } from "../lib/builds/workshop-session";
+
+test("saved graph validation accepts long arranged chains while rejecting unbounded coordinates", () => {
+  const build = buildById["graph-optional-patterns"];
+  const graph = assemble(build.recipe, TOOLS);
+  expect(Math.max(...graph.pieces.map(piece => piece.x))).toBeGreaterThan(5000);
+  expect(validConstructionForBuild(graph, build, TOOLS)).toBe(true);
+
+  const outsideFloor = structuredClone(graph);
+  outsideFloor.pieces[0].x = Number.MAX_SAFE_INTEGER;
+  expect(validConstructionForBuild(outsideFloor, build, TOOLS)).toBe(false);
+  const nonFinite = structuredClone(graph);
+  nonFinite.pieces[0].x = Infinity;
+  expect(validConstructionForBuild(nonFinite, build, TOOLS)).toBe(false);
+});
 
 test("journey diagnosis runs every authored changed case without inventing a failure for a general solution", () => {
   const caseCounts: Record<number, number> = {};

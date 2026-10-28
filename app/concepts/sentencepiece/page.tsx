@@ -76,11 +76,11 @@ export default function SentencePiecePage() {
                     sentence or belongs to an abbreviation.
                   </p>
                   <p>
-                    A richer pre-tokenizer may split punctuation, contractions or
-                    hyphenated expressions as well. Those are additional decisions.
-                    SentencePiece lets us train from the text stream without first
-                    supplying a linguistic word segmentation.
-                  </p>
+                  A pre-tokenizer is a preliminary rule that splits text before the learned vocabulary works on it. Such a rule might separate punctuation or contractions as well as spaces. Each choice restricts which later pieces can span those boundaries.
+                </p>
+                <p>
+                  SentencePiece lets us train from a text stream without first supplying linguistic word segmentation. The implementation still has input normalization and configuration choices, so we will inspect what its space marker preserves and what it changes.
+                </p>
                 </>
                 <KeepInMind>
                   There are two questions here and they are usually asked
@@ -1079,7 +1079,11 @@ export default function SentencePiecePage() {
           practice: [
             exercise(
               "Fit the four words under two marks",
-              ["Part 3 ran fifteen merges on the four words and watched the mark join last, and Part 6 fitted the same words again with an underscore for the mark and found 18 of the 27 rows in common. Fit both with the merging learner, asking for 30 rows. For each, print how many rows the table holds and how many of them begin with the mark, the merges in the order they were learned, and the cut of lowest. Then print how many rows the two tables share.", "The usual mark is the character numbered 9601, which many consoles cannot print, so the script writes every mark as an underscore before printing, which is also what lets the two tables be compared row for row. The count of rows beginning with the mark is not in the lesson for either fit."],
+              [
+  "Fit the supplied four-word corpus with SentencePiece’s BYTE_PAIR learner twice, using its default whitespace marker and an underscore marker. Request thirty rows from each.",
+  "For each fit print the actual vocabulary size, rows beginning with its marker, learned merge pairs and lowest’s pieces. Display either marker as an underscore so the report is readable.",
+  "Replace each marker with an underscore for display and for the final shared-row comparison. This compares piece structure after marker renaming, rather than literal marker spellings. Alphabetical tie-breaking during fitting still uses the real code points."
+],
               `from oop_ml import SentencePiece, SubwordAlgorithm
 
 corpus = [
@@ -1131,11 +1135,21 @@ codepoint 95: 27 rows, 14 begin with the mark
   merges: e+s es+t _+l _l+o _lo+w _+n _n+e _ne+w _new+est _+w _w+i _wi+d _wid+est _low+e _lowe+r
   lowest: _low est
 18 rows in common`,
-              { hints: ["The learner is chosen at construction with algorithm=SubwordAlgorithm.BYTE_PAIR, and the mark with whitespace_marker. Asking for 30 rows is not refused when the corpus runs out of pairs at 27.", "merges is iterable in the order the merges were learned, and each merge has a left and a right. The vocabulary is iterable too, one row at a time.", "Two sets of rows are compared with the & operator, and that only means something once both are written with the same mark."], check: numberCheck("How many of the 27 rows begin with the mark when the mark is an underscore?", 14, 0, "An underscore is codepoint 95 and sorts before every lowercase letter, so a pair beginning with it wins each tie it enters and every word is grown outward from its space, the mark with l, then with lo, then with low. That leaves the mark itself and thirteen pieces that start a word. Under the usual mark at 9601 the same ties go the other way and only five rows begin with it, the mark, low, newest, widest and lower. Both cut lowest identically, so nine rows of 27 turned on a codepoint without changing this answer.") },
+              {
+question: "Can changing a boundary marker change which merge wins a tie?",
+ hints: [
+  "Set algorithm=SubwordAlgorithm.BYTE_PAIR and whitespace_marker at construction.",
+  "Read the actual vocabulary size after fitting; a requested ceiling need not be reached.",
+  "Keep the marker-normalised row sets for the final intersection. The comparison deliberately treats the two marker spellings as equivalent."
+], check: numberCheck("How many of the 27 rows begin with the mark when the mark is an underscore?", 14, 0, "With an underscore marker, fourteen rows begin with that mark. Its different code-point ordering changes tied merge choices in this implementation, although both fits segment lowest identically here.") },
             ),
             exercise(
               "Find where the two schemes cross on the sentence",
-              ["Part 5 fitted both ways of recording a boundary on the eighteen sentences at fourteen sizes. Its table has the front-marked fit ahead on the held-out sentence at 60 rows, 38 pieces against 39, and behind at 80, and says the curves cross in between. Fit both at 60, 70 and 137 rows, the front-marked one with the merging learner and the other with its byte rows switched off, and at each size print what the corpus costs, what the sentence costs, and whether the sentence comes back exactly.", "The rows at 60 and 137 are in the lesson’s table. The row at 70 is not."],
+              [
+  "Compare a front-marked SentencePiece BYTE_PAIR fit with the end-marked BPE fit at requested sizes 60, 70 and 137. Disable byte fallback on the end-marked model.",
+  "At each setting print the actual vocabulary size, total corpus tokens, held-out Dr. Alvarez sentence tokens and whether decoding that sentence is exact.",
+  "Use the same eighteen training sentences. Length and exact recovery are separate outcomes, and the actual size can finish below its requested ceiling."
+],
               `from oop_ml import BytePairEncoding, SentencePiece, SubwordAlgorithm
 
 sentences = [
@@ -1210,11 +1224,21 @@ for size in [60, 70, 137]:
 70 behind: 70 rows, corpus 460, sentence 32, exact False
 137 in front: 136 rows, corpus 261, sentence 28, exact True
 137 behind: 137 rows, corpus 263, sentence 25, exact False`,
-              { hints: ["fit learns in place and also answers the fitted model, so calling it inside the loop is enough.", "A corpus costs the sum of what each of its texts encodes to. encode answers an object with an n_tokens and the ids that decode takes back.", "The front-marked fit stops at 136 rows when asked for 137, since no pair is left that occurs twice, and vocabulary.n_tokens says so."], check: numberCheck("How many pieces does the front-marked fit read the held-out sentence in at 70 rows?", 36, 0, "At 60 rows the front-marked fit is still one piece ahead on the sentence, 38 against 39, and at 70 it is four behind, 36 against 32, so the crossing falls between those two sizes. On the corpus it stays ahead, 444 pieces against 460. Both come from the same place. The fifteen alphabet rows it saved are spent as extra merges, and many of its merges build pieces that begin with a space, which pay on words the corpus has seen start and not on a sentence made of words it never held. Only the front-marked fit gives the sentence back at any size.") },
+              {
+question: "Which boundary convention shortens familiar text, and which preserves the new sentence?",
+ hints: [
+  "Fit a fresh model for each requested size and convention.",
+  "Sum encode(text).n_tokens over the corpus and inspect the held-out sentence separately.",
+  "Test decode(encoding.ids) == sentence. Comparing token counts cannot detect a lost character or space."
+], check: numberCheck("How many pieces does the front-marked fit read the held-out sentence in at 70 rows?", 36, 0, "At seventy requested rows the front-marked fit uses 36 pieces for the held-out sentence. It is longer than the comparison there, while still recovering the sentence exactly.") },
             ),
             exercise(
               "Measure what the round trip does not keep",
-              ["Part 4 said the round trip is exact up to a normalisation, and listed what the defaults discard. A run of whitespace of any length and kind comes back as one space, and whitespace at the two ends is dropped. Fit the four words with the merging learner and send five texts out and back, printing each text, its length, how many pieces it became, what came back and its length.", "The last text is three words laid out over three indented lines. The lesson says this normalisation would cost every level of indentation in a page of code without measuring a case, so count the characters that go in and the characters that come back."],
+              [
+  "Fit the supplied four-word corpus with the front-marked BYTE_PAIR learner. Encode and decode all five probe strings, including repeated spaces, a tab and indented lines.",
+  "For each probe print its escaped original text and length, token count, escaped decoded text and length, and exact-equality result.",
+  "The default normalisation collapses whitespace runs and trims outer whitespace. An exact comparison against the original layout will reveal that loss even when every word survives."
+],
               `from oop_ml import SentencePiece, SubwordAlgorithm
 
 corpus = [
@@ -1262,7 +1286,12 @@ for text in texts:
 ' low lower ' (11) -> 2 pieces -> 'low lower' (9), exact False
 'low\\tlower' (9) -> 2 pieces -> 'low lower' (9), exact False
 'low\\n    lower\\n        lowest' (28) -> 4 pieces -> 'low lower lowest' (16), exact False`,
-              { hints: ["encode answers an object with the ids and an n_tokens, and decode takes the ids and answers a string.", "Writing {text!r} in an f-string prints the text the way Python would write it in source, so a tab shows as a backslash and a t and a line break as a backslash and an n."], check: numberCheck("How many characters come back from the indented text of 28?", 16, 0, "Each line break together with the indentation after it is one run of whitespace, five characters the first time and nine the second, and each run becomes one mark and comes back as one space. So 14 characters of whitespace come back as 2 and the 28 characters come back as 16, with every word intact and the layout gone. Nothing was refused and nothing warned, and the pieces are the same four whether the words were indented or not, which is why the text cannot be recovered from them.") },
+              {
+question: "What layout information disappears during whitespace normalisation?",
+ hints: [
+  "Use repr or an f-string’s !r conversion so tabs, line breaks and indentation are visible.",
+  "Compare decode(encode(text).ids) with the original input, not with an already normalised copy."
+], check: numberCheck("How many characters come back from the indented text of 28?", 16, 0, "Sixteen characters return from the indented input. The words remain but the distinct line breaks and indentation have collapsed into ordinary spaces.") },
             ),
           ],
         },

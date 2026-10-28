@@ -9,6 +9,7 @@ import type { Construction } from "@/lib/builds/engine";
 import type { JourneyData } from "@/lib/builds/journey";
 import { BotieSays } from "@/components/site/Botie";
 import { WorkshopValue } from "./WorkshopValue";
+import { caseLabel } from "@/lib/builds/case-labels";
 
 const button = "min-h-11 rounded-lg border border-line bg-raised px-4 py-2 text-sm font-semibold hover:border-accent-fill";
 const primary = `${button} !border-accent-fill !bg-accent-fill text-accent-ink`;
@@ -50,7 +51,7 @@ export function JourneyDiagnostic({ data, graph, recordKey, onAssistance, childr
       {children}
     </>}
     <details className="rounded-xl border border-line bg-surface p-4" open={!state.committed} data-testid="journey-diagnostic-evidence">
-      <summary className="cursor-pointer text-sm font-semibold">{state.committed ? "Your decision and first run" : `Send ${changed.name.toLowerCase()} through your construction`}</summary>
+      <summary className="cursor-pointer text-sm font-semibold">{state.committed ? "Your decision and first run" : `Send ${caseLabel(build, changed).toLowerCase()} through your construction`}</summary>
       <p className="mt-3 text-sm leading-7 text-muted">The inputs that changed are {sourceChanges}. This runs the pieces currently saved in your construction, including edits you have not tested.</p>
       {!state.observed && <div className="mt-4">
         {graph ? <button className={primary} onClick={run}>Run my construction on this case</button> : <>
@@ -66,8 +67,8 @@ export function JourneyDiagnostic({ data, graph, recordKey, onAssistance, childr
               : "Your construction runs, but its result does not meet this case's objective. Follow the changed inputs through the pieces before deciding what to adjust."}
           </BotieSays>}
           <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-            <div className="min-w-0"><p className="mb-2 text-xs text-muted">Same construction on {challenges.variation.previous.name.toLowerCase()}</p>{result.earlierResult?.error ? <p className="text-sm">{result.earlierResult.error.message}</p> : <WorkshopValue value={result.earlierResult?.output ?? null} />}</div>
-            <div className="min-w-0"><p className="mb-2 text-xs text-accent">Your result for {changed.name.toLowerCase()}</p><div data-testid="journey-diagnostic-output">{result.trace.error ? <p className="text-sm">{diagnosticPieceName(result.graph, result.trace.error.id, build)}: {result.trace.error.message}</p> : <WorkshopValue value={result.trace.output ?? null} />}</div></div>
+            <div className="min-w-0"><p className="mb-2 text-xs text-muted">Same construction on {caseLabel(build, challenges.variation.previous).toLowerCase()}</p>{result.earlierResult?.error ? <p className="text-sm">{result.earlierResult.error.message}</p> : <WorkshopValue value={result.earlierResult?.output ?? null} />}</div>
+            <div className="min-w-0"><p className="mb-2 text-xs text-accent">Your result for {caseLabel(build, changed).toLowerCase()}</p><div data-testid="journey-diagnostic-output">{result.trace.error ? <p className="text-sm">{diagnosticPieceName(result.graph, result.trace.error.id, build)}: {result.trace.error.message}</p> : <WorkshopValue value={result.trace.output ?? null} />}</div></div>
           </div>
           <details className="rounded-lg border border-line p-3"><summary className="cursor-pointer text-sm font-semibold">Follow the values through my pieces</summary><ol className="mt-4 max-h-96 space-y-4 overflow-auto">
             {result.trace.steps.map((step, index) => <li key={step.id} className="min-w-0 rounded-lg bg-background p-3">
@@ -91,7 +92,7 @@ export function JourneyDiagnostic({ data, graph, recordKey, onAssistance, childr
           <label className="block text-sm font-semibold">Your reasoning, if you want to keep a note
             <textarea className="mt-2 block min-h-20 w-full rounded-lg border border-line bg-background p-3 text-sm font-normal" value={state.reason} onChange={event => saved.set(previous => ({ ...previous, reason: event.target.value }))} />
           </label>
-          <label className="block text-sm font-semibold">What do you expect your next construction to do with {changed.name.toLowerCase()}?
+          <label className="block text-sm font-semibold">What do you expect your next construction to do with {caseLabel(build, changed).toLowerCase()}?
             <textarea required className="mt-2 block min-h-20 w-full rounded-lg border border-line bg-background p-3 text-sm font-normal" value={state.prediction} onChange={event => saved.set(previous => ({ ...previous, prediction: event.target.value }))} />
           </label>
           <p className="text-xs leading-6 text-muted">A value, a change in the output, or a description of the operation is enough. These notes are for comparing your reasoning with what the machine does; they are not graded.</p>

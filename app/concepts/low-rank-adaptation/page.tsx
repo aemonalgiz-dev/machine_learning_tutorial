@@ -29,7 +29,7 @@ export default function Page() {
 { title: "Part 1. Freeze the Base and Describe a Correction", content: <>
 <SubSection title="1. Separate what stays fixed from what learns">
 <p>{"Full fine-tuning allows the pretrained weights to change. In a wide projection, every input-output coordinate pair has a weight, so there may be many values to update and save for each task. Could we describe a useful change with fewer trainable numbers? We will keep the original matrix fixed and build an additional update from smaller factors."}</p>
-<p>{"LoRA freezes a pretrained weight matrix and adds a trainable low-rank update. During task training, gradients update the adapter factors while the base matrix stays fixed. The full model still runs a forward and backward computation through the relevant paths."}</p>
+<p>{"Start with weights the model has already learned; these are the pretrained weights. Keep them fixed during this task's training. Then let an extra route calculate a correction to their output. LoRA represents that correction using two smaller matrices, called adapter factors. We will see what their narrow connection allows before naming the rank constraint."}</p>
 <p>{"It helps to name the two things separately. The base is the pretrained matrix. It is frozen, which means the optimizer never writes to it. The correction is a second matrix of the same shape that is added to the base. The adapted projection is their sum, and only the correction is learned."}</p>
 <Equation>{"Adapted projection = base     + correction\n                     (frozen)   (learned)"}</Equation>
 <p>{"The tiny projection on this page maps four coordinates to four, so it has 16 weights. Full fine-tuning would learn and store 16 changed numbers for a task. The adapter worked through below describes its correction with 8."}</p>
@@ -62,14 +62,16 @@ export default function Page() {
 <p>{"A common initialization makes one factor zero so the initial correction is zero while the other factor is nonzero. Setting both factors to zero would give both a zero first derivative through their product. The live example instead uses nonzero chosen factors so the correction is visible immediately."}</p>
 <WhyThisWorks title="Why both factors cannot start at zero">
 <p>{"The correction is a product, and the slope of a product with respect to one factor is the other factor. The gradient that reaches A is the loss’s gradient multiplied by B, and the gradient that reaches B is multiplied by x A. If both factors are zero, both gradients are zero, and neither factor ever leaves zero."}</p>
-<p>{"If only B starts at zero, the correction is still zero at the start, so the adapted model begins as exactly the pretrained one. But x A is not zero, so B receives a gradient on the first step. Once B has moved, A receives one too."}</p>
+<p>{"If only B starts at zero, the initial correction is zero and the adapted model begins as the pretrained one. A nonzero A leaves a route through which B can receive a gradient on the first step. Once B has moved, A can receive one too. A particular input or upstream derivative can still make a gradient zero; the initialization makes learning possible rather than guaranteeing a change on every example."}</p>
 </WhyThisWorks>
 </SubSection>
 <SubSection title="4. Count parameters instead of assuming a saving">
 <p>{"The full projection has one parameter for each input-output pair. The adapter has one matrix on each side of the rank bottleneck."}</p>
 <Equation>{"Full projection: d_in × d_out\nAdapter:         (d_in × r) + (r × d_out)\n\nFor a four-by-four projection:\nFull update = 4 × 4 = 16\nRank one adapter = (4 × 1) + (1 × 4) = 8\nRank two adapter = (4 × 2) + (2 × 4) = 16\nRank three adapter = (4 × 3) + (3 × 4) = 24"}</Equation>
 <p>{"The default rank-one case saves trainable parameters. Rank two breaks even on this tiny matrix; rank three uses more. Large projection widths allow useful low ranks to be a much smaller fraction of a full update."}</p>
-<p>{"The break-even point can be read off the two formulas. For a square projection of width d the full update has d × d parameters and the adapter has 2 × d × r, so the adapter is the smaller of the two only while r is less than half of d. At a width of four that leaves rank one and nothing else, which is what the counts above show. The same two formulas at larger widths give the picture the method was designed for."}</p>
+<p>{"For a square projection, we can find the ranks that actually save parameters by comparing the two counts. Let d be its width and r be the adapter's intermediate width."}</p>
+<Equation>{"Adapter is smaller when:\n2 × d × r < d × d\n\nFor positive d:\nr < d / 2\n\nAt width d = 4:\nr < 2"}</Equation>
+<p>{"For a positive integer rank on this four-coordinate example, only rank one gives a saving. The larger examples below use the same counting rule."}</p>
 <NumberTable headings={["Width d", "Rank r", "Full update, d × d", "Adapter, 2 × d × r", "Adapter as a share of full"]} rows={[["4", "1", "16", "8", "50%"], ["64", "4", "4,096", "512", "12.5%"], ["256", "4", "65,536", "2,048", "3.1%"], ["1,024", "8", "1,048,576", "16,384", "1.6%"]]} caption="Parameter counts for square projections. They are counts from the two formulas, and they say nothing about whether a given rank is enough for a task." />
 <p>{"The adapter’s count grows in step with the width, and the full update’s grows with the width squared. So the wider the projection, the smaller the share a fixed rank takes."}</p>
 </SubSection>
@@ -230,7 +232,7 @@ output [-2. -1.  1.  4.]  correction [ 0. -1.  0.  0.]
  [0.  0.  0.  0. ]
  [0.  0.  0.  0. ]]
 trainable parameters 8`,
-              { hints: ["LowRankAdapter takes base, down, up and alpha. The base here is np.eye(4).", "respond_to takes a two-dimensional array with one input per row, so all four inputs can go through in one call. It answers one output row for each.", "delta is the assembled update, already scaled by alpha over the rank, and trainable_parameters is the count of entries in the two factors."], check: numberCheck("What is the second coordinate of the correction for the input [3, 1, 0, 0]?", 1.5, 0.0005, "The first factor reads only the first input coordinate, so the one number that crosses the middle is 3. The second factor writes half of it into the second output coordinate, which is 1.5. Every other correction in the list is the same direction, [0, 0.5, 0, 0], multiplied by whatever its input put through the middle, and that is what a rank of one allows.") },
+              { hints: ["LowRankAdapter takes base, down, up and alpha. The base here is np.eye(4).", "respond_to takes a two-dimensional array with one input per row, so all four inputs can go through in one call. It answers one output row for each.", "delta is the assembled update, already scaled by alpha over the rank, and trainable_parameters is the count of entries in the two factors."], check: numberCheck("What is the second coordinate of the correction for the input [3, 1, 0, 0]?", 1.5, 0.0005, "The first factor reduces the input to one internal coordinate. The second factor maps that coordinate into one fixed output direction, so changing the input changes the correction’s size and sign while preserving that direction. The identity base makes the correction easy to inspect as output minus input.") , question: "What kinds of correction can this rank-one adapter make?" },
             ),
             exercise(
               "Rebuild the live example and check that the two routes agree",
@@ -266,7 +268,7 @@ print(f"largest difference {np.abs(merged - two_routes).max():.1e}")`,
               `merged     1.0007 -0.0355 0.4884 -0.5039
 two routes 1.0007 -0.0355 0.4884 -0.5039
 largest difference 2.2e-16`,
-              { hints: ["The library call is one line, LowRankAdapter(base, down, up, alpha).respond_to(inputs), and it answers an array with one row.", "In NumPy the @ operator is the matrix product. The base route is inputs @ base, and the adapter route is (inputs @ down) @ up.", "The scale on the adapter route is alpha divided by the rank, and the two routes are added."], check: numberCheck("What is the second coordinate of the adapted output, to four places?", -0.0355, 5e-05, "The input’s second coordinate is zero and the identity base leaves it zero, so the whole −0.0355 is the adapter’s contribution. The two calculations agree to about the sixteenth decimal place, which is the rounding of two orders of the same arithmetic. That is the page’s claim that the merged matrix and the two routes are one linear operation written two ways.") },
+              { hints: ["The library call is one line, LowRankAdapter(base, down, up, alpha).respond_to(inputs), and it answers an array with one row.", "In NumPy the @ operator is the matrix product. The base route is inputs @ base, and the adapter route is (inputs @ down) @ up.", "The scale on the adapter route is alpha divided by the rank, and the two routes are added."], check: numberCheck("What is the second coordinate of the adapted output, to four places?", -0.0355, 5e-05, "The base contribution to this coordinate is zero, leaving the adapter contribution visible on its own. The merged calculation and separate routes implement the same linear transformation. Their tiny numerical difference comes from floating-point evaluation order, not from different fitted parameters.") , question: "Do the merged matrix and the separate adapter route produce the same output?" },
             ),
             exercise(
               "Find where a width of 64 stops saving",
@@ -297,7 +299,7 @@ rank  8  adapter 1024  full 4096  share 25.0%
 rank 16  adapter 2048  full 4096  share 50.0%
 rank 32  adapter 4096  full 4096  share 100.0%
 rank 48  adapter 6144  full 4096  share 150.0%`,
-              { hints: ["The base of a projection 64 wide is np.eye(width), and its number of entries is adapter.base.size.", "trainable_parameters is an integer, the entries of down plus the entries of up.", "Multiply the ratio by 100 before formatting it with .1f."], check: numberCheck("How many trainable parameters does the rank-8 adapter have at a width of 64?", 1024, 0.5, "Each factor has 64 times 8 entries, which is 512, and there are two of them. That is a quarter of the 4,096 entries of a full update. The share reaches 100 percent at a rank of 32, half the width, which is the break-even rule from Part 2, and at 48 the adapter is half as large again as the update it was meant to replace.") },
+              { hints: ["The base of a projection 64 wide is np.eye(width), and its number of entries is adapter.base.size.", "trainable_parameters is an integer, the entries of down plus the entries of up.", "Multiply the ratio by 100 before formatting it with .1f."], check: numberCheck("How many trainable parameters does the rank-8 adapter have at a width of 64?", 1024, 0.5, "Both factor arrays contain trainable entries, so increasing the internal rank increases the total even though the base stays frozen. Compare that count with the full projection’s entries. A low-rank factorisation saves trainable parameters only below its break-even rank; the name alone does not guarantee a saving.") , question: "At which ranks does a width-64 adapter save fewer parameters than a full update?" },
             ),
             exercise(
               "Hand the adapter factors that do not join",
@@ -324,7 +326,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `ShapeMismatchError
 adapter factors must join the base projection`,
-              { hints: ["The refusal comes from the constructor, before any input has been supplied, so the try block only needs to build the adapter."] },
+              { hints: ["The refusal comes from the constructor, before any input has been supplied, so the try block only needs to build the adapter."] , question: "What should happen when the two adapter factors disagree about the internal rank?" },
             ),
           ],
         },

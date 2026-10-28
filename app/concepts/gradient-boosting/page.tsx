@@ -86,17 +86,8 @@ export default function GradientBoostingPage() {
                   As we add rounds, we will also need to decide how deep each tree should be and when to stop. We can check those choices on held-out data. Along the way, we will compare boosting with bagging and with AdaBoost, since growing many trees does not always mean combining them in the same way.
                 </p>
 </>
-                <p>
-                  Everything starts from the laziest possible model. The
-                  fifteen readings of the full throw have a mean height of
-                  12.76 metres, so the first prediction is 12.76 at every
-                  time, before any tree exists. That flat line misses the
-                  reading at the launch by 12.06 metres, since the ball was
-                  at 0.7, and misses the reading at two seconds by 8.24 in
-                  the other direction, since the ball was at 21.0. Squaring
-                  the fifteen misses and adding them up gives 654.36, which
-                  is what every later round is trying to bring down.
-                </p>
+                <p>Let&apos;s begin with a constant prediction for the full throw. Its fifteen measured heights have a mean of 12.76 metres, so before fitting any tree the model predicts 12.76 at every time.</p>
+              <p>That flat line predicts too high near launch and too low near the peak. The sum of its squared misses is 654.36. Each later boosting round will fit a correction to the mistakes left by the current prediction, so keep the prediction and the remaining errors separate.</p>
                 <Equation>{"prediction₀(t) = mean of the heights\nresidualᵢ = hᵢ − prediction(tᵢ)"}</Equation>
                 <p>
                   On the three readings the page works by hand, heights of
@@ -833,7 +824,7 @@ export default function GradientBoostingPage() {
 </>
               </SubSection>
 
-              <SubSection title="22. Averaging cannot add flexibility, summing can">
+              <SubSection title="22. Why fitting corrections changes the ensemble" id="22-averaging-cannot-add-flexibility-summing-can">
                 <p>
                   Hand the two frames the same stump and the difference in
                   what they make of it is the clearest measurement on the
@@ -842,7 +833,8 @@ export default function GradientBoostingPage() {
                 <MemberTargets points={SIXTY_THROW} panel="curves" />
                 <>
 <p>
-                  Fifty bagged stumps score 0.4758 on the training readings and 0.2727 held out, because the average of fifty two-shelf rules is a smoothed two-shelf rule, and no amount of averaging supplies a shape none of the members has. Fifty boosted stumps at a rate of 0.3 score 0.9767 and 0.8832, because each stump was fitted to what the others left and the sum of fifty different two-shelf rules is a hundred-shelf staircase.
+
+                  Fifty bagged stumps score 0.4758 on the training readings and 0.2727 held out here. Fifty boosted stumps at rate 0.3 score 0.9767 and 0.8832. Both an average and a sum of stumps can form a multi-step curve: each distinct split can add a breakpoint. The difference is how those pieces were fitted. Bagged stumps independently fit resampled original heights; each boosted stump fits errors left by the current ensemble. On this dataset, those successive corrections follow the arc much better.
                 </p>
                 <p>
                   Fifty deep bagged trees score 0.9849 and 0.8761, which is the frame that averages handed the member built for averaging, and it reaches the boosted stumps&rsquo; held-out score within 0.007 by the opposite route.
@@ -939,15 +931,15 @@ export default function GradientBoostingPage() {
               "Bagging gets its honest score free because every member missed about a third of the readings and those readings can judge it. On the same forty-two training readings the deep bagged trees report 0.9029 out of bag beside a held-out 0.8761, and the boosted stumps can report only the second. The stochastic form, where each round is fitted on a random fraction of the rows, is what would supply one, and no committee here is that form.",
             ),
             choice(
-              "Fifty bagged stumps score 0.4758 on the training readings and 0.2727 held out, where fifty boosted stumps at a rate of 0.3 score 0.9767 and 0.8832. What accounts for that?",
+              "Both ensembles use fifty one-question regression trees, yet boosting predicts this arc much better. Which description correctly distinguishes how they were trained?",
               [
-                "The average of fifty two-shelf rules is a smoothed two-shelf rule, where the sum of fifty different ones is a hundred-shelf staircase",
-                "The bagged members each saw fewer readings, so they had less to learn from",
+                "Bagging independently fits resampled original targets; boosting fits each new stump to residuals of the current ensemble",
+                "Every boosted stump independently fits the same original heights",
                 "The boosted members were allowed more depth",
                 "The bagged members were combined by a weighted vote rather than a plain average",
               ],
               0,
-              "No amount of averaging supplies a shape none of the members has, which is why the bagged stumps stay a two-shelf rule however many are averaged. Handed the member built for averaging instead, fifty deep bagged trees score 0.9849 and 0.8761, reaching the boosted stumps' held-out score within 0.007 by the opposite route.",
+              "Averages and sums of one-dimensional stumps can both have several breakpoints. Boosting's later stumps are fitted to the current residuals, so they address errors the earlier combination still makes. Bagging fits original targets on separate resamples. Their different results here follow from those procedures, not a two-step-versus-hundred-step expressiveness rule.",
             ),
             several(
               "Which of these describe AdaBoost rather than the boosted regression on this page?",
@@ -1025,10 +1017,7 @@ export default function GradientBoostingPage() {
         {
           title: "Practice. Fitting the Throw Round by Round With the Library",
           practice: [
-            exercise(
-              "Run the first round on the fifteen readings",
-              ["Section 2 starts the full throw from a flat 12.76 and section 3 fits the first stump to the misses, finding the question t below 0.43 with answers −9.81 and 1.51, and a squared total of 541.09 once three tenths of it is added. Reproduce that round with the library.", "Fit one round at a rate of 0.3 with stumps as members. Read the starting constant, the first member’s question and its two answers off the fitted model, then evaluate it on the readings and print the residual sum of squares and the R squared, which the page does not quote for this round."],
-              `from oop_ml import Feature, GradientBoostingRegressor
+            exercise("Run the first round on the fifteen readings",["Section 2 starts the full throw from a flat 12.76 and section 3 fits the first stump to the misses, finding the question t below 0.43 with answers −9.81 and 1.51, and a squared total of 541.09 once three tenths of it is added. Reproduce that round with the library.", "Fit one round at a rate of 0.3 with stumps as members. Read the starting constant, the first member’s question and its two answers off the fitted model, then evaluate it on the readings and print the residual sum of squares and the R squared, which the page does not quote for this round."],`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1036,8 +1025,7 @@ heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1,
 model = GradientBoostingRegressor(n_rounds=1, learning_rate=0.3, max_depth=1)
 # Fit the model, print its starting constant, the first member's threshold and
 # its two leaf answers, then the residual sum of squares and R squared on the
-# readings, each to two places except R squared to three.`,
-              `from oop_ml import Feature, GradientBoostingRegressor
+# readings, each to two places except R squared to three.`,`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1052,26 +1040,19 @@ print(f"answers {stump.left.prediction:.2f} on the left and {stump.right.predict
 
 evaluation = model.evaluate([times], heights)
 print(f"squared total after one round {evaluation.residual_sum_of_squares:.2f}")
-print(f"R squared after one round {evaluation.r2_score:.3f}")`,
-              `starting constant 12.76
+print(f"R squared after one round {evaluation.r2_score:.3f}")`,`starting constant 12.76
 first stump asks t < 0.43
 answers -9.81 on the left and 1.51 on the right
 squared total after one round 541.09
-R squared after one round 0.173`,
-              { hints: ["A stump is a tree whose max_depth is 1, and the member depth is a field on the boosting model itself. The rate and the round count are the other two fields, and the data goes to fit.", "initial_prediction is the flat start, a property of the fitted model. members is a tuple of the fitted trees in order, so the first round’s stump is at position zero.", "A tree’s root is a node holding a split with a threshold, and a stump’s root has a leaf on each side, each answering with a prediction. The left leaf answers strictly below the threshold.", "evaluate pairs every prediction with its reading and exposes residual_sum_of_squares and r2_score as properties."], check: numberCheck("What squared total does the committee leave after one round, to two places?", 541.09, 0.005, "The flat mean leaves 654.36, the first stump explains the two launch readings’ misses on its left shelf and the other thirteen on its right, and keeping three tenths of it takes the total to 541.09. That is an R squared of 0.173, since 541.09 over 654.36 is what remains unexplained.") },
-            ),
-            exercise(
-              "Watch the squared leftover fall",
-              ["Section 7 reports the squared total on the fifteen readings at 111.58 after ten rounds, 28.55 after twenty, 9.82 after thirty and 1.84 after sixty at a rate of 0.3. Fit a committee at each of those round counts and read the total and the R squared off each.", "A committee of k rounds is the first k members of a longer one, which section 26 pins, so four separate fits give the same numbers one replayed fit would. Then fit sixty rounds at a rate of 1.0, whose squared total the page gives as 0.77, and print its R squared, which the page does not."],
-              `from oop_ml import Feature, GradientBoostingRegressor
+R squared after one round 0.173`,{...{ hints: ["A stump is a tree whose max_depth is 1, and the member depth is a field on the boosting model itself. The rate and the round count are the other two fields, and the data goes to fit.", "initial_prediction is the flat start, a property of the fitted model. members is a tuple of the fitted trees in order, so the first round’s stump is at position zero.", "A tree’s root is a node holding a split with a threshold, and a stump’s root has a leaf on each side, each answering with a prediction. The left leaf answers strictly below the threshold.", "evaluate pairs every prediction with its reading and exposes residual_sum_of_squares and r2_score as properties."], check: numberCheck("What squared total does the committee leave after one round, to two places?", 541.09, 0.005, "The initial constant is the training mean, and the first stump is fitted to its residuals. Adding a learning-rate-scaled correction reduces the training residual sum of squares; the reported R squared measures that reduction against the constant baseline.") },question:"What does the first correction learn from the ball's prediction errors?"}),
+            exercise("Watch the squared leftover fall",["Section 7 reports the squared total on the fifteen readings at 111.58 after ten rounds, 28.55 after twenty, 9.82 after thirty and 1.84 after sixty at a rate of 0.3. Fit a committee at each of those round counts and read the total and the R squared off each.", "A committee of k rounds is the first k members of a longer one, which section 26 pins, so four separate fits give the same numbers one replayed fit would. Then fit sixty rounds at a rate of 1.0, whose squared total the page gives as 0.77, and print its R squared, which the page does not."],`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
 
 # For 10, 20, 30 and 60 rounds at a rate of 0.3, fit a committee of stumps and
 # print its squared total to two places and its R squared to three. Then do
-# the same for sixty rounds at a rate of 1.0.`,
-              `from oop_ml import Feature, GradientBoostingRegressor
+# the same for sixty rounds at a rate of 1.0.`,`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1085,26 +1066,19 @@ for rounds in (10, 20, 30, 60):
 full = GradientBoostingRegressor(n_rounds=60, learning_rate=1.0, max_depth=1)
 evaluation = full.fit([times], heights).evaluate([times], heights)
 print(f"rate 1.0, 60 rounds: squared total {evaluation.residual_sum_of_squares:.2f}, "
-      f"R squared {evaluation.r2_score:.4f}")`,
-              `rate 0.3, 10 rounds: squared total 111.58, R squared 0.829
+      f"R squared {evaluation.r2_score:.4f}")`,`rate 0.3, 10 rounds: squared total 111.58, R squared 0.829
 rate 0.3, 20 rounds: squared total 28.55, R squared 0.956
 rate 0.3, 30 rounds: squared total 9.82, R squared 0.985
 rate 0.3, 60 rounds: squared total 1.84, R squared 0.997
-rate 1.0, 60 rounds: squared total 0.77, R squared 0.9988`,
-              { hints: ["fit answers the fitted model itself, so a fit and an evaluate can be chained on one line.", "The round count and the rate are fields of the constructor, so a loop over round counts constructs a fresh model each time.", "R squared is one minus the squared total over the flat mean’s 654.36, so the two numbers on each line are the same miss in different units."], check: numberCheck("What R squared does the sixty-round committee at a rate of 1.0 reach on the readings, to four places?", 0.9988, 5e-05, "At a rate of 1.0 the squared leftover fell at every one of the sixty rounds, from 654.36 to 432.27 after the first and to 0.77 after the last, and 0.77 over 654.36 leaves 0.9988 explained. It is a statement about the readings the committee was fitted on, and Part 5 is where the same sequence is measured on readings it never saw.") },
-            ),
-            exercise(
-              "Give the committee two readings at one time",
-              ["Section 26 records that two readings at the same time with different heights share their mean for ever. Put heights of 4 and 8 at two seconds between the readings of 2 at one second and 10 at three, run forty rounds, and see what the committee makes of the pair.", "Print the committee’s prediction at each of the four readings, its R squared, and its squared total, which the page does not quote. No rule that reads only the time can tell the two readings at two seconds apart, so their miss is permanent."],
-              `from oop_ml import Feature, GradientBoostingRegressor
+rate 1.0, 60 rounds: squared total 0.77, R squared 0.9988`,{...{ hints: ["fit answers the fitted model itself, so a fit and an evaluate can be chained on one line.", "The round count and the rate are fields of the constructor, so a loop over round counts constructs a fresh model each time.", "R squared is one minus the squared total over the flat mean’s 654.36, so the two numbers on each line are the same miss in different units."], check: numberCheck("What R squared does the sixty-round committee at a rate of 1.0 reach on the readings, to four places?", 0.9988, 5e-05, "These additional rounds reduce error on the readings used to fit them. The high training score does not establish a good forecast or held-out result; those require separate evaluation.") },question:"How do additional boosting rounds change the training error?"}),
+            exercise("Give the committee two readings at one time",["Section 26 records that two readings at the same time with different heights share their mean for ever. Put heights of 4 and 8 at two seconds between the readings of 2 at one second and 10 at three, run forty rounds, and see what the committee makes of the pair.", "Print the committee’s prediction at each of the four readings, its R squared, and its squared total, which the page does not quote. No rule that reads only the time can tell the two readings at two seconds apart, so their miss is permanent."],`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [1, 2, 2, 3])
 heights = Feature("h", [2, 4, 8, 10])
 
 model = GradientBoostingRegressor(n_rounds=40, learning_rate=0.5, max_depth=1)
 # Fit the model, print its prediction at each reading to two places, then its
-# R squared to two places and its squared total to two places.`,
-              `from oop_ml import Feature, GradientBoostingRegressor
+# R squared to two places and its squared total to two places.`,`from oop_ml import Feature, GradientBoostingRegressor
 
 times = Feature("t", [1, 2, 2, 3])
 heights = Feature("h", [2, 4, 8, 10])
@@ -1117,19 +1091,13 @@ for time, height, predicted in zip(times.values, heights.values, model.predict([
 
 evaluation = model.evaluate([times], heights)
 print(f"R squared {evaluation.r2_score:.2f}")
-print(f"squared total {evaluation.residual_sum_of_squares:.2f}")`,
-              `t = 1, reading 2, prediction 2.00
+print(f"squared total {evaluation.residual_sum_of_squares:.2f}")`,`t = 1, reading 2, prediction 2.00
 t = 2, reading 4, prediction 6.00
 t = 2, reading 8, prediction 6.00
 t = 3, reading 10, prediction 10.00
 R squared 0.80
-squared total 8.00`,
-              { hints: ["predict answers one prediction per reading in the order the readings were given, and a feature’s values are the numbers it was built from, so the three can be zipped together.", "The pair at two seconds lands in the same leaf of every stump, since no threshold on time separates them, so every round gives both the same correction.", "The squared total is the two misses of 2 each, squared and summed, and R squared is one minus that over the spread of the four heights about their mean."], check: numberCheck("What R squared does the committee reach on the four readings, to two places?", 0.8, 0.005, "The readings at one and three seconds are matched, and the pair at two seconds share their mean of 6, missing by 2 each way for a squared total of 8. The four heights spread 40 about their mean of 6, and 8 over 40 leaves 0.8 explained. This is the same ceiling section 16 met on the sixty readings, where three repeated times held the training score at 0.9937 however deep the members were.") },
-            ),
-            exercise(
-              "Hand the same stump to both frames",
-              ["Section 22 fits fifty bagged stumps, fifty deep bagged trees and fifty boosted stumps on the same forty-two training readings of the sixty-point throw and scores all three on the eighteen held out. The deal is the site’s seeded one, three tenths of the readings under seed 4, which this script reproduces with the same generator the page uses.", "Fit the three committees and print each one’s training and held-out R squared to four places, then the deep bagged trees’ out-of-bag score, which the boosted committee cannot report. The page gives 0.4758 and 0.2727 for the bagged stumps, 0.9767 and 0.8832 for the boosted stumps, and 0.9849 and 0.8761 for the deep bagged trees."],
-              `import numpy as np
+squared total 8.00`,{...{ hints: ["predict answers one prediction per reading in the order the readings were given, and a feature’s values are the numbers it was built from, so the three can be zipped together.", "The pair at two seconds lands in the same leaf of every stump, since no threshold on time separates them, so every round gives both the same correction.", "The squared total is the two misses of 2 each, squared and summed, and R squared is one minus that over the spread of the four heights about their mean."], check: numberCheck("What R squared does the committee reach on the four readings, to two places?", 0.8, 0.005, "The two observations at the same input must receive the same prediction from a deterministic time-only rule. Their different heights leave an irreducible contribution to squared error unless more informative inputs are supplied.") },question:"Can a model distinguish two heights recorded at the same time?"}),
+            exercise("Hand the same stump to both frames",["Section 22 fits fifty bagged stumps, fifty deep bagged trees and fifty boosted stumps on the same forty-two training readings of the sixty-point throw and scores all three on the eighteen held out. The deal is the site’s seeded one, three tenths of the readings under seed 4, which this script reproduces with the same generator the page uses.", "Fit the three committees and print each one’s training and held-out R squared to four places, then the deep bagged trees’ out-of-bag score, which the boosted committee cannot report. The page gives 0.4758 and 0.2727 for the bagged stumps, 0.9767 and 0.8832 for the boosted stumps, and 0.9849 and 0.8761 for the deep bagged trees."],`import numpy as np
 from oop_ml import BaggingRegressor, DecisionTreeRegressor, Feature, GradientBoostingRegressor
 
 times = [0.11, 0.16, 0.25, 0.33, 0.46, 0.54, 0.58, 0.59, 0.64, 0.77, 0.77, 0.81, 1.04, 1.05, 1.11, 1.12, 1.21, 1.25, 1.32, 1.61, 1.64, 1.69, 1.81, 1.84, 1.89, 1.94, 2.04, 2.04, 2.05, 2.06, 2.11, 2.15, 2.16, 2.2, 2.37, 2.45, 2.49, 2.57, 2.73, 2.9, 3.0, 3.01, 3.01, 3.11, 3.15, 3.15, 3.21, 3.28, 3.31, 3.36, 3.41, 3.42, 3.45, 3.51, 3.67, 3.79, 3.8, 3.85, 3.88, 3.92]
@@ -1143,8 +1111,7 @@ test_h = Feature("h", [h for i, h in enumerate(heights) if i in held])
 
 # Fit fifty bagged stumps and fifty deep bagged trees under seed 7, and fifty
 # boosted stumps at a rate of 0.3, then print each committee's training and
-# held-out score to four places and the deep trees' out-of-bag score.`,
-              `import numpy as np
+# held-out score to four places and the deep trees' out-of-bag score.`,`import numpy as np
 from oop_ml import BaggingRegressor, DecisionTreeRegressor, Feature, GradientBoostingRegressor
 
 times = [0.11, 0.16, 0.25, 0.33, 0.46, 0.54, 0.58, 0.59, 0.64, 0.77, 0.77, 0.81, 1.04, 1.05, 1.11, 1.12, 1.21, 1.25, 1.32, 1.61, 1.64, 1.69, 1.81, 1.84, 1.89, 1.94, 2.04, 2.04, 2.05, 2.06, 2.11, 2.15, 2.16, 2.2, 2.37, 2.45, 2.49, 2.57, 2.73, 2.9, 3.0, 3.01, 3.01, 3.11, 3.15, 3.15, 3.21, 3.28, 3.31, 3.36, 3.41, 3.42, 3.45, 3.51, 3.67, 3.79, 3.8, 3.85, 3.88, 3.92]
@@ -1167,13 +1134,10 @@ for name, committee in committees:
     print(f"{name}: training {committee.score([train_t], train_h):.4f}, "
           f"held out {committee.score([test_t], test_h):.4f}")
 
-print(f"deep bagged trees, out of bag {committees[1][1].out_of_bag_score():.4f}")`,
-              `bagged stumps: training 0.4758, held out 0.2727
+print(f"deep bagged trees, out of bag {committees[1][1].out_of_bag_score():.4f}")`,`bagged stumps: training 0.4758, held out 0.2727
 deep bagged trees: training 0.9849, held out 0.8761
 boosted stumps: training 0.9767, held out 0.8832
-deep bagged trees, out of bag 0.9029`,
-              { hints: ["The bagging frame takes a base_model, the prototype every member copies, and its default is a deep tree. A stump handed in makes every member a stump. The boosting model takes its member depth as a field of its own.", "All three committees fit on the two training features and score on either pair, and score answers R squared for a regressor.", "out_of_bag_score exists on the bagged committees only, because every boosted round is fitted on every row and so no member has a row it never saw."], check: numberCheck("What held-out R squared do the fifty boosted stumps reach, to four places?", 0.8832, 5e-05, "Each boosted stump was fitted to what the others left, so the sum of fifty different two-shelf rules is a hundred-shelf staircase that follows the arc, where the average of fifty bagged stumps is a smoothed two-shelf rule at 0.2727. The deep bagged trees reach 0.8761 by the opposite route, the frame that averages handed the member built for averaging, and they alone can also report an out-of-bag score, 0.9029 on these forty-two readings.") },
-            ),
+deep bagged trees, out of bag 0.9029`,{...{ hints: ["The bagging frame takes a base_model, the prototype every member copies, and its default is a deep tree. A stump handed in makes every member a stump. The boosting model takes its member depth as a field of its own.", "All three committees fit on the two training features and score on either pair, and score answers R squared for a regressor.", "out_of_bag_score exists on the bagged committees only, because every boosted round is fitted on every row and so no member has a row it never saw."], check: numberCheck("What held-out R squared do the fifty boosted stumps reach, to four places?", 0.8832, 5e-05, "Boosting fits later stumps to the errors of the current ensemble, while bagging averages stumps fitted independently to resampled targets. Either combination can have several breakpoints; the difference here is how those stumps are fitted and combined. The reported advantage belongs to this shared held-out split.") },question:"How do bagged and boosted trees compare on the same held-out readings?"}),
           ],
         },
       ]}

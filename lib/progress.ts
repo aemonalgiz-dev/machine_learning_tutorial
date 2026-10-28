@@ -1,4 +1,4 @@
-// Completion records, cached separately for guests and signed-in accounts.
+// Completion records live in memory for this visit, separated by account.
 //
 // A quiz records itself when its last card is answered and a set of problems
 // when every coding challenge has passed its output check. A lesson records how
@@ -6,14 +6,13 @@
 // of them has been. The home page and the section pages read the same record
 // to mark lessons off and to fill the progress bars.
 //
-// accounts.ts handles synchronization. Importing guest progress is explicit,
-// so a shared browser never silently merges different people's records.
+// accounts.ts hydrates and saves signed-in progress through the backend.
+// Guest completion never survives a reload and old guest caches are ignored.
 
 import { useSyncExternalStore } from "react";
 
 const KEY = "oop_ml.progress.v1";
 let accountId: string | null = null;
-const storageKey = () => accountId ? `${KEY}:account:${accountId}` : KEY;
 
 export interface Progress {
   // Lesson path, such as /concepts/k-means, to the ids of the sections on it
@@ -27,7 +26,7 @@ const EMPTY: Progress = { done: {}, required: {} };
 
 // The snapshot has to be the same object between reads that change nothing,
 // or useSyncExternalStore sees a new value every render and loops.
-let cached: Progress | null = null;
+const progressByAccount = new Map<string | null, Progress>();
 const listeners = new Set<() => void>();
 const changes = new Set<() => void>();
 const scopes = new Set<() => void>();
@@ -50,43 +49,18 @@ export function normalised(parsed: unknown): Progress {
 }
 
 export function readProgress(): Progress {
-  if (cached) return cached;
-  try {
-    const stored = window.localStorage.getItem(storageKey());
-    cached = stored ? normalised(JSON.parse(stored)) : EMPTY;
-  } catch {
-    cached = EMPTY;
-  }
-  return cached;
+  return progressByAccount.get(accountId) ?? EMPTY;
 }
 
 function write(next: Progress, local = true) {
-  cached = next;
-  try {
-    window.localStorage.setItem(storageKey(), JSON.stringify(next));
-  } catch {
-    // Private windows and blocked storage still get a working page; the
-    // record simply does not outlive it.
-  }
+  progressByAccount.set(accountId, next);
   listeners.forEach((listener) => listener());
   if (local) changes.forEach((listener) => listener());
 }
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  // Another tab finishing a quiz shows up here too.
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === storageKey() || event.key === null) {
-      cached = null;
-      listener();
-      changes.forEach((changed) => changed());
-    }
-  };
-  window.addEventListener("storage", onStorage);
-  return () => {
-    listeners.delete(listener);
-    window.removeEventListener("storage", onStorage);
-  };
+  return () => { listeners.delete(listener); };
 }
 
 const noProgress = () => EMPTY;
@@ -144,7 +118,6 @@ export const getProgressAccount = () => accountId;
 export function setProgressAccount(id: string | null) {
   if (id === accountId) return;
   accountId = id;
-  cached = null;
   scopes.forEach(listener => listener());
   listeners.forEach(listener => listener());
 }
@@ -162,8 +135,21 @@ export function onProgressChange(listener: () => void) {
 }
 
 export function guestProgress(): Progress {
-  try { return normalised(JSON.parse(window.localStorage.getItem(KEY) ?? "null")); }
-  catch { return EMPTY; }
+  return progressByAccount.get(null) ?? EMPTY;
+}
+
+/** Merge only the verified account's old cache after remote hydration. */
+export function migrateAccountProgress(expectedAccount: string) {
+  if (expectedAccount !== accountId) return;
+  try {
+    const legacy = localStorage.getItem(`${KEY}:account:${expectedAccount}`);
+    if (legacy) write(mergeProgress(normalised(JSON.parse(legacy)), readProgress()), false);
+  } catch { /* Old browser data cannot prevent backend learning. */ }
+}
+
+export function retireAccountProgressCache(expectedAccount: string) {
+  if (expectedAccount !== accountId) return;
+  try { localStorage.removeItem(`${KEY}:account:${expectedAccount}`); } catch { /* No new browser copy is written. */ }
 }
 
 export function mergeProgress(left: Progress, right: Progress): Progress {

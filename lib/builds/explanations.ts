@@ -6,7 +6,7 @@ export const constructionTitles:Record<string,string> = {
   "calculus":"How fast was the traveller moving?",
   "simple-linear-regression":"Fit a line to the observations",
   "held-out-evaluation":"Check predictions against reserved observations",
-  "logistic-regression":"Which components need inspection?",
+  "logistic-regression":"When does the exam model predict a pass?",
   "pca":"Describe the cloud along its main direction",
   "multiple-polynomial-regression":"When does warmer help the process?",
   "distance-metrics":"Compare people on a common scale",

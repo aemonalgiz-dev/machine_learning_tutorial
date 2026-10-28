@@ -1407,7 +1407,11 @@ export default function PatternWordsPage() {
           practice: [
             exercise(
               "Cut the sentence about Dr. Alvarez and write the pieces back",
-              ["Build the library’s pattern rule around the published pattern and put the sentence about Dr. Alvarez to it. Print each piece beside its half-open span, with the piece in quotation marks so that a space at the front of it can be seen. Then write the pieces one after another with nothing between them and compare with the sentence.", "Part 1 arrived at fourteen pieces whose spans run from 0 to 51 with no gap, and at the sentence coming back exactly. Count the pieces that begin with a space and compare that with the number of spaces in the sentence.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
+              [
+  "Construct PatternPreTokenizer from the supplied published pattern and split the Dr. Alvarez sentence.",
+  "Print every piece in quoted form beside its half-open span. Then print the piece count, count of pieces beginning with a space, original space count and whether joining piece texts without separators exactly recovers the sentence.",
+  "These are preliminary pieces before any subword merges. Their leading spaces are real retained characters, so do not add another separator when reconstructing the text."
+],
               `from oop_ml import PatternPreTokenizer
 from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
 
@@ -1449,11 +1453,21 @@ print(f"written one after another, exact: {''.join(words.texts) == sentence}")`,
 14 pieces, 6 of them begin with a space
 6 spaces in the sentence
 written one after another, exact: True`,
-              { hints: ["The rule takes the pattern by keyword when it is constructed, and the text goes to split, which answers words that each carry text, start and end.", "A piece’s text holds its space as an ordinary character. Inside an f-string, an exclamation mark and the letter r after a value prints it in quotation marks, and the test for a leading space is whether the text starts with one.", "The texts of the split, joined with the empty string, are the pieces written one after another. No space goes between them, because the spaces are already inside."], check: numberCheck("How many of the fourteen pieces begin with a space?", 6, 0.0, "Six pieces begin with a space and the sentence holds six spaces, which is the whole method in one count. Every space is at the front of the piece after it, so all 51 characters are inside a piece and the pieces written one after another are the sentence. The four earlier rules give back some arrangement of the other 45 characters and none of the six.") },
+              {
+question: "Can a pattern preserve every character while choosing useful preliminary pieces?",
+ hints: [
+  "Pass pattern by keyword to the constructor.",
+  "Use !r to reveal a leading space and startswith(\" \") to count it.",
+  "Compare \"\".join(result.texts) with the source. Contiguous source coverage and exact reconstruction are different checks from token count."
+], check: numberCheck("How many of the fourteen pieces begin with a space?", 6, 0.0, "Six pieces begin with a space, accounting for the six spaces in this particular sentence. The pattern retains those spaces inside its pieces, so direct concatenation recovers the source.") },
             ),
             exercise(
               "Count the six sentences under five rules",
-              ["Part 4 counted the six sentences of the notebook under the four earlier rules and under the pattern. Do the same with the library’s five rules. For each, print how many pieces the six sentences became, how many different pieces there were, and how many of the six sentences come back when their pieces are written one after another with nothing between them.", "The counts should be 63, 69, 72, 72 and 85, with 53 different pieces under the pattern, and only the pattern should give any sentence back. Then count how often the pattern produces the word the with a space in front of it and how often without, which the page does not print.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
+              [
+  "Apply the five supplied rules to the same six-sentence notebook. For each print total pieces, distinct spellings and the number of sentences recovered by joining their piece texts with no separator.",
+  "Then print how often the pattern rule produces the exact pieces \" the\" and \"the\". Preserve their different leading-space spelling when counting.",
+  "Equal-looking words can occupy different vocabulary rows because of retained spacing. The round-trip test also shows whether the rule discarded source characters."
+],
               `from oop_ml import Corpus, MosesPreTokenizer, PatternPreTokenizer, PennTreebankPreTokenizer
 from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
 from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
@@ -1516,11 +1530,21 @@ translation rules 72 pieces, 49 different, 0 of 6 come back
 the pattern       85 pieces, 53 different, 6 of 6 come back
 with its space: 9
 without it: 0`,
-              { hints: ["The corpus’s word_counts takes a rule and answers the count of every distinct piece over all six sentences, with total for every piece counted and n_words for the different ones.", "A sentence comes back when its split’s texts, joined with the empty string, equal the sentence. A true answer adds as one, so the six tests can be summed.", "count_of takes a piece exactly as the rule produced it, so the with a space in front and the without one are two separate questions."], check: numberCheck("How many times does the pattern produce the word the with a space in front of it?", 9, 0.0, "All nine uses of the in the six sentences stand in the middle of a sentence, so every one is the piece with its space and the bare piece never occurs. That is why section 7 says a vocabulary learned over these pieces holds the word with a space stuck to the front. The capitalised word at the head of two sentences is a third piece again, which the pattern cannot fold together, since a capital is a different character.") },
+              {
+question: "How much do five preliminary splitting rules retain from the same notebook?",
+ hints: [
+  "Corpus.word_counts(rule) supplies total and n_words for the first two counts.",
+  "Compare an empty-string join with each original sentence and sum the successful comparisons.",
+  "Use count_of on the exact spaced and unspaced strings. A visually hidden leading character still distinguishes an entry."
+], check: numberCheck("How many times does the pattern produce the word the with a space in front of it?", 9, 0.0, "The spaced piece \" the\" occurs nine times, while bare \"the\" never occurs in this notebook’s pattern output. Vocabulary spellings reflect the actual preliminary pieces, including spaces.") },
             ),
             exercise(
               "Delete one part of the pattern at a time",
-              ["Sections 7 and 10 each delete one part of the pattern and count what changes. The script starts with the pattern as the library writes it, with the seven contraction branches taken off the front, and with the optional space taken off the three runs. Build a rule around each, and print how many pieces the sentence about Dr. Alvarez and the six sentences give, and how many of the six sentences still come back exactly.", "The sentence about Dr. Alvarez should go from fourteen pieces to fifteen and to twenty, and the six sentences from 85 to the 142 of section 7. The page does not count the six sentences without the contraction branches, so work out what you expect from how many contractions they hold before you run it."],
+              [
+  "The starter supplies three patterns: the original, one without contraction branches and one without optional leading spaces on character runs.",
+  "Build a tokenizer for each. Print token counts for the Dr. Alvarez sentence and the complete six-sentence notebook, plus how many notebook sentences still reconstruct by direct concatenation.",
+  "Change only the pattern supplied to the tokenizer. Retaining all characters does not force a particular number of pieces."
+],
               `from oop_ml import PatternPreTokenizer
 
 notebook = [
@@ -1565,11 +1589,21 @@ for name, source in patterns.items():
               `the pattern        sentence 14, notebook 85, 6 of 6 come back
 no contractions    sentence 15, notebook 86, 6 of 6 come back
 no optional space  sentence 20, notebook 142, 6 of 6 come back`,
-              { hints: ["Each pattern is an ordinary string handed to PatternPreTokenizer by the keyword pattern. The r in front of the quotation mark keeps Python from reading the backslashes itself.", "The pieces of the notebook are the sum over the six sentences of the n_words of each split.", "Deleting the contraction branches changes only a text that holds one of the seven endings, and it turns that one piece into two, the apostrophe and the letters after it."], check: numberCheck("How many pieces do the six sentences give with the seven contraction branches deleted?", 86, 0.0, "The six sentences hold exactly one contraction, the one in the sentence about Dr. Alvarez, so deleting the seven branches adds exactly one piece, 86 where there were 85. That is section 9’s count seen from the other side, since only one of the seven branches claimed a piece over the whole notebook. All three patterns still give every sentence back, because each still covers every character, which is why 142 is the comparison section 15 calls the honest one.") },
+              {
+question: "Which part of the pattern is responsible for each change in token count?",
+ hints: [
+  "Each pattern is a Python string passed with pattern=.",
+  "Sum split(text).n_words over the notebook. Test reconstruction separately for each sentence.",
+  "Inspect what happens to the apostrophe suffix when its special branch is removed; it can become separate punctuation and letters."
+], check: numberCheck("How many pieces do the six sentences give with the seven contraction branches deleted?", 86, 0.0, "Removing the contraction branches gives 86 notebook pieces. The characters still survive, but the contraction’s punctuation and letters are grouped differently.") },
             ),
             exercise(
               "Put twelve spellings to the seven branches",
-              ["Section 12 put twelve things a person actually types to the pattern and found that the contraction branches fired on half of them. Put the same twelve to the rule. For each, print how many pieces came back and whether any piece is exactly one of the seven spellings, and then count the texts on which one fired.", "Six should fire and six should not. The texts are printed with ascii so that the curved apostrophe shows up as the different character it is, which is the reason the fifth text misses while the first, the same words to a reader, does not.", "The published pattern is not exported from the top of the library, so it is imported here from the module that holds it."],
+              [
+  "Apply the supplied pattern to all twelve probe texts. For each print the piece count, whether any piece exactly equals one of the seven supplied contraction suffixes, and the escaped source.",
+  "Finish with the number of probes triggering that exact-suffix test. Preserve capitals and apostrophe characters rather than normalising the inputs.",
+  "A branch match reports what the regular expression did. It does not establish that it recognised the grammatical role intended by the writer."
+],
               `from oop_ml import PatternPreTokenizer
 from oop_ml.core.natural_language_processing.tokenization.word_level.pattern import GPT2_PATTERN
 
@@ -1615,7 +1649,13 @@ print(f"a contraction branch fired on {fired} of {len(texts)}")`,
 5 pieces  missed  "l'analyse est pr\\xeate"
 4 pieces  fired   "she'd've gone"
 a contraction branch fired on 6 of 12`,
-              { hints: ["A contraction branch fired exactly when one of the pieces is one of the seven spellings, since those branches carry no space and match nothing else.", "any over the pieces, asking of each whether it is in the set of endings, gives the answer for one text.", "Inside an f-string, an exclamation mark and the letter a after a value formats it with ascii, which writes a character outside the basic set as its code."], check: numberCheck("On how many of the twelve texts does a contraction branch fire?", 6, 0.0, "Six fire and six miss. The misses are the capitals, the curved apostrophe, two words and a French article the list does not hold, and a possessive with no letter after its mark. One of the six that fire is the archaic word at the start of the ninth text, where the branch written for a negation cuts a word at its own beginning, so a count of how often the list fired says nothing about how often it was right.") },
+              {
+question: "When do the pattern’s contraction branches actually match typed text?",
+ hints: [
+  "Use any(piece in endings for piece in result.texts) for the stated test.",
+  "Use ascii or !a to distinguish the curved apostrophe from the straight one.",
+  "Keep the supplied endings unchanged. Their matching is case-sensitive in this pattern."
+], check: numberCheck("On how many of the twelve texts does a contraction branch fire?", 6, 0.0, "Six probes contain a matching suffix piece. Some familiar contractions miss because of spelling, while a suffix-shaped match can also occur in a different grammatical use.") },
             ),
           ],
         },

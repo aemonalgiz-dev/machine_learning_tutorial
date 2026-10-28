@@ -470,7 +470,7 @@ export const applicationFreshCases: Record<string, FreshJourneyCase> = {
   },
   "design-prototype-experiments": {
     name: "The prototype helps most on large inputs",
-    prompt: "Botie measures latency in milliseconds for four controlled combinations, ordered small input with original model, small input with smaller model, large input with original model, large input with smaller model. Compare the model-size change for large inputs with the change for small inputs.",
+    prompt: "Botie measures batch duration in milliseconds for four controlled combinations, ordered small batch with original parameter format, small batch with smaller format, large batch with original format, large batch with smaller format. Compare the format change at the large batch with its change at the small batch.",
     data: { times: [18, 12, 70, 40] },
     expected: -24,
     why: "The smaller model reduces latency by 6 milliseconds on small inputs and 30 on large inputs. The negative difference of changes shows an additional 24-millisecond reduction for large inputs. These timings demonstrate an interaction in this prototype, not a universal hardware law.",

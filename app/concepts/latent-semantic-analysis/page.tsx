@@ -672,13 +672,17 @@ one boat document against the other       3 − 2  =  1`}</Equation>
             several(
               "Which of these hold for the twenty-four documents once the table has been squeezed?",
               [
-                "A fit keeping two directions reports 48.0 percent of the table, a share whose denominator was worked out before the cut",
-                "The two cooking documents that share no word come out at 0.9998, above the 0.0819 of the cooking and sailing pair that share one",
-                "Flour against bake and flour against anchor, both exactly zero in the table as counted, come out at 1.0000 and −0.0028",
-                "The running total of the shares reaches the whole table at the fourteenth direction and never moves again",
-              ],
+                              "A fit keeping two directions reports 48.0 percent of the table, a share whose denominator was worked out before the cut",
+                              "The two cooking documents that share no word come out at 0.9998, above the 0.0819 of the cooking and sailing pair that share one",
+                              "Flour against bake and flour against anchor, both exactly zero in the table as counted, come out at 1.0000 and −0.0028",
+                              "The running total of the shares reaches the whole table at the fourteenth direction and never moves again",
+                            ],
               [0, 1, 2, 3],
               "All four hold. After the cut the discarded numbers are gone, so a share worked out then would report that the fit had kept everything. The reversal among the documents, and the two word pairs ending at opposite ends of the range, is the method doing the job it was invented for, and none of it amounts to the fit having learned about cooking, since flour and bake are simply used in documents that use the same other words. Twenty-three words over twenty-four documents arranged in this cycle leave only fourteen directions with any spread in them at all.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "direction | its number | its share | the running total\n1 | 13.6994 | 26.3% | 26.3%\n2 | 12.4510 | 21.7% | 48.0%\n3 | 8.4582 | 10.0% | 58.0%\n4 | 8.4500 | 10.0% | 68.0%\n5 | 7.6517 | 8.2% | 76.2%\n6 | 7.5307 | 7.9% | 84.2%\n8 | 6.1192 | 5.2% | 94.8%\n14 | 1.4763 | 0.3% | 100.0%\n\nWith two directions kept:\nTwo cooking documents sharing no word: cosine 0.9998\nCooking/sailing documents sharing a word: cosine 0.0819\nWord pairs with zero observed co-occurrence:\nflour/bake: cosine 1.0000; flour/anchor: cosine −0.0028\nAll directions after direction 14 have zero singular value.\nShares use squared singular values before truncation."
+              },
             ),
             choice(
               "Why can the leading direction of a count table not put the two halves on opposite sides?",
@@ -694,13 +698,17 @@ one boat document against the other       3 − 2  =  1`}</Equation>
             several(
               "Each row is shifted by its own mean across the documents before decomposing. Which of these follow?",
               [
-                "The leading direction becomes the separating one, carrying 29.4 percent against the unshifted leading direction’s 26.3",
-                "Perron no longer applies, because the matrix is no longer non-negative",
-                "A rebuilt entry is still a guess at a weight some document gave a word",
-                "Every empty cell is filled with the negative of a row mean, so a table that is 73.9 percent empty stops being sparse",
-              ],
+                              "The leading direction becomes the separating one, carrying 29.4 percent against the unshifted leading direction’s 26.3",
+                              "Perron no longer applies, because the matrix is no longer non-negative",
+                              "A rebuilt entry is still a guess at a weight some document gave a word",
+                              "Every empty cell is filled with the negative of a row mean, so a table that is 73.9 percent empty stops being sparse",
+                            ],
               [0, 1, 3],
               "The shift is what makes a sign change possible and what the leading direction gains by. What it costs is the reading, since an entry of the unshifted table is a weight a document actually gave a word, and that is what makes the rebuild readable and a new document foldable later. On a real collection the loss of sparsity is the difference between a computation that fits in memory and one that does not.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "the table | the leading direction’s share | the two halves on it | one mean minus the other\nas counted | 26.3% | 2.7948 and 2.7948 | 4.4 × 10⁻¹⁶\nafter shifting | 29.4% | 2.5388 and −2.5388 | 5.0777\n\nBefore centring, 73.9% of word/document cells are zero.\nReplace each entry Aᵢⱼ by Aᵢⱼ − mean(row i), including zero entries.\nReconstruct the centred matrix without adding those row means back."
+              },
             ),
         ],
         },
@@ -1113,13 +1121,16 @@ one boat document against the other       3 − 2  =  1`}</Equation>
             several(
               "Which of these survive the indeterminacies of the decomposition?",
               [
-                "An angle between two words",
-                "The value of a single coordinate",
-                "A comparison of one fit’s third coordinate with another’s",
-                "The rebuild itself, under a rotation of two directions of equal strength",
-              ],
+                              "An angle between two words",
+                              "The value of a single coordinate",
+                              "A comparison of one fit’s third coordinate with another’s",
+                              "The rebuild itself, under a rotation of two directions of equal strength",
+                            ],
               [0, 3],
               "Each direction is settled only up to a sign, since flipping a word direction and its matching document direction together leaves everything the fit says unchanged. Two directions of equal strength are settled only up to a rotation within the plane they span, and the four-document collection has exactly that, its third and fourth numbers both being exactly 1, so those two directions come from the arithmetic rather than from the data.",
+              {
+                "description": "A decomposition may flip a singular direction and its matching coefficient signs together. Inside a block of equal singular values, it may rotate both matching factors together. Apply these changes consistently to the same retained subspace. Compare its reconstruction and within-fit vector angles."
+              },
             ),
             choice(
               "One cooking word and one sailing word are respelled roll, and nothing else changes. Where does roll land?",
@@ -1139,7 +1150,10 @@ one boat document against the other       3 − 2  =  1`}</Equation>
           practice: [
             exercise(
               "Decompose the four documents under plain counts",
-              ["Fit LatentSemanticAnalysis to the four-document collection, keeping all four directions and weighting by plain counts. Print the square of each direction’s number, the share of the table each carries, the first two coordinates of every document, and the first two coordinates of the word the.", "The squares should be the 7, 3, 1 and 1 of step 12, the shares should be twelfths, every document should sit at 1.3229 on the first direction, and the word the should sit at 2 and 0. Step 12 says the cat documents sit at one value on the second direction and the boat documents at minus it, without giving the value."],
+              [
+  "Fit the four supplied documents with plain-count weighting and all four singular directions.",
+  "Print squared singular values, their shares of total squared matrix magnitude, the first two coordinates of each document and the’s first two word coordinates. Keep document order fixed."
+],
               `from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
     LatentSemanticAnalysis,
 )
@@ -1183,11 +1197,17 @@ the cat ran     1.3229 0.8660
 the boat sailed 1.3229 -0.8660
 the boat sank   1.3229 -0.8660
 the             2.0000 0.0000`,
-              { hints: ["The weighting is a field of the model and TermWeighting.COUNT is the plain count. Left out, the model weights by the formula of step 5, and the squares stop being whole numbers.", "A fitted model has singular_values, one per direction kept, and variance_shares beside them. Its document_vectors hold one position per document, reached with vector_of and the document’s place in the list.", "Its embeddings are the positions of the words. vector_of takes a word there, and the coordinates are the values of what comes back."], check: numberCheck("At what value do the two cat documents sit on the second direction, to four places?", 0.866, 5e-05, "The second direction is the pattern that sets the cat pair against the boat pair, and its number is the square root of 3. Scaled to length one that pattern puts a half on each document, so the cat documents sit at half the square root of 3, which is 0.8660, and the boat documents at minus it. The first direction does the same with the square root of 7 and no minus signs, which is the 1.3229 every document shares.") },
+              { hints: [
+  "These shares describe an uncentred term-document decomposition, not variance after subtracting feature means.",
+  "Inspect document_vectors and word embeddings separately; their coordinates have different roles in the factorisation."
+], check: numberCheck("At what value do the two cat documents sit on the second direction, to four places?", 0.866, 5e-05, "The cat documents have coordinate 0.8660 on this chosen second-axis orientation. That direction separates their pair from the boat pair in this fitted decomposition."), question: "Which directions describe the common words and which separate the document groups?" },
             ),
             exercise(
               "Squeeze the twenty-four documents at three widths",
-              ["Fit LatentSemanticAnalysis to the twenty-four documents keeping two directions, then four, then six, with the weighting left at its default. At each width print the share of the table the kept directions carry between them and the cosine of flour with bake, of flour with sugar and of flour with anchor, and the cosine of the first document with the sixth and with the thirteenth, which are the two pairs of step 3.", "At two directions you should see the 48.0% of step 9 and the figures of step 10, with flour and bake at 1.0000 and the two cooking documents at 0.9998. At six you should see step 15, with flour and bake down at 0.0727 and flour and sugar at 0.8777. Four directions is a width the page does not report, and the pair of cooking documents that share no word is worth following down all three."],
+              [
+  "Fit the supplied twenty-four documents at widths two, four and six with the same default weighting.",
+  "For each print retained squared-magnitude share, the supplied flour word-pair cosines and document-pair cosines for the first/sixth and first/thirteenth documents. Compare topic separation with distinctions inside a topic."
+],
               `from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
     LatentSemanticAnalysis,
 )
@@ -1278,11 +1298,17 @@ for dimension in (2, 4, 6):
 6 directions keep 0.8416 of the table
   flour with bake 0.0727, sugar 0.8777, anchor 0.0030
   first document with the sixth 0.0859, with the thirteenth 0.0855`,
-              { hints: ["dimension is how many directions the model keeps. fit takes the list of texts and answers the fitted model.", "variance_shares has one share per kept direction, each worked out against the whole table, so their sum is what the cut kept.", "embeddings.similarity takes two words and document_vectors.similarity takes two places in the list of documents, counting from zero, so the sixth document is 5 and the first sailing one is 12."], check: numberCheck("What share of the table do four directions keep, to four places?", 0.6801, 5e-05, "The first two directions carry 26.3% and 21.7%, and the next two about a tenth each, which comes to 0.6801. Those two extra directions have begun to spread the cooking words out, flour with sugar falling from 1.0000 to 0.8830, while flour with bake is still at 1.0000, so four is not yet the width at which the fit can order the words of one half, which step 15 found at six. The widening has a price the last line of each block shows. The two cooking documents that share no word fall from 0.9998 to 0.1743 and then to 0.0859, level with the cooking and sailing pair, so the repair of step 10 belongs to the narrow fit.") },
+              { hints: [
+  "Fit a fresh decomposition for each width.",
+  "A narrow fit can make topic mates nearly identical; extra directions can restore distinctions while changing their similarities."
+], check: numberCheck("What share of the table do four directions keep, to four places?", 0.6801, 5e-05, "Four directions retain share 0.6801 of squared matrix magnitude. The quantity refers to the uncentred decomposed table, not a centred variance percentage."), question: "How does representation width change which relationships remain visible?" },
             ),
             exercise(
               "Check the error against what was thrown away",
-              ["Step 7 says the squared error of a rebuild is exactly the sum of the squares of the numbers that were discarded. Check it at two directions and at four. For each, take the table the fit decomposed and the rebuild of it, and print the summed squared difference between them beside the discarded weight. Then print how many cells the collection left empty, the mean of what the rebuild put in them, and how many cells of the rebuild are below zero.", "At two directions the two figures should both be the 371.3389 of step 7, with 408 empty cells filled to 0.4043 on average and 104 cells below zero, which is step 8. The row for four directions is yours."],
+              [
+  "At widths two and four, reconstruct the decomposed term-document table. Print summed squared reconstruction error beside the sum of discarded squared singular values.",
+  "Also report original zero-cell count, mean reconstructed value at those positions and negative reconstructed-cell count. Low-rank approximation is not constrained to nonnegative counts."
+],
               `import numpy as np
 from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
     LatentSemanticAnalysis,
@@ -1377,11 +1403,17 @@ for dimension in (2, 4):
   408 empty cells filled to 0.4043 on average, 104 cells below zero
 4 directions: error 228.3946, discarded 228.3946
   408 empty cells filled to 0.2541 on average, 136 cells below zero`,
-              { hints: ["The decomposition remembers the squared size of the whole table as total_squared_singular_values, which was worked out before the cut, so subtracting the kept squares from it leaves the discarded weight.", "original == 0 is a grid of True and False the same shape as the table, and indexing the rebuild with it picks out exactly the cells the collection never wrote in."], check: numberCheck("What is the squared error of the rebuild from four directions, to four places?", 228.3946, 5e-05, "The whole table’s squared size is the same whatever is kept, and four directions keep 0.6801 of it where two kept 0.4799, so the error falls from 371.3389 to 228.3946 and matches the discarded weight to every digit printed, because dropping a piece removes its contribution and nothing else. The empty cells are filled less heavily, 0.2541 against 0.4043, and more of the rebuild goes below zero, 136 cells against 104, since nothing told the fit its entries are counts.") },
+              { hints: [
+  "Use exactly the weighted matrix the fitted model decomposed.",
+  "Mask original zero cells before taking their reconstructed mean; count negative values over the complete reconstruction."
+], check: numberCheck("What is the squared error of the rebuild from four directions, to four places?", 228.3946, 5e-05, "The four-direction summed squared error is 228.3946. It matches the discarded squared singular contributions for this truncated decomposition."), question: "Does reconstruction error account for the directions that were discarded?" },
             ),
             exercise(
               "Fold new texts into a fitted collection",
-              ["Fit the twenty-four documents at two directions and fold in the three texts of step 16 with transform, together with a fourth that takes two words from each half. Print the two coordinates of each. Then fold the twenty-four fitted documents themselves back in and print the largest difference from the positions the fit gave them, and print the second coordinate of whisk, eggs, deck and boat.", "The first three should be the figures of step 16, the cooking side, the sailing side and the origin. The fitted documents should come back where they were, to rounding. Read the second coordinates of the four words before deciding where the fourth text ought to land."],
+              [
+  "Fit the supplied twenty-four documents at width two, then transform the four probe texts without refitting. Print each coordinate pair beside its text.",
+  "Transform the training documents as a consistency check and print their maximum coordinate difference. Then print the second word-coordinate values for whisk, eggs, deck and boat to interpret the mixed probe."
+],
               `import numpy as np
 from oop_ml.core.natural_language_processing.embeddings.counts.latent_semantic_analysis import (
     LatentSemanticAnalysis,
@@ -1497,7 +1529,10 @@ whisk -2.3562
 eggs  -3.1580
 deck   2.3562
 boat   3.1580`,
-              { hints: ["transform takes a list of texts and answers their positions in the fitted space, without refitting anything. What comes back has vector_of, taking a place in the list, and vectors, the whole grid.", "The weights transform puts on a new text’s counts are the ones the fit worked out, which is why a fitted document folded in lands where the fit put it.", "A word’s coordinates are model.embeddings.vector_of(word).values, and the second of them is at index 1."], check: numberCheck("Where on the first direction does the text with two words of each half land, to four places?", 3.291, 5e-05, "It lands at 3.2910 on the first direction and at 0.0000 on the second. whisk and deck sit at −2.3562 and 2.3562 on the direction that separates the halves and eggs and boat at −3.1580 and 3.1580, so the two cooking words pull the text exactly as far one way as the two sailing words pull it the other, while on and of are ignored because the collection never contained them and the word the adds nothing there because it is used equally on both sides. What is left is the first direction, which measures how much of the common vocabulary a text uses.") },
+              { hints: [
+  "Unknown words are outside the fitted vocabulary and do not create new directions during transform.",
+  "Inspect which known words contribute in opposite directions before interpreting a mixed text near the separating-axis origin."
+], check: numberCheck("Where on the first direction does the text with two words of each half land, to four places?", 3.291, 5e-05, "The mixed text’s first coordinate is 3.2910. Its cooking and sailing contributions cancel along the second direction, while a shared first-direction contribution remains."), question: "Where does a fitted document space put unfamiliar text?" },
             ),
           ],
         },

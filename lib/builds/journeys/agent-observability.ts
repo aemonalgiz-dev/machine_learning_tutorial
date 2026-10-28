@@ -2,14 +2,14 @@ import type { JourneyPlan } from '../journey-plan';
 
 export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
   'agent-tracing': {
-    premise: 'The maintenance assistant works across tools, but its answer cannot explain a slow request. Botie needs to follow the technician’s own execution through the recorded spans.',
+    premise: "The maintenance answer was slow. A span records one operation’s start and finish; a trace groups the operations for one request. Find the technician’s request span so another request or an overlapping child call cannot supply the waiting time.",
     order: 'investigate-first',
     preparation: {
       path: [0, 0, 0], title: 'Separate one technician’s trace from the export',
       challenge: 'Use the requested trace ID to keep its span records. Keep both the request and its child operations for now.',
       why: 'The same export can contain several technicians. Measuring a root before selecting its trace can answer the wrong person’s question.',
     },
-    construction: { title: 'Measure the interval the technician waited', start: 'Find the single request span inside the selected trace, measure its duration, and return that one value.', outcome: 'The construction reports the chosen request’s elapsed milliseconds even when child work overlaps.' },
+    construction: { title: 'Measure the interval the technician waited', start: 'Find the single request span inside the selected trace, measure its duration, and return that one value.', outcome: 'The construction reports the chosen request’s elapsed milliseconds even when child work overlaps.' , hints: ["Select the requested trace before finding its root request. Otherwise another technician’s request may look like a valid root.","Measure the root’s end against its start. Adding child durations can count overlapping or nested work more than once."] },
     investigation: {
       title: 'The manual and equipment lookups run together', caseIndex: 1, kind: 'diagnose',
       question: 'The request spans 0–900 ms, while child spans cover 50–350, 100–500 and 500–850 ms. Why would adding the child durations overstate this request’s wait?',
@@ -29,7 +29,7 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
     premise: 'Botie has versioned maintenance runs and evaluation results. A favourable score means little if it belongs to the wrong trace or ignores the runs that never received a judgement.',
     order: 'build-first',
     preparation: { path: [0, 0, 0], title: 'Attach one rubric’s judgement to each run', challenge: 'Select the requested rubric revision and join its scores to the run records by traceId. Preserve a missing score as null.', why: 'Scoring can finish out of order. Identity, rather than row position, determines which answer received each judgement.' },
-    construction: { title: 'Read the version’s score beside its coverage', start: 'Keep the requested prompt revision, then calculate the mean available score and the fraction of its runs that were scored.', outcome: 'The paired result retains missing evaluations in the coverage denominator without changing them into zero scores.' },
+    construction: { title: 'Read the version’s score beside its coverage', start: 'Keep the requested prompt revision, then calculate the mean available score and the fraction of its runs that were scored.', outcome: 'The paired result retains missing evaluations in the coverage denominator without changing them into zero scores.' , hints: ["A score must join to the run it evaluated, using traceId. Arrival order is not evidence that two rows belong together.","Select the requested rubric revision before joining scores, then select the prompt revision. Keep unscored runs for coverage even though the available-score mean excludes them."] },
     investigation: {
       title: 'One request never reaches the evaluator', caseIndex: 1, kind: 'compare',
       question: 'Prompt 3 has runs A, B and C. A scores 0, B scores 1, and C has no judgement. What should change compared with a version where all runs were scored?',
@@ -50,7 +50,7 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
     premise: 'The technician asked about an inspection. Botie’s response can sound right while his tool calls do something the case forbids. The evaluator must inspect both.',
     order: 'investigate-first',
     preparation: { path: [0, 1], title: 'Read each case’s permission boundary', challenge: 'Produce one flag per recorded case indicating whether every executed call name is in that case’s allowed list.', why: 'A correct outcome label cannot undo an unapproved action. This branch isolates the permission check before combining it with the task result.' },
-    construction: { title: 'Require the outcome and the permitted route', start: 'Calculate outcome-match flags, combine them with the aligned permission flags, and average only after both requirements have been applied per case.', outcome: 'The fraction describes cases satisfying both contracts, including cases that must abstain or ask for approval.' },
+    construction: { title: 'Require the outcome and the permitted route', start: 'Calculate outcome-match flags, combine them with the aligned permission flags, and average only after both requirements have been applied per case.', outcome: 'The fraction describes cases satisfying both contracts, including cases that must abstain or ask for approval.' , hints: ["Inspect what happened as well as the label returned. A correct request_approval label cannot excuse an executed create_job call.","Combine outcome matching and permission flags for each case first. Average those joint results only after the flags remain aligned by case."] },
     investigation: {
       title: 'Botie asks for approval after already creating the job', caseIndex: 1, kind: 'diagnose',
       question: 'The approval-missing case returns request_approval, as required, but calls create_job even though only search_manual and propose_job are permitted. Which part of the earlier outcome-only test is missing?',
@@ -70,7 +70,7 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
     premise: 'Some maintenance answers need semantic review. Botie has recorded human and model labels, and needs uncertain or disputed cases to remain visible instead of disappearing into an average.',
     order: 'build-first',
     preparation: { path: [1, 0, 0], title: 'Find disagreement with the human reference', challenge: 'Compare the human and judge fields in each record, flagging either uncertainty or unequal labels.', why: 'This checks one source of disagreement. The repeated judgement may reveal a separate issue even when the first judge result agrees with the human.' },
-    construction: { title: 'Keep every reason for review attached to the case', start: 'Add the evidence-order comparison, turn either reason into a keep mask, and select case IDs in their original order.', outcome: 'The review list names cases with disputed or uncertain labels without claiming which label is correct.' },
+    construction: { title: 'Keep every reason for review attached to the case', start: "Keep the cases needing review because a label is uncertain, the human and judge disagree, or changing evidence order changes the judge’s label. Return their IDs in the original case order.", outcome: 'The review list names cases with disputed or uncertain labels without claiming which label is correct.' , hints: ["Matching labels are not enough when the matching label means uncertain. That case still needs review.","Keep a case if any review reason holds. Build a mask from those reasons, then apply it to the aligned IDs."] },
     investigation: {
       title: 'Everyone writes uncertain', caseIndex: 2, kind: 'decide',
       question: 'For conflicting-manuals, the human, judge and reordered-evidence judge all return −1, meaning uncertain. Should matching labels remove this case from review?',
@@ -90,7 +90,7 @@ export const agentObservabilityJourneys: Record<string, JourneyPlan> = {
     premise: 'The new maintenance assistant improves average answers, but Botie must still respect approval requirements and the technician’s waiting budget. A release decision needs all of those requirements.',
     order: 'investigate-first',
     preparation: { path: [0, 0, 0], title: 'Compare each maintenance case with itself', challenge: 'Pair baseline and candidate records by case ID, subtract their aligned scores and calculate the mean paired change.', why: 'This is evidence about answer quality. It deliberately leaves the critical-action and latency requirements for separate branches.' },
-    construction: { title: 'Keep release requirements independent until the final gate', start: 'Compare the paired mean gain with its minimum, the largest candidate latency with its limit, and the largest critical flag with zero. Return 1 only when every branch passes.', outcome: 'Improved average scores cannot override a critical action or an exceeded timing budget.' },
+    construction: { title: 'Keep release requirements independent until the final gate', start: 'Compare the paired mean gain with its minimum, the largest candidate latency with its limit, and the largest critical flag with zero. Return 1 only when every branch passes.', outcome: 'Improved average scores cannot override a critical action or an exceeded timing budget.' , hints: ["A better average answer does not compensate for a critical unapproved action. Keep that branch as a hard requirement.","Join shared case IDs before calculating the mean change. Compare latency and quality with their own limits, then require every branch to pass."] },
     investigation: {
       title: 'The score improves while approval is bypassed', caseIndex: 1, kind: 'decide',
       question: 'Both answer scores improve, but one candidate record has critical=1 for an unapproved job creation. The policy permits no critical failures. What should happen?',

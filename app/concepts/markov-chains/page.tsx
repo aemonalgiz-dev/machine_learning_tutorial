@@ -72,16 +72,8 @@ export default function MarkovChainsPage() {
           content: (<>
 <>
               <SubSection title="1. Letters are not independent draws">
-                <p>
-                  Take the first two chapters of Alice&rsquo;s Adventures in
-                  Wonderland, 128 sentences and 16,803 letters once the spaces
-                  are gone, and sort every letter into a vowel or a consonant
-                  the way Markov sorted Pushkin. A little over a third of them
-                  are vowels, 38.14 percent. If the letters were drawn
-                  independently, like a coin weighted towards consonants, the
-                  chance of a vowel would be 38.14 percent after anything at all,
-                  and knowing the letter before would tell us nothing.
-                </p>
+                <p>Take the first two chapters of Alice&apos;s Adventures in Wonderland. After removing spaces, our example contains 16,803 letters in 128 sentences. We classify each letter as a vowel or consonant, following the kind of question Markov asked of Pushkin&apos;s text. Vowels account for 38.14 percent.</p>
+              <p>If we drew each category independently using that overall frequency, the chance of a vowel would be the same after every previous letter. Knowing whether the preceding letter was a vowel or consonant would tell us nothing. Let&apos;s compare that assumption with the actual transitions in this text.</p>
                 <>
 <p>
                   The preceding letter does help. In this text, a vowel follows a vowel 14.61 percent of the time, but follows a consonant 52.70 percent of the time. That is a difference of more than a factor of three and a half. A model that uses the previous letter&apos;s category can represent a pattern that independent draws would miss.
@@ -814,7 +806,7 @@ export default function MarkovChainsPage() {
             trueFalse(
               "The stationary distribution is where every walk ends up, so a chain whose walk never settles has none.",
               false,
-              "It is the distribution a single step leaves unchanged, π P = π with the entries summing to one, which is a fact about the table and says nothing about any particular walk. For two states the balance solves by hand, the flow from vowels to consonants, π_V times 0.8539, equal to the flow back, π_C times 0.5270, which puts the chance of a vowel at 0.3816. Whether a walk arrives there is a separate question, and banana’s chain in Part 7 has exactly one stationary distribution, half and half, that no walk reaches, since the walk is certainly at a consonant after every even step.",
+              "A stationary distribution is unchanged by a transition step. The alternating banana chain has the stationary half-and-half distribution, which remains unchanged if used initially. Starting certainly in one class instead produces alternating next-step distributions and does not converge to that stationary distribution.",
             ),
             choice(
               "Scored on the third chapter, which no chain counted, what did one letter of memory buy over the letter shares alone?",
@@ -1040,21 +1032,12 @@ export default function MarkovChainsPage() {
                   </p>
                 </>
                 <p>
-                  What survives is a weaker statement. Averaged over a long walk,
-                  the walk spends half its time at each state, and the
-                  widget&rsquo;s share of time over the first thousand steps
-                  reads 0.5 and 0.5. On a periodic chain the stationary
-                  distribution means the share of time and nothing about where
-                  the walk will be at any particular step. A smoothing of a half
-                  breaks the lockstep, since each state can now repeat, and the
-                  smoothed chain settles at 0.5122 for a vowel, where every walk
-                  arrives.
+
+                  Averaging over time answers a different question from predicting one particular step. In this alternating chain, a long path spends half its steps in each state, even though a distribution concentrated on one starting state never settles. Starting with the stationary half-and-half distribution would preserve it at every step. Positive smoothing allows repeated states and makes the next-step distributions from either known starting class converge; with smoothing 0.5, the stationary vowel probability is 0.5122.
                 </p>
                 <KeepInMind>
-                  Banana&rsquo;s chain has exactly one stationary distribution
-                  and no walk that reaches it. Having one needs every state
-                  reachable from every other, and reaching it needs, besides,
-                  that the walk not cycle in lockstep.
+
+                  This finite alternating chain has one stationary distribution, yet a known starting state produces oscillating next-step distributions. Irreducibility is sufficient for a finite chain to have a unique stationary distribution, but it is not necessary. A unique closed communicating class gives uniqueness; if that class is also aperiodic, the distributions converge to it from any starting state.
                 </KeepInMind>
               </SubSection>
 
@@ -1221,25 +1204,21 @@ export default function MarkovChainsPage() {
                 "spa’s, as counted with no smoothing",
               ],
               [0, 1],
-              "Having exactly one needs a single closed group of states, and none of the magnitudes matter. banana’s chain cycles in lockstep, so its one stationary distribution, half and half, is the share of time over a long walk and no walk ever settles there, which the widget reads as 0.5 and 0.5 over the first thousand steps. asks is reducible, since the vowel cannot be reached from the consonant, and still has exactly one, all of it on the consonant. rhythm and aeiou give two closed groups, so every mixture is stationary and where the walk starts decides, and spa’s vowel is never left, so its table does not exist until something is decided.",
+              "For these finite chains, uniqueness follows from having one closed communicating class. Banana has one and is periodic: a known starting state oscillates, while its stationary half-and-half starting distribution stays fixed. The reducible asks chain also has one closed class, the consonant. The identity table from rhythm and aeiou has two closed classes and multiple stationary mixtures. Unsmoothed spa lacks a defined outgoing row under this fitted-table convention.",
             ),
           ],
         },
         {
           title: "Practice. Counting Chains With the Library",
           practice: [
-            exercise(
-              "Count Oh my dear Dinah with the library",
-              ["Part 2 counted the thirteen letters of Oh my dear Dinah by hand into twelve steps, a vowel row of 1 and 4 giving 0.2000 and 0.8000, and a consonant row of 3 and 4 giving 0.4286 and 0.5714. Part 4 then solved the balance for a stationary vowel share of 15 over 43. Fit the chain with the library on the same classes and read every one of those numbers off it.", "The y of my is a consonant by the page’s convention, which the class mapping in the starter already makes. The observed share of vowels is 5 of 13, and the page says why it differs from the stationary share on so short a sentence."],
-              `from oop_ml import MarkovChain
+            exercise("Count Oh my dear Dinah with the library",["Part 2 counted the thirteen letters of Oh my dear Dinah by hand into twelve steps, a vowel row of 1 and 4 giving 0.2000 and 0.8000, and a consonant row of 3 and 4 giving 0.4286 and 0.5714. Part 4 then solved the balance for a stationary vowel share of 15 over 43. Fit the chain with the library on the same classes and read every one of those numbers off it.", "The y of my is a consonant by the page’s convention, which the class mapping in the starter already makes. The observed share of vowels is 5 of 13, and the page says why it differs from the stationary share on so short a sentence."],`from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
 dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
 
 # Fit a chain on the one sequence. Print how many steps it counted, then for
 # each state its row of counts and its row of probabilities, then the
-# stationary vowel share and the sentence's own share of vowels.`,
-              `from oop_ml import MarkovChain
+# stationary vowel share and the sentence's own share of vowels.`,`from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
 dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
@@ -1254,18 +1233,12 @@ for source in ("V", "C"):
 
 settled = chain.stationary_distribution()
 print(f"stationary vowel share {settled['V']:.4f}")
-print(f"observed vowel share {dinah.count('V') / len(dinah):.4f}")`,
-              `classes VCCCCVVCCVCVC, 13 letters, 12 steps
+print(f"observed vowel share {dinah.count('V') / len(dinah):.4f}")`,`classes VCCCCVVCCVCVC, 13 letters, 12 steps
 after V: counts [1, 4], probabilities [0.2, 0.8]
 after C: counts [3, 4], probabilities [0.4286, 0.5714]
 stationary vowel share 0.3488
-observed vowel share 0.3846`,
-              { hints: ["fit takes a list of sequences, and each sequence is a list of state names, so the one sentence goes in as a list holding one list. A bare string is refused, since it would be read as its letters.", "transition_counts has count_of(source, target) and n_transitions, and probability_of(source, target) on the chain reads the table. All of them take the state names.", "stationary_distribution answers a distribution indexed by state name, so indexing it with V reads the vowel share."], check: numberCheck("What stationary vowel share does the chain on Oh my dear Dinah report?", 0.3488, 0.0005, "The flow from vowels to consonants has to equal the flow back, so the vowel share is p_CV over p_CV plus p_VC, which is 3/7 over 3/7 plus 4/5, 15 over 43. The sentence itself is 5 of 13 vowels, 0.3846, and the two differ because the first and last letters of a thirteen-letter sentence are a sizeable part of it; on 128 sentences the same gap is 0.3814 against 0.3816.") },
-            ),
-            exercise(
-              "Walk the Dinah chain forward and watch it forget",
-              ["Part 3 carried the two-chapter chain several steps ahead and found the walks from a vowel and from a consonant crossing before settling, with the gap to the settled share shrinking by the table’s second eigenvalue at every step. Do the same on the Dinah chain, whose table is 0.2 and 0.8 after a vowel and 3/7 and 4/7 after a consonant.", "Two steps on from a vowel is a number the page never prints for this chain. The two-chapter chain gave 0.4713 there, and Part 3 says how to get it from the table by hand, the two routes through the letter in between added together."],
-              `from oop_ml import MarkovChain
+observed vowel share 0.3846`,{...{ hints: ["fit takes a list of sequences, and each sequence is a list of state names, so the one sentence goes in as a list holding one list. A bare string is refused, since it would be read as its letters.", "transition_counts has count_of(source, target) and n_transitions, and probability_of(source, target) on the chain reads the table. All of them take the state names.", "stationary_distribution answers a distribution indexed by state name, so indexing it with V reads the vowel share."], check: numberCheck("What stationary vowel share does the chain on Oh my dear Dinah report?", 0.3488, 0.0005, "The stationary vowel share balances expected flow in each direction under the fitted transition table. It need not equal the empirical vowel fraction of one short sentence, whose beginning and ending also affect the counts.") },question:"Can the letter sequence recover the counted transition table and its stationary distribution?"}),
+            exercise("Walk the Dinah chain forward and watch it forget",["Part 3 carried the two-chapter chain several steps ahead and found the walks from a vowel and from a consonant crossing before settling, with the gap to the settled share shrinking by the table’s second eigenvalue at every step. Do the same on the Dinah chain, whose table is 0.2 and 0.8 after a vowel and 3/7 and 4/7 after a consonant.", "Two steps on from a vowel is a number the page never prints for this chain. The two-chapter chain gave 0.4713 there, and Part 3 says how to get it from the table by hand, the two routes through the letter in between added together."],`from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
 dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
@@ -1273,8 +1246,7 @@ dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter !=
 chain = MarkovChain().fit([dinah])
 # For one to six steps, print the chance of a vowel that many steps after a
 # vowel and after a consonant. Then print the table's second eigenvalue,
-# p_VV less p_CV, and the stationary vowel share the walks settle at.`,
-              `from oop_ml import MarkovChain
+# p_VV less p_CV, and the stationary vowel share the walks settle at.`,`from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
 dinah = [("V" if letter in "aeiou" else "C") for letter in sentence if letter != " "]
@@ -1287,21 +1259,15 @@ for steps in range(1, 7):
 
 second_eigenvalue = chain.probability_of("V", "V") - chain.probability_of("C", "V")
 print(f"second eigenvalue {second_eigenvalue:.4f}")
-print(f"settles at {chain.stationary_distribution()['V']:.4f}")`,
-              `1 steps on: vowel with chance 0.2000 from a vowel, 0.4286 from a consonant
+print(f"settles at {chain.stationary_distribution()['V']:.4f}")`,`1 steps on: vowel with chance 0.2000 from a vowel, 0.4286 from a consonant
 2 steps on: vowel with chance 0.3829 from a vowel, 0.3306 from a consonant
 3 steps on: vowel with chance 0.3411 from a vowel, 0.3530 from a consonant
 4 steps on: vowel with chance 0.3506 from a vowel, 0.3479 from a consonant
 5 steps on: vowel with chance 0.3484 from a vowel, 0.3491 from a consonant
 6 steps on: vowel with chance 0.3489 from a vowel, 0.3488 from a consonant
 second eigenvalue -0.2286
-settles at 0.3488`,
-              { hints: ["distribution_after takes a starting state name and a number of steps, and answers a distribution over the chain’s states indexed by name, so indexing it with V reads the chance of a vowel.", "For two states the second eigenvalue is p_VV less p_CV, read off probability_of. Its sign says whether the walks cross and its size says how much of the remaining distance each step leaves."], check: numberCheck("What chance of a vowel does the Dinah chain give two steps after a vowel?", 0.3829, 0.0005, "The walk passes through a vowel with chance 0.2 and then reaches a vowel with chance 0.2, or passes through a consonant with chance 0.8 and then reaches a vowel with chance 3/7, so 0.04 plus 0.3429, which is the table squared read at the vowel row. The second eigenvalue is 0.2 less 0.4286, so each step leaves 0.2286 of the remaining distance and the sign makes the two walks cross, 0.3829 against 0.3306 after two steps, before both settle at 0.3488.") },
-            ),
-            exercise(
-              "Score the sentence under its own chain",
-              ["Part 2 says the counted table is the one under which the counted text is most probable, and that the probability of a text is a product of one table entry per step, given its first letter. Ask the chain for the log probability of Oh my dear Dinah, confirm it by adding the twelve logarithms yourself, and then score a sentence the chain never counted, the classes of banana.", "The two-chapter chain gives its text a log likelihood of −9,773.73 nats. The number for the thirteen-letter sentence is one the page does not print, and the first letter is never scored, which is why thirteen letters give twelve terms."],
-              `import math
+settles at 0.3488`,{...{ hints: ["distribution_after takes a starting state name and a number of steps, and answers a distribution over the chain’s states indexed by name, so indexing it with V reads the chance of a vowel.", "For two states the second eigenvalue is p_VV less p_CV, read off probability_of. Its sign says whether the walks cross and its size says how much of the remaining distance each step leaves."], check: numberCheck("What chance of a vowel does the Dinah chain give two steps after a vowel?", 0.3829, 0.0005, "The two-step prediction includes both possible intermediate letter classes. The negative second eigenvalue explains alternating sides of the stationary share while the distribution approaches it for this aperiodic chain.") },question:"How does the next-letter distribution change over repeated steps?"}),
+            exercise("Score the sentence under its own chain",["Part 2 says the counted table is the one under which the counted text is most probable, and that the probability of a text is a product of one table entry per step, given its first letter. Ask the chain for the log probability of Oh my dear Dinah, confirm it by adding the twelve logarithms yourself, and then score a sentence the chain never counted, the classes of banana.", "The two-chapter chain gives its text a log likelihood of −9,773.73 nats. The number for the thirteen-letter sentence is one the page does not print, and the first letter is never scored, which is why thirteen letters give twelve terms."],`import math
 from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
@@ -1311,8 +1277,7 @@ chain = MarkovChain().fit([dinah])
 # Print the log probability the chain gives its own sentence, and the
 # probability that is. Add the twelve logarithms by hand from the counts,
 # one of 1/5, four of 4/5, three of 3/7 and four of 4/7, and print the sum.
-# Then score the classes of the word banana under the same chain.`,
-              `import math
+# Then score the classes of the word banana under the same chain.`,`import math
 from oop_ml import MarkovChain
 
 sentence = "oh my dear dinah"
@@ -1328,17 +1293,11 @@ by_hand = math.log(1 / 5) + 4 * math.log(4 / 5) + 3 * math.log(3 / 7) + 4 * math
 print(f"the twelve logarithms added by hand {by_hand:.4f} nats")
 
 banana = [("V" if letter in "aeiou" else "C") for letter in "banana"]
-print(f"log probability of banana's classes {chain.log_probability_of(banana):.4f} nats")`,
-              `log probability of the sentence under its own chain -7.2824 nats
+print(f"log probability of banana's classes {chain.log_probability_of(banana):.4f} nats")`,`log probability of the sentence under its own chain -7.2824 nats
 probability 0.000688
 the twelve logarithms added by hand -7.2824 nats
-log probability of banana's classes -2.9882 nats`,
-              { hints: ["log_probability_of takes one sequence of state names and answers the sum of the natural logarithms of each step’s probability, given the first state, so the exponential of it is the probability of the twelve steps together.", "The steps in the sentence are one vowel to vowel, four vowel to consonant, three consonant to vowel and four consonant to consonant, so the sum by hand has those four terms with those four counts.", "banana’s classes are C V C V C V, five steps, every one a step the Dinah chain counted, so nothing in it has probability zero."], check: numberCheck("What log probability does the chain give Oh my dear Dinah, in nats?", -7.2824, 0.0005, "Twelve steps, one table entry each, and the logarithm of the product is the sum of the logarithms, one of 1/5, four of 4/5, three of 3/7 and four of 4/7. Part 2 says no other table can give the sentence a larger value, since each row is its counts over its own total, and the same calculation on the two chapters gives −9,773.73 nats. The first letter is taken as given and never scored.") },
-            ),
-            exercise(
-              "Count the three chains where the method stops being defined",
-              ["Part 7 counts chains on spa, whose vowel is never left, on banana, whose classes alternate in lockstep, and on rhythm and aeiou together, whose table is the identity. Count all three with the library, as counted and smoothed by a half, and see which question each refuses to answer.", "The page says the first is refused at the fit, the second has exactly one stationary distribution that no walk reaches, and the third has a whole line of them. Smoothed by a half, banana settles at 0.5122 for a vowel and the two words at 0.4545."],
-              `from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
+log probability of banana's classes -2.9882 nats`,{...{ hints: ["log_probability_of takes one sequence of state names and answers the sum of the natural logarithms of each step’s probability, given the first state, so the exponential of it is the probability of the twelve steps together.", "The steps in the sentence are one vowel to vowel, four vowel to consonant, three consonant to vowel and four consonant to consonant, so the sum by hand has those four terms with those four counts.", "banana’s classes are C V C V C V, five steps, every one a step the Dinah chain counted, so nothing in it has probability zero."], check: numberCheck("What log probability does the chain give Oh my dear Dinah, in nats?", -7.2824, 0.0005, "Conditioning on the first class leaves one transition term for each later letter. Adding natural-log transition probabilities calculates the same sequence score without multiplying many small numbers.") },question:"What probability does the fitted chain assign to each sentence?"}),
+            exercise("Count the three chains where the method stops being defined",["Fit the supplied class sequences for spa, banana, and the separate words rhythm and aeiou, both without smoothing and with smoothing 0.5. Print the transition tables and ask each fitted chain for its stationary distribution. Catch and print the library's named refusals.","The unsmoothed spa sequence has a state with no observed outgoing transition. Banana alternates deterministically: its stationary distribution exists, but a start concentrated on one class keeps oscillating. The identity table from the separate words has several stationary distributions. Compare those different failures with the smoothed results."],`from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
 
 groups = {"spa": ["spa"], "banana": ["banana"], "rhythm and aeiou": ["rhythm", "aeiou"]}
 for label, words in groups.items():
@@ -1348,8 +1307,7 @@ for label, words in groups.items():
     # there is one, otherwise print its table, the chance of a vowel over
     # the first six steps from the first state, and its stationary vowel
     # share, or the refusal if it has no single one.
-    pass`,
-              `from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
+    pass`,`from oop_ml import MarkovChain, NonUniqueStationaryDistributionError, TooFewValuesError
 
 groups = {"spa": ["spa"], "banana": ["banana"], "rhythm and aeiou": ["rhythm", "aeiou"]}
 for label, words in groups.items():
@@ -1367,17 +1325,14 @@ for label, words in groups.items():
     try:
         print(f"{label}: as counted, stationary vowel share {chain.stationary_distribution()['V']:.4f}")
     except NonUniqueStationaryDistributionError as refusal:
-        print(f"{label}: as counted, no single answer. {refusal}")`,
-              `spa: smoothed to a half, settles at 0.5000 for a vowel
+        print(f"{label}: as counted, no single answer. {refusal}")`,`spa: smoothed to a half, settles at 0.5000 for a vowel
 spa: as counted, refused. ['V'] never began a counted step, so each has a row of transitions that is zero over zero. Give a smoothing above zero, or count sequences that leave them
 banana: smoothed to a half, settles at 0.5122 for a vowel
 banana: as counted, table [[0.0, 1.0], [1.0, 0.0]], chance of a vowel over six steps [0.0, 1.0, 0.0, 1.0, 0.0, 1.0]
 banana: as counted, stationary vowel share 0.5000
 rhythm and aeiou: smoothed to a half, settles at 0.4545 for a vowel
 rhythm and aeiou: as counted, table [[1.0, 0.0], [0.0, 1.0]], chance of a vowel over six steps [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-rhythm and aeiou: as counted, no single answer. this chain has 2 closed groups of states, ('C',), ('V',). A walk that enters one never leaves it, so each has its own stationary distribution and every mixture of them is stationary too; there is no single one to give. A smoothing above zero joins them`,
-              { hints: ["A state that never begins a step is refused by fit with TooFewValuesError when the smoothing is zero, and the message names the state. Catching it and continuing is what lets the loop reach the other two.", "stationary_distribution raises NonUniqueStationaryDistributionError when there is more than one closed group of states, and the message names the groups. It still answers on banana, where there is one closed group, even though no walk arrives there.", "distribution_after from the first state of the first word shows the lockstep on banana, certainly a consonant after every even step and certainly a vowel after every odd one."], check: numberCheck("Where does banana’s chain settle for a vowel once smoothed by a half?", 0.5122, 0.0005, "A smoothing of a half adds half a step to every cell, so each state can now repeat and the lockstep is broken. The consonant row becomes 3.5 of 4 to a vowel and the vowel row 2.5 of 3 to a consonant, and the balance gives 0.875 over 0.875 plus 0.8333, which is 0.5122, where every walk now arrives. As counted the table is the flip, with exactly one stationary distribution, half and half, that no walk reaches.") },
-            ),
+rhythm and aeiou: as counted, no single answer. this chain has 2 closed groups of states, ('C',), ('V',). A walk that enters one never leaves it, so each has its own stationary distribution and every mixture of them is stationary too; there is no single one to give. A smoothing above zero joins them`,{...{ hints: ["A state that never begins a step is refused by fit with TooFewValuesError when the smoothing is zero, and the message names the state. Catching it and continuing is what lets the loop reach the other two.", "stationary_distribution raises NonUniqueStationaryDistributionError when there is more than one closed group of states, and the message names the groups. It still answers on banana, where there is one closed group, even though no walk arrives there.", "distribution_after from the first state of the first word shows the lockstep on banana, certainly a consonant after every even step and certainly a vowel after every odd one."], check: numberCheck("Where does banana’s chain settle for a vowel once smoothed by a half?", 0.5122, 0.0005, "Positive smoothing permits repeated states and breaks the deterministic alternation, so next-step distributions can converge. Without smoothing the alternating chain still has a stationary half-and-half distribution: it stays unchanged if used as the starting distribution, while a start concentrated on one class oscillates.") },question:"How do missing transitions, periodicity and separate closed groups affect the chain?",hints:["With no smoothing, fit refuses a state that has no observed outgoing step. Catch TooFewValuesError so the other examples can still run.","stationary_distribution raises NonUniqueStationaryDistributionError for multiple closed groups. It still answers for the alternating banana chain; existence of a stationary distribution does not imply convergence from a particular starting state.","Use distribution_after from the first state of the word to observe the alternating distributions, then compare with positive smoothing."]}),
           ],
         },
       ]}

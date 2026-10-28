@@ -71,17 +71,12 @@ export default function MosesRulesPage() {
 <>
               <SubSection title="1. The pieces have to go back together again">
                 <p>
-                  The three rules on the pages before this one were each
-                  answering a question and none of them was asked what happened
-                  next. Splitting on spaces asks where the gaps are, the
-                  boundary rules ask which pairs of characters a word may break
-                  between, and the annotation rules ask which units a person
-                  marking up grammar needs a row for. Every one of those ends
-                  when the pieces come out.
+                  A word counter can finish once it has produced pieces. A translation system still has work to do: after its model chooses output pieces, those pieces must become readable text again. A rule that is convenient on input can leave the output with misplaced spaces or punctuation.
                 </p>
                 <p>
-                  A translation system has an additional problem: it must turn its output pieces back into readable text. The choices made during tokenization affect what can be reconstructed afterwards. We will use the same sentence to examine punctuation and spacing decisions, then check how the reverse operation handles them.
+                  The earlier space and boundary rules gave us useful points of comparison. Here we will judge a tokenizer together with its reverse operation, using the same sentence so the punctuation decisions remain visible.
                 </p>
+
                 <Equation>
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
                 </Equation>
@@ -1444,7 +1439,11 @@ export default function MosesRulesPage() {
           practice: [
             exercise(
               "Cut the sentence about Dr. Alvarez under both rule lists",
-              ["Put the sentence about Dr. Alvarez to the library’s Moses rules and print each piece beside the half-open span it came from. Then put the same sentence to the Penn Treebank rules, which are the annotation rules of this page, and count the pieces the two answers have in common.", "Part 1 arrived at nine pieces under each and seven shared, with the two that differ being the halves of the contraction. Print the pieces only one of the two rule lists produced, so that the disagreement can be read off."],
+              [
+  "Split the supplied Dr. Alvarez sentence with MosesPreTokenizer and PennTreebankPreTokenizer. These fixed rules need no training corpus.",
+  "For Moses, print each piece beside its zero-based, half-open source span. Then print both piece counts, the number of distinct spellings shared by the two results, and the sorted spellings unique to each rule set.",
+  "Use sets for the spelling comparison. This measures shared distinct pieces, rather than aligned occurrences or agreement about their positions."
+],
               `from oop_ml import MosesPreTokenizer, PennTreebankPreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -1478,11 +1477,20 @@ re-analysis  [39, 50)
 9 pieces here, 9 pieces there, 7 shared
 only here:  ["'t", 'didn']
 only there: ['did', "n't"]`,
-              { hints: ["Both rules are constructed with nothing, since the defaults are the English setting with both switches off, and the text goes to split.", "split answers a collection that can be iterated for words carrying text, start and end, and that knows n_words and the texts alone.", "Turning each answer’s texts into a set makes the shared pieces an intersection and the pieces only one side produced a difference."], check: numberCheck("How many pieces do the two rule lists share on the sentence about Dr. Alvarez?", 7, 0.0, "Both give nine pieces and seven are the same. These rules cut the contraction at the apostrophe, into didn and a piece beginning with the mark, and the annotation rules cut it in front of the negation, into did and a piece beginning with n. The first needs nothing known about English to state, which is what decided it for a script that had to run over eleven languages.") },
+              {
+question: "Where do two English rule sets disagree on the same contraction?",
+ hints: [
+  "split returns pieces carrying text, start and end, plus a texts tuple for the whole result.",
+  "Set intersection gives shared spellings. Set differences show which contraction pieces each rule set chose."
+], check: numberCheck("How many pieces do the two rule lists share on the sentence about Dr. Alvarez?", 7, 0.0, "The results share seven distinct spellings. Moses and the Treebank rules divide didn’t at different positions; their different conventions can give equally long results.") },
             ),
             exercise(
               "Give the same abbreviation two different followers",
-              ["Section 7 gave the rules the same abbreviation twice with different writing after it. Put the three pairs below to the Moses rules, and for each text print the pieces and whether the word in question came back with its stop still attached.", "Each pair should split, one kept and one cut, and in every pair the abbreviation itself is identical in both texts. Count how many of the six stops were kept, and notice which clause of section 6 is responsible for each of the six answers."],
+              [
+  "Each supplied pair contains the same abbreviation with different text after it. Split all six texts with the Moses rules and inspect the abbreviation, rather than assuming its spelling determines the result.",
+  "Print the split pieces with a kept/split label for the abbreviation’s full stop. Finish with the total number of stops retained. Keep the supplied text order.",
+  "A retained stop is part of the abbreviation piece; a detached stop is its own piece."
+],
               `from oop_ml import MosesPreTokenizer
 
 cases = [
@@ -1524,11 +1532,20 @@ kept   The  reading  was  approx.  forty  per  cent  .
 kept   Alvarez  et  al.  ran  the  analysis  .
 split  Alvarez  et  al  .  Ran  it  again  .
 3 of 6 stops kept`,
-              { hints: ["The texts of a split are a tuple of strings, so whether the abbreviation kept its stop is whether the word with the stop on it is in that tuple.", "A stop that came off shows up as the bare word followed by a piece that is a full stop and nothing else.", "A true answer counts as one when it is added to a number, so the tally of kept stops can be a running sum of the test."], check: numberCheck("How many of the six stops do the rules keep?", 3, 0.0, "Three are kept and all three by what follows the word. No. keeps its stop because a figure follows an entry of the figures list, and approx. and al. keep theirs because the next word begins with a lowercase letter. The other three are the same abbreviations in front of a capital or a figure, so the answer turned on writing that has nothing to do with the abbreviation, which is section 7’s warning about a clause that reads the next word.") },
+              {
+question: "Can the following word change whether an abbreviation keeps its full stop?",
+ hints: [
+  "Test whether the full abbreviation spelling occurs in the split’s texts.",
+  "Accumulate that Boolean test over the six inputs. Compare the following word or digit within each pair to explain the changed decision."
+], check: numberCheck("How many of the six stops do the rules keep?", 3, 0.0, "Three stops remain attached. In these probes, the rules use what follows the abbreviation, so identical abbreviations do not always receive identical cuts.") },
             ),
             exercise(
               "Count what the rules cost over the minutes",
-              ["Part 5 counted the eighteen minuted sentences under each rule. Count them under splitting on spaces, under the Moses rules, and under the Moses rules with the switch that cuts a compound at its hyphen. For each, print how many pieces the corpus became and how many different pieces there were.", "The first two rows should be 192 and 137 against 228 and 136, and the third should have the 240 pieces section 17 quotes. The page does not say what the hyphen switch does to the count of different pieces, so read that off and see whether cutting the compounds made the vocabulary smaller here."],
+              [
+  "The supplied eighteen sentences contain repeated words and hyphenated compounds. Compare whitespace splitting, the default Moses rules and Moses with compound splitting enabled.",
+  "For each rule print total piece occurrences and distinct piece spellings over the corpus. The second count is the size a vocabulary would need before reserving any unknown entry.",
+  "Use the same sentences for all three rules. A compound can disappear as one entry while introducing several new component entries."
+],
               `from oop_ml import Corpus, MosesPreTokenizer, WhitespacePreTokenizer
 
 minutes = [
@@ -1595,11 +1612,20 @@ for name, rule in rules.items():
               `at spaces           192 pieces, 137 different
 these rules         228 pieces, 136 different
 with compounds cut  240 pieces, 138 different`,
-              { hints: ["Corpus.of takes the list of sentences, and its word_counts takes a rule and answers the count of every distinct piece the rule produced over the whole corpus.", "The counts know total, which is every piece counted with its repeats, and n_words, which is how many different pieces there were."], check: numberCheck("How many different pieces do the minutes give with every compound cut at its hyphen?", 138, 0.0, "Cutting the compounds takes three entries away, low-cost, re-analysis and well-known, and opens five, which are low, re, well, known and the marker that stands for the hyphen, since cost and analysis already had rows. So 136 becomes 138 and the switch makes the vocabulary larger on eighteen sentences, for the reason section 20 gives about the rules as a whole. The saving needs the halves to turn up elsewhere often enough, and at this size they do not.") },
+              {
+question: "Does splitting hyphenated words always shrink a vocabulary?",
+ hints: [
+  "Corpus.of(sentences).word_counts(rule) counts the pieces produced by that rule.",
+  "The counts expose total for occurrences and n_words for distinct spellings. They answer different questions."
+], check: numberCheck("How many different pieces do the minutes give with every compound cut at its hyphen?", 138, 0.0, "Compound splitting produces 138 distinct pieces on this corpus. The new component spellings outweigh the compound entries removed here; the direction depends on which components already occur elsewhere.") },
             ),
             exercise(
               "Switch the rewriting on and undo it",
-              ["Section 17 says the eight named characters can be put back because nothing else produces those names. Split each of the eighteen minuted sentences with the rewriting switched on, count the pieces whose text is no longer the stretch of the sentence their span names, then join the pieces with nothing between them, put the eight characters back, and compare with the sentence stripped of its spacing.", "Every one of the eighteen should come back. The page counts three rewritten pieces on its quoted sentence and does not count them over the minutes, so read off how many pieces of the whole corpus the switch rewrote.", "The table of names is not exported from the top of the library, so it is imported here from the module that holds the rules."],
+              [
+  "Enable the Moses rewriting option for the supplied eighteen sentences. Some token spellings will use escape names instead of the original punctuation characters.",
+  "Count pieces whose text differs from the source slice named by their span. For each sentence join the pieces without separators, replace escape names through the supplied UNESCAPES mapping, and compare with the source stripped of whitespace.",
+  "Print the total rewritten-piece count and the number of recovered sentences. This experiment checks the supplied corpus after whitespace removal; it does not recover the discarded layout or prove invertibility for arbitrary text containing escape-like names."
+],
               `import re
 
 from oop_ml import MosesPreTokenizer
@@ -1673,7 +1699,13 @@ print(f"pieces rewritten: {rewritten}")
 print(f"sentences recovered: {recovered} of {len(minutes)}")`,
               `pieces rewritten: 8
 sentences recovered: 18 of 18`,
-              { hints: ["UNESCAPES is a dictionary from each name, such as the one for a quotation mark, to the character it stands for, and the pattern built above matches any one of the eight names.", "A rewritten piece still carries the span of the writing it replaced, so the test for one is whether its text differs from the sentence sliced from start to end.", "The pattern’s sub takes a function that is handed each match, and the matched name is found.group(0), which is the key to look up. Splitting a sentence with no argument and joining with nothing strips its spacing."], check: numberCheck("How many pieces of the eighteen sentences does the switch rewrite?", 8, 0.0, "Eight pieces are rewritten, the four quotation marks of the tenth sentence and the four pieces that begin with an apostrophe, which come from didn’t, Andrew’s, It’s and committee’s. All eighteen sentences come back once the names are replaced, because each name stands for exactly one character and nothing else in the writing produces it. That is the difference from the annotation rules’ quotation marks, whose rewritten spelling a typist could also have typed.") },
+              {
+question: "Can the escaped token spellings recover the original non-whitespace text?",
+ hints: [
+  "piece.text differs from sentence[piece.start:piece.end] when the rule rewrote its spelling.",
+  "The supplied pattern locates escape names. Its replacement callback can look up match.group(0) in UNESCAPES.",
+  "Compare with \"\".join(sentence.split()), since whitespace is intentionally absent from this reconstruction."
+], check: numberCheck("How many pieces of the eighteen sentences does the switch rewrite?", 8, 0.0, "Eight pieces are rewritten and all eighteen supplied sentences recover after whitespace removal. This establishes the round trip for these inputs and this reconstruction procedure, rather than for every possible source string.") },
             ),
           ],
         },

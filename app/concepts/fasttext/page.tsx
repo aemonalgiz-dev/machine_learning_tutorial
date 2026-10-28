@@ -482,15 +482,18 @@ export default function FasttextPage() {
               "There is no lookup and no list of pieces anywhere. A piece is hashed and the remainder on division by the number of rows is the row it uses, so a piece nobody has ever written is given a row just as readily as a common one. The piece laying, which no word of this corpus contains, lands in row 827, and that row is still every coordinate zero.",
             ),
             several(
-              "Which of these follow from a word’s vector being the sum of its own row and the rows of its pieces?",
+              "Which statements follow from the update rule or agree with this first-pass comparison?",
               [
                 "The correction from a training pair is added unchanged to every part’s row",
                 "A word’s composed vector travels further per correction than a plain one would",
                 "A step size chosen for one row per word is still the right step size here",
-                "The first pass costs less per training pair than the same fit without pieces",
+                "The first pass has lower mean loss per training pair than the same fit without pieces"
               ],
               [0, 1, 3],
-              "The derivative of a sum with respect to any one term is the derivative with respect to the whole, so every part receives the same correction, and a word here has 14.6129 parts on average. The cost curve shows the effect, with a first pass at 2.5560 against 3.7370 without pieces. The step size therefore does not transfer, since doubling the published 0.025 takes the plain fit from 0.7033 to 0.8266 while this one goes only from 0.8723 to 0.8814 and its verb forms start coming apart.",
+              "The derivative passes the same correction to every contributing row. With distinct rows, their combined vector therefore moves by more than a single-row vector would; repeated hash buckets need their multiplicities counted too. The table also reports a lower first-pass mean loss with parts. That result is an observation of this setup, not a guarantee that the same learning rate is suitable for another model or corpus.",
+              {
+                "description": "A word vector is its word row plus its character-part rows, without dividing by the number of rows. Every contributing row receives the derivative of this sum. In the measured corpus a word uses 14.6129 rows on average. The same step size is used in both runs.\n\npass | cost per pair, with the pieces | without them\n1 | 2.5560 | 3.7370\n2 | 2.0716 | 2.6643\n3 | 2.0706 | 2.3677\n4 | 2.0710 | 2.1853\n5 | 2.0840 | 2.1509"
+              },
             ),
         ],
         },
@@ -938,13 +941,16 @@ export default function FasttextPage() {
             several(
               "Zap has five pieces, and the hash sent every one of them to a row no word of this corpus reaches. Which of these then hold?",
               [
-                "Its vector is every coordinate exactly zero",
-                "A cosine against it is zero divided by zero, so the quantity does not exist",
-                "Its cosine against another word is zero, which reports that it is unrelated to everything",
-                "More passes over the same corpus would give it a direction",
-              ],
+                              "Its vector is every coordinate exactly zero",
+                              "A cosine against it is zero divided by zero, so the quantity does not exist",
+                              "Its cosine against another word is zero, which reports that it is unrelated to everything",
+                              "More passes over the same corpus would give it a direction",
+                            ],
               [0, 1],
               "Every term of the sum is a row that never moved, and a cosine divides by the product of the two lengths, so against a zero vector the denominator is zero. Returning zero instead would report that the word is unrelated to everything, which is a claim the method never made. More passes walk the same sentences, and no word in them reaches any of zap’s five rows, so the rows stay where they started.",
+              {
+                "description": "Zap has no whole-word row in this model. Its vector is the sum of its five hashed character-part contributions. Unused character-part rows start at zero, and no training word reaches any of these five rows. The corpus remains unchanged."
+              },
             ),
         ],
         },
@@ -953,7 +959,10 @@ export default function FasttextPage() {
           practice: [
             exercise(
               "Ask both fits for the word no sentence holds",
-              ["The starter builds the corpus of Part 1, whose verb list holds play, plays, player and played and leaves playing out. Fit Word2Vec and FastText to it with the same settings, and give FastText two thousand rows for its pieces, which is what the page uses.", "Ask the plain fit’s embeddings for the words nearest playing and print the refusal. Then ask the FastText model for the four nearest, and print the mean cosine from playing to the twenty verb forms and to the eleven money words, to four places."],
+              [
+  "Fit the supplied Word2Vec and FastText models with identical settings, giving FastText two thousand piece buckets. The verb corpus deliberately omits playing.",
+  "Catch and print the plain embedding table’s unknown-word refusal. For FastText print playing’s four nearest words and mean cosine to the supplied verb and money lists, to four decimal places."
+],
               `import random
 from statistics import mean
 
@@ -1021,11 +1030,17 @@ player  0.9987
 played  0.9985
 to the verb forms:  0.9970
 to the money words: 0.1003`,
-              { hints: ["Both constructors take the same settings, so Word2Vec(**settings) and FastText(**settings, n_buckets=2000) differ only in the rows for the pieces.", "A Word2Vec answers through its embeddings, a table with one row per word, so embeddings.most_similar raises for a word it never indexed. Wrap the call in try and except UnknownTokenError.", "The FastText model answers most_similar and similarity itself, composing a vector from the pieces of any spelling. Looping over most_similar gives entries with a word and a similarity."], check: numberCheck("What is the mean cosine from playing to the eleven money words, to four places?", 0.1003, 5e-05, "None of the eleven money words shares a single piece with playing, so its vector is a sum over rows that only verb forms wrote to. That is the 0.1003 of Part 3, against 0.9970 to the verb forms, from a fit that never saw the word.") },
+              { hints: [
+  "The plain table has no row for an absent word. FastText composes from hashed character pieces instead.",
+  "Use FastText’s own most_similar/similarity methods for the composed word; its fixed known-word embedding table is a different interface."
+], check: numberCheck("What is the mean cosine from playing to the eleven money words, to four places?", 0.1003, 5e-05, "Playing’s mean cosine to the money words is 0.1003 in this fit. Compare it with the verb-group mean; an unfamiliar spelling can still use parts learned from familiar forms."), question: "Can word parts supply a vector for a spelling absent from the training vocabulary?" },
             ),
             exercise(
               "Find the words stocking is spelled like",
-              ["Part 5 says stocking lands among the money words because five letters agree with stock. No fit is needed to see what it shares, since the pieces are decided by the spellings alone. Cut stocking and every word of the two lists at the published lengths.", "Print how many pieces stocking has, how many of them some word of the corpus also owns, and then each corpus word that shares a piece with it beside the number shared, largest first. The lesson quotes none of these counts."],
+              [
+  "Without fitting, cut stocking and every supplied corpus word into FastText character pieces of lengths three through six.",
+  "Print stocking’s piece count and the number appearing in any corpus word, then each sharing word and overlap count in the supplied descending-count order. This measures spelling overlap before learned vector comparisons."
+],
               `from oop_ml import FastText
 
 VERBS = (
@@ -1071,11 +1086,17 @@ saying   3
 stay     1
 stayed   1
 stays    1`,
-              { hints: ["An unfitted FastText() already knows how to cut. n_grams_of(word) answers the pieces of any spelling at lengths three to six.", "Turn each answer into a set, and the pieces two words share are the intersection of their sets.", "Sorting the words by the negative of their count puts the largest first."], check: numberCheck("How many pieces does stocking share with stock?", 10, 0, "Wrapped, the two words begin with the same six characters, and every run of three to six characters inside them is a piece of both, four of length three, three of four, two of five and one of six. The six pieces it shares with talking and with walking come from the ending, and the fit still puts it at 0.9694 to the money words.") },
+              { hints: [
+  "Use n_grams_of and sets to compare distinct piece spellings.",
+  "Count intersection sizes and preserve the starter’s tie order when sorting equally large overlaps."
+], check: numberCheck("How many pieces does stocking share with stock?", 10, 0, "Stocking and stock share ten distinct pieces. Character overlap supplies reusable parameters but cannot establish which meaning of a spelling is intended."), question: "Which known spellings share character pieces with stocking?" },
             ),
             exercise(
               "Read the length a cosine throws away",
-              ["Part 5 ends on the one visible sign that queue was placed by an accident, which is how short its vector is. Fit FastText as in the first problem and look at four words no sentence holds, playing, stocking, queue and zap.", "For each, print how many of the rows its pieces reach were ever written to, and the length of its vector to four places. Then ask for the word nearest zap and print the refusal. The lesson gives the lengths of playing and queue and not of stocking."],
+              [
+  "Fit FastText as in the first exercise. For playing, stocking, queue and zap print how many of their hashed piece-row occurrences have nonzero vectors, out of the total, and each composed vector’s norm.",
+  "Finally ask for zap’s nearest word and print the library refusal. A bucket hit can be caused by a different piece hashing to that bucket, so a nonzero row does not prove that exact spelling was observed."
+],
               `import random
 
 import numpy as np
@@ -1144,7 +1165,10 @@ stocking rows written 16 of 26   length 3.0864
 queue    rows written  1 of 14   length 0.1893
 zap      rows written  0 of  5   length 0.0000
 zap: the zero vector has no direction, so nothing is similar to it`,
-              { hints: ["model.n_gram_ids_of(word) answers the row each piece is hashed to, and model.bucket_vectors is the table of those rows, two thousand by twelve.", "A row that was never written to is still every coordinate zero, so model.bucket_vectors[row].any() is False for it.", "model.vector_of(word).values is the composed vector as an array, and np.linalg.norm gives its length."], check: numberCheck("How long is stocking’s vector, to four places?", 3.0864, 5e-05, "Sixteen written rows went into its sum, nearly as many as playing’s seventeen, so it is nearly as long as playing’s 3.7789. The length marks queue, whose 0.1893 is one row, and says nothing against stocking, whose mistake is in the spelling and not in the arithmetic.") },
+              { hints: [
+  "n_gram_ids_of identifies reached bucket rows. Inspect bucket_vectors for nonzero entries.",
+  "vector_of(word).values gives the composed vector. A zero vector has no cosine direction."
+], check: numberCheck("How long is stocking’s vector, to four places?", 3.0864, 5e-05, "Stocking’s vector norm is 3.0864. Its nonzero hashed buckets include reused information; a bucket hit alone does not prove that exact piece was observed."), question: "How much learned bucket information supports an unfamiliar word’s vector?" },
             ),
           ],
         },

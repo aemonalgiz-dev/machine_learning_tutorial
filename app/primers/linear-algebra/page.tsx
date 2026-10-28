@@ -59,9 +59,7 @@ export default function LinearAlgebraPrimerPage() {
         <p>
           We can put those measurements in an ordered list called a vector. Here the first position means height. If we swap it with weight, we change the meaning of the input even though the numbers themselves have not changed. The number of entries is the vector&apos;s dimension, so our list of three measurements is a three-dimensional vector.
         </p>
-        <p>
-          Imagine recording several measurements of one person. We want to keep those measurements together and perform calculations on them in a consistent order. A vector lets us treat that collection as one mathematical object. We usually write its coordinates as a list, but it also comes with operations such as addition and multiplication by a scalar.
-        </p>
+        <p>A vector also has operations we can apply consistently. We can add corresponding entries or multiply every entry by one number. That multiplying number is called a scalar. We will picture those operations with two-entry vectors before using the same arithmetic on longer lists.</p>
         <p>
           A two-entry vector also has a picture, drawn as a point or an arrow on
           a pair of axes. We stay in two dimensions throughout this primer for
@@ -278,16 +276,19 @@ export default function LinearAlgebraPrimerPage() {
             "Subtracting the positions gives the movement from a to b, which is (3, 4), and the distance is that movement’s length. It is the same 5 as section 4’s arrow, because it is the same arrow moved so its tail sits at the origin. The 3 is only the horizontal part of the trip, and 25 is the sum of the squares before the root is taken.",
           ),
           several(
-            "Which of these hold for a vector’s length?",
-            [
-              "It is measured by Pythagoras on the entries",
-              "A third dimension adds one more squared entry under the root",
-              "Subtracting one point from another gives something whose length is a distance",
-              "It can be defined only where the vector can be drawn",
-            ],
-            [0, 1, 2],
-            "A vector’s entries describe its movement along each axis separately, so its length is the direct distance across a right triangle, and higher dimensions carry on the same way with one squared entry each. The picture stops being drawable long before the arithmetic stops working.",
-          ),
+              "Which statements hold for Euclidean vector length?",
+              [
+                            "It is measured by Pythagoras on the entries",
+                            "A third dimension adds one more squared entry under the root",
+                            "Subtracting one point from another gives something whose length is a distance",
+                            "It can be defined only where the vector can be drawn",
+                          ],
+              [0, 1, 2],
+              "A vector’s entries describe its movement along each axis separately, so its length is the direct distance across a right triangle, and higher dimensions carry on the same way with one squared entry each. The picture stops being drawable long before the arithmetic stops working.",
+              {
+                "description": "Use ordinary real coordinates in perpendicular axes. Euclidean length means the square root of the sum of squared entries. The question is not claiming this is the only possible vector norm."
+              },
+            ),
         ]}
       />
 
@@ -733,16 +734,16 @@ export default function LinearAlgebraPrimerPage() {
             "Every vector is a scaled copy of e₁ plus a scaled copy of e₂, which is what its coordinates have been saying all along, and a matrix distributes over addition and scaling. So the image of (x, y) is x copies of where e₁ went plus y copies of where e₂ went, and two arrows fix the whole transformation.",
           ),
           several(
-            "Which of these describe what a matrix is doing in sections 10 to 13?",
-            [
-              "Packaging several weighted sums so they can be performed as one operation",
-              "Giving each output its own weight vector as a row",
-              "Turning the whole input into a single number, as the dot product does",
-              "Introducing an operation that addition and scaling cannot express",
-            ],
-            [0, 1],
-            "A matrix is not a new idea so much as a container, one row per output, and that is why it exists at all. Section 10 wanted several numbers out rather than one, which is exactly what a dot product cannot give, so a matrix answers with a vector rather than collapsing the input to a number. The row-by-row route and the basis-vector route are the same arithmetic gathered differently, and both are built out of the two operations from section 3.",
-          ),
+              "For matrix multiplication y = A x, with x written as a column vector and more than one output row, which statements hold?",
+              [
+                            "Packaging several weighted sums so they can be performed as one operation",
+                            "Giving each output its own weight vector as a row",
+                            "Turning the whole input into a single number, as the dot product does",
+                            "Introducing an operation that addition and scaling cannot express",
+                          ],
+              [0, 1],
+              "Each row of A supplies the coefficients for one weighted sum of x. Collecting the results gives a vector with one entry per row. Matrix multiplication groups additions and scalar multiplications; it does not require a new arithmetic operation. A matrix with one row would be the special case returning a single number.",
+            ),
         ]}
       />
 
@@ -1111,11 +1112,7 @@ export default function LinearAlgebraPrimerPage() {
         exercises={[
           exercise(
             "Measure movement and compare directions",
-            [
-              "The arrows from section 5 end at a and b below. Subtract their coordinates to find the movement from a to b. Square that movement's entries, add them, and take the square root to find its length.",
-              "Distance is one question; direction is another. Complete a cosine function by multiplying matching coordinates and adding them for the dot product, then dividing by both vector lengths. Use np.sum, np.sqrt and array arithmetic so each operation remains visible.",
-              "Run it on the two pairs from section 9 and on a and b themselves. The last pair has different lengths but nearly the same direction. Its cosine is a number the primer has not worked out for you.",
-            ],
+            ["The workshop used ordered quantities to calculate bills. Vectors can also describe positions and directions. Start with the two supplied endpoints: subtract their matching coordinates to find the movement from a to b, then calculate that movement's length.","Distance is one question; direction is another. Complete a cosine function by multiplying matching coordinates and adding them for the dot product, then dividing by both vector lengths. Use np.sum, np.sqrt and array arithmetic so each operation remains visible.","Run it on the two pairs from section 9 and on a and b themselves. The last pair has different lengths but nearly the same direction. Its cosine is a number the primer has not worked out for you."],
             `import numpy as np
 
 a = np.array([1.0, 2.0])

@@ -211,6 +211,61 @@ test("a Lambda function URL backend receives signed requests in canonical form",
   });
 });
 
+test("billing checkout and portal preserve the authenticated account and origin", async () => {
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: "https://accounts.example.test" }, () => Response.json({ url: "https://checkout.stripe.com/c/pay/example" }), async sent => {
+    await GET(new NextRequest("https://perceptronlab.example/account-api/billing", {
+      headers: { Cookie: "fitlab_session=member", "X-FitLab-Account": "alice" },
+    }), { params: Promise.resolve({ path: ["billing"] }) });
+    for (const path of ["checkout", "portal"]) {
+      const body = path === "checkout" ? '{"interval":"annual"}' : "{}";
+      const response = await POST(new NextRequest(`https://perceptronlab.example/account-api/billing/${path}`, {
+        method: "POST", body, headers: { Cookie: "fitlab_session=member", Origin: "https://perceptronlab.example", "Content-Type": "application/json", "X-FitLab-Account": "alice", Authorization: "caller-secret", "stripe-signature": "caller-signature" },
+      }), { params: Promise.resolve({ path: ["billing", path] }) });
+      expect(response.status).toBe(200);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+    }
+    expect(sent.map(entry => entry.url.pathname)).toEqual(["/billing", "/billing/checkout", "/billing/portal"]);
+    for (const entry of sent) {
+      expect(entry.headers.get("cookie")).toBe("fitlab_session=member");
+      expect(entry.headers.get("x-fitlab-account")).toBe("alice");
+      expect(entry.headers.has("authorization")).toBe(false);
+      expect(entry.headers.has("stripe-signature")).toBe(false);
+    }
+    expect(sent[1].headers.get("origin")).toBe("https://perceptronlab.example");
+    expect(new TextDecoder().decode(sent[1].body)).toBe('{"interval":"annual"}');
+    const refused = await PUT(new NextRequest("https://perceptronlab.example/account-api/billing", { method: "PUT", body: "{}" }), { params: Promise.resolve({ path: ["billing"] }) });
+    expect(refused.status).toBe(404); expect(sent).toHaveLength(3);
+  });
+});
+
+test("Stripe webhooks retain their signed raw bytes through the private backend proxy", async () => {
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: LAMBDA_URL, ...SIGNING_ENVIRONMENT }, () => Response.json({ received: true }), async sent => {
+    const body = '{\n  "id": "evt_example", "data": {"note": "Botie café"}\n}\n';
+    const response = await POST(new NextRequest("https://perceptronlab.example/account-api/billing/webhook", {
+      method: "POST", body, headers: { "Content-Type": "application/json", "stripe-signature": "t=123,v1=signature", Cookie: "must-not-forward", Origin: "https://untrusted.example", "X-FitLab-Account": "forged", Authorization: "must-not-forward" },
+    }), { params: Promise.resolve({ path: ["billing", "webhook"] }) });
+    expect(response.status).toBe(200); expect(sent).toHaveLength(1);
+    const entry = sent[0];
+    expect(entry.url.pathname).toBe("/billing/webhook");
+    expect(new TextDecoder().decode(entry.body)).toBe(body);
+    expect(entry.headers.get("stripe-signature")).toBe("t=123,v1=signature");
+    expect(entry.headers.get("x-amz-content-sha256")).toBe(createHash("sha256").update(body).digest("hex"));
+    expect(entry.headers.get("authorization")).toBe(resignedAuthorization(entry));
+    for (const name of ["cookie", "origin", "x-fitlab-account"]) expect(entry.headers.has(name)).toBe(false);
+    const wrongMethod = await GET(new NextRequest("https://perceptronlab.example/account-api/billing/webhook"), { params: Promise.resolve({ path: ["billing", "webhook"] }) });
+    expect(wrongMethod.status).toBe(404); expect(sent).toHaveLength(1);
+  });
+});
+
+test("oversized Stripe webhook bodies never reach the account backend", async () => {
+  await throughProxy({ OOP_ML_ACCOUNTS_URL: "https://accounts.example.test" }, () => Response.json({ received: true }), async sent => {
+    const response = await POST(new NextRequest("https://perceptronlab.example/account-api/billing/webhook", {
+      method: "POST", body: "x".repeat(1048577), headers: { "stripe-signature": "t=123,v1=signature" },
+    }), { params: Promise.resolve({ path: ["billing", "webhook"] }) });
+    expect(response.status).toBe(413); expect(sent).toHaveLength(0);
+  });
+});
+
 test("without AWS credentials a Lambda backend is unavailable and never contacted", async () => {
   await throughProxy({ OOP_ML_ACCOUNTS_URL: LAMBDA_URL }, () => new Response(null), async (sent, logged) => {
     const session = await GET(new NextRequest("http://localhost:3000/account-api/session"), { params: Promise.resolve({ path: ["session"] }) });

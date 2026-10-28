@@ -83,9 +83,8 @@ export default function KernelRidgePage() {
 </>
                 <Equation>{"minimise  ‖y − Xw‖² + λ‖w‖²"}</Equation>
                 <Equation>{"w = (XᵀX + λI)⁻¹ Xᵀ y"}</Equation>
-                <p>
-                  In the expression above, the matrix has one row and column per feature, so its size is p by p. We will now rewrite the same fitted rule using one weight per training observation. That gives us an n-by-n system. Why bother? The second form lets us replace explicit feature inner products with kernel evaluations.
-                </p>
+                <p>The earlier system has one row and column for each input feature. If there are p features, it is a p-by-p system. We can express the same ridge prediction using one coefficient for each of the n training observations instead, giving an n-by-n system.</p>
+              <p>Those coefficients have different jobs: one weights features, while the other combines comparisons with stored observations. The second form needs inner products between observations. That is where a kernel can replace explicitly constructed feature coordinates. We will first check the equivalent linear forms before changing the comparison.</p>
                 <KeepInMind>
                   The penalty page owns the penalty. Everything it says about
                   λ shrinking the weights and about scaling the columns first
@@ -881,14 +880,8 @@ export default function KernelRidgePage() {
 
               <SubSection title="22. An indefinite kernel is refused by the solver">
                 <p>
-                  Not every function of two rows is a kernel. A kernel&rsquo;s
-                  Gram matrix has no negative eigenvalue on any set of rows,
-                  which is Mercer&rsquo;s condition, and the sigmoid kernel
-                  fails it for many settings. The solve uses a Cholesky
-                  factorisation, which succeeds exactly when the matrix it
-                  is given is positive definite, so the factorisation is
-                  also the test, and the fit is refused at the first pivot
-                  that is not positive.
+
+                  A valid positive-semidefinite kernel produces a Gram matrix with no negative eigenvalues for every finite set of inputs. The sigmoid comparison fails that requirement at many settings. This implementation attempts a Cholesky factorisation of the Gram matrix after adding the penalty to its diagonal. That checks the shifted system used by this solve, rather than proving that the original comparison is a valid kernel.
                 </p>
                 <MercerProbe />
                 <>
@@ -900,10 +893,8 @@ export default function KernelRidgePage() {
                 </p>
 </>
                 <KeepInMind>
-                  The refusal guards the arithmetic only. A large enough penalty can make an indefinite
-                  system positive definite, and what comes out then is the
-                  minimiser of nothing, so a sigmoid fit that runs is not
-                  thereby a kernel fit.
+
+                  A large enough diagonal penalty can make this particular shifted system positive definite even when the original Gram matrix is indefinite. A successful factorisation establishes that the numerical solve can proceed under its checks. It does not supply the usual kernel-ridge interpretation based on a positive-semidefinite kernel and its associated feature-space norm.
                 </KeepInMind>
               </SubSection>
 
@@ -1009,15 +1000,15 @@ export default function KernelRidgePage() {
               "At gamma 1 and a penalty of a tenth it answers 12.46 at six seconds, 12.758 at seven and 12.759998 at eight, against a mean of 12.76, because a query far from every row resembles none of them and every term in the sum is near zero. The squared polynomial kernel does the opposite and answers −136.5 at eight, which is the more dangerous of the two only because a mean is a number a reader recognises as ignorance.",
             ),
             choice(
-              "The sigmoid kernel at gamma 1 and a constant of −0.5 has a smallest Gram eigenvalue of −4.313. What happens once the penalty passes 4.3?",
+              "The sigmoid comparison has a smallest Gram eigenvalue of −4.313 on these throws. At penalty 4.4 the shifted solve succeeds. What does that establish?",
               [
-                "The factorisation goes through and the fit is accepted, scoring −228 at 4.4, so a sigmoid fit that runs is not thereby a kernel fit",
+                "The shifted system passes the solver check, but this does not make the unshifted comparison a valid positive-semidefinite kernel",
                 "The fit stays refused at every penalty, since the condition is about the kernel rather than about the system",
                 "The fit is accepted and does better than answering the mean",
                 "The smallest eigenvalue turns positive, so the kernel now satisfies Mercer’s condition",
               ],
               0,
-              "The solve uses a Cholesky factorisation, which succeeds exactly when the matrix it is handed is positive definite, so the factorisation is also the test and the refusal guards the arithmetic only. A large enough penalty can make an indefinite system positive definite and what comes out then is the minimiser of nothing. Even at a constant of zero the smallest eigenvalue is −0.878, hidden at a penalty of one.",
+              "The penalty shifts the matrix used by the Cholesky solve. That can make this particular system positive definite without changing the fact that the original Gram matrix is indefinite. The successful computation therefore does not establish the usual positive-semidefinite kernel-ridge interpretation; its poor prediction score is a separate observation.",
             ),
             several(
               "Which of these hold for a penalty of zero?",
@@ -1046,10 +1037,7 @@ export default function KernelRidgePage() {
         {
           title: "Practice. One Weight Per Row, With the Library",
           practice: [
-            exercise(
-              "Recover ridge’s slope from three dual weights",
-              ["Part 2 solved the dual system on the three people by hand and found dual weights of minus two, nought and two, then recovered ridge’s slope of four by multiplying each weight by its person’s centred height and adding. Fit the same model with the library under the linear kernel at a penalty of one, read the dual weights and the target mean off it, recover the slope the same way, and ask it for the weight of someone 170.5 centimetres tall.", "The weights should come back whole, the slope should be 4, and the prediction should be 72 kilograms, which is the mean weight plus half a centimetre of slope."],
-              `from oop_ml import Feature, KernelRidgeRegression, LinearKernel
+            exercise("Recover ridge’s slope from three dual weights",["Part 2 solved the dual system on the three people by hand and found dual weights of minus two, nought and two, then recovered ridge’s slope of four by multiplying each weight by its person’s centred height and adding. Fit the same model with the library under the linear kernel at a penalty of one, read the dual weights and the target mean off it, recover the slope the same way, and ask it for the weight of someone 170.5 centimetres tall.", "The weights should come back whole, the slope should be 4, and the prediction should be 72 kilograms, which is the mean weight plus half a centimetre of slope."],`from oop_ml import Feature, KernelRidgeRegression, LinearKernel
 
 heights = [169, 170, 171]
 weights = [64, 70, 76]
@@ -1057,8 +1045,7 @@ weights = [64, 70, 76]
 model = KernelRidgeRegression(kernel=LinearKernel(), penalty=1.0)
 # Fit the model to the three people, print its dual weights and target mean,
 # recover the slope by adding the weights up through the centred heights,
-# and print the weight it predicts at 170.5 cm.`,
-              `from oop_ml import Feature, KernelRidgeRegression, LinearKernel
+# and print the weight it predicts at 170.5 cm.`,`from oop_ml import Feature, KernelRidgeRegression, LinearKernel
 
 heights = [169, 170, 171]
 weights = [64, 70, 76]
@@ -1073,17 +1060,11 @@ predicted = float(model.predict([Feature("height", [170.5])])[0])
 print(f"dual weights {[round(float(weight), 4) for weight in model.dual_weights]}")
 print(f"target mean {model.target_mean:.1f} kg")
 print(f"recovered slope {slope:.4f} kg per cm")
-print(f"predicted weight at 170.5 cm {predicted:.2f} kg")`,
-              `dual weights [-2.0, 0.0, 2.0]
+print(f"predicted weight at 170.5 cm {predicted:.2f} kg")`,`dual weights [-2.0, 0.0, 2.0]
 target mean 70.0 kg
 recovered slope 4.0000 kg per cm
-predicted weight at 170.5 cm 72.00 kg`,
-              { hints: ["The kernel is a field of the model, so the model is constructed with kernel=LinearKernel() and penalty=1.0, and then fit takes a list holding one Feature of heights and a Feature of weights as the target.", "dual_weights is a property of the fitted model holding one number per training row in the order the rows were given, and target_mean is the mean the fit adds back to every prediction.", "The centred heights are each height less the mean of 170, so the slope is the sum over the three people of dual weight times centred height, which is the arithmetic Part 2 wrote out."], check: numberCheck("What slope do the dual weights add up to through the centred heights, in kilograms per centimetre?", 4.0, 0.0005, "The dual weights are −2, 0 and 2 and the centred heights are −1, 0 and 1, so the sum is 2 + 0 + 2. That is ridge’s own slope of 4 from Part 2, 12 over 2 plus 1, reached by a system as wide as the rows rather than the features, and the person at the mean contributes nothing to it.") },
-            ),
-            exercise(
-              "Take the throw’s gamma to the crowd",
-              ["Part 3 says the gamma of 1 that suited times in seconds is a reach of one centimetre on the crowd, whose people stand three apart, and that the radial fit scores 0.750 there against the line’s 0.890. Fit the line and the radial kernel at gamma 1, a hundredth and a ten-thousandth on the fifteen people, all at a penalty of one, and print each fit’s R², its largest dual weight and its answer for the person at 173 centimetres.", "At gamma 1 the Gram matrix is the identity to four decimals, so Part 3 says every dual weight is half that person’s centred weight. The largest of them is a number the page does not print, and the fifteen weights say whose it is."],
-              `from oop_ml import Feature, KernelRidgeRegression, RadialBasisKernel, RidgeRegression
+predicted weight at 170.5 cm 72.00 kg`,{...{ hints: ["The kernel is a field of the model, so the model is constructed with kernel=LinearKernel() and penalty=1.0, and then fit takes a list holding one Feature of heights and a Feature of weights as the target.", "dual_weights is a property of the fitted model holding one number per training row in the order the rows were given, and target_mean is the mean the fit adds back to every prediction.", "The centred heights are each height less the mean of 170, so the slope is the sum over the three people of dual weight times centred height, which is the arithmetic Part 2 wrote out."], check: numberCheck("What slope do the dual weights add up to through the centred heights, in kilograms per centimetre?", 4.0, 0.0005, "Under the linear kernel, the dual weights recover the same centred-feature slope as the corresponding ridge fit. The two formulations organise the calculation around observations and features respectively.") },question:"Can the dual weights recover the ordinary ridge slope?"}),
+            exercise("Take the throw’s gamma to the crowd",["Part 3 says the gamma of 1 that suited times in seconds is a reach of one centimetre on the crowd, whose people stand three apart, and that the radial fit scores 0.750 there against the line’s 0.890. Fit the line and the radial kernel at gamma 1, a hundredth and a ten-thousandth on the fifteen people, all at a penalty of one, and print each fit’s R², its largest dual weight and its answer for the person at 173 centimetres.", "At gamma 1 the Gram matrix is the identity to four decimals, so Part 3 says every dual weight is half that person’s centred weight. The largest of them is a number the page does not print, and the fifteen weights say whose it is."],`from oop_ml import Feature, KernelRidgeRegression, RadialBasisKernel, RidgeRegression
 
 heights = [152, 155, 158, 161, 164, 167, 170, 173, 176, 179, 182, 185, 188, 191, 194]
 weights = [51, 61, 56, 66, 62, 71, 66, 76, 71, 81, 75, 86, 81, 91, 86]
@@ -1092,8 +1073,7 @@ target = Feature("weight", weights)
 
 # Fit ridge at a penalty of one and print its R2. Then for gamma 1, 0.01 and
 # 0.0001 fit the radial kernel at the same penalty and print its R2, its
-# largest dual weight in size, and its prediction for 173 cm.`,
-              `from oop_ml import Feature, KernelRidgeRegression, RadialBasisKernel, RidgeRegression
+# largest dual weight in size, and its prediction for 173 cm.`,`from oop_ml import Feature, KernelRidgeRegression, RadialBasisKernel, RidgeRegression
 
 heights = [152, 155, 158, 161, 164, 167, 170, 173, 176, 179, 182, 185, 188, 191, 194]
 weights = [51, 61, 56, 66, 62, 71, 66, 76, 71, 81, 75, 86, 81, 91, 86]
@@ -1108,17 +1088,11 @@ for gamma in (1, 0.01, 0.0001):
     model = KernelRidgeRegression(kernel=kernel, penalty=1.0).fit(rows, target)
     largest = max(abs(float(weight)) for weight in model.dual_weights)
     at_173 = float(model.predict([Feature("height", [173])])[0])
-    print(f"gamma {gamma}: R2 {model.score(rows, target):.3f}, largest dual weight {largest:.4f}, at 173 cm {at_173:.2f} kg")`,
-              `line R2 0.890
+    print(f"gamma {gamma}: R2 {model.score(rows, target):.3f}, largest dual weight {largest:.4f}, at 173 cm {at_173:.2f} kg")`,`line R2 0.890
 gamma 1: R2 0.750, largest dual weight 10.4997, at 173 cm 74.00 kg
 gamma 0.01: R2 0.835, largest dual weight 9.2864, at 173 cm 72.19 kg
-gamma 0.0001: R2 0.481, largest dual weight 15.4921, at 173 cm 72.01 kg`,
-              { hints: ["RadialBasisKernel takes gamma as its one field, and a RidgeRegression at the same penalty is the line to compare against. Both fit on the same list of Features and both score with score(rows, target).", "dual_weights is a numpy array with one entry per person, so the largest in size is the max of abs over it, and predict takes a list holding one Feature of the heights to ask about."], check: numberCheck("What is the largest dual weight, in size, at gamma 1 on the crowd?", 10.4997, 0.0005, "At gamma 1 the Gram matrix is the identity to four decimals, so with a penalty of one the system is twice the identity and every dual weight is half that person’s centred weight. The shortest person weighs 51 kilograms against a mean of 72, a centred weight of −21, and half of that is 10.5 in size; the last digits are where the identity holds only to four decimals. It is the largest because that person sits farthest from the mean weight, not because they matter most to the shape.") },
-            ),
-            exercise(
-              "Ask each fit what the ball does after the data",
-              ["Part 6 asks the radial fit what the ball is doing two seconds past the last throw and finds it has forgotten the ball. Fit the widget’s three settings on the fifteen throws, the radial kernel at gamma 1 and a penalty of a tenth, the squared polynomial kernel at a penalty of one, and the line at a penalty of one, and ask each for the height at five, six, seven and eight seconds.", "The radial answers should land on 7.47, 12.46, 12.758 and 12.759998 against a mean of 12.76, and the polynomial ones on −19.5, −49.8 and −136.5 at five, six and eight. What the polynomial kernel answers at seven seconds is a number the page does not quote."],
-              `from oop_ml import Feature, KernelRidgeRegression, LinearKernel, PolynomialKernel, RadialBasisKernel
+gamma 0.0001: R2 0.481, largest dual weight 15.4921, at 173 cm 72.01 kg`,{...{ hints: ["RadialBasisKernel takes gamma as its one field, and a RidgeRegression at the same penalty is the line to compare against. Both fit on the same list of Features and both score with score(rows, target).", "dual_weights is a numpy array with one entry per person, so the largest in size is the max of abs over it, and predict takes a list holding one Feature of the heights to ask about."], check: numberCheck("What is the largest dual weight, in size, at gamma 1 on the crowd?", 10.4997, 0.0005, "At this short comparison range, different training people have almost no cross-similarity. The dual solve therefore depends heavily on each person's centred target, which explains why the largest absolute weight belongs to a target far from the mean.") },question:"What happens when a kernel width suited to seconds is applied to centimetres?"}),
+            exercise("Ask each fit what the ball does after the data",["Part 6 asks the radial fit what the ball is doing two seconds past the last throw and finds it has forgotten the ball. Fit the widget’s three settings on the fifteen throws, the radial kernel at gamma 1 and a penalty of a tenth, the squared polynomial kernel at a penalty of one, and the line at a penalty of one, and ask each for the height at five, six, seven and eight seconds.", "The radial answers should land on 7.47, 12.46, 12.758 and 12.759998 against a mean of 12.76, and the polynomial ones on −19.5, −49.8 and −136.5 at five, six and eight. What the polynomial kernel answers at seven seconds is a number the page does not quote."],`from oop_ml import Feature, KernelRidgeRegression, LinearKernel, PolynomialKernel, RadialBasisKernel
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1133,8 +1107,7 @@ settings = [
 ]
 # For each setting, fit the model on the throw and print its predictions at
 # the four later times. Then print the radial answer at 8 s to six places
-# and the mean height the fit adds back.`,
-              `from oop_ml import Feature, KernelRidgeRegression, LinearKernel, PolynomialKernel, RadialBasisKernel
+# and the mean height the fit adds back.`,`from oop_ml import Feature, KernelRidgeRegression, LinearKernel, PolynomialKernel, RadialBasisKernel
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1154,18 +1127,12 @@ for label, kernel, penalty in settings:
 
 radial = KernelRidgeRegression(kernel=RadialBasisKernel(gamma=1.0), penalty=0.1).fit(rows, target)
 print(f"radial at 8 s to six places {float(radial.predict([Feature('time', [8.0])])[0]):.6f} m")
-print(f"mean height {radial.target_mean:.2f} m")`,
-              `radial, gamma 1, penalty 0.1: 7.468, 12.464, 12.758, 12.760 m at 5, 6, 7 and 8 s
+print(f"mean height {radial.target_mean:.2f} m")`,`radial, gamma 1, penalty 0.1: 7.468, 12.464, 12.758, 12.760 m at 5, 6, 7 and 8 s
 polynomial, degree 2, penalty 1: -19.494, -49.782, -88.799, -136.545 m at 5, 6, 7 and 8 s
 linear, penalty 1: 13.543, 13.805, 14.066, 14.327 m at 5, 6, 7 and 8 s
 radial at 8 s to six places 12.759998 m
-mean height 12.76 m`,
-              { hints: ["predict takes a list holding one Feature, and that Feature can hold several times at once, so the four later times go in as one Feature and four predictions come back in the same order.", "The penalty differs between the settings, so build a fresh KernelRidgeRegression for each kernel and penalty rather than refitting one model.", "target_mean is the mean height the fit adds back to every prediction, which is what the radial fit returns to once every kernel term has fallen to nothing."], check: numberCheck("What height does the squared polynomial kernel answer at seven seconds, in metres?", -88.799, 0.001, "Part 6 quotes −49.8 at six seconds and −136.5 at eight, and seven sits between them on the same runaway. The polynomial kernel raises the inner product plus one to a power, and the inner product with a time far past the data keeps growing, so the curve keeps its shape; the radial kernel’s every term has fallen to nothing by then and what is left is the mean of 12.76.") },
-            ),
-            exercise(
-              "Refuse what is not a kernel, then watch it slip through",
-              ["Part 7 says a penalty of zero is refused at construction, before any data is seen, and Part 6 says the sigmoid kernel at gamma 1 and a constant of −0.5 has a smallest Gram eigenvalue of −4.313 on the throws, so the fit is refused at every penalty up to 4.3 and accepted from 4.4. Make both refusals happen, and then let the sigmoid fit through.", "The refusal at construction is pydantic’s, from the model’s own field bounds; the refusal at the solve is the library’s own and names Mercer’s condition. The accepted fit at 4.4 should score −228, which is a curve far worse than answering the mean."],
-              `from oop_ml import Feature, KernelRidgeRegression, MLLibError, SigmoidKernel
+mean height 12.76 m`,{...{ hints: ["predict takes a list holding one Feature, and that Feature can hold several times at once, so the four later times go in as one Feature and four predictions come back in the same order.", "The penalty differs between the settings, so build a fresh KernelRidgeRegression for each kernel and penalty rather than refitting one model.", "target_mean is the mean height the fit adds back to every prediction, which is what the radial fit returns to once every kernel term has fallen to nothing."], check: numberCheck("What height does the squared polynomial kernel answer at seven seconds, in metres?", -88.799, 0.001, "The polynomial kernel continues its fitted algebraic pattern beyond the observations. The radial comparisons instead fade with distance, leaving the retained target mean. Neither behaviour is a guarantee about a ball outside the measured interval.") },question:"How do the fitted kernels extrapolate beyond the ball's observations?"}),
+            exercise("Refuse what is not a kernel, then watch it slip through",["First construct KernelRidgeRegression with a zero penalty and catch the constructor's validation error. Then use the supplied throw data with a sigmoid kernel at gamma 1 and constant -0.5. Try the listed penalties around the point at which its shifted Gram system becomes positive definite.","Print each refusal's class and message, then the accepted fit's R squared at penalty 4.4. Distinguish the library's numerical factorisation check from proving that the original kernel is positive semidefinite. A successful solve need not provide the usual kernel-ridge interpretation."],`from oop_ml import Feature, KernelRidgeRegression, MLLibError, SigmoidKernel
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1176,8 +1143,7 @@ target = Feature("height", heights)
 # print the name of its class. Then, with the sigmoid kernel at gamma 1 and
 # a constant of -0.5, fit at penalties 1, 4.3, 4.4 and 5: print the class
 # of each refusal and whether its message names Mercer, or the R2 of each
-# fit that is accepted.`,
-              `from oop_ml import Feature, KernelRidgeRegression, MLLibError, SigmoidKernel
+# fit that is accepted.`,`from oop_ml import Feature, KernelRidgeRegression, MLLibError, SigmoidKernel
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1196,14 +1162,11 @@ for penalty in (1.0, 4.3, 4.4, 5.0):
         model.fit(rows, target)
         print(f"penalty {penalty}: accepted, R2 {model.score(rows, target):.1f}")
     except MLLibError as refusal:
-        print(f"penalty {penalty}: {type(refusal).__name__}, names Mercer: {'Mercer' in str(refusal)}")`,
-              `penalty 0: ValidationError at construction
+        print(f"penalty {penalty}: {type(refusal).__name__}, names Mercer: {'Mercer' in str(refusal)}")`,`penalty 0: ValidationError at construction
 penalty 1.0: InvalidValuesError, names Mercer: True
 penalty 4.3: InvalidValuesError, names Mercer: True
 penalty 4.4: accepted, R2 -228.4
-penalty 5.0: accepted, R2 -4.5`,
-              { hints: ["A penalty of zero is refused by the model’s field bounds, so the error is pydantic’s and arrives as a ValueError before fit is ever called. The sigmoid’s refusal comes out of fit and is one of the library’s own, so catch MLLibError there.", "SigmoidKernel takes gamma and constant as its two fields. Build one kernel and a fresh KernelRidgeRegression for each penalty, since the penalty is a field too.", "type(refusal).__name__ gives the class and str(refusal) the message, and the message names Mercer’s condition, so the in operator on the string is enough to confirm it."], check: numberCheck("What R² does the sigmoid fit score once a penalty of 4.4 lets it through?", -228.4, 0.1, "The smallest eigenvalue of the sigmoid’s Gram matrix is −4.313, so at every penalty up to 4.3 the shifted system still has a negative eigenvalue, the Cholesky factorisation meets a pivot that is not positive, and the fit is refused naming Mercer’s condition. At 4.4 the shift is enough to make the system positive definite, the factorisation goes through, and what comes out is the minimiser of nothing, scoring −228 where answering the mean would score zero.") },
-            ),
+penalty 5.0: accepted, R2 -4.5`,{...{ hints: ["A penalty of zero is refused by the model’s field bounds, so the error is pydantic’s and arrives as a ValueError before fit is ever called. The sigmoid’s refusal comes out of fit and is one of the library’s own, so catch MLLibError there.", "SigmoidKernel takes gamma and constant as its two fields. Build one kernel and a fresh KernelRidgeRegression for each penalty, since the penalty is a field too.", "type(refusal).__name__ gives the class and str(refusal) the message, and the message names Mercer’s condition, so the in operator on the string is enough to confirm it."], check: numberCheck("What R² does the sigmoid fit score once a penalty of 4.4 lets it through?", -228.4, 0.1, "A large diagonal shift can make this particular linear system positive definite even though the original Gram matrix is indefinite. A successful solve therefore does not establish a valid positive-semidefinite kernel or the usual RKHS ridge interpretation. Its poor score is a separate measured result.") },question:"Can regularisation make a solve succeed without making its kernel valid?"}),
           ],
         },
       ]}

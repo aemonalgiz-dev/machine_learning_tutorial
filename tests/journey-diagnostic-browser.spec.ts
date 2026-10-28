@@ -1,3 +1,4 @@
+import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 
@@ -6,8 +7,10 @@ async function wire(page: Page, output: string, input: string) {
   await page.getByRole("button", { name: input, exact: true }).click();
 }
 
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
 test("diagnosis uses current edited pieces and tests a repaired graph against the known cases", async ({ page }) => {
-  await page.goto("/lab/statistics");
+  await page.goto("/lab/statistics"); await waitForAccountReady(page);
   for (const name of ["Deaths recorded each week", "Add a list", "Count items", "Divide"]) await page.getByRole("button", { name, exact: true }).click();
   await wire(page, "Deaths recorded each week output", "Add a list input 1: Numbers");
   await wire(page, "Deaths recorded each week output", "Count items input 1: Items");
@@ -40,7 +43,7 @@ test("diagnosis uses current edited pieces and tests a repaired graph against th
   await expect(page.getByText("Required result", { exact: true })).toHaveCount(3);
   await page.getByTestId("journey-diagnostic-evidence").locator("summary").first().click();
   await expect(page.getByText(/These are now known examples/)).toBeVisible();
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await page.getByTestId("journey-diagnostic-evidence").locator("summary").first().click();
   await expect(page.getByText("Using the number of weeks as divisor should return 32.", { exact: true })).toBeVisible();
   await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");

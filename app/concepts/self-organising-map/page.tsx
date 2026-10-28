@@ -463,12 +463,8 @@ export default function SelfOrganisingMapPage() {
                   has forgotten every other person it ever won.
                 </p>
                 <p>
-                  Since the step is a fraction rather than a distance, it does
-                  not shrink because the map is getting better. A cell already
-                  well placed is dragged just as far by the next person as a
-                  badly placed one, so if the step never falls, the map never
-                  settles, and what you read at the end is a fact about which
-                  person happened to arrive last.
+
+                  A fixed step retains the same fraction of each new discrepancy. Its absolute movement still depends on the distance to the current observation. A prototype near one observation can remain far from the next, so a constant learning rate can keep it moving late in training. Reducing the rate reduces that late movement; it does not by itself establish a good arrangement.
                 </p>
               </SubSection>
 
@@ -661,15 +657,15 @@ export default function SelfOrganisingMapPage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "Why does the step have to shrink as the run goes on?",
+              "Why can reducing the learning rate late in training help the map's prototypes stabilise?",
               [
-                "Because it is a fraction of the remaining gap rather than a distance, so a well placed cell is dragged just as far by the next person as a badly placed one",
+                "A prototype can remain far from the next observation even when it is near earlier ones, so a fixed fractional step can keep moving it",
                 "Because the gaps themselves get smaller as the map improves",
                 "Because the reach is shrinking too, and the two have to stay in proportion",
                 "Because a large step would push a cell outside the range of the data",
               ],
               0,
-              "A step of a half halves the gap whatever the gap is, so the size of the move does not fall just because the map is getting better. If the step never falls the map never settles, and what you read at the end is a fact about which person happened to arrive last.",
+              "The step is a fraction of the current observation-to-prototype gap, so absolute movement depends on that gap. Observations can keep pulling in different directions. A smaller late learning rate reduces those changes, though a small movement alone does not establish a useful map.",
             ),
             several(
               "Eighteen people along an arch, six cells, the same seed and a hundred passes, fitted four times over. Which of these did those runs report?",
@@ -922,19 +918,8 @@ export default function SelfOrganisingMapPage() {
           content: (
             <>
               <SubSection title="27. Grid geometry, neighbourhood reach and the stopping rule" id="27-what-a-complete-implementation-must-specify">
-                <p>
-                  A description of this method is incomplete until it states the
-                  shape of the grid and how many cells it holds, how grid
-                  distance is counted, the shape of the neighbourhood and the
-                  schedule its reach follows, the schedule the step follows,
-                  whether both schedules are written against the pass budget or
-                  against the pass number, how many passes are allowed and what
-                  else may stop the run early, how the cells are started,
-                  whether the people are reshuffled each pass, what the metric
-                  in the competition is and whether it can be changed, what a
-                  label means, and which of the cell positions, the winners and
-                  the two diagnostics it hands back.
-                </p>
+                <p>To reproduce a self-organising map, first state its grid: the number and arrangement of cells, and how distance between cells is measured. Next describe how a winning cell and its neighbours move, including the neighbourhood shape and how its reach changes during training.</p>
+              <p>The run also needs starting cell positions, a learning-rate schedule, the order in which observations are presented and a stopping rule. State whether schedules depend on the pass number or total pass budget. Finally, record the measurement-space distance used to choose a winner and what the returned labels and diagnostics mean. Grid position, fitted feature position and cluster label are different objects.</p>
                 <>
 <p>
                   This implementation answers all of those. The grid is a rectangle and grid distance is straight-line across it, so a diagonal neighbour is the square root of two away rather than one or two, which is chosen because the reach is stated as a radius, and counting a diagonal as one step would let the same radius reach further across the grid on the diagonal than along a row.
@@ -1032,10 +1017,7 @@ export default function SelfOrganisingMapPage() {
         {
           title: "Practice. Draping a Chain Over the Crowd With the Library",
           practice: [
-            exercise(
-              "Drape the chain of four over the crowd",
-              ["Fit the chain Part 1 describes with the library rather than through the playground. A row of four cells, a hundred passes and a seed of 3 are what every figure on the page was quoted under, with the step falling from a half to a hundredth and the reach from half the row to a quarter of a cell.", "Part 1 says the four cells come to rest at (177.0, 76.8), (160.3, 59.0), (144.1, 46.6) and (123.2, 28.5) reading along the row. Read them off the fitted map, read which cell won each person, and read how far the furthest-moving cell travelled during the last pass, a number the page quotes for the arch and the two clumps but never for the crowd."],
-              `from oop_ml import Feature, LinearDecaySchedule, SelfOrganisingMap
+            exercise("Drape the chain of four over the crowd",["Fit the chain Part 1 describes with the library rather than through the playground. A row of four cells, a hundred passes and a seed of 3 are what every figure on the page was quoted under, with the step falling from a half to a hundredth and the reach from half the row to a quarter of a cell.", "Part 1 says the four cells come to rest at (177.0, 76.8), (160.3, 59.0), (144.1, 46.6) and (123.2, 28.5) reading along the row. Read them off the fitted map, read which cell won each person, and read how far the furthest-moving cell travelled during the last pass, a number the page quotes for the arch and the two clumps but never for the crowd."],`from oop_ml import Feature, LinearDecaySchedule, SelfOrganisingMap
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1043,8 +1025,7 @@ crowd = [Feature("height", heights), Feature("weight", weights)]
 
 # Construct a map of four cells in one row with the reach falling from 2.0 to
 # 0.25 over a hundred passes from seed 3, fit it to the crowd, then print where
-# each cell rests, which cell won each person, and the last pass's movement.`,
-              `from oop_ml import Feature, LinearDecaySchedule, SelfOrganisingMap
+# each cell rests, which cell won each person, and the last pass's movement.`,`from oop_ml import Feature, LinearDecaySchedule, SelfOrganisingMap
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1063,19 +1044,13 @@ for unit in chain.units:
     print(f"cell {unit.position.column + 1} rests at ({unit.weight_for('height'):.1f}, {unit.weight_for('weight'):.1f})")
 winners = [int(value) + 1 for value in chain.predict(crowd)]
 print(f"cell won by each person {winners}")
-print(f"passes run {chain.epochs_run}, furthest cell moved {chain.final_epoch_movement:.4f} on the last pass")`,
-              `cell 1 rests at (177.0, 76.8)
+print(f"passes run {chain.epochs_run}, furthest cell moved {chain.final_epoch_movement:.4f} on the last pass")`,`cell 1 rests at (177.0, 76.8)
 cell 2 rests at (160.3, 59.0)
 cell 3 rests at (144.1, 46.6)
 cell 4 rests at (123.2, 28.5)
 cell won by each person [3, 2, 3, 2, 2, 4, 4, 4, 1, 1, 1]
-passes run 100, furthest cell moved 0.1496 on the last pass`,
-              { hints: ["The reach has to be named, because the library cannot know how large the grid is. Part 3 says it falls in a straight line from half the grid’s longest side to a quarter of a cell, which for a row of four is a LinearDecaySchedule from 2.0 to 0.25. The step’s geometric fall from a half to a hundredth is the default and need not be passed.", "units iterates the cells in grid order. Each one has a position with a row and a column, and weight_for reads its resting value along a named feature.", "predict answers the index of the cell that won each person, counting from zero in the same order units iterates, so adding one makes the labels match the cell numbers printed.", "epochs_run and final_epoch_movement are properties of the fitted map, the second being the furthest any cell moved during the last pass."], check: numberCheck("How far did the furthest-moving cell travel during the last pass?", 0.1496, 0.0001, "Part 6 says the readouts report two things, how far the furthest-moving cell travelled during the last pass, which says whether the map has settled, and the mean distance from each person to their cell, which says whether it describes anybody. The step is a fraction of the remaining gap that ends the run at a hundredth, so a movement this small is partly the schedule running out rather than the map arriving, which is why the movement is worth reading beside the word settled.") },
-            ),
-            exercise(
-              "Measure the arrangement, then take the reach away",
-              ["Part 5 makes the arrangement claim measurable. Every pair of cells has two numbers, how many steps apart they sit on the grid and how far apart they came to rest among the people, and on an arranged map the two rise together. Fit the chain of four twice, once as in the first problem and once with the reach held at zero for the whole run, and print both numbers for all six pairs of each.", "The page quotes the one-step pairs at 20.407, 24.364 and 27.717 and the three-step pair at 72.332, and never prints the two-step pairs. Then print the mean distance from each person to their own cell for both fits, which Part 5 gives as 5.1435 arranged against 3.5932 with the reach taken away."],
-              `from math import hypot
+passes run 100, furthest cell moved 0.1496 on the last pass`,{...{ hints: ["The reach has to be named, because the library cannot know how large the grid is. Part 3 says it falls in a straight line from half the grid’s longest side to a quarter of a cell, which for a row of four is a LinearDecaySchedule from 2.0 to 0.25. The step’s geometric fall from a half to a hundredth is the default and need not be passed.", "units iterates the cells in grid order. Each one has a position with a row and a column, and weight_for reads its resting value along a named feature.", "predict answers the index of the cell that won each person, counting from zero in the same order units iterates, so adding one makes the labels match the cell numbers printed.", "epochs_run and final_epoch_movement are properties of the fitted map, the second being the furthest any cell moved during the last pass."], check: numberCheck("How far did the furthest-moving cell travel during the last pass?", 0.1496, 0.0001, "A small final movement can reflect the shrinking learning-rate schedule as well as proximity to a stable arrangement. Read it alongside the distance from observations to their selected prototypes.") },question:"Where do the map's prototypes finish, and are they still moving?"}),
+            exercise("Measure the arrangement, then take the reach away",["Part 5 makes the arrangement claim measurable. Every pair of cells has two numbers, how many steps apart they sit on the grid and how far apart they came to rest among the people, and on an arranged map the two rise together. Fit the chain of four twice, once as in the first problem and once with the reach held at zero for the whole run, and print both numbers for all six pairs of each.", "The page quotes the one-step pairs at 20.407, 24.364 and 27.717 and the three-step pair at 72.332, and never prints the two-step pairs. Then print the mean distance from each person to their own cell for both fits, which Part 5 gives as 5.1435 arranged against 3.5932 with the reach taken away."],`from math import hypot
 
 from oop_ml import ConstantSchedule, Feature, LinearDecaySchedule, SelfOrganisingMap
 
@@ -1089,8 +1064,7 @@ for name, reach in reaches.items():
     units = list(chain.units)
     print(name)
     # For every pair of cells print the grid distance and the resting distance,
-    # then print the mean distance from each person to the cell that won them.`,
-              `from math import hypot
+    # then print the mean distance from each person to the cell that won them.`,`from math import hypot
 
 from oop_ml import ConstantSchedule, Feature, LinearDecaySchedule, SelfOrganisingMap
 
@@ -1110,8 +1084,7 @@ for name, reach in reaches.items():
             print(f"  cells {first + 1} and {second + 1} sit {steps:.0f} apart on the grid and rest {apart:.3f} apart")
     winners = [int(value) for value in chain.predict(crowd)]
     distances = [hypot(height - units[winner].weight_for("height"), weight - units[winner].weight_for("weight")) for height, weight, winner in zip(heights, weights, winners)]
-    print(f"  mean distance from a person to their cell {sum(distances) / len(distances):.4f}")`,
-              `with the reach
+    print(f"  mean distance from a person to their cell {sum(distances) / len(distances):.4f}")`,`with the reach
   cells 1 and 2 sit 1 apart on the grid and rest 24.364 apart
   cells 1 and 3 sit 2 apart on the grid and rest 44.620 apart
   cells 1 and 4 sit 3 apart on the grid and rest 72.332 apart
@@ -1126,13 +1099,8 @@ reach taken away
   cells 2 and 3 sit 1 apart on the grid and rest 51.558 apart
   cells 2 and 4 sit 2 apart on the grid and rest 31.051 apart
   cells 3 and 4 sit 1 apart on the grid and rest 81.417 apart
-  mean distance from a person to their cell 3.5932`,
-              { hints: ["ConstantSchedule(value=0.0) is a reach that is zero for the whole run, which is how Part 4 switches the cooperation off and leaves only the winner moving.", "A cell’s position has distance_to, which counts steps on the grid between two positions, and the resting distance is the straight-line gap between the two cells’ heights and weights, which hypot gives from the two differences.", "The mean distance pairs each person with the cell predict names for them, takes the straight-line gap to that cell’s resting height and weight, and averages the eleven gaps."], check: numberCheck("What mean distance from a person to their cell does the chain with the reach taken away report?", 3.5932, 0.0001, "Part 5 quotes 5.1435 arranged against 3.5932 with the reach taken away, which is thirty percent closer. For as long as the reach lasted every cell was dragged toward people its grid neighbours had won, so each ended somewhere between its own people and its neighbours’, and afterwards the step is already too small to walk the rest of the way. The control describes the crowd better and carries no arrangement at all, which the pairs show, since without the reach the resting distances no longer rise with the grid steps.") },
-            ),
-            exercise(
-              "Hold each decay still on the arch",
-              ["Part 3 tests the two decays by holding each one still in turn. Fit the eighteen people along the arch with a row of six cells four times over, from seed 3 for a hundred passes, with both schedules shrinking, the step held at a half, the reach held wide at three cells, and neither shrinking.", "For each run print how far the furthest cell moved on the last pass and the mean distance from a person to their cell, which the page gives as 0.2703 and 7.9669, 13.5400 and 6.9227, 0.0278 and 22.7539, and 17.9446 and 21.3833. Also print how much of the arch the six cells span, which the page quotes only for two of the four runs."],
-              `from math import hypot
+  mean distance from a person to their cell 3.5932`,{...{ hints: ["ConstantSchedule(value=0.0) is a reach that is zero for the whole run, which is how Part 4 switches the cooperation off and leaves only the winner moving.", "A cell’s position has distance_to, which counts steps on the grid between two positions, and the resting distance is the straight-line gap between the two cells’ heights and weights, which hypot gives from the two differences.", "The mean distance pairs each person with the cell predict names for them, takes the straight-line gap to that cell’s resting height and weight, and averages the eleven gaps."], check: numberCheck("What mean distance from a person to their cell does the chain with the reach taken away report?", 3.5932, 0.0001, "Neighbourhood updates encourage neighbouring grid cells to remain related, at a cost to this nearest-prototype fit. Removing that constraint gives a lower mean distance here without preserving the same grid arrangement.") },question:"Does preserving grid neighbourhoods improve the nearest-prototype fit?"}),
+            exercise("Hold each decay still on the arch",["Part 3 tests the two decays by holding each one still in turn. Fit the eighteen people along the arch with a row of six cells four times over, from seed 3 for a hundred passes, with both schedules shrinking, the step held at a half, the reach held wide at three cells, and neither shrinking.", "For each run print how far the furthest cell moved on the last pass and the mean distance from a person to their cell, which the page gives as 0.2703 and 7.9669, 13.5400 and 6.9227, 0.0278 and 22.7539, and 17.9446 and 21.3833. Also print how much of the arch the six cells span, which the page quotes only for two of the four runs."],`from math import hypot
 
 from oop_ml import ConstantSchedule, ExponentialDecaySchedule, Feature, LinearDecaySchedule, SelfOrganisingMap
 
@@ -1153,8 +1121,7 @@ runs = {
 for name, (step, reach) in runs.items():
     # Fit six cells in a row to the arch under this step and reach, then print
     # the last pass's movement, the mean distance to a cell, and the cells' span.
-    pass`,
-              `from math import hypot
+    pass`,`from math import hypot
 
 from oop_ml import ConstantSchedule, ExponentialDecaySchedule, Feature, LinearDecaySchedule, SelfOrganisingMap
 
@@ -1178,17 +1145,11 @@ for name, (step, reach) in runs.items():
     winners = [int(value) for value in chain.predict(arch)]
     distances = [hypot(height - units[winner].weight_for("height"), weight - units[winner].weight_for("weight")) for height, weight, winner in zip(heights, weights, winners)]
     span = max(unit.weight_for("height") for unit in units) - min(unit.weight_for("height") for unit in units)
-    print(f"{name}: moved {chain.final_epoch_movement:.4f} on the last pass, mean distance {sum(distances) / len(distances):.4f}, cells span {span:.1f}")`,
-              `both shrink: moved 0.2703 on the last pass, mean distance 7.9669, cells span 74.7
+    print(f"{name}: moved {chain.final_epoch_movement:.4f} on the last pass, mean distance {sum(distances) / len(distances):.4f}, cells span {span:.1f}")`,`both shrink: moved 0.2703 on the last pass, mean distance 7.9669, cells span 74.7
 the step held at a half: moved 13.5400 on the last pass, mean distance 6.9227, cells span 82.0
 the reach held wide: moved 0.0278 on the last pass, mean distance 22.7539, cells span 31.2
-neither shrinks: moved 17.9446 on the last pass, mean distance 21.3833, cells span 34.1`,
-              { hints: ["Both schedules are fields of the map, learning_rate for the step and neighbourhood_radius for the reach. ExponentialDecaySchedule and LinearDecaySchedule take a start and an end, and ConstantSchedule holds one value for the whole run.", "On a row of six the reach starts at three cells, half the longest side, so a held reach is a constant three and a shrinking one runs from three to a quarter.", "The last pass’s movement is final_epoch_movement, the mean distance is the same calculation as the previous problem, and the span is the gap between the largest and smallest resting height among the six cells."], check: numberCheck("How far was the map still travelling per pass with the step held at a half?", 13.54, 0.0001, "A step of a half halves the remaining gap whatever the gap is, so a cell already well placed is dragged just as far by the next person as a badly placed one, and the map never settles. 13.5400 per pass is roughly a fifth of the 74.7 that the settled fit’s six cells span, so the run is being dragged a fifth of the way across the map by whoever arrived most recently, and its lower mean distance of 6.9227 describes where the cells happened to be when the pass budget ran out rather than a better map.") },
-            ),
-            exercise(
-              "Switch the reach off and compare with the grouping method",
-              ["Part 4 says a map with no reach is the grouping method written as an online rule. Fit a row of three cells to the crowd with the reach held at zero, fit the grouping method with three groups from the same seed, and print both labellings.", "The page says the two put the same people together while answering 0 0 0 0 0 2 2 2 1 1 1 and 1 1 1 1 1 2 2 2 0 0 0, and that the furthest-separated pair of prototypes sits 0.0233 apart. Sort the three cells and the three centres by height so they pair up, print each pair, and print how far apart the furthest-separated pair is."],
-              `from math import hypot
+neither shrinks: moved 17.9446 on the last pass, mean distance 21.3833, cells span 34.1`,{...{ hints: ["Both schedules are fields of the map, learning_rate for the step and neighbourhood_radius for the reach. ExponentialDecaySchedule and LinearDecaySchedule take a start and an end, and ConstantSchedule holds one value for the whole run.", "On a row of six the reach starts at three cells, half the longest side, so a held reach is a constant three and a shrinking one runs from three to a quarter.", "The last pass’s movement is final_epoch_movement, the mean distance is the same calculation as the previous problem, and the span is the gap between the largest and smallest resting height among the six cells."], check: numberCheck("How far was the map still travelling per pass with the step held at a half?", 13.54, 0.0001, "A fixed half-gap learning rate retains the same fraction of each new discrepancy; its absolute movement still depends on that discrepancy. Late observations can continue moving prototypes substantially, so a lower distance at the last pass is not evidence that this schedule converged.") },question:"What happens when the learning-rate or neighbourhood schedule stops shrinking?"}),
+            exercise("Switch the reach off and compare with the grouping method",["Part 4 says a map with no reach is the grouping method written as an online rule. Fit a row of three cells to the crowd with the reach held at zero, fit the grouping method with three groups from the same seed, and print both labellings.", "The page says the two put the same people together while answering 0 0 0 0 0 2 2 2 1 1 1 and 1 1 1 1 1 2 2 2 0 0 0, and that the furthest-separated pair of prototypes sits 0.0233 apart. Sort the three cells and the three centres by height so they pair up, print each pair, and print how far apart the furthest-separated pair is."],`from math import hypot
 
 from oop_ml import ConstantSchedule, Feature, KMeans, SelfOrganisingMap
 
@@ -1199,8 +1160,7 @@ crowd = [Feature("height", heights), Feature("weight", weights)]
 chain = SelfOrganisingMap(grid_width=3, grid_height=1, neighbourhood_radius=ConstantSchedule(value=0.0), max_epochs=100, random_seed=3).fit(crowd)
 grouping = KMeans(n_clusters=3, random_seed=3).fit(crowd)
 # Print both labellings, then pair each cell with a centre by sorting both by
-# height, print each pair, and print the largest gap between a cell and its centre.`,
-              `from math import hypot
+# height, print each pair, and print the largest gap between a cell and its centre.`,`from math import hypot
 
 from oop_ml import ConstantSchedule, Feature, KMeans, SelfOrganisingMap
 
@@ -1219,15 +1179,12 @@ gaps = []
 for (cell_height, cell_weight), (centre_height, centre_weight) in zip(cells, centres):
     gaps.append(hypot(cell_height - centre_height, cell_weight - centre_weight))
     print(f"cell ({cell_height:.4f}, {cell_weight:.4f}) beside centre ({centre_height:.4f}, {centre_weight:.4f})")
-print(f"furthest-separated pair {max(gaps):.4f} apart")`,
-              `chain labels    [0, 0, 0, 0, 0, 2, 2, 2, 1, 1, 1]
+print(f"furthest-separated pair {max(gaps):.4f} apart")`,`chain labels    [0, 0, 0, 0, 0, 2, 2, 2, 1, 1, 1]
 grouping labels [1, 1, 1, 1, 1, 2, 2, 2, 0, 0, 0]
 cell (119.9996, 25.6656) beside centre (120.0000, 25.6667)
 cell (153.8233, 53.7996) beside centre (153.8000, 53.8000)
 cell (180.3333, 80.3333) beside centre (180.3333, 80.3333)
-furthest-separated pair 0.0233 apart`,
-              { hints: ["A reach held at zero is ConstantSchedule(value=0.0), and the grouping method is KMeans with n_clusters set to the same three as the chain has cells.", "Both models answer predict with one label per person. Compare which people share a label rather than the labels themselves, since nothing ever told either method which group deserved which number.", "The map’s cells are read through units and weight_for, and the grouping method’s centres through centroids and coordinate_for. Sorting both lists of pairs by height lines the three up."], check: numberCheck("How far apart are the furthest-separated cell and centre?", 0.0233, 0.0001, "With the reach at zero only the winner moves, and each person a cell wins nudges it a fraction of the way toward them, which is a running average of the people that cell has won. The grouping method computes the same average in one jump, so the two come to rest in the same places, the middle pair 0.0233 apart and the other two closer still, while the labels are the same partition written in different numbers. The agreement is not a promise, since at four cells the two methods put different people together with the furthest pair 8.0623 apart.") },
-            ),
+furthest-separated pair 0.0233 apart`,{...{ hints: ["A reach held at zero is ConstantSchedule(value=0.0), and the grouping method is KMeans with n_clusters set to the same three as the chain has cells.", "Both models answer predict with one label per person. Compare which people share a label rather than the labels themselves, since nothing ever told either method which group deserved which number.", "The map’s cells are read through units and weight_for, and the grouping method’s centres through centroids and coordinate_for. Sorting both lists of pairs by height lines the three up."], check: numberCheck("How far apart are the furthest-separated cell and centre?", 0.0233, 0.0001, "With zero neighbourhood radius only the winning prototype moves, resembling online k-means. The groups happen to agree closely here; fixed fractional updates and finite training do not guarantee the exact batch means or the same partition.") },question:"How close is winner-only map training to the fitted k-means groups?"}),
           ],
         },
       ]}

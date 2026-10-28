@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { LessonMark, SectionProgress } from "@/components/course/LessonMarks";
+import { LessonTrailCard, PathProgress } from "@/components/course/LearningMap";
 import { CURRICULUM } from "@/lib/curriculum";
 import { learningAreaForSection, learningAreaHref, learningAreaSections } from "@/lib/learning-areas";
-import { labHref } from "@/lib/labs";
 import {
   courseSectionHref,
   courseSectionId,
   courseTopicId,
   findCourseSection,
-  lessonCount,
   lessonHrefs,
   standsAlone,
 } from "@/lib/course-navigation";
@@ -54,14 +52,9 @@ export default async function CourseSectionPage({ params }: Props) {
         </Link>
       </nav>
       <header id={courseSectionId(part)} className="mb-10 scroll-mt-8">
-        <p className="mb-3 font-mono text-xs uppercase tracking-[0.2em] text-accent">
-          Section {index + 1} of {sections.length} · {lessonCount(part)} lessons
-        </p>
+        <PathProgress lessons={lessons} variant="header" />
         <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{part.title}</h1>
         <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">{part.intro}</p>
-        <div className="mt-6 max-w-md">
-          <SectionProgress lessons={lessons} />
-        </div>
       </header>
 
       {showTopics && (
@@ -98,7 +91,7 @@ export default async function CourseSectionPage({ params }: Props) {
                 {topic.blurb && <p className="mt-2 max-w-2xl text-muted">{topic.blurb}</p>}
               </header>
             )}
-            <ol className="space-y-3">
+            <ol className="lesson-trail">
               {topic.concepts.map((concept) => {
                 if (!concept.href) {
                   return (
@@ -116,29 +109,7 @@ export default async function CourseSectionPage({ params }: Props) {
                 const numbered = numberOf.get(concept.href) ?? 0;
                 return (
                   <li key={concept.title}>
-                    <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
-                    <Link
-                      href={concept.href}
-                      className="group flex gap-4 p-5 transition hover:bg-raised"
-                    >
-                      <span className="w-6 shrink-0 pt-0.5 font-mono text-xs text-muted">
-                        {String(numbered).padStart(2, "0")}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block font-semibold text-foreground group-hover:text-accent">
-                          {concept.title}
-                        </span>
-                        <span className="mt-1.5 block text-sm leading-relaxed text-muted">
-                          {concept.blurb}
-                        </span>
-                      </span>
-                      <LessonMark lesson={concept.href} />
-                    </Link>
-                    <div className="flex flex-wrap gap-x-6 border-t border-line px-5 py-2">
-                      <Link href={labHref(concept.href.split("/").pop()!)} className="inline-flex min-h-11 items-center text-sm font-semibold text-accent hover:underline">Build with Botie →</Link>
-                      <Link href={concept.href} className="inline-flex min-h-11 items-center text-sm text-muted hover:text-foreground hover:underline">Read the lesson</Link>
-                    </div>
-                    </div>
+                    <LessonTrailCard href={concept.href} title={concept.title} description={concept.blurb} number={numbered} />
                   </li>
                 );
               })}

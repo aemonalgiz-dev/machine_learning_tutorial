@@ -890,7 +890,10 @@ export default function MaximumMatchingPage() {
           practice: [
             exercise(
               "Scan the wildlife park sentence from both ends",
-              ["Build the nine-word list from Part 2 and run the greedy rule over 我们在野生动物园玩 from the left and then from the right. Print each answer with its piece count and how many of its pieces are lone characters.", "Part 2 found six pieces scanning from the left and Part 3 found five from the right, and the five are what a reader answers. The library’s segmenter is a pre-tokenizer, so it answers with words that carry their text and their span in the sentence."],
+              [
+  "Use the supplied nine-entry dictionary to segment 我们在野生动物园玩, first from the left and then from the right. Each step takes the longest dictionary entry available at its current position.",
+  "Print the pieces, total piece count and number of one-character pieces for each direction. Compare both with the reader segmentation given in the lesson; a locally longest match can block a useful match later."
+],
               `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
 
 sentence = "我们在野生动物园玩"
@@ -917,11 +920,20 @@ for direction in (MatchingDirection.FORWARD, MatchingDirection.BACKWARD):
   6 pieces, 3 lone characters
 backward: 我们 | 在 | 野生 | 动物园 | 玩
   5 pieces, 2 lone characters`,
-              { hints: ["A word list becomes a dictionary through WordDictionary.from_words, which gives every entry a frequency of one, the honest statement that nothing beyond the list is known.", "MaximumMatchingSegmenter takes the dictionary and a direction at construction. MatchingDirection.FORWARD scans from the left and MatchingDirection.BACKWARD from the right.", "split answers a Words object. Its texts property is the pieces as strings, n_words is the count, and iterating it gives each piece with a text attribute, which is how to count the one-character ones."], check: numberCheck("How many pieces does the right-to-left scan answer?", 5, 0.5, "Moving from the right, the first thing the scan meets is the word for zoo, whole, and everything in front of it falls into place. From the left the second take is 在野 rather than 在, which moves the cursor one character too far, lets 生动 line up as an entry, and leaves three lone characters behind, six pieces in all.") },
+              {
+question: "Does the direction of a greedy word scan change the sentence it finds?",
+ hints: [
+  "Build WordDictionary.from_words(words), then pass it to MaximumMatchingSegmenter with the required MatchingDirection.",
+  "split returns pieces carrying text. Use texts for the display, n_words for the total and len(piece.text) for the single-character count."
+], check: numberCheck("How many pieces does the right-to-left scan answer?", 5, 0.5, "The backward scan gives five pieces. It encounters the zoo entry from the right before making the conflicting choice that misleads the forward scan on this sentence.") },
             ),
             exercise(
               "Let the heuristic choose on the surname sentence",
-              ["Part 4 put the surname in front of the sentence about the origin of life. Run the five-word list over 阿尔瓦雷斯研究生命起源 three ways, from the left, from the right and both ways with the heuristic keeping one, and print each answer with its piece count, its lone-character count and how many of its pieces the list holds.", "Both scans answer eight pieces, so the heuristic’s first rule cannot decide. The lesson says five characters of the surname come back alone; count the lone characters on each side and you will see which rule does."],
+              [
+  "Segment the supplied surname sentence 阿尔瓦雷斯研究生命起源 with the five-entry dictionary, using FORWARD, BACKWARD and BIDIRECTIONAL.",
+  "For each result print its pieces, total piece count, one-character count and dictionary-entry count. The surname is absent from the dictionary, so examine how the heuristic treats the remaining ambiguity after those unfamiliar characters.",
+  "BIDIRECTIONAL compares the two scans with fixed preferences. Its chosen cut is a heuristic result, not a contextual understanding of the surname or sentence."
+],
               `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
 
 sentence = "阿尔瓦雷斯研究生命起源"
@@ -949,11 +961,21 @@ backward: 阿 | 尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源
   8 pieces, 5 lone characters, 3 entries
 bidirectional: 阿 | 尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源
   8 pieces, 5 lone characters, 3 entries`,
-              { hints: ["MatchingDirection has three members, and iterating the enum visits FORWARD, BACKWARD and BIDIRECTIONAL in that order, so one loop runs all three.", "The dictionary supports the in operator, so piece.text in dictionary says whether the list holds a piece.", "A character the list lacks comes back as a word of its own, which is a one-character piece that in dictionary answers false for."], check: numberCheck("How many lone characters does the left-to-right scan leave on the surname sentence?", 6, 0.5, "The five characters of the surname come back alone whichever way the scan runs, since no entry covers them. Scanning from the left then takes 研究生, the graduate student reading, which strands 命 as a sixth. From the right the scan takes 生命 whole and leaves five, so the two answers tie at eight pieces and the heuristic’s second rule, fewer lone characters, keeps the right-to-left answer.") },
+              {
+question: "How does the bidirectional heuristic choose when both scans use eight pieces?",
+ hints: [
+  "Iterating MatchingDirection visits all three directions. Construct a segmenter for each one.",
+  "Count one-character pieces with len(piece.text) == 1 and known entries with piece.text in dictionary.",
+  "When piece counts tie, compare the number of one-character pieces before looking for a later tie rule."
+], check: numberCheck("How many lone characters does the left-to-right scan leave on the surname sentence?", 6, 0.5, "The forward scan leaves six one-character pieces. Five come from the absent surname and the sixth from a conflicting match later in the sentence, which lets the heuristic distinguish the tied scans.") },
             ),
             exercise(
               "Take the word for zoo out of the list",
-              ["Part 4 removes 动物园 from the nine-word list and runs both scans on the wildlife park sentence again. Do the same, and for each scan print the pieces and how many of them are entries of the shortened list.", "The right-to-left scan was the one that got the sentence right. Without the word for zoo it has nothing whole to meet at the end, and what it answers instead carries no mark that anything is missing."],
+              [
+  "Remove 动物园, the zoo entry, from the supplied wildlife-park dictionary. Run the forward and backward maximum-matching scans on the same sentence again.",
+  "Print each segmentation and the number of its pieces found in the shortened dictionary. Compare this with the earlier backward scan, which could take the complete zoo entry.",
+  "A count of known pieces tells us whether the pieces were listed. It does not tell us whether their combination expresses the intended words."
+],
               `from oop_ml import MatchingDirection, MaximumMatchingSegmenter, WordDictionary
 
 sentence = "我们在野生动物园玩"
@@ -977,11 +999,20 @@ for direction in (MatchingDirection.FORWARD, MatchingDirection.BACKWARD):
   6 pieces, 6 of them entries
 backward: 我们 | 在野 | 生动 | 物 | 园 | 玩
   6 pieces, 6 of them entries`,
-              { hints: ["The shortened list is an ordinary dictionary built from eight words, so the segmenter is constructed exactly as before.", "Counting entries is piece.text in shortened over the pieces, and a count equal to the piece count means every piece is an entry."], check: numberCheck("How many of the right-to-left scan’s pieces are entries once the word for zoo is gone?", 6, 0.5, "Without 动物园 the scan from the right has nothing whole to take at the end, so it takes 园, then 物, and from there the same two false words the left-hand scan fell for, ending in the identical six pieces. Every one of them is an entry, which is exactly what a correct answer looks like, and that is why a missing word is not a failure the method can report.") },
+              {
+question: "Will a missing dictionary word announce itself as a failure?",
+ hints: [
+  "Construct a fresh WordDictionary from the remaining eight entries and use it for both directions.",
+  "Count membership for every returned piece. A fully listed segmentation can still be the wrong reading."
+], check: numberCheck("How many of the right-to-left scan’s pieces are entries once the word for zoo is gone?", 6, 0.5, "All six backward-scan pieces are dictionary entries after the removal, even though the intended zoo word has been lost. Dictionary membership therefore cannot expose this error by itself.") },
             ),
             exercise(
               "Try to match across a space",
-              ["Part 1 says whitespace ends a run before any matching begins, so a list holding thecat as an entry will not produce it from the two words the cat. Build that list, split the cat and then thecat, and print every piece with the span it was cut from.", "Each word the segmenter answers carries a start and an end offset into the text it came from, so the second piece of the cat should begin after the space rather than at the fourth character."],
+              [
+  "Build the supplied dictionary containing the, cat and thecat. Segment \"the cat\" and \"thecat\" with the same forward matcher.",
+  "For each input print its piece count, then every piece with its start and end offsets. Offsets are zero-based and half-open: the end position belongs to the next slice.",
+  "This segmenter first separates whitespace-delimited runs. The entry thecat can match inside one run, but cannot cross the space between two runs."
+],
               `from oop_ml import MaximumMatchingSegmenter, WordDictionary
 
 dictionary = WordDictionary.from_words(["thecat", "the", "cat"])
@@ -1005,7 +1036,12 @@ for text in ("the cat", "thecat"):
   'cat' at [4, 7)
 'thecat' -> 1 piece(s)
   'thecat' at [0, 6)`,
-              { hints: ["The direction defaults to scanning from the left, so a segmenter built from the dictionary alone is the forward one.", "Iterating the Words object gives Word objects, each with text, start and end attributes. The span is half open, so text[start:end] is the slice the piece came from."], check: numberCheck("At what offset does the piece cat start in the text the cat?", 4, 0.5, "The space at offset 3 closed the first run before any lookup happened, so the longest entry beginning at offset 0 could only be sought inside the, and cat is found in a second run that starts at offset 4. Handed thecat with no space, the same list produces the six-letter entry whole, since now nothing closes the run.") },
+              {
+question: "Can the matcher join an entry across whitespace?",
+ hints: [
+  "MaximumMatchingSegmenter defaults to FORWARD.",
+  "Iterate split(text) to read piece.text, piece.start and piece.end. Check each span with text[start:end]."
+], check: numberCheck("At what offset does the piece cat start in the text the cat?", 4, 0.5, "Cat starts at offset 4 in \"the cat\". The space ends the first matching run, so the six-letter entry is available only for the input without that space.") },
             ),
           ],
         },

@@ -47,7 +47,7 @@ export const agentFrameworkTools: Record<string, Tool> = {
     },
   },
   afLoadThread: {
-    title: "Load this thread's evidence", why: "Resume from the checkpoint for the selected maintenance request. A different request must not inherit this request's evidence.", inputs: ["Checkpoint records by thread", "Thread ID"],
+    title: "Load this thread's evidence", why: "Read the evidence previously saved for this maintenance request, identified by its thread ID. That saved state is the checkpoint. Another thread’s evidence must stay separate.", inputs: ["Checkpoint records by thread", "Thread ID"],
     run: ([checkpoints, thread]) => {
       const r = record(checkpoints, "Checkpoints");
       if (typeof thread !== "string" || !thread) throw Error("Supply a nonempty thread ID.");

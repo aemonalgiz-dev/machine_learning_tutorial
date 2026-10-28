@@ -63,13 +63,10 @@ export default function WordPiecePage() {
 <>
               <SubSection title="1. Where this starts, and the one thing that changes">
                 <p>
-                  We start where the previous page ended. A corpus is cut into
-                  words, every word is written out in single symbols, and a loop
-                  runs. Count every pair of adjacent symbols, weighting each by
-                  how often its word occurs, take the best pair, replace every
-                  occurrence of it with the two symbols written together, and go
-                  round again. Each turn adds one row to the vocabulary, so the
-                  loop stops when the vocabulary is the size that was asked for.
+                  Start with the merge loop from the previous lesson. Write each word in single symbols, count adjacent pairs across the corpus, then join the pair selected by the scoring rule. Repeat until the vocabulary reaches the requested size.
+                </p>
+                <p>
+                  We now have a separate question to ask of that scoring rule: did a pair occur often because its halves belong together, or because both halves occur almost everywhere? The next example compares those possibilities before giving the relative-frequency calculation.
                 </p>
                 <>
                   <p>
@@ -1065,7 +1062,11 @@ export default function WordPiecePage() {
           practice: [
             exercise(
               "Cut lowest by longest match on the four words",
-              ["Part 3 fitted the four words to ten merges and cut lowest, which the corpus never contained, as low and ##est. Fit the same corpus with the library, asking for 22 rows, print the rows the fit holds, and encode lowest, widest and lox. Fit the count-scored scheme of the previous lesson at the same size, with its byte rows switched off, and read the same three words with it.", "Part 5 settled the first tie in favour of ##id over wi, and Part 4 said a word that cannot be cut becomes one stand-in whole where the count-scored cut keeps lo. Both should show in what is printed."],
+              [
+  "Fit WordPiece and BPE on the supplied repeated four-word corpus at twenty-two rows, disabling byte fallback for BPE.",
+  "Print the WordPiece vocabulary size, merge count and row spellings. Then print each model’s pieces and counts for lowest, widest and lox.",
+  "WordPiece uses ## to mark a continuation after a word’s first piece. Its encoding takes the longest available match at each position; the BPE comparison replays its learned merges. Inspect lox to compare how an unspellable word is handled."
+],
               `from oop_ml import BytePairEncoding, WordPiece
 
 corpus = [
@@ -1102,11 +1103,21 @@ for word in ["lowest", "widest", "lox"]:
 lowest: low ##est (2) | count-scored: lo w est</w> (3)
 widest: wid ##est (2) | count-scored: widest</w> (1)
 lox: [UNK] (1) | count-scored: lo [UNK] (2)`,
-              { hints: ["Both fits take the size at construction and the corpus in fit. The vocabulary is iterable in the order its rows were added, the stand-in first, then the alphabet, then the merges.", "The marked fit exposes n_merges and not the merges themselves, because under longest match the merges are how the vocabulary was learned and not what it is.", "encode answers an object whose texts are the pieces as a reader sees them, with the two hashes on every continuation."], check: numberCheck("How many pieces does lowest come to under the continuation-marked fit?", 2, 0, "Longest match takes the longest opening piece that fits, which is low rather than l or lo, and then the longest continuation that fits the rest, which is ##est, and nothing about the order the rows were learned in is consulted. The count-scored scheme replays its merges instead and arrives at three pieces, lo, w and est with its marker, from the same corpus at the same size.") },
+              {
+question: "What does longest-match WordPiece do differently from replaying BPE merges?",
+ hints: [
+  "Both constructors take vocabulary_size and both fit the same corpus.",
+  "Use model.vocabulary and n_merges for the fit report, and encode(word).texts for the segmentation.",
+  "A continuation needs its ## spelling in the vocabulary. An available word-initial spelling cannot automatically be reused in that position."
+], check: numberCheck("How many pieces does lowest come to under the continuation-marked fit?", 2, 0, "WordPiece uses two pieces for lowest. The available opening low is followed by ##est, while the BPE vocabulary’s merge procedure gives a different cut.") },
             ),
             exercise(
               "Fit both schemes at one size and compare",
-              ["Part 4 fitted both schemes at the same requested sizes and read the eighteen sentences and the held-out sentence with each. Fit at 100 and at 130, and at each size print, for each scheme, the rows learned, the pieces the corpus costs, the pieces the sentence costs, how many of those are the stand-in, and whether the sentence comes back exactly.", "At 130 the table in Part 4 has the corpus at 343 against 277 and the sentence at 31 against 25, with the continuation-marked fit giving the sentence back exactly and the end-marked one never doing so. The row at 100 is one the lesson does not print."],
+              [
+  "Fit WordPiece and end-marked BPE at requested sizes one hundred and one hundred thirty using the same eighteen training sentences. Disable byte fallback for BPE.",
+  "For each fit print actual rows, total corpus tokens, held-out Dr. Alvarez sentence tokens, its unknown-piece count and exact round-trip result.",
+  "Keep coverage beside length in the report. A shorter sequence containing an unknown stand-in has lost information that a longer exact sequence may retain."
+],
               `from oop_ml import BytePairEncoding, WordPiece
 
 sentences = [
@@ -1180,11 +1191,21 @@ for size in [100, 130]:
 100 end-marked: 100 rows, corpus 344, sentence 27, stand-ins 1, exact False
 130 marked: 130 rows, corpus 343, sentence 31, stand-ins 0, exact True
 130 end-marked: 130 rows, corpus 277, sentence 25, stand-ins 1, exact False`,
-              { hints: ["The end-marked scheme is the previous lesson’s class with its byte rows switched off, which is what makes its table comparable row for row and is also why it can leave a piece unspellable.", "A corpus costs the sum of what each of its texts encodes to. The stand-in is spelled [UNK] under both schemes, so counting pieces equal to it counts what could not be spelled.", "Whether the sentence came back is decode compared with the text that went in. The end-marked fit puts its stand-in where the z and its end-of-word mark belong, so the z and the space after Alvarez are both missing from what comes back."], check: numberCheck("How many pieces does the corpus cost under the continuation-marked fit at 100 rows?", 446, 0, "At 100 rows the score-driven fit has spent fifty merges on pairs chosen for association rather than frequency, so the corpus is still 446 pieces where the count-scored fit of the same size reads it in 344. That is the price Part 4 measures, since a row spent on a rare pair shortens the corpus less than a row spent on a common one, and the gap closes only at exhaustion, 254 against 263.") },
+              {
+question: "How do two vocabularies of the same requested size behave on new text?",
+ hints: [
+  "Sum model.encode(text).n_tokens over the unchanged training corpus.",
+  "Count \"[UNK]\" in the probe encoding’s texts.",
+  "Compare the probe’s decoded IDs with the original string, rather than accepting a plausible-looking reconstruction."
+], check: numberCheck("How many pieces does the corpus cost under the continuation-marked fit at 100 rows?", 446, 0, "WordPiece uses 446 corpus pieces at one hundred rows. Its merge scoring allocates rows differently from frequency-driven BPE, so the same requested budget need not give the same compression.") },
             ),
             exercise(
               "Fit to exhaustion and price three texts per word",
-              ["Part 6 fitted the eighteen sentences until nothing was left to merge and priced three texts in pieces per word. Fit with a size the corpus cannot reach, print the rows learned, and for the corpus, the sentence about the dial and the diode, and the sentence about Dr. Alvarez print the pieces, the words and the pieces per word to two places.", "The lesson arrives at 1.91, 2.38 and 4.14. Then count how many of the corpus’s 72 distinct words are single rows of the vocabulary, which the lesson does not say."],
+              [
+  "Fit WordPiece on the eighteen supplied sentences with vocabulary_size=600, allowing it to stop when no eligible repeated pair remains.",
+  "Print actual vocabulary and merge counts. For the joined corpus, supplied neighbour sentence and Dr. Alvarez sentence, print tokens, whitespace-delimited word count and tokens per word to two decimal places.",
+  "Finally print how many distinct whitespace-delimited corpus words already exist as complete vocabulary rows. This describes the fitted inventory, not a promise about future words."
+],
               `from oop_ml import WordPiece
 
 sentences = [
@@ -1257,11 +1278,21 @@ corpus: 254 pieces over 133 words, 1.91 per word
 neighbour: 19 pieces over 8 words, 2.38 per word
 running: 29 pieces over 7 words, 4.14 per word
 24 of 72 distinct words are single rows`,
-              { hints: ["Asking for 600 is not refused. The fit stops when no pair is left that occurs twice and vocabulary.n_tokens says what it reached, which Part 4 put at 157.", "Words are found on spaces by the default rule, so joining the sentences with spaces and encoding once costs the same as encoding them one at a time.", "The vocabulary answers the in operator, so a word is a single row exactly when the word itself is in it. A word-initial piece carries no mark, which is what makes that test work."], check: numberCheck("How many of the 72 distinct words of the corpus are single rows of the vocabulary?", 24, 0, "Among them are analysis, expected and costing, and estimate with its full stop attached, which is why the corpus reads at under two pieces per word. The sentence about Dr. Alvarez shares only two of its seven words with that list, Dr. and the, and costs 4.14 per word, which is what carrying one corpus looks like on text the corpus did not contain.") },
+              {
+question: "How far does a vocabulary specialised to one corpus transfer to nearby text?",
+ hints: [
+  "Read vocabulary.n_tokens after fitting instead of assuming the requested ceiling was reached.",
+  "Use the same whitespace word definition for every denominator.",
+  "A word-initial complete WordPiece entry has no ## prefix. Test the exact corpus-word spelling for vocabulary membership."
+], check: numberCheck("How many of the 72 distinct words of the corpus are single rows of the vocabulary?", 24, 0, "Twenty-four distinct corpus words are complete vocabulary rows. Familiar text can reuse them directly, while new words often require several known parts.") },
             ),
             exercise(
               "Spell the words each marking cannot",
-              ["Part 3 says the two markings fail on different words. Fit the eighteen sentences to exhaustion under both schemes, the end-marked one with its byte rows switched off so that it is the method of the previous lesson exactly, and read Alvarez, zebra, you, old and hour with each.", "Alvarez should defeat the end-marked spelling and not this one, zebra the other way round, and you both. The two words the lesson’s prose never reads, old and hour, say something about which letters the corpus used in both positions."],
+              [
+  "Fit WordPiece and BPE to exhaustion on the supplied eighteen sentences, using the large requested budget and disabling BPE byte fallback.",
+  "Encode Alvarez, zebra, you, old and hour with both. Print their pieces and counts in the supplied order.",
+  "Compare unknown markers as well as counts. WordPiece distinguishes initial and continuation entries; this BPE distinguishes word-ending entries, so merely seeing a letter somewhere in the training text does not guarantee every needed spelling."
+],
               `from oop_ml import BytePairEncoding, WordPiece
 
 sentences = [
@@ -1325,7 +1356,13 @@ zebra: [UNK] (1) | end-marked: z e b r a</w> (5)
 you: [UNK] (1) | end-marked: y o [UNK] (3)
 old: o ##l ##d (3) | end-marked: o l d</w> (3)
 hour: h ##o ##u ##r (4) | end-marked: h o u r</w> (4)`,
-              { hints: ["A text of one word encodes to that word’s pieces, so no pre-tokenizer has to be called by hand.", "The continuation-marked fit answers one stand-in for a whole word it cannot cut, where the end-marked fit keeps the letters it could spell and puts the stand-in where it failed, so the two refusals do not look alike."], check: numberCheck("How many pieces does Alvarez cost under the continuation-marked vocabulary?", 6, 0, "Every letter of Alvarez has been seen in the position it sits in, A opening a word and the rest inside one, so the word is spelled, at six pieces, which is the honest price of a word the corpus never held. The end-marked vocabulary also answers six pieces and the last of them is a stand-in, because no word of the corpus ends in z. A count of pieces alone cannot tell those two readings apart, which is why length and coverage are read together.") },
+              {
+question: "Can the same letters be spellable in one word position and missing in another?",
+ hints: [
+  "Read each input as one complete word using encode(word).texts.",
+  "WordPiece can replace an unspellable whole word with one stand-in. The BPE comparison can retain known pieces around an unknown position.",
+  "For a failed position, check which boundary-marked form would have been needed."
+], check: numberCheck("How many pieces does Alvarez cost under the continuation-marked vocabulary?", 6, 0, "WordPiece spells Alvarez in six pieces. BPE also returns six pieces here but includes an unknown ending, so equal length conceals different coverage.") },
             ),
           ],
         },

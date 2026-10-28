@@ -41,7 +41,7 @@ export default function ResidualConnectionsPage() {
       </> },
       { title: "Part 2. The Two Routes Through the Calculation", content: <>
         <SubSection title="3. Add both input derivatives">
-          <p>Training moves every weight by the slope of the loss with respect to it, and that slope reaches a weight only by travelling back down through every layer above it. A plain layer hands the slope on through its own derivative, which for a tanh neuron is never larger than the size of its weight, and in the playground&rsquo;s branch at the default setting it is 0.3932. The shortcut was added for what it does on this way back, so the second route has to be followed as carefully as the first.</p>
+          <p>Consider changing an early weight a little. Its effect reaches the loss through the later layers, so the backward calculation has to follow those dependencies. For a single chain, the local derivatives multiply. A derivative whose magnitude is below one reduces the contribution arriving through that route. In the playground branch the derivative with respect to its input is 0.3932 at the default setting. We will compare it with the additional route supplied by the shortcut.</p>
           <p>A change to the input affects the result through the branch and through the shortcut. Backpropagation must include both contributions. For a scalar input:</p>
           <Equation>{`dy/dx = 1 + F′(x)\n\nFor F(x) = tanh(w x):\nF′(x) = w × (1 − tanh²(w x))\n\nAt x = 1 and w = 0.5:\nF′(1) ≈ 0.5 × (1 − 0.4621²) ≈ 0.3932\ndy/dx ≈ 1 + 0.3932 = 1.3932`}</Equation>
           <WorkedExample title="Both routes, measured on the playground branch">
@@ -84,13 +84,16 @@ export default function ResidualConnectionsPage() {
             several(
               "Which of these hold about matching the two routes?",
               [
-                "A residual addition requires the same shape on both routes",
-                "The SDK checks exact input and output shapes when the wrapper is constructed",
-                "A flattened image and a two-dimensional image can hold the same number of values without having the same arrangement",
-                "The wrapper learns a projection on the shortcut when the dimensions differ",
-              ],
+                              "A residual addition requires the same shape on both routes",
+                              "The SDK checks exact input and output shapes when the wrapper is constructed",
+                              "A flattened image and a two-dimensional image can hold the same number of values without having the same arrangement",
+                              "The wrapper learns a projection on the shortcut when the dimensions differ",
+                            ],
               [0, 1, 2],
               "Each input coordinate needs a corresponding branch-output coordinate, so an equal count of values is not enough and the arrangement has to agree too. The SDK neither reshapes silently nor learns a projection; larger architectures introduce such projections explicitly when dimensions change.",
+              {
+                "description": "This SDK wrapper represents a direct element-by-element residual addition. Its constructor requires the branch’s input and output shape tuples to match exactly. It does not insert reshaping, broadcasting or a learned shortcut projection."
+              },
             ),
             choice(
               "At an input of one and a branch weight of 0.5, what is the derivative of the residual output with respect to the input?",
@@ -112,13 +115,13 @@ export default function ResidualConnectionsPage() {
         },
       { title: "Part 3. Why Deep Networks Use Shortcuts", content: <>
         <p>A long chain asks its derivative to pass through every transformation. Residual connections introduce additional routes through the chain and make it straightforward for a block to preserve its input. This helps explain their usefulness in deep networks, including image models and transformers.</p>
-        <p>The failure the shortcut repairs is a product. On the way back, the slope arriving at the top of a chain is multiplied at each plain layer by that layer&rsquo;s own derivative, and a product of many factors each smaller than one is very small. The bottom of such a chain receives almost no slope, learns almost nothing, and reports no error, because the loss at the top still falls while the layers nearer the top do the learning. A shortcut turns the factor at each block into a sum, one plus the branch&rsquo;s derivative, and a chain of such sums has a route from the top to the bottom along which nothing is multiplied by any weight at all.</p>
+        <p>Suppose many successive layers each reduce the arriving gradient. Their reductions multiply, and an early layer can receive a very small signal. This is called a vanishing gradient. A residual block has an extra route that carries the input directly. Its derivative includes that route as well as the learned branch, which can help an early layer receive a useful signal. The complete derivative still combines both contributions, so cancellation or amplification remains possible.</p>
         <WorkedExample title="The playground neuron, stacked thirty deep">
           <p>Take the playground&rsquo;s branch at its default weight of 0.5, stack copies of it so that each reads what the one before answered, and hand the chain an input of one. The derivative at the bottom of the plain chain is one factor per layer multiplied together, and each factor is a tanh slope times 0.5, so no factor exceeds a half. In the residual chain each block adds its input back, so each factor is one plus a branch derivative instead.</p>
           <Equation>{`depth    plain chain dy/dx     residual chain dy/dx\n  1      0.3932                 1.3932\n  2      0.1865                 1.8188\n  5      0.0229                 2.5053\n 10      0.0007                 2.5763\n 30      6.8 × 10⁻¹⁰            2.5768`}</Equation>
-          <p>Thirty plain layers hand the bottom layer less than a billionth of the slope that arrived at the top, so it is barely trained however long the run goes on, and nothing in the loss says so. Thirty residual layers hand it 2.5768. The residual chain&rsquo;s output has grown as well, to 29.68, since once the branch&rsquo;s tanh saturates each block adds almost exactly one to what it read. The branch&rsquo;s derivative there is near zero, so each block passes the slope through at almost exactly one, which is why the residual figure stops moving after about ten layers.</p>
+          <p>At these fixed settings, the thirty-layer plain chain passes back less than a billionth of the arriving derivative. The residual chain passes back 2.5768. This measures sensitivity through the chosen chains; it is not a complete training run or a guarantee about how long learning would take. The residual output also grows to about 29.68. As the tanh branch approaches its flat upper range, each block contributes nearly one to the output and passes back a derivative close to one.</p>
         </WorkedExample>
-        <p>Read forward, the same addition says that a block whose branch has learned nothing yet is harmless. At a branch weight of zero the playground&rsquo;s output is its input, where a plain neuron at a weight of zero answers zero whatever it was given. A network can therefore be made deeper without first being made worse, which is the observation the residual formulation was introduced to explain.</p>
+        <p>If the learned branch outputs zero, the shortcut lets this block return its input unchanged. The playground demonstrates that case at a branch weight of zero. An untrained branch with arbitrary initial weights need not output zero. Residual parameterisation makes an identity mapping easy to express; it does not make every newly added block harmless.</p>
         <KeepInMind><p>The complete derivative is a sum. A negative branch derivative can cancel the shortcut&apos;s contribution, and repeated residual blocks can still amplify or reduce gradients. A shortcut improves the structure of the learning problem; it does not promise that every gradient or every training run will behave well.</p><p>The playground can show the cancellation, though not at every input. At an input of one the branch derivative never falls below −0.4477, which it reaches at a weight of about −0.77, so the combined derivative never falls below 0.5523 there. At an input of zero the branch derivative is simply the weight, so a weight of −1 gives a combined derivative of exactly 0 and a weight of −2 gives −1, a branch pulling against its own shortcut.</p></KeepInMind>
         <p>The residual formulation is developed in <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>. The skip connections on the <Link href="/concepts/u-net">U-Net</Link> page serve a related purpose of preserving information, but that model concatenates selected feature maps rather than applying this elementwise addition.</p>
       </> },
@@ -170,7 +173,10 @@ export default function ResidualConnectionsPage() {
           practice: [
             exercise(
               "Follow both routes at the playground’s default",
-              ["Build the playground’s branch, one neuron with a weight of 0.5, a bias of zero and a tanh activation, wrap it in a residual connection, and hand both the branch on its own and the wrapped block an input of one. Read the branch output and the residual output off the two responses.", "Then send a slope of one back into each and print what arrives at the input. Part 2 arrived at 0.3932 through the branch alone and 1.3932 through branch and shortcut together, and the difference between the two should be exactly the one the shortcut contributes."],
+              [
+  "Build the supplied single-neuron tanh branch with weight 0.5 and zero bias, then wrap it in Residual. Send input one through each.",
+  "Print both outputs and the input derivative from upstream one through each response. Compare the branch path with the added identity path."
+],
               `import numpy as np
 from oop_ml import DenseLayer, HyperbolicTangent, Neuron, Residual
 
@@ -202,11 +208,17 @@ print(f"slope through branch and shortcut {slope:.4f}")`,
 residual output 1.4621
 slope through the branch alone 0.3932
 slope through branch and shortcut 1.3932`,
-              { hints: ["A layer answers through respond_to, which takes a block with one row per example, so a single input of one goes in as a one by one array.", "The response carries outputs, and the first row’s first entry is the one number this block answers with.", "correction_for takes the response the layer produced and the slope arriving at its outputs, and what it hands down to the input is passed_down. A block of ones the same shape as the outputs is the slope of one."], check: numberCheck("What slope arrives at the input through branch and shortcut together?", 1.3932, 0.0005, "The branch alone hands down 0.3932, its weight times the slope of the tanh at 0.5, and the shortcut hands down the arriving slope of one unchanged. The two routes add, and nothing about the branch changed between the two measurements.") },
+              { hints: [
+  "The wrapped output adds the unchanged input to the branch response.",
+  "Backward contributions from both paths add at their shared input."
+], check: numberCheck("What slope arrives at the input through branch and shortcut together?", 1.3932, 0.0005, "The input derivative is 1.3932. Contributions from the branch and unchanged-input path add at their shared input."), question: "What does the direct shortcut add to the branch’s output and derivative?" },
             ),
             exercise(
               "Look for the weight that cancels the shortcut",
-              ["Part 3 says a negative branch derivative can cancel the shortcut’s contribution, and that the playground cannot show it at every input. Build the block at several settings and print the output and the combined derivative at each, at an input of one with weights 0.5, −0.5, −0.77 and −2, and at an input of zero with weights −1 and −2.", "At an input of one the combined derivative should never fall below about 0.55, however negative the weight. At an input of zero the branch derivative is simply the weight, so a weight of −1 should give exactly zero and a weight of −2 should turn the derivative negative."],
+              [
+  "Evaluate the supplied residual tanh branch at input one with weights 0.5, -0.5, -0.77 and -2, then at input zero with weights -1 and -2.",
+  "Print wrapped output and combined input derivative for each setting. Keep bias zero. The identity path contributes a derivative, but the branch can contribute a signed value."
+],
               `import numpy as np
 from oop_ml import DenseLayer, HyperbolicTangent, Neuron, Residual
 
@@ -234,11 +246,17 @@ input +1.00 weight -0.77: output +0.3531 slope +0.5523
 input +1.00 weight -2.00: output +0.0360 slope +0.8587
 input +0.00 weight -1.00: output +0.0000 slope +0.0000
 input +0.00 weight -2.00: output +0.0000 slope -1.0000`,
-              { hints: ["The branch is rebuilt inside the loop, since a neuron’s weight is fixed when it is constructed.", "The combined derivative is one plus the branch derivative, and the branch derivative is the weight times one minus the square of the tanh, which at an input of zero is the weight itself.", "A plus sign in the format, as in {slope:+.4f}, prints the sign of every number, which is what makes the negative derivative at an input of zero and a weight of −2 stand out."], check: numberCheck("What is the combined derivative at an input of one and a branch weight of −0.5?", 0.6068, 0.0005, "The branch derivative there is −0.5 times one minus the square of tanh(−0.5), which is −0.3932, and the shortcut adds one, leaving 0.6068. At an input of one the tanh is never steep enough for any weight in the playground’s range to cancel the shortcut, and the lowest the combined derivative reaches is 0.5523, at a weight of about −0.77.") },
+              { hints: [
+  "Use the actual tanh derivative at each input/weight pair.",
+  "Adding an identity path does not impose a positive lower bound on every possible combined derivative."
+], check: numberCheck("What is the combined derivative at an input of one and a branch weight of −0.5?", 0.6068, 0.0005, "The combined derivative is 0.6068. A negative branch derivative subtracts from the identity contribution rather than guaranteeing amplification."), question: "Can a residual branch cancel or reverse its shortcut’s derivative?" },
             ),
             exercise(
               "Read the weight’s own slope with and without the shortcut",
-              ["Part 2 says the shortcut has no parameters and leaves the branch’s own gradient exactly as it was. Check it. Send a slope of one back into the branch alone and into the wrapped block, and read the slope on the branch’s weight and on its bias from each correction’s gradient.", "The two weight slopes should agree to every printed digit, as should the two bias slopes, because the shortcut carries the input and the input does not depend on either parameter."],
+              [
+  "For the same branch and residual wrapper, send upstream derivative one through both and inspect their parameter gradients.",
+  "Print weight and bias gradients for the branch alone and wrapped branch. Compare parameter derivatives separately from the input derivatives examined earlier."
+],
               `import numpy as np
 from oop_ml import DenseLayer, HyperbolicTangent, Neuron, Residual
 
@@ -272,11 +290,17 @@ print(f"bias slope, wrapped {wrapped.biases[0]:.4f}")`,
 weight slope, wrapped 0.7864
 bias slope, branch alone 0.7864
 bias slope, wrapped 0.7864`,
-              { hints: ["A correction carries two things, passed_down for the layer beneath and gradient for the layer’s own parameters.", "The gradient holds a weights block with one row per neuron and a biases vector with one entry per neuron, so this branch’s single weight is at row 0, column 0."], check: numberCheck("What slope does the branch’s weight receive inside the wrapped block?", 0.7864, 0.0005, "The weight’s slope is the input times one minus the square of the tanh, which at an input of one and a weight of 0.5 is 0.7864, and it is the same number with the shortcut as without it. The wrapper changes what the layers beneath receive, 1.3932 against 0.3932, and leaves the branch’s own corrections untouched.") },
+              { hints: [
+  "The input shortcut does not depend on the branch’s weight or bias.",
+  "Extract the wrapped correction’s branch gradient rather than assuming the input derivative is a parameter derivative."
+], check: numberCheck("What slope does the branch’s weight receive inside the wrapped block?", 0.7864, 0.0005, "The weight derivative is 0.7864 in both versions. The identity path depends on the input, not on the branch parameter, so it adds no direct parameter derivative."), question: "Does an identity shortcut create new trainable parameters?" },
             ),
             exercise(
               "Stack the neuron thirty deep",
-              ["Part 3 stacks copies of the playground’s neuron and measures what reaches the bottom. Build two chains of thirty layers, one of plain copies of the branch and one of residual copies, feed each an input of one layer by layer, keeping every response, and then walk a slope of one back down through the responses in reverse.", "Print the final output and the slope that reaches the input for each chain, the slope to ten places. The plain chain should hand the input well under a billionth and the residual chain about 2.58, which is the product against the sum."],
+              [
+  "Build thirty-layer plain and residual chains from the supplied fixed neuron. Send input one forward while keeping every response, then send a final derivative one backward in reverse order.",
+  "Print each chain’s final output and input derivative, using ten decimal places for the derivative. This experiment compares these particular nonlinear trajectories, not a universal guarantee of stable residual gradients."
+],
               `import numpy as np
 from oop_ml import DenseLayer, HyperbolicTangent, Neuron, Residual
 
@@ -308,7 +332,10 @@ for shortcut in (False, True):
     print(f"{kind} chain of 30: output {block[0, 0]:.4f}, slope at the input {arriving[0, 0]:.10f}")`,
               `plain chain of 30: output 0.0000, slope at the input 0.0000000007
 residual chain of 30: output 29.6829, slope at the input 2.5767800599`,
-              { hints: ["Each layer reads what the one before it answered, so the block handed to the next respond_to is the previous response’s outputs.", "The backward walk needs each layer paired with the response it produced, so keep the responses in a list and walk both lists in reverse together.", "What one layer passes down is what arrives at the layer beneath it, so the arriving block is overwritten at every step on the way down."], check: numberCheck("What slope reaches the input through the residual chain of thirty?", 2.5768, 0.0005, "Each plain layer multiplies the slope by a tanh slope times 0.5, so thirty of them leave 6.8 × 10⁻¹⁰ of what arrived at the top. Each residual block adds one to its branch’s derivative instead, and once the branch’s tanh saturates, which happens as the chain’s output climbs towards 29.68, each block passes the slope through at almost exactly one. The figure therefore settles at 2.5768 after about ten layers.") },
+              { hints: [
+  "Each backward call must use its corresponding saved forward response.",
+  "A residual chain’s local derivatives still multiply across depth, even though each local derivative includes an added identity contribution."
+], check: numberCheck("What slope reaches the input through the residual chain of thirty?", 2.5768, 0.0005, "The thirty-block residual derivative is about 2.5768 in this run. Local residual derivatives multiply across depth; this measured value is specific to these weights and trajectory."), question: "How do repeated residual blocks affect a derivative across thirty layers?" },
             ),
           ],
         },

@@ -160,13 +160,7 @@ export default function PictureVectorPage() {
                 <Equation>
                   {"cosine(a, b) = (a · b) / (‖a‖ ‖b‖)"}
                 </Equation>
-                <p>
-                  What we would want is a comparison that ignores where the
-                  shape sits, how big it is and how bright, and still notices
-                  which shape it is. Nobody can write that comparison down pixel
-                  by pixel, which is why the rest of the page lets a network
-                  find one.
-                </p>
+                <p>For this task, we would like a comparison that is less sensitive to a shape&apos;s position, size and brightness while retaining evidence about its kind. We could try hand-designed descriptors or train a representation from examples. This page investigates the learned route and checks what it preserves, including for pictures outside the training conditions.</p>
                 <KeepInMind>
                   Pixels by angle manage 196 of 240, and pixels less each
                   picture&rsquo;s own mean manage 212, the best any comparison of
@@ -339,9 +333,7 @@ export default function PictureVectorPage() {
                   Each row compares the reference network with one retrained from
                   another weight seed, on the same 240 held-out pictures.
                 </p>
-                <p>
-                  The same picture&rsquo;s vector under the reference network and under seed 1 has a mean cosine of &minus;0.1387, and under seed 2 of 0.0187, so on average one picture&rsquo;s two vectors are at right angles. The nearest picture is the same picture under both networks for only 40 and 45 of the 240, yet the nearest picture is the same kind under both for 225 and 230.
-                </p>
+                <p>Comparing each picture&apos;s reference vector with its vector from another fit gives mean cosines of −0.1387 for seed 1 and 0.0187 for seed 2. These averages show little consistent coordinate alignment; they do not mean every pair of corresponding vectors is perpendicular. The nearest picture is identical across the fits for only 40 and 45 of the 240 queries, while the nearest picture has the same kind across fits for 225 and 230. Useful within-fit comparisons can survive even when coordinates do not align across fits.</p>
                 <p>
                   This is the finding the word page makes by turning its whole table, met here with the network retrained instead, and it has the same consequence, since only comparisons between vectors from one network carry anything.
                 </p>
@@ -391,9 +383,9 @@ export default function PictureVectorPage() {
               "Sixteen numbers each below 1 in size cannot make a vector as long as √16, which is 4. The scaling to length one happens later and only for the drawing, and the scores are a separate layer that is not used at all when a vector is read off.",
             ),
             trueFalse(
-              "Retraining the same design from a different starting seed leaves each of the sixteen numbers measuring the same thing it measured before.",
+              "Retraining a learned representation from another starting seed guarantees that each coordinate keeps the same meaning.",
               false,
-              "One picture’s vector under the reference network and under seed 1 has a mean cosine of −0.1387, and under seed 2 of 0.0187, so on average the same picture’s two vectors are at right angles. What survives retraining is which kind lands near which, since the nearest picture is the same kind under both networks for 225 and 230 of the 240. A coordinate is a bookkeeping entry of one training.",
+              "The training objective does not assign names to the axes. Rotating a representation and adjusting its next linear layer can preserve every prediction while changing the coordinates. Separate fits therefore need not agree coordinate by coordinate, even if their within-fit comparisons are useful.",
             ),
         ],
         },
@@ -693,15 +685,19 @@ export default function PictureVectorPage() {
               "Holding and comparing a vector is cheaper, at 16 multiplications against 256, but making one costs 29,696 multiplications and a trained network before that. Producing the two vectors for a single comparison already costs more than the comparison by pixels, so a vector repays itself only when a picture is compared many times.",
             ),
             several(
-              "Which of these hold of the untrained network of the same design?",
+              "What does this comparison tell us about the untrained network?",
               [
-                "It names 0.2125 of the held-out pictures correctly, a little under what a guess would get",
-                "Its sixteen numbers find their own kind less often than straight-line pixel distance does",
-                "Its 128 numbers before the dense layer find their own kind more often than straight-line pixel distance does",
-                "Its 128 numbers before the dense layer beat every comparison of raw pixels",
-              ],
+                              "It names 0.2125 of the held-out pictures correctly, a little under what a guess would get",
+                              "Its sixteen numbers find their own kind less often than straight-line pixel distance does",
+                              "Its 128 numbers before the dense layer find their own kind more often than straight-line pixel distance does",
+                              "Its 128 numbers before the dense layer beat every comparison of raw pixels",
+                            ],
               [0, 1, 2],
               "Untrained, the sixteen gather 189, 180 and 186 of 240 across the three seeds, below the 194 that pixel distance manages on every seed, which is why the gathering is credited to training, which took the count to 233, 230 and 235 and opened the gap between the mean cosine within a kind and across kinds from 0.0069 to 0.7566. Read one layer earlier the same untrained network reaches 201, 206 and 208, above pixel distance but below the 212 of pixels less their own mean, so beating every comparison of raw pixels overstates it.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Nearest neighbour has the same kind, out of 240:\nraw pixel distance: 194\npixels after subtracting each picture’s mean: 212\nuntrained 16-number layer, seeds 0/1/2: 189 / 180 / 186\nuntrained 128-number layer, seeds 0/1/2: 201 / 206 / 208\n\nUntrained classifier accuracy, seed 0: 0.2125\nFour equally common kinds: chance accuracy 0.25"
+              },
             ),
             trueFalse(
               "Kinds that a flat cut separates can still be long and spread out, so that a picture’s nearest neighbour lies across the cut.",
@@ -762,12 +758,8 @@ export default function PictureVectorPage() {
                   ]}
                   caption="Mean cosines over the 240 held-out pictures. The table above gives the same figures for all three seeds."
                 />
-                <p>
-                  The flattened layer barely separates the kinds on average, since its gap is 0.1081, and it wins on nearest neighbour only because the single nearest picture is still usually right. The sixteen open a gap seven times as wide with an eighth as many numbers. The four scores open the widest gap of all and still have the worst count, because four numbers leave room only for four directions, and within a kind there is little left to rank pictures by, so a picture between two kinds finds its nearest neighbour almost by chance.
-                </p>
-                <p>
-                  Four scores also have no room for a kind they were not trained to score, which is the next Part&rsquo;s subject.
-                </p>
+                <p>The flattened layer has a small mean-cosine gap, but a picture&apos;s single nearest neighbour is still often the right kind. The sixteen-number representation separates the kinds more clearly on average. The four class scores have the widest mean gap and the weakest nearest-neighbour result in this comparison. Four coordinates still allow infinitely many directions. Their limitation here comes from what training asked the scores to do: choose among the four labels. That objective need not preserve the geometry we want for retrieval.</p>
+                <p>The classifier&apos;s four output labels cannot name a fifth kind. Its score vectors might still distinguish some unseen pictures, so we should measure that rather than infer it from the number of coordinates. The next part introduces rings to test this.</p>
                 <KeepInMind>
                   The layer of sixteen separates the kinds by a mean-cosine gap of
                   0.7566, where the flattened layer manages 0.1081. That is the
@@ -1017,7 +1009,7 @@ export default function PictureVectorPage() {
             trueFalse(
               "Among the three layers measured, the sixteen numbers separate the four kinds by the widest mean-cosine gap.",
               false,
-              "The four scores open the widest gap of all, and they still come last on the nearest-neighbour count on every seed. Four numbers leave room for only four directions, so within a kind there is little left to rank pictures by and a picture between two kinds finds its nearest neighbour almost by chance. The argument for the sixteen is that they open a gap of 0.7566 where the flattened layer manages 0.1081, with an eighth as many numbers.",
+              "The four class scores have the widest mean-cosine gap but the poorest nearest-neighbour count in these runs. Four coordinates allow infinitely many directions; the result is not a four-direction limit. Classification training and nearest-neighbour retrieval reward different properties. The sixteen-number representation is useful here because of its measured retrieval behaviour, rather than a rule that a particular width must work best.",
             ),
             choice(
               "Of the readings measured on the 60 rings, which gathered them best?",
@@ -1038,13 +1030,17 @@ export default function PictureVectorPage() {
             several(
               "Which of these hold of the reference network’s vectors?",
               [
-                "An all-black picture and a flat picture at a brightness of 0.15 receive exactly the same vector",
-                "The length of a vector correlates with the probability the network gives its top kind, at 0.4355",
-                "A flat picture at 0.3 lights none of the first convolution’s 1,024 numbers",
-                "Comparing by angle keeps whatever the length of a vector carries",
-              ],
+                              "An all-black picture and a flat picture at a brightness of 0.15 receive exactly the same vector",
+                              "The length of a vector correlates with the probability the network gives its top kind, at 0.4355",
+                              "A flat picture at 0.3 lights none of the first convolution’s 1,024 numbers",
+                              "Comparing by angle keeps whatever the length of a vector carries",
+                            ],
               [0, 1],
               "Neither the all-black picture nor the flat one at 0.15 lights any of the first convolution’s 1,024 numbers, so nothing of either gets past the first layer and the two come out at a cosine of 1.0000, named a bar at 0.8921 from the biases alone. A flat picture at 0.3, the brightest background training ever drew, lights 464 of them and is still named a bar. Lengths run from 1.4867 to 3.9429 and carry some of the network’s confidence, and comparing by angle divides every vector by its length, so the length is exactly what the angle discards.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "First convolution: 1,024 outputs\nflat brightness 0:     0 positive outputs\nflat brightness 0.15:  0 positive outputs\nflat brightness 0.30: 464 positive outputs\n\nThe first two pictures reach identical later-layer vectors.\nVector length versus top-class probability: correlation 0.4355\nCosine similarity divides the dot product by both vector lengths."
+              },
             ),
             choice(
               "The four pictures of step 6 are multiplied down to a quarter of their brightness. What happens?",
@@ -1064,7 +1060,10 @@ export default function PictureVectorPage() {
           practice: [
             exercise(
               "Build the network of Part 2 and count what it learns",
-              ["Build the network of Part 2 with the library, layer by layer, and count the numbers it learns. The walk in Part 2 lists each layer's answer shape and how many of its numbers are learned, 2,468 in all with 2,064 in the dense layer of 16.", "Two convolutions, each followed by a pooling, then the flattening, the dense layer of sixteen hyperbolic tangents and the four scores. A convolution learns its kernels and one bias per filter, a dense layer its weight matrix and one bias per neuron, and pooling and flattening learn nothing at all."],
+              [
+  "Build the supplied seven-layer image network: two convolution/pooling rounds, flattening, a sixteen-unit tanh layer and a four-score output layer. Keep the channel and spatial dimensions declared in the starter.",
+  "For each layer print its output shape, output-value count and learned-parameter count. Finish with the total learned parameters. Count kernels/weights and biases; pooling and flattening store no learned parameters."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear
 
@@ -1114,11 +1113,18 @@ layer 4 answers (128,), 128 numbers, 0 learned
 layer 5 answers (16,), 16 numbers, 2064 learned
 layer 6 answers (4,), 4 numbers, 68 learned
 learned numbers in all 2468`,
-              { hints: ["A LayerStack takes its layers in order, and each layer's reads has to match what the one before answers, which is how (8, 4, 4) becomes the 128 the flattening hands on. The stack can be iterated and indexed like a list.", "A Conv2d keeps its learned numbers in kernels and bias_vector, a DenseLayer in weight_matrix and bias_vector, and every array has a size. MaxPool2d and Flatten hold nothing.", "Each layer's shape.answers is the arrangement it hands on and shape.n_outputs the count of numbers in it, which is the pair the walk in Part 2 lists for every row."], check: numberCheck("How many learned numbers does the network hold in all?", 2468, 0.5, "The two convolutions hold 40 and 296, the dense layer of sixteen 2,064 and the four scores 68, and pooling and flattening learn nothing, which is the 2,468 Part 2 quotes. The dense layer of sixteen holds most of them because each of its sixteen neurons reads all 128 flattened numbers.") },
+              { hints: [
+  "Inspect each layer’s shape.answers and shape.n_outputs before counting its stored arrays.",
+  "Conv2d stores kernels and bias_vector; DenseLayer stores weight_matrix and bias_vector. Array .size counts all entries."
+], check: numberCheck("How many learned numbers does the network hold in all?", 2468, 0.5, "There are 2468 learned parameters. The sixteen-unit dense layer holds most because it connects each unit to every flattened input; output-value count is a separate measurement."), question: "Where does this image network keep its learned parameters?" },
             ),
             exercise(
               "Train on a dozen pictures and compare them by vector and by pixels",
-              ["Train the same design on a dozen pictures of your own, six crosses and six square outlines drawn at random positions with the page's random backgrounds, lifts and noise, and read each picture's vector off the layer of sixteen. The script draws the pictures and trains the network for 40 passes on all twelve at once. Write the comparison.", "Part 3 found a mean cosine of 0.7588 within a kind and 0.0022 across on the 240 held-out pictures, and a nearest neighbour of the right kind for 233 of 240 by vector against 194 by pixel distance. A dozen pictures of two kinds give different numbers, and the same two questions can be asked of them."],
+              [
+  "The starter generates twelve pictures, six crosses and six square outlines, and trains the supplied network for forty full-batch passes. Use its sixteen-unit hidden output as each picture’s vector.",
+  "Print mean cosine similarity within a kind and across kinds. Then count same-kind nearest neighbours using vector cosine and raw-pixel distance, excluding each picture itself.",
+  "These comparisons reuse the twelve training pictures. They demonstrate the measurement procedure, not held-out retrieval accuracy."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear, SoftmaxCrossEntropy
 
@@ -1200,11 +1206,18 @@ print(f"nearest by pixels is its own kind for {(labels[gaps.argmin(axis=1)] == l
 mean cosine across kinds 0.0785
 nearest by vector is its own kind for 12 of 12
 nearest by pixels is its own kind for 8 of 12`,
-              { hints: ["respond_to on the stack answers every layer's response in order, so the sixteen numbers are the response at position 5, read through its outputs.", "Divide every vector by its length, and the matrix of dot products between the scaled vectors is every cosine at once. Two pictures share a kind where their labels agree, and the diagonal compares a picture with itself and has to be left out of both means.", "For the nearest neighbour, set the diagonal to minus infinity before taking each row's largest cosine, and to plus infinity for the pixel distances before taking each row's smallest."], check: numberCheck("What mean cosine do two pictures of one kind have in the trained network's sixteen numbers?", 0.6983, 0.001, "Two crosses, or two squares, point about 46 degrees apart on average while a cross and a square are nearly at a right angle, 0.0785, which is the arrangement Part 3 found on the page at 0.7588 and 0.0022. By vector every one of the twelve finds its own kind, where the pixels manage eight, a dozen-picture version of 233 against 194.") },
+              { hints: [
+  "Keep each picture’s label beside its vector so pair groups and neighbour labels use the same order.",
+  "Use each distinct within-kind pair once, and all cross-kind pairs. Exclude the diagonal when selecting neighbours."
+], check: numberCheck("What mean cosine do two pictures of one kind have in the trained network's sixteen numbers?", 0.6983, 0.001, "Same-kind training pairs average cosine 0.6983 here. Compare this with the cross-kind mean and then evaluate unseen pictures before treating the grouping as general retrieval accuracy."), question: "Do learned vectors find same-kind pictures more reliably than raw pixels?" },
             ),
             exercise(
               "Ask whether training did the gathering",
-              ["Part 4 asks whether the gathering is the work of training or of the design. The starter keeps the network's starting weights as start and the network after forty passes as stack. Read the sixteen numbers off both, and for each print how many of the twelve it names correctly, the mean cosine within a kind and across kinds, the gap between the two, and how many pictures find their own kind as nearest neighbour.", "On the page training took the gap from 0.0069 to 0.7566 and the count from 189 to 233 of 240. The starting weights here are the very numbers training began from, so whatever gap they open is what the design alone contributes."],
+              [
+  "Compare start, the preserved initial network, with stack, its trained version, on the same twelve supplied pictures.",
+  "For each print classification count, mean within-kind cosine, mean across-kind cosine, their difference and same-kind nearest-neighbour count. Read both representations from the sixteen-unit hidden layer.",
+  "The comparison changes learned parameters while keeping architecture, pictures and measurement definitions fixed."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear, SoftmaxCrossEntropy
 
@@ -1283,11 +1296,18 @@ for name, network in (("untrained", start), ("trained", stack)):
     print(f"{name}: names {(named == labels).sum()} of 12, within {within:.4f}, across {across:.4f}, gap {within - across:.4f}, nearest own kind {own} of 12")`,
               `untrained: names 7 of 12, within 0.6851, across 0.6981, gap -0.0130, nearest own kind 9 of 12
 trained: names 12 of 12, within 0.6983, across 0.0785, gap 0.6198, nearest own kind 12 of 12`,
-              { hints: ["Every step builds a new stack rather than changing the old one, so start is still the network before any step and stack the network after forty, and the same reading can be taken from both.", "The stack response's own outputs are the last layer's scores, so the name the network gives a picture is the position of its largest score, and the sixteen numbers are the response at position 5.", "A gap near zero means pictures of one kind sit no nearer than pictures of two, which is the untrained network's position on the page as well, at 0.7394 within a kind against 0.7325 across."], check: numberCheck("What gap between the mean cosine within a kind and across kinds does the untrained network open?", -0.013, 0.001, "Before training the two means are 0.6851 and 0.6981, so pictures of one kind are if anything slightly farther apart than pictures of two, and the network names seven of twelve, about what a coin would. Forty passes on the same starting weights open the gap to 0.6198 and take the nearest-neighbour count from nine to twelve, which is the page's argument on a dozen pictures. The design on its own did not gather the kinds.") },
+              { hints: [
+  "Use the corresponding hidden output from each network, preserving the same picture/label order.",
+  "Compute all summaries separately for the initial and trained vectors. A classification score and a retrieval score test different uses of them."
+], check: numberCheck("What gap between the mean cosine within a kind and across kinds does the untrained network open?", -0.013, 0.001, "The initial gap is -0.0130: the within-kind mean is slightly below the cross-kind mean. This untrained representation has not produced the topic separation seen after training."), question: "Which part of the picture grouping comes from training?" },
             ),
             exercise(
               "Dim a picture and watch its vector move",
-              ["Part 7 multiplies a picture through and watches its vector move. Take the first cross, read its vector at full brightness, then at a quarter, a half and twice its brightness, and print the cosine of each to the full-brightness vector, the vector's length, and what the network names the picture.", "On the reference network the cross at a quarter of its brightness reached a cosine of −0.1928 to where it started and was named a bar. The network here has only two names to choose from, so the question is how far the vector moves rather than what the picture is called."],
+              [
+  "Use the trained small network and its first cross. Multiply all pixel values by 0.25, 0.5, 1.0 and 2.0 without retraining.",
+  "For each brightness print cosine similarity to the original hidden vector, vector length and predicted class. Keep the original vector as the reference for every row.",
+  "This probes brightness sensitivity of this fitted network; two-class success here does not establish brightness invariance."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear, SoftmaxCrossEntropy
 
@@ -1364,7 +1384,10 @@ for factor in (0.25, 0.5, 1.0, 2.0):
 at 0.5 of its brightness the cross has cosine 0.9511 to itself, length 0.7920, named cross
 at 1.0 of its brightness the cross has cosine 1.0000 to itself, length 1.5317, named cross
 at 2.0 of its brightness the cross has cosine 0.9896 to itself, length 2.4193, named cross`,
-              { hints: ["A picture multiplied by a factor is still a block the stack can read, and pictures[:1] * factor keeps the leading rows axis that respond_to expects.", "The cosine to the original is the dot product of the two vectors divided by both lengths, so scale the full-brightness vector to length one first and only the dimmed vector's length is left to divide by."], check: numberCheck("What cosine does the cross at a quarter of its brightness have to its own full-brightness vector?", 0.5684, 0.001, "Multiplying the picture by a quarter changes nothing about its shape, and the vector still turns away, to a cosine of 0.5684, with its length falling from 1.5317 to 0.4839. Twice the brightness barely moves it, at 0.9896, which is the page's finding too, that brighter pictures hold up better than dimmer ones. On the reference network the same experiment reached −0.1928, and this network, trained on twelve pictures for two names, has less to lose.") },
+              { hints: [
+  "Extract the original sixteen-coordinate vector once. Recompute it for each brightness-scaled input.",
+  "Compare directions with cosine and lengths with the norm, then obtain the class from the output scores."
+], check: numberCheck("What cosine does the cross at a quarter of its brightness have to its own full-brightness vector?", 0.5684, 0.001, "The quarter-brightness vector has cosine 0.5684 to its original. The shape is unchanged, but this learned representation is sensitive to the altered pixel scale."), question: "Does preserving a picture’s shape also preserve its learned vector?" },
             ),
           ],
         },

@@ -581,13 +581,17 @@ export default function MulticlassClassificationPage() {
             several(
               "The middle person gets 0.9731 from softmax and 0.3333 from the teenager-versus-rest classifier. Which of these hold?",
               [
-                "Both routes call this person a teenager",
-                "The 0.9731 is a share of one unit of probability divided among the three classes",
-                "The 0.3333 is the same kind of number as the 0.9731, only smaller",
-                "The middle person’s three one-vs-rest outputs total one",
-              ],
+                              "Both routes call this person a teenager",
+                              "The 0.9731 is a share of one unit of probability divided among the three classes",
+                              "The 0.3333 is the same kind of number as the 0.9731, only smaller",
+                              "The middle person’s three one-vs-rest outputs total one",
+                            ],
               [0, 1],
               "The largest one-vs-rest output still belongs to the teenager classifier, at 0.3333 against 0.0101 from each of the other two, so the call is the same. The numbers do not carry the same meaning. The 0.3333 is one classifier’s answer to one yes-or-no question, and the three answers total 0.3535 rather than one.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "class | z, the intercept | e^z | ÷ 53.92 | probability\nchild | 0.0000 | 1.00 | 1.00 / 53.92 | 0.0185\nteenager | 3.9602 | 52.47 | 52.47 / 53.92 | 0.9731\nadult | −0.7918 | 0.45 | 0.45 / 53.92 | 0.0084\ntotal |  | 53.92 |  | 1.0000\n\nclassifier | output q\nchild versus the rest | 0.0101\nteenager versus the rest | 0.3333\nadult versus the rest | 0.0101\ntotal | 0.3535"
+              },
             ),
         ],
         },
@@ -886,29 +890,36 @@ export default function MulticlassClassificationPage() {
             trueFalse(
               "Both routes score an accuracy of 1.000 on the crowd, so their decision regions agree.",
               false,
-              "Equal training accuracy establishes only that both chose the correct largest class for every training person. The two maps disagree on 88 of the 676 cells, and they disagree between the training points, which is exactly where new observations arrive.",
+              "An accuracy of 1.000 tells us both routes classify the observed training people correctly. It does not determine their predictions between or beyond those observations. Different decision boundaries can therefore have identical training accuracy.",
             ),
             choice(
               "Softmax reports a loss of 0.016 on the three worked people and one-vs-rest reports 0.215. What follows?",
               [
-                "Little, because the two figures are different objectives",
-                "Softmax is roughly thirteen times the better probability model",
-                "One-vs-rest is underfitted and needs more passes",
-                "The comparison is fair, since both numbers are log losses",
-              ],
+                              "Little, because the two figures are different objectives",
+                              "Softmax is roughly thirteen times the better probability model",
+                              "One-vs-rest is underfitted and needs more passes",
+                              "The comparison is fair, since both numbers are log losses",
+                            ],
               0,
               "Softmax is fitted to the multiclass loss, three terms that average to 0.016. One-vs-rest is fitted to three binary losses independently, nine terms in all, and nearly all of its 0.215 is the teenager classifier’s 0.6365. The numbers should not be compared as if one probability model were being scored twice.",
+              {
+                "description": "Softmax loss: one multiclass negative log-probability for each of 3 people, averaged.\nOne-vs-rest loss: 3 separate binary losses for each of those 3 people, averaged over 9 terms.\nThe reported 0.016 and 0.215 are these different training objectives, rather than both models scored with one common evaluation rule."
+              },
             ),
             several(
               "Which of these hold for the fits on the three worked people?",
               [
-                "Under softmax, accuracy is perfect from pass 2",
-                "The size of the softmax coefficients is still growing at pass 500",
-                "The softmax run is reported as not converged",
-                "The teenager-versus-rest fit converged while the child and adult fits ran out of passes",
-              ],
+                              "Under softmax, accuracy is perfect from pass 2",
+                              "The size of the softmax coefficients is still growing at pass 500",
+                              "The softmax run is reported as not converged",
+                              "The teenager-versus-rest fit converged while the child and adult fits ran out of passes",
+                            ],
               [0, 1, 2, 3],
               "All four hold. The coefficient size is 2.3 at pass 10, 7.1 at pass 100 and 11.4 at pass 500, and on perfectly separated data no finite set of coefficients reaches the maximum, so the softmax run is honestly reported as not converged while classifying every person correctly. One-vs-rest is a mixture. The teenager classifier settled in 49 passes because it could separate nothing, and the other two each see one person separable from two.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Three separable training people:\nSoftmax training accuracy becomes 1.000 at pass 2.\nSoftmax coefficient length: pass 10 = 2.3; pass 100 = 7.1; pass 500 = 11.4.\nSoftmax result after pass 500: converged = false.\n\nOne-vs-rest result:\nteenager fit converges at pass 49; child and adult fits exhaust the pass budget."
+              },
             ),
             choice(
               "Why is the child row of the fitted coefficient table all zeros?",
@@ -971,7 +982,10 @@ export default function MulticlassClassificationPage() {
           practice: [
             exercise(
               "Share one unit of probability among the three people",
-              ["Fit the softmax route to the three worked people of Part 5 and print the three probabilities it gives each of them, with the row total. The heights and weights are standardised first, as they are on the page, and the walk is given the same 500 passes.", "Part 5 gives the middle person 0.0185, 0.9731 and 0.0084. The fit should reproduce that row, every total should be one, and the name of the type that comes back says which of Part 11’s two guarantees it carries."],
+              [
+  "Standardise the supplied three people’s height/weight features, then fit the stated softmax model for at most five hundred passes.",
+  "Print result type, every class-probability row and row total, the teenager intercept and its probability for the middle person. Preserve class order child, teenager, adult."
+],
               `from oop_ml import Feature, MultinomialLogisticRegression, Standardizer
 
 heights = Feature("height", [120, 150, 180])
@@ -1010,11 +1024,17 @@ teenager: 0.0185, 0.9731, 0.0084  total 1.0000
 adult: 0.0000, 0.0083, 0.9917  total 1.0000
 teenager class intercept 3.9602
 middle person, teenager probability 0.9731`,
-              { hints: ["fit takes the list of standardised features and the label feature. predict_probabilities takes the same list of features and answers one row per person and one column per class.", "What comes back is an object rather than a bare array. Its values property is the table, so values[1] is the middle person’s row and values[1][1] is that person’s teenager probability.", "The intercepts are on the fitted model as intercepts, one per class in label order, so the teenager’s is intercepts[1]."], check: numberCheck("What probability does the fit give the middle person for the teenager class, to four places?", 0.9731, 0.0005, "The middle person standardises to zero in both features, so each class’s score is its intercept alone. Those are 0, 3.9602 and −0.7918, and the teenager’s exponential, 52.47, divided by the shared total of 53.92 is 0.9731. It is a share of one unit, which is why the row beside it totals one.") },
+              { hints: [
+  "Inspect the result’s probability matrix rather than independent binary outputs.",
+  "The middle person has centred feature values, so intercepts explain its relative class scores."
+], check: numberCheck("What probability does the fit give the middle person for the teenager class, to four places?", 0.9731, 0.0005, "The middle person’s teenager probability is 0.9731. Softmax normalises all class scores together, making this entry part of a row summing to one."), question: "How does softmax divide one unit of probability among three classes?" },
             ),
             exercise(
               "Three separate fits, and what their answers add up to",
-              ["Fit the one-vs-rest route to the same three people, with a LogisticRegression given the same 500 passes as the binary model. Print each person’s three outputs with the row total, and then how many passes each of the three binary fits ran and whether it converged.", "Part 5 puts the middle person’s total at 0.3535 and each end at 1.3293, and Part 10 says the three fits do not finish alike. Both should show here, along with a type whose name promises less than the softmax route’s did."],
+              [
+  "Fit the supplied one-vs-rest model to the same standardised three people using five-hundred-pass binary LogisticRegression settings.",
+  "Print result type, each person’s three scores and their total, plus passes and convergence status for each binary fit. Keep the independent outputs without renormalising them."
+],
               `from oop_ml import Feature, LogisticRegression, OneVsRestClassifier, Standardizer
 
 heights = Feature("height", [120, 150, 180])
@@ -1058,11 +1078,17 @@ child versus the rest: 500 passes, converged False
 teenager versus the rest: 49 passes, converged True
 adult versus the rest: 500 passes, converged False
 middle person total 0.3535`,
-              { hints: ["The wrapper takes its binary model at construction, as binary_model, and copies it once per class when it fits. Nothing else changes from the softmax problem.", "model_for takes a class index and answers that class’s own fitted LogisticRegression, which carries epochs_run and converged like any other fit of that model.", "The row total is the plain sum of a row of values. Nothing in the library computes it for you, because nothing in this route promises what it will be."], check: numberCheck("What do the middle person’s three one-vs-rest outputs total, to four places?", 0.3535, 0.0005, "The teenager classifier cannot isolate the middle of three people on a line, so it answers its base rate of a third. The child and adult classifiers each answer 0.0101 for somebody who is not theirs. The total is 0.3333 and two lots of 0.0101, and no equation was ever going to make it one.") },
+              { hints: [
+  "Each binary fit asks whether its class beats the rest; the fits do not share a softmax denominator.",
+  "Read each classifier’s own training status, not only the wrapper’s returned score table."
+], check: numberCheck("What do the middle person’s three one-vs-rest outputs total, to four places?", 0.3535, 0.0005, "The three independent outputs total 0.3535 for the middle person. Their separate binary objectives impose no per-person sum-to-one condition."), question: "Do three independent binary probabilities form a probability distribution over classes?" },
             ),
             exercise(
               "Give the separated fit ten times the passes",
-              ["Part 10 says the softmax coefficients on the three people are still growing at pass 500, where their size is 11.4. Fit the same model twice, once with 500 passes and once with 5000, and print for each whether it converged, the size of its coefficients and the probability the middle person gets for the teenager class.", "The size the page quotes is the square root of the sum of the squared weights on height and weight across the three classes, leaving the intercepts out. If the likelihood had a maximum, ten times the passes would find it and stop."],
+              [
+  "Fit the same unregularised softmax model with maximum passes five hundred and five thousand.",
+  "For each print convergence status, the norm of feature coefficients excluding intercepts, and the middle person’s teenager probability. A larger iteration limit is an observation to compare, not proof of convergence."
+],
               `from oop_ml import Feature, MultinomialLogisticRegression, Standardizer
 
 heights = Feature("height", [120, 150, 180])
@@ -1102,11 +1128,17 @@ print(f"size after 5000 passes {size:.4f}")`,
               `500 passes: converged False, size 11.3855, teenager 0.9731
 5000 passes: converged False, size 17.4473, teenager 0.9974
 size after 5000 passes 17.4473`,
-              { hints: ["coefficients_for takes a class index and answers that class’s weights, addressable by feature name, so coefficients[\"height\"] is one number.", "The reference class’s weights are all zero, so including it in the sum changes nothing and saves a special case.", "converged is a property of the fitted model. It reports whether the walk stopped because nothing moved further than the tolerance, which is a different thing from the walk running out of passes."], check: numberCheck("What is the size of the coefficients after 5000 passes, to four places?", 17.4473, 0.0005, "Ten times the passes moved the size from 11.3855 to 17.4473 and the middle person’s probability from 0.9731 to 0.9974, and the walk still reports that it did not converge. The three people are perfectly separated, so every larger set of coefficients scores a little better and there is no finite best to arrive at.") },
+              { hints: [
+  "Keep the data and all other settings fixed.",
+  "Compare probability improvement with continued coefficient growth. Perfect separation can make a finite maximum-likelihood optimum unavailable."
+], check: numberCheck("What is the size of the coefficients after 5000 passes, to four places?", 17.4473, 0.0005, "The feature-coefficient norm reaches 17.4473 without convergence. On separated data, further unregularised likelihood improvement can accompany growing coefficients."), question: "Will more iterations produce a finite optimum on perfectly separated classes?" },
             ),
             exercise(
               "Move the middle person off centre",
-              ["Part 6 warns that the third is a fact about three evenly spaced people. Keep everyone on the same line but move the teenager to 144 cm and 45 kg, which is closer to the child, and fit the one-vs-rest route again. Print the teenager classifier’s intercept and its weight on height, whether it converged, and its output for each of the three people.", "With the symmetry gone the weight should no longer be zero. Look at which person the teenager classifier now scores highest, and at what its three outputs add up to."],
+              [
+  "Move the supplied teenager to height 144 cm and weight 45 kg while retaining the three people on their line. Refit the stated one-vs-rest model.",
+  "Inspect the teenager classifier: print intercept, height coefficient, pass/convergence status and its output for each person, followed by their total and the child’s output."
+],
               `from oop_ml import Feature, LogisticRegression, OneVsRestClassifier, Standardizer
 
 heights = Feature("height", [120, 144, 180])
@@ -1150,7 +1182,10 @@ teenager classifier on the teenager: 0.3400
 teenager classifier on the adult: 0.2640
 total of the three 1.0000
 output for the child 0.3960`,
-              { hints: ["model_for(1) is the teenager’s binary fit. Its intercept is a property and its coefficients are addressable by feature name.", "The teenager classifier’s outputs are the middle column of the table predict_probabilities answers, so take entry 1 of every row.", "A fitted intercept makes the average output equal the share of yes answers, here one in three, whatever the weights do. That fixes the total of three outputs and says nothing about how they are spread."], check: numberCheck("What does the teenager classifier answer for the child, to four places?", 0.396, 0.0005, "The weight on height comes out at −0.1239 where the symmetric three gave zero, so the output now falls as height rises and the classifier gives its highest answer, 0.3960, to the child. It still cannot isolate the middle of a line. The three outputs keep a total of one, because the intercept holds their average at the base rate of a third, but they are no longer the same number.") },
+              { hints: [
+  "This comparison changes geometric symmetry without giving the linear classifier a curved decision region.",
+  "Compare which person receives the highest teenager score, rather than interpreting a nonzero fitted weight as successful isolation."
+], check: numberCheck("What does the teenager classifier answer for the child, to four places?", 0.396, 0.0005, "The teenager classifier gives the child 0.3960, its largest output here. Breaking the symmetry changes its coefficients without giving a straight boundary the ability to isolate the middle point."), question: "Can a one-vs-rest straight boundary isolate the middle of three collinear people?" },
             ),
           ],
         },

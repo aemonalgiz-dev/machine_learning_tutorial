@@ -423,13 +423,16 @@ export default function HebbianPcaPage() {
             several(
               "The change in squared length after one step has two terms. Which of these hold?",
               [
-                "The first term is positive while the weights are shorter than one and negative while they are longer",
-                "The second term is always positive, so a single step can still leave the length a little over one",
+                "For nonzero output y, the first term is positive below unit length and negative above it",
+                "The second term is nonnegative, so a step can still leave the length a little over one",
                 "On the step from a squared length of 1.0640 the pull toward one is the larger of the two, so the length falls",
-                "The whole expression is an approximation, good only for a small rate",
+                "The whole expression is an approximation, good only for a small rate"
               ],
               [0, 1],
-              "It is an identity with no approximation in it, which is what lets the two terms be weighed against each other exactly. On that step the pull toward one is about −0.0461 and the outward term about 0.0587, so the outward term wins and the length rises to about 1.0376, because the rate is not small relative to that person’s squared input length. The second term is smaller by a factor of the rate, so it loses as the rate falls, and over epochs the pull toward one wins.",
+              "Expanding the squared length gives an exact identity. On this step the positive squared-update term is larger than the negative first term, so the squared length rises. The second term is nonnegative, including zero when the update is zero. At sufficiently small rates it is of second order in η, while the first term is of first order.",
+              {
+                "description": "Oja update: Δw = η y (x − y w), with y = w · x and η > 0.\n\nExact identity:\n||w + Δw||² − ||w||² = 2ηy²(1 − ||w||²) + η²y²||x − y w||²\n\nOn the reported step:\nold squared length ≈ 1.0640\nfirst term ≈ −0.0461\nsecond term ≈ +0.0587\nnew length ≈ 1.0376"
+              },
             ),
             choice(
               "Averaged over the people, where is the corrected update zero?",
@@ -699,13 +702,17 @@ export default function HebbianPcaPage() {
             several(
               "Raising the rate on the four height and weight measurements, which of these were measured?",
               [
-                "At twice the rate, held constant, the walk settles in three epochs at a length of 0.9994",
-                "At three times it never settles, and the length bounces between 0.24 and 1.25 for all twenty epochs",
-                "At four times the fit is refused, on the fourth epoch",
-                "Where that line falls is a property of the rule rather than of the cloud",
-              ],
+                              "At twice the rate, held constant, the walk settles in three epochs at a length of 0.9994",
+                              "At three times it never settles, and the length bounces between 0.24 and 1.25 for all twenty epochs",
+                              "At four times the fit is refused, on the fourth epoch",
+                              "Where that line falls is a property of the rule rather than of the cloud",
+                            ],
               [0, 1, 2],
               "Past a certain rate the square of the step outgrows the pull back toward one, so a kick meant to shrink the weights grows them instead. The line is a fact about the data’s spread, which is why the crowd runs the full two hundred epochs at four times the rate and is refused only at eight.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Four centred height/weight measurements; base rate 0.0025:\n2 × base, constant: settles in 3 epochs, length 0.9994\n3 × base, constant: no settling in 20 epochs; length 0.24 to 1.25\n4 × base, fit’s falling-rate schedule: refused at epoch 4\n\nOn the crowd dataset, 4 × its base rate completes 200 epochs.\nThe rate schedule and dataset must be compared along with the multiplier."
+              },
             ),
             choice(
               "The textbook argument says a constant rate can never settle. What did measuring it show?",
@@ -824,10 +831,10 @@ export default function HebbianPcaPage() {
                   An eigensolver&rsquo;s directions are perpendicular to the last bit and its variances add to the total exactly. The rule&rsquo;s are neither, and the fit reports rather than pretends. The worst orthogonality is the largest dot product between two learned unit directions, 0.000043 on the four height and weight measurements after the full walk and 0.14 on the crowd, where the second direction was left short.
                 </p>
                 <p>
-                  The variances along the two directions add to 166.66666685 against a total of 166.66666667, a little over, because two directions that overlap slightly count the overlap twice. After one epoch, with the directions 0.12 from perpendicular, they add to 176.3.
+                  The variances along the two learned directions add to 166.66666685 against a total of 166.66666667, a little over. After one epoch, with the directions 0.12 from perpendicular, they add to 176.3. These are measurements of this fit. Non-orthogonal directions can overcount some parts of the spread and miss others, so their sum can fall above or below the total. In two dimensions, two perpendicular unit directions form a complete basis and their variances add to the total.
                 </p>
 </>
-                <Equation>{"kept variance = variance along w₁ + variance along w₂  ≥  total, when w₁ · w₂ ≠ 0"}</Equation>
+                <Equation>{"in 2D, for perpendicular unit directions:\nvariance along w₁ + variance along w₂ = total variance\n\nfor non-orthogonal directions, the sum can be above or below the total"}</Equation>
                 <KeepInMind>
                   A share above one is a report on the fit rather than an error in
                   it. The vocabulary that holds the eigensolver&rsquo;s answer refuses
@@ -1041,15 +1048,15 @@ export default function HebbianPcaPage() {
           title: "Questions on Parts 5 to 7",
           quiz: [
             choice(
-              "Two independent units under the corrected rule, on the crowd, do what?",
+              "Two independent Oja units see the same centred data, which has a unique largest-variance direction. There is no term making them avoid one another. What should we expect if both converge to the leading direction?",
               [
-                "They coincide to a thousandth of a degree, since nothing tells a unit what another unit has already found",
+                "They find the same direction, possibly with opposite signs, because neither accounts for what the other has found",
                 "They settle perpendicular to one another",
                 "The second decays to no length at all",
-                "They split the largest eigenvalue between them",
+                "They split the largest eigenvalue between them"
               ],
               0,
-              "Every unit finds the direction of greatest spread and no other. Sanger’s extension hands the second unit the person with the first unit’s reconstruction removed, and the sum running up to and including the unit’s own term is the whole of it, since dropping the own term loses the normalisation and dropping the earlier ones loses the reason to differ.",
+              "Each unit independently maximises variance along one direction. With a unique leading direction they have the same target. Sanger’s extension subtracts what earlier units already represent, giving a later unit a reason to learn a different component.",
             ),
             trueFalse(
               "Two learned directions that overlap slightly count the overlap twice, so their variances can add to a little more than the total.",
@@ -1062,10 +1069,14 @@ export default function HebbianPcaPage() {
                 "The first learned direction is 0.0000012 degrees from the eigensolver’s and the second 0.0024",
                 "The variances along the two learned directions come back 133.3333333 and 33.3333335 against eigenvalues of 133.3333 and 33.3333",
                 "Person 1 scores 14.1421 on the first direction whether the rule or the eigensolver produced it",
-                "A person can be rebuilt from their two coordinates by a transpose, as on the PCA page",
+                "Transposing the learned directions is guaranteed to give an exact inverse transform, as for a complete orthonormal PCA basis"
               ],
               [0, 1, 2],
-              "Where the walk settles it settles on the eigensolver’s direction to within millionths of a degree, and the variance is measured from the people along the unit direction, which is the same quantity an eigenvalue reports, so the shares 0.8 and 0.2 agree to six decimals. There is no inverse transform, because rebuilding a person by a transpose needs exactly orthonormal directions and these are only nearly so. On the crowd the second direction is left 8.2 degrees off at a length of 0.43, starved by the falling rate, and the length is what reports it.",
+              "The measured directions and variances agree closely with the eigensolver, but close agreement is not exact orthonormality. A transpose can produce an approximate reconstruction; it is an exact inverse for a complete orthonormal basis. This local-rule API does not offer that guarantee or an inverse-transform method.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Four centred measurements after the full local-rule walk:\nangle to eigensolver, components 1/2: 0.0000012° / 0.0024°\nvariances along learned unit directions: 133.3333333 / 33.3333335\neigensolver variances: 133.3333 / 33.3333\nperson 1, first coordinate by either route: 14.1421\nlargest dot product between learned unit directions: 0.000043\n\nThe SDK exposes no inverse_transform for this local-rule fit."
+              },
             ),
             choice(
               "Run the rule on the raw positions rather than the deviations, with the rate set from the longest position. What does it learn on the four height and weight measurements?",
@@ -1079,15 +1090,15 @@ export default function HebbianPcaPage() {
               "The average update on raw rows is the second-moment matrix rather than the covariance matrix, and its leading eigenvector is dominated by where the mean is when the mean is far from the origin. It still settles at length one, so nothing about the length announces that the answer is a fact about the units and the origin rather than about the people.",
             ),
             several(
-              "Eight people evenly round a circle about the mean. Which of these were measured?",
+              "Eight observations are evenly spaced around a circle centred at the origin. Both covariance eigenvalues are equal. Which statements follow?",
               [
-                "The rule settles at length 1.0005 with a share of exactly a half, on a direction 80 degrees from the eigensolver’s",
-                "Five seeds send it 21, 9, 57 and 39 degrees from where the page’s own seed sent it",
-                "The walk never stops itself, because a flat objective gives it no reason to",
-                "The eigensolver still answers, with the height axis and the weight axis, and that answer is an arbitrary choice",
+                "Every unit direction in the plane captures half the total variance",
+                "Separate fits can return different directions without disagreeing about the captured variance",
+                "Equal eigenvalues alone guarantee that a particular iterative learning rule never meets its stopping tolerance",
+                "An eigensolver may return the coordinate axes, but those axes are one valid choice among many"
               ],
-              [0, 1, 2, 3],
-              "Every direction through a circle carries the same spread, so the tie leaves the components inside the plane undetermined by either route. The eigensolver answers with the two axes and the rule answers too, reporting a direction and a length of one as though it had found something, and only the shares and the disagreement between seeds say that it could not have.",
+              [0,1,3],
+              "The circle has the same spread along every direction through its centre. A complete perpendicular pair can therefore be rotated without changing the explained variances. An iterative rule’s stopping behaviour also depends on its update order, rate and stopping test; equal eigenvalues alone do not determine whether it stops.",
             ),
         ],
         },
@@ -1138,7 +1149,10 @@ export default function HebbianPcaPage() {
           practice: [
             exercise(
               "Learn the four and hold them against the eigensolver",
-              ["Fit the rule on the four height and weight measurements at the rate Part 4 sets, 0.0025 falling a hundredfold, with the seed the page uses, and fit the eigensolver on the same four people. Print each learned direction beside its eigen twin, with the angle between them.", "Part 6 puts the first direction 0.0000012 degrees from the eigensolver’s and the second 0.0024, with variances of 133.3333333 and 33.3333335. Look for those, for a length of one on both directions that nothing divided to get, and for the epoch on which the walk stopped itself."],
+              [
+  "Fit the supplied four height/weight observations using the stated decaying rate, seed and stopping settings. Fit the PCA eigensolver on the same features.",
+  "Print passes/convergence and, per direction, its unit coordinates, stored weight length, directional variance, eigenvalue and sign-insensitive angle. Finish with the largest orthogonality residual."
+],
               `import math
 
 from oop_ml import (
@@ -1195,11 +1209,17 @@ component_2
   variance along it 33.3333, eigenvalue 33.3333
   angle to the eigen direction 0.0024 degrees
 worst orthogonality 0.000043`,
-              { hints: ["The rate is a schedule object handed to learning_rate at construction, beside n_components, max_epochs and random_seed. The people go to fit.", "The fitted model has epochs_run and converged, and its directions can be looped over. Each one carries name, direction, length and variance, where direction is the unit vector and length is what the walk left the weights at.", "The eigensolver’s answer is solved.components, whose entries carry direction and variance in the same order, so zip pairs each learned direction with its twin.", "The rule may land on either sign of a direction, so take the absolute value of the dot product before the arccosine, and cap it at one, since rounding can leave it a last bit over."], check: numberCheck("On which epoch did the walk stop itself?", 91, 0, "The budget was two hundred and the walk stopped at epoch 91, because no weight moved more than a millionth in a whole pass, which is 364 presentations of one of four people. By then both lengths are one to four decimals without anything having divided by a norm, and the directions sit 0.0000 and 0.0024 degrees from the eigensolver’s.") },
+              { hints: [
+  "Match components by order, but allow the two methods to choose opposite signs.",
+  "Use absolute dot product of unit directions for the angle and clip it into the valid arccos range."
+], check: numberCheck("On which epoch did the walk stop itself?", 91, 0, "This scheduled run meets its stopping rule at epoch ninety-one. Its direction angles, lengths and orthogonality residual are separate checks of what was learned."), question: "Do the learned directions agree with a covariance eigensolver?" },
             ),
             exercise(
               "Score a fifth person by both routes",
-              ["Part 6 scores the four people the rule was fitted on. Hand both fitted models somebody neither has seen, 185 cm and 60 kg, with the weight column given before the height column, and print the coordinates each model answers.", "The mean is (170, 68), so this person’s deviation is (15, −8). Work out what the score along (0.7071, 0.7071) ought to be before running anything, and then compare the two routes on the second direction, where the lesson says the signs are free to differ."],
+              [
+  "Transform the supplied new person, height 185 cm and weight 60 kg, with both fitted models. Supply the named weight feature before height as in the starter.",
+  "Print the two component scores from each model. Use stored training means and named feature matching; do not refit on this one person."
+],
               `from oop_ml import (
     ExponentialDecaySchedule,
     Feature,
@@ -1242,11 +1262,17 @@ for route, model in (("by the rule", learned), ("by the eigensolver", solved)):
 by the eigensolver
   component_1 4.9497
   component_2 -16.2635`,
-              { hints: ["transform takes features the way fit did and answers a list of features, one per direction, named component_1 and component_2 by both models.", "Each returned column holds one value per person handed in, so a single newcomer is the value at position 0.", "The columns are matched to the fitted ones by name, which is why handing weight before height changes nothing. Both models centre with the means they stored at the fit."], check: numberCheck("What does the newcomer score on the first direction?", 4.9497, 0.0005, "The deviation is (15, −8) and the first direction is (0.7071, 0.7071), so the score is 7 over root two, 4.9497, by both routes. On the second direction the eigensolver answers −16.2635 and the rule 16.2637. The sign is conventional, and the two ten-thousandths are the 0.0024 degrees the learned second direction sits from its twin, read on a person seventeen units from the mean.") },
+              { hints: [
+  "Transform returns named component features with one value for the newcomer.",
+  "Opposite component signs describe the same direction with reversed orientation, so compare that possibility before diagnosing an error."
+], check: numberCheck("What does the newcomer score on the first direction?", 4.9497, 0.0005, "The first score is 4.9497 using the stored training centre. Named feature matching preserves the input meaning even when the supplied column order changes."), question: "Can both fitted models score a new person despite a changed input-column order?" },
             ),
             exercise(
               "Take the default rate to centimetres, then standardise",
-              ["Part 4 says the default rate of 0.05 suits data spread about one and overflows on the four height and weight measurements in centimetres. Fit the four without naming a rate and print what the library does about it. Then make the repair the refusal itself suggests, standardising the two columns first, and fit again at the same default rate.", "numpy prints overflow warnings of its own while the first walk runs away, and the library’s refusal follows them. After the repair, read the two lengths. One of them is the report Part 5 describes."],
+              [
+  "Fit the supplied raw height/weight columns using the learner’s default rate and catch its divergence error. Then fit a Standardizer on those columns and retry on its transformed features at the same default rate.",
+  "Print the refusal class/message, then retry pass count, convergence flag and each learned direction’s unit coordinates, length and variance share. A finite retry is not automatically a converged one."
+],
               `from oop_ml import Feature, HebbianPrincipalComponents, MLLibError, Standardizer
 
 people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
@@ -1290,11 +1316,17 @@ component_2
   unit direction (0.7244, -0.6894)
   length 0.9936
   share 0.2004`,
-              { hints: ["Leaving learning_rate out of the constructor is what selects the default. Catch MLLibError to inspect the overflow reported for this learning rate.", "Standardizer is fitted and then asked to transform, like any other transformer here, and what it answers is a list of features that can go straight to fit.", "learned.directions.variance_shares holds one share per direction, in the order the directions come out, so zip pairs them."], check: numberCheck("After standardising, what length does the second direction come back with?", 0.9936, 0.0005, "Standardised, the people are spread about one, so the default rate no longer overflows, and the first direction lands on the diagonal at length one with a share of 0.8, as it did in centimetres, since both columns had the same spread to begin with. The second comes back 0.9936 long after the full two hundred epochs without converging. It is chasing a fifth of the variance while the rate falls, so it is still a little short, and its share of 0.2004 is a little over for the reason Part 5 gives.") },
+              { hints: [
+  "Use MLLibError to catch the learner’s reported divergence, while allowing NumPy’s own warning to remain distinguishable.",
+  "Read the weight length separately from the normalised direction. Inspect convergence and orthogonality before interpreting variance shares."
+], check: numberCheck("After standardising, what length does the second direction come back with?", 0.9936, 0.0005, "The second stored weight length is 0.9936. Standardisation prevents the earlier overflow, but the run still reaches its epoch ceiling without reporting convergence."), question: "What happens when a learning rate is too large for the measurement scale?" },
             ),
             exercise(
               "Hold the rate constant on the four and on the crowd",
-              ["Part 4 tests the textbook claim that a constant rate can never settle, and finds it false on the four height and weight measurements and true on the crowd. Set the starting rate from each cloud the way the lesson does, half over the squared longest deviation, and fit each cloud twice, once with the rate falling a hundredfold and once with it held where it starts.", "Read the epochs first, then the lengths. On the crowd neither walk stops itself, and the two schedules fail in different places, which Part 5 measured."],
+              [
+  "For both supplied datasets derive the initial rate from the stated longest centred deviation. Fit each with a rate falling a hundredfold and with a constant rate at that initial value.",
+  "Print starting rate, epochs, convergence flag and learned direction lengths for every run. Keep each dataset’s centring and maximum-epoch setting fixed across its two schedules."
+],
               `from oop_ml import ConstantSchedule, ExponentialDecaySchedule, Feature, HebbianPrincipalComponents
 
 CLOUDS = {
@@ -1357,7 +1389,10 @@ the crowd, starting rate 0.000249
     lengths 1.0000, 0.4256
   constant rate, 200 epochs, converged False
     lengths 1.0000, 1.0026`,
-              { hints: ["ExponentialDecaySchedule takes the rate it starts at and the rate it ends at, and ConstantSchedule takes the one value it holds.", "The schedule goes to learning_rate, exactly where a single number would have gone.", "learned.directions.lengths holds the length the walk left each weight vector at, first direction first."], check: numberCheck("On the four height and weight measurements, at which epoch does the constant rate stop the walk?", 46, 0, "Every one of the four lies exactly on an eigen direction, so at the answer each person’s update is exactly zero and a constant rate has nothing to keep chasing. It stops at epoch 46 where the falling rate takes 91. Nobody in the crowd lies on an axis, so neither walk stops in two hundred epochs there. The falling rate leaves the second direction 0.4256 long, starved, and the constant rate brings it to 1.0026 while the first direction wobbles.") },
+              { hints: [
+  "Pass the appropriate ExponentialDecaySchedule or ConstantSchedule to learning_rate.",
+  "Inspect both stopping status and direction lengths. Results on four observations do not establish convergence for the larger crowd."
+], check: numberCheck("On the four height and weight measurements, at which epoch does the constant rate stop the walk?", 46, 0, "The four-observation constant-rate run stops at epoch forty-six. That example does not establish the same behaviour on the larger crowd or every learning rate."), question: "Does one successful constant-rate run establish that a schedule always converges?" },
             ),
           ],
         },

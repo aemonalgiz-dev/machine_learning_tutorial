@@ -13,11 +13,17 @@ the current learning area. Mark areas without published lessons as being in
 preparation. Run the navigation contracts in `tests/learning-areas.spec.ts`
 when adding or moving sections.
 
+Learning-area pages open with a short description followed by the section cards.
+Avoid repeated "with Botie" buttons and a second navigation menu that repeats
+those cards. Use group headings only when they distinguish several sections.
+
 ## Writing the lessons
 
-Additional account practice belongs in `/practice`, separate from the existing
-free course and Botie journey. The author requested an account gate for these
-extra quizzes, programming challenges and workshops. Describe generated cases
+Additional paid practice belongs in `/practice`, separate from the existing
+free course and Botie journey. The extra quizzes, programming challenges and
+workshops require a verified Practice subscription. The main course and its
+existing exercises remain public. Free accounts save progress and drafts through
+the same backend without purchasing a subscription. Describe generated cases
 as variations of an authored problem, not as separately written lessons. Each
 case must supply its data, and the programming and construction checks must
 include changed inputs. A larger count is useful only when learners still have
@@ -32,6 +38,13 @@ question, an observation about the example, or a patient explanation. Do not
 manufacture excitement with claims about an idea's importance. Do not invent
 personal experiences, add deliberate mistakes, or remove qualifications to
 make the writing sound casual. Accuracy and depth still come first.
+
+Keep the example consistent between the opening, diagram, live widget and
+worked calculation. State explicitly when a later example changes its data or
+setting. Technical names need a concrete operation or observation beside their
+first explanation. Medium articles can inform pacing and presentation; check
+technical claims against primary sources and do not copy another author's text
+or describe an explanation as highly rated without verifiable evidence.
 
 Avoid rhetorical contrasts such as "not just X, but Y", polished slogans,
 decorative metaphors and anonymous appeals to experts. Prefer ordinary verbs
@@ -137,9 +150,12 @@ existing fragment IDs when changing section titles.
   implementation details. Move a technical detour later if it interrupts the
   first complete example. Keep mathematical primers available on demand.
 - Provide an exact `technicalStart` section title and a useful section list.
-  The list is the dropdown at the top of every lesson, so section titles have
-  to stand on their own there. Preserve section links and update numbered
-  references when reordering.
+  The lesson title appears above the content. Bottom navigation moves between
+  pages, reaching the previous lesson's last page or the next lesson's first
+  page at the boundaries. The footer's Lesson contents menu includes a page
+  selector and workshop and coding shortcuts. Titles must stand on their own
+  in that list. Preserve section links and update numbered references when
+  reordering.
 - Quiz sections sit beside the parts they draw on and are titled for them,
   `Questions on Parts 3 to 5`, which is also how the page finds the parts to
   offer after a wrong answer. Test concepts already explained. A fresh example

@@ -18,10 +18,10 @@ database. Update the login logo and verification email using the files in
 
 Existing storage keys, session cookies, account headers and deployment variable
 names retain their previous identifiers for compatibility. They are not public
-branding. Browser storage belongs to its origin, so guest drafts do not
-automatically transfer to a different domain. Readers can import guest work
-into their account on the existing domain before moving, or download a backup
-from the account page. Account work stays in the same backend database.
+branding. Learning results and drafts are not persisted in browser storage.
+Guest work lasts for the current visit; account work stays in the same backend
+database across a domain change. Readers can download their loaded account
+work from the account page.
 
 The default reading path begins with an everyday problem, introduces the parts
 needed to understand it, works through an example, and then develops the
@@ -60,20 +60,49 @@ For a fresh local checkout, copy that example to `.env.development.local`.
 
 ## Accounts and saved work
 
-### Additional practice library
+### Free learning and paid Practice membership
 
-`/practice` adds 3,456 account-only activities: 48 problem families with 24
+`/practice` adds 3,456 paid-member activities: 48 problem families with 24
 reproducible datasets each, available as a quiz, a programming challenge and a
 Botie workshop. These are variations of the same problems, not 3,456 separate
 lessons. Topics cover mathematics, predictive models, language and images,
 sequential decisions, databases, and agent policy checks. The original course
-and its exercises remain accessible without an account.
+and its exercises remain accessible without an account. Free accounts save
+course progress, answers, code and workshop drafts through the existing backend.
+Saving does not require a paid membership.
+
+Practice membership is intended to cost **US$9 monthly or US$90 annually**.
+Both billing intervals unlock the same additional library. `/membership` shows
+the available billing options after the server retrieves and validates their
+Stripe prices. An unconfigured checkout stays unavailable; there is no
+client-only purchase or automatic paid-access grant.
 
 Definitions live in `lib/practice-bank/`. The client fetches one activity at a
 time from `/practice-api`; that route verifies the backend's opaque session
-cookie and the current account before returning content. Definitions are not
+cookie, the current account and an active, unexpired Practice entitlement before
+returning content. Free accounts receive `403 practice_subscription_required`
+from the catalog and all three activity formats. Definitions are not
 included in public HTML or client bundles. Responses are private and uncached.
-The library uses the existing account setup and does not add a subscription.
+Stripe subscriptions are separate from Cognito identity. The backend owns
+customers, price selection and membership status. A checkout return URL never
+grants access. Signed webhooks reconcile the payment provider's state; account
+sessions report the resulting entitlement. Accounts without a membership field
+remain free accounts, including when an older backend is still deployed.
+
+Configure the Stripe keys, the two recurring price IDs, the customer portal
+and the new database migration using [the backend billing setup](../backend/README.md).
+Keep all Stripe secrets in the account backend. The website uses its existing
+`OOP_ML_ACCOUNTS_URL`; it needs no public Stripe key or new client runtime.
+Stripe sends webhooks to the public website route
+`https://perceptronlab.dev/account-api/billing/webhook`. The proxy preserves the
+signed raw bytes and forwards them to the private backend using its existing
+transport, including AWS IAM signing where configured.
+
+Canceling a membership retains the main course, free account saving and existing
+saved work. An active subscription scheduled to cancel retains paid access
+through its paid period. Expired or inactive membership cannot fetch new library
+content. The account and membership pages provide Stripe's customer portal for
+billing management when configured.
 
 The bank uses the same Python/SQLite runtimes, quiz feedback and workshop
 engine as the course. Reference programs must pass four behavioral tests;
@@ -164,8 +193,9 @@ override it. Cognito's signup endpoint and its parameters are described in
 
 Quiz answers, Python drafts,
 workshop constructions, journey decisions and notes use the same account sync.
-Guest work stays separate until the learner chooses to import it. Leaving the
-URL unset or empty keeps guest learning available.
+Guest work stays in memory for the current visit and resets on reload or an
+external sign-in redirect. Leaving the URL unset or empty keeps guest learning
+available without persistent results.
 
 Run `npm run check:backend -- --site http://localhost:3000` with the services
 running to check backend health, its session response, and the website's
@@ -236,14 +266,19 @@ blocks and never use em dashes.
 A section may hold questions instead of prose (`quiz`, built with the helpers
 in `lib/quizzes.ts`) or problems to work through with the library (`practice`,
 built with the helpers in `lib/exercises.ts`). Both kinds report themselves to
-the progress the reader's browser keeps (`lib/progress.ts`), which is what the
-marks on the home page and the section pages read. Guests keep progress in
-their browser. Signed-in readers sync their work through the independent
-private `../backend` repository; the account page offers an explicit guest
-work import. `lib/learner-state.ts` stores quiz answers, Python drafts/results,
-Botie journeys and constructions, experiment inputs, and preferences. Each
-activity has its own server revision and an account-scoped offline cache.
-Conflicting device edits are preserved for an explicit choice on `/account`.
+in-memory progress store (`lib/progress.ts`), which is what the marks on the
+home page and the section pages read. Guest progress resets on reload.
+Signed-in readers load and save work through the independent private
+`../backend` repository. `lib/learner-state.ts` holds quiz answers, Python
+drafts/results, Botie journeys and constructions, and experiment inputs in
+memory. Each account activity retains its existing key and server revision.
+There is no durable browser queue for learning work. Failed saves remain in
+memory with a warning to keep the tab open; reloading loses unsaved changes.
+Preference storage and required authentication storage remain separate.
+Legacy guest caches are discarded. A legacy account cache is considered only
+after authenticated remote hydration and cannot override a newer server
+revision. Conditional migration writes retire their old cache after acknowledgement.
+Conflicting current-visit edits retain a recovery copy in memory for download.
 New activities should use `useLearnerRecord` and `useLearnerField`, with a
 stable, versioned key; write on user edits, never on mounting default values.
 Keep timers, pointer gestures and active code execution outside saved records.
@@ -341,8 +376,8 @@ The examples do not train full language or image-generation systems.
 Every lesson and primer has a practice section with a stated challenge, an
 editable Python workspace, hints, and a worked solution. The section controls
 also provide a direct coding jump. CodeMirror provides editing, indentation,
-line numbers and keyboard shortcuts. Drafts and previous passing results are stored
-in localStorage, with storage failures handled without disabling the editor.
+line numbers and keyboard shortcuts. Drafts and previous passing results stay
+in memory for guests and persist through the backend for signed-in readers.
 
 The three mathematics primers use direct NumPy calculations: readers build
 statistics from deviations, matrix operations from weighted sums, and gradient
@@ -357,8 +392,9 @@ rounding at the displayed precision are accepted. These are output tests,
 not source-code checks or proof against hard-coded answers. Results show
 passed and failed counters, skipped counts when applicable, and individual
 assertions with expected/actual values.
-Reading a solution does not mark its tests as passed. The existing local course
-progress is preserved. Sign-in is optional; exercises have no locked steps.
+Reading a solution does not mark its tests as passed. Sign-in is optional for
+the existing course; its exercises have no locked steps. Sign in before work
+that needs to survive a reload.
 
 Python runs in a dedicated [Pyodide worker](https://pyodide.org/en/stable/usage/webworker.html).
 The engine is pinned to 314.0.7. It loads only on Run, downloads NumPy, and

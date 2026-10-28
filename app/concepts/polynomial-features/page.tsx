@@ -77,17 +77,8 @@ export default function PolynomialFeaturesPage() {
                 <p>
                   We have measured twenty-two people: height and waist girth in centimetres, and weight in kilograms. They range from a child who is 104 centimetres tall and weighs 16.1 kilograms to an adult who is 191 centimetres tall and weighs 81.3 kilograms. Suppose we want to predict weight from height. We know how to fit a straight line, so let&apos;s start there and inspect where it misses.
                 </p>
-                <p>
-                  There is a reason to expect trouble before any fitting
-                  happens. A person is roughly a solid of some height and some
-                  thickness, and the weight of a solid goes as a length times a
-                  girth squared, so weight against height alone should follow
-                  something nearer a cube than a line over a range this wide.
-                  Set the playground above to degree 1 and the straight line
-                  through these people scores 0.9620, which looks like an
-                  excellent fit, and it is the number I want to argue with
-                  first.
-                </p>
+                <p>A straight line may struggle across this wide range of body sizes. As a rough geometric motivation, the volume of a similarly shaped object grows with several length dimensions, rather than just one. Human proportions and density vary, so that is a reason to inspect the relationship, not a physical law saying weight must be a cubic function of height.</p>
+              <p>In the interactive example, degree 1 scores 0.9620 on these observations. That sounds encouraging. Before trusting the summary, let&apos;s look at how far the line misses particular people and which measurements might explain those misses.</p>
                 <InAModel title="The line, on these twenty-two people">
                   <p>
                     It reaches 0.9620 and leaves 548.33 as the total of its
@@ -957,10 +948,7 @@ export default function PolynomialFeaturesPage() {
         {
           title: "Practice. Expanding the Crowd With the Library",
           practice: [
-            exercise(
-              "Build the columns, and meet one that duplicates another",
-              ["Part 3 hands the fit four people, the corners of the twelve builds, and every column a degree-two expansion makes from their height and girth. Build that expansion with PolynomialFeatures and print the columns, then build the same expansion with the products left out and print only its column names.","A column containing only zero and one is unchanged by squaring. Expand the height of eight people beside the column recording whether each person swims. Print swims and swims^2, then use NumPy to check whether those columns are identical. A duplicated column gives a fit no new information, even if a numerical solver happens to return coefficients for it."],
-              `import numpy as np
+            exercise("Build the columns, and meet one that duplicates another",["Part 3 hands the fit four people, the corners of the twelve builds, and every column a degree-two expansion makes from their height and girth. Build that expansion with PolynomialFeatures and print the columns, then build the same expansion with the products left out and print only its column names.","A column containing only zero and one is unchanged by squaring. Expand the height of eight people beside the column recording whether each person swims. Print swims and swims^2, then use NumPy to check whether those columns are identical. A duplicated column gives a fit no new information, even if a numerical solver happens to return coefficients for it."],`import numpy as np
 from oop_ml import Feature, PolynomialFeatures
 
 corners = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
@@ -971,8 +959,7 @@ expansion = PolynomialFeatures(degree=2).fit(corners)
 
 people = [Feature("height", [150, 160, 170, 180, 155, 165, 175, 185]), Feature("swims", [0, 1, 0, 1, 1, 0, 1, 0])]
 # Expand people to degree two, print the swims column and the swims^2 column,
-# then print whether those two arrays are identical.`,
-              `import numpy as np
+# then print whether those two arrays are identical.`,`import numpy as np
 from oop_ml import Feature, PolynomialFeatures
 
 corners = [Feature("height", [150, 150, 180, 180]), Feature("girth", [66, 96, 66, 96])]
@@ -989,8 +976,7 @@ for column in columns:
     if column.name in ("swims", "swims^2"):
         print(f"  {column.name}: {[int(value) for value in column.values]}")
 values = {column.name: column.values for column in columns}
-print("identical columns", bool(np.array_equal(values["swims"], values["swims^2"])))`,
-              `5 columns
+print("identical columns", bool(np.array_equal(values["swims"], values["swims^2"])))`,`5 columns
   height: [150, 150, 180, 180]
   girth: [66, 96, 66, 96]
   height^2: [22500, 22500, 32400, 32400]
@@ -999,13 +985,8 @@ print("identical columns", bool(np.array_equal(values["swims"], values["swims^2"
 powers alone: ('height', 'girth', 'height^2', 'girth^2')
   swims: [0, 1, 0, 1, 1, 0, 1, 0]
   swims^2: [0, 1, 0, 1, 1, 0, 1, 0]
-identical columns True`,
-              {"hints":["fit fixes the list of terms from the column names and transform builds the columns, so the four values of every term come from transform, one Feature per term, each carrying its name.","The learned list of terms is on terms, which has n_terms and names, and the names are written with ^ for a power and * for a product.","np.array_equal checks every entry of the two arrays. Equal arrays cannot supply two independent pieces of information to the fit."],"check":{"prompt":"What does the product column hold for the person 180 tall with a girth of 96?","answer":17280,"tolerance":0.5,"because":"The product column gives 17,280 for that person. The swims column and its square are identical, so the second adds no new information. A fit using both cannot uniquely separate their coefficients."}},
-            ),
-            exercise(
-              "Hold seven back and bend the line through the fifteen",
-              ["Every score on this page comes from one split, fifteen people fitted and seven held back, drawn with TrainTestSplitter at a test fraction of 0.3 under seed 3, and the height column is standardized on the fitted fifteen before it is raised. Make that split, then for degrees one to four expand the standardized height, fit MultipleLinearRegression and print the score on the fitted people, the score on the seven held back, the total of the squared misses over all twenty-two, and the prediction for the 104 cm child.", "Part 1 arrives at 0.9620 and 548.33 for the straight line, with the child at 7.80 kg, and Part 2 at 307.18 and 225.56 for the next two degrees. The held-back score at degree one is a number the lesson does not print."],
-              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, Standardizer, TrainTestSplitter
+identical columns True`,{...{"hints":["fit fixes the list of terms from the column names and transform builds the columns, so the four values of every term come from transform, one Feature per term, each carrying its name.","The learned list of terms is on terms, which has n_terms and names, and the names are written with ^ for a power and * for a product.","np.array_equal checks every entry of the two arrays. Equal arrays cannot supply two independent pieces of information to the fit."],"check":{"prompt":"What does the product column hold for the person 180 tall with a girth of 96?","answer":17280,"tolerance":0.5,"because":"The product column gives 17,280 for that person. The swims column and its square are identical, so the second adds no new information. A fit using both cannot uniquely separate their coefficients."}},question:"Which expanded columns add information, and which repeat an existing column?"}),
+            exercise("Hold seven back and bend the line through the fifteen",["Every score on this page comes from one split, fifteen people fitted and seven held back, drawn with TrainTestSplitter at a test fraction of 0.3 under seed 3, and the height column is standardized on the fitted fifteen before it is raised. Make that split, then for degrees one to four expand the standardized height, fit MultipleLinearRegression and print the score on the fitted people, the score on the seven held back, the total of the squared misses over all twenty-two, and the prediction for the 104 cm child.", "Part 1 arrives at 0.9620 and 548.33 for the straight line, with the child at 7.80 kg, and Part 2 at 307.18 and 225.56 for the next two degrees. The held-back score at degree one is a number the lesson does not print."],`from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, Standardizer, TrainTestSplitter
 
 heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
 weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
@@ -1023,8 +1004,7 @@ for degree in (1, 2, 3, 4):
     # MultipleLinearRegression on the expanded fitted rows and the training
     # target, and print the fitted score, the held-back score, the residual sum
     # of squares over everyone, and the prediction for the first person.
-    pass`,
-              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, Standardizer, TrainTestSplitter
+    pass`,`from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, Standardizer, TrainTestSplitter
 
 heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
 weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
@@ -1044,17 +1024,11 @@ for degree in (1, 2, 3, 4):
     held = line.score(expansion.transform(held_rows), split.testing.target_feature)
     misses = line.evaluate(expansion.transform(everyone), Feature("weight", weights)).residual_sum_of_squares
     child = float(line.predict(expansion.transform(everyone))[0])
-    print(f"degree {degree}: fitted {fitted:.4f}, held back {held:.4f}, squared misses {misses:.2f}, child {child:.2f} kg")`,
-              `degree 1: fitted 0.9620, held back 0.9512, squared misses 548.33, child 7.80 kg
+    print(f"degree {degree}: fitted {fitted:.4f}, held back {held:.4f}, squared misses {misses:.2f}, child {child:.2f} kg")`,`degree 1: fitted 0.9620, held back 0.9512, squared misses 548.33, child 7.80 kg
 degree 2: fitted 0.9834, held back 0.9623, squared misses 307.18, child 14.02 kg
 degree 3: fitted 0.9864, held back 0.9755, squared misses 225.56, child 16.67 kg
-degree 4: fitted 0.9864, held back 0.9762, squared misses 222.79, child 16.57 kg`,
-              { hints: ["A split holds two Datasets, training and testing, and each carries input_features and target_feature. The scaler and the expansion are both fitted on the training rows alone and then applied to everything.", "score takes the expanded columns and the target and answers R squared. evaluate takes the same two and answers an object whose residual_sum_of_squares is the total of the squared misses.", "The expansion of everyone is in the original order, so the 104 cm child is the first prediction."], check: numberCheck("What score do the seven held-back people give the straight line?", 0.9512, 0.0005, "The straight line scores 0.9620 on the fifteen it was fitted to and 0.9512 on the seven it never saw, and the two climb together through the early degrees, the held-back score reaching 0.9762 at degree four. The squared misses fall 548.33, 307.18, 225.56 as the curve bends, and the child the line put at 7.80 kg lands at 14.02 with the square and 16.67 with the cube, against a measured 16.1.") },
-            ),
-            exercise(
-              "Run the degree up to fourteen, with and without a penalty",
-              ["Part 5 runs the same split up to degree fourteen, where the fit has fifteen numbers to set and fifteen people to set them from. Extend the loop to degrees 9, 10, 11, 12 and 14 and print the fitted and held-back scores and what the curve answers for the 131 cm person, who weighs 27.6 kg.", "Then fit RidgeRegression with a penalty of 0.001 at degrees 4 and 14 and print the held-back score of each. Part 5 says the penalty takes degree fourteen from −24,967.20 to 0.9631 and degree four from 0.9762 to 0.9675."],
-              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, RidgeRegression, Standardizer, TrainTestSplitter
+degree 4: fitted 0.9864, held back 0.9762, squared misses 222.79, child 16.57 kg`,{...{ hints: ["A split holds two Datasets, training and testing, and each carries input_features and target_feature. The scaler and the expansion are both fitted on the training rows alone and then applied to everything.", "score takes the expanded columns and the target and answers R squared. evaluate takes the same two and answers an object whose residual_sum_of_squares is the total of the squared misses.", "The expansion of everyone is in the original order, so the 104 cm child is the first prediction."], check: numberCheck("What score do the seven held-back people give the straight line?", 0.9512, 0.0005, "These early degree increases improve this held-out split while changing how the curve follows height. The measured scores describe this fixed split, rather than guaranteeing that more polynomial terms improve generalisation.") },question:"Do higher polynomial degrees improve predictions on the held-out people?"}),
+            exercise("Run the degree up to fourteen, with and without a penalty",["Part 5 runs the same split up to degree fourteen, where the fit has fifteen numbers to set and fifteen people to set them from. Extend the loop to degrees 9, 10, 11, 12 and 14 and print the fitted and held-back scores and what the curve answers for the 131 cm person, who weighs 27.6 kg.", "Then fit RidgeRegression with a penalty of 0.001 at degrees 4 and 14 and print the held-back score of each. Part 5 says the penalty takes degree fourteen from −24,967.20 to 0.9631 and degree four from 0.9762 to 0.9675."],`from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, RidgeRegression, Standardizer, TrainTestSplitter
 
 heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
 weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
@@ -1076,8 +1050,7 @@ for degree in (9, 10, 11, 12, 14):
 for degree in (4, 14):
     # Fit a RidgeRegression with penalty=0.001 on the same expanded rows and
     # print its held-back score.
-    pass`,
-              `from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, RidgeRegression, Standardizer, TrainTestSplitter
+    pass`,`from oop_ml import Dataset, Feature, MultipleLinearRegression, PolynomialFeatures, RidgeRegression, Standardizer, TrainTestSplitter
 
 heights = [104, 111, 118, 124, 131, 137, 143, 149, 154, 158, 162, 166, 169, 172, 175, 178, 180, 183, 185, 187, 189, 191]
 weights = [16.1, 18.1, 18.1, 21.7, 27.6, 29.1, 35.5, 43.6, 53.1, 45.8, 59.0, 61.1, 68.2, 65.7, 70.9, 79.3, 79.6, 77.5, 83.9, 89.9, 88.5, 81.3]
@@ -1101,20 +1074,14 @@ for degree in (9, 10, 11, 12, 14):
 for degree in (4, 14):
     expansion = PolynomialFeatures(degree=degree).fit(fitted_rows)
     shrunk = RidgeRegression(penalty=0.001).fit(expansion.transform(fitted_rows), split.training.target_feature)
-    print(f"degree {degree} with the penalty: held back {shrunk.score(expansion.transform(held_rows), split.testing.target_feature):.4f}")`,
-              `degree 9: fitted 0.9874, held back 0.91, the 131 cm person 25.45 kg
+    print(f"degree {degree} with the penalty: held back {shrunk.score(expansion.transform(held_rows), split.testing.target_feature):.4f}")`,`degree 9: fitted 0.9874, held back 0.91, the 131 cm person 25.45 kg
 degree 10: fitted 0.9881, held back 0.98, the 131 cm person 21.56 kg
 degree 11: fitted 0.9888, held back 0.36, the 131 cm person 2.83 kg
 degree 12: fitted 0.9970, held back -36.35, the 131 cm person -261.97 kg
 degree 14: fitted 0.9998, held back -24967.20, the 131 cm person -9002.94 kg
 degree 4 with the penalty: held back 0.9761
-degree 14 with the penalty: held back 0.9631`,
-              { hints: ["The setup is the previous problem's, and the only change inside the loop is which person is read off the predictions. The 131 cm person is the fifth in the list, which is index 4.", "RidgeRegression takes the same expanded columns that MultipleLinearRegression took, and its one hyperparameter is penalty, set at construction.", "The held-back score at degree fourteen is a large negative number, so it is printed to two places rather than four to keep the line readable."], check: numberCheck("What does the degree-fourteen curve answer for the 131 cm person, in kilograms?", -9002.94, 0.05, "The 131 cm person is one of the seven held back, and the degree-fourteen curve passes through every one of the fifteen fitted people while swinging to −9,002.94 kg between them, which is why its fitted score reads 0.9998 and its held-back score −24,967.20. The penalty makes large weights expensive and takes that fit to 0.9631, a working model built from a ruinous one, while costing degree four 0.0087 of its held-back score.") },
-            ),
-            exercise(
-              "Give the fit a product column on the twelve builds",
-              ["Part 3 lays out twelve people as four girths at each of three heights and fits them three ways, a plane in height and girth, the powers alone at degree two, and the powers with the products. Fit all three with MultipleLinearRegression and print each one's column count, the total of its squared misses, and how much weight going from a girth of 66 to a girth of 96 adds at 150 cm and at 180 cm.", "Part 3 arrives at 28.07 for the powers alone and 1.83 with the products, and at 49.45 everywhere for a fit with one coefficient for girth against 44.59 and 54.31 with the product in. The misses the plane leaves are a number the lesson does not print."],
-              `from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
+degree 14 with the penalty: held back 0.9631`,{...{ hints: ["The setup is the previous problem's, and the only change inside the loop is which person is read off the predictions. The 131 cm person is the fifth in the list, which is index 4.", "RidgeRegression takes the same expanded columns that MultipleLinearRegression took, and its one hyperparameter is penalty, set at construction.", "The held-back score at degree fourteen is a large negative number, so it is printed to two places rather than four to keep the line readable."], check: numberCheck("What does the degree-fourteen curve answer for the 131 cm person, in kilograms?", -9002.94, 0.05, "The high-degree model fits the training rows closely but behaves extremely poorly between them. Penalising its large coefficients stabilises this fit, with a different tradeoff for the lower-degree model.") },question:"Can a small penalty stabilise the high-degree fit?"}),
+            exercise("Give the fit a product column on the twelve builds",["Part 3 lays out twelve people as four girths at each of three heights and fits them three ways, a plane in height and girth, the powers alone at degree two, and the powers with the products. Fit all three with MultipleLinearRegression and print each one's column count, the total of its squared misses, and how much weight going from a girth of 66 to a girth of 96 adds at 150 cm and at 180 cm.", "Part 3 arrives at 28.07 for the powers alone and 1.83 with the products, and at 49.45 everywhere for a fit with one coefficient for girth against 44.59 and 54.31 with the product in. The misses the plane leaves are a number the lesson does not print."],`from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
 
 heights = [150, 150, 150, 150, 165, 165, 165, 165, 180, 180, 180, 180]
 girths = [66, 76, 86, 96, 66, 76, 86, 96, 66, 76, 86, 96]
@@ -1127,8 +1094,7 @@ for label, degree, products in (("a plane", 1, True), ("the powers alone", 2, Fa
     # Build the expansion, fit the line on the expanded columns, read the
     # residual sum of squares off evaluate, predict the four ends through the
     # same expansion, and print the column count, the misses, and the two gains.
-    pass`,
-              `from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
+    pass`,`from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
 
 heights = [150, 150, 150, 150, 165, 165, 165, 165, 180, 180, 180, 180]
 girths = [66, 76, 86, 96, 66, 76, 86, 96, 66, 76, 86, 96]
@@ -1143,12 +1109,9 @@ for label, degree, products in (("a plane", 1, True), ("the powers alone", 2, Fa
     misses = fit.evaluate(expansion.transform(columns), target).residual_sum_of_squares
     predicted = [float(value) for value in fit.predict(expansion.transform(ends))]
     print(f"{label}: {expansion.terms.n_terms} columns, squared misses {misses:.2f}, "
-          f"girth 66 to 96 adds {predicted[1] - predicted[0]:.2f} kg at 150 cm and {predicted[3] - predicted[2]:.2f} kg at 180 cm")`,
-              `a plane: 2 columns, squared misses 36.87, girth 66 to 96 adds 49.45 kg at 150 cm and 49.45 kg at 180 cm
+          f"girth 66 to 96 adds {predicted[1] - predicted[0]:.2f} kg at 150 cm and {predicted[3] - predicted[2]:.2f} kg at 180 cm")`,`a plane: 2 columns, squared misses 36.87, girth 66 to 96 adds 49.45 kg at 150 cm and 49.45 kg at 180 cm
 the powers alone: 4 columns, squared misses 28.07, girth 66 to 96 adds 49.45 kg at 150 cm and 49.45 kg at 180 cm
-the powers and the products: 5 columns, squared misses 1.83, girth 66 to 96 adds 44.59 kg at 150 cm and 54.31 kg at 180 cm`,
-              { hints: ["A degree-one expansion with products is just the two columns, so the same loop builds the plane. include_interactions=False at degree two is the powers alone.", "The expansion fitted on the twelve people is the one to transform the four ends through, so the ends get the same columns in the same order.", "The gain at a height is the prediction at girth 96 less the prediction at girth 66 for that height, which is two differences of the four predictions."], check: numberCheck("What total of squared misses does the fit with the products leave?", 1.83, 0.01, "The plane leaves 36.87 and the powers alone 28.07, because every fit with one coefficient for girth has to answer one number for the gain, 49.45 at every height, when the people say 44.50, 49.30 and 54.80. The product column lets the coefficient of girth carry height inside it, the fit answers 44.59 and 54.31 at the two ends, and one extra column removes 93 percent of what was left.") },
-            ),
+the powers and the products: 5 columns, squared misses 1.83, girth 66 to 96 adds 44.59 kg at 150 cm and 54.31 kg at 180 cm`,{...{ hints: ["A degree-one expansion with products is just the two columns, so the same loop builds the plane. include_interactions=False at degree two is the powers alone.", "The expansion fitted on the twelve people is the one to transform the four ends through, so the ends get the same columns in the same order.", "The gain at a height is the prediction at girth 96 less the prediction at girth 66 for that height, which is two differences of the four predictions."], check: numberCheck("What total of squared misses does the fit with the products leave?", 1.83, 0.01, "A model with only a single girth coefficient assigns the same marginal girth effect at every height. The interaction lets that effect depend on height, reducing this dataset's remaining squared error.") },question:"Can a height-by-girth interaction explain a changing effect of girth?"}),
           ],
         },
       ]}

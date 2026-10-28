@@ -40,8 +40,8 @@ export const modern = {
     source("Kingma and Welling (2013), Auto-Encoding Variational Bayes", "https://arxiv.org/abs/1312.6114"),
   ],
   "An ordinary autoencoder can give each training example a code, but that does not tell us where to choose a new code for generation. Unused regions between familiar codes may decode poorly. We need a model of how the hidden codes themselves are distributed.",
-  "Kingma and Welling's 2013 work developed efficient learning and approximate inference for models with continuous latent variables. A key contribution was reparameterising a random draw so that gradient-based training could adjust the distribution's parameters.",
-  "The encoder describes a distribution of possible codes for an input. The decoder learns to reconstruct from samples, while the objective encourages those code distributions to remain compatible with a chosen prior. We can later draw from that prior and decode. Reconstruction quality and the distribution constraint compete, so the method learns an organised generative representation rather than simply assigning an unrelated address to each example."),
+  "Kingma and Welling's 2013 work gave the encoder a different job: describe a range of possible codes for an input, including how likely different codes are. That range is a probability distribution. Training can sample a code from it and ask the decoder to reconstruct the input. Their reparameterisation technique writes the sampling step in a form that lets gradients adjust the encoder's settings.",
+  "We also choose a distribution from which we will draw codes when generating new examples. This is the prior. Training balances reconstruction against a penalty for code distributions that differ from that prior. Later we can draw a fresh code from the prior and decode it. This gives generation a specified starting point, although it does not guarantee that every sampled output will be convincing."),
 
   "generative-adversarial-networks": history("Could Another Model Tell the Generator What Looks Wrong?", [
     source("Goodfellow and colleagues (2014), Generative Adversarial Networks", "https://arxiv.org/abs/1406.2661"),
@@ -76,8 +76,8 @@ export const modern = {
     source("Hu and colleagues (2021), LoRA: Low-Rank Adaptation of Large Language Models", "https://arxiv.org/abs/2106.09685"),
   ],
   "A large pretrained model already contains a useful representation. Updating every weight for each new task can require substantial training memory and a separate large set of parameters to store for every adaptation. We would like to preserve most of that shared work.",
-  "Hu and colleagues introduced LoRA in 2021, motivated by the possibility that useful task-specific changes occupy a much smaller space than the full weight matrices. They froze pretrained weights and learned low-rank updates through smaller matrices.",
-  "The original transformation remains available. Two smaller learned transformations together provide an adjustment to it. Their restricted size limits the rank of the update, reducing the number of trainable parameters. This is an assumption about the changes needed for adaptation, not a claim that the original model itself has only a few useful directions. The rank controls the capacity of the adjustment."),
+  "Hu and colleagues introduced LoRA in 2021. They kept the pretrained weights fixed and described an adjustment using two smaller matrices. Multiplying those matrices produces an update with the same shape as the original weights. The small intermediate width means that training has far fewer numbers to adjust.",
+  "The adjustment can use only a limited number of independent directions. That number is its rank, and the intermediate width sets an upper bound on it. We add this restricted adjustment to the original transformation. LoRA therefore limits how the weights can change; it does not claim that the original model uses only a few directions. We will follow a small matrix example before counting the saved parameters."),
 
   "retrieval-augmented-generation": history("Could the Model Consult a Reference Before Answering?", [
     source("Lewis and colleagues (2020), Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks", "https://arxiv.org/abs/2005.11401"),

@@ -1,5 +1,4 @@
-// What the site records about readers. It describes instrumentation-client.ts
-// and app/site-activity/route.ts, and has to change whenever they do.
+// Keep this in step with reading analytics, account storage and membership billing.
 
 import type { Metadata } from "next";
 import { ActivityOptOut } from "@/components/site/ActivityOptOut";
@@ -8,7 +7,7 @@ import { REPOSITORY } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Privacy · Perceptron Lab",
-  description: "What Perceptron Lab records about reading, why, how long it is kept, and how to switch it off.",
+  description: "What Perceptron Lab records about reading and saved work, how optional membership billing works, and how to switch reading analytics off.",
 };
 
 export default function PrivacyPage() {
@@ -17,8 +16,8 @@ export default function PrivacyPage() {
       <header>
         <h1 className="text-4xl font-bold tracking-tight text-foreground">Privacy</h1>
         <p className="mt-4 text-lg text-muted">
-          Perceptron Lab has no advertising and no tracking cookies, and I don&rsquo;t sell or share anything about the people
-          who read it. This page says what the site does record and why.
+          Perceptron Lab has no advertising or tracking cookies, and I don&rsquo;t sell personal data.
+          This page explains what the site records and how the account and payment services use it.
         </p>
       </header>
 
@@ -50,8 +49,25 @@ export default function PrivacyPage() {
           site, and those do include addresses.
         </p>
         <p>
-          Your progress through the lessons is kept in your own browser&rsquo;s storage, so the site can show you what
-          you have finished. It isn&rsquo;t sent to me.
+          Guest answers, code drafts and workshop constructions stay in memory during the current visit and reset
+          when the page reloads. During a signed-in visit, your work and progress save through the account
+          service so you can resume later or on another device. Free accounts include this saving. Learning results and drafts are not kept in
+          browser storage. Essential sign-in data and preferences such as the colour theme are separate.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">Paying for Extra Practice</h2>
+        <p>
+          If you choose a paid Practice membership, Stripe handles checkout and billing. You enter your payment
+          details on Stripe&rsquo;s hosted page. Our account service connects your account to its Stripe customer
+          and subscription identifiers. It keeps the membership status and paid period, along with the references
+          needed to confirm payment events and recover interrupted checkouts.
+        </p>
+        <p>
+          The main course and account progress saving stay free. You can manage a subscription through Stripe&rsquo;s
+          billing portal. Stripe describes its handling of payment information in its{" "}
+          <a href="https://stripe.com/privacy" className="text-accent underline-offset-4 hover:underline">privacy policy</a>.
         </p>
       </section>
 

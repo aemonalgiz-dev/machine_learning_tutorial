@@ -18,6 +18,7 @@ export function WorkshopOnboarding({ originalBuild }: { originalBuild: Build }) 
 }
 
 function Onboarding({ originalBuild }: { originalBuild: Build }) {
+  const account = useProgressAccount();
   const [earlier, setEarlier] = useState(false);
   const record = useLearnerRecord("workshop-onboarding:v2", {
     stage: 0,
@@ -74,7 +75,8 @@ function Onboarding({ originalBuild }: { originalBuild: Build }) {
       <h2 className="text-lg font-semibold">{stage === 0 ? "Ready to choose the pieces?" : "What would you like to build next?"}</h2>
       <p role="status" className="mt-2 text-sm leading-7 text-muted">{completed
         ? stage === 0 ? "That connection carries each new reading into the same calculation. Now try making the whole construction yourself." : "Your rule handled positive and negative readings. The next workshops use these controls to work through problems from the lessons."
-        : "You can keep experimenting here or continue whenever you want. Your construction will be here when you return."}</p>
+        : account ? "You can keep experimenting here or continue whenever you want. Once your account finishes saving, the construction can be opened on your next visit."
+          : "You can keep experimenting here or continue whenever you want. Guest constructions last for this visit and reset on reload; sign in to save across visits."}</p>
       <div className="mt-4 flex flex-wrap gap-3">
         {stage === 0 ? <button onClick={() => go(1)} className="min-h-11 rounded-lg bg-accent-fill px-4 py-2 text-sm font-semibold text-accent-ink">Build from an empty floor</button>
           : stage === 1 ? <button onClick={() => go(2)} className="min-h-11 rounded-lg bg-accent-fill px-4 py-2 text-sm font-semibold text-accent-ink">Try the replacement sensor</button>

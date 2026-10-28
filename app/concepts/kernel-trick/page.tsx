@@ -451,10 +451,7 @@ export default function KernelTrickPage() {
         {
           title: "Practice. Calculate the Comparisons With the Library",
           practice: [
-            exercise(
-              "Take both routes to 121 with the library’s kernels",
-              ["Part 3 compares a = (1, 2) with b = (3, 4) two ways, by lifting both through the feature map and taking the dot product of the three-entry vectors, and by squaring the original dot product of 11. Ask the library’s kernels for all three numbers.", "A kernel here is an object that compares two blocks of rows and answers a matrix with one entry per pair, so a block of one row each gives a single entry. The linear kernel is the plain dot product, and the polynomial kernel of degree 2 with its constant at zero is the pure squared kernel. Finish by asking the playground’s Squared kernel, whose constant is one, for its value on the same pair, which the page does not quote."],
-              `import numpy as np
+            exercise("Take both routes to 121 with the library’s kernels",["Part 3 compares a = (1, 2) with b = (3, 4) two ways, by lifting both through the feature map and taking the dot product of the three-entry vectors, and by squaring the original dot product of 11. Ask the library’s kernels for all three numbers.", "A kernel here is an object that compares two blocks of rows and answers a matrix with one entry per pair, so a block of one row each gives a single entry. The linear kernel is the plain dot product, and the polynomial kernel of degree 2 with its constant at zero is the pure squared kernel. Finish by asking the playground’s Squared kernel, whose constant is one, for its value on the same pair, which the page does not quote."],`import numpy as np
 from oop_ml import LinearKernel, PolynomialKernel, RowBlock
 
 a = RowBlock(np.array([[1.0, 2.0]]), ["x1", "x2"])
@@ -465,8 +462,7 @@ lifted_b = RowBlock(np.array([[9.0, root_two * 3.0 * 4.0, 16.0]]), ["u", "v", "w
 
 # Print the original dot product, the dot product of the lifted vectors, the
 # pure squared kernel's value on a and b, and the value of the degree-2 kernel
-# with its constant at one, each as a whole number.`,
-              `import numpy as np
+# with its constant at one, each as a whole number.`,`import numpy as np
 from oop_ml import LinearKernel, PolynomialKernel, RowBlock
 
 a = RowBlock(np.array([[1.0, 2.0]]), ["x1", "x2"])
@@ -483,25 +479,18 @@ shifted = PolynomialKernel(degree=2, constant=1).between(a, b).values[0, 0]
 print(f"a . b = {dot:.0f}")
 print(f"route one, the lifted dot product = {lifted:.0f}")
 print(f"route two, the squared kernel = {squared:.0f}")
-print(f"the playground's Squared kernel, (a . b + 1) squared = {shifted:.0f}")`,
-              `a . b = 11
+print(f"the playground's Squared kernel, (a . b + 1) squared = {shifted:.0f}")`,`a . b = 11
 route one, the lifted dot product = 121
 route two, the squared kernel = 121
-the playground's Squared kernel, (a . b + 1) squared = 144`,
-              { hints: ["between takes two row blocks and answers a kernel matrix. Its values are a two-dimensional array, so the one comparison of a one-row block against another sits at position [0, 0].", "The lifted vectors are the feature map worked by hand in section 3, (1, 2√2, 4) and (9, 12√2, 16), handed to the linear kernel under their own three names.", "The polynomial kernel raises the dot product plus its constant to its degree, so a constant of zero is the pure square and a constant of one is what the playground calls Squared."], check: numberCheck("What does the pure squared kernel return for a and b?", 121, 0.5, "The original dot product is 11 and its square is 121, and the lifted route reaches the same 121 through 9 plus 48 plus 64, which is the identity the √2 on the middle feature makes exact. The playground’s Squared kernel answers 144, since (11 + 1)² is a different comparison with linear terms riding along, which is why Part 4 says the two should not be described as the same fit.") },
-            ),
-            exercise(
-              "Read the radial kernel at two gammas",
-              ["Section 14 works the radial kernel on a pair whose squared distance is 4, finding 0.1353 at a gamma of 0.5 and 0.0003 at a gamma of 2. Put the origin and the point (2, 0) to the library’s radial kernel at both gammas, and at a gamma of 0.1, which the page does not work.", "Print each value to four places. The larger gamma gives the pair a far smaller comparison, and the smallest gamma a larger one, since gamma sets how fast the kernel falls with distance."],
-              `import numpy as np
+the playground's Squared kernel, (a . b + 1) squared = 144`,{...{ hints: ["between takes two row blocks and answers a kernel matrix. Its values are a two-dimensional array, so the one comparison of a one-row block against another sits at position [0, 0].", "The lifted vectors are the feature map worked by hand in section 3, (1, 2√2, 4) and (9, 12√2, 16), handed to the linear kernel under their own three names.", "The polynomial kernel raises the dot product plus its constant to its degree, so a constant of zero is the pure square and a constant of one is what the playground calls Squared."], check: numberCheck("What does the pure squared kernel return for a and b?", 121, 0.5, "The explicit feature-map dot product agrees with the zero-constant squared kernel. Adding a constant before the square defines a different kernel, so its value need not match that homogeneous feature map.") },question:"Do explicit feature vectors and the kernel give the same comparison?"}),
+            exercise("Read the radial kernel at two gammas",["Section 14 works the radial kernel on a pair whose squared distance is 4, finding 0.1353 at a gamma of 0.5 and 0.0003 at a gamma of 2. Put the origin and the point (2, 0) to the library’s radial kernel at both gammas, and at a gamma of 0.1, which the page does not work.", "Print each value to four places. The larger gamma gives the pair a far smaller comparison, and the smallest gamma a larger one, since gamma sets how fast the kernel falls with distance."],`import numpy as np
 from oop_ml import RadialBasisKernel, RowBlock
 
 origin = RowBlock(np.array([[0.0, 0.0]]), ["x1", "x2"])
 two_along = RowBlock(np.array([[2.0, 0.0]]), ["x1", "x2"])
 
 # For gammas of 0.5, 2 and 0.1, print the radial kernel's value on the pair
-# to four places.`,
-              `import numpy as np
+# to four places.`,`import numpy as np
 from oop_ml import RadialBasisKernel, RowBlock
 
 origin = RowBlock(np.array([[0.0, 0.0]]), ["x1", "x2"])
@@ -509,16 +498,10 @@ two_along = RowBlock(np.array([[2.0, 0.0]]), ["x1", "x2"])
 
 for gamma in (0.5, 2, 0.1):
     value = RadialBasisKernel(gamma=gamma).between(origin, two_along).values[0, 0]
-    print(f"gamma {gamma}: k = {value:.4f}")`,
-              `gamma 0.5: k = 0.1353
+    print(f"gamma {gamma}: k = {value:.4f}")`,`gamma 0.5: k = 0.1353
 gamma 2: k = 0.0003
-gamma 0.1: k = 0.6703`,
-              { hints: ["The radial kernel is constructed with its gamma and compared the same way as the others, through between on two row blocks.", "The squared distance between the two rows is 4, so each value is exp of minus gamma times 4, which is what the library computes."], check: numberCheck("What does the radial kernel return at a gamma of 0.5, to four places?", 0.1353, 5e-05, "The squared distance is 4, so at a gamma of 0.5 the kernel is exp(−2), about 0.1353, and at a gamma of 2 it is exp(−8), about 0.0003. At 0.1 it is exp(−0.4), about 0.6703, so a smaller gamma keeps distant pairs comparable for longer, which is the broad end of the sweep in section 15 where overly wide comparisons miss the pattern.") },
-            ),
-            exercise(
-              "Fit the clinic under three kernels",
-              ["Part 4 fits the support vector classifier on the standardized clinic and compares Linear with Squared, and Part 6 adds the radial kernel. Fit all three yourself on the twenty-four patients, standardizing the two vitals first as every fit on the page does, and read each fit’s training accuracy, how many patients are support vectors, how many of those sit at the capacity, and how many ascent steps the solver took.", "The library’s default step of 0.001 and ceiling of 1000 epochs stop short on this clinic, so use a step of 0.02 and a ceiling of 50000, which is what the page’s widgets run. Finish by fitting the linear kernel at the library’s own defaults and reading its support vector count, which the page does not quote."],
-              `from oop_ml import (
+gamma 0.1: k = 0.6703`,{...{ hints: ["The radial kernel is constructed with its gamma and compared the same way as the others, through between on two row blocks.", "The squared distance between the two rows is 4, so each value is exp of minus gamma times 4, which is what the library computes."], check: numberCheck("What does the radial kernel return at a gamma of 0.5, to four places?", 0.1353, 5e-05, "A smaller gamma makes the radial comparison decay more slowly with distance. The pair is unchanged; only the range over which it remains similar has changed.") },question:"How does gamma change the comparison of the same two points?"}),
+            exercise("Fit the clinic under three kernels",["Part 4 fits the support vector classifier on the standardized clinic and compares Linear with Squared, and Part 6 adds the radial kernel. Fit all three yourself on the twenty-four patients, standardizing the two vitals first as every fit on the page does, and read each fit’s training accuracy, how many patients are support vectors, how many of those sit at the capacity, and how many ascent steps the solver took.", "The library’s default step of 0.001 and ceiling of 1000 epochs stop short on this clinic, so use a step of 0.02 and a ceiling of 50000, which is what the page’s widgets run. Finish by fitting the linear kernel at the library’s own defaults and reading its support vector count, which the page does not quote."],`from oop_ml import (
     Feature, LinearKernel, PolynomialKernel, RadialBasisKernel, Standardizer, SupportVectorClassifier,
 )
 
@@ -533,8 +516,7 @@ inputs = scaler.transform([temperature, heart_rate])
 # kernel at gamma 1, fit with capacity 1, learning_rate 0.02 and max_epochs
 # 50000, and print the accuracy to four places, the support vector count, the
 # count at the capacity and the epochs run. Then fit the linear kernel at the
-# library's defaults and print its support vector count and epochs run.`,
-              `from oop_ml import (
+# library's defaults and print its support vector count and epochs run.`,`from oop_ml import (
     Feature, LinearKernel, PolynomialKernel, RadialBasisKernel, Standardizer, SupportVectorClassifier,
 )
 
@@ -554,17 +536,11 @@ for name, kernel in kernels:
           f"{support.n_at_the_cap(1)} at the capacity, {model.epochs_run} epochs")
 
 default = SupportVectorClassifier(kernel=LinearKernel()).fit(inputs, healthy)
-print(f"linear at the defaults: support vectors {default.support_vectors.n_vectors} of 24, {default.epochs_run} epochs")`,
-              `linear: accuracy 0.7083, support vectors 20 of 24, 19 at the capacity, 226 epochs
+print(f"linear at the defaults: support vectors {default.support_vectors.n_vectors} of 24, {default.epochs_run} epochs")`,`linear: accuracy 0.7083, support vectors 20 of 24, 19 at the capacity, 226 epochs
 squared: accuracy 1.0000, support vectors 6 of 24, 3 at the capacity, 812 epochs
 radial: accuracy 1.0000, support vectors 16 of 24, 4 at the capacity, 5768 epochs
-linear at the defaults: support vectors 24 of 24, 1000 epochs`,
-              { hints: ["A standardizer is fitted on the two vitals and its transform answers the scaled features, which are what the classifier is fitted on.", "The classifier is constructed with a kernel object, a capacity, a learning_rate and a max_epochs, and fitted on the features and the labels like every classifier here.", "support_vectors on the fitted model knows its count, n_vectors, and how many of them sit at the capacity, n_at_the_cap. epochs_run is the number of ascent steps the solver took, and a count equal to max_epochs means it stopped at the ceiling rather than by converging."], check: numberCheck("What training accuracy does the linear kernel reach on the clinic, to four places?", 0.7083, 5e-05, "No straight line cuts the ten healthy patients out of the fourteen who surround them, so the linear fit gets 17 of 24 right, 0.7083, with twenty support vectors and nineteen of them at the capacity. The squared and radial kernels both reach 1.0, drawing a curved boundary in the original vitals that is flat in their feature spaces. At the library’s defaults the linear solver stops at its 1000-epoch ceiling with every multiplier still moving, which reports all twenty-four patients as support vectors and is why the page runs a larger step and a higher ceiling.") },
-            ),
-            exercise(
-              "Build the Gram matrix under the sigmoid kernel and let the ridge check judge it",
-              ["Part 8 says a kernel must produce a positive-semidefinite Gram matrix, that the Sigmoid option on the clinic has negative eigenvalues, and that the ridge check rejects it while the classifier still returns a result. Build the clinic’s 24 by 24 table under the sigmoid kernel with a gamma of 1 and a constant of 0, read its eigenvalues, and then hand the same kernel to the library’s kernel ridge and to the classifier.", "Print the smallest and largest eigenvalue to four places and how many are negative, then the refusal the ridge fit raises, by its name and message, and the classifier’s accuracy and support vector count on the same kernel. The classifier answers, and the page says why that is the weaker guarantee."],
-              `import numpy as np
+linear at the defaults: support vectors 24 of 24, 1000 epochs`,{...{ hints: ["A standardizer is fitted on the two vitals and its transform answers the scaled features, which are what the classifier is fitted on.", "The classifier is constructed with a kernel object, a capacity, a learning_rate and a max_epochs, and fitted on the features and the labels like every classifier here.", "support_vectors on the fitted model knows its count, n_vectors, and how many of them sit at the capacity, n_at_the_cap. epochs_run is the number of ascent steps the solver took, and a count equal to max_epochs means it stopped at the ceiling rather than by converging."], check: numberCheck("What training accuracy does the linear kernel reach on the clinic, to four places?", 0.7083, 5e-05, "The nonlinear kernels fit the surrounding class pattern that the linear boundary cannot separate on these vitals. Solver settings and stopping behaviour must be checked before treating returned support-vector counts as a finished optimum.") },question:"Which kernels separate the clinic's classes, and did their solvers finish?"}),
+            exercise("Build the Gram matrix under the sigmoid kernel and let the ridge check judge it",["Part 8 says a kernel must produce a positive-semidefinite Gram matrix, that the Sigmoid option on the clinic has negative eigenvalues, and that the ridge check rejects it while the classifier still returns a result. Build the clinic’s 24 by 24 table under the sigmoid kernel with a gamma of 1 and a constant of 0, read its eigenvalues, and then hand the same kernel to the library’s kernel ridge and to the classifier.", "Print the smallest and largest eigenvalue to four places and how many are negative, then the refusal the ridge fit raises, by its name and message, and the classifier’s accuracy and support vector count on the same kernel. The classifier answers, and the page says why that is the weaker guarantee."],`import numpy as np
 from oop_ml import (
     Feature, KernelRidgeRegression, MLLibError, RowBlock, SigmoidKernel, Standardizer, SupportVectorClassifier,
 )
@@ -581,8 +557,7 @@ kernel = SigmoidKernel(gamma=1, constant=0)
 # Build the kernel matrix of the rows against themselves, print its smallest
 # and largest eigenvalue and how many are negative, then try a kernel ridge
 # fit with this kernel and print the refusal, and finally fit the classifier
-# with it and print its accuracy and support vector count.`,
-              `import numpy as np
+# with it and print its accuracy and support vector count.`,`import numpy as np
 from oop_ml import (
     Feature, KernelRidgeRegression, MLLibError, RowBlock, SigmoidKernel, Standardizer, SupportVectorClassifier,
 )
@@ -607,14 +582,11 @@ except MLLibError as refusal:
     print(refusal)
 
 model = SupportVectorClassifier(kernel=kernel, capacity=1, learning_rate=0.02, max_epochs=50000).fit(inputs, healthy)
-print(f"classifier accuracy {model.score(inputs, healthy):.4f}, support vectors {model.support_vectors.n_vectors} of 24")`,
-              `smallest eigenvalue -2.6733, largest 12.8993
+print(f"classifier accuracy {model.score(inputs, healthy):.4f}, support vectors {model.support_vectors.n_vectors} of 24")`,`smallest eigenvalue -2.6733, largest 12.8993
 negative eigenvalues 12 of 24
 InvalidValuesError
 the system K + penalty I is singular, which a valid kernel cannot produce -- a positive semi-definite Gram matrix plus a positive penalty is always invertible. This kernel (SigmoidKernel(tanh(1.0 a . b + 0.0))) failed Mercer's condition on this data; the sigmoid kernel with a negative constant is the usual way to get here
-classifier accuracy 0.7083, support vectors 19 of 24`,
-              { hints: ["A row block over the standardized columns, compared with itself through between, is the training Gram matrix, and its values are the square array whose eigenvalues numpy can read.", "Kernel ridge solves a system built from that matrix by a Cholesky route that fails exactly when the matrix is not positive definite, so its refusal is the library’s Mercer check. Catch MLLibError to inspect the failure on this Gram matrix.", "The classifier runs projected gradient ascent on the same table and never checks it, which is why it returns a result whose concavity guarantee is gone."] },
-            ),
+classifier accuracy 0.7083, support vectors 19 of 24`,{...{ hints: ["A row block over the standardized columns, compared with itself through between, is the training Gram matrix, and its values are the square array whose eigenvalues numpy can read.", "Kernel ridge solves a system built from that matrix by a Cholesky route that fails exactly when the matrix is not positive definite, so its refusal is the library’s Mercer check. Catch MLLibError to inspect the failure on this Gram matrix.", "The classifier runs projected gradient ascent on the same table and never checks it, which is why it returns a result whose concavity guarantee is gone."] },question:"Does a returned model establish that the supplied sigmoid is a valid kernel?"}),
           ],
         },
       ]}

@@ -29,7 +29,7 @@ export default function Page() {
 { title: "Part 1. Construct the Supervision Ourselves", content: <>
 <SubSection title="1. Define a forward corruption schedule">
 <p>{"If we want to generate a new picture, we cannot supply one uniquely correct image for every random starting point. We can, however, take an existing picture and add noise whose value we know. That gives us a noisy input with a training target. Diffusion models learn from these deliberately corrupted examples, then use the learned denoising behaviour to generate from fresh noise."}</p>
-<p>{"A forward step reduces the previous signal slightly and adds Gaussian noise. The schedule sets how much noise enters at each step. After enough corruption, the resulting distribution can become close to a simple Gaussian distribution."}</p>
+<p>{"Begin with a clean image. At each forward step, reduce the current pixel values slightly and add random variation. Our variation uses Gaussian draws: values near zero are common, while large positive or negative changes are less common. The noise schedule sets the strength of each addition. After enough steps, the original image contributes very little and the resulting distribution can be close to Gaussian noise."}</p>
 <p>{"Our first example is a strip of six pixels, [0, 0, 1, 1, 0, 0], with two bright pixels between dark ones. We use twenty equal-strength noise steps. The first scales the signal by about 0.9487 and adds a Gaussian draw scaled by about 0.3162. How much an individual pixel changes depends on the draw. Repeating the process gradually reduces the original signal's contribution."}</p>
 <NumberTable headings={["forward step", "multiplier on the clean strip", "multiplier on the noise"]} rows={[["0", "1", "0"], ["1", "0.9487", "0.3162"], ["5", "0.7684", "0.6399"], ["10", "0.5905", "0.8070"], ["20", "0.3487", "0.9372"]]} caption="What the strip is made of after a given number of steps. Part 2 derives both columns from the schedule." />
 <p>{"The model does not need to learn this forward process because we specify it. Its purpose is to supply noisy inputs with known relationships to clean examples. The small schedule on this page demonstrates the relationship but is not long enough to imply that all signal is gone."}</p>
@@ -40,7 +40,7 @@ export default function Page() {
 <p>{"A common denoising network reads the noisy sample and the timestep, then predicts the noise used in its construction. A timestep embedding gives the network information about how much corruption to expect."}</p>
 <p>{"One training example on this page looks like this. The clean strip and one noise draw are combined at step 5. The network is shown the noisy strip and the number 5, and the answer it is graded against is the draw."}</p>
 <NumberTable headings={["pixel", "clean value", "noise draw, the target", "noisy value at step 5, the input"]} rows={[["1", "0", "−0.6518", "−0.4171"], ["2", "0", "−0.1747", "−0.1118"], ["3", "1", "1.6637", "1.8331"], ["4", "1", "0.6591", "1.1902"], ["5", "0", "−1.6414", "−1.0504"], ["6", "0", "−0.0052", "−0.0033"]]} caption="The live example at its default step. The clean column is used to build the input and is then put away." />
-<p>{"Nobody labeled anything. The target column came from a random number generator a moment before the input was built from it. A new draw or a new step makes a new training example from the same clean strip, so one clean example supplies as many pairs as we care to construct."}</p>
+<p>{"No person had to label the noise in these pixels. We recorded the random draw when constructing the noisy input, so that draw supplies the target. A new draw or a new step gives another pair from the same clean strip. These are useful variations of one clean example, rather than new independent images."}</p>
 <p>{"The step has to be an input because the noisy values do not reveal it. On this draw the third pixel reads 1.8331 at step 5 and 1.9080 at step 20, nearly the same number. At step 5 the clean signal entered with a multiplier of 0.7684 and at step 20 with 0.3487, so those two similar readings contain very different amounts of noise. A predictor that was not told the step could not know which case it was looking at."}</p>
 <p>{"A U-Net can serve as this predictor because it combines broad image context with fine spatial detail. Its diffusion target is the known added noise. This differs from the semantic segmentation task, where U-Net is trained with labeled images and corresponding target masks. Conditional diffusion can also use text or class labels."}</p>
 
@@ -49,7 +49,7 @@ export default function Page() {
 </> },
 { title: "Part 2. Calculate a Noisy Training Pair", content: <>
 <SubSection title="3. Jump directly to a chosen forward step">
-<p>{"Let β be the per-step noise variance, α the retained fraction for that step, and ᾱ the cumulative retained fraction. Independent Gaussian additions can be combined into one draw, so we can sample a chosen training step without simulating every preceding step."}</p>
+<p>{"We need names for the two strengths in a forward step. β sets the variance of the added noise. Its companion α is one minus β, and the square root of α scales the preceding signal. The product of those α values up to the chosen step is written ᾱ. Independent Gaussian additions can be combined into one draw, so a training example need not simulate every preceding step."}</p>
 <Equation>{"αₜ = 1 − βₜ\nᾱₜ = ∏ₛ₌₁ᵗ αₛ\n\nε ~ Normal(0, I)\nxₜ = √ᾱₜ x₀ + √(1 − ᾱₜ) ε\n\nFor this example's constant schedule at step 5:\nᾱ₅ = (1 − 0.1)⁵ = 0.59049"}</Equation>
 <p>{"The square-root coefficients control the signal and noise scales. The clean sample is x₀, the noisy sample is xₜ, and ε is the known noise draw. At step zero, cumulative retention is one and the signal is unchanged."}</p>
 <WorkedExample title="Step 5 for two of the six pixels">
@@ -218,7 +218,7 @@ pixel 6: clean 0 draw -0.0052 noisy -0.0033
 third pixel at step 5: 1.8331
 third pixel at step 10: 1.9332
 third pixel at step 20: 1.9080`,
-              { hints: ["add_noise takes the clean sample, the noise draw and the step, and returns the noisy sample. It jumps straight to that step, so there is no loop over the earlier ones.", "The third pixel is index 2 of the array that comes back."], check: numberCheck("What does the third pixel read at step 10, to four places?", 1.9332, 0.0005, "At step 10 the cumulative retention is 0.3487, so the clean value of 1 enters with a coefficient of 0.5905 and the draw of 1.6637 with 0.8070, which comes to 1.9332. That is close to the readings at step 5 and at step 20, although the share of it that is noise has changed a great deal.") },
+              { hints: ["add_noise takes the clean sample, the noise draw and the step, and returns the noisy sample. It jumps straight to that step, so there is no loop over the earlier ones.", "The third pixel is index 2 of the array that comes back."], check: numberCheck("What does the third pixel read at step 10, to four places?", 1.9332, 0.0005, "The schedule changes the clean-signal and noise coefficients together. Their contributions can partly offset, leaving similar pixel readings at different steps. The denoiser needs the step as well as the observed sample to know which noise level it is handling.") , question: "Can the same noisy pixel value hide different amounts of signal and noise?" },
             ),
             exercise(
               "Supply a fraction of the true noise",
@@ -253,11 +253,11 @@ for fraction in [0.0, 0.5, 0.9, 1.0]:
 fraction 0.5: third pixel estimated at 1.6928
 fraction 0.9: third pixel estimated at 1.1386
 fraction 1.0: third pixel estimated at 1.0000`,
-              { hints: ["recover_clean takes the noisy sample, a noise estimate of the same shape, and the step the sample was noised at.", "Multiplying the draw by the fraction scales every pixel’s noise at once, so fraction * noise is the estimate to pass."], check: numberCheck("What is the third pixel’s clean estimate when nine tenths of the draw is supplied, to four places?", 1.1386, 0.0005, "The estimate misses the draw by a tenth of 1.6637, and at step 5 an error in the noise is multiplied by 0.8328 on its way into the clean estimate. That is 0.1386 above the clean value of 1. The same nearly right predictor would miss by more at a later step, where the multiplier is larger.") },
+              { hints: ["recover_clean takes the noisy sample, a noise estimate of the same shape, and the step the sample was noised at.", "Multiplying the draw by the fraction scales every pixel’s noise at once, so fraction * noise is the estimate to pass."], check: numberCheck("What is the third pixel’s clean estimate when nine tenths of the draw is supplied, to four places?", 1.1386, 0.0005, "An imperfect noise estimate leaves some of the known draw in the recovered clean value. The schedule controls how strongly that remaining error is amplified. Supplying the true draw is an oracle check of the formula, not a learned denoiser.") , question: "How much clean-sample error remains when the noise estimate is almost right?" },
             ),
             exercise(
               "Watch the error multiplier grow",
-              ["Hold the noise estimate at half of the true draw and move the step through 1, 5, 10, 15 and 20. At each step read the cumulative retention from the schedule, compute the multiplier from Part 2, the square root of one minus the retention over the retention, and print it beside the third pixel’s clean estimate.", "Part 2 tabulates four of these steps. Step 15 is not on the page. Check for yourself that each estimate is 1 plus the multiplier times half the draw of 1.6637."],
+              ["Hold the noise estimate at half of the true draw and move the step through 1, 5, 10, 15 and 20. At each step read the cumulative retention from the schedule, compute the multiplier from Part 2, the square root of one minus the retention over the retention, and print it beside the third pixel’s clean estimate.","Rebuild the noisy sample at each step and compare the recovered third pixel with its known clean value. The multiplier describes how the remaining noise-estimation error reaches that clean estimate. Step 15 extends the steps tabulated in the lesson."],
               `import numpy as np
 from oop_ml.numpy.modern import GaussianDiffusion
 
@@ -298,7 +298,7 @@ step 10: retention 0.3487 multiplier 1.3667 third pixel estimated at 2.1369
 step 15: retention 0.2059 multiplier 1.9639 third pixel estimated at 2.6337
 step 20: retention 0.1216 multiplier 2.6880 third pixel estimated at 3.2360
 multiplier at step 15: 1.9639`,
-              { hints: ["retention is an array with one entry per step and an extra entry of 1 at the front for step zero, so retention[step] is the cumulative retention after that many steps.", "The multiplier is np.sqrt((1 - retained) / retained). It depends only on the schedule, not on the strip or the draw.", "The noisy strip has to be rebuilt at each step, and recover_clean has to be told the same step."], check: numberCheck("What is the error multiplier at step 15, to four places?", 1.9639, 0.0005, "After fifteen steps the cumulative retention is 0.2059, so the multiplier is the square root of 0.7941 over 0.2059. An error in the noise estimate is nearly doubled there, where at step 1 it is cut to a third, and half of the draw missing puts the third pixel’s estimate at 2.6337 against a clean value of 1.") },
+              { hints: ["retention is an array with one entry per step and an extra entry of 1 at the front for step zero, so retention[step] is the cumulative retention after that many steps.", "The multiplier is np.sqrt((1 - retained) / retained). It depends only on the schedule, not on the strip or the draw.", "The noisy strip has to be rebuilt at each step, and recover_clean has to be told the same step."], check: numberCheck("What is the error multiplier at step 15, to four places?", 1.9639, 0.0005, "Later steps retain less clean signal. Recovering the clean value then divides by a smaller signal coefficient, magnifying the same error in the noise estimate. The growing multiplier explains why equal predictor errors at different noise levels need not produce equal clean-sample errors.") , question: "Why does the same noise-estimation error matter more at a later step?" },
             ),
             exercise(
               "Ask for a schedule and a step that cannot exist",
@@ -338,7 +338,7 @@ except MLLibError as refusal:
 `,
               `InvalidValuesError: each beta must be strictly between 0 and 1
 InvalidValuesError: step lies outside the schedule`,
-              { hints: ["Every refusal the library raises derives from MLLibError, so one except clause catches either. type(refusal).__name__ gives the specific kind.", "The first refusal comes from the constructor, before any sample is involved. The second comes from add_noise."] },
+              { hints: ["Every refusal the library raises derives from MLLibError, so one except clause catches either. type(refusal).__name__ gives the specific kind.", "The first refusal comes from the constructor, before any sample is involved. The second comes from add_noise."] , question: "Which invalid diffusion settings should fail before we use their results?" },
             ),
           ],
         },

@@ -1141,13 +1141,16 @@ export default function PointwiseMutualInformationPage() {
             several(
               "An implementation meets a pair the corpus never saw together. Which of these are named as honest choices?",
               [
-                "Put zero there, which says the two words are independent, a claim the corpus never made",
+                "Substitute a PMI target of zero, which is the independence baseline rather than evidence supplied by an unobserved pair",
                 "Leave the cell out, which is what GloVe does",
                 "Add a small count to every cell before dividing",
-                "Take the lowest score in the table and use that",
+                "Take the lowest score in the table and use that"
               ],
               [0, 1, 2],
-              "The logarithm of zero is undefined rather than large and negative, so something has to be put in its place. Zero gives a pair that was never seen the same value a pair scoring slightly below chance receives; leaving the cell out means nothing downstream that wants a square table can be handed the result; and adding a count makes the rarest pairs the ones it moves most. On these notes 249 of 529 cells have no score, so 47.1 percent of the table is whatever was substituted.",
+              "A zero joint count makes the ordinary real-valued logarithm unavailable. A method must choose how to handle it. Substituting zero, omitting the pair from an observed-pair objective, and adding pseudocounts are different explicit modelling choices. Positive PMI also clips negative finite scores to zero; that clipping should not be confused with evidence that an unseen pair is independent.",
+              {
+                "description": "We are discussing design choices for a finite table or an observed-pair fitting objective when a co-occurrence count is zero. No smoothing has yet been applied. “Leave out” means omit that pair from the fitting objective rather than provide it with a numerical target."
+              },
             ),
             trueFalse(
               "Stir and whisk were counted together four times and score higher than eggs and oven, which were counted together six times.",
@@ -1161,7 +1164,10 @@ export default function PointwiseMutualInformationPage() {
           practice: [
             exercise(
               "Score the and cat on the three sentences",
-              ["Part 2 counts the three sentences at a reach of one and scores the and cat at 0.693147 and cat and ran at 1.098612. Fit the library's model to the same three sentences with the reach at one and nothing flattened, read the total of counted neighbourings and the count for the and cat off its count table, and read the two scores off its table of scores.", "Then score cat and sat, a pair the lesson never scores. Cat and sat were counted together once, cat took four of the twelve neighbourings and sat took two, so you can check the number by hand before you print it."],
+              [
+  "Fit the supplied three-sentence corpus with context window one and context-distribution exponent one, leaving rates unflattened.",
+  "Print total context-pair count, the/cat count and PMI scores for the/cat, cat/ran and cat/sat to six decimals. Use the actual count table, including directional pair conventions."
+],
               `from oop_ml import PointwiseMutualInformationEmbeddings
 
 sentences = ["the cat sat", "the dog sat", "the cat ran"]
@@ -1193,11 +1199,17 @@ the beside cat, counted 2 times
 score for the and cat 0.693147
 score for cat and ran 1.098612
 score for cat and sat 0.405465`,
-              { hints: ["One fit does the counting and the scoring, and the model keeps both tables. cooccurrence holds the counts and pointwise_mutual_information holds the scores.", "Both tables answer one cell at a time by word rather than by position. count_between(word, context) reads a count and value_between(word, context) reads a score.", "The lesson's three-sentence numbers are at a reach of one with nothing flattened, so window is 1 and context_distribution_smoothing is 1.0. The default of 0.75 would move every score. dimension only sizes the squeeze, which this problem never reads, and it has to fit inside the five words."], check: numberCheck("What does the pair cat and sat score?", 0.405465, 5e-06, "Cat and sat were counted together once out of twelve neighbourings, which is a rate of a twelfth. Cat took four of the twelve and sat took two, so chance alone predicts a third of a sixth, which is an eighteenth. The pair occurred one and a half times as often as chance, and the logarithm of 1.5 is 0.405465.") },
+              { hints: [
+  "Read cooccurrence counts and scored entries separately.",
+  "The PMI comparison uses joint frequency relative to the two marginal frequencies, not the raw pair count alone."
+], check: numberCheck("What does the pair cat and sat score?", 0.405465, 5e-06, "Cat/sat scores 0.405465. PMI compares the observed pairing with the pairing expected from separate word/context rates, rather than ranking raw counts alone."), question: "Which word pairs occur more often than their separate frequencies would suggest?" },
             ),
             exercise(
               "Count what the clip throws away",
-              ["Part 3 splits the 529 cells of the twenty-four notes three ways. 224 keep a positive score, 56 scored below chance and were set to zero, and 249 were never seen together at all. Fit the notes at a reach of five with nothing flattened, read the number of surviving entries off the scored table, and count the pairs the corpus never put together by walking the count table.", "The 56 cannot be read off the scored table, because the clip has already made them zero. Recover them by subtraction, and then confirm the lesson's example that and beside bake, counted once, is kept at exactly zero."],
+              [
+  "Fit the supplied twenty-four notes at window five with context rates unflattened.",
+  "Print vocabulary size, total matrix cells, positive scored cells, unseen count cells and seen pairs clipped to zero. Then show and/bake’s observed count beside its retained score."
+],
               `from oop_ml import PointwiseMutualInformationEmbeddings
 
 notes = [
@@ -1262,11 +1274,17 @@ kept a positive score 224
 never seen together 249
 below chance, set to zero 56
 and beside bake, counted 1, kept 0.0000`,
-              { hints: ["The vocabulary on the count table can be iterated, and it lists every distinct word once, so a list of it is the 23 words and its length squared is the 529 cells.", "The scored table reports how many of its entries are positive as n_positive. That is the 224, and everything else in the table is a zero of one kind or the other.", "A pair never seen together has a count of exactly zero, so one loop over every word against every word, asking count_between, counts the 249. The diagonal is in that total, since no word is ever its own neighbour.", "Three groups make up the whole table, so the below-chance group is the cells less the kept entries less the never-seen pairs."], check: numberCheck("How many pairs scored below chance and were set to zero?", 56, 0.5, "Of the 529 cells, 224 keep a positive score and 249 hold a pair the corpus never put together, which leaves 56 that were seen together, scored below chance, and were clipped to zero. The clip has already made those 56 indistinguishable from the 249, which is why they have to be recovered by subtraction rather than read.") },
+              { hints: [
+  "The positive clipping merges several causes into the same zero score. Consult the raw count matrix to distinguish them.",
+  "Separate unseen cells first, then account for observed cells that did not keep a positive score."
+], check: numberCheck("How many pairs scored below chance and were set to zero?", 56, 0.5, "Fifty-six observed cells are clipped to zero. The scored table alone cannot distinguish those below-chance observations from unseen pairs."), question: "Can a zero PPMI score distinguish an unseen pair from a below-chance pair?" },
             ),
             exercise(
               "Flatten the context rates and watch the direction",
-              ["Part 4 says that flattening lifts a rare context's rate, and that because the rate sits in the denominator the score of a pair with a rare context goes down, not up. Fit the notes twice, once with nothing flattened and once at the published three quarters, and read flour beside whisk and sugar beside the off both scored tables.", "Then read and beside crew both ways round under the flattened fit, which Part 4 reports as 0.3057 one way and 0.4232 the other, and read the same pair under the unflattened fit, where the lesson says the two directions agree but does not print the value."],
+              [
+  "Fit the notes with context exponents one and 0.75. Print flour/whisk and sugar/the scores for both.",
+  "Then print and/crew and crew/and under both fits. Keep target/context order explicit: changing context frequencies can make the smoothed score directional even when raw neighbouring counts are symmetric."
+],
               `from oop_ml import PointwiseMutualInformationEmbeddings
 
 notes = [
@@ -1330,11 +1348,17 @@ flattened, and beside crew 0.3057
 flattened, crew beside and 0.4232
 unflattened, and beside crew 0.3646
 unflattened, crew beside and 0.3646`,
-              { hints: ["The flattening power is the field context_distribution_smoothing, and 0.75 is its default, so the second fit can leave it out. Naming it anyway makes the comparison readable.", "value_between takes the word first and the context second. The flattening is applied to the context's rate only, so swapping the two arguments swaps which rate was flattened.", "Whisk served as company 25 times and the 40 times, so whisk is the rare context whose rate is lifted and the is the frequent one whose rate is lowered. Expect the first score to fall and the second to rise."], check: numberCheck("What does flour beside whisk score at the published three quarters?", 0.5933, 5e-05, "Unflattened the pair scores +0.6523. Raising every context count to the three quarters pulls the large counts down towards the small ones, so after renormalising whisk, one of the rarer contexts, holds a larger share than it did. That share is in the denominator, so the ratio shrinks and the score falls to +0.5933. Sugar beside the moves the other way, from +0.4336 to +0.4922, because the is one of the commonest contexts and its share was lowered.") },
+              { hints: [
+  "An exponent below one changes the normalised context baseline in the denominator.",
+  "Read both argument orders rather than assuming a matrix remains symmetric after smoothing."
+], check: numberCheck("What does flour beside whisk score at the published three quarters?", 0.5933, 5e-05, "The smoothed score is 0.5933. Flattening the context baseline changes the denominator, so a rare context can lower a pair’s score rather than automatically boost it."), question: "How does smoothing context frequencies change pair scores and direction?" },
             ),
             exercise(
               "Squeeze the table to four numbers a word",
-              ["Part 5 squeezes the scored table to four numbers a word at the published settings and reports the four largest sizes, the nearest words to flour, a cosine of 1.0000 between flour and bake, and a mean of 0.6732 between two words of one topic against 0.0086 between a word of each. Fit the notes at those settings and reproduce each of those from the fitted model.", "Then put numbers on two things the lesson only states. Print the cosine between flour and anchor, a word of each half, and refit with the power at one, which Part 5 says separates the two halves furthest without saying by how much."],
+              [
+  "Fit the supplied notes at the stated four-dimensional PPMI settings. Print the four retained sizes, flour’s five nearest words and the specified flour/bake and flour/anchor cosines.",
+  "Compare within-topic and cross-topic mean cosines and their gap at singular-value powers 0.5 and 1.0. Keep corpus, word groups and context settings fixed."
+],
               `from statistics import mean
 
 from oop_ml import PointwiseMutualInformationEmbeddings
@@ -1406,7 +1430,10 @@ flour and bake 1.0000
 flour and anchor 0.0081
 power 0.5: within 0.6732, across 0.0086, gap 0.6646
 power 1.0: within 0.8191, across 0.0428, gap 0.7762`,
-              { hints: ["The published settings are the defaults apart from the width, so dimension=4 and window=5 is the whole configuration. The sizes are the property singular_values, in falling order.", "most_similar(word, n) answers an object whose words property is the names in order, and similarity(first, second) is the cosine between two words' four numbers.", "Two words of one topic means every pair drawn from the cooking list plus every pair drawn from the sailing list, 45 and 45, and a word of each means every cooking word against every sailing word, 100 pairs. The slice group[position + 1 :] is what stops a pair being counted twice or a word being paired with itself.", "The power is the field singular_value_exponent, and 0.5 is its default, which is why the first fit matched the lesson without naming it."], check: numberCheck("What is the gap between the two means at a power of one?", 0.7762, 0.0001, "At the published half the two halves come apart by 0.6646, which is 0.6732 less 0.0086. At a power of one each direction is weighted by its full size rather than the square root of it, so the two directions that stand well clear of the rest dominate every word's four numbers, and the gap widens to 0.7762. That is the setting this corpus prefers and the published paper does not, for the reason Part 5 gives.") },
+              { hints: [
+  "The factorisation’s scaling power changes the representation, not the underlying pair counts.",
+  "Exclude shared words from the supplied topic groups when reproducing their pair means."
+], check: numberCheck("What is the gap between the two means at a power of one?", 0.7762, 0.0001, "The mean-similarity gap is 0.7762 at power one. The scaling of retained directions changes these vector comparisons even though the underlying context counts stay fixed."), question: "What relationship survives a four-dimensional factorisation of the scored table?" },
             ),
           ],
         },

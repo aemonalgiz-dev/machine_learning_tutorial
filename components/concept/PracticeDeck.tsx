@@ -3,9 +3,10 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { challengeQuestion, type Exercise, NUMPY_SETUP_COMMANDS, SETUP_COMMANDS } from "@/lib/exercises";
-import { draftKey, readDraft, type PracticeDraft } from "@/lib/practice-drafts";
-import { useLearnerField, fingerprint, migrateLearnerRecord, useLearnerRecord, useLearnerStorageStatus } from "@/lib/learner-state";
+import { draftKey, readLegacyAccountDraft, type PracticeDraft } from "@/lib/practice-drafts";
+import { useLearnerField, fingerprint, migrateLearnerRecord, useLearnerRecord } from "@/lib/learner-state";
 import { getProgressAccount, useProgressAccount } from "@/lib/progress";
+import { useAccount } from "@/lib/accounts";
 import { usePython } from "@/lib/use-python";
 import type { PythonResult } from "@/lib/python";
 import { ProgramOutput, PythonCode } from "./PythonCode";
@@ -30,12 +31,14 @@ interface PracticeProps {
 
 // Hidden sections do not mount editors or load Python. Drafts survive navigation.
 export function PracticeDeck(props: PracticeProps) {
+  const account = useProgressAccount();
   if (!props.active || !props.exercises.length) return null;
-  return <Workspace key={props.lesson} {...props} />;
+  return <Workspace key={`${props.lesson}:${account ?? "guest"}`} {...props} />;
 }
 
 function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
   const account = useProgressAccount();
+  const session = useAccount();
   const key = `practice:${lesson}:${fingerprint(exercises.map(problem => problem.language === 'sql' ? [problem.title, problem.starter, problem.output, problem.sql?.setup] : [problem.title, problem.starter, problem.output]))}`;
   const work = useLearnerRecord(key, () => ({ card: 0, attempts: exercises.map((problem): Attempt => ({
     code: problem.starter, solved: false, hintsShown: 0, solutionShown: false,
@@ -49,15 +52,14 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
   const [attempts, setAttempts] = useLearnerField(work, "attempts");
   const latest = useRef(attempts);
   useEffect(() => { latest.current = attempts; }, [attempts]);
-  const { storageFailed } = useLearnerStorageStatus();
   useEffect(() => {
-    if (getProgressAccount() !== account) return;
-    try {
-      if (exercises.some(problem => localStorage.getItem(draftKey(lesson, problem)))) migrateLearnerRecord(key, {
-        card: 0, attempts: exercises.map(problem => ({ ...readDraft(draftKey(lesson, problem), problem), solutionShown: false })),
-      }, account);
-    } catch { /* Old drafts are optional. */ }
-  }, [key, lesson, exercises, account]);
+    if (!account || getProgressAccount() !== account || session.status !== "ready" || session.sync !== "saved") return;
+    const sources = exercises.map(problem => ({ key: draftKey(lesson, problem), problem }));
+    const legacy = sources.map(({ key, problem }) => readLegacyAccountDraft(key, problem, account));
+    if (legacy.some(Boolean)) migrateLearnerRecord(key, {
+      card: 0, attempts: exercises.map((problem, index) => ({ ...(legacy[index] ?? { code: problem.starter, solved: false, hintsShown: 0 }), solutionShown: false })),
+    }, account, sources.filter((_, index) => legacy[index]).map(source => source.key));
+  }, [key, lesson, exercises, account, session.status, session.sync]);
   const [expectedShown, setExpectedShown] = useState(false);
   const reported = useRef(false);
   const mounted = useRef(true);
@@ -197,7 +199,7 @@ function Workspace({ exercises, lesson, onFinished }: PracticeProps) {
                 className="rounded-md border border-accent-fill px-3 py-1.5 text-sm font-semibold text-accent transition hover:bg-accent-soft disabled:opacity-40">Run tests</button>
               {busy && <Quiet onClick={() => stop()}>Stop</Quiet>}
               <Quiet disabled={busy} onClick={() => update(card, { code: current.starter, result: undefined })}>Reset code</Quiet>
-              <span className="ml-auto text-xs text-muted">{storageFailed ? "Browser storage is full. Keep this tab open until sync finishes." : account ? "Drafts save here and sync to your account" : "Saved in this browser"}</span>
+              <span className="ml-auto text-xs text-muted">{!account ? "This visit only. Sign in to save your work." : session.sync === "error" ? "Not saved yet. Keep this tab open while the account reconnects." : session.sync === "saved" ? "Saved to your account" : "Saving to your account…"}</span>
             </div>
           </div>
 

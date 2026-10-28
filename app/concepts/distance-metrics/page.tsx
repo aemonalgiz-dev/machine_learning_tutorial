@@ -1039,27 +1039,36 @@ Cosine distance: approximately 0.000189`}</Equation>
 
               <SubSection title="27. What to do about it">
                 <p>
-                  Since the loss is a property of distance, the remedies
-                  are all about having fewer columns or better ones. The{" "}
+                  If many columns contain irrelevant variation, they can
+                  overwhelm the differences that matter to this task. One
+                  experiment is to select better features or reduce the
+                  representation. The{" "}
                   <Link href="/concepts/pca" className={linkClass}>
                     principal component analysis
                   </Link>{" "}
-                  page keeps the few directions the data actually varies
-                  along, which is the usual first move before a neighbour
-                  model on wide data, and the measurement above is the reason
-                  it is usual. Standardising, from Part 3, does not help
-                  here, since the drawn features already share a scale, and
-                  neither does any metric on its own. The fractional orders
-                  that Aggarwal, Hinneburg and Keim recommend are available
-                  here, since the p-norm takes any positive order,
-                  and Part 8 records the price, which is that below one the
-                  triangle inequality fails.
+                  page describes PCA, which retains directions with large
+                  variance. It may remove redundant or noisy directions,
+                  but it does not use the prediction labels: a low-variance
+                  direction can still contain the distinction we need.
+                </p>
+                <p>
+                  Standardising does not resolve this particular synthetic
+                  example because the drawn features already share a scale.
+                  Compare any feature selection or transformation inside
+                  the training and validation procedure rather than treating
+                  fewer columns as an automatic improvement. Fractional
+                  distance orders are another possibility discussed by
+                  Aggarwal, Hinneburg and Keim. The implementation accepts
+                  positive orders below one, but those comparisons no longer
+                  satisfy the triangle inequality required of a metric.
                 </p>
                 <KeepInMind>
-                  When a neighbour model on many columns scores badly, the
-                  first question is how many columns rather than which
-                  metric, and the answer is usually to reduce them before
-                  measuring anything.
+                  When a neighbour model on many columns scores badly, ask
+                  which measurements contain useful evidence, how their
+                  scales affect the comparison, and whether the available
+                  training examples cover the query. Reducing dimensions
+                  and changing the distance are experiments to evaluate,
+                  with a baseline retained for comparison.
                 </KeepInMind>
               </SubSection>
             </>
@@ -1167,10 +1176,7 @@ Cosine distance: approximately 0.000189`}</Equation>
         {
           title: "Practice. Asking Six Rules What Near Means With the Library",
           practice: [
-            exercise(
-              "Measure the worked pair under six rules, then turn the dial",
-              ["Part 1 measures the ringed person at (150, 45) against their nearest at (147, 41) by hand, gaps of 3 and 4, and reads 7, 5 and 4 off the three p-norms, 1 for Hamming, 0.00019 for cosine and 0.0566 for Canberra. Put the same pair through every member of DistanceMetric, which measures one block of rows against another, and print the six answers.", "Part 2 then sweeps the order of the p-norm from one towards infinity and reports 7 falling through 4.285 at order four and 4.022 at order ten. Build a MinkowskiDistance at orders 1, 1.5, 2, 3, 4 and 10 and print each distance. The value at order 1.5 is one the lesson never prints."],
-              `import numpy as np
+            exercise("Measure the worked pair under six rules, then turn the dial",["Compare the query (150 cm, 45 kg) with the reference (147 cm, 41 kg) under every DistanceMetric. A RowBlock holds rows with named columns, and between returns a query-by-reference distance table. Print each metric and the single pairwise value.","Then calculate Minkowski distance for the same pair at orders 1, 1.5, 2, 3, 4 and 10, in that order. Print each order and distance. The noninteger order extends the norm comparisons already explained in the lesson."],`import numpy as np
 from oop_ml import DistanceMetric, MinkowskiDistance, RowBlock
 
 names = ("height", "weight")
@@ -1180,8 +1186,7 @@ nearest = RowBlock(np.array([[147.0, 41.0]]), names)
 # For every metric in DistanceMetric, print its name and the distance from
 # the query to the nearest person, to six places. Then for each order in
 # (1, 1.5, 2, 3, 4, 10) build a MinkowskiDistance and print the same pair's
-# distance to four places.`,
-              `import numpy as np
+# distance to four places.`,`import numpy as np
 from oop_ml import DistanceMetric, MinkowskiDistance, RowBlock
 
 names = ("height", "weight")
@@ -1193,8 +1198,7 @@ for metric in DistanceMetric:
 
 for order in (1, 1.5, 2, 3, 4, 10):
     distance = float(MinkowskiDistance(order).between(query, nearest)[0, 0])
-    print(f"order {order}: {distance:.4f}")`,
-              `euclidean: 5.000000
+    print(f"order {order}: {distance:.4f}")`,`euclidean: 5.000000
 manhattan: 7.000000
 chebyshev: 4.000000
 cosine: 0.000189
@@ -1205,13 +1209,8 @@ order 1.5: 5.5843
 order 2: 5.0000
 order 3: 4.4979
 order 4: 4.2846
-order 10: 4.0220`,
-              { hints: ["A RowBlock is a block of rows with named columns, built from a two-dimensional array, so one person is an array with one row.", "between answers a table with one row per query and one column per remembered row, so a single pair's distance is the entry at [0, 0].", "DistanceMetric is a closed enum of six names, and iterating it visits all six. MinkowskiDistance takes the order at construction and is what the enum holds for Manhattan and Chebyshev."], check: numberCheck("What is the worked pair's distance at order 1.5?", 5.5843, 0.0005, "At order 1.5 the pair sits at 5.5843, between Manhattan's 7 at order one and Euclidean's 5 at order two, on its way down through 4.4979 at three, 4.2846 at four and 4.0220 at ten towards Chebyshev's 4. Raising the order shifts weight onto whichever single gap is largest and can only shrink a distance, which is the diamond inside the circle inside the square.") },
-            ),
-            exercise(
-              "Let the crowd vote under each rule",
-              ["Part 1 says that under four of the six metrics the ringed person's three nearest are the same three and the answer is child, that under cosine the third voter is a different adult and the answer flips to adult, and that under Hamming every person is at exactly 1 and the first three by index vote. Fit KNearestNeighboursClassifier with three neighbours under each metric and watch it happen.", "The observed route, neighbour_search, keeps every distance, so print who voted and how far away they were. Part 1 has the straight line at 5, 10 and 13, the taxi grid at 7, 14 and 17, the largest gap at 4, 8 and 12, cosine at 0.000189, 0.000650 and 0.001392, and Canberra at 0.0566, 0.1012 and 0.1346."],
-              `from oop_ml import DistanceMetric, Feature, KNearestNeighboursClassifier
+order 10: 4.0220`,{...{ hints: ["A RowBlock is a block of rows with named columns, built from a two-dimensional array, so one person is an array with one row.", "between answers a table with one row per query and one column per remembered row, so a single pair's distance is the entry at [0, 0].", "DistanceMetric is a closed enum of six names, and iterating it visits all six. MinkowskiDistance takes the order at construction and is what the enum holds for Manhattan and Chebyshev."], check: numberCheck("What is the worked pair's distance at order 1.5?", 5.5843, 0.0005, "For this fixed pair, increasing the Minkowski order moves the result toward the largest coordinate gap. Compare the same two measurements under each rule before attaching meaning to the distance value.") },question:"How do the distance rules compare the same two people?"}),
+            exercise("Let the crowd vote under each rule",["Part 1 says that under four of the six metrics the ringed person's three nearest are the same three and the answer is child, that under cosine the third voter is a different adult and the answer flips to adult, and that under Hamming every person is at exactly 1 and the first three by index vote. Fit KNearestNeighboursClassifier with three neighbours under each metric and watch it happen.", "The observed route, neighbour_search, keeps every distance, so print who voted and how far away they were. Part 1 has the straight line at 5, 10 and 13, the taxi grid at 7, 14 and 17, the largest gap at 4, 8 and 12, cosine at 0.000189, 0.000650 and 0.001392, and Canberra at 0.0566, 0.1012 and 0.1346."],`from oop_ml import DistanceMetric, Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1223,8 +1222,7 @@ for metric in DistanceMetric:
     # Fit a three-neighbour classifier under this metric, predict the query,
     # and print the metric's name, child or adult, and for each of the three
     # consulted their index and distance to six places, from neighbour_search.
-    pass`,
-              `from oop_ml import DistanceMetric, Feature, KNearestNeighboursClassifier
+    pass`,`from oop_ml import DistanceMetric, Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1237,19 +1235,13 @@ for metric in DistanceMetric:
     answer = "adult" if int(model.predict(query)[0]) == 1 else "child"
     for search in model.neighbour_search(query):
         voters = [(int(index), round(float(distance), 6)) for index, distance in zip(search.chosen_indices, search.chosen_distances)]
-    print(f"{metric.value}: {answer}, consulted {voters}")`,
-              `euclidean: child, consulted [(0, 5.0), (1, 10.0), (2, 13.0)]
+    print(f"{metric.value}: {answer}, consulted {voters}")`,`euclidean: child, consulted [(0, 5.0), (1, 10.0), (2, 13.0)]
 manhattan: child, consulted [(0, 7.0), (1, 14.0), (2, 17.0)]
 chebyshev: child, consulted [(0, 4.0), (1, 8.0), (2, 12.0)]
 cosine: adult, consulted [(0, 0.000189), (1, 0.00065), (3, 0.001392)]
 hamming: child, consulted [(0, 1.0), (1, 1.0), (2, 1.0)]
-canberra: child, consulted [(0, 0.056613), (1, 0.10124), (2, 0.134596)]`,
-              { hints: ["metric is a field of the classifier, set at construction, and takes a member of DistanceMetric.", "neighbour_search answers one record per query row, and each record carries chosen_indices and chosen_distances, the people who voted and how far away they were.", "Index 0 is the person at (147, 41), index 2 the child at (145, 57) and index 3 the adult at (159, 57), which is the swap cosine makes."], check: numberCheck("Under cosine, how far is the third voter, the adult at (159, 57)?", 0.001392, 1e-06, "Cosine keeps the first two voters at 0.000189 and 0.000650 and for its third passes over the child at (145, 57) in favour of the adult at (159, 57) at 0.001392, because it reads the angle from the origin and that adult points more nearly where the query points. Two adults of three, and the answer flips to adult, where the three p-norms and Canberra consult indices 0, 1 and 2 and answer child, and Hamming, with everyone at exactly 1, takes the first three by index and answers child too.") },
-            ),
-            exercise(
-              "Put three people of one height through the three rules",
-              ["Part 1 takes three people of one height weighing 45, 52 and 60 kilograms and compares the direct distance from the lightest to the heaviest with the route through the middle person. Under every p-norm the two legs add to the direct 15 exactly; under cosine they add to 0.001987 against a direct 0.003962, which breaks the triangle inequality.", "Measure the direct route and both legs under all six metrics and print whether the route by way of the middle person is at least as long as the direct one. Canberra's numbers on this triple are ones the lesson never prints."],
-              `import numpy as np
+canberra: child, consulted [(0, 0.056613), (1, 0.10124), (2, 0.134596)]`,{...{ hints: ["metric is a field of the classifier, set at construction, and takes a member of DistanceMetric.", "neighbour_search answers one record per query row, and each record carries chosen_indices and chosen_distances, the people who voted and how far away they were.", "Index 0 is the person at (147, 41), index 2 the child at (145, 57) and index 3 the adult at (159, 57), which is the swap cosine makes."], check: numberCheck("Under cosine, how far is the third voter, the adult at (159, 57)?", 0.001392, 1e-06, "Cosine distance compares directions from the origin, so its third neighbour differs from the one selected by the raw coordinate norms. That changes the class vote for this query.") },question:"Can changing the distance rule change the neighbour vote?"}),
+            exercise("Put three people of one height through the three rules",["Part 1 takes three people of one height weighing 45, 52 and 60 kilograms and compares the direct distance from the lightest to the heaviest with the route through the middle person. Under every p-norm the two legs add to the direct 15 exactly; under cosine they add to 0.001987 against a direct 0.003962, which breaks the triangle inequality.", "Measure the direct route and both legs under all six metrics and print whether the route by way of the middle person is at least as long as the direct one. Canberra's numbers on this triple are ones the lesson never prints."],`import numpy as np
 from oop_ml import DistanceMetric, RowBlock
 
 names = ("height", "weight")
@@ -1259,8 +1251,7 @@ heaviest = RowBlock(np.array([[150.0, 60.0]]), names)
 
 # For every metric print its name, the direct distance from the lightest to
 # the heaviest, the two legs by way of the middle person added together, and
-# whether that sum is at least the direct distance.`,
-              `import numpy as np
+# whether that sum is at least the direct distance.`,`import numpy as np
 from oop_ml import DistanceMetric, RowBlock
 
 names = ("height", "weight")
@@ -1271,19 +1262,13 @@ heaviest = RowBlock(np.array([[150.0, 60.0]]), names)
 for metric in DistanceMetric:
     direct = float(metric.between(lightest, heaviest)[0, 0])
     via = float(metric.between(lightest, middle)[0, 0]) + float(metric.between(middle, heaviest)[0, 0])
-    print(f"{metric.value}: direct {direct:.6f}, via the middle {via:.6f}, holds {via >= direct}")`,
-              `euclidean: direct 15.000000, via the middle 15.000000, holds True
+    print(f"{metric.value}: direct {direct:.6f}, via the middle {via:.6f}, holds {via >= direct}")`,`euclidean: direct 15.000000, via the middle 15.000000, holds True
 manhattan: direct 15.000000, via the middle 15.000000, holds True
 chebyshev: direct 15.000000, via the middle 15.000000, holds True
 cosine: direct 0.003962, via the middle 0.001987, holds False
 hamming: direct 0.500000, via the middle 1.000000, holds True
-canberra: direct 0.142857, via the middle 0.143594, holds True`,
-              { hints: ["The direct route is one call of between and each leg is another, so three calls per metric.", "A sum of two floats can land an ulp under the third, and the page allows for that in its own check. On this triple every p-norm lands on 15 exactly, so the plain comparison is enough here."], check: numberCheck("Under cosine, what do the two legs by way of the middle person add to?", 0.001987, 1e-06, "The two cosine legs are 0.000892 and 0.001095, adding to 0.001987, where the direct route is 0.003962, so the route through the middle is shorter and the third rule fails. Cosine is an angle wearing the vocabulary of a distance, and for a small angle one minus its cosine grows with the square of the angle, so two halves sum to less than the whole. The other five pass, Hamming at 0.5 direct against 1.0 via and Canberra at 0.1429 against 0.1436.") },
-            ),
-            exercise(
-              "Give the density clusterer one radius under six rules",
-              ["Part 5 hands the density clusterer a radius of twenty under every metric and finds the three clumps under Euclidean and Manhattan, two under Chebyshev, and one under cosine, Hamming and Canberra, since twenty is larger than any distance in the crowd under those three. Fit DBSCAN at that radius with a minimum neighbourhood of two under each metric and print how many groups it found and how many people it left in none.", "Then cut single linkage at two groups under Euclidean and Manhattan with AgglomerativeClustering and print the first and last merge heights, which Part 5 gives as 2.236 and 23.35 for the straight line and 3 and 33 for the taxi grid."],
-              `from oop_ml import DBSCAN, AgglomerativeClustering, DistanceMetric, Feature, Linkage
+canberra: direct 0.142857, via the middle 0.143594, holds True`,{...{ hints: ["The direct route is one call of between and each leg is another, so three calls per metric.", "A sum of two floats can land an ulp under the third, and the page allows for that in its own check. On this triple every p-norm lands on 15 exactly, so the plain comparison is enough here."], check: numberCheck("Under cosine, what do the two legs by way of the middle person add to?", 0.001987, 1e-06, "The indirect route is shorter than the direct route under one-minus-cosine on this triple. That is a concrete failure of the triangle inequality; the function can still be used as a dissimilarity when the method permits it.") },question:"Does travelling through the middle person obey the triangle inequality?"}),
+            exercise("Give the density clusterer one radius under six rules",["Part 5 hands the density clusterer a radius of twenty under every metric and finds the three clumps under Euclidean and Manhattan, two under Chebyshev, and one under cosine, Hamming and Canberra, since twenty is larger than any distance in the crowd under those three. Fit DBSCAN at that radius with a minimum neighbourhood of two under each metric and print how many groups it found and how many people it left in none.", "Then cut single linkage at two groups under Euclidean and Manhattan with AgglomerativeClustering and print the first and last merge heights, which Part 5 gives as 2.236 and 23.35 for the straight line and 3 and 33 for the taxi grid."],`from oop_ml import DBSCAN, AgglomerativeClustering, DistanceMetric, Feature, Linkage
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1297,8 +1282,7 @@ for metric in DistanceMetric:
 for metric in (DistanceMetric.EUCLIDEAN, DistanceMetric.MANHATTAN):
     # Fit AgglomerativeClustering with n_clusters=2, linkage=Linkage.SINGLE and
     # this metric, and print the first and last of its merge_distances.
-    pass`,
-              `from oop_ml import DBSCAN, AgglomerativeClustering, DistanceMetric, Feature, Linkage
+    pass`,`from oop_ml import DBSCAN, AgglomerativeClustering, DistanceMetric, Feature, Linkage
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1311,17 +1295,14 @@ for metric in DistanceMetric:
 for metric in (DistanceMetric.EUCLIDEAN, DistanceMetric.MANHATTAN):
     linked = AgglomerativeClustering(n_clusters=2, linkage=Linkage.SINGLE, metric=metric).fit(crowd)
     merges = list(linked.merge_distances)
-    print(f"single linkage, {metric.value}: first merge {merges[0]:.3f}, last merge {merges[-1]:.2f}")`,
-              `euclidean: 3 groups, 0 in none
+    print(f"single linkage, {metric.value}: first merge {merges[0]:.3f}, last merge {merges[-1]:.2f}")`,`euclidean: 3 groups, 0 in none
 manhattan: 3 groups, 0 in none
 chebyshev: 2 groups, 0 in none
 cosine: 1 groups, 0 in none
 hamming: 1 groups, 0 in none
 canberra: 1 groups, 0 in none
 single linkage, euclidean: first merge 2.236, last merge 23.35
-single linkage, manhattan: first merge 3.000, last merge 33.00`,
-              { hints: ["A clusterer takes no target, so fit receives the list of Features alone. Both models carry metric as a field set at construction.", "n_clusters and n_noise are properties of the fitted DBSCAN, and a person in no group carries the label −1 in labels.", "merge_distances on the fitted linkage model can be iterated and lists every merge made in order, nearest pair first, so its first and last entries are the two heights the lesson quotes."], check: numberCheck("At what height does single linkage under Euclidean make its last merge?", 23.35, 0.01, "Euclidean single linkage makes its first merge at 2.236, the two people nearest each other in the crowd, and its last at 23.35, the gap it has to bridge before only two groups are left, which cuts the three far children off from the other eight. Manhattan, adding every gap at full size, makes the same cuts at 3 and 33. A merge height is a distance, so it belongs to the metric it was measured under, exactly as a radius does.") },
-            ),
+single linkage, manhattan: first merge 3.000, last merge 33.00`,{...{ hints: ["A clusterer takes no target, so fit receives the list of Features alone. Both models carry metric as a field set at construction.", "n_clusters and n_noise are properties of the fitted DBSCAN, and a person in no group carries the label −1 in labels.", "merge_distances on the fitted linkage model can be iterated and lists every merge made in order, nearest pair first, so its first and last entries are the two heights the lesson quotes."], check: numberCheck("At what height does single linkage under Euclidean make its last merge?", 23.35, 0.01, "A merge height has the units and scale of the chosen distance rule. The same numeric radius or linkage cutoff does not describe the same neighbourhood under different rules.") },question:"What does a radius of twenty mean under different distance rules?"}),
           ],
         },
       ]}

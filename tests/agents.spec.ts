@@ -87,7 +87,7 @@ test('agent operations keep identity checks exact and preserve unscored cases', 
 });
 
 test('Agents opens from the learning area and framework recipes are readable on mobile', async ({ page }) => {
-  await page.goto('/learn/machine-learning');
+  await page.goto('/learn/ai-agents-and-applications');
   await page.getByRole('link', { name: /^Agents\b/ }).click();
   await expect(page.getByRole('heading', { name: 'Agents', exact: true })).toBeVisible();
   for (const lesson of lessons.filter(lesson => lesson.section === 'Agents')) await expect(page.locator(`a[href="/concepts/${lesson.id}"]`).first()).toBeVisible();
@@ -95,7 +95,8 @@ test('Agents opens from the learning area and framework recipes are readable on 
   const lesson = lessons.find(entry => entry.id === 'agent-pydantic-ai')!;
   const part = lesson.parts.find(part => part.references?.length)!;
   await page.goto(`/concepts/${lesson.id}`);
-  await page.getByRole('combobox', { name: 'Choose a section', exact: true }).first().selectOption({ label: part.title });
+  await page.getByText('Lesson contents', { exact: true }).click();
+  await page.getByRole('combobox', { name: 'Jump to a page', exact: true }).first().selectOption({ label: part.title });
   const reference = page.locator('[data-framework-reference]').first();
   await expect(reference).toBeVisible();
   await expect(reference.getByText('Run in your own environment', { exact: true })).toBeVisible();

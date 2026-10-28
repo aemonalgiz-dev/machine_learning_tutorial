@@ -113,17 +113,8 @@ export default function KernelPcaPage() {
               </SubSection>
 
               <SubSection title="3. What a curved direction would be">
-                <p>
-                  A straight direction gives every person a score that is a
-                  weighted sum of their height and weight. A curved direction
-                  gives them a score that is some other function of the
-                  pair, the distance from the typical build for the ring, the
-                  position along the curve for the arc. The kernel trick
-                  page&rsquo;s way to get one is to lift every person into a
-                  larger space of made-up features, squares and products and
-                  beyond, and choose a straight direction there; a straight
-                  direction in the lifted space is a curved one on the plane.
-                </p>
+                <p>Ordinary PCA assigns a score by combining the original coordinates with fixed weights. In the ring picture, positions on opposite sides receive very different scores even though both belong to the outer ring. A useful alternative score could depend on distance from the middle instead.</p>
+              <p>Kernel PCA performs a linear PCA calculation in a different feature representation. A straight projection there can become a nonlinear function of the original height and weight. The kernel supplies inner products in that representation. This does not guarantee that the resulting components discover our intended groups; it gives us a different family of variation to examine.</p>
                 <Equation>{"score(x) = w · φ(x)"}</Equation>
                 <p>
                   PCA in the lifted space would then find the straight
@@ -1004,10 +995,7 @@ export default function KernelPcaPage() {
         {
           title: "Practice. Decomposing the Ring and the Arc With the Library",
           practice: [
-            exercise(
-              "Run PCA through the Gram matrix on the four height and weight measurements",
-              ["Part 2 decomposed the four by four Gram matrix of the four height and weight measurements and found the same eigenvalues as the scatter matrix, 400 and 100, with the recipe for the first direction scaled to 0.0354 on persons 1 and 2 and zero on the rest, and person 1 landing at 14.14. Fit the library’s kernel decomposition under the linear kernel and read those numbers off it, then fit ordinary PCA beside it as the control.", "The library reports each direction’s variance, which is the raw eigenvalue over n − 1, so multiplying back by three recovers 400 and 100. A sign on any direction is the solver’s choice, so the coefficients may come back negated and the coordinate is read with its sign dropped. Then ask for five directions from four people, which Part 7 says is refused with both counts named."],
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, LinearKernel, MLLibError, PrincipalComponentAnalysis
+            exercise("Run PCA through the Gram matrix on the four height and weight measurements",["Part 2 decomposed the four by four Gram matrix of the four height and weight measurements and found the same eigenvalues as the scatter matrix, 400 and 100, with the recipe for the first direction scaled to 0.0354 on persons 1 and 2 and zero on the rest, and person 1 landing at 14.14. Fit the library’s kernel decomposition under the linear kernel and read those numbers off it, then fit ordinary PCA beside it as the control.", "The library reports each direction’s variance, which is the raw eigenvalue over n − 1, so multiplying back by three recovers 400 and 100. A sign on any direction is the solver’s choice, so the coefficients may come back negated and the coordinate is read with its sign dropped. Then ask for five directions from four people, which Part 7 says is refused with both counts named."],`from oop_ml import Feature, KernelPrincipalComponentAnalysis, LinearKernel, MLLibError, PrincipalComponentAnalysis
 
 heights = [180, 160, 175, 165]
 weights = [78, 58, 63, 73]
@@ -1017,8 +1005,7 @@ people = [Feature("height", heights), Feature("weight", weights)]
 # print its variance, the raw Gram eigenvalue that variance implies, and its
 # row coefficients. Print how far person 1 lands along the first direction,
 # sign dropped, then ordinary PCA's variances on the same four. Finally ask
-# for five directions from the four people and print the refusal.`,
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, LinearKernel, MLLibError, PrincipalComponentAnalysis
+# for five directions from the four people and print the refusal.`,`from oop_ml import Feature, KernelPrincipalComponentAnalysis, LinearKernel, MLLibError, PrincipalComponentAnalysis
 
 heights = [180, 160, 175, 165]
 weights = [78, 58, 63, 73]
@@ -1039,18 +1026,12 @@ print(f"ordinary PCA variances {[round(float(component.variance), 2) for compone
 try:
     KernelPrincipalComponentAnalysis(n_components=5).fit(people)
 except MLLibError as refusal:
-    print(f"{type(refusal).__name__}: {refusal}")`,
-              `kernel_component_1: variance 133.33, raw eigenvalue 400.0, coefficients [-0.0354, 0.0354, 0.0, 0.0]
+    print(f"{type(refusal).__name__}: {refusal}")`,`kernel_component_1: variance 133.33, raw eigenvalue 400.0, coefficients [-0.0354, 0.0354, 0.0, 0.0]
 kernel_component_2: variance 33.33, raw eigenvalue 100.0, coefficients [0.0, 0.0, -0.0707, 0.0707]
 person 1 along the first direction, sign dropped 14.1421
 ordinary PCA variances [133.33, 33.33]
-InvalidValuesError: cannot keep 5 components from 4 rows`,
-              { hints: ["KernelPrincipalComponentAnalysis takes a kernel and, optionally, n_components; left unset it keeps every direction with any spread. fit takes the list of Features and nothing else, since there is no target.", "The fitted components can be iterated, and each one has a name, a variance and row_coefficients, one weight per training person. PrincipalComponentAnalysis has components with a variance each in the same way.", "transform answers a list of Features, one per kept direction, named kernel_component_1 upward, and each holds one coordinate per person in the order given.", "Asking for more directions than there are rows is refused from fit with one of the library’s own errors, so catching MLLibError catches it."], check: numberCheck("What variance does the first kernel direction report on the four height and weight measurements?", 133.33, 0.01, "The raw Gram eigenvalue is 400 and there are four people, so the sample variance is 400 over 3, which is the number ordinary PCA reports for the same direction. The coefficients are normalised by the square root of the raw 400 rather than of 133.33, which is why they come out at 0.0354 in size and why person 1 lands 14.14 from the centre, where ordinary PCA’s projection of (10, 10) onto (0.707, 0.707) also lands.") },
-            ),
-            exercise(
-              "Take the ring apart along the first kernel direction",
-              ["Part 5 returns to the ring with the radial kernel at a gamma of 0.005 and finds shares of 0.137 and 0.111 of a total lifted variance of 0.898, with the inner twelve landing between 0.429 and 0.560 along the first direction and the outer twenty-four between −0.291 and −0.205, a clear stretch of 0.634 between the nearest pair. Fit it, read the coordinates, and measure the stretch yourself.", "The first twelve people in the data are the inner group and the rest the ring. The gap is the smaller group’s nearest edge against the other’s, taken whichever way round the solver signed the direction, so it comes out positive when the groups are apart and negative by the amount they overlap. Ordinary PCA on the same thirty-six should give shares of 0.516 and 0.484 and an overlap of 40.2."],
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
+InvalidValuesError: cannot keep 5 components from 4 rows`,{...{ hints: ["KernelPrincipalComponentAnalysis takes a kernel and, optionally, n_components; left unset it keeps every direction with any spread. fit takes the list of Features and nothing else, since there is no target.", "The fitted components can be iterated, and each one has a name, a variance and row_coefficients, one weight per training person. PrincipalComponentAnalysis has components with a variance each in the same way.", "transform answers a list of Features, one per kept direction, named kernel_component_1 upward, and each holds one coordinate per person in the order given.", "Asking for more directions than there are rows is refused from fit with one of the library’s own errors, so catching MLLibError catches it."], check: numberCheck("What variance does the first kernel direction report on the four height and weight measurements?", 133.33, 0.01, "The library reports sample component variance, while the raw Gram eigenvalues use a different normalisation. Converting that convention recovers the same linear feature-space directions as ordinary PCA, up to arbitrary component signs.") },question:"Does a linear-kernel decomposition recover the ordinary PCA result?"}),
+            exercise("Take the ring apart along the first kernel direction",["Part 5 returns to the ring with the radial kernel at a gamma of 0.005 and finds shares of 0.137 and 0.111 of a total lifted variance of 0.898, with the inner twelve landing between 0.429 and 0.560 along the first direction and the outer twenty-four between −0.291 and −0.205, a clear stretch of 0.634 between the nearest pair. Fit it, read the coordinates, and measure the stretch yourself.", "The first twelve people in the data are the inner group and the rest the ring. The gap is the smaller group’s nearest edge against the other’s, taken whichever way round the solver signed the direction, so it comes out positive when the groups are apart and negative by the amount they overlap. Ordinary PCA on the same thirty-six should give shares of 0.516 and 0.484 and an overlap of 40.2."],`from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
 
 heights = [169.7, 167.2, 164.8, 160.6, 155.7, 150.1, 150.1, 151.1, 155.5, 159.9, 164.1, 168.5,
            190.0, 190.1, 185.6, 181.2, 172.3, 166.3, 159.4, 150.3, 145.8, 140.2, 132.5, 131.4,
@@ -1064,8 +1045,7 @@ ring = [Feature("height", heights), Feature("weight", weights)]
 # two shares and the total lifted variance. Read every person's first
 # coordinate, print the range of the inner twelve and of the outer
 # twenty-four, and print the gap between the groups, which is negative if
-# they overlap. Then do the same for ordinary PCA's first axis.`,
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
+# they overlap. Then do the same for ordinary PCA's first axis.`,`from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
 
 heights = [169.7, 167.2, 164.8, 160.6, 155.7, 150.1, 150.1, 151.1, 155.5, 159.9, 164.1, 168.5,
            190.0, 190.1, 185.6, 181.2, 172.3, 166.3, 159.4, 150.3, 145.8, 140.2, 132.5, 131.4,
@@ -1088,17 +1068,11 @@ print(f"gap between the groups along the first direction {gap:.3f}")
 ordinary = PrincipalComponentAnalysis().fit(ring)
 plain = [float(value) for value in ordinary.transform(ring)[0].values]
 overlap = max(min(plain[:12]) - max(plain[12:]), min(plain[12:]) - max(plain[:12]))
-print(f"ordinary shares {[round(float(share), 3) for share in ordinary.components.variance_shares]}, gap {overlap:.1f}")`,
-              `kernel shares [0.137, 0.111] of a total lifted variance of 0.898
+print(f"ordinary shares {[round(float(share), 3) for share in ordinary.components.variance_shares]}, gap {overlap:.1f}")`,`kernel shares [0.137, 0.111] of a total lifted variance of 0.898
 inner twelve from 0.429 to 0.560, outer twenty-four from -0.291 to -0.205
 gap between the groups along the first direction 0.634
-ordinary shares [0.516, 0.484], gap -40.2`,
-              { hints: ["RadialBasisKernel takes gamma, and n_components=2 keeps the first two directions. The fitted components have variance_shares and total_variance.", "transform answers one Feature per kept direction, so the first direction’s coordinates are the values of the first one, in the order the people were given, which puts the inner twelve first.", "A sign on a direction is the solver’s choice, so take the gap as the larger of the two differences, the inner minimum less the outer maximum and the outer minimum less the inner maximum. One of them is the stretch between the groups and the other is far negative."], check: numberCheck("How wide is the empty stretch between the inner twelve and the outer twenty-four along the first kernel direction?", 0.634, 0.001, "The inner twelve land between 0.429 and 0.560 and the outer twenty-four between −0.291 and −0.205, so the nearest pair across the groups are 0.634 apart and nobody is on the wrong side. Ordinary PCA, which can only rotate the plane, leaves the groups overlapping by 40.2 along its first axis. The kernel’s shares of 0.137 and 0.111 are small because the lifted variance is spread over thirty-five directions, and the first still carries the fact the ring is arranged around.") },
-            ),
-            exercise(
-              "Sweep the reach and find the band where the ring comes apart",
-              ["Part 5 sweeps gamma across the ring and reports that the split holds from 0.003 to 0.017, with the widest gap of 0.645 at 0.004, an overlap of 0.966 at 0.002 and of 0.249 at 0.02, while the total lifted variance climbs and the first share falls across the whole sweep. Refit at seven gammas and print the reach, the first share, the total and the gap at each.", "The page quotes the gap only at the band’s edges and its widest point. What the gap does inside the band, at 0.003, 0.01 and 0.017, is yours to read."],
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, RadialBasisKernel
+ordinary shares [0.516, 0.484], gap -40.2`,{...{ hints: ["RadialBasisKernel takes gamma, and n_components=2 keeps the first two directions. The fitted components have variance_shares and total_variance.", "transform answers one Feature per kept direction, so the first direction’s coordinates are the values of the first one, in the order the people were given, which puts the inner twelve first.", "A sign on a direction is the solver’s choice, so take the gap as the larger of the two differences, the inner minimum less the outer maximum and the outer minimum less the inner maximum. One of them is the stretch between the groups and the other is far negative."], check: numberCheck("How wide is the empty stretch between the inner twelve and the outer twenty-four along the first kernel direction?", 0.634, 0.001, "On this ring example, the first radial-kernel coordinate separates the groups even though a single ordinary PCA projection leaves them overlapping. The kernel and its width determine that feature geometry.") },question:"Can the first radial-kernel coordinate separate the inner group from the outer ring?"}),
+            exercise("Sweep the reach and find the band where the ring comes apart",["Part 5 sweeps gamma across the ring and reports that the split holds from 0.003 to 0.017, with the widest gap of 0.645 at 0.004, an overlap of 0.966 at 0.002 and of 0.249 at 0.02, while the total lifted variance climbs and the first share falls across the whole sweep. Refit at seven gammas and print the reach, the first share, the total and the gap at each.", "The page quotes the gap only at the band’s edges and its widest point. What the gap does inside the band, at 0.003, 0.01 and 0.017, is yours to read."],`from oop_ml import Feature, KernelPrincipalComponentAnalysis, RadialBasisKernel
 
 heights = [169.7, 167.2, 164.8, 160.6, 155.7, 150.1, 150.1, 151.1, 155.5, 159.9, 164.1, 168.5,
            190.0, 190.1, 185.6, 181.2, 172.3, 166.3, 159.4, 150.3, 145.8, 140.2, 132.5, 131.4,
@@ -1113,8 +1087,7 @@ for gamma in (0.002, 0.003, 0.004, 0.005, 0.01, 0.017, 0.02):
     # the reach (one over the square root of gamma), the first share, the
     # total lifted variance, and the gap between the inner twelve and the
     # outer twenty-four along the first direction.
-    pass`,
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, RadialBasisKernel
+    pass`,`from oop_ml import Feature, KernelPrincipalComponentAnalysis, RadialBasisKernel
 
 heights = [169.7, 167.2, 164.8, 160.6, 155.7, 150.1, 150.1, 151.1, 155.5, 159.9, 164.1, 168.5,
            190.0, 190.1, 185.6, 181.2, 172.3, 166.3, 159.4, 150.3, 145.8, 140.2, 132.5, 131.4,
@@ -1131,20 +1104,14 @@ for gamma in (0.002, 0.003, 0.004, 0.005, 0.01, 0.017, 0.02):
     gap = max(min(first[:12]) - max(first[12:]), min(first[12:]) - max(first[:12]))
     share = float(model.components.variance_shares[0])
     total = model.components.total_variance
-    print(f"gamma {gamma}: reach {gamma ** -0.5:.1f}, first share {share:.3f}, total {total:.3f}, gap {gap:.3f}")`,
-              `gamma 0.002: reach 22.4, first share 0.205, total 0.761, gap -0.966
+    print(f"gamma {gamma}: reach {gamma ** -0.5:.1f}, first share {share:.3f}, total {total:.3f}, gap {gap:.3f}")`,`gamma 0.002: reach 22.4, first share 0.205, total 0.761, gap -0.966
 gamma 0.003: reach 18.3, first share 0.159, total 0.833, gap 0.519
 gamma 0.004: reach 15.8, first share 0.148, total 0.873, gap 0.645
 gamma 0.005: reach 14.1, first share 0.137, total 0.898, gap 0.634
 gamma 0.01: reach 10.0, first share 0.097, total 0.948, gap 0.477
 gamma 0.017: reach 7.7, first share 0.072, total 0.969, gap 0.091
-gamma 0.02: reach 7.1, first share 0.067, total 0.974, gap -0.249`,
-              { hints: ["Each gamma needs its own RadialBasisKernel and its own fit, since both the kernel and the directions change with it.", "The gap is the same calculation as the previous problem, the larger of the inner minimum less the outer maximum and the outer minimum less the inner maximum, read off the first transformed Feature.", "The reach is a number the page derives rather than the library, one over the square root of gamma, which in Python is gamma to the power of minus a half."], check: numberCheck("What is the gap between the two groups at a gamma of 0.01?", 0.477, 0.001, "At 0.01 the reach is ten units, inside the band from 0.003 to 0.017 where the split holds, and the gap has already fallen from its widest of 0.645 at 0.004 toward the 0.091 at 0.017, past which the groups overlap again. A sharper reach scores each person alike only to their nearest neighbours, which is why the total lifted variance keeps climbing toward one and the first share keeps falling, and neither of those lines turns at the band’s edges.") },
-            ),
-            exercise(
-              "Count how often the arc folds",
-              ["Part 5 measured the arc at a gamma of 0.002 and found that the first kernel coordinates, read by height, run −0.49, −0.44, −0.07, 0.35, 0.58, 0.61, 0.58, 0.40, 0.05, −0.37, −0.63, −0.57, turning back five times where ordinary PCA’s run from 39.1 to −40.9 without turning once. Fit both on the twelve and count the reversals yourself.", "The twelfth person in the data sits at 156 centimetres, so the people have to be ordered by height before the coordinates are read along the curve. A sign is the solver’s choice, and the count comes out the same either way up. The kernel’s second share is a number the page does not print."],
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
+gamma 0.02: reach 7.1, first share 0.067, total 0.974, gap -0.249`,{...{ hints: ["Each gamma needs its own RadialBasisKernel and its own fit, since both the kernel and the directions change with it.", "The gap is the same calculation as the previous problem, the larger of the inner minimum less the outer maximum and the outer minimum less the inner maximum, read off the first transformed Feature.", "The reach is a number the page derives rather than the library, one over the square root of gamma, which in Python is gamma to the power of minus a half."], check: numberCheck("What is the gap between the two groups at a gamma of 0.01?", 0.477, 0.001, "The chosen gamma lies inside this dataset's measured separation band. A falling first variance share or increasing total feature variance alone does not identify where the groups separate.") },question:"Which kernel widths separate the two rings in this dataset?"}),
+            exercise("Count how often the arc folds",["Part 5 measured the arc at a gamma of 0.002 and found that the first kernel coordinates, read by height, run −0.49, −0.44, −0.07, 0.35, 0.58, 0.61, 0.58, 0.40, 0.05, −0.37, −0.63, −0.57, turning back five times where ordinary PCA’s run from 39.1 to −40.9 without turning once. Fit both on the twelve and count the reversals yourself.", "The twelfth person in the data sits at 156 centimetres, so the people have to be ordered by height before the coordinates are read along the curve. A sign is the solver’s choice, and the count comes out the same either way up. The kernel’s second share is a number the page does not print."],`from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
 
 heights = [120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 156]
 weights = [80, 62, 49, 40, 35, 33, 35, 40, 49, 62, 80, 33]
@@ -1157,8 +1124,7 @@ for label, model in (("kernel", kernel), ("ordinary", PrincipalComponentAnalysis
     # by height. Count how many times the ordered list turns back, which is
     # the smaller of the number of falls and the number of rises between
     # neighbours. Print the ordered list, the shares and the count.
-    pass`,
-              `from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
+    pass`,`from oop_ml import Feature, KernelPrincipalComponentAnalysis, PrincipalComponentAnalysis, RadialBasisKernel
 
 heights = [120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 156]
 weights = [80, 62, 49, 40, 35, 33, 35, 40, 49, 62, 80, 33]
@@ -1173,13 +1139,10 @@ for label, model in (("kernel", kernel), ("ordinary", PrincipalComponentAnalysis
     reversals = min(sum(step < 0 for step in steps), sum(step > 0 for step in steps))
     shares = [round(float(share), 3) for share in model.components.variance_shares]
     print(f"{label} first coordinate by height {[round(value, 2) for value in ordered]}")
-    print(f"{label} shares {shares}, reversals {reversals}")`,
-              `kernel first coordinate by height [-0.49, -0.44, -0.07, 0.35, 0.58, 0.61, 0.58, 0.4, 0.05, -0.37, -0.63, -0.57]
+    print(f"{label} shares {shares}, reversals {reversals}")`,`kernel first coordinate by height [-0.49, -0.44, -0.07, 0.35, 0.58, 0.61, 0.58, 0.4, 0.05, -0.37, -0.63, -0.57]
 kernel shares [0.315, 0.27], reversals 5
 ordinary first coordinate by height [39.12, 31.44, 23.68, 15.84, 7.93, 3.97, -0.03, -8.06, -16.15, -24.31, -32.55, -40.87]
-ordinary shares [0.68, 0.32], reversals 0`,
-              { hints: ["Both models fit on the same list of two Features and both answer transform as a list of Features, so the first direction’s coordinates are the values of the first one for either model.", "by_height holds the positions of the people from shortest to tallest, so indexing the coordinates by it gives the list the page reads.", "A reversal count is the smaller of the number of negative steps and the number of positive steps between neighbours in the ordered list. A list that only falls has no positive steps and counts zero."], check: numberCheck("How many times does the first kernel coordinate turn back when the twelve are read by height?", 5, 0.5, "Both ends of the arc land on one side and the middle on the other, so the coordinate rises and falls five times where ordinary PCA’s falls from 39.1 to −40.9 without turning once. The kernel found the largest spread in the lifted space, which on a curve whose ends are far from everything else is the ends against the middle, and it drew the curve again rather than unrolling it.") },
-            ),
+ordinary shares [0.68, 0.32], reversals 0`,{...{ hints: ["Both models fit on the same list of two Features and both answer transform as a list of Features, so the first direction’s coordinates are the values of the first one for either model.", "by_height holds the positions of the people from shortest to tallest, so indexing the coordinates by it gives the list the page reads.", "A reversal count is the smaller of the number of negative steps and the number of positive steps between neighbours in the ordered list. A list that only falls has no positive steps and counts zero."], check: numberCheck("How many times does the first kernel coordinate turn back when the twelve are read by height?", 5, 0.5, "Maximising variance in kernel feature space does not require preserving order along the original arc. Reversals in the resulting coordinate show why a nonlinear projection is not automatically an unrolled representation.") },question:"Does the largest-variance kernel coordinate preserve order along the arc?"}),
           ],
         },
       ]}

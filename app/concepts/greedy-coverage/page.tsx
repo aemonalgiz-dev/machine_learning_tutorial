@@ -63,14 +63,10 @@ export default function GreedyCoveragePage() {
 <>
               <SubSection title="1. The corpus, the sentence, and what is being chosen">
                 <p>
-                  We work on the same two corpora the merging pages use, so that
-                  nothing in the comparison is a difference of data. The small
-                  one is four words with their counts, low five times, lower
-                  twice, newest six times and widest three, sixteen occurrences
-                  in all. The large one is eighteen short sentences of ordinary
-                  English about reports and costs and analyses, 72 distinct words
-                  across 133 occurrences. Neither contains the sentence this
-                  section carries everywhere.
+                  Suppose our vocabulary has room for only a few reusable pieces. A piece is useful if it can spell positions in the words we need to represent. Once another selected piece already handles those positions, counting them again would exaggerate the next candidate’s benefit. That is the coverage question this lesson investigates.
+                </p>
+                <p>
+                  We use the same two corpora as the merging lessons. The small corpus has low five times, lower twice, newest six times and widest three: sixteen word occurrences. The larger corpus has eighteen report-related sentences, with 72 distinct words across 133 occurrences. Neither contains the sentence we will test.
                 </p>
                 <Equation>{SENTENCE}</Equation>
                 <p>
@@ -937,7 +933,11 @@ export default function GreedyCoveragePage() {
           practice: [
             exercise(
               "Cover the four words, and merge them to the same size",
-              ["Part 2 ran the rule on low, lower, newest and widest and watched four turns cover all 79 positions, 36, then 18, then 15, then 10, with the fit stopping at 16 tokens however many were asked for. Fit the four words asking for 40, and print the rows reached and each chosen piece with what it covered. Then fit merging at 16 rows with its byte rows switched off, and under both print what the corpus costs in pieces and how lower and lowest are cut.", "The lesson gives lowest as six single symbols against three under merging. What it does not give is what the four-word corpus itself costs under a merged vocabulary of the same 16 rows."],
+              [
+  "Use the repeated low, lower, newest and widest corpus to compare greedy coverage with pair merging at the same fitted vocabulary size.",
+  "Request 40 rows from the coverage learner. Print its actual size, each chosen piece with the new positions it covered, and total coverage. Fit BPE at that actual size with byte fallback disabled.",
+  "For both fits, print the total corpus-token count and the pieces and counts for lower and lowest. Lowest is absent from the corpus, so this separates fitting familiar words from reusing their parts."
+],
               `from oop_ml import BytePairEncoding, GreedyCoverageTokenizer
 
 corpus = [
@@ -987,11 +987,21 @@ coverage: corpus 16 pieces
 merging: corpus 48 pieces
   lower: lo w e r</w> (4)
   lowest: lo w est</w> (3)`,
-              { hints: ["chosen_pieces is iterable in the order the pieces were chosen, each with a piece and the coverage it had at the moment it was taken, and it has a total_coverage of its own.", "A corpus costs the sum of what each of its texts encodes to, and encode answers an object with an n_tokens and the texts of its pieces.", "Both fits write the end-of-word mark as </w> on a word’s last symbol, so low</w> is the word low and not the first three letters of lower."], check: numberCheck("How many pieces does the four-word corpus cost under merging at 16 rows?", 48, 0, "At 16 rows merging has made four joins, es, est with its mark, lo and ew, and every one is a rung on the way to a word and not a word, so the sixteen word occurrences still cost 48 pieces. Coverage spent the same four rows on the four whole words and reads the corpus in 16, one piece per occurrence. The price is on the other side. Lowest matches none of the four words and comes back as six symbols, where merging’s rungs read it in three.") },
+              {
+question: "Does covering familiar words also help spell a new one?",
+ hints: [
+  "chosen_pieces records the selection order. Each selection exposes piece and coverage; total_coverage adds newly covered positions.",
+  "The coverage fit may stop before its requested size. Use the same actual row budget for the BPE comparison.",
+  "Sum encoding.n_tokens over all corpus strings, then inspect encoding.texts separately for the two test words."
+], check: numberCheck("How many pieces does the four-word corpus cost under merging at 16 rows?", 48, 0, "BPE uses 48 pieces for this corpus at sixteen rows. Coverage spends its learned entries on the complete familiar words, while BPE’s intermediate parts are more useful on lowest.") },
             ),
             exercise(
               "Spend one, two and three pieces on costing and costly",
-              ["Part 3 took costing three times and costly three times, 39 positions, and showed the rule spending two pieces on cost and the ending ing with its mark, reaching 33 and reading the six words in 15 pieces, where the best pair is the two whole words, covering all 39 and reading them in 6. The two words are spelled in nine symbols, so with the stand-in the alphabet takes ten rows, and asking for 11, 12 and 13 rows buys one, two and three pieces.", "Fit at each of the three sizes and print the pieces chosen with what each covered, the total covered, and what the corpus costs in pieces. The lesson stops at two pieces. The third is where coverage and length come apart most plainly."],
+              [
+  "The supplied corpus contains costing and costly three times each. Give the coverage learner room for one, then two, then three learned pieces and compare coverage with encoded length.",
+  "Fit at vocabulary sizes 11, 12 and 13, which include ten reserved/alphabet rows for this corpus. Print each selected piece and its new coverage, the total positions covered and the corpus-token count.",
+  "Coverage counts positions reached by selected pieces. Encoded length counts the pieces actually needed to write the corpus. Keep the two measurements separate."
+],
               `from oop_ml import GreedyCoverageTokenizer
 
 corpus = ["costing costing costing", "costly costly costly"]
@@ -1017,11 +1027,20 @@ for size in [11, 12, 13]:
   covers 33 of 39, corpus 15 pieces
 3 chosen: cost 24, ing</w> 9, ly</w> 6
   covers 39 of 39, corpus 12 pieces`,
-              { hints: ["n_chosen_pieces gives the number selected. Each chosen piece records how much new coverage it contributed when selected.", "total_coverage adds those contributions. To measure encoded length, add encode(text).n_tokens for the two texts."], check: numberCheck("How many pieces does the corpus cost once the rule has chosen three?", 12, 0, "Adding the marked ending ly covers the final six positions. All 39 are now covered, but the six words still require 12 tokens. Selecting the two whole words would require six. Complete coverage therefore does not establish that we have found the shortest encoding.") },
+              {
+question: "Can complete coverage still leave a longer encoding?",
+ hints: [
+  "Read n_chosen_pieces and chosen_pieces from each fresh fit.",
+  "total_coverage measures covered positions. Sum encode(text).n_tokens for encoded length; one measurement cannot substitute for the other."
+], check: numberCheck("How many pieces does the corpus cost once the rule has chosen three?", 12, 0, "The third learned piece completes coverage but leaves twelve encoded pieces. Selecting whole words would give a shorter representation here, so complete coverage does not establish a shortest encoding.") },
             ),
             exercise(
               "Move the ceiling on how long a piece may be",
-              ["Part 6 fitted the eighteen sentences at 100 tokens under several ceilings on the longest piece. With no ceiling the corpus costs 296 pieces and the held-out sentence 32, and capped at five symbols they cost 324 and 28, against merging’s 344 and 27. Fit coverage with the ceiling at 5, at 6 and at its default of 16, and merging once, all at 100 rows. For each print the first four pieces chosen, what the corpus and the sentence cost, and how the word expect is cut.", "The setting at six is one the lesson’s prose does not quote, and the cut of expect says why the sentence gets shorter where it does."],
+              [
+  "A long selected piece may cover much familiar text while missing a shorter word we later need. Test that trade-off on expect and the held-out Dr. Alvarez sentence.",
+  "Fit GreedyCoverageTokenizer at vocabulary_size=100 with max_piece_length values 5, 6 and 16. For each print its first four selections, total corpus tokens, held-out sentence tokens and expect’s pieces. Fit BPE at the same budget for a separate comparison.",
+  "The limit counts the symbols used by this learner, including its end marker. Keep all other settings fixed."
+],
               `from oop_ml import BytePairEncoding, GreedyCoverageTokenizer
 
 sentences = [
@@ -1097,7 +1116,13 @@ ceiling 6: first he</w> analys re expect
 ceiling 16: first he</w> analys expecte re
   corpus 296, sentence 32, expect: e x p e c t</w>
 merging: corpus 344, sentence 27, expect: exp ec t</w>`,
-              { hints: ["The ceiling is max_piece_length at construction, counted in symbols, and 16 is its default, which the lesson found stops binding past eight.", "chosen_pieces is iterable in the order the pieces were taken, so the first four are the first four turns.", "Each coverage fit takes a couple of seconds, since every run of symbols up to the ceiling is a candidate at every turn."], check: numberCheck("How many pieces does the corpus cost with the longest piece capped at six symbols?", 304, 0, "Six sits between the lesson’s two settings on the corpus, 304 against 296 with no ceiling and 324 at five, and it buys nothing on the sentence, which still costs 32. The cut of expect shows why. At six the rule buys the six unmarked symbols of expect out of expected, and the word expect ends in a marked t, so that piece does not occur in it and the word comes back as six letters. At five it buys expec, which is inside both, and the word costs two pieces. Those four pieces are the whole of the sentence’s gain from 32 to 28.") },
+              {
+question: "How does limiting piece length change what the vocabulary can reuse?",
+ hints: [
+  "max_piece_length is a constructor setting. Six and sixteen can admit pieces that five excludes.",
+  "List chosen_pieces in learned order and inspect the first four; use each selection’s piece.",
+  "Compare expect with the selected piece’s exact spelling. A marked final character is different from the same character inside a longer word."
+], check: numberCheck("How many pieces does the corpus cost with the longest piece capped at six symbols?", 304, 0, "The six-symbol limit gives 304 corpus pieces. Its selected expect is an internal spelling from expected, so it does not match the marked ending of the complete word expect.") },
             ),
           ],
         },

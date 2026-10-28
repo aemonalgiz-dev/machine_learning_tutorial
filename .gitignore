@@ -50,3 +50,7 @@ __pycache__/
 
 # Local content audits, kept out of the repository.
 /audits/
+
+# Local review captures and image authoring prompts.
+/page_feedback/
+/public/branding/*-prompt.txt

@@ -441,13 +441,17 @@ export default function UNetPage() {
             several(
               "Which of these hold for the two skip connections in this U?",
               [
-                "They add no layer, and only widen what one decoder convolution reads",
-                "They cost 720 parameters, all of them in the two decoder convolutions",
-                "They have weights of their own, trained alongside the convolutions",
-                "They leave the two arrangements compared in Part 4 the same size",
-              ],
+                              "They add no layer, and only widen what one decoder convolution reads",
+                              "They cost 720 parameters, all of them in the two decoder convolutions",
+                              "They have weights of their own, trained alongside the convolutions",
+                              "They leave the two arrangements compared in Part 4 the same size",
+                            ],
               [0, 1],
               "Nothing in a join has weights. A join lays one block beside another, and the whole cost is the extra channels the following convolution has to read, which is why the U with skips holds 2,521 parameters against 1,801 without them.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "layer | with the skips | without them\nway down, two convolutions | 336 | 336\nthe middle | 584 | 584\nhalf-size decoder convolution | 8 × (16 × 9 + 1) = 1,160 | 8 × (8 × 9 + 1) = 584\nfull-size decoder convolution | 4 × (12 × 9 + 1) = 436 | 4 × (8 × 9 + 1) = 292\none score per pixel | 5 | 5\nall parameters | 2,521 | 1,801\n\nEach skip concatenates an encoder feature block with a decoder block.\nIt has no weights of its own, but increases the input channel count of the following convolution."
+              },
             ),
             choice(
               "Growing a map by repetition copies each value over a two by two block. Blames of 0.1, 0.2, 0.3 and 0.4 arrive at the four copies of one value. What is owed to the value itself?",
@@ -742,15 +746,19 @@ export default function UNetPage() {
               "It still runs and still trains, because the encoder goes on receiving the blame that comes down through the middle. Only a finite difference check said the slopes were wrong, by 6.838 and 4.054 at the two encoder convolutions on slopes no larger than 9.505. The middle and the decoder sit above the joins, so their slopes came out right either way, and the error is confined to the layers whose answers were read twice and credited once.",
             ),
             choice(
-              "At seed 0 the U without skips gets 3,130 held-out pixels wrong. Where are they?",
+              "What does this error breakdown tell us about the U-Net without skips?",
               [
-                "Nearly all on an edge, 3,007 of them, about as many shape pixels missed as invented",
-                "Spread over edge pixels and other pixels in proportion to how many of each there are",
-                "Mostly inside the shapes, since the middle cannot tell what kind a shape is",
-                "Mostly in the ground far from any shape, which the coarse maps fill in",
-              ],
+                              "Nearly all on an edge, 3,007 of them, about as many shape pixels missed as invented",
+                              "Spread over edge pixels and other pixels in proportion to how many of each there are",
+                              "Mostly inside the shapes, since the middle cannot tell what kind a shape is",
+                              "Mostly in the ground far from any shape, which the coarse maps fill in",
+                            ],
               0,
               "It misses 1,760 shape pixels and invents 1,370, so its shapes come out about the right size and are off by a pixel or so along most of their outline. Away from the edges it gets 0.998 of pixels right, nearly as many as the U with skips, since the middle can place a shape to within about four pixels and no closer. The skips raised the share of edge pixels right from between 0.62 and 0.76 to about 0.997.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Seed 0, U-Net without skips:\nwrong held-out pixels: 3,130\nwrong pixels on an edge: 3,007\nshape pixels incorrectly called ground: 1,760\nground pixels incorrectly called shape: 1,370\n\nHeld-out pixels on edges: 12,433; other pixels: 49,007."
+              },
             ),
             trueFalse(
               "After twenty passes, about as much blame reaches the first convolution across the full-size skip as through the middle.",
@@ -760,13 +768,17 @@ export default function UNetPage() {
             several(
               "Which of these did the training comparison find?",
               [
-                "At seed 0 the U with skips finishes at an overlap of 0.992",
-                "The U without skips does not get past 0.64 at any pass",
-                "The worst seed without skips still gets 0.906 of pixels right",
-                "The three seeds without skips agree with each other within 0.004",
-              ],
+                              "At seed 0 the U with skips finishes at an overlap of 0.992",
+                              "The U without skips does not get past 0.64 at any pass",
+                              "The worst seed without skips still gets 0.906 of pixels right",
+                              "The three seeds without skips agree with each other within 0.004",
+                            ],
               [0, 1, 2],
               "It is the U with skips whose three seeds agree within 0.004; without them they spread from 0.163 to 0.623. And 0.906 of pixels right is only 0.016 above what answering ground everywhere gets, which is how little that score separates the two arrangements.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "held-out, after pass 20 | seed 0 | seed 1 | seed 2\noverlap, with the skips | 0.992 | 0.995 | 0.995\noverlap, without them | 0.623 | 0.163 | 0.559\npixels right, with the skips | 0.9992 | 0.9994 | 0.9994\npixels right, without them | 0.949 | 0.906 | 0.935\n\nDuring these measured runs the no-skip U-Net never exceeds overlap 0.64.\nCalling every pixel ground gives pixel accuracy about 0.889."
+              },
             ),
             choice(
               "Which kind does the U without skips do worst on?",
@@ -1002,13 +1014,17 @@ export default function UNetPage() {
             several(
               "Which of these hold on the sixty rings, a kind neither arrangement trained on?",
               [
-                "With the skips, the errors are ring pixels called ground",
+                "With skips, the dominant errors are ring pixels called ground",
                 "With the skips, at most 2 of the 2,046 pixels inside the holes are called shape",
                 "Without the skips, seed 0 called 245 of those hole pixels shape",
-                "Both arrangements had to be retrained on rings before they could answer",
+                "Both arrangements had to be retrained on rings before they could answer"
               ],
               [0, 1, 2],
               "A U-Net is asked only which pixels are shape, so a kind it never saw is still a question it can answer without retraining. The handful of hole pixels called shape is what says it did not simply fill a ring in as though it were a disc.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "60 rings, absent from both training sets; evaluated directly without retraining.\nTrue ring pixels: 2,257; pixels inside ring holes: 2,046.\nWith skips, missed ring pixels, seeds 0/1/2: 20 / 70 / 11.\nWith skips, at most 2 hole pixels are called shape.\nWithout skips, seed 0 calls 245 hole pixels shape and misses 908 ring pixels."
+              },
             ),
             choice(
               "Why can the U read a 32 by 32 picture without retraining, where the classifier cannot?",
@@ -1022,15 +1038,18 @@ export default function UNetPage() {
               "A dense layer has one weight per number of the flattened row, which fixes the classifier at sixteen by sixteen and no other size. At the seams a window reads the neighbouring picture rather than the zeros it saw at the frame during training, and the call at every pixel came out the same as when the four were read apart.",
             ),
             several(
-              "A picture whose side does not halve evenly breaks the join. Which of these are true of the ways out?",
+              "For this U-Net with two floor-halving poolings and two exact doublings, which statements describe the shape problem and its possible repairs?",
               [
                 "Cropping the larger block down is what the paper did, and it throws away the encoder’s outermost rows",
-                "Padding up to the next side that halves evenly invents pixels at the border the network then has to answer for",
-                "A U with two poolings is defined for sides divisible by four",
-                "Without the joins the trouble moves to the answer, which for a side of 30 comes out 28 wide",
+                "Padding the input to a side divisible by four introduces border values that the network processes",
+                "Without extra cropping or padding, both joins in this implementation match when the side is divisible by four",
+                "Without the joins the trouble moves to the answer, which for a side of 30 comes out 28 wide"
               ],
               [0, 1, 2, 3],
-              "All four hold. A U with d poolings needs a side divisible by two to the power d, and every other side forces a decision about which pixels to invent or throw away. Dropping the joins does not remove the difficulty, since halving 30 twice and doubling back gives 28, and an answer 28 wide cannot be compared with a mask of 30. Resizing the picture is the third way out, and it changes every shape in it.",
+              "For this implementation, two floor halvings followed by two doublings recover a side exactly when it is divisible by four. With side 30 the decoder returns side 28, so a direct comparison with the original mask fails. Cropping, padding and resizing are design choices; none makes divisibility a universal requirement of every U-Net architecture.",
+              {
+                "description": "The lesson’s convolutions preserve spatial size. Direct skip joins require equal spatial extents and do not automatically crop, pad or resize. Consider the unmodified two-pooling implementation unless a repair is explicitly stated. A padded prediction can be cropped back to the original image for evaluation."
+              },
             ),
         ],
         },
@@ -1039,7 +1058,10 @@ export default function UNetPage() {
           practice: [
             exercise(
               "Count the U with its skips, without them, and with one",
-              ["Part 2 counts the U layer by layer and finds that a skip adds no layer, only channels for one decoder convolution to read. The starter builds the two convolutions of the way down and the middle for a sixteen by sixteen picture, three times over, with the number of channels each skip would add.", "Add the half-size decoder convolution, the full-size one and the one by one convolution that scores each pixel, then print every convolution’s parameter count and the total for each of the three arrangements. The page gives 2,521 with both skips and 1,801 with neither. The U with the full-size skip only is not on the page."],
+              [
+  "Complete the supplied decoder convolutions and one-by-one pixel-score layer for the U-shaped layouts with both skips, neither skip and the full-size skip only.",
+  "Print every convolution’s parameter count and each total. A skip concatenates retained channels with the upsampled channels, increasing the next convolution’s input width without storing its own learned weights."
+],
               `from oop_ml import Conv2d, Identity, RectifiedLinear
 
 bend = RectifiedLinear()
@@ -1077,11 +1099,17 @@ neither skip: {'down 1': 40, 'down 2': 296, 'middle': 584, 'decoder half': 584, 
 neither skip: 1801 parameters in all
 the full-size skip only: {'down 1': 40, 'down 2': 296, 'middle': 584, 'decoder half': 584, 'decoder full': 436, 'score': 5}
 the full-size skip only: 1945 parameters in all`,
-              { hints: ["A decoder convolution reads the maps that came up from below with the encoder’s maps laid after them, so its reads is the eight repeated channels plus whatever the skip adds, at the size of that depth.", "A convolution keeps what it learns in kernels and bias_vector, and each has a size. The pooling and the repetition between these layers hold nothing, so the convolutions are the whole count.", "A one by one convolution needs no padding to answer at every pixel, so the score layer leaves the padding out."], check: numberCheck("How many parameters does the U hold with the full-size skip only?", 1945, 0.5, "A skip has no weights of its own. Its whole cost is the extra channels one decoder convolution reads, which takes the full-size decoder from 292 parameters to 436 and the half-size one from 584 to 1,160. With both the U holds the page’s 2,521 and with neither 1,801, so the two skips cost 144 and 576, the 720 of Part 2, and the full-size skip alone leaves the U at 1,945.") },
+              { hints: [
+  "Use the channel counts supplied for each layout rather than reusing one decoder in all three.",
+  "Count kernels over both input channels and output filters, then include one bias per output filter."
+], check: numberCheck("How many parameters does the U hold with the full-size skip only?", 1945, 0.5, "The full-size-skip layout stores 1945 parameters. Its concatenated encoder channels increase the following convolution’s weight count without giving the skip itself weights."), question: "How do skip connections change the decoder’s input-channel count?" },
             ),
             exercise(
               "Grow a two by two map, and send the blame back",
-              ["Part 2 grows a map by copying each value over a two by two block, and works the way back by hand on a map of four values. Build the repetition for one map of two by two, hand it the values 1, 2, 3 and 4, and print what it answers.", "Then send blame back. Put 0.1, 0.2, 0.3 and 0.4 on the top left block of the answer, which is the page’s example, and 1.0 on each of the four cells of the bottom right block, and print what the layer hands down to the four values and the gradient it reports for itself."],
+              [
+  "Build the supplied nearest-neighbour repetition layer on the two-by-two map [1,2;3,4]. Print its input/output shapes and enlarged map.",
+  "Use the specified upstream contributions on the upper-left and lower-right repeated blocks, with zero elsewhere. Print input derivatives, the upper-left total and the layer’s parameter gradient."
+],
               `import numpy as np
 from oop_ml import NearestUpsample2d
 
@@ -1119,11 +1147,18 @@ print(f"the layer's own gradient is {correction.gradient}")`,
  [0. 4.]]
 the top left value is owed 1.0
 the layer's own gradient is None`,
-              { hints: ["NearestUpsample2d takes the arrangement it reads as channels, height and width, and repeats by a factor of two unless told otherwise.", "A layer reads a block whose leading axis is rows, so one map goes in as small[None, None], and the response’s outputs come back arranged the same way.", "correction_for takes the response and the blame arriving at the answer. What it hands down is passed_down, arranged like what the layer read, and its gradient is what the layer would learn from."], check: numberCheck("What is the top left value owed?", 1.0, 0.05, "Moving the value moves all four of its copies together, so its slope is the total of the four slopes that arrive at them, the 1.0 Part 2 worked by hand. The bottom right value is owed 4.0 for the same reason, and the two values whose copies were blamed nothing are owed nothing. The gradient is None because a repetition has no weights, which is why Part 2 says it has nothing to get wrong.") },
+              { hints: [
+  "Every repeated output depends on one original cell. Their derivatives therefore add at that cell.",
+  "The repetition stores no trainable weights, even though it passes derivatives backward."
+], check: numberCheck("What input derivative reaches the original upper-left cell after its repeated outputs are combined?", 1.0, 0.05, "The upper-left input derivative is 1.0. Every repeated output from that one source contributes back to the same source cell."), question: "How should repeated upsampled cells send gradients back to their shared source?" },
             ),
             exercise(
               "Walk one join back by hand, and check it with a nudge",
-              ["Part 3 carries the blame back through a join by splitting it in the order the block was built, and adding the skip’s share where the encoder’s answer was read twice. The starter builds the smallest U that has a join. One convolution on the way down whose answer is kept, a pooling, a middle convolution, a repetition, and a last convolution that reads the four repeated maps with the four kept ones laid after them and answers one score per pixel. It runs the forward walk three times, twice with one weight of the first convolution nudged a millionth up and down, and measures that weight’s slope from the two losses.", "Write the walk back from the last forward pass, which is the one with no nudge. Split the blame the last convolution hands down into the part for the repeated maps and the part for the kept ones, carry the first part down through the repetition, the middle and the pooling, and ask the first convolution for its correction twice, once from the two parts added and once from the part that came down alone. Print both slopes for the nudged weight beside the measured one, and the lengths of the two parts and of their sum."],
+              [
+  "Use the supplied minimal U and finite-difference result for one first-convolution weight. Run backward from the unchanged forward response.",
+  "Split the final convolution’s input derivative in concatenation order: repeated middle maps first, retained encoder maps afterward. Carry the middle branch back through repetition, middle convolution and pooling, then add the skip contribution at the encoder output.",
+  "Print the chosen weight’s measured derivative, full-path derivative and derivative omitting the skip, plus norms of both arriving contributions and their sum."
+],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy, Conv2d, Flatten, Identity, MaxPool2d, NearestUpsample2d, RectifiedLinear
 
@@ -1202,11 +1237,17 @@ print(f"length across the skip {np.linalg.norm(across):.3f}, down through the po
 slope from the walk with the skip's share added 0.0897
 slope from the walk with the skip's share left out 0.4354
 length across the skip 3.499, down through the pooling 1.179, their sum 3.752`,
-              { hints: ["Every layer’s correction_for takes that layer’s own response and the blame arriving at its answer, and its passed_down is the blame for what the layer read, which is what the layer beneath is handed next.", "The joined block was built with the repeated maps first and the kept maps after them, so the blame splits the same way, the first four channels for the repetition and the last four across the skip.", "A convolution’s gradient holds its kernel slopes flattened to one row per filter, so the weight at filter 0, channel 0, row 1, column 1 of a three by three kernel is entry 4 of row 0.", "The length of a block of blame is the square root of the sum of its squares, which np.linalg.norm gives for a block of any arrangement."], check: numberCheck("What slope does the walk give the nudged weight when the two parts are added, to four places?", 0.0897, 0.0005, "With the two parts added the walk gives 0.0897, the slope the nudge measured. Leaving the skip’s share out gives 0.4354, nearly five times too large, from a walk that ran without complaint, which is the mistake Part 3 says only a check like this one finds. The first convolution’s answer was read twice, by the pooling and by the last convolution across the join, so it is owed the slope from both uses. The sum of the two parts is shorter than their two lengths added because the two blocks point partly against each other.") },
+              { hints: [
+  "Keep the channel slices aligned with the forward concatenation order.",
+  "Both routes read the same encoder output. Sum their derivatives before its correction_for call."
+], check: numberCheck("What slope does the walk give the nudged weight when the two parts are added, to four places?", 0.0897, 0.0005, "The complete-path derivative is 0.0897 and matches the finite difference. Omitting the skip route removes a real contribution to the shared encoder output."), question: "Which derivative contribution is lost if the skip path is omitted?" },
             ),
             exercise(
               "Train a small U with its skip and without it",
-              ["Part 4 trains the U twice, with the joins and without. This problem does the same on a collection small enough to train in a few seconds. Eighty pictures twelve pixels on a side, each holding a square outline five pixels across and one pixel thick, the kind the page found hardest without skips, lit at 0.6 on a ground of 0.1 with a little noise. The first forty train the network and the last forty are held out. The U has two poolings, a middle, one repetition by a factor of four and one full-size skip, and the starter trains it each way for 100 passes at a step size of 0.005, with the walk of Part 3 written as a loop.", "Write the scoring of Part 1 on the held-out forty. Call a pixel shape where its score is above zero, which is a probability above one half, and print the share of pixels right, the overlap averaged over pictures and how many pixels were called shape. After both arrangements, print what calling every pixel ground would get."],
+              [
+  "The supplied small U training uses forty labelled outline images and keeps forty separate for evaluation. Compare the trained one-full-size-skip network with the no-skip version.",
+  "On held-out images call pixels shape when raw score exceeds zero. Print pixel accuracy, mean per-image intersection-over-union and predicted shape-pixel count for each, then the all-background pixel-accuracy baseline."
+],
               `import numpy as np
 from oop_ml import BinaryCrossEntropy, Conv2d, Flatten, Identity, MaxPool2d, NearestUpsample2d, RectifiedLinear
 
@@ -1309,7 +1350,10 @@ print(f"calling every pixel ground gets {np.mean(targets[40:] == 0):.3f} of pixe
               `with the skip: pixels right 1.000, overlap 1.000, pixels called shape 640
 without it: pixels right 0.908, overlap 0.379, pixels called shape 554
 calling every pixel ground gets 0.889 of pixels right`,
-              { hints: ["forward answers every layer’s response in order, so the scores are the outputs of the last one, a row of 144 per picture, and a score above zero is a call of shape.", "The overlap for one picture is the count of pixels both called and truly shape over the count of pixels either called or truly shape. With rows of True and False those are & and |, summed along each row, and the mean over the forty rows is the score.", "Every picture here holds sixteen shape pixels, so the pixels in either set are never none and the division is always defined, which Part 7 points out is not so for a picture with no shape in it.", "Calling every pixel ground is right exactly where the target is zero."], check: numberCheck("What share of the held-out pixels does the U without its skip get right, to three places?", 0.908, 0.01, "Without the skip the U gets 0.908 of pixels right, only 0.019 above the 0.889 that calling every pixel ground gets, while its overlap is 0.379 against 1.000 with the skip. A square outline covers sixteen of the 144 pixels, the same one in nine as the page’s collection, so the share of pixels right is dominated by ground here too and makes the two arrangements look far closer than they are. The outline is one pixel thick and the middle works on a grid four pixels wide, which is Part 4’s point that a one-pixel line cannot be drawn from blocks of four.") },
+              { hints: [
+  "Use the binary pixel labels for intersection and union, averaging the per-image ratios as specified.",
+  "Most pixels are background. Compare the shape overlap with the accuracy baseline before judging a model."
+], check: numberCheck("What share of the held-out pixels does the U without its skip get right, to three places?", 0.908, 0.01, "The no-skip model has pixel accuracy 0.908. Compare its overlap with the all-background baseline before treating that accuracy as a good segmentation."), question: "Can pixel accuracy conceal a poor shape mask?" },
             ),
           ],
         },

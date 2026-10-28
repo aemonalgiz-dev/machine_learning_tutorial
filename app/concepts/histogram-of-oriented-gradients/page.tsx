@@ -96,18 +96,8 @@ export default function OrientedGradientsPage() {
                   of those 2304 numbers is now different.
                 </p>
                 <Equation>{`relit = 1.6 × here + 0.15`}</Equation>
-                <p>
-                  Two lists of the same length can be compared one position at
-                  a time. Take the difference at every pixel, square it, add
-                  the 2304 squares up and take the square root, and the result
-                  is one number saying how far apart the two lists are. The
-                  same arithmetic on one list by itself, squaring each
-                  brightness rather than each difference, gives that
-                  list&rsquo;s own length, which is the yardstick a distance
-                  has to be read against, since a distance means nothing until
-                  it is set beside how long the lists themselves are. Every
-                  distance and every length on this page is measured this way.
-                </p>
+                <p>We can first compare the two images as lists of brightness values, keeping matching pixel positions aligned. For each position, take the brightness difference. Square the differences, add them, and take a square root. This is Euclidean distance between the flattened images.</p>
+              <p>The same operation applied to one image against an all-zero image gives the vector&apos;s length, also called its norm. That length is a useful reference scale for the distance. It does not establish whether the difference came from lighting, a moved shape or another cause. The descriptor we build next will choose which of those changes to retain.</p>
                 <Equation>{`apart  = √( Σ over pixels of (relit − here)² )
 
 length = √( Σ over pixels of here² )`}</Equation>
@@ -1187,10 +1177,7 @@ length = blocks across × blocks down × block side² × buckets`}</Equation>
         {
           title: "Practice. Describing The Scene With The Library",
           practice: [
-            exercise(
-              "Work the one-edge patch through with the library",
-              ["Part 2 takes a patch 6 pixels square, dark on the left and bright on the right, with cells 3 pixels on a side, and counts 12 of weight into each of its four cells, all of it in bucket 0 under whole votes. Part 3 switches the sharing on and the same 12 comes apart into 6 in bucket 0 and 6 in bucket 8. Build the patch, count its votes under both rules with HistogramOfOrientedGradients, and read the top-left cell.", "Then describe the patch under the default settings. The four cells make one block, so the description is a single unit vector of 36 numbers, and it is the block of eight sixes that Part 6 works on paper. Read how long it is, its largest entry, and how many of its entries sit above the 0.2 limit."],
-              `import numpy as np
+            exercise("Work the one-edge patch through with the library",["Part 2 takes a patch 6 pixels square, dark on the left and bright on the right, with cells 3 pixels on a side, and counts 12 of weight into each of its four cells, all of it in bucket 0 under whole votes. Part 3 switches the sharing on and the same 12 comes apart into 6 in bucket 0 and 6 in bucket 8. Build the patch, count its votes under both rules with HistogramOfOrientedGradients, and read the top-left cell.", "Then describe the patch under the default settings. The four cells make one block, so the description is a single unit vector of 36 numbers, and it is the block of eight sixes that Part 6 works on paper. Read how long it is, its largest entry, and how many of its entries sit above the 0.2 limit."],`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     HistogramOfOrientedGradients,
     VoteSharing,
@@ -1205,8 +1192,7 @@ shared = HistogramOfOrientedGradients(cell_side=3)
 # grid of cells, then the top-left cell's nine buckets under each rule.
 # Then describe the patch with the shared rule, and print how many numbers
 # the description holds, its length, its largest entry and how many of its
-# entries are above 0.2.`,
-              `import numpy as np
+# entries are above 0.2.`,`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     HistogramOfOrientedGradients,
     VoteSharing,
@@ -1226,18 +1212,12 @@ print(f"top-left cell under shared votes {counted_shared.histogram_at(0, 0)}")
 described = shared.describe(patch)
 entries = np.asarray(described)
 print(f"description holds {described.n_values} numbers of length {described.length:.4f}")
-print(f"largest entry {entries.max():.4f} with {int((entries > 0.2).sum())} entries above 0.2")`,
-              `total weight 48.0 over 2 by 2 cells
+print(f"largest entry {entries.max():.4f} with {int((entries > 0.2).sum())} entries above 0.2")`,`total weight 48.0 over 2 by 2 cells
 top-left cell under whole votes  [12.  0.  0.  0.  0.  0.  0.  0.  0.]
 top-left cell under shared votes [6. 0. 0. 0. 0. 0. 0. 0. 6.]
 description holds 36 numbers of length 1.0000
-largest entry 0.3536 with 8 entries above 0.2`,
-              { hints: ["cell_histograms takes a Picture and answers an object holding one histogram per cell. total_weight, n_cell_rows and n_cell_columns are properties of it, and histogram_at(row, column) is one cell’s nine buckets as an array.", "The shared rule is the default, so the second model needs only the cell side. The whole-vote rule is VoteSharing.WHOLE_TO_NEAREST.", "describe takes the same Picture and answers the finished description. n_values and length are properties of it, and np.asarray turns it into a plain array for max and for a comparison with 0.2."], check: numberCheck("What is the largest entry of the finished description?", 0.3536, 0.0005, "The patch is one block of four identical cells, each holding 6 in bucket 0 and 6 in bucket 8, so the block has eight entries of 6 and twenty-eight of nought, which is exactly the block Part 6 works on paper. Its length is the square root of 288, and 6 over that is 0.3536. The cut to 0.2 takes all eight entries down together and the second division puts every one of them back, so the limit holds nothing here and all eight entries end above it.") },
-            ),
-            exercise(
-              "Turn a ramp across a bucket boundary",
-              ["Part 3 draws a picture whose brightness rises along a straight ramp, so that every interior pixel has the same direction, and turns the ramp from 19 degrees to 21, across the boundary between the first two buckets. Draw the two ramps, 24 pixels square, and read the middle cell at row 1 and column 1 under each voting rule.", "The lesson reports the cell moving 724.08 under whole votes and 72.41 under sharing. Print those, the shares in each bucket at both angles, and one number the lesson does not give, which is how much weight the cell holds."],
-              `import numpy as np
+largest entry 0.3536 with 8 entries above 0.2`,{...{ hints: ["cell_histograms takes a Picture and answers an object holding one histogram per cell. total_weight, n_cell_rows and n_cell_columns are properties of it, and histogram_at(row, column) is one cell’s nine buckets as an array.", "The shared rule is the default, so the second model needs only the cell side. The whole-vote rule is VoteSharing.WHOLE_TO_NEAREST.", "describe takes the same Picture and answers the finished description. n_values and length are properties of it, and np.asarray turns it into a plain array for max and for a comparison with 0.2."], check: numberCheck("What is the largest entry of the finished description?", 0.3536, 0.0005, "The nonzero entries are clipped together and then renormalised. That second normalisation can place them above the clipping value again, so the intermediate clipping level is not a final upper bound on descriptor entries.") },question:"How do edge votes become a normalised HOG descriptor?"}),
+            exercise("Turn a ramp across a bucket boundary",["Part 3 draws a picture whose brightness rises along a straight ramp, so that every interior pixel has the same direction, and turns the ramp from 19 degrees to 21, across the boundary between the first two buckets. Draw the two ramps, 24 pixels square, and read the middle cell at row 1 and column 1 under each voting rule.", "The lesson reports the cell moving 724.08 under whole votes and 72.41 under sharing. Print those, the shares in each bucket at both angles, and one number the lesson does not give, which is how much weight the cell holds."],`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     HistogramOfOrientedGradients,
     VoteSharing,
@@ -1252,8 +1232,7 @@ for sharing in (VoteSharing.WHOLE_TO_NEAREST, VoteSharing.SPLIT_BETWEEN_NEIGHBOU
     model = HistogramOfOrientedGradients(vote_sharing=sharing)
     # Read the middle cell, at row 1 and column 1, from each ramp's histograms.
     # Print the rule, the cell's total weight, its shares at each angle
-    # rounded to two places, and how far the cell moved between the two.`,
-              `import numpy as np
+    # rounded to two places, and how far the cell moved between the two.`,`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     HistogramOfOrientedGradients,
     VoteSharing,
@@ -1272,8 +1251,7 @@ for sharing in (VoteSharing.WHOLE_TO_NEAREST, VoteSharing.SPLIT_BETWEEN_NEIGHBOU
     print(f"  cell weight {before.sum():.1f}")
     print(f"  shares at 19 degrees {np.round(before / before.sum(), 2)}")
     print(f"  shares at 21 degrees {np.round(after / after.sum(), 2)}")
-    print(f"  moved {np.linalg.norm(after - before):.2f}")`,
-              `whole_to_nearest
+    print(f"  moved {np.linalg.norm(after - before):.2f}")`,`whole_to_nearest
   cell weight 512.0
   shares at 19 degrees [1. 0. 0. 0. 0. 0. 0. 0. 0.]
   shares at 21 degrees [0. 1. 0. 0. 0. 0. 0. 0. 0.]
@@ -1282,13 +1260,8 @@ split_between_neighbours
   cell weight 512.0
   shares at 19 degrees [0.55 0.45 0.   0.   0.   0.   0.   0.   0.  ]
   shares at 21 degrees [0.45 0.55 0.   0.   0.   0.   0.   0.   0.  ]
-  moved 72.41`,
-              { hints: ["The default cell side is 8, so a 24 pixel ramp is 3 cells by 3 and the cell at row 1, column 1 is the one that touches no border.", "histogram_at(1, 1) answers that cell’s nine buckets as a frozen array. Wrap it in np.asarray so the arithmetic that follows works on a plain array, and the weight is its sum.", "The move between the two angles is the length of the difference between the two histograms, which is np.linalg.norm of one minus the other, the same yardstick Part 1 uses on two lists of brightnesses."], check: numberCheck("How much weight does the middle cell hold, under either rule?", 512, 0.5, "The ramp rises by one unit of brightness per pixel along its direction, and the sweep reads that rate of change as 8 at every interior pixel, so a cell of 8 by 8 pixels collects 64 votes of 8. Under whole votes all 512 leave bucket 0 for bucket 1, a move of 512 times the square root of two, which is the 724.08 of Part 3, and under sharing a tenth of the cell moves, which is the 72.41. The weight is the same under both rules because sharing decides where a vote goes and never how much it weighs.") },
-            ),
-            exercise(
-              "Relight the scene and turn it, and measure both at each stage",
-              ["Rebuild the 48 pixel scene from Part 1, a square, a disc, a diagonal bar, three crosses and a brightness ramp, and make the three relit copies Part 4 measures, the shift of 0.15 alone, the multiplier of 1.6 alone and the two together, along with the quarter turn of Part 6.", "Describe the scene with the blocks left alone and under the default rule. Part 4 reports the unrescaled description moving 8.4 times ten to the minus fourteenth for the shift and 132.89 for the multiplier against its own length of 221.49, and Part 6 reports the quarter turn moving the finished description 5.2331 against a length of 5. Print all of those to six significant figures, with the two figures Part 6 sets side by side, the turn and the whole relighting under the default rule, in the same block of output."],
-              `import numpy as np
+  moved 72.41`,{...{ hints: ["The default cell side is 8, so a 24 pixel ramp is 3 cells by 3 and the cell at row 1, column 1 is the one that touches no border.", "histogram_at(1, 1) answers that cell’s nine buckets as a frozen array. Wrap it in np.asarray so the arithmetic that follows works on a plain array, and the weight is its sum.", "The move between the two angles is the length of the difference between the two histograms, which is np.linalg.norm of one minus the other, the same yardstick Part 1 uses on two lists of brightnesses."], check: numberCheck("How much weight does the middle cell hold, under either rule?", 512, 0.5, "Sharing changes the direction bins receiving each gradient vote, not the total gradient magnitude. The cell keeps its total weight while a small angle change redistributes that weight more gradually.") },question:"Does sharing an edge vote make a small direction change less abrupt?"}),
+            exercise("Relight the scene and turn it, and measure both at each stage",["Rebuild the 48 pixel scene from Part 1, a square, a disc, a diagonal bar, three crosses and a brightness ramp, and make the three relit copies Part 4 measures, the shift of 0.15 alone, the multiplier of 1.6 alone and the two together, along with the quarter turn of Part 6.", "Describe the scene with the blocks left alone and under the default rule. Part 4 reports the unrescaled description moving 8.4 times ten to the minus fourteenth for the shift and 132.89 for the multiplier against its own length of 221.49, and Part 6 reports the quarter turn moving the finished description 5.2331 against a length of 5. Print all of those to six significant figures, with the two figures Part 6 sets side by side, the turn and the whole relighting under the default rule, in the same block of output."],`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     BlockNormalisation,
     HistogramOfOrientedGradients,
@@ -1311,8 +1284,7 @@ here = Picture(canvas)
 changes = {"shift": canvas + 0.15, "scale": canvas * 1.6, "both": canvas * 1.6 + 0.15, "turn": np.rot90(canvas)}
 # For the blocks left alone and for the default rule, describe the scene,
 # print the description's length, and print how far each of the four changes
-# moves it, to six significant figures.`,
-              `import numpy as np
+# moves it, to six significant figures.`,`import numpy as np
 from oop_ml.core.computer_vision.oriented_gradients import (
     BlockNormalisation,
     HistogramOfOrientedGradients,
@@ -1338,8 +1310,7 @@ for rule in (BlockNormalisation.NONE, BlockNormalisation.L2_CLIPPED):
     described = model.describe(here)
     print(f"{rule.value} length {described.length:.6g}")
     for name, values in changes.items():
-        print(f"  {name} moves it {described.distance_to(model.describe(Picture(values))):.6g}")`,
-              `none length 221.49
+        print(f"  {name} moves it {described.distance_to(model.describe(Picture(values))):.6g}")`,`none length 221.49
   shift moves it 8.35981e-14
   scale moves it 132.894
   both moves it 132.894
@@ -1348,13 +1319,8 @@ l2_clipped length 5
   shift moves it 1.9318e-15
   scale moves it 1.9759e-15
   both moves it 2.29922e-15
-  turn moves it 5.23308`,
-              { hints: ["A model is configured at construction and reads a picture with describe. The only setting that changes between the two runs is block_normalisation, which takes BlockNormalisation.NONE or BlockNormalisation.L2_CLIPPED, the default.", "Each changed copy of the canvas is a plain array until Picture wraps it, and describe wants the Picture. The original canvas stays as it was, since the arithmetic made new arrays rather than writing into it.", "distance_to is a method of one description taking another, and length is a property. A format of .6g shows the tiny moves as powers of ten rather than as 0.000000."], check: numberCheck("How far does the quarter turn move the finished description, under the default rule?", 5.23308, 0.0005, "Every stage measures a direction from a fixed axis and assigns a pixel to a cell by its position, so a quarter turn turns every direction and moves every pixel into a different cell, and the description, whose own length is 5, moves further than its whole length. The same relighting that moved the unrescaled description by 132.894 moves the rescaled one by about ten to the minus fifteenth, which is the pair of figures Part 6 says must always be quoted together.") },
-            ),
-            exercise(
-              "Ask for three things the method does not define",
-              ["Part 6 lists the cases the arithmetic has no answer for, and three of them the library refuses by name. Hand it a 20 by 20 picture at the default cell side of 8, which does not divide into whole cells. Ask for the distance between the descriptions of a 48 by 48 picture and a 24 by 24 one, which are different lengths. And construct a model whose 2 by 2 blocks step 3 cells at a time, which would leave cells no block covers.", "Catch each refusal and print the name of its class and its message. The first two derive from the library’s own base error. The third is refused at construction, before any picture exists, by the validation the model’s own constructor runs, so it arrives as a validation error rather than as one of the library’s."],
-              `import numpy as np
+  turn moves it 5.23308`,{...{ hints: ["A model is configured at construction and reads a picture with describe. The only setting that changes between the two runs is block_normalisation, which takes BlockNormalisation.NONE or BlockNormalisation.L2_CLIPPED, the default.", "Each changed copy of the canvas is a plain array until Picture wraps it, and describe wants the Picture. The original canvas stays as it was, since the arithmetic made new arrays rather than writing into it.", "distance_to is a method of one description taking another, and length is a property. A format of .6g shows the tiny moves as powers of ten rather than as 0.000000."], check: numberCheck("How far does the quarter turn move the finished description, under the default rule?", 5.23308, 0.0005, "Normalisation nearly removes this uniform relighting, but a quarter turn changes both cell locations and directions measured from fixed image axes. HOG is not generally rotation invariant.") },question:"Which changes survive HOG normalisation: relighting or rotating the scene?"}),
+            exercise("Ask for three things the method does not define",["Part 6 lists the cases the arithmetic has no answer for, and three of them the library refuses by name. Hand it a 20 by 20 picture at the default cell side of 8, which does not divide into whole cells. Ask for the distance between the descriptions of a 48 by 48 picture and a 24 by 24 one, which are different lengths. And construct a model whose 2 by 2 blocks step 3 cells at a time, which would leave cells no block covers.", "Catch each refusal and print the name of its class and its message. The first two derive from the library’s own base error. The third is refused at construction, before any picture exists, by the validation the model’s own constructor runs, so it arrives as a validation error rather than as one of the library’s."],`import numpy as np
 from oop_ml import MLLibError
 from oop_ml.core.computer_vision.oriented_gradients import HistogramOfOrientedGradients
 from oop_ml.core.computer_vision.picture import Picture
@@ -1365,8 +1331,7 @@ blank = {side: Picture(np.zeros((side, side))) for side in (20, 24, 48)}
 
 # Try each of the three in turn, catching what the library raises, and print
 # the class name and the message. The third refusal comes from the
-# constructor, so the message is the first entry of its errors().`,
-              `import numpy as np
+# constructor, so the message is the first entry of its errors().`,`import numpy as np
 from oop_ml import MLLibError
 from oop_ml.core.computer_vision.oriented_gradients import HistogramOfOrientedGradients
 from oop_ml.core.computer_vision.picture import Picture
@@ -1391,15 +1356,12 @@ try:
     HistogramOfOrientedGradients(block_stride_in_cells=3)
 except ValidationError as refusal:
     print(type(refusal).__name__)
-    print(refusal.errors()[0]["msg"])`,
-              `ShapeMismatchError
+    print(refusal.errors()[0]["msg"])`,`ShapeMismatchError
 a 20 by 20 patch does not divide into whole 8 by 8 cells, and the leftover strip would either vote in a cell of a different size or not vote at all
 ShapeMismatchError
 two descriptions can only be compared position by position, and these are 900 and 144 long, so they were built under different settings
 ValidationError
-Value error, blocks 2 cells across stepping 3 cells at a time leave cells that no block covers, so those cells would not reach the answer at all; the stride is at most the block's own side`,
-              { hints: ["A blank picture describes without complaint, since a block with no weight comes back as noughts, so the second refusal is about the two lengths alone. The 48 by 48 picture describes in 900 numbers and the 24 by 24 one in 144.", "The model is a pydantic model, and a rule that spans two of its fields is checked when it is constructed. pydantic wraps that check in a ValidationError whose errors() lists each failure as a dictionary with the message under msg."] },
-            ),
+Value error, blocks 2 cells across stepping 3 cells at a time leave cells that no block covers, so those cells would not reach the answer at all; the stride is at most the block's own side`,{...{ hints: ["A blank picture describes without complaint, since a block with no weight comes back as noughts, so the second refusal is about the two lengths alone. The 48 by 48 picture describes in 900 numbers and the 24 by 24 one in 144.", "The model is a pydantic model, and a rule that spans two of its fields is checked when it is constructed. pydantic wraps that check in a ValidationError whose errors() lists each failure as a dictionary with the message under msg."] },question:"Which image and descriptor configurations does this implementation reject?"}),
           ],
         },
       ]}

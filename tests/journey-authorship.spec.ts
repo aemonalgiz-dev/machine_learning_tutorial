@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { mockAccountBackend, waitForAccountReady } from "./helpers/account-backend";
 import { journeyPlans } from "../lib/builds/journeys";
 import { buildById } from "../lib/builds/catalog";
 import { labLessons } from "../lib/labs";
@@ -7,6 +8,9 @@ import { carryConstruction, reusableCalculation } from "../lib/builds/journey-re
 import { assemble, evaluate, same } from "../lib/builds/engine";
 import { TOOLS } from "../lib/builds/tools";
 import { earlierJourneyBuilds } from "../lib/builds/journey-legacy";
+import { earlierWorkFromRecords, journeyDraftId, journeyPathKey } from "../components/lab/JourneyContinuity";
+import { newJourneyProgress } from "../lib/journey-progress";
+import { workshopRecordKey } from "../lib/builds/workshop-session";
 
 test("journey contract: each lesson has authored decisions, a valid case and earlier capabilities", () => {
   expect(Object.keys(journeyPlans).sort()).toEqual(labLessons.map(lesson => lesson.id).sort());
@@ -20,12 +24,14 @@ test("journey contract: each lesson has authored decisions, a valid case and ear
     expect(plan.reflection.prompt.length, lesson.id).toBeGreaterThan(10);
     expect(plan.investigation.caseIndex, lesson.id).toBeGreaterThan(0);
     expect(plan.investigation.caseIndex, lesson.id).toBeLessThan(data.build.cases.length);
-    expect(plan.connections.length, lesson.id).toBeLessThanOrEqual(2);
+    expect(new Set(plan.connections.map(connection => connection.lessonId)).size, `${lesson.id} repeats an earlier lesson`).toBe(plan.connections.length);
+    expect(data.connections.map(connection => connection.lessonId), `${lesson.id} drops authored capabilities`).toEqual(plan.connections.map(connection => connection.lessonId));
     for (const connection of plan.connections) {
       expect(buildById[connection.lessonId], lesson.id).toBeDefined();
       expect(connection.lessonId, lesson.id).not.toBe(lesson.id);
       expect(labLessons.findIndex(item => item.id === connection.lessonId), `${lesson.id} depends on ${connection.lessonId}`).toBeLessThan(index);
       expect(connection.why.length, lesson.id).toBeGreaterThan(20);
+      expect(connection.skill.trim().length, lesson.id).toBeGreaterThan(10);
     }
     if (plan.investigation.kind === "predict") expect(plan.investigation.predictionLabel, lesson.id).toBeTruthy();
     else {
@@ -74,6 +80,55 @@ test("journey contract: reuse carries a learner's calculation and refuses change
   expect(carryConstruction(assemble({ op: "constant", inputs: [], settings: { value: 40 } }, TOOLS), earlier, reuse)).toBeUndefined();
   expect(reusableCalculation(buildById["feature-scaling"], buildById["polynomial-features"])).toBeUndefined();
   expect(carryConstruction({ pieces: [{ tool: "unknown" }], connections: [] }, earlier, reuse)).toBeUndefined();
+});
+
+test("earlier-work collection retains a third saved calculation and its original keys", () => {
+  const prior = journeyFor("agent-iteration-project").connections.slice(0, 2);
+  const third = journeyFor("bagging").connections.find(connection => connection.lessonId === "statistics")!;
+  expect(third.reuse).toBeDefined();
+  const graph = assemble(third.build.recipe, TOOLS);
+  const key = workshopRecordKey(third.build, journeyDraftId(third.build, "construction", third.caseIndex));
+  const progress = { ...newJourneyProgress(third.lessonId, third.title, third.href), built: { at: 10, supported: true } };
+  const records = [
+    { key, value: { graph, results: Object.fromEntries(third.build.cases.slice(0, -1).map((_, index) => [index, true])), hintsShown: 1, example: false } },
+    { key: journeyPathKey(third.build), value: { graph, built: true, supported: true, explanation: "Use a count so a longer record changes the divisor." } },
+    { key: `journey-progress:${third.lessonId}:v1`, value: progress },
+  ];
+  const snapshot = structuredClone(records);
+  const work = earlierWorkFromRecords([...prior, third], records);
+  expect(work.map(item => item.connection?.lessonId)).toEqual([...prior, third].map(connection => connection.lessonId));
+  expect(work[2].note).toBe("Use a count so a longer record changes the divisor.");
+  expect(work[2].progress.built).toEqual(progress.built);
+  expect(work[2].fallbackStatus).toBe("Examples passed with guidance");
+  expect(work[2].reusable?.supported).toBe(true);
+  for (const sample of third.reuse!.target.cases) expect(same(evaluate(work[2].reusable!.graph, sample.data, TOOLS).output, sample.expected)).toBe(true);
+  expect(records).toEqual(snapshot);
+
+  // A newer unfinished draft must still take precedence over an older success.
+  const changed = records.map(record => record.key === key ? { ...record, value: { ...records[0].value, results: { 0: false } } } : record);
+  expect(earlierWorkFromRecords([...prior, third], changed)[2].reusable).toBeUndefined();
+  expect(earlierWorkFromRecords([], records)).toEqual([]);
+});
+
+test("a journey displays all three earlier capabilities with the third learner's saved note", async ({ page }) => {
+  const data = journeyFor("agent-iteration-project");
+  expect(data.connections).toHaveLength(3);
+  const third = data.connections[2];
+  const key = journeyPathKey(third.build);
+  const value = { graph: null, built: false, supported: false, explanation: "Reconcile in-flight actions before resuming the release." };
+  const backend = await mockAccountBackend(page, { records: [{ key, value }] });
+  await page.goto("/lab/agent-iteration-project");
+  await waitForAccountReady(page);
+  await page.getByRole("button", { name: /Lesson notes and saved work/ }).click();
+  const continuity = page.getByTestId("journey-connections");
+  await continuity.locator("summary").click();
+  for (const connection of data.connections) {
+    await expect(continuity.getByRole("heading", { name: connection.skill, exact: true })).toBeVisible();
+    await expect(continuity.getByRole("link", { name: `Open ${connection.title}`, exact: true })).toHaveAttribute("href", connection.href);
+  }
+  await expect(continuity.locator("blockquote").filter({ hasText: value.explanation })).toBeVisible();
+  await expect(continuity.getByText("Earlier notes saved. Open the earlier workshop to inspect it.", { exact: true })).toBeVisible();
+  expect(backend.value(key)).toEqual(value);
 });
 
 test("journey contract: legacy stage access retains case ordering and component fixtures", () => {

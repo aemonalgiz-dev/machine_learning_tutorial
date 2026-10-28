@@ -214,7 +214,10 @@ export default function RecurrentLayersPage() {
           practice: [
             exercise(
               "Follow one signal through the simple cell",
-              ["Build the simple cell of Part 1, with an input weight of one, a recurrent weight of one half and a bias of zero, and hand it a sequence of six steps whose first input is one and whose other inputs are zero. Print the state at every step.", "Then ask how far the final state would move for a small change to each input, by sending a slope of one back from the final step alone. Part 1 gave the states as 0.7616 down to 0.0224 and the derivatives as 0.9995 for the last input down to 0.0109 for the first."],
+              [
+  "Build the supplied tanh recurrent cell with input weight one, recurrent weight 0.5 and zero bias. Run the six-step sequence containing one followed by five zeros.",
+  "Print every hidden state and the derivative of the final state with respect to each input, sending an upstream derivative only from the last state."
+],
               `import numpy as np
 from oop_ml import SimpleRecurrent
 
@@ -269,11 +272,17 @@ step 5
 step 6
   state 0.0224
   derivative of the final state 0.9995`,
-              { hints: ["The cell’s weights are one row holding the input weight first and the recurrent weight second, which is the input and the previous state laid end to end. with_parameters answers a new layer and leaves the old one as it was.", "A block of inputs is rows by steps by values, so one sequence of six steps with one value at each is an array of shape (1, 6, 1).", "response.outputs has the same three axes, since this layer answers at every step. The state at a step is response.outputs[0, step, 0].", "correction_for takes the response and the slope arriving at the outputs, and passed_down is what reaches the inputs. A one at the final step and zeros elsewhere asks about the final state only."], check: numberCheck("What is the derivative of the final state with respect to the first input?", 0.0109, 5e-05, "The derivative crosses five state updates on its way back from the sixth step to the first, and each crossing multiplies it by the recurrent weight of one half and by the slope of tanh at that step. The last input, which crosses none, comes out at 0.9995. That is the difficulty Part 1 describes, measured on six steps.") },
+              { hints: [
+  "Keep time order visible in both forward outputs and backward derivatives.",
+  "A derivative from the final output passes through the intervening recurrent operations before reaching an early input."
+], check: numberCheck("What is the derivative of the final state with respect to the first input?", 0.0109, 5e-05, "The early-input derivative is about 0.0109. It has passed through the intervening recurrent weights and nonlinear derivatives before reaching the first step."), question: "How much of the first signal reaches the end of a simple recurrent sequence?" },
             ),
             exercise(
               "Change the recurrent weight",
-              ["Part 1 says that different weights can produce different behavior. Run the same six-step signal through the simple cell at recurrent weights of 0.5, 0.9 and 1.5, and print the final state and the derivative of the final state with respect to the first input at each.", "Guess first which of the three lets the most derivative back to the first input. A larger weight keeps more of the state, so it is tempting to say 1.5."],
+              [
+  "Run the same six-step signal at recurrent weights 0.5, 0.9 and 1.5, retaining all other settings.",
+  "For each print final state and its derivative with respect to the first input. Compare retained state magnitude with retained sensitivity; tanh can change its local derivative as the state grows."
+],
               `import numpy as np
 from oop_ml import SimpleRecurrent
 
@@ -317,11 +326,17 @@ recurrent weight 0.9
 recurrent weight 1.5
   final state 0.8574
   derivative for the first input 0.0061`,
-              { hints: ["The loop builds a fresh layer each time, so the three cells differ in the one number written into the second place of the weight row.", "The final state is the last step of the one sequence, response.outputs[0, -1, 0], and the first input’s derivative is passed_down[0, 0, 0].", "One step back multiplies the derivative by the recurrent weight and by the slope of tanh, which is one minus the square of the state. Look at what the state is doing at 1.5 before explaining its derivative."], check: numberCheck("At a recurrent weight of 0.9, what derivative reaches the first input?", 0.0796, 5e-05, "At 0.9 each step back keeps most of the derivative, and 0.0796 arrives where one half let 0.0109 through. At 1.5 the state does not fade at all, ending at 0.8574, yet only 0.0061 arrives, less than at one half. A state near 0.86 sits where tanh is flat, with a slope of about 0.26, so the last step back multiplies by about 0.4 and the earlier ones by not much more. The weight is one of the two factors and the slope of tanh is the other.") },
+              { hints: [
+  "Inspect both the multiplying recurrent weight and the tanh derivative along the resulting path.",
+  "Compute the backward response from the actual forward states for each setting."
+], check: numberCheck("At a recurrent weight of 0.9, what derivative reaches the first input?", 0.0796, 5e-05, "At recurrent weight 0.9 the first-input derivative is 0.0796. Larger recurrent weights can also drive tanh into a less sensitive region, so the trend need not remain increasing."), question: "Does a larger recurrent weight always send a larger derivative to the first input?" },
             ),
             exercise(
               "Move the forget gate",
-              ["Build the playground’s LSTM, whose candidate reads the input with a weight of one and whose gates have no weights at all, and run the six-step signal through it at a forget gate bias of one and then of two.", "At a bias of one, Part 2 gave the memory as 0.3808 falling to 0.0795 and Part 3 gave the first input’s derivative as 0.0218. A bias of two is on neither table, so the second half of the output is yours to read."],
+              [
+  "Build the supplied fixed-weight LSTM: input enters its candidate, while gate values come from their stated biases. Run the six-step signal at forget biases one and two.",
+  "Print the forget value, memory at every step and final-output derivative for the first input. Keep candidate, input/output gates and initial states fixed."
+],
               `import numpy as np
 from oop_ml import LongShortTermMemory
 
@@ -371,7 +386,10 @@ forget gate bias 2.0
   forget gate 0.8808
   memory 0.3808, 0.3354, 0.2954, 0.2602, 0.2292, 0.2019
   derivative for the first input 0.0535`,
-              { hints: ["The LSTM stacks its gates down the rows of one weight block and one bias block, and the class names the rows, so the forget gate’s bias is biases[LongShortTermMemory.FORGET].", "response.steps holds one record per step. Each has cell, the memory after that step, and gates, the values the step calculated, in the order the playground lists them, input gate, forget gate, candidate, output gate.", "The derivative comes back the way it did for the simple cell, a one at the final step sent through correction_for and read off passed_down."], check: numberCheck("At a forget gate bias of two, what derivative reaches the first input?", 0.0535, 5e-05, "At a bias of two the forget gate is sigmoid(2), 0.8808, so each step keeps about 88 percent of the memory and 0.2019 of the first step’s 0.3808 is left after six. The derivative crosses the same five steps on its way back and pays 0.8808 at each, which brings 0.0535 to the first input where a bias of one, with its gate of 0.7311, brought 0.0218.") },
+              { hints: [
+  "The forget bias passes through sigmoid to become a retained fraction.",
+  "Compare the memory sequence separately from the exposed hidden output and its derivative."
+], check: numberCheck("At a forget gate bias of two, what derivative reaches the first input?", 0.0535, 5e-05, "The first-input derivative is about 0.0535 at forget bias two. The changed gate retains more of this memory path while the remaining fixed gates still affect the exposed output."), question: "How does the forget gate control the memory of a short input pulse?" },
             ),
           ],
         },

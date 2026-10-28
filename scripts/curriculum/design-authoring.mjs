@@ -34,7 +34,7 @@ export function designLesson(section, record) {
     questions: checkpoint,
   }] };
 }
-export function challenge(title, task, starter, solution, output, hints, tests) {
-  return { title, question: title, task, starter, solution, output, hints,
+export function challenge(title, task, starter, solution, output, hints, tests, presentation = {}) {
+  return { title, question: presentation.question ?? title, task, starter, solution, output, hints,
     tests: tests.map(([name, code]) => ({ name, code })) };
 }

@@ -4,6 +4,7 @@ import { canonicalQuery, lambdaUrlRegion, runtimeCredentials, signedRequestHeade
 const routes: Record<string, string[]> = {
     session: ["GET"], progress: ["GET", "PUT"], "learner-state": ["GET", "PUT"],
     "auth/login": ["GET"], "auth/register": ["GET"], "auth/callback": ["GET"], "auth/logout": ["POST"],
+    billing: ["GET"], "billing/checkout": ["POST"], "billing/portal": ["POST"], "billing/webhook": ["POST"],
 };
 const headers = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" };
 function unavailable(path: string) {
@@ -37,7 +38,8 @@ export async function accountProxy(request: NextRequest, context: {
         const region = lambdaUrlRegion(url), query = region ? canonicalQuery(request.nextUrl.searchParams) : "";
         const target = `${base.replace(/\/$/, "")}/${path}${region ? query && `?${query}` : request.nextUrl.search}`;
         const forwarded = new Headers();
-        for (const name of ["cookie", "origin", "content-type", "x-fitlab-account"]) {
+        const webhook = path === "billing/webhook";
+        for (const name of webhook ? ["content-type", "stripe-signature"] : ["cookie", "origin", "content-type", "x-fitlab-account"]) {
             const value = request.headers.get(name);
             if (value)
                 forwarded.set(name, value);
@@ -53,7 +55,7 @@ export async function accountProxy(request: NextRequest, context: {
                     if (chunk.done)
                         break;
                     size += chunk.value.length;
-                    if (size > (path === "learner-state" ? 1048576 : 131072)) {
+                    if (size > (path === "learner-state" || webhook ? 1048576 : 131072)) {
                         await reader.cancel();
                         return new Response(null, { status: 413, headers });
                     }

@@ -22,7 +22,7 @@ export const GRAPH_DATABASE_FRESH: Record<string, FreshJourneyCase> = {
   },
   "graph-database-identity": {
     name: "Two source systems both resend a renamed asset",
-    prompt: "The north:plant system resends local key A, and the north system resends local key plant:A. Each pair has changed its display name. Predict the repeated structured IDs without merging the two identities at the colon.",
+    prompt: "The system named north:plant resends local key A. A different system named north resends local key plant:A. Each pair has a new display name. Predict the repeated structured keys without letting punctuation merge these separate identities.",
     data: {
       records: [
         { system: "north:plant", external_id: "A", name: "Feed pump" },

@@ -299,7 +299,7 @@
   },
   "robot-observation-latency": {
     "name": "Motion on both axes during a shorter delay",
-    "prompt": "The part now moves in two directions. Predict its displacement over half a second, keeping the two coordinates distinct.",
+    "prompt": "The part now moves in two directions. Predict its current position after half a second, keeping the two coordinates distinct and starting from the supplied captured position.",
     "data": {
       "position": [
         2,

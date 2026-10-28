@@ -6,6 +6,7 @@ export interface PracticeDraft {
   solved: boolean;
   hintsShown: number;
 }
+const currentDrafts = new Map<string, PracticeDraft>();
 
 function fingerprint(value: string): string {
   let hash = 2166136261;
@@ -21,20 +22,26 @@ export function draftKey(lesson: string, problem: Exercise): string {
 
 export function readDraft(key: string, problem: Exercise): PracticeDraft {
   const fallback = { code: problem.starter, solved: false, hintsShown: 0 };
+  return currentDrafts.get(key) ?? fallback;
+}
+
+/** Only the authenticated account's pre-backend draft format may migrate. */
+export function readLegacyAccountDraft(key: string, problem: Exercise, account: string): PracticeDraft | null {
+  if (!key.startsWith(`oop_ml.code.v1:account:${account}:`)) return null;
   try {
     const stored = localStorage.getItem(key);
-    if (!stored) return fallback;
+    if (!stored) return null;
     const parsed = JSON.parse(stored);
-    if (!parsed || typeof parsed.code !== "string" || parsed.code.length > 100_000) return fallback;
+    if (!parsed || typeof parsed.code !== "string" || parsed.code.length > 100_000) return null;
     return {
       code: parsed.code,
       solved: parsed.solved === true,
       hintsShown: Number.isInteger(parsed.hintsShown) ? Math.min(Math.max(0, parsed.hintsShown), problem.hints?.length ?? 0) : 0,
     };
-  } catch { return fallback; }
+  } catch { return null; }
 }
 
 export function writeDraft(key: string, draft: PracticeDraft): boolean {
-  try { localStorage.setItem(key, JSON.stringify(draft)); return true; }
-  catch { return false; }
+  currentDrafts.set(key, draft);
+  return true;
 }

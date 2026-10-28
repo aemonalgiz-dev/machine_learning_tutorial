@@ -11,7 +11,7 @@ import { same, type Construction } from "@/lib/builds/engine";
 import { readPrediction } from "@/lib/builds/challenges";
 import type { JourneyData } from "@/lib/builds/journey";
 import { JourneyHistory, JourneyTools } from "./JourneyReference";
-import { constructionVersion, JourneyContinuity, journeyDraftId, journeyPathKey, useEarlierWork } from "./JourneyContinuity";
+import { constructionVersion, JourneyContinuity, journeyDraftId, journeyPathKey, useEarlierWorks } from "./JourneyContinuity";
 import { earlierJourneyBuilds } from "@/lib/builds/journey-legacy";
 import { freshStageAttempt, recordStageAssistance, stageAssistance, type JourneyAssistance } from "@/lib/builds/journey-attempts";
 import { JourneyEvidenceHistory } from "./JourneyEvidenceHistory";
@@ -19,6 +19,7 @@ import { JourneyDiagnostic } from "./JourneyDiagnostic";
 import { JourneyFreshCheck } from "./JourneyFreshCheck";
 import { validConstructionForBuild, workshopRecordKey } from "@/lib/builds/workshop-session";
 import { TOOLS } from "@/lib/builds/tools";
+import { caseLabel } from "@/lib/builds/case-labels";
 
 const button = "inline-flex min-h-11 items-center justify-center rounded-lg border border-line bg-raised px-4 py-2 text-sm font-semibold hover:border-accent-fill disabled:opacity-50";
 const primary = `${button} !border-accent-fill !bg-accent-fill text-accent-ink`;
@@ -71,8 +72,8 @@ export function LessonJourney({ data }: { data: JourneyData }) {
   const markAssisted = useCallback((part: Stage) => saveJourney(previous => recordStageAssistance(previous, part, true)), [saveJourney]);
   const legacy = useLearnerRecord(`journey-flow:${build.id}:${constructionVersion(build)}`, { graph: null as Construction | null, supported: false, explanation: "" }).value;
   const progress = useJourneyProgress(build.id, plan.construction.title, build.id === "neurons-and-activations" ? "/lab/neuron" : `/lab/${build.id}`);
-  const firstWork = useEarlierWork(data.connections[0]), secondWork = useEarlierWork(data.connections[1]);
-  const reusable = [firstWork.reusable, secondWork.reusable].filter(item => item !== undefined);
+  const earlierWork = useEarlierWorks(data.connections);
+  const reusable = earlierWork.map(work => work.reusable).filter(item => item !== undefined);
   const [reference, setReference] = useState<"history" | "tools" | "previous" | null>(null);
   const [notesOpen, setNotesOpen] = useState(false);
   const [predictionError, setPredictionError] = useState("");
@@ -127,8 +128,11 @@ export function LessonJourney({ data }: { data: JourneyData }) {
   const constructionSupported = draftSupport(currentConstruction, stageAssistance(state, "construction", legacy.supported), state.attemptSupport?.construction?.supported);
   return <div data-testid="workshop-journey" className="min-w-0">
     <div className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line">
-      <nav aria-label="Journey stages" className="flex min-w-0 flex-1 flex-wrap gap-x-4">
-        {stages.map(stage => <button key={stage} className={`min-h-11 max-w-full border-b-2 px-1 py-3 text-left text-sm ${state.stage === stage ? "border-accent-fill font-semibold text-accent" : "border-transparent text-muted hover:text-foreground"}`} aria-current={state.stage === stage ? "step" : undefined} onClick={() => go(stage)}>{titles[stage]}</button>)}
+      <nav aria-label="Journey stages" className="journey-stage-track">
+        {stages.map((stage, index) => {
+          const completed = stage === "preparation" ? state.prepared : stage === "construction" ? state.built : state.varied;
+          return <button key={stage} className="journey-stage" data-complete={completed} aria-current={state.stage === stage ? "step" : undefined} onClick={() => go(stage)}><span className="stage-number" aria-hidden="true">{completed ? "✓" : index + 1}</span><span>{titles[stage]}{completed && <span className="sr-only">, checks passed</span>}</span></button>;
+        })}
       </nav>
       <button className="min-h-11 py-2 text-sm text-muted hover:text-foreground" aria-expanded={notesOpen} onClick={() => setNotesOpen(!notesOpen)}>Lesson notes and saved work {notesOpen ? "−" : "+"}</button>
     </div>
@@ -141,7 +145,7 @@ export function LessonJourney({ data }: { data: JourneyData }) {
     </div>
     {reference === "history" && <JourneyHistory data={data} />}
     {reference === "tools" && <JourneyTools data={data} />}
-    <JourneyContinuity work={[firstWork, secondWork]} />
+    <JourneyContinuity work={earlierWork} />
     <JourneyEvidenceHistory record={progress.record} />
     {legacy.graph && <p className="text-sm leading-7 text-muted">Your earlier construction can start a new draft. Any newer draft keeps its own pieces.</p>}
     </aside>
@@ -162,8 +166,8 @@ export function LessonJourney({ data }: { data: JourneyData }) {
       <div className="my-5"><BotieSays>{plan.investigation.question}</BotieSays></div>
       <details className="mb-5 space-y-4 rounded-xl border border-line bg-surface p-4" aria-label="Data for the investigation" open={!answer.revealed}>
         <summary className="cursor-pointer text-sm font-semibold">The inputs we are comparing</summary>
-        {Object.keys(build.sources).map(key => <div key={key}><h4 className="mb-2 text-sm font-semibold">{build.sources[key]}</h4>{variation.changedSources.includes(key) ? <div className="grid min-w-0 gap-3 sm:grid-cols-2"><div className="min-w-0"><p className="mb-2 text-xs text-muted">{variation.previous.name}</p><WorkshopValue value={variation.previous.data[key]} /></div><div className="min-w-0"><p className="mb-2 text-xs text-accent">{variation.build.cases[0].name}</p><WorkshopValue value={variation.build.cases[0].data[key]} /></div></div> : <><p className="mb-2 text-xs text-muted">Same in both cases</p><WorkshopValue value={variation.build.cases[0].data[key]} /></>}</div>)}
-        <details><summary className="cursor-pointer text-sm">Result for {variation.previous.name.toLowerCase()}</summary><div className="mt-3"><WorkshopValue value={variation.previous.expected} /></div></details>
+        {Object.keys(build.sources).map(key => <div key={key}><h4 className="mb-2 text-sm font-semibold">{build.sources[key]}</h4>{variation.changedSources.includes(key) ? <div className="grid min-w-0 gap-3 sm:grid-cols-2"><div className="min-w-0"><p className="mb-2 text-xs text-muted">{caseLabel(build, variation.previous)}</p><WorkshopValue value={variation.previous.data[key]} /></div><div className="min-w-0"><p className="mb-2 text-xs text-accent">{caseLabel(build, variation.build.cases[0])}</p><WorkshopValue value={variation.build.cases[0].data[key]} /></div></div> : <><p className="mb-2 text-xs text-muted">Same in both cases</p><WorkshopValue value={variation.build.cases[0].data[key]} /></>}</div>)}
+        <details><summary className="cursor-pointer text-sm">Result for {caseLabel(build, variation.previous).toLowerCase()}</summary><div className="mt-3"><WorkshopValue value={variation.previous.expected} /></div></details>
       </details>
       {!answer.revealed ? <div className="mb-6 rounded-xl border border-line p-5">
         {plan.investigation.kind === "predict" ? <>

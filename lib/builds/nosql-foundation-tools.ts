@@ -31,7 +31,7 @@ const pathSetting = [{ key: "path", label: "Field path", initial: "asset_id" }];
 /** Small record operations. These do not parse MongoDB queries or run Redis. */
 export const NOSQL_FOUNDATION_TOOLS: Record<string, Tool> = {
   nsBuckets: {
-    title: "Collect records under a key", why: "Keep every record under its text key, in input order. A repeated asset ID adds another record rather than replacing the earlier visit.", inputs: ["Records"], settings: pathSetting,
+    title: "Collect records under a key", why: "Collect complete records into a list under each selected field value. Repeated asset keys append visits to their history; they do not overwrite earlier visits.", inputs: ["Records"], settings: pathSetting,
     run: ([input], settings) => {
       const buckets = new Map<string, Data[]>();
       for (const row of documents(input)) { const key = text(path(row, String(settings.path))); if (!buckets.has(key)) buckets.set(key, []); buckets.get(key)!.push(row); }
@@ -71,7 +71,7 @@ export const NOSQL_FOUNDATION_TOOLS: Record<string, Tool> = {
     run: ([parent, value], settings) => ({ ...document(parent), [String(settings.field)]: document(value) }),
   },
   nsUnwind: {
-    title: "Make one row per array member", why: "Replace the named array with each of its members in turn, keeping its parent fields. Empty arrays produce no rows in this teaching version.", inputs: ["Documents"], settings: [{ key: "field", label: "Array field", initial: "readings" }],
+    title: "Make one row per array member", why: "Make one output row for each array member, retaining its parent's other fields. An empty array contributes no member rows. Inspect the repeated parent fields before choosing what can be counted or summed.", inputs: ["Documents"], settings: [{ key: "field", label: "Array field", initial: "readings" }],
     run: ([input], settings) => documents(input).flatMap(row => { const values = row[String(settings.field)]; if (!Array.isArray(values)) throw Error("Every document needs an array at the chosen field."); return values.map(value => ({ ...row, [String(settings.field)]: value })); }),
   },
   nsFilterPath: {

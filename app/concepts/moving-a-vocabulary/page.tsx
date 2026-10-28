@@ -52,11 +52,12 @@ export default function MovingAVocabularyPage() {
               <SubSection title="1. A vocabulary learned on one subject, reading another">
                 <>
 <p>
-                  We need two corpora rather than one, and they should differ in what they are about while agreeing on the letters they are written in. So the first is the eighteen sentences the byte pair page already learns from, about reports and costs and analyses, and the second is eighteen sentences I wrote about bread and pastry.
+                  A vocabulary fitted to reports may use several small pieces for an ordinary bakery word. A second vocabulary fitted to bread and pastry may represent that word more compactly. If a trained model changes vocabulary, what should happen to the numerical rows it already learned?
                 </p>
                 <p>
-                  Every character the second uses appears in the first, which was arranged on purpose, since a letter the old corpus never contained would be unreadable for a reason that has nothing to do with moving a vocabulary. What the two do not share is their words.
+                  We will compare two eighteen-sentence corpora, one about reports and one about baking. They use the same underlying characters, so the first comparison concerns reusable pieces rather than an unknown-character failure.
                 </p>
+
 </>
                 <p>
                   Fit the first corpus until it runs out of pairs it has seen
@@ -1107,7 +1108,11 @@ read again  l, [UNK]      and no word of this corpus ends in o`}</Equation>
           practice: [
             exercise(
               "Shrink the ten-merge vocabulary and grow the three-merge one",
-              ["Fit the four-word corpus of Part 3 twice, at 15 rows and at 22, which is three merges and ten over an alphabet of eleven symbols plus the label for the unspellable. Move the larger vocabulary into the smaller one and then the smaller into the larger, and for each direction count the tokens the old vocabulary never held, which are the ones that have to be read again, and the number of old rows each of those is seeded from on average.", "Part 3 says that shrinking reads nothing again, because the three-merge vocabulary is the first fifteen rows of the ten-merge one, and that growing reads seven tokens again from 2.86 old rows each."],
+              [
+  "Learn BPE vocabularies of 15 and 22 rows from the supplied four-word corpus, with byte fallback disabled. Compare transferring from the larger table to the smaller one with transferring in the opposite direction.",
+  "Print each fitted size and merge count. For each transfer print the target-token count, how many target spellings are absent from the old table and the average number of source IDs used to seed those newly spelled tokens.",
+  "An unchanged spelling can copy an old row directly. A new spelling must first be decoded and encoded using the old tokenizer; this exercise inspects that mapping, not trained embedding quality."
+],
               `from oop_ml import BytePairEncoding, VocabularyTransfer
 
 counts = {"low": 5, "lower": 2, "newest": 6, "widest": 3}
@@ -1141,11 +1146,21 @@ for label, old, new in [("shrinking", large, small), ("growing", small, large)]:
 large: 22 rows from 10 merges
 shrinking: 15 tokens, 0 read again, 0.00 old rows each
 growing: 22 tokens, 7 read again, 2.86 old rows each`,
-              { hints: ["Both vocabularies come from one class fitted twice on the same corpus at two sizes. The size counts the label for the unspellable and the eleven symbols of the alphabet, so 15 rows is three merges and 22 is ten.", "The page's fits switch the byte fallback off. Leave byte_fallback at its default and every vocabulary gains 257 rows the page never counted.", "VocabularyTransfer.between(old, new) answers one mapping per token of the new vocabulary. A token the old vocabulary never held is one whose target_token is not in old.vocabulary, and n_source_ids on a mapping is how many old rows seed it."], check: numberCheck("How many old rows is each of the seven tokens read again in the growing direction seeded from, on average?", 2.86, 0.005, "The seven tokens the three-merge vocabulary never held are the pieces its last seven merges built, and each decodes to text the old vocabulary spells in two, three or four of its own pieces, twenty old rows over seven tokens. Shrinking reads nothing again at all, because every row of the smaller fit is a row of the larger one.") },
+              {
+question: "What must be mapped when a smaller vocabulary grows?",
+ hints: [
+  "VocabularyTransfer.between(old, new) produces one mapping per target token.",
+  "A newly spelled token has target_token absent from old.vocabulary. Each such mapping exposes n_source_ids.",
+  "Handle an empty set of new spellings explicitly when reporting its average. Shrinking can need no re-encoding."
+], check: numberCheck("How many old rows is each of the seven tokens read again in the growing direction seeded from, on average?", 2.86, 0.005, "Growing seeds each newly spelled token from about 2.86 old rows on average. Shrinking needs no such re-encoding because this smaller vocabulary is an initial portion of the larger learned table.") },
             ),
             exercise(
               "Follow one piece through decoding",
-              ["In the growing move, ask for the mapping of the piece made of an e and a w, and print the old tokens it is seeded from. Part 4 says the second of them carries an end-of-word marker the piece never had. Then fit a third vocabulary that stops after two merges, so it no longer holds the piece made of an l and an o, move it into the ten-merge vocabulary, and print what that piece comes back as.", "Finish by counting, in that narrower move, how many tokens have to be read again and how many of those reach the label for the unspellable. The lesson shows the readings but never prints the first of those two counts."],
+              [
+  "Inspect two transfer mappings that look straightforward by spelling. Move the three-merge BPE vocabulary into the ten-merge one and print the old pieces used for ew.",
+  "Then fit a two-merge vocabulary of fourteen rows, transfer it into the same ten-merge target, and print the old pieces used for lo. Disable byte fallback in these BPE fits.",
+  "For the narrower transfer print the number of new target spellings and how many of them use the old unknown ID, including their names. An isolated piece can be re-encoded as a complete word even when it originally belonged inside one."
+],
               `from oop_ml import BytePairEncoding, VocabularyTransfer
 
 counts = {"low": 5, "lower": 2, "newest": 6, "widest": 3}
@@ -1184,11 +1199,21 @@ print(f"{len(read_again)} tokens read again, {len(reaching)} reaching the stand-
               `ew is read by the three-merge vocabulary as ('e', 'w</w>')
 lo is read by the two-merge vocabulary as ('l', '[UNK]')
 8 tokens read again, 1 reaching the stand-in: ['lo']`,
-              { hints: ["for_token on the mappings answers one token's mapping, and tokens_of on the old vocabulary turns its source_ids back into spellings.", "The two-merge vocabulary is the same class at 14 rows, one fewer than the three-merge one.", "The stand-in's position is the old vocabulary's unknown_id, so a token reaches it when that id is among its source_ids."], check: numberCheck("How many tokens of the ten-merge vocabulary have to be read again when the old vocabulary is the two-merge one?", 8, 0.5, "The three-merge vocabulary lacked seven of the 22 rows, and stopping one merge earlier takes away the piece made of l and o as well, so eight tokens now reach the third rule. Only that one reaches the stand-in, because its text is a word ending in o and no word of the four does, where the other seven decode to text the two-merge vocabulary can still spell letter by letter.") },
+              {
+question: "Does decoding an isolated vocabulary piece preserve its word position?",
+ hints: [
+  "for_token(name) retrieves one mapping. old.vocabulary.tokens_of(mapping.source_ids) shows its source spellings.",
+  "A two-merge fit has vocabulary_size=14 on this corpus.",
+  "Check membership of old.vocabulary.unknown_id in each new spelling’s source_ids, rather than checking only the mapping length."
+], check: numberCheck("How many tokens of the ten-merge vocabulary have to be read again when the old vocabulary is the two-merge one?", 8, 0.5, "Eight target spellings need re-encoding from the two-merge table. Lo reaches an unknown row because the old end-marked vocabulary cannot spell its isolated final o, even though its characters occur in other positions.") },
             ),
             exercise(
               "Cross into a vocabulary that marks the other end",
-              ["Fit a WordPiece vocabulary of the same 22 rows on the same corpus and move the ten-merge byte pair vocabulary into it. Count the tokens the copy rule answers, leaving out the label for the unspellable, the tokens that have to be read again, and the tokens seeded from nothing but the stand-in. Part 4 says four, seventeen and five.", "Then print what the continuation piece est and the word-initial piece low come back as, which Part 4 says are the two readings that land on a plausible row."],
+              [
+  "Fit the supplied four-word corpus with a 22-row WordPiece tokenizer and a 22-row BPE tokenizer with byte fallback disabled. Transfer from the BPE vocabulary to WordPiece.",
+  "Print copied target spellings, excluding the shared unknown spelling, and their count. Then print the number re-encoded and the spellings mapped solely to the unknown source ID.",
+  "Finally show the old pieces used for ##est and low. WordPiece marks continuations while this BPE marks word endings, so a plausible letter sequence may carry a different boundary claim."
+],
               `from oop_ml import BytePairEncoding, VocabularyTransfer, WordPiece
 
 counts = {"low": 5, "lower": 2, "newest": 6, "widest": 3}
@@ -1221,11 +1246,21 @@ for token in ("##est", "low"):
 read again 17, seeded from the stand-in alone 5: ['##d', '##e', '##i', '##o', '##s']
 ##est is read as ('est</w>',)
 low is read as ('low</w>',)`,
-              { hints: ["WordPiece takes the same vocabulary_size and the same corpus, and its vocabulary can be listed and searched the same way.", "The label for the unspellable is spelled the same in both vocabularies, so leave it out of the copied count or it comes out at five where the page says four.", "A token seeded from the stand-in alone has source_ids equal to a one-element tuple holding the old vocabulary's unknown_id."], check: numberCheck("How many of the seventeen tokens read again are seeded from nothing but the stand-in?", 5, 0.5, "They are the continuation pieces for d, e, i, o and s, single letters whose text is a one-letter word ending in a letter no word of the corpus ends in, so the old vocabulary has no row for any of them and answers with the label for the unspellable alone. The continuations for r, t and w land on the rows for those letters with the marker, which is right about the letters and wrong about the claim.") },
+              {
+question: "Can two tokenizers share readable letters but disagree about boundary meaning?",
+ hints: [
+  "Inspect target_token and source_ids on every transfer mapping.",
+  "An unknown-only mapping has a one-element source_ids tuple containing the old unknown_id.",
+  "Use for_token and tokens_of to inspect the two named mappings. A single source row does not by itself mean the boundary semantics match."
+], check: numberCheck("How many of the seventeen tokens read again are seeded from nothing but the stand-in?", 5, 0.5, "Five new target spellings map only to the unknown source row. The mapping procedure decodes them as isolated text, which changes the position assumed by the old end-marked vocabulary.") },
             ),
             exercise(
               "Ask for a token whose text is not text",
-              ["Fit a byte-level vocabulary of 266 rows over the four words and move the ten-merge byte pair vocabulary into it. Part 4 says exactly ten of the 266 come back with no rows at all, the ten byte values that are whitespace.", "Print how many tokens the move leaves without a row, then decode each of them to the character it stands for and print that character's byte value beside its escaped form, so the claim that they are whitespace can be checked rather than believed. The token names themselves are letters with accents that a Windows console may refuse to print, which is why the byte values are the thing to show."],
+              [
+  "Fit the supplied corpus with a 266-row byte-level BPE vocabulary and the ten-merge end-marked BPE vocabulary. Transfer from the end-marked vocabulary into the byte-level one.",
+  "Print the target size and number of unmapped tokens. For each unmapped token, decode its target ID and print the resulting single character’s integer value and escaped spelling.",
+  "The older tokenizer discards whitespace before encoding words. A whitespace-only target token can therefore produce no source IDs at all. Use escaped spellings so tabs and line breaks remain visible in the report."
+],
               `from oop_ml import ByteLevelBytePairEncoding, BytePairEncoding, VocabularyTransfer
 
 counts = {"low": 5, "lower": 2, "newest": 6, "widest": 3}
@@ -1260,7 +1295,13 @@ byte 29 is '\\x1d'
 byte 30 is '\\x1e'
 byte 31 is '\\x1f'
 byte 32 is ' '`,
-              { hints: ["The byte-level class counts its 256 byte rows inside vocabulary_size, so 266 rows is ten merges, and it has no byte fallback switch because every byte already has a row.", "n_unmapped and unmapped_tokens are properties of the mappings object, so there is nothing to count by hand.", "decode on the byte-level vocabulary turns a token's id back into the character it stands for, id_of gives the id, ord gives the byte value of a one-character string, and ascii spells a tab or a newline as an escape a console can show."], check: numberCheck("How many of the 266 tokens come back with no rows?", 10, 0.5, "Each of those ten decodes to a single whitespace character, the byte values 9 to 13 and 28 to 32. Handed one of them, the old vocabulary's first step is to find the words, it finds none, and it returns nothing, so the token is reported as having no rows rather than handed an average over nothing.") },
+              {
+question: "What happens when a target token decodes to whitespace alone?",
+ hints: [
+  "n_unmapped and unmapped_tokens identify the mappings without source IDs.",
+  "Look up the target token’s ID, decode it with the byte-level model, then use ord and ascii on the result.",
+  "Keep these empty mappings distinct from a mapping to an unknown row. They require different handling before any embedding average could be formed."
+], check: numberCheck("How many of the 266 tokens come back with no rows?", 10, 0.5, "Ten target tokens have no source rows. Each decodes to a whitespace character that the older tokenizer removes before it looks for words.") },
             ),
           ],
         },

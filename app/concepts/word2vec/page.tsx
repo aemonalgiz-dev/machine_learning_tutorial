@@ -318,10 +318,12 @@ export default function Word2vecPage() {
                   </>
                 </WorkedExample>
                 <KeepInMind>
-                  Two vectors per word is not an accident of the arrangement. A
-                  word predicting itself as its own neighbour would score its
-                  vector against itself, which is always large and positive, and
-                  a single table would make that unavoidable.
+                  The tables give a word separate roles as an input and as a
+                  predicted output. Their dot product can then change without
+                  requiring the two vectors to be identical. If one table were
+                  tied to both roles, a word&apos;s self-score would be its squared
+                  vector length, always nonnegative but not necessarily large.
+                  That would impose a constraint the two-table model avoids.
                 </KeepInMind>
               </SubSection>
 
@@ -375,24 +377,27 @@ export default function Word2vecPage() {
             choice(
               "Why does every word get two vectors rather than one?",
               [
-                "A word predicting itself as its own neighbour would score its vector against itself, which is always large and positive",
+                "Separate tables let the input role and predicted-output role learn independently instead of tying their scores to one shared vector",
                 "One is for skip-gram and the other for the bag of words",
                 "The second table is what the negatives are drawn from",
                 "A single table could not be rotated without changing the cost",
               ],
               0,
-              "One table holds a vector per word for when the word is read and the other a row per word for when it is being predicted, and a single table would make that self-scoring unavoidable. The two come out the same size, 372 numbers each on this corpus, and only the first is kept.",
+              "One table represents a word when it is read; the other represents it as a prediction target. Tying the tables would constrain their dot products, including making a self-score equal to a squared length. Separate tables allow the two roles to learn independently. The implementation on this page retains the input table for later word comparisons.",
             ),
             several(
               "Which of these are true of the window word2vec slides along a sentence?",
               [
-                "Word order inside the window is discarded",
-                "Sentence boundaries stop the window",
-                "A word dropped for being too rare is removed before the windows are formed, so its neighbours become each other’s neighbours",
-                "On the two-list corpus the reach is redrawn at random between one and three at every position",
-              ],
+                              "Word order inside the window is discarded",
+                              "Sentence boundaries stop the window",
+                              "A word dropped for being too rare is removed before the windows are formed, so its neighbours become each other’s neighbours",
+                              "On the two-list corpus the reach is redrawn at random between one and three at every position",
+                            ],
               [0, 1, 2, 3],
               "All four hold. A window is the whole of what word2vec means by context, with no parse, no grammar and no notion of which side a neighbour was on. Redrawing the reach puts a word next door inside the window three times as often as a word three away, which is why the pair count moves from 3,968 to 3,865 to 3,901 across passes.",
+              {
+                "description": "This lesson’s word2vec setup uses ordinary unordered skip-gram/CBOW contexts. It removes words below its minimum-count threshold before building windows, never crosses sentence boundaries and draws a reach uniformly from 1 through 3 at each remaining position. It does not use a positional or directional context variant."
+              },
             ),
             trueFalse(
               "The second table is deleted because it had learned nothing useful.",
@@ -713,13 +718,17 @@ export default function Word2vecPage() {
             several(
               "Which of these are true of arranging the vocabulary as the leaves of a binary tree?",
               [
-                "The probabilities of all the words still add to one, so nothing has been approximated",
+                "The leaf probabilities sum to one, giving an exactly normalised tree distribution rather than a truncated probability sum",
                 "A tree over n words has n − 1 branch points, so its table is one row shorter than a sweep would need",
                 "On the two-list corpus Huffman’s arrangement saves more than a whole branch point over a tree that split evenly",
-                "The number of rows touched is six, whatever the vocabulary holds",
+                "The number of rows touched is six, whatever the vocabulary holds"
               ],
               [0, 1],
-              "The probabilities at every branch point add to one and the paths partition the leaves, which is why the tree keeps the honest question and only changes the route to the answer. Huffman’s average path here is 4.9008 against 4.9542 for an even split, five hundredths of a branch point, because the counts run only from 73 down to 17. Touching six rows at every size is negative sampling, which gives the distribution up.",
+              "Branch probabilities sum to one and complete root-to-leaf paths partition that probability. Hierarchical softmax therefore defines a normalised distribution, although its parameterisation is different from a flat softmax. A full binary tree with n leaves has n − 1 internal nodes. Here Huffman saves only about 0.0534 decisions over the evenly split tree; touching six rows belongs to the separately configured negative-sampling comparison.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Vocabulary: 31 words.\nHierarchical softmax uses a full binary tree with one leaf per word.\nEvery branch assigns complementary probabilities to its two children.\nAverage decisions per target, weighted by corpus use:\nHuffman tree: 4.9008\nevenly split tree: 4.9542\nNegative-sampling comparison: 1 positive + 5 negative rows."
+              },
             ),
             trueFalse(
               "Which of the tree and negative sampling touches fewer rows depends on the size of the vocabulary.",
@@ -821,18 +830,7 @@ export default function Word2vecPage() {
                   width, reach, passes and start, and the first thing to notice
                   is that the numbers are not on a common scale.
                 </p>
-                <p>
-                  The two tree fits report negative cosines across the lists,
-                  −0.5570 and −0.9618, where the two negative sampling fits report
-                  positive ones, 0.1696 and 0.7116. That is not the tree
-                  separating the lists four times better; it is a different
-                  geometry. Every branch point is trained to say one thing for the
-                  words that go left of it and the opposite for the words that
-                  go right, so words on different sides of the root are pushed
-                  to opposite ends of one direction; drawn wrong answers only
-                  ever push a pair towards being unrelated, which is an angle
-                  near ninety degrees rather than near a hundred and eighty.
-                </p>
+                <p>The two tree fits report mean cross-list cosines of −0.5570 and −0.9618; the negative-sampling fits report 0.1696 and 0.7116. These numbers come from different training objectives, so a more negative value does not by itself mean a better representation. Tree decisions and sampled pair decisions apply different constraints. Negative sampling trains dot products between input and output vectors to distinguish observed pairs from sampled alternatives. It does not require the stored word vectors to become perpendicular, and these measurements do not establish a universal angle for unrelated words.</p>
                 <Word2vecCombinations word="walked" />
                 <p>
                   What can be compared is whether the lists came apart, and at
@@ -1119,7 +1117,7 @@ export default function Word2vecPage() {
                 "That a cosine is not defined for vectors fitted through a tree",
               ],
               0,
-              "Drawn wrong answers only ever push a pair towards being unrelated, which is an angle near ninety degrees rather than near a hundred and eighty, so the four numbers are not on a common scale. What can be compared is whether the lists came apart, and at the doubled step all four separate them.",
+              "The objectives constrain different dot products, so the cross-list cosines do not share a universal quality scale. Negative sampling does not require unrelated stored vectors to become perpendicular. We can compare whether each fit recovers the known list separation on this corpus, alongside its cost and stability across starts.",
             ),
             trueFalse(
               "On this corpus, comparing rows of the counting table separates the two lists more cleanly than the best of the four word2vec arrangements.",
@@ -1141,12 +1139,12 @@ export default function Word2vecPage() {
               "Rotating every vector in both tables by the same rotation leaves every dot product, and so the cost, unchanged. Which of these follow?",
               [
                 "A single coordinate carries no meaning, and the fifth coordinate of one run has no relation to the fifth of another",
-                "Averaging two runs’ tables together is undefined rather than approximate",
+                "Coordinate-wise averaging of unaligned runs has no guarantee of preserving either learned representation",
                 "A cosine or a distance survives the rotation and can be read off",
-                "Two runs from different starts disagree about which words are alike",
+                "Two runs from different starts disagree about which words are alike"
               ],
               [0, 1, 2],
-              "The two starts of Part 5 differ by 0.7816 on average coordinate by coordinate and by 2.5336 at the widest, while their pairwise cosines correlate at 0.9996. What the corpus determines is the geometry, and the coordinates are whatever fell out of where the vectors happened to start.",
+              "A common orthogonal rotation preserves dot products, Euclidean distances and cosines. Individual coordinate labels are therefore not fixed by the objective. Averaging unaligned tables is a computable operation, but it need not preserve either geometry. This symmetry alone does not determine whether two independently trained runs learn similar or different within-fit relationships.",
             ),
         ],
         },
@@ -1155,7 +1153,10 @@ export default function Word2vecPage() {
           practice: [
             exercise(
               "Fit the two lists and score them with two numbers",
-              ["The starter builds the corpus of Part 1, two hundred sentences drawn from a list of verb forms or a list of money words and never from both. Fit Word2Vec to it at a width of twelve, a reach of three, five passes, a first step of 0.05 and seed 0, which is the skip-gram fit with drawn wrong answers that Part 5 scores.", "Print the mean cosine over every pair of words in the same list, the mean cosine over every pair with a word from each, and their difference, to four places. Then print the cosine between walked and market on its own, a single pair the lesson never quotes."],
+              [
+  "Fit the supplied two-hundred-sentence verb/money corpus with width twelve, context window three, five passes, initial rate 0.05 and seed zero. Use the stated skip-gram negative-sampling configuration.",
+  "Print within-group mean cosine, cross-group mean cosine and their difference, then walked/market cosine. Keep all supplied word groups and pair definitions fixed."
+],
               `import random
 from itertools import combinations
 from statistics import mean
@@ -1219,11 +1220,17 @@ print(f"walked and market: {vectors.similarity('walked', 'market'):.4f}")`,
 across the two:    0.1696
 apart by:          0.8266
 walked and market: 0.1757`,
-              { hints: ["The constructor takes dimension, window, epochs, learning_rate and random_seed. Skip-gram with negative sampling is the default, so neither needs naming.", "fit takes the list of sentences and returns the model, and the model’s embeddings property is the kept table.", "embeddings.similarity(first, second) is the cosine between two words. combinations(group, 2) gives every pair inside one list once."], check: numberCheck("By how much does the mean cosine within a list exceed the mean cosine across the two, to four places?", 0.8266, 5e-05, "It is the 0.9962 within a list less the 0.1696 across the two that Part 6 sets beside counting. The second number is the one that says the lists came apart, and no word of either list was ever told which list it belonged to.") },
+              { hints: [
+  "Use distinct within-group pairs and every cross-group pair.",
+  "A large within-group similarity is informative only beside the cross-group comparison."
+], check: numberCheck("By how much does the mean cosine within a list exceed the mean cosine across the two, to four places?", 0.8266, 5e-05, "The mean cosine gap is 0.8266 for this fit. It separates the two supplied groups far more clearly than the within-group mean alone would establish."), question: "Does the fitted skip-gram representation distinguish the two supplied word groups?" },
             ),
             exercise(
               "Run the published first step on the bag of words",
-              ["Part 5 reports that one of the four arrangements fails at the first step the original program ships with. Fit the bag of words with drawn wrong answers twice on the same corpus, once at a first step of 0.025 and once at 0.05, keeping the width at twelve, the reach at three, five passes and seed 0.", "For each fit print the two mean cosines and their difference to four places, and the five words nearest market. Look at which of the two numbers gives the first fit away."],
+              [
+  "Fit the supplied continuous-bag-of-words negative-sampling setup at initial rates 0.025 and 0.05, retaining width twelve, window three, five passes and seed zero.",
+  "Print within/cross-group mean cosines, their difference and market’s five nearest words for each fit. This compares two finite training runs, not an inherent failure of one rate on all corpora."
+],
               `import random
 from itertools import combinations
 from statistics import mean
@@ -1293,11 +1300,17 @@ for rate in (0.025, 0.05):
   nearest market: trade stock cash bond stays
 step 0.05: within 0.9929  across 0.7116  apart by 0.2813
   nearest market: cash trade bond fund bank`,
-              { hints: ["The direction is the architecture field, and the bag of words is Word2VecArchitecture.CONTINUOUS_BAG_OF_WORDS.", "The first step is learning_rate. Everything else stays as it was in the first problem.", "embeddings.most_similar(word, 5) answers the five nearest words, and its words property is their spellings in order."], check: numberCheck("At a first step of 0.025, by how much does the within-list cosine exceed the across-list one, to four places?", 0.0034, 5e-05, "The fit left the lists at 0.9907 within and 0.9873 across, so every vector points very nearly the same way as every other and a verb form sits fifth in the list for market. The within-list number alone would have passed this fit, which is why the second number is worth computing every time.") },
+              { hints: [
+  "Keep the objective and corpus fixed when changing initial rate.",
+  "Read the cross-group similarity as well as the attractive-looking nearest-word list."
+], check: numberCheck("At a first step of 0.025, by how much does the within-list cosine exceed the across-list one, to four places?", 0.0034, 5e-05, "The gap is only 0.0034 at the smaller rate after this fixed training budget. Nearly equal within/cross similarity reveals that the two groups remain poorly distinguished."), question: "Can a low learning rate leave two groups nearly indistinguishable after the fixed budget?" },
             ),
             exercise(
               "Count how long the tree’s paths are",
-              ["Part 4 says Huffman’s arrangement barely earns its keep on this corpus, with an average path of 4.9008 branch points against 4.9542 for a tree that split evenly. Build the tree from the corpus’s own word counts and see why.", "Print the average path per word occurrence to four places, then how many of the 31 words sit at each depth. The lesson quotes the average and not the depths."],
+              [
+  "Build the supplied Huffman tree from the corpus’s word-occurrence counts.",
+  "Print largest/smallest word counts, average branch decisions per word occurrence and the number of distinct words at every represented depth. The average is occurrence-weighted, while depth counts count vocabulary entries."
+],
               `import random
 from collections import Counter
 
@@ -1360,7 +1373,10 @@ average path: 4.9008
 depth 4: 4 words
 depth 5: 21 words
 depth 6: 6 words`,
-              { hints: ["HuffmanTree.from_counts takes the list of counts, one per word, in the order the words are numbered.", "tree.expected_depth(counts) is the path length averaged over word occurrences, which is the figure Part 4 quotes.", "tree.code_of(position) is one word’s route from the root, and its depth property is how many branch points the route passes."], check: numberCheck("How many of the 31 words sit five branch points down?", 21, 0, "The counts run only from 73 down to 17, so there is no long tail of rare words to give long paths to and the tree comes out nearly even. Most words sit at five, a few commoner ones at four and a few rarer ones at six, which is how the average lands at 4.9008, five hundredths under the 4.9542 of an even split.") },
+              { hints: [
+  "A common word contributes its path length once per occurrence to the weighted average.",
+  "Use each word’s code length for its depth, then group distinct words by that length."
+], check: numberCheck("How many of the 31 words sit five branch points down?", 21, 0, "Twenty-one vocabulary words have depth five. Those are distinct word counts by depth; the average path instead weights each word by its corpus occurrence count."), question: "How much path length does this frequency-weighted tree actually save?" },
             ),
           ],
         },

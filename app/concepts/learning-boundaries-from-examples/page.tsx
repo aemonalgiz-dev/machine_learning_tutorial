@@ -66,25 +66,34 @@ export default function LearningBoundariesFromExamplesPage() {
                   Now ask a narrow question of such an answer. The sentence we carry through this section is Dr. Alvarez didn&rsquo;t expect the low-cost re-analysis, and with its spaces taken out it is forty-five characters with forty-four gaps between them. Point at the gap between the full stop of Dr. and the A of Alvarez and ask what decided it.
                 </p>
                 <p>
-                  There is no answer, and the reason is structural rather than a shortcoming of any implementation. The score being maximised is a sum over the whole run, so the boundary at that gap was settled by a comparison between two complete readings of forty-five characters, one of which cut there and one of which did not, and the difference between those two totals includes terms drawn from every character in the sentence.
+                  The decoder chose a complete sequence of character roles. We
+                  can inspect its transition and character scores, or compare it
+                  with a competing sequence that treats this gap differently.
+                  The explanation involves those linked decisions; it is not a
+                  separately learned yes-or-no score attached only to this gap.
                 </p>
                 <p>
-                  Changing the answer at that gap alone is not something the method can be asked to do.
+                  A decoder can be extended to require a boundary at a chosen
+                  gap, then find the best complete sequence satisfying that
+                  requirement. Our SDK example does not expose that constrained
+                  operation. Here we will instead train a model whose ordinary
+                  output already contains a separate decision for every gap.
                 </p>
 </>
                 <p>
-                  The same holds for correcting it. If a reader sees one gap
-                  answered wrongly there is no weight to reach for, because the
-                  quantity that decided it was assembled out of counts about
-                  places and steps that every other gap in the sentence also
-                  leaned on. And the annotation has the same shape from the other
-                  direction, which is the third section.
+                  The sequence model also shares its learned counts across
+                  positions. Changing a transition or character score to repair
+                  one sentence can affect many other boundaries. The gap
+                  classifier shares weights too, but lets us inspect which local
+                  features contributed to one particular decision. That is the
+                  distinction we will investigate, including its costs.
                 </p>
                 <KeepInMind>
-                  Scoring a whole sentence buys consistency and costs
-                  addressability. Nothing on this page recovers the consistency;
-                  what changes is that a single decision becomes a thing you can
-                  look at, correct and count.
+                  Joint decoding checks a complete sequence against the model&apos;s
+                  transition rules. Independent gap decisions are easier to
+                  inspect locally, but this classifier does not check how all
+                  those decisions fit together. Neither arrangement guarantees
+                  the boundaries a reader intended.
                 </KeepInMind>
               </SubSection>
 
@@ -124,14 +133,10 @@ export default function LearningBoundariesFromExamplesPage() {
                   Imagine asking someone to annotate boundaries and allowing them to leave uncertain cases unmarked. A compound noun may have more than one reasonable treatment under different conventions. A boundary classifier can learn from the gaps the annotator did label without requiring a complete segmentation for every sentence. That is a practical reason to investigate this arrangement, separate from its accuracy.
                 </p>
                 <p>
-                  To a gap-at-a-time learner that corpus is simply fewer
-                  examples, since a marked gap is one instance and needs no
-                  neighbour. To a method that works in places inside a word it is
-                  much worse than that, because the place a character occupies is
-                  known only when the gaps on both sides of it have been settled,
-                  so an unmarked gap spoils the two characters it sits between.
-                  Two hundred sentences of a generated language, with a share of
-                  the gaps marked at random, say how much worse.
+                  The gap learner can use each marked gap as one training example. The SDK’s supervised character-role counter needs enough adjacent boundary labels to decide a character’s role, such as beginning or ending a word. A missing gap label can therefore make both neighbouring character roles unavailable to that counting procedure.
+                </p>
+                <p>
+                  Other sequence-training methods can use partially observed labels. We are comparing the two procedures in this experiment, rather than proving a limit of all sequence models. The widget uses two hundred generated sentences with a chosen share of boundary labels retained.
                 </p>
                 <AnnotationReach />
                 <p>
@@ -519,12 +524,12 @@ export default function LearningBoundariesFromExamplesPage() {
           title: "Questions on Parts 1 to 3",
           quiz: [
             trueFalse(
-              "When the whole-sequence method answers one gap wrongly, a reader can point at the weight that decided that gap and change it.",
+              "The whole-sequence method has one dedicated weight for each individual gap, so changing that weight repairs only that gap.",
               false,
-              "There is no such weight. The score being maximised is a sum over the whole run, so a single boundary was settled by comparing two complete readings of forty-five characters, and the difference between those totals draws on every character in the sentence. Scoring a whole sentence buys consistency and costs addressability.",
+              "The sequence model shares transition and character scores across positions. We can inspect those contributions and compare alternative paths, but there is no dedicated parameter belonging only to this gap. Changing a shared score can affect other decisions too. A constrained decoder could require a chosen boundary without claiming that it had learned a new local weight.",
             ),
             choice(
-              "An annotator marks only the gaps they are certain of and leaves the arguable ones alone. Why does that corpus cost the whole-sequence learner more than the gap learner?",
+              "In this SDK experiment, an annotator leaves uncertain gaps unmarked. Why does the supervised character-role counter lose more usable labels than the independent gap learner?",
               [
                 "The place a character occupies is known only once the gaps on both sides of it are settled, so one unmarked gap spoils two characters",
                 "The whole-sequence learner needs every sentence marked all the way through or it cannot be run at all",
@@ -680,10 +685,10 @@ export default function LearningBoundariesFromExamplesPage() {
                   </p>
                 </WhyThisWorks>
                 <KeepInMind>
-                  The whole justification of this method over the previous one, on
-                  a single decision, is this list. A maximum over readings has no
-                  such list, because the quantity that decided one gap is a
-                  difference between two totals over the whole sentence.
+                  This list describes the local score used for one gap. A sequence
+                  model can expose score contributions too, but its boundary
+                  belongs to the winning complete path. Keep local feature
+                  contributions separate from why one entire path beat another.
                 </KeepInMind>
               </SubSection>
 
@@ -1228,7 +1233,11 @@ export default function LearningBoundariesFromExamplesPage() {
           practice: [
             exercise(
               "Read our sentence gap by gap",
-              ["Fit the library’s gap segmenter on the eight marked-up sentences of Part 4, with a reach of three, twenty passes and the seed 0, which is the order the page’s widgets use. Segment the sentence about Dr. Alvarez with its spaces taken out, then ask for the score at every gap and compare each sign with the reading a person gives.", "Section 11 arrived at forty-four gaps with three of them wrong, all inside the surname. Print each wrong gap with the two characters either side of it and its score to four places. The page names the three and does not print their scores, so read off how close each one was."],
+              [
+  "The supplied training sentences mark word boundaries. Train the gap classifier, remove spaces from the Dr. Alvarez probe and compare its proposed cuts with the supplied reader segmentation.",
+  "Use window=3, epochs=20 and random_seed=0. Print the model’s segmentation, then the total gap count and number of disagreements. For each disagreement print the adjacent characters and score to four decimal places.",
+  "A gap score above zero means cut. The starter constructs the reader’s boundary positions; use those positions as the comparison rather than judging the output by its appearance."
+],
               `from oop_ml import PointwiseSegmenter
 
 corpus = [
@@ -1288,11 +1297,21 @@ for gap in wrong:
 between v and a: +4.3098
 between a and r: +7.3693
 between z and d: -1.3466`,
-              { hints: ["The segmenter takes window, epochs and random_seed when it is constructed and the list of marked-up sentences when it is fitted, each sentence a list of its words.", "gap_scores takes the text and answers one score per gap, in order, where gap number g lies between the characters at positions g and g + 1. A positive score is a cut.", "The loop above the comment has already turned the reader’s words into the set of gaps that carry a boundary, so a gap is wrong when its score being positive disagrees with its being in that set."], check: numberCheck("What score does the gap between the z and the d get, to four places?", -1.3466, 5e-05, "That gap should have been a cut and falls 1.3466 short of one, which makes it the closest call of the forty-four. The questions naming the z carry no weight, since the eight sentences hold no z. The characters after the gap begin a word those sentences hold three times and vote to cut, while the letters two and three places back, the kinds and the constant question all vote to keep going, since most gaps between two letters are not boundaries. The two gaps cut in error score +4.3098 and +7.3693, each defensible alone, which is section 16’s single letter standing as a word.") },
+              {
+question: "Where does a learned boundary rule cut a new surname incorrectly?",
+ hints: [
+  "fit takes a list of sentences, each represented as a list of words.",
+  "gap_scores(text) returns one score between each adjacent character pair. Gap g lies after character g.",
+  "A disagreement occurs when score > 0 differs from membership in the reader’s boundary set. A surname absent from training can expose errors despite correct training boundaries."
+], check: numberCheck("What score does the gap between the z and the d get, to four places?", -1.3466, 5e-05, "The z/d gap scores -1.3466, so the model keeps those letters together despite the supplied boundary. The other two errors insert cuts inside the surname; the sign determines each decision.") },
             ),
             exercise(
               "Open up the gap after the full stop",
-              ["Section 12 lists every question the gap between the full stop of Dr. and the A of Alvarez asked, with the weight each one carries. Build that list. Fit the same segmenter as before, ask for the questions of gap number 2 at a reach of three, look up the weight of each, and print the five that count for most. Then add the weights up three ways, over the questions naming characters, over the ones naming kinds, and over all of them.", "The total should be the +7.1283 of section 12 and should equal the score the segmenter itself reports for that gap, with the largest single weight the +3.6304 of the full stop sitting immediately to the left. A question naming a character begins with c and one naming a kind begins with t.", "The function that lists a gap’s questions is not exported from the top of the library, so it is imported here from the module that holds the segmenter."],
+              [
+  "Inspect one decision instead of treating the boundary score as an unexplained number. Use the same fitted model and examine gap 2, between the full stop and A in the text with spaces removed.",
+  "List that gap’s features with gap_features at window=3 and look up each averaged weight. Print the five features with the largest absolute weights. Then print the feature count and separate totals for character features, character-type features, the bias and all features.",
+  "Print the model’s own gap score beside your total. Character features begin with c, type features with t, and bias is the constant feature. The internal helper is imported explicitly in the starter."
+],
               `from oop_ml import PointwiseSegmenter
 from oop_ml.core.natural_language_processing.tokenization.segmentation.pointwise import gap_features
 
@@ -1313,7 +1332,7 @@ questions = gap_features(text, 2, 3)
 # Look up the weight of every question with weight_of. Print the five
 # largest by size, each beside its question. Then print the number of
 # questions, the sum over those starting "c[", the sum over those starting
-# "t[", the weight of "bias", the total, and the model's own score at gap 2.`,
+# "t[", the weight of "bias", the total, and the model&apos;s own score at gap 2.`,
               `from oop_ml import PointwiseSegmenter
 from oop_ml.core.natural_language_processing.tokenization.segmentation.pointwise import gap_features
 
@@ -1354,11 +1373,21 @@ what kinds -0.3188
 being a gap at all -3.0455
 total +7.1283
 the score the segmenter reports +7.1283`,
-              { hints: ["gap_features takes the run of text, the number of the gap and the reach, and answers the names of the questions that gap asks. weight_of takes one of those names and answers its averaged weight, zero for a question the marked gaps never raised.", "A dictionary from each question to its weight makes both the ranking and the three sums short. Sorting the names by the size of their weight, largest first, puts the questions that count for most at the front.", "The score at a gap is the sum of the weights of the questions it asked and nothing else, so the total of the dictionary’s values and the third entry of gap_scores are the same number reached twice."], check: numberCheck("What do the twenty-three weights at that gap add up to, to four places?", 7.1283, 5e-05, "The eleven questions naming characters come to +10.4926, the eleven naming kinds to −0.3188 and the constant question to −3.0455, and those add to +7.1283, which is exactly what the segmenter reports. Nothing is approximated, because the sum is what the calculation did. Four of the five largest weights read characters behind the gap, the full stop immediately to the left carrying the largest, and the fifth is the constant question pulling the other way. The questions about the characters after the gap carry no weight, and two of them never could, since the eight sentences hold no capital A and no v.") },
+              {
+question: "Which learned features cause the cut after Dr.?",
+ hints: [
+  "gap_features(text, 2, 3) supplies the names whose weights participate in this decision.",
+  "Sort by abs(weight), not by signed weight, so a strong negative contribution remains visible.",
+  "Sum each named group and compare the complete sum with gap_scores(text)[2]. The displayed four-decimal figures are rounded from the underlying weights."
+], check: numberCheck("What do the twenty-three weights at that gap add up to, to four places?", 7.1283, 5e-05, "The complete feature sum is 7.1283 to four decimal places, matching the model’s score. Its positive sign chooses a boundary. The largest individual contribution comes from the adjacent full stop.") },
             ),
             exercise(
               "Run the same eight sentences in eight orders",
-              ["Section 10 says the order the marked gaps are visited in changes the answer. The seed decides that order, so fit the segmenter eight times on the same eight sentences with the seeds 0 to 7 and segment the sentence about Dr. Alvarez with each. Print how many corrections each run made in all, how many pieces it cut the sentence into, and whether its reading is the one a person gives.", "Every run should stop correcting well before its twenty passes are up, so all eight are right about every marked gap, and still they should not agree. Count the different readings among the eight."],
+              [
+  "Keep the eight marked training sentences fixed and vary only the order used to visit their examples. Fit models with seeds 0 through 7, window=3 and epochs=20.",
+  "For each fit print the total training corrections, the probe’s piece count and whether its segmentation equals the supplied reader segmentation. Finish by counting distinct probe segmentations across all eight fits.",
+  "Use the recorded update counts to inspect training behaviour separately from the held-out probe. A run making no further corrections has settled on the training examples, not proved a rule for every new name."
+],
               `from oop_ml import PointwiseSegmenter
 
 corpus = [
@@ -1411,11 +1440,20 @@ order 5: 76 corrections, 8 pieces, the reader's False
 order 6: 68 corrections, 7 pieces, the reader's False
 order 7: 62 corrections, 6 pieces, the reader's False
 5 different readings`,
-              { hints: ["A fitted segmenter keeps n_updates_by_epoch, the number of corrections it made on each pass, so their sum is the corrections of the whole run and a run of zeros at the end means it had stopped.", "The texts of a split are a tuple, which can be compared with the reader’s tuple and can be put in a set, and a set keeps one copy of each different reading."], check: numberCheck("How many different readings of the sentence do the eight orders give?", 5, 0.0, "Eight orders give five readings and none of them is the reader’s. The runs make between 58 and 79 corrections and then stop, so each is right about all 189 marked gaps, and being right about those does not pin the weights down, since the eight sentences raise 631 questions on 189 gaps. The runs disagree where nobody marked anything, which here is the surname. A segmentation quoted from this method is a segmentation from one order of one corpus.") },
+              {
+question: "Can different training orders agree on known gaps but disagree on a new sentence?",
+ hints: [
+  "n_updates_by_epoch records each pass’s corrections. Sum it for the printed total.",
+  "The texts returned by split can be kept as tuples. Compare them with the reader’s tuple and add them to a set to count distinct readings."
+], check: numberCheck("How many different readings of the sentence do the eight orders give?", 5, 0.0, "The eight fits produce five distinct probe segmentations. The changed visiting order affects learned weights even though later passes stop making corrections on the training data.") },
             ),
             exercise(
               "Watch a weight become a half",
-              ["Section 9 walks two steps by hand. Run that walk. Fit the segmenter on the single sentence whose words are ab and c, with a reach of one, one pass and the seed 0, which visits the first gap first. Print the averaged weight of every question each of the two gaps asks, then the scores of the two gaps and the pieces the text abc comes back as.", "Every correction adds or subtracts exactly one, so any weight that is not a whole number is the averaging at work. The four questions the two gaps share should come out at a half below zero, and the text should come back whole, with the second gap still answered wrongly after one pass.", "The function that lists a gap’s questions is not exported from the top of the library, so it is imported here from the module that holds the segmenter."],
+              [
+  "Train once on the single marked sentence [\"ab\", \"c\"] with window=1, epochs=1 and random_seed=0. This tiny run lets us inspect the effect of averaging weights across successive training states.",
+  "For each gap of abc, print every feature’s averaged weight. Then print the two gap scores, the selected segmentation and the number of training corrections.",
+  "The first gap should stay inside ab, while the second should separate c. Compare those intended labels with the decisions made by the averaged weights after only one pass."
+],
               `from oop_ml import PointwiseSegmenter
 from oop_ml.core.natural_language_processing.tokenization.segmentation.pointwise import gap_features
 
@@ -1458,7 +1496,13 @@ gap 1
 scores -5.0 and -0.5
 abc
 corrections in the pass: 2`,
-              { hints: ["A sentence is a list of its words, and the corpus is a list of sentences, so one sentence of two words is a list holding one list of two strings.", "gap_features with the text, the gap’s number and a reach of one answers the seven questions of that gap, and weight_of answers the averaged weight of each.", "The question named bias is the constant one every gap asks. It went to minus one at the first step and back to zero at the second, so look at what the average of those two states is."], check: numberCheck("What is the averaged weight of the constant question every gap asks?", -0.5, 0.0, "The constant question was moved to minus one by the first correction and back to zero by the second, and the average of those two states is minus a half. The walk finished with that weight at zero, as though nothing had been learned about it, which is the imprint of the most recent correction that section 9 says the final set of weights carries. The averaged weights score the gaps at −5.0 and −0.5, so the text comes back whole and one pass was not enough to get the second gap right.") },
+              {
+question: "Why can unit weight updates produce a fractional averaged weight?",
+ hints: [
+  "The corpus is a list containing one list of two word strings.",
+  "gap_features gives each gap’s feature names, and weight_of retrieves its averaged weight. bias appears at every gap.",
+  "The bias is decreased at one correction and increased at the next. Its average records both states, rather than only its final value."
+], check: numberCheck("What is the averaged weight of the constant question every gap asks?", -0.5, 0.0, "The averaged bias is -0.5 even though every correction uses a whole-unit update. Averaging retains the sequence of weight states. One pass still leaves the second gap incorrectly uncut.") },
             ),
           ],
         },

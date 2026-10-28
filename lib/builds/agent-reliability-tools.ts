@@ -80,7 +80,7 @@ export const agentReliabilityTools: Record<string, Tool> = {
     },
   },
   arRetrySafety: {
-    title: "Classify whether another attempt is safe", why: "A timeout can hide a completed write. Only read operations or a receiver-enforced idempotency contract can be retried automatically here.", inputs: ["Operation request", "Last attempt outcome"],
+    title: "Classify whether another attempt is safe", why: "A timeout can hide a completed write. Automatic retry here requires a read operation or a receiving service that binds the same request key to the same intended write, so repeating it cannot create another effect.", inputs: ["Operation request", "Last attempt outcome"],
     run: ([command, outcome]) => {
       const r = record(command, "Operation");
       choice(r.effect, ["read", "write"], "Operation effect");
@@ -128,7 +128,7 @@ export const agentReliabilityTools: Record<string, Tool> = {
     },
   },
   arDispatchStatus: {
-    title: "Check cancellation and dependency health", why: "An open circuit stops new calls to that dependency. A cancelled run admits no new work.", inputs: ["Run control state"],
+    title: "Check cancellation and dependency health", why: "A dependency’s circuit is the controller’s stop-calling state after failures. An open circuit blocks new calls to that dependency. Cancellation blocks all new work for the run.", inputs: ["Run control state"],
     run: ([value]) => {
       const r = record(value, "Run control");
       if (typeof r.cancelled !== "boolean" || typeof r.probe_granted !== "boolean") throw Error("Supply boolean cancelled and probe_granted fields.");

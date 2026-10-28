@@ -421,13 +421,17 @@ export default function GlovePage() {
             several(
               "Which of these hold for the table built from the twenty-four sentences?",
               [
-                "It is symmetric, because every pair is counted from both ends",
-                "281 of its 1,369 cells hold anything at all",
-                "No cell can have the same word for its row and its column",
-                "The largest count is the beside and, at 16.5",
-              ],
+                              "It is symmetric, because every pair is counted from both ends",
+                              "281 of its 1,369 cells hold anything at all",
+                              "No cell can have the same word for its row and its column",
+                              "The largest count is the beside and, at 16.5",
+                            ],
               [0, 1, 3],
               "The table is counted from both ends and so comes out symmetric, 79.5% of it is blank, and the beside and tops it at 16.5. A word can be its own neighbour, and here it happens exactly once, since and stands two positions from another and in two sentences, which puts 2.0 in the cell whose row and column are both and.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Twenty-four sentences, reach 2, distance-weighted counts.\nEvery context pair is counted from both ends.\nVocabulary: 37 words; table: 37 × 37 = 1,369 cells.\nNonzero cells: 281.\nLargest count: the beside and, 16.5.\nSelf-pair and beside and: 2.0."
+              },
             ),
             choice(
               "Why does the objective compare the dot product against the logarithm of a count rather than against the count?",
@@ -750,26 +754,34 @@ export default function GlovePage() {
               "Each pass accumulates its total while the parameters are still moving, so a pair visited early is scored against different vectors from a pair visited late, and the parameters improve during the pass being measured. The objective at rest is 0.5148 against the 0.5550 the twenty-fifth pass recorded. Running one pass at a base step of a millionth of a millionth brings the two within a billionth of each other, which shows the gap is entirely the movement and not the arithmetic.",
             ),
             choice(
-              "The released program starts every running sum at one and adds each new square after taking the step. What did those two lines cost over the same twenty-five passes?",
+              "Which statement describes this optimiser comparison after 25 passes?",
               [
-                "The objective stopped at 4.9571 rather than 0.5148, and the halves separated by 0.0306 rather than 0.1966",
-                "Nothing measurable, since the two rules are indistinguishable at every corpus size",
-                "The fit diverged and returned no answer at all",
-                "The same objective, reached nine times more slowly",
-              ],
+                              "The objective stopped at 4.9571 rather than 0.5148, and the halves separated by 0.0306 rather than 0.1966",
+                              "Nothing measurable, since the two rules are indistinguishable at every corpus size",
+                              "The fit diverged and returned no answer at all",
+                              "The same objective, reached nine times more slowly",
+                            ],
               0,
-              "Starting the sums at one means they never grow past it on a corpus this small, so every step the released rule took was the base rate times the slope to within nine per cent and the rule was not adaptive at all. On billions of words the sums leave one within the first few thousand pairs and the two rules agree, which is why a reader who knew only the name of the step rule would never have checked.",
+              "The released-rule run has a larger objective and a smaller within-minus-across cosine gap here. Starting its accumulated squares at one makes adaptation weak on this small corpus. These two runs do not establish a universal runtime ratio or prove what happens at every corpus size.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "                                    objective at rest  within-minus-across cosine\naccumulate squares before scaling     0.5148             0.1966\nreleased rule: initial sum 1, add after 4.9571             0.0306\n\nBoth use this same small corpus and pass budget."
+              },
             ),
             several(
               "Which of these are true of the reach on this corpus?",
               [
                 "It decides how many counts fall below one, and so the sign of most of the logarithms",
-                "At a reach of one nothing is below one, and the fit still fails",
+                "At reach one no count is below one, but the measured separation gaps still vary around zero",
                 "At a reach of five more than half the counts are below one and the mean logarithm has gone negative",
-                "It is settled before the first equation exists, so sweeping it means counting the corpus again for every value",
+                "The reach is chosen before fitting; to use a different reach, its co-occurrence counts must be constructed"
               ],
               [0, 1, 2, 3],
-              "Every one of them holds. A neighbour further away contributes a smaller fraction, so the reach settles what fraction of the counts are below one, none at a reach of one and 51.9% at five, and at a reach of one the 158 pairs left are simply too little of the corpus to see anything by. The reach is baked into the table before a single equation exists, and no quantity the fit produces turns over as it passes a good value, so a sweep is a fresh count of the corpus at every setting.",
+              "A larger reach includes more distant neighbours, each with a smaller contribution. Here that changes both the fraction of fractional counts and the mean of their logarithms. Reach one avoids negative logarithms, yet its three separation gaps remain small and have mixed signs. The count table is an input to fitting, so a new reach needs the corresponding counts; an implementation may recompute or cache them.",
+              {
+                "description": "A neighbour d positions away contributes 1/d to its pair count. Changing the maximum reach changes which neighbours enter the count table. The final column reports within-half mean cosine minus across-half mean cosine for three training starts.",
+                "data": "reach | pairs | counts below one | mean logarithm | how far the halves came apart, three starts\n1 | 158 | 0 (0%) | +0.6623 | −0.0171, +0.0483, +0.0001\n2 | 281 | 86 (30.6%) | +0.2617 | +0.1966, +0.1314, +0.2284\n3 | 390 | 178 (45.6%) | +0.0101 | +0.0043, +0.0541, −0.0039\n5 | 474 | 246 (51.9%) | −0.1523 | +0.0156, +0.0123, −0.0076"
+              },
             ),
         ],
         },
@@ -936,16 +948,17 @@ export default function GlovePage() {
                   distinguish a set of vectors from a rotation of it. Turn every
                   vector in both tables by the same rotation and every dot product is
                   unchanged, so every term of the objective is unchanged, so the
-                  rotated answer is exactly as good. Individual coordinates therefore
-                  carry no meaning at all, and the third coordinate of one fit has no
-                  relation to the third coordinate of another.
+                  rotated answer is exactly as good. Individual coordinates describe the axes of this particular fit.
+                  They do not automatically name a feature, and another fit can
+                  use a different orientation.
                 </p>
                 <KeepInMind>
                   Anything read off these vectors has to survive a rotation, which a
                   cosine does and a coordinate does not. Averaging two fits&rsquo;
                   tables together, or handing one fit&rsquo;s vectors to something
-                  trained on another&rsquo;s, is undefined rather than approximate,
-                  because the two answers were never written in the same coordinates.
+                  trained on another&rsquo;s, is numerically possible but generally
+                  unjustified before the representations are aligned. A coordinate
+                  in one fit need not measure the same direction in the other.
                 </KeepInMind>
               </SubSection>
 
@@ -988,12 +1001,12 @@ export default function GlovePage() {
                     {
                       expression: "the individual coordinates of a vector",
                       reason:
-                        "undefined as quantities. Rotating both tables by one rotation leaves every dot product, and so the whole objective, exactly where it was, so the coordinates are one arbitrary choice among infinitely many that fit equally well. Only rotation-invariant readings mean anything.",
+                        "numerically defined in the axes of this fit. Rotating both tables together leaves every dot product and the objective unchanged, so the objective does not assign a fixed interpretation to an individual coordinate. Within-fit cosine comparisons survive such a rotation.",
                     },
                     {
                       expression: "comparing two fits coordinate by coordinate",
                       reason:
-                        "undefined for the same reason, and so is averaging two fits’ tables or feeding one fit’s vectors to something trained on another’s.",
+                        "numerically computable, but generally not meaningful before alignment. Averaging two fits or reusing a model trained on another fit’s vectors assumes matching coordinate systems, which separate training runs do not guarantee.",
                     },
                     {
                       expression: "more unknowns than equations",
@@ -1046,6 +1059,10 @@ export default function GlovePage() {
               "On this corpus the fitted vectors beat the raw rows of counts on both of the two questions the page asks.",
               false,
               "They win one and lose one. The raw rows put 74.7% of the five nearest content words in the same half against the fit's 67.3%, and they do it with 37 numbers per word where the fit uses 8; the fit separates the halves by 0.1966 against the raw rows' 0.1404.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "                                 raw count rows  fitted vectors\nnumbers per word                  37              8\nfive nearest content words in half 74.7%           67.3%\nwithin-minus-across cosine         0.1404          0.1966"
+              },
             ),
             choice(
               "Why do the raw rows separate the two halves by only 0.1404?",
@@ -1079,11 +1096,11 @@ export default function GlovePage() {
               [
                 "Every dot product is unchanged, so the rotated answer is exactly as good",
                 "Averaging the rotated table with the original gives a table at least as good as either",
-                "Handing one fit's vectors to something trained on another's is undefined rather than approximate",
-                "The cosine between two words changes, which is why the page reports coordinates instead",
+                "Reusing one fit’s vectors in a model trained on an unaligned fit has no general guarantee",
+                "The cosine between two words changes, which is why the page reports coordinates instead"
               ],
               [0, 2],
-              "A rotation leaves every dot product alone, so it leaves every term of the objective alone and the objective cannot tell the two apart. That is exactly why anything read off these vectors has to survive a rotation, which a cosine does and a coordinate does not. Two tables that were never written in the same coordinates cannot be averaged, so the mean of a table and its rotation is undefined rather than a better table, and the third coordinate of one fit has no relation to the third coordinate of another.",
+              "The same orthogonal rotation preserves every dot product when applied to both tables, so the GloVe objective is unchanged. It also preserves within-table cosines. Averaging the original and rotated vectors is numerically defined, but need not preserve their dot products or produce an equally good fit. Separately trained tables need alignment before coordinate-wise operations or a downstream model can be interpreted consistently.",
             ),
         ],
         },
@@ -1092,7 +1109,10 @@ export default function GlovePage() {
           practice: [
             exercise(
               "Count the table, once",
-              ["Fit the page’s settings, a width of eight and a reach of two, to the twenty-four sentences, and then read the table the fit was made on rather than the vectors. Part 2 said the table has 1,369 cells of which 281 hold anything, that the counts add to 552.0, that the beside and tops it at 16.5 and that and stands beside itself at 2.0. Confirm each of those, and count how many of the filled cells hold less than one.", "Part 4 said the smallest count earns a weight of 0.0188 and the largest 0.2589, about fourteen times as much. Print the two weights and their ratio, which the lesson rounds and the script does not."],
+              [
+  "Fit the supplied twenty-four sentences at vector width eight and context window two. Inspect the stored cooccurrence table before interpreting learned vectors.",
+  "Print vocabulary size, total/filled cells, count sum, the/and and and/and counts and number of positive counts below one. Then print weights of the smallest and largest positive counts and their ratio."
+],
               `from oop_ml import GloVe
 
 corpus = """the chef chops onion and garlic
@@ -1180,11 +1200,17 @@ filled cells below one 86
 weight of 0.5 is 0.0188
 weight of 16.5 is 0.2589
 ratio 13.77`,
-              { hints: ["The fitted model keeps the matrix it was fitted on as a property named cooccurrence, and that object answers n_words, total and count_between with two words.", "counts is a square array with a row and a column per word, so counts[counts > 0] is the 281 filled cells and (filled < 1).sum() counts the ones below one.", "weight_of_count is on the model and needs no fit at all. It takes one count and returns the weight Part 4 describes, at the model’s own cap and exponent."], check: numberCheck("What is the ratio of the largest count’s weight to the smallest count’s?", 13.77, 0.01, "Both weights are the count over the cap of 100, raised to three quarters, so the cap cancels out of the ratio and what is left is 33 to the three quarters, which is 13.77. Part 4 rounds that to about fourteen. The cap cancelling is also why moving it to exactly 16.5 changed none of the shares, since every weight scales alike while nothing lies beyond it.") },
+              { hints: [
+  "cooccurrence.counts is the word-by-context matrix. Use positive entries for both count limits and filled-cell statistics.",
+  "weight_of_count applies the fitted model’s weighting function; it is separate from the cooccurrence count itself."
+], check: numberCheck("What is the ratio of the largest count’s weight to the smallest count’s?", 13.77, 0.01, "The weighting ratio is about 13.77. This weighting function increases the influence of larger observed counts without making its weight equal to the count."), question: "Which context counts does GloVe actually fit, and how are they weighted?" },
             ),
             exercise(
               "Run the fit and read where it stopped",
-              ["Part 5 reported the summed pair terms falling from 18.9335 in the first pass to 0.5550 in the twenty-fifth, and an objective of 0.5148 recomputed where the walk stopped. The library records each pass as a mean over the 281 pairs, so multiply a recorded mean by the number of pairs to get the totals the lesson quotes.", "Print the first and last pass totals, whether the recorded history fell, and the objective at rest, and confirm the objective at rest sits below the last pass’s total for the reason Part 5 gives."],
+              [
+  "Use the supplied fitted GloVe model. Convert the first and last recorded mean losses to summed pair losses using each record’s n_pairs.",
+  "Print pass count, pairs per pass, first/last totals, the stated decreasing-history check and objective_value() evaluated at the final parameters."
+],
               `from oop_ml import GloVe
 
 corpus = """the chef chops onion and garlic
@@ -1259,11 +1285,17 @@ first pass total 18.9335
 last pass total 0.5550
 history fell True
 objective at rest 0.5148`,
-              { hints: ["history is a property of the fitted model. It holds one record per pass, and mean_losses is the tuple of their means in order.", "Each record also knows n_pairs, the number of pairs the pass visited, which is the 281 to multiply a mean by.", "objective_value is a method rather than a property, because it recomputes the objective from the fitted parameters at rest instead of reading back a number the walk recorded."], check: numberCheck("What objective does the model report, recomputed where the walk stopped?", 0.5148, 0.0005, "The last pass’s total of 0.5550 was accumulated while the parameters were still moving, so it is not the objective at any one set of parameters. Recomputed at rest the objective is 0.5148, lower, because the parameters improved during the pass being measured, and Part 5 showed the two agree to within a billionth once the walk is made to stand still.") },
+              { hints: [
+  "Recorded pass losses were measured while parameters changed between pairs.",
+  "objective_value recomputes every term at the same final parameter state. It is not a stored last-pass number."
+], check: numberCheck("What objective does the model report, recomputed where the walk stopped?", 0.5148, 0.0005, "The final recomputed objective is 0.5148. It uses one final parameter state, whereas recorded pass terms were evaluated during successive updates."), question: "Why can the recomputed objective differ from the last recorded pass?" },
             ),
             exercise(
               "Ask the vectors the two questions",
-              ["The page scores every fit on two mean cosines, how alike two content words of one half are and how alike a word of each half are, with the seven shared words left out of both. Compute both means over the thirty content words and print the gap between them, which Part 5 gave as 0.1966.", "Then print the five words nearest moon with their similarities. Part 5 said the list begins with orbits at 0.9826 and that a function word gets in, which is the effect the spare numbers only partly remove."],
+              [
+  "Use the supplied fifteen cooking and fifteen astronomy content words; exclude the shared function words from the pair means.",
+  "Print mean within-topic cosine, mean cross-topic cosine and their difference. Then print moon’s five nearest words, allowing the full vocabulary in that neighbour search."
+],
               `from itertools import combinations
 from statistics import mean
 
@@ -1354,11 +1386,17 @@ of 0.9799
 planet 0.9536
 astronomer 0.9336
 orbit 0.8815`,
-              { hints: ["similarity takes two words and answers their cosine, so the within mean is the mean over every pair inside each half and the across mean is the mean over every cooking word against every astronomy word.", "combinations from itertools gives each pair of a half once, which is 105 pairs per half, and the fifteen by fifteen cross pairs are a plain double loop.", "most_similar takes a word and how many neighbours to return, and each neighbour it answers has a word and a similarity."], check: numberCheck("What is the mean cosine between two content words of the same half?", 0.1188, 0.0005, "Fifteen words in each half make 105 pairs per half, 210 within-half cosines, and their mean is 0.1188. The 225 cross-half pairs average −0.0778, so words of one half point broadly together and words of different halves point slightly apart, and the gap of 0.1966 between the two means is the one number Parts 5 and 6 compare every fit on.") },
+              { hints: [
+  "Use each within-topic pair once and every cooking/astronomy pair.",
+  "The neighbour list answers a different question from a content-only mean; shared function words remain eligible there."
+], check: numberCheck("What is the mean cosine between two content words of the same half?", 0.1188, 0.0005, "The same-topic content mean is 0.1188. Read it beside the cross-topic mean and individual neighbours before judging the representation."), question: "Do the learned vectors separate topics while keeping useful neighbours?" },
             ),
             exercise(
               "Widen the reach to the published five",
-              ["Part 5 says the reach decides the sign of most of the logarithms, with none of the counts below one at a reach of one and more than half at a reach of five. Fit the corpus at reaches of one, two and five with everything else at the page’s settings, and for each print how many pairs the table holds, what share of them sit below one, the mean logarithm of a count, and the mean of the spare numbers in the word role.", "The mean logarithm at a reach of five is a number the lesson describes only as negative. Part 5 does give the mean spare number there, minus 0.0169, and calls it an order of magnitude too small to absorb the mean it was meant to absorb."],
+              [
+  "Refit the supplied GloVe corpus at context windows one, two and five, keeping all other settings fixed.",
+  "For each print positive pair count, percentage of positive counts below one, mean log count and mean learned word-role bias. These biases are the extra scalar terms alongside the vectors."
+],
               `from math import log
 from statistics import mean
 
@@ -1443,7 +1481,10 @@ reach 2, 281 pairs, 30.6% below one
 reach 5, 474 pairs, 51.9% below one
   mean logarithm -0.1523
   mean spare number -0.0169`,
-              { hints: ["window is the constructor field that sets the reach, and construction configures while fit learns, so a new reach is a new model fitted again.", "The spare numbers of the word role are the model’s biases property, one per word, frozen, and a numpy array answers its own mean.", "The logarithms are of the counts themselves, not of anything the fit produced, so the share below one and the mean logarithm are settled before the first pass and do not change with the seed."], check: numberCheck("What is the mean logarithm of a count at a reach of five?", -0.1523, 0.0005, "At a reach of five a neighbour four or five positions away adds a quarter or a fifth, so 51.9% of the 474 counts are below one and the mean of their logarithms is −0.1523. The spare numbers ought to absorb that mean and after twenty-five passes reach only −0.0169, so the negative ends up in the dot products, where the meaning was supposed to be, and that is why the reach that works on this corpus is two.") },
+              { hints: [
+  "Inspect only positive counts before taking logarithms.",
+  "Read the word-role biases from model.biases and compare them with the fixed count statistics; they are different quantities."
+], check: numberCheck("What is the mean logarithm of a count at a reach of five?", -0.1523, 0.0005, "The mean log count is -0.1523. At this reach many positive fractional counts lie below one, which gives them negative logarithms before any fitting."), question: "How does context reach change the count distribution the model must fit?" },
             ),
           ],
         },

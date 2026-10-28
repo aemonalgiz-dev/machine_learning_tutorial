@@ -827,12 +827,7 @@ export default function CalculusPrimerPage() {
             responds to each setting, and move every setting in the direction
             that is expected to reduce it.
           </p>
-          <p>
-            Everything you watched on the one-dimensional bowl happens there too.
-            The strides shrink as the ground flattens, the rate can be too small
-            or too hot, and the valley it settles in is a nearby one rather than
-            necessarily the lowest.
-          </p>
+          <p>The same small-change questions apply when there are many settings, but the bowl is a particularly simple case. A more complicated loss can have several minima or flat points that are not minima at all. The gradient describes the local response; it does not tell us that a useful setting is nearby or that our next finite step will reach it.</p>
         </InAModel>
       </PrimerSection>
 
@@ -846,16 +841,19 @@ export default function CalculusPrimerPage() {
             "Substituting f′(x) = x − 1 into the update rule and subtracting 1 from both sides turns the rule into a statement about the distance from the floor at x = 1, and the factor left standing is 1 − η. The step table in section 11 checks it, where the distances run 4, 2.8, 1.96 and 1.372, each exactly 0.7 of the one before.",
           ),
           several(
-            "At which of these rates does the walk fail to close on the floor of this bowl?",
-            [
-              "0.3, which closes 30% of the distance each step",
-              "1.9, which crosses to the far side every step",
-              "2.0, which hops between two mirror points forever",
-              "2.5, which grows every step",
-            ],
-            [2, 3],
-            "Below 2 the magnitude of 1 − η is under one and the walk converges however alarming it looks on the way, which is why 1.9 zigzags across the bowl and still settles. At exactly 2 the factor is −1, so the walk neither closes nor escapes, and above 2 every hop is longer than the last.",
-          ),
+              "At which of these rates does the walk fail to close on the floor of this bowl?",
+              [
+                            "0.3, which closes 30% of the distance each step",
+                            "1.9, which crosses to the far side every step",
+                            "2.0, which hops between two mirror points forever",
+                            "2.5, which grows every step",
+                          ],
+              [2, 3],
+              "Below 2 the magnitude of 1 − η is under one and the walk converges however alarming it looks on the way, which is why 1.9 zigzags across the bowl and still settles. At exactly 2 the factor is −1, so the walk neither closes nor escapes, and above 2 every hop is longer than the last.",
+              {
+                "description": "Use f(x) = ½(x − 1)² and gradient descent x_next = x − η(x − 1), starting from x = 4. The minimum is at x = 1. The question asks about convergence over indefinitely many steps, using exact arithmetic."
+              },
+            ),
           trueFalse(
             "A curve sharper than this bowl starts to run away at a learning rate below 2.",
             true,
@@ -892,11 +890,7 @@ export default function CalculusPrimerPage() {
         exercises={[
           exercise(
             "Measure a slope with two nearby values",
-            [
-              "A derivative describes how quickly the curve is changing at one location. Before using it to move downhill, check that it agrees with a measurement. The function below is the same bowl the primer uses.",
-              "For each supplied location, evaluate the curve a small step to the left and the same step to the right. Divide the change in height by the distance between those two locations. This centred difference estimates the tangent slope.",
-              "Also write the derivative from section 8 and compare it with that estimate. Complete the two functions; the array operations will evaluate all five locations together. Print both slopes, then check whether they agree to within one hundred-millionth.",
-            ],
+            ["The workshop estimated the traveller's rate of movement from two readings. Now use that same change-per-input idea on the primer's loss curve. Before taking a downhill step, check whether two nearby evaluations agree with its derivative.","For each supplied location, evaluate the curve a small step to the left and the same step to the right. Divide the change in height by the distance between those two locations. This centred difference estimates the tangent slope.","Also write the derivative from section 8 and compare it with that estimate. Complete the two functions; the array operations will evaluate all five locations together. Print both slopes, then check whether they agree to within one hundred-millionth."],
             `import numpy as np
 
 def curve(x):

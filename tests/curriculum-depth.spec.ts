@@ -38,7 +38,8 @@ test('new generated and static explanations are reachable with independent check
   ]) {
     await page.goto(`/concepts/${id}#${sectionId(title)}`);
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible();
-    await page.getByRole('combobox', { name: 'Choose a section' }).first().selectOption({ label: `Quiz · ${checkpoint}` });
+    await page.getByText('Lesson contents', { exact: true }).click();
+    await page.getByRole('combobox', { name: 'Jump to a page' }).first().selectOption({ label: `Quiz · ${checkpoint}` });
     await expect(page.getByRole('group', { name: 'Data for this question' })).toBeVisible();
     await expect(page.getByRole('heading', { name: checkpoint, exact: true })).toBeVisible();
   }
@@ -65,9 +66,10 @@ test('a supplementary coding challenge rejects memorised output and accepts a re
   const lesson = staticLessons['attention'];
   const exercise = lesson.practice[0];
   await page.goto('/concepts/attention');
-  const option = await page.getByRole('combobox', { name: 'Choose a section' }).first().locator('option').evaluateAll(options => options.find(option => option.textContent?.startsWith('Practice.'))?.getAttribute('value'));
+  await page.getByText('Lesson contents', { exact: true }).click();
+  const option = await page.getByRole('combobox', { name: 'Jump to a page' }).first().locator('option').evaluateAll(options => options.find(option => option.textContent?.startsWith('Practice.'))?.getAttribute('value'));
   expect(option).toBeTruthy();
-  await page.getByRole('combobox', { name: 'Choose a section' }).first().selectOption(option!);
+  await page.getByRole('combobox', { name: 'Jump to a page' }).first().selectOption(option!);
   await page.getByRole('button', { name: new RegExp(`Challenge \\d+: ${exercise.title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`) }).click();
   await page.locator('.cm-content').fill(`print(${JSON.stringify(exercise.output)})`);
   await page.getByRole('button', { name: 'Run tests', exact: true }).click();

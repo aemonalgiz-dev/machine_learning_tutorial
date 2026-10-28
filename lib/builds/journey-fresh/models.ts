@@ -3,7 +3,7 @@ import type { FreshJourneyCase } from "../journey-fresh";
 export const modelFreshCases: Record<string, FreshJourneyCase> = {
   "probability-calibration": {
     name: "The group agrees, but individual sensors still fail",
-    prompt: "Five sensors each received a failure probability of 0.6. Return the pair of group averages, followed by the Brier score. Does agreement between the averages mean every forecast was correct?",
+    prompt: "Five sensors each received failure probability 0.6. Return [mean probability, observed failure frequency] as the first entry and mean squared probability error, the Brier score, as the second. Does agreement between the averages make every individual forecast correct?",
     data: { probabilities: [.6, .6, .6, .6, .6], outcomes: [1, 1, 0, 1, 0] }, expected: [[.6, .6], .24],
     why: "The failure frequency agrees with the group's forecast. Individual outcomes are still either zero or one, so their squared probability errors remain positive. This one group does not establish calibration everywhere.",
   },
@@ -27,7 +27,7 @@ export const modelFreshCases: Record<string, FreshJourneyCase> = {
   },
   "parameter-posteriors": {
     name: "Ten working sensors and no new failures",
-    prompt: "A Beta prior represents some earlier failures. Update it after ten more sensors work correctly, then return the posterior mean failure probability. Should the absence of new failures erase the prior?",
+    prompt: "The Beta prior represents an existing belief about the failure rate. Update it after ten more sensors work correctly, then return the posterior mean failure probability. Should the absence of new failures erase that prior belief?",
     data: { a: 2, b: 8, fail: 0, pass: 10 }, expected: .1,
     why: "The working sensors reduce the estimated failure rate, but the prior still contributes. Observing no failures in this batch does not establish a zero failure probability.",
   },
@@ -45,7 +45,7 @@ export const modelFreshCases: Record<string, FreshJourneyCase> = {
   },
   "gaussian-process-regression": {
     name: "Two correlated temperature observations",
-    prompt: "These residual observations have nonzero covariance with each other. Use their full noisy covariance matrix and the query covariances to return the query's conditional mean residual.",
+    prompt: "These temperature residuals are observations minus a specified baseline mean. Their supplied noisy covariance includes nonzero off-diagonal entries, so they share information. Use the full matrix and query covariances to return the query's predicted residual mean, rather than an absolute temperature.",
     data: { A: [[2, 1], [1, 2]], y: [3, 0], k: [1, .5] }, expected: 1.5,
     why: "The covariance solve accounts for information shared by the observations. Treating the diagonal entries as independent error variances would produce a different answer. This construction reports a residual mean, not its uncertainty.",
   },

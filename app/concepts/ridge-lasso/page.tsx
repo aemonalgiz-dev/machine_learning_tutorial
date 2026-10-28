@@ -67,16 +67,8 @@ export default function RidgeLassoPage() {
           content: (<>
 <>
               <SubSection title="1. Revisit the overfit polynomial">
-                <p>
-                  The box above is the polynomial page&rsquo;s problem, the
-                  same noisy throw fitted at degree 9, far more flexibility than a
-                  ball deserves. Set the penalty slider to its lowest and the
-                  fit answers only to the data. It scores 0.997 on the fifteen
-                  readings, and on the polynomial page the same curve scored
-                  −5479 on four readings held back from it. The training score
-                  and the held-out score are not measuring the same thing, and
-                  the whole of this page follows from the gap between them.
-                </p>
+                <p>In the polynomial lesson, a degree-9 curve follows the fifteen noisy ball readings closely. Its training score is 0.997. On four readings held out in that lesson, the corresponding fit scores about -5479. A good match to the fitted observations has not produced a reliable curve between them.</p>
+              <p>Ridge and lasso change what fitting rewards. They retain the error term but add a cost for the coefficient values. That additional cost is a regularisation penalty. We will inspect how it changes the fitted terms, then use held-out evidence to decide whether the change helps.</p>
                 <p>
                   Look at the bars below the curve. They show the nine coefficients chosen by the fit. Each coefficient multiplies one power of the input, and their combined contributions determine the curve between the readings.
                 </p>
@@ -986,10 +978,7 @@ export default function RidgeLassoPage() {
         {
           title: "Practice. Restraining the Degree-9 Curve With the Library",
           practice: [
-            exercise(
-              "Tame the degree-9 curve",
-              ["Fit the fifteen noisy readings at degree 9 the way every fit on this page does, power columns from PolynomialFeatures and then every column standardized, and fit RidgeRegression at no penalty and at λ = 1. For each, print the training R squared, the largest coefficient in size, the intercept, and the objective in its two halves, RSS plus λ times the sum of squared coefficients.", "Part 2 quotes 0.997 and a largest coefficient of 85,263 at no penalty, 0.846 and 7.64 at λ = 1, an intercept of 12.76, and an objective at λ = 1 of about 101 plus 79. The page gives the residual cost there only to the nearest whole number."],
-              `from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+            exercise("Tame the degree-9 curve",["Fit the fifteen noisy readings at degree 9 the way every fit on this page does, power columns from PolynomialFeatures and then every column standardized, and fit RidgeRegression at no penalty and at λ = 1. For each, print the training R squared, the largest coefficient in size, the intercept, and the objective in its two halves, RSS plus λ times the sum of squared coefficients.", "Part 2 quotes 0.997 and a largest coefficient of 85,263 at no penalty, 0.846 and 7.64 at λ = 1, an intercept of 12.76, and an objective at λ = 1 of about 101 plus 79. The page gives the residual cost there only to the nearest whole number."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1001,8 +990,7 @@ for penalty in [0.0, 1.0]:
     # Fit ridge at this penalty on the standardized columns, then print the
     # R squared, the largest coefficient in size, the intercept, and the
     # RSS, the penalty cost and their sum.
-    pass`,
-              `from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+    pass`,`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 heights = Feature("h", [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2])
@@ -1016,17 +1004,11 @@ for penalty in [0.0, 1.0]:
     largest = max(abs(coefficient.value) for coefficient in model.coefficients)
     squares = sum(coefficient.value ** 2 for coefficient in model.coefficients)
     print(f"penalty {penalty}: R squared {evaluation.r2_score:.3f}, largest coefficient {largest:,.2f}, intercept {model.intercept:.2f}")
-    print(f"  RSS {evaluation.residual_sum_of_squares:.2f} + penalty cost {penalty * squares:.2f} = objective {evaluation.residual_sum_of_squares + penalty * squares:.2f}")`,
-              `penalty 0.0: R squared 0.997, largest coefficient 85,263.31, intercept 12.76
+    print(f"  RSS {evaluation.residual_sum_of_squares:.2f} + penalty cost {penalty * squares:.2f} = objective {evaluation.residual_sum_of_squares + penalty * squares:.2f}")`,`penalty 0.0: R squared 0.997, largest coefficient 85,263.31, intercept 12.76
   RSS 1.68 + penalty cost 0.00 = objective 1.68
 penalty 1.0: R squared 0.846, largest coefficient 7.64, intercept 12.76
-  RSS 101.04 + penalty cost 79.17 = objective 180.21`,
-              { hints: ["PolynomialFeatures and Standardizer are both fitted and then asked to transform, and the standardized columns keep the power columns’ names, t through t^9. RidgeRegression takes them like any other features, and its penalty is a constructor field.", "The coefficients iterate as named pairs with a value each, so the largest in size is a max over abs(coefficient.value) and the penalty’s sum is a sum over coefficient.value squared.", "evaluate answers an object carrying residual_sum_of_squares and r2_score. The penalty cost is λ times the sum of squares, which the fit minimised together with the RSS, and the intercept is uncharged so it stays at 12.76 whatever λ is."], check: numberCheck("What residual sum of squares does the ridge fit at λ = 1 report?", 101.04, 0.01, "The unpenalised fit’s RSS is 1.68, and at λ = 1 the fit accepts an RSS sixty times larger in exchange for coefficients whose squares sum to about 79 rather than to billions, because 101.04 plus 79.17 is the smallest the whole bar can be at that price. The R squared of 0.846 is that trade read as a score, worse on the readings and far steadier between them.") },
-            ),
-            exercise(
-              "Shrink one slope by hand and by library",
-              ["Sections 10 and 13 work the one-feature case on the five people, heights centred so the cross-product is 200 and the sum of squares is 250. Fit RidgeRegression and LassoRegression on the centred heights at penalties of 0, 100, 250, 400 and 500, and print each slope beside the formula the page gives for it.", "Ridge should follow 200 / (250 + λ) and lasso should follow max(0, 200 − λ/2) / 250, reaching exactly zero at λ = 400 and staying there. The page says ridge passes 0.31 at that λ and keeps gliding."],
-              `from oop_ml import Feature, LassoRegression, RidgeRegression
+  RSS 101.04 + penalty cost 79.17 = objective 180.21`,{...{ hints: ["PolynomialFeatures and Standardizer are both fitted and then asked to transform, and the standardized columns keep the power columns’ names, t through t^9. RidgeRegression takes them like any other features, and its penalty is a constructor field.", "The coefficients iterate as named pairs with a value each, so the largest in size is a max over abs(coefficient.value) and the penalty’s sum is a sum over coefficient.value squared.", "evaluate answers an object carrying residual_sum_of_squares and r2_score. The penalty cost is λ times the sum of squares, which the fit minimised together with the RSS, and the intercept is uncharged so it stays at 12.76 whatever λ is."], check: numberCheck("What residual sum of squares does the ridge fit at λ = 1 report?", 101.04, 0.01, "The ridge fit accepts greater residual error in exchange for much smaller coefficients under the stated RSS-plus-penalty objective. That training tradeoff does not by itself choose the penalty for new observations.") },question:"How does the coefficient penalty trade training fit for smaller weights?"}),
+            exercise("Shrink one slope by hand and by library",["Sections 10 and 13 work the one-feature case on the five people, heights centred so the cross-product is 200 and the sum of squares is 250. Fit RidgeRegression and LassoRegression on the centred heights at penalties of 0, 100, 250, 400 and 500, and print each slope beside the formula the page gives for it.", "Ridge should follow 200 / (250 + λ) and lasso should follow max(0, 200 − λ/2) / 250, reaching exactly zero at λ = 400 and staying there. The page says ridge passes 0.31 at that λ and keeps gliding."],`from oop_ml import Feature, LassoRegression, RidgeRegression
 
 centred_heights = Feature("height", [-10, -5, 0, 5, 10])
 weights = Feature("weight", [58, 66, 68, 74, 74])
@@ -1034,8 +1016,7 @@ weights = Feature("weight", [58, 66, 68, 74, 74])
 for penalty in [0, 100, 250, 400, 500]:
     # Fit ridge and lasso at this penalty, and print each fitted slope
     # beside the page's formula for it.
-    pass`,
-              `from oop_ml import Feature, LassoRegression, RidgeRegression
+    pass`,`from oop_ml import Feature, LassoRegression, RidgeRegression
 
 centred_heights = Feature("height", [-10, -5, 0, 5, 10])
 weights = Feature("weight", [58, 66, 68, 74, 74])
@@ -1045,18 +1026,12 @@ for penalty in [0, 100, 250, 400, 500]:
     lasso = LassoRegression(penalty=penalty).fit([centred_heights], weights)
     ridge_formula = 200 / (250 + penalty)
     lasso_formula = max(0, 200 - penalty / 2) / 250
-    print(f"penalty {penalty}: ridge {ridge.coefficients['height']:.4f} (formula {ridge_formula:.4f}), lasso {lasso.coefficients['height']:.4f} (formula {lasso_formula:.4f})")`,
-              `penalty 0: ridge 0.8000 (formula 0.8000), lasso 0.8000 (formula 0.8000)
+    print(f"penalty {penalty}: ridge {ridge.coefficients['height']:.4f} (formula {ridge_formula:.4f}), lasso {lasso.coefficients['height']:.4f} (formula {lasso_formula:.4f})")`,`penalty 0: ridge 0.8000 (formula 0.8000), lasso 0.8000 (formula 0.8000)
 penalty 100: ridge 0.5714 (formula 0.5714), lasso 0.6000 (formula 0.6000)
 penalty 250: ridge 0.4000 (formula 0.4000), lasso 0.3000 (formula 0.3000)
 penalty 400: ridge 0.3077 (formula 0.3077), lasso 0.0000 (formula 0.0000)
-penalty 500: ridge 0.2667 (formula 0.2667), lasso 0.0000 (formula 0.0000)`,
-              { hints: ["Both models take the same list of one feature and the same target, and both read their slope by name, coefficients['height']. Neither charges the intercept, which stays at the mean weight of 68.", "The five heights are 160, 165, 170, 175 and 180, so centring on 170 gives −10 to 10, and the sums the page quotes follow: squares of 100, 25, 0, 25, 100 add to 250, and the cross-products with the centred weights add to 200.", "Lasso at exactly zero prints 0.0000 and not a small number. The corner holds the minimum once λ/2 reaches 200, so from 400 on the slope is exactly zero rather than merely tiny."], check: numberCheck("What slope does ridge report at λ = 400, to four places?", 0.3077, 0.0005, "Ridge adds the penalty to the sum of squares underneath, so at 400 the slope is 200 over 650, and it never reaches zero at any finite λ because dividing by a larger number only ever makes the ratio smaller. Lasso subtracts half the penalty from the 200 on top instead, and at 400 there is nothing left to subtract from, which is the exact zero the two paths part on.") },
-            ),
-            exercise(
-              "Find where the held-out score turns",
-              ["Section 18 traces two scores across the penalty. Reproduce the ridge half on the page’s split, which keeps back the readings at t = 0, 0.29, 2.86 and 3.43 and fits on the other eleven, with the power columns and the standardization both learned from the eleven alone. Fit at penalties of 0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1 and 10 and print both scores each time.", "The training score should only fall as λ grows. The held-out score should climb from ruin at no penalty to 0.993 near λ = 0.0001 and then fall, reaching −0.317 at λ = 1 and −1.405 at 10, which are the degree-9 row of section 20’s table. The page does not say what it reads at 0.001."],
-              `from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+penalty 500: ridge 0.2667 (formula 0.2667), lasso 0.0000 (formula 0.0000)`,{...{ hints: ["Both models take the same list of one feature and the same target, and both read their slope by name, coefficients['height']. Neither charges the intercept, which stays at the mean weight of 68.", "The five heights are 160, 165, 170, 175 and 180, so centring on 170 gives −10 to 10, and the sums the page quotes follow: squares of 100, 25, 0, 25, 100 add to 250, and the cross-products with the centred weights add to 200.", "Lasso at exactly zero prints 0.0000 and not a small number. The corner holds the minimum once λ/2 reaches 200, so from 400 on the slope is exactly zero rather than merely tiny."], check: numberCheck("What slope does ridge report at λ = 400, to four places?", 0.3077, 0.0005, "For this nonzero one-feature cross-product, ridge approaches zero as the penalty grows but does not reach it at a finite penalty. Lasso's threshold can remove the slope exactly under the supplied objective convention.") },question:"Why can lasso remove the slope while ridge only shrinks it in this example?"}),
+            exercise("Find where the held-out score turns",["Section 18 traces two scores across the penalty. Reproduce the ridge half on the page’s split, which keeps back the readings at t = 0, 0.29, 2.86 and 3.43 and fits on the other eleven, with the power columns and the standardization both learned from the eleven alone. Fit at penalties of 0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1 and 10 and print both scores each time.", "The training score should only fall as λ grows. The held-out score should climb from ruin at no penalty to 0.993 near λ = 0.0001 and then fall, reaching −0.317 at λ = 1 and −1.405 at 10, which are the degree-9 row of section 20’s table. The page does not say what it reads at 0.001."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1075,8 +1050,7 @@ hidden_terms = scaler.transform(powers.transform([hidden_times]))
 for penalty in [0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0]:
     # Fit ridge at this penalty on the training share, then print its
     # R squared on the training share and on the hidden share.
-    pass`,
-              `from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+    pass`,`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
 heights = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1094,21 +1068,15 @@ hidden_terms = scaler.transform(powers.transform([hidden_times]))
 
 for penalty in [0.0, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1.0, 10.0]:
     model = RidgeRegression(penalty=penalty).fit(training_terms, training_heights)
-    print(f"penalty {penalty:g}: training R squared {model.score(training_terms, training_heights):.3f}, held-out R squared {model.score(hidden_terms, hidden_heights):.3f}")`,
-              `penalty 0: training R squared 0.999, held-out R squared -5710.273
+    print(f"penalty {penalty:g}: training R squared {model.score(training_terms, training_heights):.3f}, held-out R squared {model.score(hidden_terms, hidden_heights):.3f}")`,`penalty 0: training R squared 0.999, held-out R squared -5710.273
 penalty 1e-05: training R squared 0.996, held-out R squared 0.984
 penalty 0.0001: training R squared 0.996, held-out R squared 0.993
 penalty 0.001: training R squared 0.996, held-out R squared 0.992
 penalty 0.01: training R squared 0.993, held-out R squared 0.936
 penalty 0.1: training R squared 0.975, held-out R squared 0.638
 penalty 1: training R squared 0.876, held-out R squared -0.317
-penalty 10: training R squared 0.731, held-out R squared -1.405`,
-              { hints: ["The means and standard deviations have to be learned from the training rows only and applied unchanged to the hidden rows, which is why the Standardizer is fitted once on the training terms and then transforms both shares.", "score takes features and a target and answers R squared, so one call on each share gives the two curves of section 18.", "The ruin at no penalty is the polynomial page’s collapse seen again on standardized columns, and a held-out score below zero means the curve is worse on those four readings than a flat guess at their mean."], check: numberCheck("What held-out R squared does ridge reach at λ = 0.001?", 0.992, 0.001, "The turn is near λ = 0.0001, where the held-out score reads 0.993, and at 0.001 it has barely begun to fall. At 0.01 it is 0.936 and by λ = 1 it is below zero, because too much restraint stops the curve from following the arc at all. The training score falls the whole way, from 0.999 to 0.731, which is why nothing on that side of the chart can choose the penalty.") },
-            ),
-            exercise(
-              "Move one reading and refit",
-              ["Section 3 fits the same degree-9 model on the noisy throw and on the same readings with one of them moved a metre and a half. Sample B is sample A with the reading at t = 2.0 lifted from 21.0 to 22.5. Fit both samples at no penalty and at λ = 1, and print the training R squared and the largest coefficient in size each time.", "The table in section 3 reads 0.997 and 85,263 for sample A and 0.993 and 76,525 for sample B at no penalty, and 7.64 against 7.80 at λ = 1. It does not give sample B’s training score at λ = 1."],
-              `from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+penalty 10: training R squared 0.731, held-out R squared -1.405`,{...{ hints: ["The means and standard deviations have to be learned from the training rows only and applied unchanged to the hidden rows, which is why the Standardizer is fitted once on the training terms and then transforms both shares.", "score takes features and a target and answers R squared, so one call on each share gives the two curves of section 18.", "The ruin at no penalty is the polynomial page’s collapse seen again on standardized columns, and a held-out score below zero means the curve is worse on those four readings than a flat guess at their mean."], check: numberCheck("What held-out R squared does ridge reach at λ = 0.001?", 0.992, 0.001, "The held-out score improves over part of this penalty range and then deteriorates. Training fit alone would favour too little restraint here, so use separate validation evidence when choosing the penalty.") },question:"Which penalties predict the held-out readings best?"}),
+            exercise("Move one reading and refit",["Section 3 fits the same degree-9 model on the noisy throw and on the same readings with one of them moved a metre and a half. Sample B is sample A with the reading at t = 2.0 lifted from 21.0 to 22.5. Fit both samples at no penalty and at λ = 1, and print the training R squared and the largest coefficient in size each time.", "The table in section 3 reads 0.997 and 85,263 for sample A and 0.993 and 76,525 for sample B at no penalty, and 7.64 against 7.80 at λ = 1. It does not give sample B’s training score at λ = 1."],`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 sample_a = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1118,8 +1086,7 @@ terms = PolynomialFeatures(degree=9).fit([times]).transform([times])
 standardized = Standardizer().fit(terms).transform(terms)
 
 # For each sample and each penalty, 0 and 1, fit ridge on the standardized
-# columns and print the training R squared and the largest coefficient.`,
-              `from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
+# columns and print the training R squared and the largest coefficient.`,`from oop_ml import Feature, PolynomialFeatures, RidgeRegression, Standardizer
 
 times = Feature("t", [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0])
 sample_a = [0.7, 5.2, 9.5, 13.0, 16.9, 18.1, 19.4, 21.0, 19.6, 19.1, 16.8, 13.6, 11.1, 6.2, 1.2]
@@ -1133,13 +1100,10 @@ for label, readings in [("A, the noisy throw", sample_a), ("B, one reading moved
     for penalty in [0.0, 1.0]:
         model = RidgeRegression(penalty=penalty).fit(standardized, heights)
         largest = max(abs(coefficient.value) for coefficient in model.coefficients)
-        print(f"sample {label}, penalty {penalty}: training R squared {model.score(standardized, heights):.3f}, largest coefficient {largest:,.2f}")`,
-              `sample A, the noisy throw, penalty 0.0: training R squared 0.997, largest coefficient 85,263.31
+        print(f"sample {label}, penalty {penalty}: training R squared {model.score(standardized, heights):.3f}, largest coefficient {largest:,.2f}")`,`sample A, the noisy throw, penalty 0.0: training R squared 0.997, largest coefficient 85,263.31
 sample A, the noisy throw, penalty 1.0: training R squared 0.846, largest coefficient 7.64
 sample B, one reading moved, penalty 0.0: training R squared 0.993, largest coefficient 76,524.72
-sample B, one reading moved, penalty 1.0: training R squared 0.840, largest coefficient 7.80`,
-              { hints: ["The times are the same in both samples, so the power columns and their standardization are built once and only the target changes between the two fits.", "A target is a Feature like any other, so sample B is Feature('h', sample_b), and the two fits read the same way as the first problem’s.", "The largest coefficient is a max over abs(coefficient.value). Printing it with a thousands separator, the format :,.2f, makes 85,263.31 readable beside the page’s 85,263."], check: numberCheck("What training R squared does sample B score at λ = 1?", 0.84, 0.001, "The penalty costs sample B a little more training fit than it costs sample A, 0.840 against 0.846, and in exchange its largest coefficient comes down from 76,525 to 7.80, within two percent of sample A’s 7.64. Two fits that agreed on nothing at no penalty agree closely at λ = 1, which is the stability the page is buying.") },
-            ),
+sample B, one reading moved, penalty 1.0: training R squared 0.840, largest coefficient 7.80`,{...{ hints: ["The times are the same in both samples, so the power columns and their standardization are built once and only the target changes between the two fits.", "A target is a Feature like any other, so sample B is Feature('h', sample_b), and the two fits read the same way as the first problem’s.", "The largest coefficient is a max over abs(coefficient.value). Printing it with a thousands separator, the format :,.2f, makes 85,263.31 readable beside the page’s 85,263."], check: numberCheck("What training R squared does sample B score at λ = 1?", 0.84, 0.001, "The penalised fits respond more similarly to this changed measurement than the unpenalised high-degree fits. This is a measured stability improvement on these two samples, not a guarantee that every coefficient or prediction stays fixed.") },question:"Does regularisation reduce the response to one changed measurement?"}),
           ],
         },
       ]}

@@ -40,7 +40,7 @@ export function constructionJourney(original: Build, authored?: JourneyPlan): Co
   const caseIndex = plan?.investigation.caseIndex ?? original.cases.length - 1;
   if (!Number.isInteger(caseIndex) || caseIndex < 1 || caseIndex >= original.cases.length) throw new Error(`${original.id}: choose a changed case after the first example.`);
   const variationCase = original.cases[caseIndex];
-  const contextual = plan ? { ...original, title: plan.construction.title, problem: plan.premise, why: plan.construction.outcome } : original;
+  const contextual = plan ? { ...original, title: plan.construction.title, problem: plan.premise, why: plan.construction.outcome, hints: plan.construction.hints ?? original.hints } : original;
   const construction: Build = { ...contextual, cases: original.cases.filter((_, index) => index !== caseIndex) };
   const previous = construction.cases[0];
   const changedSources = Object.keys(original.sources).filter(key => JSON.stringify(previous.data[key]) !== JSON.stringify(variationCase.data[key]));
@@ -71,8 +71,8 @@ export function constructionJourney(original: Build, authored?: JourneyPlan): Co
     challenge: plan!.preparation!.challenge,
     why: plan!.preparation!.why,
     extras: [...new Set([...(original.extras ?? []), ...operations])],
-    hints: [
-      `The data sources for this part are ${Object.values(sources).join(" and ")}. Place the sources you need and inspect what each contains.`,
+    hints: plan!.preparation!.hints ?? [
+      plan!.preparation!.why,
       `${TOOLS[tool].title} needs ${TOOLS[tool].inputs.join(" and ")}. ${TOOLS[tool].why}`,
       `One construction uses ${operations.map(key => TOOLS[key].title).join(", ")}. Follow what each operation produces before connecting it to the next input.`,
     ],

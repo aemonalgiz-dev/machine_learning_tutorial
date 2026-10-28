@@ -347,15 +347,15 @@ export default function ShapesAndFlatteningPage() {
               "A dense layer’s neurons hold one weight per arriving number and have no notion of a row or a column, so a count tells them everything. A convolution’s whole subject is neighbourhood, so collapsing (8, 26, 26) to 5408 throws away what it exists to exploit. The count is the extents multiplied together, so it is derived from the arrangement and never the other way round.",
             ),
             several(
-              "An extent is a whole number of at least one. Which of these are refused at the point the shape is written?",
+              "This SDK’s shape type requires a nonempty tuple of positive integer extents. Which requests are rejected when constructing that shape?",
               [
-                "A picture of height zero",
-                "A negative width",
-                "A side with no extents at all",
-                "An extent larger than the one in the layer beneath",
-              ],
+                              "A picture of height zero",
+                              "A negative width",
+                              "A side with no extents at all",
+                              "An extent larger than the one in the layer beneath",
+                            ],
               [0, 1, 2],
-              "The zero, the negative and the empty side are all refused when the shape is made, so no layer downstream has to carry a branch for meeting one. Zero looks like the harmless edge and is the dangerous one, since a layer of height zero is an absent layer whose shape would agree with whatever sat above it. An extent being larger than the one beneath it is not a fault in the shape. It is a seam question, and a seam is settled by comparing the two shapes.",
+              "Zero, negative and empty-tuple requests violate this SDK’s stated shape contract. These are design rules for this layer interface; NumPy itself does support arrays with zero-sized axes and scalar arrays. Whether two otherwise valid layer shapes meet is a separate comparison at their connection.",
             ),
             trueFalse(
               "A chain built only out of dense layers cannot tell an implementation that compares arrangements from one that only ever counts.",
@@ -709,13 +709,16 @@ export default function ShapesAndFlatteningPage() {
             several(
               "A convolution answers (8, 26, 26). Which of these readings, placed straight above it, are refused?",
               [
-                "(5408,)",
-                "(26, 8, 26)",
-                "(4, 52, 26)",
-                "(784,)",
-              ],
+                              "(5408,)",
+                              "(26, 8, 26)",
+                              "(4, 52, 26)",
+                              "(784,)",
+                            ],
               [0, 1, 2, 3],
               "All four are refused, because a seam holds only when the two tuples are equal and the one reading that holds is (8, 26, 26) itself. The flat row of 5408, the swap that turns rows into channels and the halving of one extent against the doubling of another all hold 5408 numbers, so a count comparison would have let those three through. (784,) is the count of the picture that went in rather than of what came out, so there the counts disagree as well and the refusal says less.",
+              {
+                "description": "This SDK requires exact equality between the output shape tuple of one layer and the input shape tuple of the next. It does not silently flatten, transpose or reshape a connection."
+              },
             ),
             choice(
               "When does the refusal add the clause saying it is the arrangement that disagrees and not the width?",
@@ -740,15 +743,18 @@ export default function ShapesAndFlatteningPage() {
               "The bridge reads (16, 5, 5) and answers (400,), which is 400 numbers on both sides. The count peaks at 5408 straight after the first convolution, because eight kernels each produce a whole picture of their own, and it is the pooling layers that bring it down, to 1352 and then to 400. Where the picture becomes a row is not where the data gets smaller.",
             ),
             several(
-              "Which of these hold for the bridge, the flattening layer?",
+              "Which statements hold for this SDK’s flattening layer?",
               [
-                "It produces no gradient at all rather than a block of zeros",
+                "It has no trainable-parameter gradient, but still passes the arriving gradient back to its input",
                 "Its backward reshape uses the same ordering as its forward one, with the last extent varying fastest",
                 "It reshapes rather than copies wherever the numbers are already laid out contiguously",
-                "Handing it a row rather than a picture is refused, since there is nothing to flatten",
+                "Handing it a row rather than a picture is refused, since there is nothing to flatten"
               ],
               [0, 1, 2],
-              "A block of zeros would be a small false claim about having something to learn, and the two reshapes have to agree about which position is which or the blame arrives at the wrong pixels while every shape still agrees. Under that ordering the number at channel 1, row 0, column 1 of a (2, 2, 2) picture sits at position 5 of the row in both directions. Flattening a row is allowed and is the identity, reading (36,) and answering (36,), and it is still worth having because it states a join a reader would otherwise carry in their head.",
+              "There are no parameters to update, but the input still needs a gradient. Backward reshapes that gradient to the original input shape using the same element order. A contiguous input permits a view rather than a data copy here. Flattening an already flat row is allowed and leaves its shape unchanged.",
+              {
+                "description": "Use the SDK’s order-preserving reshape: the last axis varies fastest. Flattening has no learned weights. Its forward input is a contiguous array, allowing the reshape to use the existing storage."
+              },
             ),
         ],
         },
@@ -1308,7 +1314,10 @@ export default function ShapesAndFlatteningPage() {
           practice: [
             exercise(
               "Build the digit chain and read every extent",
-              ["Build Part 4’s digit chain with the library, a convolution of 8 kernels of 3 by 3, a pooling layer of window 2 at stride 2, a convolution of 16 kernels, a second pooling layer, the bridge, a dense layer of 32 neurons and a dense layer of 10. Each layer above the first reads what the one beneath it answers, and the dense layers can hold zero weights, since nothing here reads a weight. Print what every layer reads and answers and how many numbers it hands on, then the chain’s own two ends.", "Section 14’s table should come back line for line, ending at 400 numbers arriving at the bridge. The loop then runs the same settings over a colour picture of (3, 32, 32), which the lesson never builds, so nothing on the page tells you what arrives at the bridge there."],
+              [
+  "Build the supplied two convolution/pooling rounds, Flatten and dense layers of widths thirty-two and ten. Propagate each preceding output shape into the next layer’s input.",
+  "For grayscale (1,28,28) and colour (3,32,32) inputs, print every layer’s input shape, output shape and output-value count, then the stack endpoints and width entering Flatten. Parameter values may be zero here because the exercise inspects shape contracts."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear
 
@@ -1360,11 +1369,17 @@ DenseLayer reads (576,)       answers (32,)        hands on 32
 DenseLayer reads (32,)        answers (10,)        hands on 10
 the chain reads (3, 32, 32) and answers (10,)
 numbers arriving at the bridge 576`,
-              { hints: ["Every layer carries a shape with reads and answers, each a tuple of extents. Passing the layer beneath’s shape.answers as the next layer’s reads is the whole of how a chain is written.", "A dense layer is built from neurons, and a neuron holds a width and not a picture, so it wants the count the bridge answers with. That count is bridge.shape.n_outputs, and np.zeros of that length is one neuron’s weights.", "A shape also reports n_inputs and n_outputs, the extents of each side multiplied together. LayerStack can be looped over layer by layer, and type(layer).__name__ gives a name to print."], check: numberCheck("With the same seven layers over a picture of (3, 32, 32), how many numbers arrive at the bridge?", 576, 0.5, "The sides run 32, 30, 15, 13 and 6. Each convolution takes two off, the first pooling layer halves 30 exactly, and the second drops a remainder, since (13 − 2) // 2 + 1 is 6 and one row and one column are never covered. Sixteen channels of 6 by 6 hold 576 numbers. The three colour channels change the first layer’s reads and nothing after it, because the first convolution answers with its eight kernels whatever it read.") },
+              { hints: [
+  "A spatial output keeps channel, height and width axes until Flatten.",
+  "The dense input width is the product of the immediately preceding spatial dimensions; recompute it for each image layout."
+], check: numberCheck("With the same seven layers over a picture of (3, 32, 32), how many numbers arrive at the bridge?", 576, 0.5, "There are 576 values before Flatten for the colour-image setting. Their channels and spatial dimensions determine the dense input width, not the earlier grayscale case."), question: "Which dimensions reach the dense layer after the image stack?" },
             ),
             exercise(
               "Leave the bridge out, then ask each seam yourself",
-              ["A dense layer of ten neurons holding 5408 weights each is built without complaint. Put it straight above the first convolution and print what the stack says. Then put a Flatten between them and print the two ends of the chain that now exists.", "Section 10’s table asks five readings to sit above the same convolution. A Flatten accepts any arrangement as what it reads, so use one as a stand-in for a layer reading each of the five, and print for each how many numbers it holds, whether the counts agree, and whether the seam holds. The seam question is the shape’s own follows."],
+              [
+  "Attempt the supplied convolution-to-dense stack without Flatten and print the library refusal. Add Flatten, then print the valid stack endpoints.",
+  "Use the five candidate input shapes supplied in the starter to compare element counts and shape.follows compatibility against the same convolution output. Print each candidate, count, count-equality check and compatibility check."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, Neuron, RectifiedLinear, ShapeMismatchError
 
@@ -1405,11 +1420,17 @@ with the bridge the chain reads (1, 28, 28) and answers (10,)
 (26, 8, 26)  holds 5408, counts agree True, seam holds False
 (4, 52, 26)  holds 5408, counts agree True, seam holds False
 (784,)       holds  784, counts agree False, seam holds False`,
-              { hints: ["LayerStack raises ShapeMismatchError from its constructor at the first seam that fails, and the exception printed as it is carries the whole sentence, position, both arrangements and the clause about the counts.", "The bridge is Flatten(reads=first.shape.answers). It reads (8, 26, 26) and answers (5408,), so both of its seams hold by exact equality.", "A shape has a method follows that takes the shape beneath and answers whether this one may sit above it, and n_inputs and n_outputs are the counts on its two sides."] },
+              { hints: [
+  "The ordered axis sizes describe how values are arranged, not only how many exist.",
+  "Flatten explicitly declares the conversion to one feature axis; it does not make all equal-sized arrangements interchangeable."
+], question: "Is matching the number of values enough to join two layers?" },
             ),
             exercise(
               "Count the window positions before the layer does",
-              ["Each setting below is a side, a window, a stride and a padding. The first six are rows of Part 5’s tables over a side of eight, including the window of nine that does not fit. For each one, count the positions with section 19’s sum, then build a convolution of four kernels over a square picture of that side and print what it answers with beside your count, or its refusal.", "The last setting is the digit picture’s side of 28 under a window of 5 at a stride of 2 with 2 of padding, which the lesson never works. Count it by hand before running the script."],
+              [
+  "For every supplied side/window/stride/padding setting, independently count valid window positions along one axis. Then construct its four-filter square convolution.",
+  "Print your count beside the actual output shape, or the caught refusal for a window that cannot fit. Include the final twenty-eight-pixel setting with window five, stride two and padding two."
+],
               `from oop_ml import Conv2d, Identity, MLLibError
 
 settings = [(8, 3, 1, 0), (8, 3, 2, 0), (8, 3, 2, 1), (8, 5, 1, 2), (8, 8, 1, 0), (8, 9, 1, 0), (28, 5, 2, 2)]
@@ -1443,11 +1464,17 @@ side  8 window 5 stride 1 padding 2, counted  8, the layer answers (4, 8, 8)
 side  8 window 8 stride 1 padding 0, counted  1, the layer answers (4, 1, 1)
 side  8 window 9 stride 1 padding 0, counted  0, refused, this convolution's answer would have height (8 - 9 + 2 * 0) // 1 + 1 = 0, so the window does not fit over what it reads
 side 28 window 5 stride 2 padding 2, counted 14, the layer answers (4, 14, 14)`,
-              { hints: ["Python’s // is the division that drops its remainder, which is the floor the lesson’s sum needs for these whole numbers.", "Conv2d takes reads, n_filters, kernel_size and activation, with stride and padding as keywords, and it works out its own answering side from them. Its shape.answers is (kernels, height, width).", "A window that does not fit is refused by the constructor with one of the library’s own errors, all of which derive from MLLibError, so wrap the construction in try and except and print the exception."], check: numberCheck("What side does a window of 5 at a stride of 2 with 2 of padding leave from a side of 28?", 14, 0.5, "Two of padding at each edge widen the side the window walks along to 32, so the sum is (28 − 5 + 4) // 2 + 1, which is 27 // 2 + 1 = 14 with a remainder of one dropped. A window of width 2m + 1 with m of padding leaves the side alone at a stride of one, so at a stride of two it halves it, and the layer answers (4, 14, 14).") },
+              { hints: [
+  "Count positions after padding and require a complete window at each stride.",
+  "A nonpositive output extent must be treated as invalid rather than constructing an empty convolution."
+], check: numberCheck("What side does a window of 5 at a stride of 2 with 2 of padding leave from a side of 28?", 14, 0.5, "The output side is fourteen. Only positions where the complete padded window fits at the given stride contribute output cells."), question: "Can you predict output width before constructing each convolution?" },
             ),
             exercise(
               "Step one layer standing at two positions",
-              ["The layer below is the small square layer of section 28, with the two rows and two targets its box uses. Put the same object at both positions of one stack, confirm that the stack really does hold one object twice, and run one backward pass under SquaredError. Print the loss, which the lesson does not quote.", "Then step the stack from that one backward pass at rates of 0.1, 0.01 and 0.001. For each, print whether the two positions are still one object and the largest gap between their weight matrices to seven places. Section 28 gives 1.54375 at a rate of 0.1 and 0.0154375 at a rate a hundred times smaller. The rate between them is yours to measure."],
+              [
+  "Use the supplied square dense layer twice in one stack. Print whether both positions reference the same object, then run the supplied squared-error backward pass and print loss.",
+  "From that same backward result step at rates 0.1, 0.01 and 0.001. Print identity equality of updated positions and their maximum weight difference. This probes this stack’s update semantics; it is not a shared-gradient implementation."
+],
               `import numpy as np
 from oop_ml import DenseLayer, Identity, LayerStack, Neuron, SquaredError
 
@@ -1488,7 +1515,10 @@ loss 33.9219
 rate 0.1, one object after False, largest gap 1.5437500
 rate 0.01, one object after False, largest gap 0.1543750
 rate 0.001, one object after False, largest gap 0.0154375`,
-              { hints: ["A square layer reads exactly what it answers with, so LayerStack([shared, shared]) has one seam and it holds. A stack is indexed by position, and `is` asks whether two positions hold the same object rather than equal ones.", "backward_pass takes the rows, the targets and the loss and answers one gradient per position, with the loss on it. stepped_by takes that and a learning rate and answers a new stack, leaving the old one untouched, so one backward pass serves all three rates.", "Each position of the stepped stack is a dense layer with a weight_matrix. Subtract one from the other, take np.abs and then np.max."], check: numberCheck("How far apart, at their furthest, are the two positions’ weights after one step at a rate of 0.01?", 0.154375, 1e-06, "A step moves each position by the rate times that position’s own gradient, and the two positions were handed different gradients, so the gap is the rate times the largest difference between those two gradients. That makes it exactly proportional to the rate, 1.54375 at 0.1, 0.154375 at 0.01 and 0.0154375 at 0.001. No rate closes it, and at every rate the two positions come back as two objects where one went in.") },
+              { hints: [
+  "Check object identity separately from numerical equality.",
+  "Each comparison starts from the same original stack and backward result. Carrying one stepped stack into the next would change the experiment."
+], check: numberCheck("How far apart, at their furthest, are the two positions’ weights after one step at a rate of 0.01?", 0.154375, 1e-06, "The maximum updated-weight difference is 0.154375 at rate 0.01. This stack steps its two layer positions separately, so initial object aliasing does not implement tied-parameter training."), question: "Does putting the same layer object in two positions preserve weight sharing after an update?" },
             ),
           ],
         },

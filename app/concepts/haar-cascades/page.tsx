@@ -93,15 +93,8 @@ export default function HaarCascadesPage() {
                   A scene sixty-six pixels square holds 3,025 such positions, and that number is fixed before we have decided anything at all about how the question is answered.
                 </p>
 </>
-                <p>
-                  That is already the whole difficulty in miniature. Whatever we
-                  do to answer &ldquo;is the band here&rdquo;, we are going to
-                  do it three thousand times over on a scene the size of a
-                  postage stamp, and a real photograph is a thousand times
-                  larger and has to be searched at several sizes as well. So the
-                  first thing to settle is how little a single answer can be
-                  made to cost, and how accurate the answer is comes after that.
-                </p>
+                <p>The search already requires thousands of window checks on this small scene. A larger photograph, searched at several object sizes, requires more. If every window receives the same expensive calculation, most of that work may be spent on obvious background.</p>
+              <p>Our aim is to reject clear background cheaply and reserve later checks for the few windows that remain plausible. We still need to measure how many real targets those early decisions discard. Speed is useful only alongside an acceptable detection error.</p>
                 <KeepInMind>
                   <p>
                     The count of positions is not something the method chooses.
@@ -1196,10 +1189,7 @@ export default function HaarCascadesPage() {
         {
           title: "Practice. Reading A Box, A Layout And A Fitted Cascade",
           practice: [
-            exercise(
-              "Read two boxes off the table",
-              ["Build the six by seven picture of Part 2, whose pixel at row r and column c is 10r + c, and its table of running totals. Read the three by three box that starts at row one, column two, printing the four entries the read names, the sign each enters with, and the total. Then do the same for the two by two box in the picture’s bottom-right corner, and add that box’s four pixels up directly as a check.", "Part 2 works the first box to 340 − 10 − 124 + 1, which is 207. The second box is not on the page. Look at which of its four entries you have already met."],
-              `from oop_ml.core.computer_vision.cascade import IntegralImage, Rectangle
+            exercise("Read two boxes off the table",["Build the six by seven picture of Part 2, whose pixel at row r and column c is 10r + c, and its table of running totals. Read the three by three box that starts at row one, column two, printing the four entries the read names, the sign each enters with, and the total. Then do the same for the two by two box in the picture’s bottom-right corner, and add that box’s four pixels up directly as a check.", "Part 2 works the first box to 340 − 10 − 124 + 1, which is 207. The second box is not on the page. Look at which of its four entries you have already met."],`from oop_ml.core.computer_vision.cascade import IntegralImage, Rectangle
 from oop_ml.core.computer_vision.picture import Picture
 
 picture = Picture([[10.0 * row + column for column in range(7)] for row in range(6)])
@@ -1210,8 +1200,7 @@ boxes = {"worked": Rectangle(1, 2, 3, 3), "corner": Rectangle(4, 5, 2, 2)}
 # column, sign and the table's entry there. Then print the total the table
 # gives for the box, and the total of the same pixels added up directly.
 
-# Print the corner box's total on a line of its own.`,
-              `from oop_ml.core.computer_vision.cascade import IntegralImage, Rectangle
+# Print the corner box's total on a line of its own.`,`from oop_ml.core.computer_vision.cascade import IntegralImage, Rectangle
 from oop_ml.core.computer_vision.picture import Picture
 
 picture = Picture([[10.0 * row + column for column in range(7)] for row in range(6)])
@@ -1226,8 +1215,7 @@ for name, box in boxes.items():
     pixels = picture.values[box.top : box.bottom, box.left : box.right]
     print(f"  from the table {table.sum_over(box):.0f}, from the pixels {pixels.sum():.0f}")
 
-print(f"corner box total: {table.sum_over(boxes['corner']):.0f}")`,
-              `worked
+print(f"corner box total: {table.sum_over(boxes['corner']):.0f}")`,`worked
   table[4, 5] = 340, sign +1
   table[1, 5] = 10, sign -1
   table[4, 2] = 124, sign -1
@@ -1239,13 +1227,8 @@ corner
   table[6, 5] = 810, sign -1
   table[4, 5] = 340, sign +1
   from the table 202, from the pixels 202
-corner box total: 202`,
-              { hints: ["A Rectangle is its top row, its left column, its height and its width. corners_for takes one and answers the four lookups a read of it makes, each with a row, a column and a sign.", "The table itself is on the IntegralImage as table. It is one row and one column larger than the picture, so its indices are the picture’s shifted by the border of zeros.", "sum_over does the four reads for you. A box also knows its bottom and its right, one past its last row and column, which is exactly what a slice of the picture’s values wants."], check: numberCheck("What do the four pixels of the corner box total?", 202, 0.5, "The four entries are 1,176, 504, 810 and 340, and 1,176 − 504 − 810 + 340 is 202, the same as 45 + 46 + 55 + 56. The 340 is the entry the worked box took as its bottom-right corner. Here it is the top-left corner and is added back, because it totals the region above and to the left of this box, which the two subtractions each removed.") },
-            ),
-            exercise(
-              "Predict five readings on a picture with nothing in it",
-              ["Part 3 says two of the five layouts read the lamp as well as the picture. Take a flat six by six picture, read each of the five layouts on it with cells two pixels on a side, and do it at two brightnesses, 0.6 and 0.9.", "Before running it, use Part 3’s expression for a flat picture, the pixels in one cell times the brightness times the sum of the cell signs, to predict all ten numbers. The lesson measures one-pixel cells and these are four-pixel cells, so its −0.25 and −0.9 will not be what comes back."],
-              `import numpy as np
+corner box total: 202`,{...{ hints: ["A Rectangle is its top row, its left column, its height and its width. corners_for takes one and answers the four lookups a read of it makes, each with a row, a column and a sign.", "The table itself is on the IntegralImage as table. It is one row and one column larger than the picture, so its indices are the picture’s shifted by the border of zeros.", "sum_over does the four reads for you. A box also knows its bottom and its right, one past its last row and column, which is exactly what a slice of the picture’s values wants."], check: numberCheck("What do the four pixels of the corner box total?", 202, 0.5, "The upper-left integral-image region was removed by both subtractions, so it must be restored once. The rectangle read and direct sum agree, checking the boundary convention as well as the four signs.") },question:"Can four integral-image entries recover each rectangle's pixel total?"}),
+            exercise("Predict five readings on a picture with nothing in it",["Part 3 says two of the five layouts read the lamp as well as the picture. Take a flat six by six picture, read each of the five layouts on it with cells two pixels on a side, and do it at two brightnesses, 0.6 and 0.9.", "Before running it, use Part 3’s expression for a flat picture, the pixels in one cell times the brightness times the sum of the cell signs, to predict all ten numbers. The lesson measures one-pixel cells and these are four-pixel cells, so its −0.25 and −0.9 will not be what comes back."],`import numpy as np
 from oop_ml.core.computer_vision.cascade import (
     FeatureArrangement,
     IntegralImage,
@@ -1262,8 +1245,7 @@ for brightness in (0.6, 0.9):
     # RectangleFeature of each at the window's top-left corner with cells two
     # tall and two wide, and print its value in the window to four places.
 
-# Print the three-cell column's reading at 0.6 on a line of its own.`,
-              `import numpy as np
+# Print the three-cell column's reading at 0.6 on a line of its own.`,`import numpy as np
 from oop_ml.core.computer_vision.cascade import (
     FeatureArrangement,
     IntegralImage,
@@ -1284,8 +1266,7 @@ for brightness in (0.6, 0.9):
         print(f"  {arrangement.value}: {feature.n_cells} cells, reading {value:.4f}")
 
 column = readings[0.6, FeatureArrangement.THREE_VERTICAL]
-print(f"three cells in a column at 0.6: {column:.4f}")`,
-              `brightness 0.6
+print(f"three cells in a column at 0.6: {column:.4f}")`,`brightness 0.6
   two_horizontal: 2 cells, reading 0.0000
   two_vertical: 2 cells, reading 0.0000
   three_horizontal: 3 cells, reading -2.4000
@@ -1297,13 +1278,8 @@ brightness 0.9
   three_horizontal: 3 cells, reading -3.6000
   three_vertical: 3 cells, reading -3.6000
   four_chequer: 4 cells, reading 0.0000
-three cells in a column at 0.6: -2.4000`,
-              { hints: ["FeatureArrangement is a closed set of five, and looping over the class itself visits each member. A RectangleFeature takes the arrangement, then the row and column of its top-left corner inside the window, then the height and width of one cell.", "value_in takes the table and the window the feature sits in. The window here is the whole picture, a Rectangle starting at row zero, column zero.", "A total that should be exactly zero can come back as a zero with a minus sign in front. Rounding and then adding 0.0 prints it as a plain zero."], check: numberCheck("What does the three-cell column read on the flat picture at 0.6, to four places?", -2.4, 0.0005, "Each cell holds four pixels at 0.6, so each cell totals 2.4, and the three-cell signs are one added and two subtracted, which sum to −1. The reading is 4 × 0.6 × −1. At 0.9 the same layout reads −3.6, so it moved by half as much again when the lamp did, while the two-cell layouts and the chequer stayed at zero.") },
-            ),
-            exercise(
-              "Fit the cascade and read its stages",
-              ["The starter draws Part 4’s training windows, 50 bright bands on blocky clutter followed by 2,000 windows of clutter alone. Fit a cascade of at most five stages with two rules a stage, searching 600 readings, and print what each stage did to the backgrounds it was handed. Under each stage print every rule’s voice and that voice’s share of the stage’s total.", "Part 4 reports three stages and five rules, with the backgrounds falling 2,000 to 105 to 3 to none and all fifty targets kept throughout. The louder rule’s share in the first stage should be the 0.5355 the page quotes for the least confident training target."],
-              `import numpy as np
+three cells in a column at 0.6: -2.4000`,{...{ hints: ["FeatureArrangement is a closed set of five, and looping over the class itself visits each member. A RectangleFeature takes the arrangement, then the row and column of its top-left corner inside the window, then the height and width of one cell.", "value_in takes the table and the window the feature sits in. The window here is the whole picture, a Rectangle starting at row zero, column zero.", "A total that should be exactly zero can come back as a zero with a minus sign in front. Rounding and then adding 0.0 prints it as a plain zero."], check: numberCheck("What does the three-cell column read on the flat picture at 0.6, to four places?", -2.4, 0.0005, "This layout has unequal total positive and negative rectangle area, so a flat image produces a nonzero response that changes with brightness. Balanced layouts cancel uniform brightness instead.") },question:"Which rectangle features respond to a flat picture's brightness?"}),
+            exercise("Fit the cascade and read its stages",["The starter draws Part 4’s training windows, 50 bright bands on blocky clutter followed by 2,000 windows of clutter alone. Fit a cascade of at most five stages with two rules a stage, searching 600 readings, and print what each stage did to the backgrounds it was handed. Under each stage print every rule’s voice and that voice’s share of the stage’s total.", "Part 4 reports three stages and five rules, with the backgrounds falling 2,000 to 105 to 3 to none and all fifty targets kept throughout. The louder rule’s share in the first stage should be the 0.5355 the page quotes for the least confident training target."],`import numpy as np
 from oop_ml import Feature
 from oop_ml.core.computer_vision.cascade import HaarCascade
 from oop_ml.core.computer_vision.picture import Picture
@@ -1327,8 +1303,7 @@ cascade = HaarCascade(n_stages=5, rules_per_stage=2, n_candidate_features=600, r
 # backgrounds reached it, how many it rejected and how many targets it kept,
 # and under that each rule's voice and its share of the stage's total voice.
 
-# Print how many backgrounds the first stage rejected on a line of its own.`,
-              `import numpy as np
+# Print how many backgrounds the first stage rejected on a line of its own.`,`import numpy as np
 from oop_ml import Feature
 from oop_ml.core.computer_vision.cascade import HaarCascade
 from oop_ml.core.computer_vision.picture import Picture
@@ -1357,8 +1332,7 @@ for stage, outcome in zip(cascade.stages, cascade.stage_outcomes):
         share = weighted.voice / stage.total_voice
         print(f"  voice {weighted.voice:.4f}, share of the stage {share:.4f}")
 
-print(f"first stage rejected: {cascade.stage_outcomes[0].negatives_rejected}")`,
-              `3 stages, 5 rules
+print(f"first stage rejected: {cascade.stage_outcomes[0].negatives_rejected}")`,`3 stages, 5 rules
 stage 1: 2000 backgrounds in, 1895 rejected, 50 targets kept
   voice 1.8067, share of the stage 0.5355
   voice 1.5669, share of the stage 0.4645
@@ -1367,13 +1341,8 @@ stage 2: 105 backgrounds in, 102 rejected, 50 targets kept
   voice 2.0171, share of the stage 0.4879
 stage 3: 3 backgrounds in, 3 rejected, 50 targets kept
   voice 1.0000, share of the stage 1.0000
-first stage rejected: 1895`,
-              { hints: ["fit takes the list of pictures and the label feature, the same shape of call as every other model in the library, and what was learned is read off properties afterwards.", "stages and stage_outcomes run in step, one outcome per stage. An outcome carries negatives_reaching, negatives_rejected, negatives_surviving and positives_kept.", "A stage’s rules are its weighted_rules, each with a voice, and the stage knows its total_voice. Dividing one by the other is the share a window attracts when that rule alone says yes."], check: numberCheck("How many of the 2,000 training backgrounds does the first stage reject?", 1895, 0.5, "That is 94.75 percent of them, thrown away by two rules that both straddle the middle rows where the band is. The 105 that survive are what the second stage is boosted against, which is why its rules can be more particular. The first stage’s shares come out at 0.5355 and 0.4645, so at a demand of a half the louder rule decides on its own.") },
-            ),
-            exercise(
-              "Score the detector on windows it never saw",
-              ["Draw three sets of windows the same way, from seeds 7, 99 and 11. Fit the cascade on the first, which is the training set, and evaluate it on the other two. Seed 99 is the fresh draw of Part 4. Seed 11 is one the lesson never looks at.", "Part 4 scores the fresh draw at 0.998 accuracy, 0.94 recall and 0.9792 precision. The calibration keeps every target it was trained on and promises nothing about any other, so watch which of the three numbers moves most between the two draws."],
-              `import numpy as np
+first stage rejected: 1895`,{...{ hints: ["fit takes the list of pictures and the label feature, the same shape of call as every other model in the library, and what was learned is read off properties afterwards.", "stages and stage_outcomes run in step, one outcome per stage. An outcome carries negatives_reaching, negatives_rejected, negatives_surviving and positives_kept.", "A stage’s rules are its weighted_rules, each with a voice, and the stage knows its total_voice. Dividing one by the other is the share a window attracts when that rule alone says yes."], check: numberCheck("How many of the 2,000 training backgrounds does the first stage reject?", 1895, 0.5, "The first stage removes most training backgrounds, leaving a smaller, harder set for the next stage. The per-rule voice shares explain which combinations can reach that stage's acceptance threshold.") },question:"How does each fitted cascade stage change the surviving windows?"}),
+            exercise("Score the detector on windows it never saw",["Draw three sets of windows the same way, from seeds 7, 99 and 11. Fit the cascade on the first, which is the training set, and evaluate it on the other two. Seed 99 is the fresh draw of Part 4. Seed 11 is one the lesson never looks at.", "Part 4 scores the fresh draw at 0.998 accuracy, 0.94 recall and 0.9792 precision. The calibration keeps every target it was trained on and promises nothing about any other, so watch which of the three numbers moves most between the two draws."],`import numpy as np
 from oop_ml import Feature
 from oop_ml.core.computer_vision.cascade import HaarCascade
 from oop_ml.core.computer_vision.picture import Picture
@@ -1397,8 +1366,7 @@ cascade = HaarCascade(n_stages=5, rules_per_stage=2, n_candidate_features=600, r
 # Fit on the draw from seed 7. Evaluate on the draws from seeds 99 and 11 and
 # print the accuracy, recall and precision of each to four places.
 
-# Print the recall on the draw from seed 11 on a line of its own, to two places.`,
-              `import numpy as np
+# Print the recall on the draw from seed 11 on a line of its own, to two places.`,`import numpy as np
 from oop_ml import Feature
 from oop_ml.core.computer_vision.cascade import HaarCascade
 from oop_ml.core.computer_vision.picture import Picture
@@ -1426,12 +1394,9 @@ for seed in (99, 11):
     print(f"seed {seed}: accuracy {evaluation.accuracy:.4f}, "
           f"recall {evaluation.recall:.4f}, precision {evaluation.precision:.4f}")
 
-print(f"recall on the draw from seed 11: {evaluation.recall:.2f}")`,
-              `seed 99: accuracy 0.9980, recall 0.9400, precision 0.9792
+print(f"recall on the draw from seed 11: {evaluation.recall:.2f}")`,`seed 99: accuracy 0.9980, recall 0.9400, precision 0.9792
 seed 11: accuracy 0.9971, recall 0.9000, precision 0.9783
-recall on the draw from seed 11: 0.90`,
-              { hints: ["evaluate takes pictures and labels, predicts once, and answers an object that has already paired every prediction with its truth. accuracy, recall and precision are properties of that object.", "The same labels serve all three draws, since every draw is fifty targets followed by two thousand backgrounds in that order."], check: numberCheck("What recall does the detector score on the draw from seed 11, to two places?", 0.9, 0.005, "It finds 45 of those fifty targets, where it found 47 of the fifty from seed 99 and all fifty it was trained on. The accuracy barely moves between the draws, because two thousand backgrounds swamp fifty targets in it. The recall is the number the calibration cannot promise, and Part 6’s own fresh draw of upright targets found 43 of 50.") },
-            ),
+recall on the draw from seed 11: 0.90`,{...{ hints: ["evaluate takes pictures and labels, predicts once, and answers an object that has already paired every prediction with its truth. accuracy, recall and precision are properties of that object.", "The same labels serve all three draws, since every draw is fifty targets followed by two thousand backgrounds in that order."], check: numberCheck("What recall does the detector score on the draw from seed 11, to two places?", 0.9, 0.005, "The new draw contains targets the fitted cascade never saw. Recall falls while accuracy changes little because backgrounds greatly outnumber targets; keeping training targets did not promise the same recall on fresh windows.") },question:"Does keeping every training target imply perfect recall on fresh windows?"}),
           ],
         },
       ]}

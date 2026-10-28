@@ -35,7 +35,7 @@ export const calibrationRepair: Build = {
   recipe: op("add", [op("multiply", [source("reading"), constant(2)]), constant(4)]),
   cases: [{name: "Replacement at zero", data: {reading: 0}, expected: 4}, {name: "Replacement at three", data: {reading: 3}, expected: 10}],
   extras: ["subtract"],
-  hints: ["At a reading of zero, changing the multiplier still leaves zero. What operation can supply a fixed adjustment?", "Keep doubling the reading, then add the difference between the doubled reading and its reference."],
+  hints: ["At a reading of zero, changing the multiplier still leaves zero. What operation can supply a fixed adjustment?", "The reference is higher than the doubled sensor reading. Keep the doubling rule, then add the fixed amount needed to reach that reference. Check both calibration pairs before trying new readings."],
   why: "The multiplier repairs the scale. The added constant repairs the zero point. They address different parts of the calibration.",
 };
 

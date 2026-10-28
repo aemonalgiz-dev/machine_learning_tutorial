@@ -430,13 +430,17 @@ export default function MultiplePolynomialRegressionPage() {
             several(
               "Which of these hold for the plane fitted to the twenty people?",
               [
-                "Fix an age and read the plane against height, and the cut is a straight line whose slope is the height coefficient, 0.651 kg per centimetre",
-                "The residual is the vertical gap between a person’s measured weight and the plane’s prediction, and squaring and adding those gaps gives 214.2 for the twenty people",
-                "Sliding the fixed age across its range changes the slope of the height cut",
-                "The fit works one input at a time, fitting height, locking it, then fitting age on what is left",
-              ],
+                              "Fix an age and read the plane against height, and the cut is a straight line whose slope is the height coefficient, 0.651 kg per centimetre",
+                              "The residual is the vertical gap between a person’s measured weight and the plane’s prediction, and squaring and adding those gaps gives 214.2 for the twenty people",
+                              "Sliding the fixed age across its range changes the slope of the height cut",
+                              "The fit works one input at a time, fitting height, locking it, then fitting age on what is left",
+                            ],
               [0, 1],
               "A plane tilts by the same amount everywhere, so moving the cut changes where it sits and never its slope, and 0.651 is section 4’s one centimetre taller at a fixed age made literal. The fit cannot go one input at a time because changing one coefficient changes what the others need to do, so least squares chooses all of them at once as the single lowest point of one bowl over every coefficient together. Residuals, RSS and the least-squares rule carry over from the straight line untouched.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Fit an unpenalised least-squares plane to 20 people using height and age together.\nHeight coefficient: 0.651 kg/cm\nAge coefficient and intercept are also fitted.\nSum of squared vertical weight residuals over those 20 people: 214.2 kg²\nNo height × age interaction is included."
+              },
             ),
             choice(
               "Why does polynomial regression still count as linear regression?",
@@ -769,13 +773,17 @@ export default function MultiplePolynomialRegressionPage() {
             several(
               "Which of these does the lesson say about raising the degree?",
               [
-                "A higher degree allows a more complex shape and does not require it, so on the ideal throw a degree-4 fit puts 0.00 on t³ and 0.00 on t⁴ and draws the same parabola as degree 2",
-                "Training R² for nested models can only rise or stay unchanged as terms are added",
-                "On the fifteen noisy readings degree 9 scores far better on the training rows than degree 2 does",
-                "The straight line through the five ideal readings improves substantially on the mean",
-              ],
+                              "A higher degree allows a more complex shape and does not require it, so on the ideal throw a degree-4 fit puts 0.00 on t³ and 0.00 on t⁴ and draws the same parabola as degree 2",
+                              "Training R² for nested models can only rise or stay unchanged as terms are added",
+                              "On the fifteen noisy readings degree 9 scores far better on the training rows than degree 2 does",
+                              "The straight line through the five ideal readings improves substantially on the mean",
+                            ],
               [0, 1],
               "Each power buys the curve the possibility of one more turn, and the fitted coefficients decide how many appear, which is why the extra turns stay at zero on the ideal throw. A degree-3 model contains every degree-2 model, since it can put zero on t³, so its best training fit is at least as good, but on the noisy readings degree 2 reads 0.996 and degree 9 reads 0.997, ten coefficients doing the work of three. And the best line through a symmetric arc is almost flat, so on the ideal throw degree 1 scores 0.005 against the mean’s 0.000.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "All models use unpenalised least squares with an intercept and nested polynomial powers.\nIdeal 5-point throw: degree-4 coefficients on t³ and t⁴ round to 0.00.\nIdeal throw training R²: degree 1 = 0.005; degree 2 = 1.000.\nNoisy 15-point throw training R²: degree 2 = 0.996; degree 9 = 0.997."
+              },
             ),
             choice(
               "Across the degrees on the noisy readings, what does the held-out score do?",
@@ -789,15 +797,15 @@ export default function MultiplePolynomialRegressionPage() {
               "The training score climbs from 0.222 at degree 1 to 0.999 at degree 9 and never falls, while the held-out score drops to 0.693 at degree 6 and then collapses, reaching −104 at degree 8. A curve scoring 0.999 on the eleven readings it was fitted to is wrong by street widths on the four it was not.",
             ),
             several(
-              "Which of these does the lesson name as signs of overfitting?",
+              "Which observations justify investigating overfitting, rather than proving it by themselves?",
               [
-                "Very low training error",
-                "Large and unstable coefficients",
-                "Training residuals that are tiny while errors elsewhere grow",
-                "Residuals negative at both ends and positive in the middle",
+                "Training error keeps falling while validation error starts rising",
+                "Coefficients become very large and change sharply when the training observations are slightly perturbed",
+                "Training residuals are tiny while errors on held-out observations grow",
+                "Residuals negative at both ends and positive in the middle"
               ],
               [0, 1, 2],
-              "The last is the underfitting signature, the arc the straight line could not draw left over in its errors. The other three travel together at degree 9, where the coefficient on t⁴ is −229.5 and on t⁵ is +169.5, two huge terms cancelling each other almost everywhere and not quite cancelling between the points.",
+              "The training-versus-held-out divergence is the strongest sign here. Unstable coefficients are another reason to investigate sensitivity and conditioning. Low training error by itself can occur in a model that generalises well. Residuals with the same curved pattern across the input range instead suggest that a straight line has missed systematic structure.",
             ),
         ],
         },
@@ -1090,7 +1098,10 @@ export default function MultiplePolynomialRegressionPage() {
           practice: [
             exercise(
               "Fit the plane to the twenty people",
-              ["Fit weight from height and age together for the twenty people of Part 1, and read the two coefficients, the intercept, the residual sum of squares and R squared off the fitted model. Then ask it for the two 168 cm people, aged 31 and aged 60.", "Part 2 quotes a height coefficient of 0.651 kg per centimetre, an age coefficient of 0.154 kg per year, an RSS of 214.2 and an R squared of 0.865, and Part 1 quotes 64.95 kg and 69.41 kg for the two people. The intercept is the one number the page’s prose never quotes."],
+              [
+  "Fit MultipleLinearRegression on the supplied twenty people’s height/age features and weight target.",
+  "Print the height coefficient in kg/cm, age coefficient in kg/year, intercept in kg, residual sum of squares and R-squared. Then predict the two supplied people at height 168 cm and ages 31 and 60."
+],
               `from oop_ml import Feature, MultipleLinearRegression
 
 heights = [186, 186, 173, 163, 152, 167, 168, 152, 152, 195, 179, 161, 170, 194, 190, 188, 168, 172, 180, 153]
@@ -1131,11 +1142,17 @@ RSS 214.2
 R squared 0.865
 168 cm and 31 years 64.95 kg
 168 cm and 60 years 69.41 kg`,
-              { hints: ["A Feature is a named column, Feature(name, values). The model takes a list of them for the inputs and one more for the target, and the data goes to fit rather than to the constructor.", "Coefficients are read by name, model.coefficients['height'], so the order the features were given in never matters. The intercept is a property of its own.", "evaluate answers an object carrying the residual sum of squares and R squared as properties. predict takes the same named features with one value per person, so two people are two values in each list."], check: numberCheck("What intercept does the plane report, in kilograms?", -49.12, 0.01, "The intercept is the plane’s value at zero height and zero age, a person who does not exist, and it is negative because the plane has to pass through weights of 54.9 to 82.5 kg at heights of 152 to 195 cm and ages of 20 to 65. It is the α of section 2’s prediction, the piece every prediction starts from before the two contributions are added on.") },
+              { hints: [
+  "Keep the feature names and units matched to their coefficients.",
+  "The two predictions share height; their different age contribution illustrates the second feature’s role."
+], check: numberCheck("What intercept does the plane report, in kilograms?", -49.12, 0.01, "The intercept is -49.12 kg. It is the fitted plane’s prediction at zero height and age, a coordinate outside the observations rather than a plausible person’s weight."), question: "How can height and age jointly predict different weights at the same height?" },
             ),
             exercise(
               "Manufacture the power columns and recover the physics",
-              ["Take the five exact readings of the throw from Part 4, manufacture the power columns with PolynomialFeatures, and fit them with the same MultipleLinearRegression that fitted the plane. Do it at degree 1, degree 2 and degree 4, printing each fit’s intercept, coefficients and R squared.", "Section 14 scored the straight line at 0.005 and the parabola at 1.000, and section 13 recovered 20 on t and −4.9 on t². Part 5 claims a degree-4 fit puts 0.00 on t³ and t⁴ and draws the same parabola. The gravity is minus two times the coefficient on t²."],
+              [
+  "Use PolynomialFeatures to construct powers of the supplied five exact throw times at degrees one, two and four. Fit the same linear coefficient solver at each degree.",
+  "Print intercept, named power coefficients and R-squared. For the quadratic fit report the implied downward acceleration from the squared-time coefficient using the stated trajectory convention."
+],
               `from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
 
 times = Feature("t", [0, 1, 2, 3, 4])
@@ -1163,11 +1180,17 @@ for degree in [1, 2, 4]:
 degree 2: intercept 0.00, t 20.00, t^2 -4.90, R squared 1.000
 gravity implied by the t^2 coefficient 9.80 m/s^2
 degree 4: intercept -0.00, t 20.00, t^2 -4.90, t^3 0.00, t^4 -0.00, R squared 1.000`,
-              { hints: ["PolynomialFeatures(degree=2) is fitted on the input features and then transforms them into the power columns, named t and t^2. Those columns go to MultipleLinearRegression like any other features.", "The coefficients iterate as named pairs, and one can also be read by name, so the gravity is -2 * model.coefficients['t^2'].", "A coefficient that prints as -0.00 is a number such as -3e-13, zero to every digit shown. The fit lands on the parabola to within rounding rather than exactly, which is what Part 5’s 0.00 on t³ and t⁴ means in practice."], check: numberCheck("What coefficient does the degree-2 fit put on t^2?", -4.9, 0.005, "The readings were generated by 20t − 4.9t², and the fit minimised squared misses over a table with a t column and a t² column, so the physics came out because the physics is what generated the data. Doubling the coefficient and changing its sign gives 9.8, the gravitational acceleration, because physics writes the squared-time term as minus half g.") },
+              { hints: [
+  "The model is linear in its fitted coefficients even when a feature is time squared.",
+  "Use the degree-two coefficient with the conventional negative half-acceleration term; keep time and distance units consistent."
+], check: numberCheck("What coefficient does the degree-2 fit put on t^2?", -4.9, 0.005, "The quadratic-time coefficient is -4.9 in the stated units. It matches the coefficient used to generate these exact observations; the acceleration interpretation follows the specified motion equation."), question: "Can a linear coefficient solver recover a curved trajectory from power columns?" },
             ),
             exercise(
               "Trace both scores across every degree",
-              ["Reproduce the chart of Part 6. The page keeps back four of the fifteen noisy readings, the ones at t = 0, 0.29, 2.86 and 3.43, fits every degree from 1 to 9 on the other eleven, and scores each fit on both shares.", "The training score should climb from 0.222 to 0.999 and never fall. The held-out score should reach 0.989 at degree 2, hold near there through degree 5, drop to 0.693 at degree 6 and collapse to −5479 at degree 9. The page quotes degree 2’s held-out score and not degree 4’s."],
+              [
+  "Use the supplied fifteen noisy observations and fixed four-row holdout. Fit polynomial degrees one through nine on the remaining eleven rows.",
+  "Print training and held-out R-squared for every degree, using the same split throughout. Compute each held-out score without refitting or selecting new holdout rows."
+],
               `from oop_ml import Feature, MultipleLinearRegression, PolynomialFeatures
 
 times = [0.0, 0.29, 0.57, 0.86, 1.14, 1.43, 1.71, 2.0, 2.29, 2.57, 2.86, 3.14, 3.43, 3.71, 4.0]
@@ -1210,7 +1233,10 @@ degree 6: training R squared 0.996, held-out R squared 0.693
 degree 7: training R squared 0.997, held-out R squared -1.396
 degree 8: training R squared 0.997, held-out R squared -104.059
 degree 9: training R squared 0.999, held-out R squared -5479.352`,
-              { hints: ["Fit the power columns on the training times only, then transform both the training times and the hidden times with that same fitted PolynomialFeatures, so the two shares are expanded the same way.", "score takes features and a target and answers R squared, so one call on the training share and one on the hidden share gives the two curves of Part 6.", "A held-out R squared below zero means the curve is worse on those four readings than a flat guess at their mean would have been."], check: numberCheck("What held-out R squared does the degree-4 fit reach?", 0.993, 0.001, "Degrees 2 to 5 all hold near 0.99 on the four hidden readings, the plateau Part 6 describes before the drop to 0.693 at degree 6, and degree 4 sits at the top of it. The eleven training readings can pin a parabola with a little to spare, and the extra columns neither help nor yet hurt until degree 6, where they start fitting the particular wobble of the eleven.") },
+              { hints: [
+  "Fit the power-column definition and coefficients from training, then transform the held-out times with that same definition.",
+  "A high-degree curve can closely fit training noise while giving unstable predictions elsewhere."
+], check: numberCheck("What held-out R squared does the degree-4 fit reach?", 0.993, 0.001, "The degree-four held-out R-squared is about 0.993 on this fixed split. The complete degree sweep shows how added flexibility can later damage held-out predictions."), question: "Does a better training fit predict the held-out trajectory better?" },
             ),
             exercise(
               "Hand the fit a column it cannot tell apart",

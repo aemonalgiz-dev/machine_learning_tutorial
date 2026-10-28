@@ -134,9 +134,8 @@ export default function FeatureScalingPage() {
 
               <SubSection title="3. The walk slows with the unit">
                 <>
-<p>
-                  A model fitted by walking downhill feels the unit differently. Predicting weight from height by gradient descent means stepping down a bowl with one direction for the line&rsquo;s level and one for its slope, and how steeply the bowl curves along the slope direction is set by the mean of the squared centred heights, a number that is 521.8 in centimetres, ten thousand times smaller in metres, and one hundred times larger in millimetres.
-                </p>
+<p>A gradient-descent fit changes the line&apos;s intercept and slope a little at a time to reduce its error. Plot the error against those two adjustable values and we get a surface with a low region we want to reach. The steepness along the slope direction depends on the numerical scale of height.</p>
+              <p>For this centred example, the relevant curvature is the mean squared centred height: 521.8 in centimetres. Changing to metres makes that number ten thousand times smaller; changing to millimetres makes it one hundred times larger. The physical people are unchanged, while the update calculation now works on a differently shaped error surface.</p>
                 <p>
                   The level direction always curves at one. One step size has to serve both directions, so it is set by the steeper one and crawls along the shallower.
                 </p>
@@ -981,10 +980,7 @@ export default function FeatureScalingPage() {
         {
           title: "Practice. Scaling the Crowd With the Library",
           practice: [
-            exercise(
-              "Take the vote four times",
-              ["Part 1 puts a person of 150 cm and 60 kg to the crowd and lets their three nearest neighbours vote, once with the heights in millimetres, once in centimetres, once in metres, and once with both columns standardized. Take the same four votes with KNearestNeighboursClassifier, where a label of 0 is a child and 1 is an adult.", "Part 1 arrives at child for millimetres and adult for the other three. For the standardized vote, fit a Standardizer on the crowd and put the query through the same one, and print the two spreads it divides by."],
-              `from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
+            exercise("Take the vote four times",["Part 1 puts a person of 150 cm and 60 kg to the crowd and lets their three nearest neighbours vote, once with the heights in millimetres, once in centimetres, once in metres, and once with both columns standardized. Take the same four votes with KNearestNeighboursClassifier, where a label of 0 is a child and 1 is an adult.", "Part 1 arrives at child for millimetres and adult for the other three. For the standardized vote, fit a Standardizer on the crowd and put the query through the same one, and print the two spreads it divides by."],`from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -997,8 +993,7 @@ for unit, factor in (("millimetres", 10), ("centimetres", 1), ("metres", 0.01)):
     pass
 
 # Fit a Standardizer on both columns, transform the crowd and the query through
-# it, take the same vote, and print the answer and the two spreads it learned.`,
-              `from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
+# it, take the same vote, and print the answer and the two spreads it learned.`,`from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1019,18 +1014,12 @@ answer = int(model.predict(query)[0])
 print(f"standardized: {'adult' if answer == 1 else 'child'}")
 height_spread = scaler.scalings["height"].standard_deviation
 weight_spread = scaler.scalings["weight"].standard_deviation
-print(f"height divided by {height_spread:.1f}, weight divided by {weight_spread:.1f}")`,
-              `millimetres: child
+print(f"height divided by {height_spread:.1f}, weight divided by {weight_spread:.1f}")`,`millimetres: child
 centimetres: adult
 metres: adult
 standardized: adult
-height divided by 22.8, weight divided by 20.8`,
-              { hints: ["The classifier takes a list of Features and a Feature of labels, and predict takes a list of Features of the same names, one value each for a single query.", "Only the height column is multiplied by the factor. The weights, and the query's 60 kg, stay as they are, which is what makes the unit the only thing that changes between the three votes.", "The query must go through the same fitted Standardizer as the crowd, by transform, never through a new one. A fresh fit on a single row has no spread and would be refused.", "predict answers one value per query row, so index the first and turn it into an int to compare it with the labels."], check: numberCheck("By what number does the standardized reading divide the height column?", 22.8, 0.05, "The crowd's heights have a standard deviation of 22.8 and the weights one of 20.8, so after standardizing a gap of one spread in either column counts the same in the squared distance. In millimetres the height column owned at least 0.71 of every squared distance and the vote went two children to one; in the other three readings it went two adults to one, over three different sets of neighbours, and nothing about the person changed.") },
-            ),
-            exercise(
-              "Five rulers on five readings, then on an outlier",
-              ["Part 2 puts the five readings 9, 19, 24, 29 and 39 through five rulers and reads the 39 as 1.5, 1.0, 1.0, 1.5 and 1.5. Fit all five scalers on that column and print each one's centre, spread and scaled values, then do the same with the 39 typed as 99, which is the outlier button of Part 3.", "Part 3 says the mean jumps to 36 and the robust row does not move. The standard deviation the standardizer reads off the outlier column is a number the lesson never prints."],
-              `from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, RobustScaler, RootMeanSquareScaler, Standardizer
+height divided by 22.8, weight divided by 20.8`,{...{ hints: ["The classifier takes a list of Features and a Feature of labels, and predict takes a list of Features of the same names, one value each for a single query.", "Only the height column is multiplied by the factor. The weights, and the query's 60 kg, stay as they are, which is what makes the unit the only thing that changes between the three votes.", "The query must go through the same fitted Standardizer as the crowd, by transform, never through a new one. A fresh fit on a single row has no spread and would be refused.", "predict answers one value per query row, so index the first and turn it into an int to compare it with the labels."], check: numberCheck("By what number does the standardized reading divide the height column?", 22.8, 0.05, "Standardisation measures each feature relative to its training spread. Raw unit changes instead alter the relative numerical contributions to distance, even though the person and their class did not change.") },question:"Can a change of units change the predicted class?"}),
+            exercise("Five rulers on five readings, then on an outlier",["Part 2 puts the five readings 9, 19, 24, 29 and 39 through five rulers and reads the 39 as 1.5, 1.0, 1.0, 1.5 and 1.5. Fit all five scalers on that column and print each one's centre, spread and scaled values, then do the same with the 39 typed as 99, which is the outlier button of Part 3.", "Part 3 says the mean jumps to 36 and the robust row does not move. The standard deviation the standardizer reads off the outlier column is a number the lesson never prints."],`from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, RobustScaler, RootMeanSquareScaler, Standardizer
 
 readings = [9, 19, 24, 29, 39]
 with_outlier = [9, 19, 24, 29, 99]
@@ -1041,8 +1030,7 @@ for values in (readings, with_outlier):
     print(values)
     # Fit a Standardizer on the column and print its mean, standard deviation
     # and the scaled values rounded to two places. Then fit each affine scaler
-    # and print its centre, spread and scaled values the same way.`,
-              `from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, RobustScaler, RootMeanSquareScaler, Standardizer
+    # and print its centre, spread and scaled values the same way.`,`from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, RobustScaler, RootMeanSquareScaler, Standardizer
 
 readings = [9, 19, 24, 29, 39]
 with_outlier = [9, 19, 24, 29, 99]
@@ -1059,8 +1047,7 @@ for values in (readings, with_outlier):
         fitted = kind().fit([column])
         learned = fitted.scalings["value"]
         scaled = [round(float(v), 2) for v in fitted.transform([column])[0].values]
-        print(f"  {name}: centre {learned.centre:.2f}, spread {learned.spread:.2f}, scaled {scaled}")`,
-              `[9, 19, 24, 29, 39]
+        print(f"  {name}: centre {learned.centre:.2f}, spread {learned.spread:.2f}, scaled {scaled}")`,`[9, 19, 24, 29, 39]
   standardize: centre 24.00, spread 10.00, scaled [-1.5, -0.5, 0.0, 0.5, 1.5]
   min-max: centre 9.00, spread 30.00, scaled [0.0, 0.33, 0.5, 0.67, 1.0]
   max-abs: centre 0.00, spread 39.00, scaled [0.23, 0.49, 0.62, 0.74, 1.0]
@@ -1071,13 +1058,8 @@ for values in (readings, with_outlier):
   min-max: centre 9.00, spread 90.00, scaled [0.0, 0.11, 0.17, 0.22, 1.0]
   max-abs: centre 0.00, spread 99.00, scaled [0.09, 0.19, 0.24, 0.29, 1.0]
   robust: centre 24.00, spread 10.00, scaled [-1.5, -0.5, 0.0, 0.5, 7.5]
-  root mean square: centre 0.00, spread 48.29, scaled [0.19, 0.39, 0.5, 0.6, 2.05]`,
-              { hints: ["Every scaler is fitted the same way, on a list holding the one Feature, and transform answers a list holding the scaled Feature.", "The Standardizer names its two numbers mean and standard_deviation. The four affine scalers name them centre and spread, which is why the solution reads them in two places.", "The scaled Feature's values are an array; rounding each to two places after converting it to a float is what makes the lists readable."], check: numberCheck("What standard deviation does the standardizer read off the column once the 39 has become 99?", 32.19, 0.005, "The mean moves from 24 to 36 and every deviation from it changes, so the standard deviation moves from 10 to 32.19 and the four ordinary values are pressed together on that ruler as well as on the min-max and max-abs ones. The robust row alone still reads 24 and 10, because the median and the quartiles are positions in the sorted list and the 99 holds the same position the 39 did, so it is sent to 7.5 while the other four stay where they were.") },
-            ),
-            exercise(
-              "Hold out the three tallest adults",
-              ["Part 4 holds the three tallest adults, rows 8, 9 and 10 of the crowd, out of the fit and standardizes their heights two ways, with the mean and deviation of the eight training rows and with their own. Build a Standardizer on the eight, fit the least-squares line on the standardized training heights with SimpleLinearRegression, and read the three held-out people both ways.", "Part 4 arrives at scores of 2.26, 2.43 and 2.14 against the training numbers and −0.16, 1.30 and −1.14 against their own, with predicted weights of 74.8, 77.2 and 73.1 kilograms by the first route and 41.0, 61.4 and 27.4 by the second, for people who weigh 80, 83 and 78."],
-              `from oop_ml import Feature, SimpleLinearRegression, Standardizer
+  root mean square: centre 0.00, spread 48.29, scaled [0.19, 0.39, 0.5, 0.6, 2.05]`,{...{ hints: ["Every scaler is fitted the same way, on a list holding the one Feature, and transform answers a list holding the scaled Feature.", "The Standardizer names its two numbers mean and standard_deviation. The four affine scalers name them centre and spread, which is why the solution reads them in two places.", "The scaled Feature's values are an array; rounding each to two places after converting it to a float is what makes the lists readable."], check: numberCheck("What standard deviation does the standardizer read off the column once the 39 has become 99?", 32.19, 0.005, "The outlier changes the mean and standard deviation. In this particular five-value column it leaves the median and interquartile range unchanged because its sorted position stays the same; robust statistics are not unaffected by every possible outlier pattern.") },question:"Which scaling references change when one reading becomes an outlier?"}),
+            exercise("Hold out the three tallest adults",["Part 4 holds the three tallest adults, rows 8, 9 and 10 of the crowd, out of the fit and standardizes their heights two ways, with the mean and deviation of the eight training rows and with their own. Build a Standardizer on the eight, fit the least-squares line on the standardized training heights with SimpleLinearRegression, and read the three held-out people both ways.", "Part 4 arrives at scores of 2.26, 2.43 and 2.14 against the training numbers and −0.16, 1.30 and −1.14 against their own, with predicted weights of 74.8, 77.2 and 73.1 kilograms by the first route and 41.0, 61.4 and 27.4 by the second, for people who weigh 80, 83 and 78."],`from oop_ml import Feature, SimpleLinearRegression, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1091,8 +1073,7 @@ held_out = Feature("height", [heights[row] for row in held])
 # Fit a SimpleLinearRegression on the standardized training heights and the
 # training weights, and print its intercept and slope. Then, once with that
 # Standardizer and once with a new one fitted on the held-out heights,
-# transform the held-out column, predict from the scores, and print both.`,
-              `from oop_ml import Feature, SimpleLinearRegression, Standardizer
+# transform the held-out column, predict from the scores, and print both.`,`from oop_ml import Feature, SimpleLinearRegression, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1114,18 +1095,12 @@ for label, scaler in (("training numbers", by_training), ("their own numbers", b
     scores = [float(v) for v in scaler.transform([held_out])[0].values]
     predicted = [round(float(v), 1) for v in line.predict(scores)]
     print(f"{label}: scores {[round(s, 2) for s in scores]}, predicted {predicted}")
-print(f"actual weights {[weights[row] for row in held]}")`,
-              `training mean 141.1, deviation 17.2
+print(f"actual weights {[weights[row] for row in held]}")`,`training mean 141.1, deviation 17.2
 line: weight = 43.25 + 13.96 times the standardized height
 training numbers: scores [2.26, 2.43, 2.14], predicted [74.8, 77.2, 73.1]
 their own numbers: scores [-0.16, 1.3, -1.14], predicted [41.0, 61.4, 27.4]
-actual weights [80, 83, 78]`,
-              { hints: ["SimpleLinearRegression takes two plain lists, the standardized heights and the weights, so the scores come out of the transformed Feature's values as floats first.", "The line is fitted once. The only thing that changes between the two readings is which Standardizer transforms the held-out column.", "predict takes a list of standardized heights and answers one weight per height, which can be rounded in a comprehension."], check: numberCheck("What weight does the line predict for the 178 cm adult when the three are standardized with their own numbers?", 27.4, 0.05, "Against their own mean of the three, the 178 cm adult comes out at −1.14, the shortest of a group of three and apparently well below average, and the line, which learned that a standardized height of −1.14 belongs to a child of the training rows, answers 27.4 kg for an adult who weighs 78. Against the training mean of 141.1 and deviation of 17.2 the same person is 2.14 spreads above the people the fit saw and is predicted at 73.1 kg.") },
-            ),
-            exercise(
-              "Ask the scalers about the edges",
-              ["Part 6 says that six identical values of eight are accepted by the robust scaler with an interquartile range of 0.75 and seven of eight are refused, that max-abs accepts a constant column of 170 and answers a constant 1, and that a min-max scaler fitted on heights of 118 to 183 answers 2.03 for 250. Ask the library all four.", "Catch the one refusal with the library's own base error and print its message, and print the accepted answers to two places."],
-              `from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, MLLibError, RobustScaler
+actual weights [80, 83, 78]`,{...{ hints: ["SimpleLinearRegression takes two plain lists, the standardized heights and the weights, so the scores come out of the transformed Feature's values as floats first.", "The line is fitted once. The only thing that changes between the two readings is which Standardizer transforms the held-out column.", "predict takes a list of standardized heights and answers one weight per height, which can be rounded in a comprehension."], check: numberCheck("What weight does the line predict for the 178 cm adult when the three are standardized with their own numbers?", 27.4, 0.05, "The fitted line expects training-standardised heights. Recentring the held-out adults on their own mean gives the same number a different meaning, so the model applies its learned slope to the wrong coordinates.") },question:"What goes wrong if we standardise the held-out people using their own statistics?"}),
+            exercise("Ask the scalers about the edges",["Part 6 says that six identical values of eight are accepted by the robust scaler with an interquartile range of 0.75 and seven of eight are refused, that max-abs accepts a constant column of 170 and answers a constant 1, and that a min-max scaler fitted on heights of 118 to 183 answers 2.03 for 250. Ask the library all four.", "Catch the one refusal with the library's own base error and print its message, and print the accepted answers to two places."],`from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, MLLibError, RobustScaler
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 
@@ -1136,8 +1111,7 @@ for label, values in (("six of eight", [5] * 6 + [8, 9]), ("seven of eight", [5]
 
 # Fit a MaxAbsScaler on a column of three 170s and print what it answers for
 # the same column. Then fit a MinMaxScaler on the crowd's heights and print
-# what it answers for a height of 250.`,
-              `from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, MLLibError, RobustScaler
+# what it answers for a height of 250.`,`from oop_ml import Feature, MaxAbsScaler, MinMaxScaler, MLLibError, RobustScaler
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 
@@ -1154,13 +1128,10 @@ print(f"max-abs, a constant 170: accepted, answers {[round(float(v), 2) for v in
 
 fitted = MinMaxScaler().fit([Feature("height", heights)])
 beyond = float(fitted.transform([Feature("height", [250])])[0].values[0])
-print(f"min-max, 250 after fitting on 118 to 183: accepted, answers {beyond:.2f}")`,
-              `robust, six of eight: accepted, interquartile range 0.75
+print(f"min-max, 250 after fitting on 118 to 183: accepted, answers {beyond:.2f}")`,`robust, six of eight: accepted, interquartile range 0.75
 robust, seven of eight: refused, 'value' has a spread of 0.0, so it cannot be rescaled; a column carrying no variation has nothing to divide by
 max-abs, a constant 170: accepted, answers [1.0, 1.0, 1.0]
-min-max, 250 after fitting on 118 to 183: accepted, answers 2.03`,
-              { hints: ["The refusal happens inside fit, where the spread is read, so the try has to wrap the fit and not only the reading of scalings.", "An affine scaler's learned numbers are on scalings, addressed by the column's name, with properties centre and spread.", "Nothing clips. A min-max scaler applies the same subtraction and division to 250 that it applied to the fitted column, which is why the answer is above one."], check: numberCheck("What does the min-max scaler fitted on the crowd's heights answer for 250 cm?", 2.03, 0.005, "The scaler learned a centre of 118 and a spread of 65, and 250 less 118 over 65 is 2.03. The unit interval was a fact about the column it learned from and not a bound it enforces, so a value beyond the fitted range lands wherever the same map puts it, and that is evidence that it differs from the fitted examples rather than an error.") },
-            ),
+min-max, 250 after fitting on 118 to 183: accepted, answers 2.03`,{...{ hints: ["The refusal happens inside fit, where the spread is read, so the try has to wrap the fit and not only the reading of scalings.", "An affine scaler's learned numbers are on scalings, addressed by the column's name, with properties centre and spread.", "Nothing clips. A min-max scaler applies the same subtraction and division to 250 that it applied to the fitted column, which is why the answer is above one."], check: numberCheck("What does the min-max scaler fitted on the crowd's heights answer for 250 cm?", 2.03, 0.005, "The scaler applies its retained training minimum and range to every later input. A value outside that fitted range can produce a result outside the unit interval; this transformation does not clip it.") },question:"How do these scalers handle constant columns and a value beyond the fitted range?"}),
           ],
         },
       ]}

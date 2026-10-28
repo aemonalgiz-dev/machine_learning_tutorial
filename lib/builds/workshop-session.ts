@@ -1,4 +1,10 @@
 import { evaluate, same, type Build, type Construction, type Tool } from "./engine";
+import { NODE_WIDTH } from "./wires";
+
+const MAX_PIECES = 36;
+// Auto-layout can extend beyond the manual drag boundary. Allow a full-depth
+// chain at layout.ts's column spacing while keeping saved coordinates bounded.
+const MAX_SAVED_X = 36 + (MAX_PIECES - 1) * (NODE_WIDTH + 96);
 
 export interface WorkshopOutcome {
   passed: boolean;
@@ -20,10 +26,10 @@ export function validConstructionForBuild(
 ): raw is Construction {
   if (!raw || typeof raw !== "object") return false;
   const graph = raw as Construction;
-  if (!Array.isArray(graph.pieces) || graph.pieces.length > 36 ||
+  if (!Array.isArray(graph.pieces) || graph.pieces.length > MAX_PIECES ||
       !Array.isArray(graph.connections) || graph.connections.length > 120) return false;
   const validPieces = graph.pieces.every(piece => piece && typeof piece.id === "string" &&
-    Number.isFinite(piece.x) && piece.x >= 0 && piece.x <= 5000 &&
+    Number.isFinite(piece.x) && piece.x >= 0 && piece.x <= MAX_SAVED_X &&
     Number.isFinite(piece.y) && piece.y >= 0 && piece.y <= 5000 &&
     piece.settings && typeof piece.settings === "object" && !Array.isArray(piece.settings) &&
     Object.values(piece.settings).every(value => typeof value === "string" || typeof value === "number" && Number.isFinite(value)) &&

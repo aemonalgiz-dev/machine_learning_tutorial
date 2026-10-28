@@ -1,0 +1,9 @@
+.blocked :is(button, input, textarea, select, [contenteditable="true"], [role="button"]) {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.blocked nav[aria-label="Lesson navigation"] :is(button, input, select) {
+  cursor: pointer;
+  opacity: 1;
+}

@@ -1,8 +1,10 @@
 import { test, expect, type Page } from "@playwright/test";
 import { buildById } from "../lib/builds/catalog";
 import { TOOLS } from "../lib/builds/tools";
-import { assemble, evaluate, plug } from "../lib/builds/engine";
-import { openFullWorkshop, showEarlierWorkshop, openLessonNotes } from "./helpers/open-workshop";
+import { assemble, evaluate, plug, type Construction } from "../lib/builds/engine";
+import { showEarlierWorkshop, openLessonNotes } from "./helpers/open-workshop";
+import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
+import { workshopRecord } from "./helpers/workshop-record";
 
 test("the bookkeeping construction handles different customer counts and prices", () => {
   const build = buildById["linear-algebra"], graph = assemble(build.recipe, TOOLS);
@@ -55,14 +57,14 @@ async function wire(page: Page, from: string, to: string) {
 test("a learner builds customer rows, catches reversed columns, and inspects the real matrix calculation", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
-  await page.addInitScript(() => {
-    const key = "fitlab-construction-v1:linear-algebra";
-    if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify({
-      pieces: [{ id: "output", tool: "output", x: 800, y: 70, settings: {} }, { id: "piece-1", tool: "constant", x: 36, y: 70, settings: { value: 8 } }],
-      connections: [{ from: "piece-1", to: "output", port: 0 }],
-    }));
-  });
-  await openFullWorkshop(page, "linear-algebra");
+  const legacyGraph: Construction = {
+    pieces: [{ id: "output", tool: "output", x: 800, y: 70, settings: {} }, { id: "piece-1", tool: "constant", x: 36, y: 70, settings: { value: 8 } }],
+    connections: [{ from: "piece-1", to: "output", port: 0 }],
+  };
+  const backend = await mockAccountBackend(page, { records: [{ key: "workshop:linear-algebra:v1", value: workshopRecord(legacyGraph) }] });
+  await page.goto("/lab/linear-algebra");
+  await waitForAccountReady(page);
+  await showEarlierWorkshop(page);
   await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
   await expect(page.locator("[data-piece]")).toHaveCount(1);
   for (const name of ["Loaves for each customer", "Milk bottles for each customer", "Prices: bread, then milk", "Collect two results", "Swap rows and columns", "Matrix times vector"]) {
@@ -86,8 +88,12 @@ test("a learner builds customer rows, catches reversed columns, and inspects the
   await calculation.getByRole("button", { name: "Follow Customer C", exact: true }).click();
   await expect(calculation.getByTestId("matrix-row-calculation")).toContainText("8 + 0 = 8 coins");
   await expect(page.getByRole("group", { name: "Swap rows and columns machine", exact: true }).getByRole("table")).toHaveCount(1);
-  const oldDraft = await page.evaluate(() => JSON.parse(localStorage.getItem("fitlab-construction-v1:linear-algebra")!));
-  expect(oldDraft.pieces).toHaveLength(2);
+  expect(backend.value<{ graph: typeof legacyGraph }>("workshop:linear-algebra:v1")?.graph).toEqual(legacyGraph);
+  await backend.waitForRecord("workshop:linear-algebra:v2", value => {
+    const draft = value as { graph?: { pieces: unknown[] }; results?: Record<string, boolean> };
+    return draft.graph?.pieces.length === 7 && Object.values(draft.results ?? {}).filter(Boolean).length === 3;
+  });
+  await waitForAccountSync(page);
   await page.reload();
   await showEarlierWorkshop(page);
   await expect(page.locator("[data-piece]")).toHaveCount(7);

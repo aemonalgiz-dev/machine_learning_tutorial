@@ -4,13 +4,15 @@ import { expandedLessons } from "../lib/lessons";
 import { presentIntuition } from "../lib/intuition/presentation";
 import { story, step, strips, type Scene } from "../lib/intuition/types";
 import { sectionId } from "../components/concept/sectionId";
+import { lessonOrder } from "../lib/course-navigation";
 
 const lessons = { ...lessonIntuitions, ...Object.fromEntries(expandedLessons.map(lesson => [lesson.id,
   story(lesson.opening, lesson.intuition.map(item => step(item.title, item.explanation, item.scene ?? strips("An invented example for this lesson.", item.rows))), "Connection", [])])) };
 
 test("all guided examples use readable relationships with complete labels and finite geometry", () => {
-  expect(Object.keys(lessons)).toHaveLength(321);
-  let count = 0;
+  // Kernel trick uses its own transformation walkthrough. Every other lesson
+  // must remain covered as the curriculum grows, without a fixed page quota.
+  expect(Object.keys(lessons).sort()).toEqual(lessonOrder.map(href => href.split("/").pop()!).filter(id => id !== "kernel-trick").sort());
   const check = (scene: Scene) => {
     expect(scene.kind).not.toBe("strips");
     expect(JSON.stringify(scene)).not.toContain("—");
@@ -28,12 +30,14 @@ test("all guided examples use readable relationships with complete labels and fi
       else expect(day.value).toBeUndefined();
     }
   };
-  for (const [id, lesson] of Object.entries(lessons)) for (const item of presentIntuition(id, lesson).steps) {
-    count++;
-    check(item.scene);
-    if (item.alternative) check(item.alternative.scene);
+  for (const [id, lesson] of Object.entries(lessons)) {
+    const steps = presentIntuition(id, lesson).steps;
+    expect(steps.length, id).toBeGreaterThan(0);
+    for (const item of steps) {
+      check(item.scene);
+      if (item.alternative) check(item.alternative.scene);
+    }
   }
-  expect(count).toBe(910);
 });
 
 test("the forecast boundary advances without leaking its target and scores aligned days", () => {
@@ -59,6 +63,17 @@ test("paired records retain their original identities and custom authored scenes
   ] });
   const tokens = presentIntuition("what-a-token-is", lessons["what-a-token-is"]).steps[2].scene;
   expect(tokens).toMatchObject({kind:"table",records:[{label:"the",cells:["12"]},{label:"cat",cells:["103"]},{label:"sat",cells:["57"]}]});
+  expect(presentIntuition("logistic-regression", lessons["logistic-regression"]).steps[0].scene).toMatchObject({
+    kind: "table", columns: ["Study hours", "Recorded outcome"],
+    records: [{ cells: ["4", "Passed"] }, { cells: ["5", "Failed"] }],
+  });
+  expect(presentIntuition("multiple-polynomial-regression", lessons["multiple-polynomial-regression"]).steps[1].scene).toMatchObject({
+    kind: "table", columns: ["Height (cm)", "Age (years)"],
+    records: [{ cells: ["168", "31"] }, { cells: ["168", "60"] }],
+  });
+  expect(lessons["gradient-descent-regression"].steps[0].scene).toMatchObject({
+    kind: "plot", points: [[165, 62], [170, 68], [175, 68]],
+  });
   const scene: Scene = {kind:"bars",caption:"A new authored example",items:[{label:"Changed data",value:20}]};
   const custom = story([], [step("A revised example", "Different authored data", scene)], "Connection", []);
   expect(presentIntuition("rolling-forecast-validation", custom).steps[0].scene).toEqual(scene);

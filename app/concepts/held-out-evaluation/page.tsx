@@ -379,17 +379,16 @@ export default function HeldOutEvaluationPage() {
                 <SeedFamilyStrip />
                 <>
 <p>
-                  At degree 2 the thirty verdicts run from 0.955 to 0.998, a spread of 0.043 around a mean of 0.988, while the mean training score across the same thirty fits is 0.996. So the 0.004 by which degree 4 beat degree 2 on the fixed deal is a tenth of the distance the verdict moves when nothing changes except which four rows were hidden, and it settles nothing.
+
+                  At degree 2 the thirty held-out scores run from 0.955 to 0.998, with mean 0.988. Mean training score across those fits is 0.996. The degree-four advantage of 0.004 on one fixed split is not enough by itself to establish a reliable improvement. To compare the methods, score both on matching splits and inspect their paired differences. The range of one method’s scores is not a significance threshold for that comparison.
                 </p>
                 <p>
                   Turn the dial to degree 5 and the lowest verdict is 0.355 against a highest of 0.998, a spread of 0.643, which is the same curve family being called excellent by one deal and poor by another.
                 </p>
 </>
                 <KeepInMind>
-                  A difference between two held-out scores means something
-                  only when it is larger than the movement the seed alone
-                  produces. On this data at this share that movement is
-                  0.043 for a parabola and 0.643 for a quintic.
+
+                  Changing the split changes which observations judge the fit. The observed ranges, 0.043 for degree two and 0.643 for degree five here, show sensitivity to that choice. They are neither confidence intervals nor cutoffs that a difference between methods must exceed.
                 </KeepInMind>
               </SubSection>
 
@@ -475,24 +474,15 @@ export default function HeldOutEvaluationPage() {
                   mean at those degrees is not a number to read on its own.
                 </p>
                 <KeepInMind>
-                  The mean across folds is the headline number, and on this
-                  data it is a number to act on at degree 2, where the folds
-                  sit within 0.032 of each other, and a number to distrust at
-                  degree 8, where they sit 11.27 apart.
+
+                  Read the mean beside the individual fold results. Degree two is relatively consistent across these folds, while degree eight has a very poor result on one fold. Neither the mean nor the range alone describes uncertainty in a comparison with another method.
                 </KeepInMind>
               </SubSection>
 
               <SubSection title="13. The spread, and what it is not">
                 <p>
-                  The second number reported is the spread, the best
-                  fold&rsquo;s score less the worst&rsquo;s. At degree 2
-                  it is 0.032, so the five verdicts nearly agree and the mean
-                  stands on firm ground. At degree 8 the five folds read
-                  0.979, −10.29, 0.828, 0.916 and 0.369, a spread of 11.27,
-                  and the mean of −1.44 above that band is an average of
-                  verdicts that have nothing in common. The honest reading is
-                  that a degree 8 curve has become a gamble on which three
-                  rows it is denied.
+
+                  The spread is the best fold score minus the worst. At degree two it is 0.032, so these fold scores are relatively close. At degree eight the scores are 0.979, −10.29, 0.828, 0.916 and 0.369, with mean −1.44 and spread 11.27. They all assess the same degree-eight procedure, but one result is much worse than the others. Keep that failed fold visible instead of treating the mean as a typical result.
                 </p>
                 <NumberTable
                   headings={["degree", "the five folds", "mean", "spread"]}
@@ -606,15 +596,15 @@ export default function HeldOutEvaluationPage() {
           title: "Questions on Parts 3 and 4",
           quiz: [
             choice(
-              "At degree 2 the thirty seeded verdicts run from 0.955 to 0.998. What does that say about degree 4 beating degree 2 by 0.004 on the fixed deal?",
+              "Degree two scores between 0.955 and 0.998 across thirty splits. Degree four beats it by 0.004 on one fixed split. What can we conclude from that information alone?",
               [
-                "It settles nothing, since 0.004 is a tenth of the distance the verdict moves when only the hidden rows change",
+                "The single-split advantage does not establish a reliable improvement; compare both methods on matching splits",
                 "It confirms degree 4, since a spread of 0.043 is narrow",
                 "It means degree 4 would have won under every seed",
                 "It means the fixed deal was an unlucky one",
               ],
               0,
-              "A difference between two held-out scores means something only when it is larger than the movement the seed alone produces. Turn the dial to degree 5 and the lowest verdict is 0.355 against a highest of 0.998, which is one curve family called excellent by one deal and poor by another.",
+              "The score of one method varies when different rows are held out. Its observed range is not a significance cutoff for a paired model comparison. We need the two methods' differences on matching evaluation observations, along with an appropriate uncertainty assessment.",
             ),
             choice(
               "Why does the held-out score move so much more across seeds than the training score does?",
@@ -628,9 +618,9 @@ export default function HeldOutEvaluationPage() {
               "The fits under the thirty seeds are nearly identical parabolas and the verdicts still span 0.043. Four rows drawn from across the whole flight have heights spanning twenty metres and the same misses cost almost nothing, where four from the top of the arc sit within a metre or two of each other.",
             ),
             trueFalse(
-              "The spread across folds is a range over five numbers rather than a standard error, so it prices the trust in one mean and is not a threshold for choosing between two candidates.",
+              "The best-minus-worst range of five fold scores is neither a standard error nor a significance threshold for comparing two models.",
               true,
-              "It grows with the number of folds for that reason alone, and the five verdicts are not independent either, since any two of the five fits share three of their four training folds, so their agreement is weaker evidence than five separate experiments agreeing. At degree 2 the folds sit within 0.032 of each other and the mean of 0.989 stands on firm ground; at degree 8 they sit 11.27 apart and the mean of −1.44 is an average of verdicts with nothing in common.",
+              "The range describes these particular fold results. The fits share training observations, so their scores are dependent, and changing the number or composition of folds changes what is being summarised. A close range can indicate consistency without by itself establishing precise uncertainty.",
             ),
             choice(
               "At degree 2 the pooled score is 0.994 where the mean across folds is 0.989. Why do they differ?",
@@ -852,21 +842,8 @@ export default function HeldOutEvaluationPage() {
               </SubSection>
 
               <SubSection title="23. The held-out share is spent once">
-                <p>
-                  There is a leak the folds cannot close, and this page has
-                  already committed it. Section 12 read the validation curve
-                  and chose degree 2, and the score it chose by, 0.989, is
-                  now the best of nine candidates rather than the score of
-                  one, and the best of several noisy estimates is higher than
-                  any of them deserves. Nine candidates on a smooth curve make
-                  the effect small here, and the{" "}
-                  <Link href="/concepts/grid-search" className={link}>
-                    grid search page
-                  </Link>{" "}
-                  measures it on a case built to show it, twenty-five
-                  candidates on a target of pure noise, where the winner
-                  reported a score no candidate could honestly earn.
-                </p>
+                <p>We used the validation curve to choose degree 2. Its score of 0.989 therefore helped select a winner among nine candidates. It is no longer an independent final assessment of that choice. A candidate can win partly because it suits the particular validation observations.</p>
+              <p>The grid-search lesson isolates that effect by trying twenty-five candidates on a target made of noise. Here the practical next step is the same: keep additional observations outside the selection process, then evaluate the chosen procedure there. Cross-validation supports selection, but it does not make repeatedly reused evidence independent again.</p>
                 <KeepInMind>
                   Once a held-out score has been used to choose, it is a
                   training score for that choice. The score to report is one
@@ -996,10 +973,7 @@ export default function HeldOutEvaluationPage() {
         {
           title: "Practice. Dealing the Split and the Folds With the Library",
           practice: [
-            exercise(
-              "Hold out four rows and score the fit twice",
-              ["Deal the fifteen measurements of the thrown ball with the library’s own splitter, three tenths held out under seed 4, fit a degree 2 curve on the eleven training rows alone, and score it on both shares.", "The library cuts its held-out block from the end of the shuffled order, where the page’s fixed deal was drawn from the front of the same order, so the four rows it hides under seed 4 are not the four ringed in the playground. Print which times were hidden and both scores. Neither score is a number the page quotes, and the gap between them should still be small, since a parabola has too little freedom to memorise eleven points."],
-              `from oop_ml import (
+            exercise("Hold out four rows and score the fit twice",["Deal the fifteen measurements of the thrown ball with the library’s own splitter, three tenths held out under seed 4, fit a degree 2 curve on the eleven training rows alone, and score it on both shares.", "The library cuts its held-out block from the end of the shuffled order, where the page’s fixed deal was drawn from the front of the same order, so the four rows it hides under seed 4 are not the four ringed in the playground. Print which times were hidden and both scores. Neither score is a number the page quotes, and the gap between them should still be small, since a parabola has too little freedom to memorise eleven points."],`from oop_ml import (
     Dataset,
     Feature,
     MultipleLinearRegression,
@@ -1020,8 +994,7 @@ curve = RegressionPipeline(
 )
 # Split the throw with three tenths held out under seed 4 and fit the curve on
 # the training half. Then print the held-out times, the training score, the
-# held-out score and the gap between them.`,
-              `from oop_ml import (
+# held-out score and the gap between them.`,`from oop_ml import (
     Dataset,
     Feature,
     MultipleLinearRegression,
@@ -1050,17 +1023,11 @@ training = curve.score(split.training.input_features, split.training.target_feat
 held_out = curve.score(split.testing.input_features, split.testing.target_feature)
 print(f"training R squared {training:.4f}")
 print(f"held-out R squared {held_out:.4f}")
-print(f"gap {training - held_out:.4f}")`,
-              `held-out times 0.86, 1.43, 3.14, 4.00
+print(f"gap {training - held_out:.4f}")`,`held-out times 0.86, 1.43, 3.14, 4.00
 training R squared 0.9963
 held-out R squared 0.9924
-gap 0.0038`,
-              { hints: ["TrainTestSplitter takes test_fraction and random_seed at construction, and its split takes the Dataset and answers a DataSplit with a training half and a testing half, each a Dataset of its own with input_features and target_feature.", "Fit on the training half’s input_features and target_feature, then score on the testing half’s. The pipeline rebuilds the squared term inside its fit, so the hidden rows are transformed by a recipe that never saw them.", "The hidden times are the values of the testing half’s one input feature."], check: numberCheck("What R squared does the curve earn on the four rows the library hid?", 0.9924, 0.0005, "The library hid the measurements at 0.86, 1.43, 3.14 and 4.0 seconds, which are not the page’s four, so this is a different jury asking a different question of a nearly identical parabola. It still lands close to the training score, because a degree 2 curve has too little freedom to memorise eleven points, which is why the page’s own fixed deal showed a gap of only 0.0064.") },
-            ),
-            exercise(
-              "Deal again thirty times",
-              ["Part 3 says the way to find out what a single held-out score is worth is to deal again. Refit the degree 2 curve under seeds 0 to 29, three tenths held out each time, and collect the thirty held-out scores.", "Print the lowest, the highest, the spread between them and the mean. Part 3 quotes a range of 0.955 to 0.998, a spread of 0.043 and a mean of 0.988, and the library’s splitter is what produced those, so they should come back to the last printed digit."],
-              `from oop_ml import (
+gap 0.0038`,{...{ hints: ["TrainTestSplitter takes test_fraction and random_seed at construction, and its split takes the Dataset and answers a DataSplit with a training half and a testing half, each a Dataset of its own with input_features and target_feature.", "Fit on the training half’s input_features and target_feature, then score on the testing half’s. The pipeline rebuilds the squared term inside its fit, so the hidden rows are transformed by a recipe that never saw them.", "The hidden times are the values of the testing half’s one input feature."], check: numberCheck("What R squared does the curve earn on the four rows the library hid?", 0.9924, 0.0005, "The splitter's hidden times differ from the page's fixed display split. This is a new evaluation of a similar fitted parabola, and the score should be interpreted with those actual held-out rows in view.") },question:"What score does the curve earn on the rows this splitter actually holds out?"}),
+            exercise("Deal again thirty times",["Part 3 says the way to find out what a single held-out score is worth is to deal again. Refit the degree 2 curve under seeds 0 to 29, three tenths held out each time, and collect the thirty held-out scores.", "Print the lowest, the highest, the spread between them and the mean. Part 3 quotes a range of 0.955 to 0.998, a spread of 0.043 and a mean of 0.988, and the library’s splitter is what produced those, so they should come back to the last printed digit."],`from oop_ml import (
     Dataset,
     Feature,
     MultipleLinearRegression,
@@ -1086,8 +1053,7 @@ for seed in range(30):
     pass
 
 # Print the lowest score, the highest, the spread between them and the mean,
-# each to three places.`,
-              `from oop_ml import (
+# each to three places.`,`from oop_ml import (
     Dataset,
     Feature,
     MultipleLinearRegression,
@@ -1116,17 +1082,11 @@ lowest, highest = min(held_out_scores), max(held_out_scores)
 print(f"lowest held-out score {lowest:.3f}")
 print(f"highest held-out score {highest:.3f}")
 print(f"spread {highest - lowest:.3f}")
-print(f"mean {sum(held_out_scores) / len(held_out_scores):.3f}")`,
-              `lowest held-out score 0.955
+print(f"mean {sum(held_out_scores) / len(held_out_scores):.3f}")`,`lowest held-out score 0.955
 highest held-out score 0.998
 spread 0.043
-mean 0.988`,
-              { hints: ["The seed is the random_seed of the splitter, so each pass of the loop builds a new TrainTestSplitter with the same test_fraction and that seed.", "The same pipeline can be fitted again and again. Its fit works on copies of its steps and its model, so the configuration itself is never left fitted and each seed starts clean.", "A score is the held-out R squared, which is score called with the testing half’s input_features and target_feature."], check: numberCheck("What is the spread of the thirty held-out scores, highest less lowest?", 0.043, 0.0005, "The thirty fits are nearly identical parabolas, and the verdicts still run from 0.955 to 0.998, because which four rows sit on the jury decides the spread underneath the ratio. That 0.043 is the movement the seed alone produces, and a difference between two held-out scores means something only when it is larger than that, which is why the 0.004 by which degree 4 beat degree 2 on the fixed deal settles nothing.") },
-            ),
-            exercise(
-              "Fold the throw five ways",
-              ["Part 4 lets every row take a turn as the judge. Deal the fifteen measurements into five folds under seed 4 and cross-validate the curve at degree 2 and at degree 8, reading the five fold scores, their mean and their spread each time.", "The folds under this seed are the page’s own, so at degree 2 the five verdicts should be 0.992, 0.992, 0.998, 0.966 and 0.996 with a mean of 0.989 and a spread of 0.032, and at degree 8 the spread should be the 11.27 that makes the mean of −1.44 a number to distrust."],
-              `from oop_ml import (
+mean 0.988`,{...{ hints: ["The seed is the random_seed of the splitter, so each pass of the loop builds a new TrainTestSplitter with the same test_fraction and that seed.", "The same pipeline can be fitted again and again. Its fit works on copies of its steps and its model, so the configuration itself is never left fitted and each seed starts clean.", "A score is the held-out R squared, which is score called with the testing half’s input_features and target_feature."], check: numberCheck("What is the spread of the thirty held-out scores, highest less lowest?", 0.043, 0.0005, "Changing the split alone produces a range of scores on this dataset. That range illustrates sensitivity to which rows were held out; it is not a significance threshold for comparing methods. Compare methods on matching splits and consider uncertainty in their paired differences.") },question:"How much does the score change across thirty train-test splits?"}),
+            exercise("Fold the throw five ways",["Part 4 lets every row take a turn as the judge. Deal the fifteen measurements into five folds under seed 4 and cross-validate the curve at degree 2 and at degree 8, reading the five fold scores, their mean and their spread each time.", "The folds under this seed are the page’s own, so at degree 2 the five verdicts should be 0.992, 0.992, 0.998, 0.966 and 0.996 with a mean of 0.989 and a spread of 0.032, and at degree 8 the spread should be the 11.27 that makes the mean of −1.44 a number to distrust."],`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1149,8 +1109,7 @@ for degree in (2, 8):
         model=MultipleLinearRegression(),
     )
     # Cross-validate the curve over the throw with these folds, then print the
-    # five fold scores to three places, and the mean and the spread.`,
-              `from oop_ml import (
+    # five fold scores to three places, and the mean and the spread.`,`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1175,17 +1134,11 @@ for degree in (2, 8):
     result = CrossValidation(folds=folds).evaluate(curve, throw)
     scores = ", ".join(f"{evaluation.r2_score:.3f}" for evaluation in result)
     print(f"degree {degree}: fold scores {scores}")
-    print(f"  mean {result.mean_r2_score:.3f}  spread {result.r2_score_spread:.3f}")`,
-              `degree 2: fold scores 0.992, 0.992, 0.998, 0.966, 0.996
+    print(f"  mean {result.mean_r2_score:.3f}  spread {result.r2_score_spread:.3f}")`,`degree 2: fold scores 0.992, 0.992, 0.998, 0.966, 0.996
   mean 0.989  spread 0.032
 degree 8: fold scores 0.979, -10.291, 0.828, 0.916, 0.369
-  mean -1.440  spread 11.269`,
-              { hints: ["CrossValidation is built from the folds, and its evaluate takes the model and the whole Dataset. It deals the folds, refits the pipeline inside each one, and answers one result.", "The result is iterable, one evaluation per fold, and each evaluation has an r2_score. The summaries are properties of the result, mean_r2_score and r2_score_spread.", "The degree lives on the PolynomialFeatures step, so the pipeline is rebuilt for each degree while the folds stay the same object, which is what keeps the two degrees judged on the same deal."], check: numberCheck("What is the mean across the five folds at degree 2?", 0.989, 0.0005, "Every measurement is judged exactly once by a fit that never saw it, and the five verdicts 0.992, 0.992, 0.998, 0.966 and 0.996 average to 0.989 with a spread of 0.032, so the mean stands on firm ground. At degree 8 the folds read 0.979, −10.291, 0.828, 0.916 and 0.369, a spread of 11.27, and the mean of −1.44 above that band is an average of verdicts that have nothing in common.") },
-            ),
-            exercise(
-              "Deal the crowd plain and stratified",
-              ["Part 5 deals the twelve overlapping people into five folds two ways. Fold them with a tree two questions deep, first by a plain shuffle-and-cut and then stratified, and read the count of folds missing a class, the pooled accuracy and the accuracy spread for each deal.", "The plain deal under seed 4 leaves two folds without one of the classes and pools to an accuracy of 0.5 over a spread of 1.0; the stratified deal leaves none and pools to 0.8333 over a spread of 0.5. Both come from the library’s own folding, so all four numbers should match."],
-              `from oop_ml import CrossValidation, Dataset, DecisionTreeClassifier, Feature, KFold
+  mean -1.440  spread 11.269`,{...{ hints: ["CrossValidation is built from the folds, and its evaluate takes the model and the whole Dataset. It deals the folds, refits the pipeline inside each one, and answers one result.", "The result is iterable, one evaluation per fold, and each evaluation has an r2_score. The summaries are properties of the result, mean_r2_score and r2_score_spread.", "The degree lives on the PolynomialFeatures step, so the pipeline is rebuilt for each degree while the folds stay the same object, which is what keeps the two degrees judged on the same deal."], check: numberCheck("What is the mean across the five folds at degree 2?", 0.989, 0.0005, "Every row is evaluated by a fit that excluded it, while the training folds overlap. The degree-two fold scores are relatively close here. The much wider degree-eight variation warns that its mean conceals unstable results; the folds still evaluate the same declared procedure.") },question:"How do the two polynomial degrees behave across the same five folds?"}),
+            exercise("Deal the crowd plain and stratified",["Part 5 deals the twelve overlapping people into five folds two ways. Fold them with a tree two questions deep, first by a plain shuffle-and-cut and then stratified, and read the count of folds missing a class, the pooled accuracy and the accuracy spread for each deal.", "The plain deal under seed 4 leaves two folds without one of the classes and pools to an accuracy of 0.5 over a spread of 1.0; the stratified deal leaves none and pools to 0.8333 over a spread of 0.5. Both come from the library’s own folding, so all four numbers should match."],`from oop_ml import CrossValidation, Dataset, DecisionTreeClassifier, Feature, KFold
 
 heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
 weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
@@ -1197,8 +1150,7 @@ for stratified in (False, True):
     tree = DecisionTreeClassifier(max_depth=2, n_known_classes=2)
     # Deal the crowd with these folds and print how many folds miss a class.
     # Then cross-validate the tree with the same folds and print the pooled
-    # accuracy and the accuracy spread.`,
-              `from oop_ml import CrossValidation, Dataset, DecisionTreeClassifier, Feature, KFold
+    # accuracy and the accuracy spread.`,`from oop_ml import CrossValidation, Dataset, DecisionTreeClassifier, Feature, KFold
 
 heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
 weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
@@ -1212,13 +1164,10 @@ for stratified in (False, True):
     missing = folds.split(crowd).classes_missing_from_a_fold()
     result = CrossValidation(folds=folds).evaluate_classifier(tree, crowd)
     print(f"{deal} deal: folds missing a class {missing}")
-    print(f"  pooled accuracy {result.pooled_accuracy:.4f}  spread {result.accuracy_spread:.4f}")`,
-              `plain deal: folds missing a class 2
+    print(f"  pooled accuracy {result.pooled_accuracy:.4f}  spread {result.accuracy_spread:.4f}")`,`plain deal: folds missing a class 2
   pooled accuracy 0.5000  spread 1.0000
 stratified deal: folds missing a class 0
-  pooled accuracy 0.8333  spread 0.5000`,
-              { hints: ["KFold takes n_folds, random_seed and stratified at construction, and its split answers the folds, which can say how many of them miss a class.", "CrossValidation has two entry points, and evaluate_classifier is the one for a classifier. Its result has pooled_accuracy, which adds the folds’ tables and divides once, and accuracy_spread, the best fold less the worst.", "n_known_classes tells the tree the class count, which is what the page’s deal does, so a training fold short of a class would still answer with the full width."], check: numberCheck("What pooled accuracy does the stratified deal report?", 0.8333, 0.0005, "Dealing each class round the folds in turn takes the adult counts to 1, 2, 1, 1 and 1, no fold misses a class, and the pooled table reads 10 of 12 people right. Pooling counts each person once rather than each fold once, which is why it reads 0.8333 where averaging the five fold accuracies reads 0.8, and the spread of 0.5 is still one person in a fold of two.") },
-            ),
+  pooled accuracy 0.8333  spread 0.5000`,{...{ hints: ["KFold takes n_folds, random_seed and stratified at construction, and its split answers the folds, which can say how many of them miss a class.", "CrossValidation has two entry points, and evaluate_classifier is the one for a classifier. Its result has pooled_accuracy, which adds the folds’ tables and divides once, and accuracy_spread, the best fold less the worst.", "n_known_classes tells the tree the class count, which is what the page’s deal does, so a training fold short of a class would still answer with the full width."], check: numberCheck("What pooled accuracy does the stratified deal report?", 0.8333, 0.0005, "Stratification keeps both classes represented in each of these folds. Pooled accuracy counts every held-out person equally, while a plain mean of unequal-size fold accuracies weights folds equally. Both remain estimates from this small dataset.") },question:"What changes when each class is distributed across the folds?"}),
           ],
         },
       ]}

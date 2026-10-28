@@ -390,7 +390,7 @@ export default function NeuronsAndActivationsPage() {
               "The score varies only as you move across those lines. A weight turns the line of zero score and a bias slides it, and where that line lies, with which side a person falls on, is the whole of what one neuron can say about the plane.",
             ),
             choice(
-              "Both weights are set to zero. What happens to the dashed line of zero score?",
+              "Both input weights are zero and the bias stays at 0.5. What happens to the dashed line of zero score?",
               [
                 "There is none, because the score is then the bias everywhere",
                 "It passes through the origin",
@@ -797,32 +797,40 @@ export default function NeuronsAndActivationsPage() {
               "The slope is the output times one minus the output, which is largest at a half. The tangent reaches 1 at a score of zero and falls away on both sides. Changing the weights changes the score the activation is read at and does not change this bound.",
             ),
             several(
-              "The neuron fitted to the crowd keeps its sigmoid, with weights 2.55 and 1.29. Which of these hold on the twenty-five people?",
-              [
-                "The child of 120 centimetres and 25 kilograms scores −7.38, where the sigmoid’s slope is 0.000622",
-                "Six of the twenty-five people sit where the slope is under a hundredth of the sigmoid’s peak",
-                "Scaling the three fitted numbers by ten leaves every slope positive, since the sigmoid never reaches either end in principle",
-                "At a quarter of the fitted scale the same six people are still flat",
-              ],
-              [0, 1],
-              "Saturation is about the size of the score, and scaling the weights and the bias together leaves the dashed line where it is while steepening the score everywhere else. At a quarter of the fitted scale nobody in the crowd is flat, at the fitted scale six are, and at ten times it three people have a slope of exactly 0.0, because in floating point the output has rounded to exactly 0 or exactly 1 and the output times one minus the output is then zero.",
-            ),
+  "Which conclusions are supported by this fitted-neuron diagnostic report?",
+  [
+    "The supplied child reading lies where sigmoid changes only weakly as its score changes",
+    "Six observations have a local sigmoid slope below one hundredth of its maximum",
+    "In exact real arithmetic, multiplying a finite score by ten makes its sigmoid derivative exactly zero",
+    "Dividing the fitted coefficients by four preserves every observation's local sigmoid derivative"
+  ],
+  [0, 1],
+  "The child's recorded derivative is small, and six slopes fall below the stated fraction of the sigmoid peak. Changing coefficient scale moves the points at which sigmoid is evaluated, so their local derivatives can change. The mathematical derivative is positive at every finite score; an exactly zero computed derivative in a highly scaled run reflects finite-precision arithmetic, not a new exact plateau in the mathematical function.",
+  {
+    "description": "These are recorded diagnostics for the course sigmoid implementation on the fixed twenty-five-person example, not a universal guarantee about floating-point sigmoid implementations.",
+    "data": "Weights at the fitted scale: approximately 2.55 and 1.29\n120 cm, 25 kg example: score approximately -7.38; sigmoid derivative approximately 0.000622\nAt fitted scale: 6 of 25 derivatives are below 0.0025\nAfter multiplying all fitted coefficients by 10: at least one computed derivative is exactly zero\nAt one quarter of the fitted scale: the same six observations are not all below that flatness cutoff."
+  },
+),
             trueFalse(
               "Raising the learning rate recovers the gradient that a chain of ten sigmoid neurons has multiplied away.",
               false,
               "Ten slopes each at most a quarter leave under a millionth even at the single best point, where every one of the ten scores is exactly zero, and at the tall heavy person’s slope of 0.1491 the product is two hundred times smaller than that. The rate scales the product it is handed rather than restoring what the squashes removed, so nothing raises and the walk simply stalls.",
             ),
             several(
-              "The neuron fitted to the crowd is given a rectifier instead of its sigmoid. Which of these follow?",
-              [
-                "12 of the 25 people land on the dead side, with an output and a slope of exactly 0",
-                "The other 13 pass through at a slope of exactly 1",
-                "A neuron whose score is negative for everyone it sees cannot move its weights to change that",
-                "Some people sit between the two, with a slope between 0 and 1",
-              ],
-              [0, 1, 2],
-              "Nothing is in between, because the rectifier has no in between. A dead unit receives no gradient from anyone, and the gradient is the only thing that could move its weights, so it stays dead. The usual guards are a small positive bias at the start and a learning rate that cannot fling the weights across zero in one step, with the leaky rectifier the repair that changes the activation itself.",
-            ),
+  "Replace sigmoid with ReLU while keeping these fitted scores fixed. Which claims follow?",
+  [
+                  "12 of the 25 people land on the dead side, with an output and a slope of exactly 0",
+                  "The other 13 pass through at a slope of exactly 1",
+                  "With fixed inputs and these loss-gradient updates alone, a unit that scores negatively for every training row gets no update through ReLU",
+                  "Some people sit between the two, with a slope between 0 and 1",
+                ],
+  [0, 1, 2],
+  "For these nonzero scores, ReLU has derivative zero or one. A unit that is inactive on every fixed training input receives no loss gradient through those responses. Earlier-layer changes, other parameter updates or a different activation can change that situation in a larger model. Initialisation and the learning rate affect the risk; a small positive bias is not a universal guarantee against dead units.",
+  {
+    "description": "Use ReLU(z)=max(0,z), with derivative zero for negative scores and one for positive scores. No independent weight decay, noise or reinitialisation is applied.",
+    "data": "Among 25 observations, 12 scores are negative and 13 are positive; none is zero.\nFor the dead-unit statement, assume all inputs reaching that unit have negative scores and weights are updated only through its local ReLU gradient."
+  },
+),
         ],
         },
         {
@@ -873,7 +881,7 @@ export default function NeuronsAndActivationsPage() {
                   Section 4 said one neuron knows one direction in the plane, and this is the price.
                 </p>
 </>
-                <WhyThisWorks title="Why no nonlinear activation rescues it">
+                <WhyThisWorks title="Why these monotone activations cannot solve exclusive-or">
                   <p>
                     Write the score at the four corners of exclusive-or,
                     where the answer is yes when exactly one of two inputs is
@@ -889,7 +897,12 @@ export default function NeuronsAndActivationsPage() {
                     The two yes corners and the two no corners carry the same total score, for every weight and bias there is. Exclusive-or asks for both yes corners above a threshold and both no corners below it, which would make the left-hand total exceed twice the threshold while the right-hand total falls short of it, and those two totals are the same number.
                   </p>
                   <p>
-                    The argument never touches the activation function, only the assumption that a higher score never means a lower output, which every activation function on the list satisfies, so no cleverer squash escapes it.
+                    This argument assumes that raising the score never lowers
+                    the output. Such an activation is called monotone
+                    nondecreasing. Identity, ReLU, sigmoid and tanh all have
+                    that property. An activation that rises and then falls
+                    would need a different argument; the claim is about these
+                    monotone activations followed by one output threshold.
                   </p>
 </>
                 </WhyThisWorks>
@@ -1029,25 +1042,33 @@ export default function NeuronsAndActivationsPage() {
           title: "Questions on Parts 6 and 7",
           quiz: [
             trueFalse(
-              "Handing the logistic regression fit’s three numbers to one sigmoid neuron reproduces that model’s probabilities, with the largest gap over the twenty-five people at 1.1 × 10⁻¹⁶.",
-              true,
-              "A neuron with a sigmoid activation and logistic regression are the same calculation, weights, a bias and a squash. That gap is one rounding of a double, and the logistic page’s single-input model is the same neuron with one weight.",
-            ),
+  "Give a sigmoid neuron the same ordered inputs, coefficients and intercept as a binary logistic regression model. In exact arithmetic, the two produce the same probabilities.",
+  true,
+  "A neuron with a sigmoid activation and logistic regression are the same calculation, weights, a bias and a squash. That gap is one rounding of a double, and the logistic page’s single-input model is the same neuron with one weight.",
+  {
+    "description": "Both use the same sigmoid function.",
+    "data": "Logistic probability = sigmoid(w @ x + b)\nNeuron output = sigmoid(w @ x + b)\nInput preparation and coefficient order are identical."
+  },
+),
             choice(
-              "The fitted neuron calls 17 of the 25 people correctly. Why does it miss the other eight?",
-              [
-                "They lie in the crowd’s tangled middle, which does not sort along any straight line",
-                "The sigmoid saturates on those eight and passes nothing back",
-                "The climb stopped at 7527 passes, before those eight were fitted",
-                "Their height and weight were not standardised with the rest",
-              ],
-              0,
-              "A weighted sum is zero along a straight line for every choice of weights and bias, so the dashed line is straight and a child and an adult of nearly the same height and weight sit on opposite sides of whatever line is drawn. One neuron knows one direction in the plane, and an accuracy of 0.68 is what that costs here.",
-            ),
+  "Why can this fitted single affine neuron still miss people despite a long completed optimisation run?",
+  [
+                  "They lie in the crowd’s tangled middle, which does not sort along any straight line",
+                  "The sigmoid saturates on those eight and passes nothing back",
+                  "The climb stopped at 7527 passes, before those eight were fitted",
+                  "Their height and weight were not standardised with the rest",
+                ],
+  0,
+  "This fitted neuron has nonzero input weights, so its threshold boundary is a straight line in the height-weight plane. The labels in the middle are mixed in a way that one such line cannot separate. The measured fit gets 17 of the 25 labels right. The issue is the permitted boundary shape, rather than a guarantee that every zero-weight configuration has a line to draw.",
+  {
+    "description": "Interpret the stated geometry and completed run.",
+    "data": "The twenty-five-person dataset contains a tangled middle that no straight boundary separates perfectly.\nThe inputs are consistently standardised.\nThe completed sigmoid fit correctly labels 17 of 25.\nThe eight remaining errors occur in that inseparable middle."
+  },
+),
             trueFalse(
-              "A cleverer squash would let one neuron answer exclusive-or.",
+              "Replacing sigmoid with another monotone activation, one whose output never falls when its score rises, lets one affine-score neuron solve exclusive-or using one output threshold.",
               false,
-              "The two yes corners and the two no corners carry the same total score for every weight and bias there is, so the argument never touches the activation function. It assumes only that a higher score never means a lower output, which every activation on the list satisfies. Composition is what escapes it, with two neurons each drawing a line and a third reading both.",
+              "The two yes corners and the two no corners have the same total affine score. They cannot put all yes scores above one score threshold and all no scores below it. A monotone activation followed by a threshold preserves that limitation. This does not rule out an arbitrary nonmonotone activation. Composing several ordinary neurons is the route the next lesson develops.",
             ),
             choice(
               "Three neurons scoring 2, 1 and 0.1 come out of softmax at 0.6590, 0.2424 and 0.0986. Only the third score moves, to 5. What happens to the first neuron’s answer?",
@@ -1061,10 +1082,14 @@ export default function NeuronsAndActivationsPage() {
               "Every output shares one denominator and the three compete for a fixed total of one. No function of a single number can do that, and no single neuron can hold it, since a neuron has no neighbours to normalise against. That is why softmax belongs to an output layer rather than to the list of activations a neuron may own.",
             ),
             trueFalse(
-              "A row handed to the neuron with its height and weight swapped is scored wrongly with nothing raised, because the weights are kept in input order and carry no names.",
-              true,
-              "A row of the wrong length is refused, since the weight count is the input width, but a row of the right length is matched to the weights by position and nothing checks what each value means. Booleans coerce just as quietly, which turns a column of yes-and-no flags into ones and zeros without anyone saying so. Both are the price of a unit that reads unnamed coordinates from the layer beneath it.",
-            ),
+  "Under this input contract, swapping height and weight changes the score without triggering a width error.",
+  true,
+  "A row of the wrong length is refused, since the weight count is the input width, but a row of the right length is matched to the weights by position and nothing checks what each value means. Booleans coerce just as quietly, which turns a column of yes-and-no flags into ones and zeros without anyone saying so. Both are the price of a unit that reads unnamed coordinates from the layer beneath it.",
+  {
+    "description": "The input array contains two ordered standardised coordinates; the width check does not inspect field names.",
+    "data": "Expected input: [height, weight] = [1,2]\nSwapped input: [2,1]\nWeights: [2,-1]\nBias: 0.5"
+  },
+),
         ],
         },
         {
@@ -1072,7 +1097,7 @@ export default function NeuronsAndActivationsPage() {
           practice: [
             exercise(
               "Apply the neuron to two height and weight profiles",
-              ["Part 1 builds a neuron with weights 2 and −1 and a bias of one half, and reads the tall heavy person at (1, 1) and the short heavy person at (−1, 1) through it. Build that neuron with Neuron once for each of the four activations and ask it about both people with respond_to.", "The score should be 1.5 and −2.5 every time, whichever activation is chosen, and only the output should change from line to line. Part 3 gives the tall heavy person’s outputs as 1.5, 1.5, 0.8176 and 0.9051. Print both people’s score and output to four places."],
+              ["The workshop combined two light readings. Here the two inputs are standardised height and weight profiles, using the neuron from the lesson. Keep its weights and bias fixed while trying each of the four activation objects.","For both supplied people, print the neuron's score and output to four decimal places under every activation. The score is the weighted sum with its bias; the activation reads that score. There is no training in this challenge."],
               `from oop_ml import HyperbolicTangent, Identity, Neuron, RectifiedLinear, Sigmoid
 
 bends = [("identity", Identity()), ("rectifier", RectifiedLinear()),
@@ -1101,11 +1126,11 @@ for name, bend in bends:
 rectifier: tall heavy score 1.5000 output 1.5000, short heavy score -2.5000 output 0.0000
 sigmoid: tall heavy score 1.5000 output 0.8176, short heavy score -2.5000 output 0.0759
 tangent: tall heavy score 1.5000 output 0.9051, short heavy score -2.5000 output -0.9866`,
-              { hints: ["A neuron is built complete from its weights as a list, its bias and an activation object. There is nothing to fit, so it answers straight away.", "respond_to takes one row, a list with one value per weight, and answers an object carrying both of the neuron’s numbers as score and output.", "The score is computed before the activation is applied, so it is the same number on all four lines. If it moves, the activation has been put in the wrong place."], check: numberCheck("What does the sigmoid neuron answer for the short heavy person, to four places?", 0.0759, 0.0005, "The score is two times minus one, less one, plus one half, which is −2.5 whatever the activation, and the sigmoid maps −2.5 to one over one plus e to the 2.5, which is 0.0759. The same score comes out of the rectifier as exactly 0 and of the tangent as −0.9866, already close to its floor, which is Part 3’s point that the four functions read one score and differ only in what they do to it.") },
+              { hints: ["A neuron is built complete from its weights as a list, its bias and an activation object. There is nothing to fit, so it answers straight away.", "respond_to takes one row, a list with one value per weight, and answers an object carrying both of the neuron’s numbers as score and output.", "The score is computed before the activation is applied, so it is the same number on all four lines. If it moves, the activation has been put in the wrong place."], check: numberCheck("What does the sigmoid neuron answer for the short heavy person, to four places?", 0.0759, 0.0005, "The sigmoid maps the short-heavy profile’s negative score to a small positive output. Changing the activation changes that output while leaving the weights, bias and score fixed. These are two standardised feature values, rather than raw centimetres and kilograms."), question: "What changes when the same weighted sum uses a different activation?" },
             ),
             exercise(
               "Read the slope a gradient is multiplied by",
-              ["Part 4 says an activation is chosen for its slope, because the slope at the score the forward pass produced is what a gradient is multiplied by on its way back. Every activation object answers two questions about an array of scores, of for the output and derivative_at for the slope. Ask all four about the two worked scores, 1.5 and −2.5.", "Part 4 gives the sigmoid’s slope at 1.5 as 0.1491 and the tangent’s as 0.1807, and at −2.5 as 0.0701 and 0.0266. Part 5 multiplies ten sigmoid slopes together. Print the outputs and slopes to four places, then what ten sigmoid neurons in a chain keep of a gradient at each worked person’s slope, which at the short heavy person’s slope the lesson does not print."],
+              ["The previous challenge compared activation outputs. Now inspect the local derivative, which describes how much the output changes for a small change in score. Call of and derivative_at on the supplied score array for each activation.","Print both outputs and derivatives to four decimal places. Then raise each sigmoid derivative to the tenth power and print that activation-only factor in scientific notation. This isolates ten identical activation derivatives; a full network gradient also includes weights and other paths."],
               `import numpy as np
 from oop_ml import HyperbolicTangent, Identity, RectifiedLinear, Sigmoid
 
@@ -1144,11 +1169,11 @@ tangent: at 1.5 output 0.9051 slope 0.1807, at -2.5 output -0.9866 slope 0.0266
 ten sigmoid neurons keep 5.45e-09 at the tall heavy person's slope
 and 2.87e-12 at the short heavy person's
 against 9.537e-07 with every one of the ten scores at zero`,
-              { hints: ["of and derivative_at each take a numpy array of scores and answer an array of the same shape, so both worked scores go in together and come back as a pair.", "A chain multiplies the gradient by one slope per neuron, so ten neurons at one score keep that slope to the tenth power. Python’s ** raises to a power, and a format of .2e prints the result in scientific notation."], check: numberCheck("What slope does the sigmoid report at a score of 1.5, to four places?", 0.1491, 0.0005, "The sigmoid’s slope is its own output times one minus that output, and at 1.5 the output is 0.8176, so the slope is 0.8176 times 0.1824. Part 4 derives it in that form so a backward pass never recomputes the exponential, and ten such slopes multiplied together leave 5.4 × 10⁻⁹, two hundred times less than the millionth that ten peak slopes of a quarter would keep.") },
+              { hints: ["of and derivative_at each take a numpy array of scores and answer an array of the same shape, so both worked scores go in together and come back as a pair.", "A chain multiplies the gradient by one slope per neuron, so ten neurons at one score keep that slope to the tenth power. Python’s ** raises to a power, and a format of .2e prints the result in scientific notation."], check: numberCheck("What slope does the sigmoid report at a score of 1.5, to four places?", 0.1491, 0.0005, "The derivative is positive at this score, but smaller than one. Repeated multiplication of such local derivatives can reduce a backward signal substantially. The sigmoid derivative can be expressed using its output; whether an implementation caches that output or recomputes it is a separate choice."), question: "How much of a backward signal can each activation pass at these scores?" },
             ),
             exercise(
               "Build the logistic twin",
-              ["Part 6 fits the logistic regression page’s model to the crowd on standardised height and weight and reads a coefficient of 2.5537 on height, 1.2944 on weight and an intercept of 0.1396 after 7527 passes. Standardise the crowd with Standardizer, fit LogisticRegression, and hand the fitted three numbers to a Neuron with a Sigmoid activation.", "Part 6 says the child of 147 centimetres and 41 kilograms scores −1.5321 and that the model’s probability and the neuron’s output both come to 0.177694, with the largest gap over the twenty-five people at 1.1 × 10⁻¹⁶. Print the fitted numbers, the first person through both routes, the largest gap, and the accuracy of 0.68."],
+              ["A logistic model combines standardised height and weight with learned coefficients. Fit the supplied model, then build a sigmoid Neuron using its two coefficients in height-then-weight order and its intercept as the bias.","Print the fitted coefficients and training metadata. Send the same transformed rows through both routes, printing the first person's score and probability, the largest probability difference over the crowd, and classification accuracy. Keep the fitted standardisation reference unchanged."],
               `from oop_ml import Feature, LogisticRegression, Neuron, Sigmoid, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145,
@@ -1198,11 +1223,11 @@ print(f"accuracy {model.score(standardised, label):.2f}")`,
 first person: score -1.5321, model 0.177694, neuron 0.177694
 largest gap over the crowd 1.1e-16
 accuracy 0.68`,
-              { hints: ["A fitted model’s coefficients can be read by name, as model.coefficients[\"height\"], and its intercept and epochs_run are properties. All three raise rather than answer before fit.", "The neuron’s weights go in as a list in the order the fit saw the columns, height then weight, with the intercept as its bias. The rows are standardised, since that is what the model was fitted on.", "predict_probability answers one probability per row; its values property is the plain array, which lines up with the rows by position for a zip."], check: numberCheck("What coefficient does the fit put on standardised height, to four places?", 2.5537, 0.0005, "The climb settles on 2.5537 for height against 1.2944 for weight, so height counts about twice as much as weight in the fitted score. Handing those two and the intercept to a sigmoid neuron reproduces every probability to one rounding of a double, because a sigmoid neuron and logistic regression are the same calculation, weights, a bias and a squash.") },
+              { hints: ["A fitted model’s coefficients can be read by name, as model.coefficients[\"height\"], and its intercept and epochs_run are properties. All three raise rather than answer before fit.", "The neuron’s weights go in as a list in the order the fit saw the columns, height then weight, with the intercept as its bias. The rows are standardised, since that is what the model was fitted on.", "predict_probability answers one probability per row; its values property is the plain array, which lines up with the rows by position for a zip."], check: numberCheck("What coefficient does the fit put on standardised height, to four places?", 2.5537, 0.0005, "The neuron and logistic model apply the same score-to-probability calculation when their feature order, standardisation, coefficients and bias match. Agreement here checks that correspondence; it does not establish predictive accuracy on people excluded from fitting."), question: "Can one sigmoid neuron reproduce the fitted model’s probabilities?" },
             ),
             exercise(
               "Take a census of the flat and the dead",
-              ["Part 5 gives the fitted neuron a rectifier in place of its sigmoid and finds 12 of the 25 people on the dead side with a slope of exactly 0. With the sigmoid kept, six people sit where the slope is under a hundredth of its peak of a quarter, and with the three fitted numbers scaled by ten, three people have a slope of exactly 0.0 in floating point. Run all three censuses.", "For each, build the neuron, find every person’s score with respond_to, and read the slope at each score with derivative_at. Print how many slopes are exactly zero, how many are under a hundredth of the peak, and the smallest slope to six places. The count under the hundredth at ten times the fitted scale is a number the lesson does not print."],
+              ["Reuse the fitted score rule in three configurations: ReLU, the original sigmoid, and a sigmoid with both weights and the bias multiplied by ten. For each configuration, evaluate the local derivative at every supplied person's score.","Print the count of exactly zero derivatives, the count below one hundredth of that activation's peak derivative, and the smallest derivative. These counts describe the supplied profiles; they do not establish that a neuron is permanently inactive for every possible input."],
               `import numpy as np
 from oop_ml import Feature, LogisticRegression, Neuron, RectifiedLinear, Sigmoid, Standardizer
 
@@ -1258,7 +1283,7 @@ for name, bend, scale, peak in trials:
               `rectifier: 12 dead, 12 under a hundredth of the peak, smallest slope 0.000000
 sigmoid: 0 dead, 6 under a hundredth of the peak, smallest slope 0.000298
 sigmoid at ten times: 3 dead, 17 under a hundredth of the peak, smallest slope 0.000000`,
-              { hints: ["respond_to answers one row at a time, so a comprehension over rows collects the twenty-five scores, and derivative_at then reads all twenty-five slopes from that array in one call.", "Scaling the two weights and the bias by the same factor leaves the dashed line where it is and multiplies every score by the factor, which is what pushes people onto the flat ends.", "A boolean array summed with np.sum counts how many entries are true, so slopes == 0.0 counts the dead and slopes < peak / 100 counts the saturated, the dead among them."], check: numberCheck("How many of the twenty-five people does the rectifier leave dead?", 12, 0.5, "The rectifier’s slope is exactly 0 wherever the score is negative, and the fitted score is negative for twelve people, every one of them on the far side of the dashed line. Those twelve contribute nothing to the gradient at all, and the other thirteen pass it through at a slope of exactly 1, with nothing in between because the rectifier has no in between.") },
+              { hints: ["Collect scores with respond_to, then pass their NumPy array to derivative_at. Apply the derivative to scores rather than to already activated outputs.","Multiplying every weight and the bias by the same positive amount preserves the zero-score boundary while changing the scores' magnitudes.","Summing a Boolean array counts its true entries. The small-derivative count includes any exactly zero derivatives too."], check: numberCheck("How many of the twenty-five people does the rectifier leave dead?", 12, 0.5, "For these supplied profiles, twelve ReLU scores fall on the inactive side and therefore have zero local derivative. The others have derivative one. That is an observation about this batch at the current parameters; other inputs or changed upstream representations can behave differently."), question: "Which supplied profiles receive a zero or very small activation derivative?" },
             ),
           ],
         },

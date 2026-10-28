@@ -60,7 +60,7 @@ test('new learning areas and one lesson in each render without browser errors', 
   for (const [area,id] of paths) {
     await page.goto(`/learn/${area}`);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(LEARNING_AREAS.find(item => item.id === area)!.title);
-    await expect(page.getByRole('link', { name: LEARNING_AREAS.find(item => item.id === area)!.workshopStart + ' →', exact: true })).toHaveAttribute('href', /^\/lab\//);
+    await expect(page.locator('#sections a').first()).toHaveAttribute('href', lessonLocations[`/concepts/${id}`].sectionHref);
     await page.goto(`/concepts/${id}`);
     await expect(page.getByRole('heading', { level: 1 })).toContainText(expandedLessonById[id].title);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), id).toBe(true);

@@ -896,21 +896,28 @@ export default function ConvolutionPage() {
               "Each of the second window’s nine inputs was itself formed from a three by three patch, and neighbouring patches overlap, so the nine of them together span five cells a side. A third layer covers seven. That growing patch is the receptive field, and stacking layers is what widens it while each layer keeps its own small count of weights, where a wider kernel would widen it at the cost of the parameter saving.",
             ),
             several(
-              "Which of these hold of the way the answer moves when the picture moves?",
+              "When a picture is shifted, which statements hold for the convolution’s output?",
               [
-                "Every map cell with somewhere to move to agrees exactly, with the largest disagreement reported as 0",
+                "Matching output cells move with the picture and have the same value, apart from floating-point rounding",
                 "It holds whatever nine numbers the kernel is carrying, since it is a statement about the arithmetic",
                 "At a stride of two it holds only for shifts the stride divides",
-                "A layer above this one therefore sees the same map for a moved picture",
+                "A layer above this one therefore sees the same map for a moved picture"
               ],
               [0, 1, 2],
               "The answer moves rather than staying put, so a layer above does see a different map, and anything needing a verdict that survives a shift has to get it from pooling or from a summary taken over the whole map. Reading this property as invariance is the commonest way it gets overstated. The map really is travelling, since at a shift of two all thirty-six of its cells change.",
+              {
+                "description": "Use a shared kernel and bias, with the same activation at each position. Compare positions whose complete input windows remain inside both pictures. At stride two, test shifts divisible by two."
+              },
             ),
             choice(
-              "A dense layer holding the page’s nine weights in one window position, and zeros in the other fifty-five places, answers 4 at rest. What does it answer once the picture moves one column?",
+              "This fixed-position dense detector answers 4 before the picture moves. What does it answer after moving the picture one column to the right?",
               ["4, since the edge is still in the picture", "0", "1.753", "3, since the window now overlaps the edge by two rows"],
               1,
               "It answers 0 at a shift of one, and again at two and at three. It learned the edge at one place and learned nothing at all about the same edge one cell over. The 1.753 belongs to the other comparison, an ordinary draw of thirty-six neurons whose answers move by more than the largest answer it gives anywhere on the picture.",
+              {
+                "description": "Use zero-based indices. The dense output reads only rows 2–4, columns 0–2 with the nine weights below; every other weight and the bias are zero. Shift the picture right by one column, filling the vacated left column with zeros.",
+                "data": "picture =\n0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0\n\nweights in the fixed window =\n−1 0 1\n−2 0 2\n−1 0 1"
+              },
             ),
         ],
         },
@@ -1514,15 +1521,19 @@ export default function ConvolutionPage() {
               "Raising the stride shrinks the answer to a quarter as many numbers without adding a layer, and the cost is countable. Pushing to a stride of four answers two by two and leaves 28 of the 64 cells outside every window, which the failure contracts record as accepted rather than refused. A setting that answers with a pleasingly small map may be ignoring a quarter of the picture to do it.",
             ),
             choice(
-              "A slope of one is sent to every one of the thirty-six answer cells over the page’s square. What does each of the nine kernel entries come back wanting?",
+              "Each of this convolution’s 36 output cells receives an arriving gradient of 1. What gradient does each of the nine shared kernel entries receive?",
               [
-                "16, the number of lit cells in the picture",
-                "36, one for each position it was used at",
-                "9, one for each entry of the kernel",
-                "4, the largest entry of the map",
-              ],
+                              "16, the number of lit cells in the picture",
+                              "36, one for each position it was used at",
+                              "9, one for each entry of the kernel",
+                              "4, the largest entry of the map",
+                            ],
               0,
               "A kernel entry multiplied a one at sixteen of its thirty-six positions and a zero at the other twenty, and its slope is the sum over every position it was used at, which is the sharing seen from behind. It is the bias that comes back wanting 36, because it was added once at every position. Both directions accumulate rather than assign, and writing the kernel slope as an assignment leaves the layer training on the last window it visited.",
+              {
+                "description": "Use a 3 × 3 kernel, stride 1, no padding and a linear activation. Every output receives gradient 1. A kernel entry’s gradient adds input_value × arriving_gradient across all of its window positions.",
+                "data": "picture =\n0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 1 1 1 1 0 0\n0 0 0 0 0 0 0 0\n0 0 0 0 0 0 0 0"
+              },
             ),
             trueFalse(
               "A convolution answering (1, 6, 6) placed directly beneath a layer reading (36,) is refused at the moment the stack is built, before any picture has been read.",
@@ -1536,7 +1547,10 @@ export default function ConvolutionPage() {
           practice: [
             exercise(
               "Sweep the vertical edge kernel across the square",
-              ["Paint the page’s picture, eight cells by eight with a four by four square lit in rows 2 to 5 and columns 2 to 5, and build a convolution reading one channel of eight by eight with a single three by three filter and an identity activation. Hand it the vertical edge kernel through with_parameters, with a bias of zero, and sweep it across the picture.", "Print the six by six map, the arrangement the layer answers with, how many parameters it holds, and the answer at row 2, column 0, which Part 2 worked by hand and got 4. Then count how many of the thirty-six answers are not zero, which the page does not print."],
+              [
+  "Use the supplied eight-by-eight single-channel image with its bright square in rows and columns 2 through 5. Apply the given three-by-three vertical-edge kernel, zero bias and identity activation.",
+  "Print the six-by-six response map, output shape, parameter count, response at zero-based row 2/column 0 and number of nonzero responses."
+],
               `import numpy as np
 from oop_ml import Conv2d, Identity
 
@@ -1576,11 +1590,17 @@ arrangement answered (1, 6, 6)
 parameters 10
 answer at row 2, column 0 is 4
 answers that are not zero 24 of 36`,
-              { hints: ["The layer draws random kernels when it is built, and with_parameters answers a copy carrying the kernels and biases it is given. A bank of kernels is arranged as filters, channels, rows and columns, so one three by three kernel over one channel is a block of (1, 1, 3, 3).", "A convolution reads a block whose leading axis is rows, so a single picture goes in arranged as (1, 1, 8, 8), one row holding one channel of eight by eight.", "The response’s outputs come back arranged the same way, so the map for the one picture and the one filter is the slice at row 0, channel 0."], check: numberCheck("How many of the thirty-six answers are not zero?", 24, 0.5, "The two columns of windows that straddle the square’s left edge answer positive numbers, 1, 3, 4, 4, 3 and 1 down each, and the two that straddle its right edge answer the same numbers negated. The two columns of windows between them answer zero, because every row of such a window is the same shade all the way across and the kernel’s two outer columns cancel. That is twenty-four cells with an answer and twelve without, and the whole map sums to zero.") },
+              { hints: [
+  "with_parameters supplies the fixed kernel and bias; respond_to performs the sweep.",
+  "Count learned storage separately from the number of positions sharing those same weights."
+], check: numberCheck("How many of the thirty-six answers are not zero?", 24, 0.5, "Twenty-four response cells are nonzero. Their signs distinguish opposite vertical boundaries, while balanced windows cancel under this kernel."), question: "Where does the vertical-edge filter respond to a bright square?" },
             ),
             exercise(
               "Move the picture and the answer moves",
-              ["Part 4 claims that moving the picture a column to the right moves the map a column to the right, exactly, whatever the kernel holds. Sweep the resting picture, then slide it one, two and three columns right with zeros entering at the left, sweep each, and compare the moved answer against the resting answer moved by the same amount over the columns the move leaves inside the map.", "Print how many picture cells and how many map cells changed at each shift and the largest gap between the two maps. Part 4 reports 8 picture cells and 18 map cells at a shift of one and 16 and 36 at a shift of two, and a gap of 0 throughout. A shift of three is not on the page."],
+              [
+  "Compute the original filter map, then move the supplied image right by one, two and three columns, filling the newly exposed left columns with zero.",
+  "At each shift print changed input-cell and map-cell counts, then the largest difference between shifted responses over their common valid region. Cropped-away positions are outside that comparison."
+],
               `import numpy as np
 from oop_ml import Conv2d, Identity
 
@@ -1619,11 +1639,17 @@ for shift in (1, 2, 3):
               `shift 1: 8 picture cells changed, 18 map cells changed, largest gap 0.0
 shift 2: 16 picture cells changed, 36 map cells changed, largest gap 0.0
 shift 3: 20 picture cells changed, 30 map cells changed, largest gap 0.0`,
-              { hints: ["A picture moved one column right holds, at column j, what the original held at column j minus one, so slice the original’s first seven columns into the moved picture’s last seven and leave the first column dark.", "The columns pushed off the right edge of the map have nothing to be compared against, so compare the moved map from column shift onwards with the resting map up to column six minus shift.", "The answer at a shift of three has only three columns left to compare, and the claim is that those three agree to the last bit."], check: numberCheck("How many of the map’s thirty-six cells change at a shift of three?", 30, 0.5, "At a shift of three the square’s left edge has moved from column 2 to column 5 and its right edge has left the picture, so every window that straddled an edge before now reads something else. The only cells that keep their value are the six in the third column of the map, which read the dark columns 2 to 4 of the moved picture and answer zero, as they did at rest. The gap is still 0, because the three columns left to compare are the resting map moved three columns along, which is what equivariance promises.") },
+              { hints: [
+  "Shift the image rather than its labels or kernel.",
+  "Compare only response columns for which both shifted windows exist. Boundary cropping can change cells outside that shared region."
+], check: numberCheck("How many of the map’s thirty-six cells change at a shift of three?", 30, 0.5, "Thirty map cells change at this shift. The translated valid overlap still agrees exactly, but cropping alters which windows remain in the image."), question: "Does moving the input move the convolution response over the comparable region?" },
             ),
             exercise(
               "Send a slope of one back down",
-              ["Part 6 works the backward pass by hand with a slope of one arriving at every answer cell. Reproduce it. Sweep the square, build a block of ones the same shape as the answer, and ask the layer for its correction.", "Print the nine kernel slopes, the bias slope, the blame handed down to the picture, what the corner cell and the centre cell receive, and how many of the sixty-four cells receive nothing. Part 6 says every kernel entry wants 16, the bias wants 36, the corner collects −1, and thirty-two cells receive nothing."],
+              [
+  "Run the supplied square through its fixed convolution. Send an upstream derivative of one to every output-map position and obtain correction_for from that forward response.",
+  "Print kernel gradients, bias gradient, input-gradient map, the specified corner/centre gradients and number of zero input gradients. These are derivatives of the summed outputs, not a separate fitted loss."
+],
               `import numpy as np
 from oop_ml import Conv2d, Identity
 
@@ -1670,11 +1696,17 @@ bias slope 36
  [-1. -1.  0.  0.  0.  0.  1.  1.]]
 corner cell receives -1, centre cell receives 0
 cells receiving nothing 32 of 64`,
-              { hints: ["correction_for takes the response the forward pass produced and the slope arriving at every answer cell, which here is a block of ones arranged like the outputs.", "The correction’s gradient holds the kernel slopes flattened to one row per filter, so the nine for this filter reshape to three by three, and its biases hold one slope per filter.", "The blame handed down is passed_down, arranged like the picture the layer read, so the corner is row 0, column 0 and the centre of an eight by eight is row 4, column 4."], check: numberCheck("What slope does the bias come back wanting?", 36, 0.5, "The bias was added once at every one of the thirty-six answer positions, so its slope is the arriving slopes added up, and with a slope of one everywhere that is a count of positions. Each kernel entry wants 16 for the same reason, since it multiplied a lit cell at sixteen of those positions and a dark one at the other twenty. Both are sums rather than assignments, which is the sharing seen from behind.") },
+              { hints: [
+  "Use np.ones_like(response.outputs) so upstream shape matches the complete batch/channel map.",
+  "The same kernel parameter participates at many positions, so its gradient collects contributions from all of them."
+], check: numberCheck("What is the bias derivative when every output receives upstream derivative one?", 36, 0.5, "The bias derivative is 36. That single bias participates in every output position, so its derivative collects all supplied upstream contributions."), question: "How do shared kernel weights collect gradients from every window?" },
             ),
             exercise(
               "Count the library’s own example, and refuse the wrong join",
-              ["Part 3 costs a twenty-eight by twenty-eight picture read by eight filters of three by three, and Part 7 puts a layer that reads a row straight on top of a convolution. Build that convolution, count its parameters and those of a dense layer reading the same 784 cells and answering the same 5,408 numbers, and print the ratio.", "Then build a dense layer of ten neurons reading 5,408 numbers, offer the two to a stack with nothing between them, and print the class and the message of what comes back. Finally put a flattening between them and print what the stack that builds reads and answers."],
+              [
+  "Build the supplied eight-filter convolution for a one-channel twenty-eight-by-twenty-eight image. Compare its parameter count with a dense layer mapping the same pixel count to the same output-value count. Print both counts and their ratio.",
+  "Attempt to join the convolution directly to the supplied ten-unit dense layer; print its error class/message. Add Flatten between them and print the resulting stack’s layer count and input/output shapes."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, Identity, LayerStack, MLLibError, Neuron
 
@@ -1710,7 +1742,10 @@ convolution 80 parameters, dense layer of equal width 4245280, ratio 53066
 ShapeMismatchError
 layer 0 answers with (8, 26, 26) and layer 1 reads (5408,); both hold 5408 numbers, so it is the arrangement that disagrees and not the width
 with a flattening between them the stack holds 3 layers, reads (1, 28, 28) and answers (10,)`,
-              { hints: ["A layer’s shape carries reads and answers as tuples of extents, and n_inputs and n_outputs as the products of those extents, so the dense count is n_outputs times n_inputs plus n_outputs.", "Flatten takes the arrangement it will read, which is exactly what the convolution answers, so handing it the convolution’s own shape.answers builds the right bridge."], check: numberCheck("How many parameters does the dense layer of equal width hold?", 4245280, 0.5, "A dense layer reading 784 cells and answering 5,408 numbers holds one weight per input per output plus one bias per output, which is 5,408 times 784 plus 5,408. The convolution holds 80, eight filters of nine weights and a bias, so the dense layer holds 53,066 times as many for an answer of exactly the same size, and the ratio would go on growing with the picture while the 80 stayed as it is.") },
+              { hints: [
+  "The convolution returns channel/row/column axes; the dense layer expects one feature axis.",
+  "Flatten changes the arrangement while preserving the number and order of values."
+], check: numberCheck("How many parameters does the dense layer of equal width hold?", 4245280, 0.5, "The dense layer stores 4245280 parameters. It gives each output a separate connection to every pixel instead of sharing a small kernel across positions."), question: "Why can equal-sized outputs still need a flattening step?" },
             ),
           ],
         },

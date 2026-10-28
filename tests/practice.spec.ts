@@ -1,3 +1,4 @@
+import { mockAccountBackend, accountBackendFor, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -14,16 +15,20 @@ test.beforeEach(async ({ context }) => {
 });
 
 async function openPractice(page: Page, lesson = "simple-linear-regression") {
-  await page.goto(`/concepts/${lesson}`);
-  await page.getByRole("button", { name: "Go to the coding challenges" }).click();
+  await page.goto(`/concepts/${lesson}`); await waitForAccountReady(page);
+  const navigation = page.getByRole("navigation", { name: "Lesson navigation", exact: true });
+  await navigation.getByText("Lesson contents", { exact: true }).click();
+  await navigation.getByRole("button", { name: "Coding challenges", exact: true }).click();
   await expect(page.locator(".cm-content")).toBeVisible();
 }
 
-test("challenge, real Python tests, saved drafts, and local results", async ({ page }) => {
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
+test("challenge, real Python tests, saved drafts, and account results", async ({ page }) => {
   const failures: string[] = [];
   page.on("pageerror", (error) => failures.push(error.message));
   await openPractice(page);
-  await expect(page.getByRole("heading", { name: "How would you fit the five people and predict a sixth?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What weight does the line predict for someone we have not measured?", exact: true })).toBeVisible();
   await page.locator(".cm-content").fill('print("slope", 999)');
   await page.getByRole("button", { name: "Run tests", exact: true }).click();
   await expect(page.getByRole("heading", { name: /Test results/ })).toBeVisible();
@@ -49,7 +54,7 @@ test("challenge, real Python tests, saved drafts, and local results", async ({ p
   await expect(page.locator(".cm-content")).not.toContainText("my saved draft");
   await page.getByRole("button", { name: "Previous challenge", exact: true }).click();
   await expect(page.locator(".cm-content")).toContainText("my saved draft");
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await expect(page.locator(".cm-content")).toContainText("my saved draft");
   await expect(page.getByText("Tests passed for 1 of 4 exercises", { exact: true })).toBeVisible();
 
@@ -61,7 +66,8 @@ test("challenge, real Python tests, saved drafts, and local results", async ({ p
     await expect(page.getByText("All tests passed", { exact: true })).toBeVisible();
     if (number < 4) await page.getByRole("button", { name: "Next challenge", exact: false }).click();
   }
-  const progress = await page.evaluate(() => JSON.parse(localStorage.getItem("oop_ml.progress.v1") ?? "{}"));
+  await waitForAccountSync(page);
+  const progress = accountBackendFor(page).progress;
   expect(progress.done["/concepts/simple-linear-regression"].some((section: string) => section.startsWith("practice"))).toBe(true);
   expect(failures).toEqual([]);
 });
@@ -105,7 +111,7 @@ test("mobile layout, reset, keyboard navigation, and lazy runtime", async ({ pag
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: ".practice-checks/practice-mobile.png", fullPage: true });
   await page.setViewportSize({ width: 1280, height: 960 });
-  await page.getByRole("heading", { name: /How would you reproduce/ }).scrollIntoViewIfNeeded();
+  await page.getByRole("heading", { name: "How does each colour token combine information from the three positions?", exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: ".practice-checks/practice-desktop.png" });
   await page.getByRole("button", { name: "Switch to the light theme", exact: true }).click();
   await page.screenshot({ path: ".practice-checks/practice-light.png" });
@@ -144,7 +150,7 @@ test("maths primers keep their links and run with NumPy alone", async ({ page })
     ["linear-algebra", "practice-vectors-and-matrices-in-the-library"],
     ["calculus", "practice-walking-a-real-bowl-with-the-library"],
   ]) {
-    await page.goto(`/primers/${lesson}#${fragment}`);
+    await page.goto(`/primers/${lesson}#${fragment}`); await waitForAccountReady(page);
     await expect(page.locator(".cm-content")).toBeVisible();
     await expect(page.locator(".cm-content")).toContainText("import numpy as np");
     await expect(page.locator(".cm-content")).not.toContainText("oop_ml");

@@ -1,8 +1,9 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { onProgressChange, readProgress, receiveProgress, setProgressAccount } from "./progress";
-import { hasPendingLearnerState, LearnerStorageLimit, listenForLearnerStorage, onLearnerChange, syncLearnerState } from "./learner-state";
+import { migrateAccountProgress, onProgressChange, readProgress, receiveProgress, retireAccountProgressCache, setProgressAccount } from "./progress";
+import { discardLegacyGuestLearning, hasPendingLearnerState, LearnerStorageLimit, listenForLearnerStorage, onLearnerChange, syncLearnerState } from "./learner-state";
+import { FREE_MEMBERSHIP, readMembership, type PracticeMembership } from "./membership";
 
 export interface AccountUser { id: string; name: string; email: string | null }
 interface AccountState {
@@ -10,12 +11,13 @@ interface AccountState {
   enabled: boolean;
   registrationEnabled: boolean;
   user: AccountUser | null;
+  membership: PracticeMembership;
   sync: "idle" | "saving" | "saved" | "error";
   syncMessage: string | null;
-  /** The current identity's first saved-work sync has settled, including offline fallback. */
+  /** The current identity's first saved-work sync has settled, including failure. */
   learnerStateReady: boolean;
 }
-const initial: AccountState = { status: "checking", enabled: false, registrationEnabled: false, user: null, sync: "idle", syncMessage: null, learnerStateReady: false };
+const initial: AccountState = { status: "checking", enabled: false, registrationEnabled: false, user: null, membership: { ...FREE_MEMBERSHIP }, sync: "idle", syncMessage: null, learnerStateReady: false };
 let state = initial;
 const listeners = new Set<() => void>();
 let generation = 0;
@@ -64,11 +66,11 @@ export function refreshAccount(): Promise<void> {
         if (user) sessionStorage.setItem(SESSION_CACHE, JSON.stringify(user));
         else sessionStorage.removeItem(SESSION_CACHE);
       } catch { /* Account caches still work for this page. */ }
-      update({ status: "ready", enabled: result.enabled === true, registrationEnabled: result.registrationEnabled === true, user, sync: user ? state.sync : "idle",
+      update({ status: "ready", enabled: result.enabled === true, registrationEnabled: result.registrationEnabled === true, user, membership: user ? readMembership(result.membership) : { ...FREE_MEMBERSHIP }, sync: user ? state.sync : "idle",
         learnerStateReady: !user || (state.user?.id === user.id && state.learnerStateReady) });
       if (user) scheduleSync();
     } catch {
-      if (!stopped && started === generation) update({ status: "unavailable", sync: state.user ? "error" : "idle", learnerStateReady: true });
+      if (!stopped && started === generation) update({ status: "unavailable", membership: { ...FREE_MEMBERSHIP }, sync: state.user ? "error" : "idle", learnerStateReady: true });
     } finally { checking = null; }
   })();
   return checking;
@@ -87,8 +89,24 @@ export async function syncProgress() {
   const started = generation;
   sending = true;
   update({ sync: "saving", syncMessage: null });
-  const snapshot = JSON.stringify(readProgress());
   try {
+    // Read before writing: an empty first-render snapshot must never replace
+    // progress already saved for this authenticated account.
+    const loaded = await request("progress", { headers: { "X-FitLab-Account": user.id } });
+    if (stopped || started !== generation) return;
+    if (loaded.status === 401 || loaded.status === 409) {
+      update({ sync: "error" });
+      await refreshAccount();
+      return;
+    }
+    if (!loaded.ok) throw new Error("Could not load account progress");
+    const existing = await loaded.json();
+    if (stopped || started !== generation) return;
+    if (!existing || typeof existing !== "object" || !existing.done || typeof existing.done !== "object" || Array.isArray(existing.done) ||
+      !existing.required || typeof existing.required !== "object" || Array.isArray(existing.required)) throw new Error("Invalid account progress");
+    receiveProgress(existing, user.id);
+    migrateAccountProgress(user.id);
+    const snapshot = JSON.stringify(readProgress());
     const response = await request("progress", {
       method: "PUT", headers: { "Content-Type": "application/json", "X-FitLab-Account": user.id },
       body: snapshot,
@@ -104,6 +122,7 @@ export async function syncProgress() {
     if (stopped || started !== generation) return;
     let changed = JSON.stringify(readProgress()) !== snapshot;
     receiveProgress(remote, user.id);
+    retireAccountProgressCache(user.id);
     await syncLearnerState(user.id, () => !stopped && started === generation && !signingOut, request);
     if (stopped || started !== generation) return;
     changed ||= hasPendingLearnerState(user.id);
@@ -131,7 +150,7 @@ export async function signOut(): Promise<boolean> {
     const result = await response.json();
     setProgressAccount(null);
     try { sessionStorage.removeItem(SESSION_CACHE); } catch { /* Optional browser cache. */ }
-    update({ user: null, sync: "idle", status: "ready", syncMessage: null, learnerStateReady: true });
+    update({ user: null, membership: { ...FREE_MEMBERSHIP }, sync: "idle", status: "ready", syncMessage: null, learnerStateReady: true });
     try { localStorage.setItem(AUTH_EVENT, String(Date.now())); } catch { /* storage may be blocked */ }
     if (typeof result.redirect === "string" && result.redirect.startsWith("https://")) window.location.assign(result.redirect);
     return true;
@@ -143,8 +162,9 @@ export async function signOut(): Promise<boolean> {
 
 export function startAccountSync() {
   stopped = false;
-  // A verified identity cached in this tab can restore offline work after a
-  // reload. It grants no authority: uploads wait for a fresh session response.
+  discardLegacyGuestLearning();
+  // The optional identity hint preserves account presentation, not learning
+  // records. Saved work loads only after a fresh authenticated session.
   if (state.status === "checking" && !state.user) try {
     const previous = JSON.parse(sessionStorage.getItem(SESSION_CACHE) ?? "null") as AccountUser | null;
     if (previous && typeof previous.id === "string" && typeof previous.name === "string") {

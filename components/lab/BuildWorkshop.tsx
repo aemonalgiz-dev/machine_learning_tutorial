@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type PointerEvent, type ReactNode } from "react";
-import { useLearnerField, useLearnerRecord, migrateLearnerRecord } from "@/lib/learner-state";
+import { useLearnerField, useLearnerHydrated, useLearnerRecord } from "@/lib/learner-state";
 import { useProgressAccount } from "@/lib/progress";
 import { BotieSays } from "@/components/site/Botie";
 import { TOOLS } from "@/lib/builds/tools";
@@ -9,6 +9,7 @@ import { assemble, evaluate, previewConstruction, expressionTools, plug, same, t
 import { wirePath, looseWire, outputPoint, inputPoint, NODE_WIDTH, type NodeGeometry, type Point } from "@/lib/builds/wires";
 import { arrangeConstruction, estimatedHeight } from "@/lib/builds/layout";
 import styles from "./BuildWorkshop.module.css";
+import { caseLabel } from "@/lib/builds/case-labels";
 import { WorkshopValue } from "./WorkshopValue";
 import { MatrixVectorCalculation } from "./MatrixVectorCalculation";
 import { WorkshopPiece } from "./WorkshopPiece";
@@ -73,7 +74,7 @@ export function BuildWorkshop(props: BuildWorkshopProps) {
 
 function Workshop({build, guide=false, compact=false, embeddedBrief=false, initialGraph, initialSupported=false, initialCaseIndex=0, recordId, allowSolution=true, sessionHistory=false, briefing, openingCoach, continuation=false, reusable, onReuse, onAssistance, onOutcome, onActivity, onFreshAttempt, withholdExpectedUntilTest=false}: BuildWorkshopProps) {
   const account = useProgressAccount();
-  const storageKey=`fitlab-construction-v1:${build.id}${build.draftVersion?`:revision-${build.draftVersion}`:""}`;
+  const hydrated = useLearnerHydrated();
   const key = workshopRecordKey(build, recordId);
   const initial = () => ({graph:validGraph(initialGraph)?clone(initialGraph):empty(compact), attemptId: `${key}:legacy`, undo:[] as Construction[], redo:[] as Construction[], caseIndex:Math.max(0, Math.min(build.cases.length - 1, initialCaseIndex)),
     results:{} as Record<number,boolean>, tested:{} as Record<number,Trace>, customData:null as Record<string,Data>|null,
@@ -98,8 +99,9 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
   const carriedSupport = Boolean(saved.value.carriedSupport || (usesSeed && seed.supported));
   const saveDraft = saved.set;
   useEffect(() => {
+    if (account && !hydrated) return;
     if (usesSeed) saveDraft(previous => previous === seed.draft ? { ...previous, carriedSupport: seed.supported } : previous);
-  }, [usesSeed, seed, saveDraft]);
+  }, [usesSeed, seed, saveDraft, account, hydrated]);
   const [graph,setGraph]=useLearnerField(saved, "graph");
   const savedUndo=useLearnerField(saved, "undo");
   const savedRedo=useLearnerField(saved, "redo");
@@ -282,15 +284,6 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
   },[graph.pieces,zoom]);
 
   useEffect(() => {
-    if (account || recordId) return;
-    try {
-      const graph = JSON.parse(localStorage.getItem(storageKey) ?? "null");
-      if (validGraph(graph)) migrateLearnerRecord(key, {...initial(), graph}, null);
-    } catch { /* Legacy browser drafts are optional. */ }
-    // This migration only seeds a missing guest record. Account data is separate.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storageKey, key, account, recordId]);
-  useEffect(() => {
     nextId.current = Math.max(nextId.current, 0, ...graph.pieces.map(piece => Number(piece.id.replace("piece-", "")) || 0));
   }, [graph]);
 
@@ -451,7 +444,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
   const hints=constructionHints(build);
   const failedRunIndex=run?.done&&!run.experiment?run.traces.findIndex((candidate,i)=>i<=run.index&&!candidate.error&&!same(candidate.output,build.cases[run.cases[i]].expected)):-1;
   const feedback=run?.done&&failedRunIndex!==undefined&&failedRunIndex>=0?resultFeedback(build,graph,run.traces[failedRunIndex],run.cases[failedRunIndex]):undefined;
-  const mismatch=feedback&&run&&failedRunIndex!==undefined?`Example: ${build.cases[run.cases[failedRunIndex]].name}. ${feedback}`:undefined;
+  const mismatch=feedback&&run&&failedRunIndex!==undefined?`Example: ${caseLabel(build, build.cases[run.cases[failedRunIndex]])}. ${feedback}`:undefined;
   const inspectedIssue=selectedPiece?preview.issues.get(selectedPiece.id):undefined;
   const coach=trace?.error?.message||(customData?"What do you expect to happen when this input changes? Try it, then follow the values through the pieces. These are your own inputs; Test all examples still checks the lesson's original data.":complete?build.why:mismatch|| (guide?tutorialTip():notice||(socket?"Which operation needs this value next? Choose its input socket.":openingCoach??"The floor is yours. Start by deciding which information the answer depends on, then choose the operations needed to turn it into that answer.")));
   const hasFeedback=Boolean(guide||trace?.error||customData||complete||mismatch||notice||socket);
@@ -502,7 +495,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
         {toolsOpen&&<aside className={styles.shelf} aria-label="Construction toolbox"><h4 className="mb-2 text-sm font-semibold">Choose a tool</h4><p className="mb-3 text-xs leading-5 text-muted">Click to add, or drag to any spot.</p><input className={styles.toolSearch} type="search" aria-label="Find a workshop tool" placeholder="Find a tool…" value={toolQuery} onChange={e=>setToolQuery(e.target.value)}/>{[true,false].map(source=><div key={String(source)}><h5 className={styles.shelfHeading}>{source?"Data for this problem":"Operations"}</h5>{filteredChoices.filter(key=>key.startsWith("source:")===source).map(key=><button key={key} draggable={!busy} disabled={busy} title={source?"Brings this example's data onto the floor.":TOOLS[key].why} onDragStart={()=>setPlacing(key)} onDragEnd={()=>setPlacing(null)} onClick={()=>add(key)} className={`${styles.tool} ${source?styles.sourceTool:""}`}><span aria-hidden="true">{source?"▣":"+"}</span>{source?build.sources[key.slice(7)]:TOOLS[key].title}</button>)}</div>)}{!filteredChoices.length&&<p className="text-xs text-muted">No matching tools. Try another word.</p>}</aside>}
         <div ref={viewport} className={styles.viewport} aria-label="Construction floor" tabIndex={0}>
           <div style={{width:width*zoom,height:height*zoom,overflow:"hidden"}}><div ref={floor} data-testid="construction-floor" className={styles.floor} style={{width,height,transform:`scale(${zoom})`,transformOrigin:"top left"}} onPointerDown={e=>{if(e.button===0&&e.target===e.currentTarget&&!socket&&viewport.current){panning.current={x:e.clientX,y:e.clientY,left:viewport.current.scrollLeft,top:viewport.current.scrollTop};e.currentTarget.setPointerCapture(e.pointerId);}}} onPointerMove={movePointer} onPointerUp={finishPointer} onPointerCancel={()=>{panning.current=null;moving.current=null;setDragged(null);cancelWire();}} onClick={e=>{if(e.target===e.currentTarget||(e.target as Element).tagName==="svg"){cancelWire();setSelected(null);setSelectedWire(null);viewport.current?.focus({preventScroll:true});}}} onDragOver={e=>{if(placing)e.preventDefault();}} onDrop={e=>{e.preventDefault();if(placing){const p=coordinates(e);add(placing,Math.max(32,p.x-NODE_WIDTH/2),Math.max(50,p.y-50));}}}>
-            <p className={styles.floorHint}>{graph.pieces.length===1?"An empty floor. Start with the information your machine needs.":`${customData?"Your experiment":sample.name} · drag empty space to move around`}</p>
+            <p className={styles.floorHint}>{graph.pieces.length===1?"An empty floor. Start with the information your machine needs.":`${customData?"Your experiment":caseLabel(build, sample)} · drag empty space to move around`}</p>
             <svg className={styles.wires} width={width} height={height} aria-label="Your connections">
               {graph.connections.map((w,i)=>{
                 const a=graph.pieces.find(p=>p.id===w.from)!,b=graph.pieces.find(p=>p.id===w.to)!,d=paths[i];
@@ -547,7 +540,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
       <summary>{compact?"Examples, experiments and workspace controls":"Workspace controls"}</summary>
       <div className={styles.liveBar}>
         <span className={styles.modeLabel}>{customData?"Your experiment":run&&!run.done?"Following a signal":run?"Test result":"Live values"}</span>
-        <label>Example <select aria-label="Active workshop example" disabled={busy} value={caseIndex} onChange={e=>{resetExperiment();setCaseIndex(Number(e.target.value));}}>{build.cases.map((item,i)=><option key={i} value={i}>{item.name}</option>)}</select></label>
+        <label>Example <select aria-label="Active workshop example" disabled={busy} value={caseIndex} onChange={e=>{resetExperiment();setCaseIndex(Number(e.target.value));}}>{build.cases.map((item,i)=><option key={i} value={i}>{caseLabel(build, item)}</option>)}</select></label>
         <p>{run?"Return to live values to see changes as you build.":"Connect a tool's inputs to see what it produces. You can try a branch before connecting it to Result."}</p>
       </div>
       <details className={styles.experiment}>
@@ -571,7 +564,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{build.cases.map((sample,i)=><div key={sample.name}
         className={styles.exampleResult} data-testid="workshop-example-result"
         data-result={checkedResults[i]===undefined?"pending":checkedResults[i]?"pass":"fail"}>
-        <button disabled={busy} aria-pressed={(run?.cases[run.index]??caseIndex)===i} aria-label={sample.name} className={styles.exampleResultButton}
+        <button disabled={busy} aria-pressed={(run?.cases[run.index]??caseIndex)===i} aria-label={caseLabel(build, sample)} className={styles.exampleResultButton}
           onClick={()=>{
             resetExperiment();setCaseIndex(i);
             const result=tested[i];
@@ -580,7 +573,7 @@ function Workshop({build, guide=false, compact=false, embeddedBrief=false, initi
               if(result.error){setSelected(result.error.id);focusPiece(result.error.id);}
             }
           }}>
-          <span>{sample.name}</span><WorkshopTestBadge result={checkedResults[i]}/>
+          <span>{caseLabel(build, sample)}</span><WorkshopTestBadge result={checkedResults[i]}/>
           {(run?.cases[run.index]??caseIndex)===i&&<span className="text-xs font-normal text-muted">Shown on the floor</span>}
         </button>
         <dl className="mt-3 space-y-2 text-xs">

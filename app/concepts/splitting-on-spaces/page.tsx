@@ -837,7 +837,11 @@ export default function SplittingOnSpacesPage() {
           practice: [
             exercise(
               "Cut the sentence about Dr. Alvarez and read the spans",
-              ["Put the sentence Part 1 carries to the library’s whitespace rule, print each piece beside the half-open span it came from, and then add the spans up to find how much of the sentence the pieces hold.", "Part 1 arrived at seven pieces and Part 2 at 45 of the 51 characters inside a piece. Both should come straight out of the spans, and the share kept, to one decimal place, should be the 88.2 per cent the page quotes."],
+              [
+  "Split the supplied Dr. Alvarez sentence with WhitespacePreTokenizer. Print every piece beside its zero-based, half-open start/end span.",
+  "Print the piece count, total source characters covered by the spans out of the sentence length, and covered percentage to one decimal place.",
+  "A span covers one non-whitespace run. This measurement tells us which source positions reached a piece; it does not decide whether attached punctuation is a useful part of a token."
+],
               `from oop_ml import WhitespacePreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -870,11 +874,20 @@ print(f"share kept {100 * covered / len(sentence):.1f} per cent")`,
 7 pieces
 45 of 51 characters inside a piece
 share kept 88.2 per cent`,
-              { hints: ["The rule takes no settings, so it is constructed with nothing and the text goes to split, which answers a collection of words.", "Iterating over that collection gives one word at a time, and each word carries text, start and end. The collection itself knows n_words.", "The span is half-open, so the length of a piece is end minus start with no correction, and summing those lengths is the count of characters inside a piece."], check: numberCheck("What share of the sentence’s characters do the pieces hold, in per cent to one place?", 88.2, 0.05, "The seven spans add up to 45 characters of the 51, and 45 over 51 is 88.2 per cent. The six characters outside every piece are the six spaces, which is true of any text under this rule, since the gaps between the runs are made of exactly the characters the runs exclude.") },
+              {
+question: "What do the spans reveal about what whitespace splitting keeps?",
+ hints: [
+  "split returns iterable pieces with text, start and end.",
+  "The length of a half-open span is end - start. Add those lengths before taking the percentage."
+], check: numberCheck("What share of the sentence’s characters do the pieces hold, in per cent to one place?", 88.2, 0.05, "The pieces cover 88.2 percent of this sentence. The uncovered positions are the spaces between its seven non-whitespace runs.") },
             ),
             exercise(
               "Put ten characters between two letters",
-              ["Section 4 put ten characters between the letters a and b one at a time and counted the pieces that came back. Do the same, building each character from its code point so that the invisible ones are written down unambiguously, and count how many of the ten end a word.", "Seven should end a word and three should not. Watch which three, since one of them has the word space in its name and another exists only to offer a line break."],
+              [
+  "For each of the ten supplied code points, build a probe containing a, that character and b. Split it with WhitespacePreTokenizer.",
+  "Print the code point in four-digit uppercase hexadecimal, its supplied label and the piece count. Finish with the number of probes split into more than one piece.",
+  "Build invisible characters with chr(code). Their names alone do not determine whether Python’s whitespace test recognises them."
+],
               `from oop_ml import WhitespacePreTokenizer
 
 candidates = {
@@ -926,11 +939,20 @@ U+200B  zero width space        1
 U+00AD  soft hyphen             1
 U+002D  hyphen-minus            1
 7 of 10 end a word`,
-              { hints: ["chr turns a code point into the character itself, so the probe text for each row is the letter a, chr of the code, and the letter b.", "A character ends a word exactly when the probe comes back as two pieces rather than one, so the test is whether n_words is greater than one.", "Format the code point with a width of four in upper-case hexadecimal, which is how a character table writes it, and the rows will line up."], check: numberCheck("How many of the ten characters end a word?", 7, 0.0, "Seven of the ten are white space by the test the rule applies and three are not. The hyphen is expected there, since it is visibly a mark, and the zero width space and the soft hyphen are the surprise, because the rule asks whether a character is white space and never what it is called or what it is for.") },
+              {
+question: "Does every character called a space separate this tokenizer’s pieces?",
+ hints: [
+  "Construct one three-character probe per code point.",
+  "n_words > 1 detects separation here. Keep the code-point label beside each result so invisible separators are not confused."
+], check: numberCheck("How many of the ten characters end a word?", 7, 0.0, "Seven of the ten separate the letters. The zero width space and soft hyphen remain within a run under this whitespace rule, despite what their names might suggest.") },
             ),
             exercise(
               "Glue the pieces with spaces, then rebuild them from the spans",
-              ["Take the sentence about Dr. Alvarez with one doubled space and one line break, which is the second text of section 7. Cut it, glue the pieces back with a single space between each pair, and compare the result with the text that went in. Then put each piece back at its own offsets, taking the source between one piece and the next, and compare again.", "The pieces should be the same seven as the singly spaced sentence gives, the glue should fail and the spans should succeed. Count how many of the six gaps between the pieces are a single space, which is the number of places where the guess happens to be right."],
+              [
+  "Split the supplied respaced Dr. Alvarez sentence. Reconstruct it once by joining token spellings with one space and once by placing pieces back with the original source gaps identified by their spans.",
+  "Print the piece count, whether the simple join is exact, how many inter-piece gaps are exactly one ordinary space, and whether the span-and-source reconstruction is exact.",
+  "The second procedure still has the original source available. Spans locate its gaps but do not themselves store what characters those gaps contained."
+],
               `from oop_ml import WhitespacePreTokenizer
 
 text = "Dr.  Alvarez didn't expect\\nthe low-cost re-analysis."
@@ -966,11 +988,21 @@ print(f"rebuilt from the spans, exact: {rebuilt == text}")`,
 glued with one space each, exact: False
 gaps that are one space: 4 of 6
 rebuilt from the spans, exact: True`,
-              { hints: ["The collection of words has a texts property holding the strings alone, which is exactly what something holding the pieces without their spans would have, so the glue is one join over it.", "The gap between two neighbouring pieces is the slice of the text from the first one’s end to the next one’s start, and zip over the pieces and the pieces shifted by one pairs each with its neighbour.", "To rebuild, walk the pieces keeping the offset where the last one ended, and append the source between that offset and the next start before appending the piece. Whatever follows the last piece goes on at the end."], check: numberCheck("How many of the six gaps between the pieces are a single space?", 4, 0.0, "Four of the six are a single space, so the guess is right in four places and wrong at the doubled space and the line break, and the glued text is the singly spaced sentence rather than the one that went in. The seven pieces are identical to the ones the singly spaced sentence gives, so nothing a model reads could tell the two texts apart, and only the spans, which still say where each piece stood, give the second text back.") },
+              {
+question: "Are token spellings alone enough to restore doubled spaces and line breaks?",
+ hints: [
+  "The simple reconstruction is \" \".join(words.texts).",
+  "Between adjacent pieces, the original gap is source[left.end:right.start]. Compare that string with \" \".",
+  "For the second reconstruction retain source text before, between and after pieces using their offsets, rather than guessing a separator."
+], check: numberCheck("How many of the six gaps between the pieces are a single space?", 4, 0.0, "Four gaps are ordinary single spaces. The other two explain the failed simple join. Exact reconstruction here relies on reading the original gaps from the retained source.") },
             ),
             exercise(
               "Count the table over the six sentences",
-              ["Section 12 read six sentences under this rule and under the Unicode word boundary rules and found that both arrive at 47 entries. Build the same corpus, count the entries and the pieces each rule produces, and count how many entries the two rules hold in common.", "Then look up one word the page talks about. Section 8 says a word that turns up bare in one place and wearing a mark in another has two rows, each learned from half the occurrences it should have had. Count how many times analysis is an entry under each rule, which the page does not print."],
+              [
+  "Count the supplied six-sentence notebook with whitespace splitting and Unicode word-boundary splitting. Print distinct entries and total pieces for both, then their shared distinct-entry count.",
+  "Print the count of the exact entry analysis under each rule. The boundary rule can expose analysis inside a hyphenated compound, while whitespace splitting retains the compound spelling.",
+  "Keep entry counts distinct from a claim about word meaning. Splitting a compound is an operational convention, not proof that every component has the same use."
+],
               `from oop_ml import Corpus, UnicodeWordPreTokenizer, WhitespacePreTokenizer
 
 notebook = [
@@ -1015,7 +1047,12 @@ on word boundaries: 47 entries, 69 pieces
 entries held by both rules: 35
 analysis on spaces: counted 2 times
 analysis on word boundaries: counted 4 times`,
-              { hints: ["Corpus.of takes the list of sentences, and word_counts takes the rule and answers one count per distinct entry, each carrying word and count.", "The sum of the counts is the number of pieces the six sentences produced in all, and the number of counts is the number of distinct entries.", "Turning each rule’s counts into a dictionary from word to count makes the shared entries the intersection of the two key sets, and a word’s count a lookup."], check: numberCheck("How many times is analysis counted as an entry under the word boundary rules?", 4, 0.0, "The six sentences use the word four times, twice bare and twice inside re-analysis. The boundary rules split the hyphenated compound, so all four reach one entry, while this rule counts two for the bare word and keeps the other two apart as re-analysis and re-analysis., the one entry section 12 names as a word the list already holds wearing a full stop. That is section 8’s two rows, each learned from a share of the occurrences the word actually had.") },
+              {
+question: "How can two equal-sized vocabularies count a word differently?",
+ hints: [
+  "Convert each word_counts result into a word-to-count mapping.",
+  "Intersect the key sets to count shared spellings, then look up analysis in each mapping."
+], check: numberCheck("How many times is analysis counted as an entry under the word boundary rules?", 4, 0.0, "The boundary rule counts analysis four times in this notebook. Its cuts expose the component inside the two re-analysis occurrences, which whitespace splitting keeps in compound entries.") },
             ),
           ],
         },

@@ -13,7 +13,8 @@ function WorkshopEntry({ lesson }: { lesson: WorkshopLink }) {
   const useCurrent = Boolean(progress.built || progress.transferred || !existing);
   const label = useCurrent ? status?.label : existing;
   return <li><Link href={lesson.href} className="group flex min-h-20 items-center justify-between gap-4 px-5 py-4 hover:bg-accent-soft">
-    <span className="min-w-0">
+    <span className="milestone-seal" aria-hidden="true" style={{ color: progress.built ? "var(--success)" : undefined, borderColor: progress.built ? "var(--success)" : undefined }}>{progress.built ? "✓" : "◇"}</span>
+    <span className="min-w-0 flex-1">
       <span className="block font-semibold group-hover:text-accent">{lesson.mission}</span>
       <span className="mt-1 block text-sm text-muted">{lesson.title}</span>
       {label && <span className="mt-2 inline-block rounded-md border border-line bg-raised px-2 py-1 text-xs text-muted" title={useCurrent ? status?.detail : undefined}>{label}</span>}

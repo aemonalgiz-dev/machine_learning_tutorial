@@ -100,17 +100,7 @@ export default function NormalisationLayersPage() {
               </SubSection>
 
               <SubSection title="2. What standardising once before the model cannot fix">
-                <p>
-                  The feature scaling page put height and weight on a common
-                  footing once, before the model saw them, and the crowd network
-                  here reads them that way. That settles the block the first
-                  layer reads and nothing after it. The block the output layer
-                  reads is produced by weights that change, so there is no
-                  one-off standardisation of it to make, and the only place a
-                  standardising step can go is inside the model, between the
-                  two layers, recomputed on every pass from whatever is flowing
-                  through at that moment.
-                </p>
+                <p>The feature-scaling lesson standardised the measured inputs before they entered the model. That fixes the reference for the first layer, but a later layer reads activations produced by weights that keep changing. Here we insert a normalisation step between layers. During batch-normalisation training, it measures the current batch, meaning the examples processed together on this pass. During prediction it uses saved statistics instead. We will keep those two behaviours separate.</p>
                 <>
 <p>
                   Switch the chart above to the batch layer and the sixteen lines start at exactly zero and one, because that is what standardising does to them. What happens afterwards is the claim this page has to be plain about. The block the output layer reads still moves, and by more. The largest mean shift over training is 1.3204 against the plain network&rsquo;s 1.0897, and the largest single-epoch move is 0.3113 against 0.1375.
@@ -416,6 +406,10 @@ export default function NormalisationLayersPage() {
               "On the crowd network the batch layer held the block the output layer reads steadier than the plain network did.",
               false,
               "It moved further. The largest mean shift over training is 1.3204 against the plain network’s 1.0897, and the largest single-epoch move 0.3113 against 0.1375. What the layer did do is make the location and the spread two explicit parameters per unit that the gradient moves on purpose, rather than a by-product of sixteen weight vectors being adjusted for other reasons.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Movement of the block read by the output layer:\n                         plain network  batch-normalised\nlargest mean shift       1.0897         1.3204\nlargest epoch-to-epoch move 0.1375       0.3113\nLower movement would mean steadier by these measures."
+              },
             ),
             choice(
               "The second unit’s four readings are 7, 9, 1 and 7, and the playground prints a deviation of 3.0000017 rather than 3. Why?",
@@ -447,13 +441,16 @@ export default function NormalisationLayersPage() {
             several(
               "Which of these hold for the running figures?",
               [
-                "They begin at zero and one, which is why predicting through a fresh layer is close to an identity",
-                "They move when the layer is stepped rather than when it answers",
-                "After one step on the worked batch the second column’s running mean is 0.6 and its running variance 1.8",
-                "On the worked batch they need 53 steps to bring the predicting answer within a hundredth of the training one",
-              ],
+                              "They begin at zero and one, which is why predicting through a fresh layer is close to an identity",
+                              "They move when the layer is stepped rather than when it answers",
+                              "After one step on the worked batch the second column’s running mean is 0.6 and its running variance 1.8",
+                              "On the worked batch they need 53 steps to bring the predicting answer within a hundredth of the training one",
+                            ],
               [0, 1, 2, 3],
               "All four hold. One step moves the pair a tenth of the way from 0 and 1 toward the batch’s 6 and 9, so the 7 that answered 0.3333 while training answers 4.7703 while predicting, and only more steps bring the two together. A larger batch makes each step’s figures a better estimate and does nothing to the number of steps the average needs. A forward pass never followed by a step contributes nothing to them at all.",
+              {
+                "description": "This SDK starts running mean at 0 and running variance at 1. A training forward pass saves batch statistics; the following step updates each running statistic as 0.9 × old + 0.1 × batch.\n\nWorked column: 7, 9, 1, 7; batch mean 6; biased variance 9.\nScale = 1; shift = 0; ε = 0.00001.\nRepeated steps on this same batch first put the largest predicting/training difference below 0.01 at step 53."
+              },
             ),
         ],
         },
@@ -1012,18 +1009,22 @@ export default function NormalisationLayersPage() {
             several(
               "Which of these did the measurement on the crowd network find?",
               [
-                "The batch layer held out at 0.640 against the plain network’s 0.744, with every seed below the plain mean",
-                "Weight normalisation finished 0.008 above the plain network on held-out accuracy, which is inside what the seeds move by",
-                "The two row layers crossed a loss of 0.3 at epoch 16 against the plain network’s 77",
-                "The three activation normalisers all trained to a higher accuracy than the plain network",
-              ],
+                              "The batch layer held out at 0.640 against the plain network’s 0.744, with every seed below the plain mean",
+                              "Weight normalisation finished 0.008 above the plain network on held-out accuracy, which is inside what the seeds move by",
+                              "The two row layers crossed a loss of 0.3 at epoch 16 against the plain network’s 77",
+                              "The three activation normalisers all trained to a higher accuracy than the plain network",
+                            ],
               [0, 1, 2],
               "The three activation normalisers all trained to a lower accuracy and a higher loss at the same stride. A held-out score on twenty-five people moves by 0.04 per person, so the spread across seeds rather than any single number is the ruler the comparison is measured with.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "arrangement | training accuracy | held out | held out across seeds | training loss at the end\nno normalisation | 0.992 | 0.744 | 0.64 to 0.84 | 0.0829\nbatch layer | 0.904 | 0.640 | 0.60 to 0.68 | 0.2088\nlayer normalisation | 0.910 | 0.696 | 0.64 to 0.76 | 0.1604\nRMS normalisation | 0.870 | 0.720 | 0.64 to 0.80 | 0.2392\nweight normalisation | 0.986 | 0.752 | 0.68 to 0.80 | 0.0775\n\nSeed-0 epoch when training loss first falls below 0.3:\nplain: 77; layer normalisation: 16; RMS normalisation: 16."
+              },
             ),
             trueFalse(
-              "During training, the batch layer asked by its running figures and asked by the batch’s own statistics disagreed about the accuracy on 88 of the 400 epochs.",
+              "The same batch-normalisation layer can give different predictions using the current batch statistics and using its running statistics.",
               true,
-              "At epoch 10 the layer answers 0.76 one way and 0.72 the other. That is the lag of Part 3 seen from inside a training loop, since the running figures move only a tenth of the way toward each batch per step, and it is why a loss curve read while training is not quite the curve the deployed model would report.",
+              "Training uses statistics from the current batch. Prediction uses a moving estimate gathered over earlier updates. Those estimates can lag or differ from the current batch, so the two modes need not produce identical predictions. The experiment observes that difference during training.",
             ),
         ],
         },
@@ -1087,7 +1088,10 @@ export default function NormalisationLayersPage() {
           practice: [
             exercise(
               "Standardise the four, then undo it",
-              ["The block is the whole-number four of Part 2, two hidden units read for four people. Send it through a fresh BatchNormalization layer while training and print the mean and the deviation the layer read down each column and the standardised block. Step 3 gives means of 8 and 6 and the second column as 0.3333, 1.0000, −1.6667 and 0.3333.", "Print the two deviations to seven places. Step 4 gives the second as 3.0000017 and says only that the first is 9. Then build a second layer whose scale is the first layer’s deviation and whose shift is its mean, send the block through, and print what comes back and its largest gap to the raw block, which step 5 gives as 8.9e−16."],
+              [
+  "Send the supplied four-observation, two-feature block through a fresh BatchNormalization layer in training mode. Print batch means, epsilon-adjusted deviations to seven decimals and standardised outputs.",
+  "Build a second layer with scale equal to those deviations and shift equal to those means. Apply it in training mode to the same block; print reconstruction and largest absolute difference from the original."
+],
               `import numpy as np
 from oop_ml import BatchNormalization, PassPurpose
 
@@ -1121,11 +1125,17 @@ deviation 9.0000006 and 3.0000017
 standardised [[-0.7778, 0.3333], [-0.7778, 1.0], [-0.1111, -1.6667], [1.6667, 0.3333]]
 with the scale and shift set to undo it [[1.0, 7.0], [1.0, 9.0], [7.0, 1.0], [23.0, 7.0]]
 largest gap to the raw block 8.9e-16`,
-              { hints: ["respond_to takes the block and the purpose of the pass. A batch layer standardises by the batch only under PassPurpose.TRAINING, and left out the purpose is predicting, which reads the running figures instead.", "A training response from this layer carries more than an ordinary one, batch_mean and deviation, one entry per feature, with the epsilon already inside the deviation.", "The scale and the shift are constructor arguments, one number per feature, and they default to one and zero. Handing the deviation in as the scale and the mean as the shift is the γ = √(v + ε), β = m of step 5."], check: numberCheck("What deviation does the layer read down the first column, to seven places?", 9.0000006, 6e-08, "The first column holds 1, 1, 7 and 23, whose mean is 8 and whose squared deviations 49, 49, 1 and 225 total 324, a biased variance of 81. The layer takes the root of 81 + 0.00001, which is 9.0000006. The same epsilon moved the second column’s deviation by three times as much, to 3.0000017, because 0.00001 is a larger share of a variance of 9 than of 81.") },
+              { hints: [
+  "Batch statistics combine observations down each feature column.",
+  "The denominator includes epsilon, so use the actual response deviation rather than a rounded display value when setting the inverse scale."
+], check: numberCheck("What deviation does the layer read down the first column, to seven places?", 9.0000006, 6e-08, "The first deviation is about 9.0000006. Epsilon is included before the square root, so it differs slightly from the raw standard deviation."), question: "Can learned scale and shift undo a batch’s standardisation?" },
             ),
             exercise(
               "Step the running figures a hundred times",
-              ["Step 8 says the running figures move a tenth of the way toward the batch each time the layer is stepped, and step 9 says they move at the step and not at the forward pass. Take one training pass over the four, ask the layer for its backward step with a block of zeros arriving, and step it. Print the running mean and running variance, and what the first row answers while predicting. Step 8 gives 0.6 and 1.8 for the second column and 4.7703 for the 7. It does not give the first column.", "Keep going for a hundred steps of the same batch, recording after each the widest gap between the predicting answers and the training answers of the fresh layer. Print the gap after 1, 10 and 100 steps and the first step at which it is under a hundredth, which step 8 gives as 5.7333, 1.0433, 6.5e−05 and step 53."],
+              [
+  "Use the supplied batch and repeated training/update loop. After one update print running means/variances and the first row’s predicting output.",
+  "Continue through one hundred steps. Compare prediction outputs with the fresh training-mode reference, reporting maximum gaps after one, ten and one hundred steps and the first step below 0.01."
+],
               `import numpy as np
 from oop_ml import BatchNormalization, PassPurpose
 
@@ -1168,11 +1178,17 @@ print(f"first under a hundredth at step {next(step for step, gap in enumerate(ga
 the first row while predicting [0.0667, 4.7703]
 widest gap after 1 step 5.7333, after 10 1.0433, after 100 6.5e-05
 first under a hundredth at step 53`,
-              { hints: ["correction_for takes the layer’s own training response and the block of slopes arriving at its outputs. Its gradient carries the batch’s mean and variance beside the slopes for the scale and the shift, which is how the running figures reach the step without the forward pass changing anything.", "stepped_by takes that gradient and a learning rate and answers a new layer. With zeros arriving, the scale and shift slopes are zero, so the rate moves neither of them and the step only folds the batch a tenth of the way into the running figures.", "A layer exposes running_mean and running_variance, one entry per feature. respond_to with no purpose is a predicting pass, which standardises by those and not by the block in front of it."], check: numberCheck("What is the first column’s running variance after one step?", 9.0, 5e-05, "The running variance starts at 1 and the first column’s batch variance is 81, so one step gives 0.9 × 1 + 0.1 × 81 = 9, beside a running mean of 0.9 × 0 + 0.1 × 8 = 0.8. After one step the layer predicts as though that column had a deviation of 3 where the batch has 9, so the 23 that answered 1.6667 while training answers 7.4 while predicting. That one cell is the 5.7333 the widest gap starts at.") },
+              { hints: [
+  "In this library the running-state update occurs when the layer is stepped, not merely during its forward response.",
+  "Zero upstream derivatives isolate that running-state behaviour from learned scale/shift updates."
+], check: numberCheck("What is the first column’s running variance after one step?", 9.0, 5e-05, "The first running variance becomes 9.0. It is still moving from the initial stored state toward the batch statistic, so prediction and training outputs can differ."), question: "When do running statistics start resembling the repeated batch?" },
             ),
             exercise(
               "Three routes against a nudge",
-              ["Send the four through the batch layer while training and ask for its backward step under the slope Part 4 uses, counting up from one across the block. Print the block it passes down and that block’s column sums, then the naive block, the arriving slope over the deviation, and its column sums. Step 12 gives the true sums as zero and the naive ones as 1.7778 and 6.6667. Print the scale and shift slopes as well, which step 13 gives as 8.0 and −2.6667, and 16 and 20.", "Then check one cell without trusting either form. Nudge the first row’s first reading up and down by a hundred-thousandth, rerun the training pass each way, total the arriving slope times the outputs, and divide the difference by the width of the nudge. The lesson works the second column by hand and never prints this cell."],
+              [
+  "For the supplied four-by-two block, pass the stated increasing upstream derivatives backward through its training response. Print input derivatives and column sums, the naive upstream/deviation result and sums, and scale/shift gradients.",
+  "Independently perturb the first input cell up and down by 0.00001. Recompute the supplied scalar objective and compare its finite-difference derivative with the backward result and naive result."
+],
               `import numpy as np
 from oop_ml import BatchNormalization, PassPurpose
 
@@ -1216,11 +1232,17 @@ naive form [[0.1111, 0.6667], [0.3333, 1.3333], [0.5556, 2.0], [0.7778, 2.6667]]
 its column sums [1.7778, 6.6667]
 scale slopes [8.0, -2.6667], shift slopes [16.0, 20.0]
 first reading of the first row: passed down -0.1605, by nudging -0.1605, naive 0.1111`,
-              { hints: ["The correction carries passed_down, the slopes at the layer’s inputs, and gradient, whose weights hold the scale slopes, one row per feature, and whose biases hold the shift slopes.", "The naive form treats the mean and the deviation as constants, so it is the arriving slope times the scale over the deviation. The scale is one on a fresh layer, and the response carries the deviation.", "The objective being differenced is the arriving slope times the outputs, summed over the block. The nudged passes have to be training passes, or the layer standardises by its running figures and the three routes are not there to measure."], check: numberCheck("What slope does the layer pass down to the first reading of the first row, to four places?", -0.1605, 0.0005, "In the first column the arriving slopes are 1, 3, 5 and 7, which total 16, and the standardised values are −0.7778, −0.7778, −0.1111 and 1.6667, so the sum of slope times value is 8. The compact form gives (4 × 1 − 16 − (−0.7778) × 8) / (4 × 9), which is −0.1605, and the nudge agrees. The naive form reports 1 / 9 = 0.1111 for the same cell, the wrong sign, and those two sums, 16 and 8, are the shift slope and the scale slope the layer reports for that column.") },
+              { hints: [
+  "Changing one input also changes its column’s batch mean and variance.",
+  "Use fresh forward responses for both perturbations; keep the upstream coefficient block fixed for the scalar objective."
+], check: numberCheck("What slope does the layer pass down to the first reading of the first row, to four places?", -0.1605, 0.0005, "The full derivative is -0.1605 and agrees with the input perturbation. The naive division misses how changing one observation also changes its batch mean and variance."), question: "Why does the batch-normalisation derivative include other observations?" },
             ),
             exercise(
               "One row, three layers",
-              ["Step 6 says a row’s answer under the batch layer depends on its company, and Part 5 says a row layer’s does not. Send the first row, (1, 7), through a fresh batch layer three ways, among the four while training, alone while training, and alone while predicting. Steps 6 and 7 give −0.7778 and 0.3333, then zeros, then 0.999995 and 6.999965.", "Then send the four through LayerNormalization and through RMSNormalization, and the first row alone through each, and print whether the first row’s answer alone is the same as among the four. Step 14 gives ±0.9999994 for the first row and step 17 gives 0.2000 and 1.4000. Print the second row’s answers under RMS on a line of their own, which the lesson does not work."],
+              [
+  "Compare the first supplied row under BatchNormalization among all four observations, alone in training mode and alone in predicting mode. Keep the fresh-layer settings stated in the starter.",
+  "Apply LayerNormalization and RMSNormalization to all four and to the first row alone. Print complete outputs and equality checks, then RMS outputs for the second row separately."
+],
               `import numpy as np
 from oop_ml import BatchNormalization, LayerNormalization, PassPurpose, RMSNormalization
 
@@ -1259,7 +1281,10 @@ layer normalisation, the first row alone [-0.9999994, 0.9999994], the same as am
 RMS normalisation, the four rows [[0.2, 1.3999997], [0.1561737, 1.4055637], [1.3999997, 0.2], [1.3529412, 0.4117647]]
 RMS normalisation, the first row alone [0.2, 1.3999997], the same as among the four True
 RMS normalisation, the second row 0.1562 and 1.4056`,
-              { hints: ["All three layers are built from the number of features they read, n_features=2 here, and all three answer through respond_to with the block and, optionally, the purpose.", "Slicing with block[:1] keeps the first row as a block of one row, which is what a layer reads. Indexing with block[0] would hand over a flat row and be refused.", "The row layers reduce inside each row, so they do the same thing under either purpose and no purpose needs stating. np.array_equal compares two arrays exactly, to the last bit."], check: numberCheck("What does RMS normalisation answer for the larger entry of the second row, (1, 9), to four places?", 1.4056, 0.0005, "The mean of the squares is (1 + 81) / 2 = 41, and the root of 41 with the epsilon inside is about 6.4031, so the row answers 1 / 6.4031 = 0.1562 and 9 / 6.4031 = 1.4056. Under layer normalisation the same row is −1 and 1 to within the epsilon, exactly as the first row is, because a row of two only says which entry is larger. RMS keeps the proportions, so (1, 7) and (1, 9) stay apart as 1.4000 and 1.4056.") },
+              { hints: [
+  "Batch normalisation pools statistics across observations; layer and RMS forms here operate within each row.",
+  "RMS normalisation divides by a root-mean-square scale without subtracting the row mean."
+], check: numberCheck("What does RMS normalisation answer for the larger entry of the second row, (1, 9), to four places?", 1.4056, 0.0005, "The larger second-row RMS output is 1.4056. This rule retains the within-row ratio because it scales without first subtracting the mean."), question: "Which normalisation depends on the other observations in a batch?" },
             ),
           ],
         },

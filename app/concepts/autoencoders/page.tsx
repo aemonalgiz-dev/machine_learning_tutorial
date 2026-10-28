@@ -104,16 +104,19 @@ trueFalse(
   "Each pair averages to 1, so the code is 1 and the reconstruction is [1, 1] for all three. The decoder cannot tell which observation it came from. Only the error separates them, at 0 for the first, 1 for the second and 4 for the third, growing with the square of the offset from the shared average.",
 ),
 several(
-  "Take the five readings [0, 0], [1, 1], [2, 2], [3, 3] and [2, 0]. Which of these hold?",
-  [
-    "Keeping the average and copying it into both outputs scores a mean squared error of 0.2",
-    "Keeping sensor A alone and copying it into both outputs scores worse than averaging",
-    "The best one-number linear code brings the error on these readings to zero",
-    "Mean squared error is the only loss a reconstruction can be scored with",
-  ],
-  [0, 1],
-  "Averaging is wrong only on the fifth reading, by one in each output, which comes to 0.2, and keeping sensor A alone scores 0.4. The best one-number linear code reaches about 0.1858 and not zero, because five readings that do not lie on one line cannot all be rebuilt from one number. That best code is the line the readings lie closest to, which is the link to principal components. Squared error is one possible objective for real-valued inputs, and a binary or probabilistic observation model can call for another.",
-),
+              "Take the five readings [0, 0], [1, 1], [2, 2], [3, 3] and [2, 0]. Which of these hold?",
+              [
+                  "Keeping the average and copying it into both outputs scores a mean squared error of 0.2",
+                  "Keeping sensor A alone and copying it into both outputs scores worse than averaging",
+                  "The best one-number linear code brings the error on these readings to zero",
+                  "Mean squared error is the only loss a reconstruction can be scored with",
+                ],
+              [0, 1],
+              "Averaging is wrong only on the fifth reading, by one in each output, which comes to 0.2, and keeping sensor A alone scores 0.4. The best one-number linear code reaches about 0.1858 and not zero, because five readings that do not lie on one line cannot all be rebuilt from one number. That best code is the line the readings lie closest to, which is the link to principal components. Squared error is one possible objective for real-valued inputs, and a binary or probabilistic observation model can call for another.",
+              {
+                "description": "Sensor A is the first entry and sensor B the second. Compare a code that keeps their average with one that keeps A. Each decoder copies its one stored number into both reconstructed entries. Average squared error over all ten scalar entries, not just the five rows. The best linear code is restricted to one stored number per row."
+              },
+            ),
 ] },
 { title: "Part 3. Reconstruction Is Not Yet a Sampling Rule", content: <>
 <SubSection title="5. Reproduce the chosen transformation">
@@ -177,7 +180,11 @@ choice(
           practice: [
             exercise(
               "Move the offset and watch the code stay put",
-              ["Build the page’s autoencoder with LinearAutoencoder, an encoder that averages the two readings and a decoder that copies the code into both outputs. Pass it the live example’s input at offsets of 0, 0.5, 1, 1.5 and 2 from a shared average of 1, and print the input, the code, the reconstruction and the mean squared error each time.", "Part 2 tabulates four of these offsets. The row at 1.5 is not on the page, and the pattern in the error column says what it has to be before you run it."],
+              [
+  "Build the fixed LinearAutoencoder in the starter: the encoder averages two sensor readings, and the decoder copies that one-number code to both outputs.",
+  "Keep average 1 while moving the readings in opposite directions by offsets 0, 0.5, 1, 1.5 and 2. Print each input, code, reconstruction and mean squared error, then the error at offset 1.5 separately.",
+  "These weights are chosen by hand. The experiment isolates information lost by averaging rather than demonstrating a trained encoder."
+],
               `import numpy as np
 from oop_ml.numpy.modern import LinearAutoencoder
 
@@ -218,11 +225,18 @@ offset 1.0: input [2. 0.] code [1.] reconstruction [1. 1.] error 1.00
 offset 1.5: input [ 2.5 -0.5] code [1.] reconstruction [1. 1.] error 2.25
 offset 2.0: input [ 3. -1.] code [1.] reconstruction [1. 1.] error 4.00
 error at an offset of 1.5: 2.25`,
-              { hints: ["respond_to takes a block with one observation per row, so a single observation is still written with two pairs of brackets.", "The result holds code, reconstructed and mean_squared_error. The first two are blocks with one row per observation, so result.code[0] is the code for the only row."], check: numberCheck("What is the mean squared error at an offset of 1.5, to two places?", 2.25, 0.005, "The input is [2.5, −0.5], its average is 1, and the reconstruction is [1, 1], so both outputs are wrong by 1.5. Each squared error is 2.25 and so is their mean. The error is the square of the offset at every setting, which is why 0.5 gave 0.25 and 2 gave 4.") },
+              { hints: [
+  "The code can remain fixed while the two individual readings separate.",
+  "Compute error against both reconstructed coordinates using the same mean-squared convention as the starter."
+], check: numberCheck("What is the mean squared error at an offset of 1.5, to two places?", 2.25, 0.005, "The mean squared error is 2.25. The single average code cannot distinguish opposite sensor deviations that preserve that average."), question: "Which differences are lost when two sensor readings share one average?" },
             ),
             exercise(
               "Remove the bottleneck, then keep only what was lost",
-              ["Pass the observation [3, −1] through two wider autoencoders. In the first, the encoder and the decoder are both the two-by-two identity, so nothing is compressed. In the second, the encoder keeps the average and half the difference, and the decoder adds the second code entry to one output and subtracts it from the other. Print the code, the reconstruction and the error for each.", "Part 1 says a code as wide as the input can copy, and Part 2 says a second code entry repairs the reconstruction. Both should come back with an error of zero. Compare the two codes, because only one of them says anything about how the sensors relate."],
+              [
+  "Send the supplied observation [3, -1] through two fixed two-coordinate autoencoders: identity encoding/decoding, and encoding by average plus half-difference with its matching decoder.",
+  "Print each code, reconstruction and error. Finish with the half-difference value. Compare how the two codes represent the same reconstructable information.",
+  "Both codes are as wide as the input. Zero reconstruction error here does not show that either compressed the observation."
+],
               `import numpy as np
 from oop_ml.numpy.modern import LinearAutoencoder
 
@@ -265,11 +279,18 @@ print(f"half the difference between the readings: {splitting.respond_to(observat
               `copying: code [ 3. -1.] reconstruction [ 3. -1.] error 0.00
 average and half difference: code [1. 2.] reconstruction [ 3. -1.] error 0.00
 half the difference between the readings: 2.0`,
-              { hints: ["Both models are already built. The work is one call to respond_to each, exactly as with the one-number code.", "The second entry of the splitting code is result.code[0, 1], row zero and column one."], check: numberCheck("What is the second entry of the code that keeps the average and half the difference, for the observation [3, −1]?", 2.0, 0.05, "Half the difference between 3 and −1 is 2. The one-number code kept only the average, 1, so this 2 is exactly what the bottleneck discarded, and putting it back takes the error from 4 to zero. The copying code [3, −1] also scores zero, and it is only the observation again.") },
+              { hints: [
+  "The identity route simply copies both entries.",
+  "The second decoder adds and subtracts its second code entry around the stored average. Use the corresponding encoder and decoder together."
+], check: numberCheck("What is the second entry of the code that keeps the average and half the difference, for the observation [3, −1]?", 2.0, 0.05, "The second code entry is 2.0. Retaining the half-difference beside the average restores the information the narrower code discarded."), question: "What extra information lets a wider code reconstruct both readings?" },
             ),
             exercise(
               "Rank four codes on the five readings",
-              ["Part 2 scored three fixed one-number codes on five readings. Reproduce the three errors, then add a fourth code whose encoder and decoder both use a weight of 0.7555 on sensor A and 0.6552 on sensor B, which is the best one-number linear code for these readings to four places. Print the codes and the mean squared error for each.", "The first three errors should match the table. The fourth should land a little under averaging, as the lesson says. Look at its codes as well. They are not averages, and they do not need to be, because the decoder is scaled to match."],
+              [
+  "Compare the three supplied fixed encoders/decoders on the five two-sensor observations. Add the fourth pair using weights 0.7555 and 0.6552 in both encoder and decoder.",
+  "For each print the five codes and mean squared reconstruction error. Keep the full five-row input and the same error convention for every pair.",
+  "The fourth weights approximate the best origin-passing linear direction for these observations. A code need not be a numerical average if its decoder is designed to match it."
+],
               `import numpy as np
 from oop_ml.numpy.modern import LinearAutoencoder
 
@@ -311,11 +332,17 @@ sensor A, zero for B: codes 0.00, 1.00, 2.00, 3.00, 2.00
     error 1.4000
 leaning toward sensor A: codes 0.00, 1.41, 2.82, 4.23, 1.51
     error 0.1858`,
-              { hints: ["The encoder for a one-number code has two rows and one column, and the decoder has one row and two columns. The lists in the dictionary are already that shape once they are wrapped in np.array.", "respond_to accepts all five readings as one block. The error it reports is averaged over every number in the block, ten here.", "result.code has one row per reading and one column, so result.code[:, 0] is the five codes."], check: numberCheck("What mean squared error does the code leaning toward sensor A score, to four places?", 0.1858, 0.0005, "It is the lowest error any one-number linear code reaches on these five readings, a little under the 0.2 of plain averaging. The one reading that disagrees, [2, 0], has sensor A above sensor B, so the line the readings lie closest to tilts toward A. It cannot reach zero, because five readings that are not on one line cannot all be rebuilt from one number.") },
+              { hints: [
+  "Evaluate the encoder and its matching decoder as a pair, rather than comparing code magnitudes alone.",
+  "Average the squared reconstruction differences over the same observations and coordinates for every design."
+], check: numberCheck("What mean squared error does the code leaning toward sensor A score, to four places?", 0.1858, 0.0005, "The tilted encoder/decoder gives error about 0.1858. Its direction fits this particular five-row cloud slightly better than the fixed average-copy design."), question: "Which fixed one-coordinate code reconstructs these five readings best?" },
             ),
             exercise(
               "Hand it shapes that do not fit",
-              ["Make two mistakes on purpose and print what the library says about each. First build an autoencoder whose decoder writes three outputs when the encoder reads two. Then pass the page’s autoencoder a single observation as a flat array, without the outer pair of brackets.", "There is no number to check here. A decoder that does not return to the input width has no reconstruction error to report, since there is nothing to compare its output with. A flat array is ambiguous between one observation of two readings and two observations of one."],
+              [
+  "Inspect two deliberate shape errors. First construct an encoder reading two inputs with a decoder returning three outputs. Then send the valid two-input autoencoder a flat one-dimensional observation.",
+  "Catch the library’s errors and print each class name and message in that order. The decoder must return to the input width, and the input block must retain its explicit observation axis."
+],
               `import numpy as np
 from oop_ml import MLLibError
 from oop_ml.numpy.modern import LinearAutoencoder
@@ -347,7 +374,10 @@ except MLLibError as refusal:
 `,
               `ShapeMismatchError: decoder must return to the input width
 ShapeMismatchError: inputs must have 2 dimensions`,
-              { hints: ["Every refusal the library raises derives from MLLibError, so one except clause catches either. type(refusal).__name__ gives the specific kind.", "The first refusal comes from the constructor, before any data is involved. The second comes from respond_to."] },
+              { hints: [
+  "Reconstruction compares corresponding input and output coordinates, so their feature widths must agree.",
+  "A single two-feature observation still needs shape (1, 2). Catch the specified library error instead of suppressing every exception."
+], question: "Can the autoencoder reject a reconstruction with the wrong shape?" },
             ),
           ],
         },

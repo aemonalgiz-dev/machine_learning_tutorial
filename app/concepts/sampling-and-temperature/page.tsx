@@ -29,7 +29,7 @@ export default function Page() {
 { title: "Part 1. Distinguish Scores, Probabilities, and Choices", content: <>
 <SubSection title="1. A score is not a probability">
 <p>{"Before moving the controls, follow how a token is selected. The model first produces scores. We turn those scores into a probability distribution, then select one token from it. Temperature and filtering change the distribution used for selection. Keeping that sequence in view helps us see which part of the process a control actually affects."}</p>
-<p>{"A logit can be any finite real number. Softmax compares all vocabulary logits to produce nonnegative shares that total one. The absolute size of a score is less important than its difference from other scores."}</p>
+<p>{"A model might score sat above slept while giving another candidate a negative number. Those scores express a preference; they are not yet probabilities. A score at this stage is called a logit. Softmax is the conversion that makes the scores into nonnegative shares adding up to one. It responds to the gaps between scores, so increasing every score by the same amount changes none of those shares."}</p>
 <p>{"The live example holds four candidates and their scores fixed. The candidate sat has a logit of 2, slept has 1, ran has 0 and sang has −1. None of those is a probability. They do not total one, and one of them is negative. Softmax turns them into the shares in the last column."}</p>
 <NumberTable headings={["candidate", "logit", "probability"]} rows={[["sat", "2", "0.6439"], ["slept", "1", "0.2369"], ["ran", "0", "0.0871"], ["sang", "−1", "0.0321"]]} caption="The live table at a temperature of one with top-p at one. Part 2 shows the arithmetic." />
 <p>{"Only the gaps between the scores matter. Add 1,000 to every logit and the four probabilities come out the same, because each candidate is exactly as far from the others as before."}</p>
@@ -232,7 +232,7 @@ temperature 1.0: sat 0.6439  slept 0.2369  ran 0.0871  sang 0.0321
 temperature 2.0: sat 0.4551  slept 0.2760  ran 0.1674  sang 0.1015
 logits + 1000:   sat 0.6439  slept 0.2369  ran 0.0871  sang 0.0321
 sat at a temperature of 1: 0.6439`,
-              { hints: ["from_logits is called on the class, not on an instance. It takes the logits and then the temperature.", "The object it returns holds probabilities, one share per candidate in the order the logits were given.", "Adding 1000 to a numpy array adds it to every entry, so logits + 1000 is the shifted row of scores."], check: numberCheck("What probability does sat hold at a temperature of 1 after every logit is raised by 1,000, to four places?", 0.6439, 0.0005, "Softmax subtracts the largest logit before exponentiating, so the shifted scores are 0, −1, −2 and −3 whether the logits started at 2 or at 1,002. The weights and their sum are unchanged, and sat keeps the 0.6439 it has on the live table.") },
+              { hints: ["from_logits is called on the class, not on an instance. It takes the logits and then the temperature.", "The object it returns holds probabilities, one share per candidate in the order the logits were given.", "Adding 1000 to a numpy array adds it to every entry, so logits + 1000 is the shifted row of scores."], check: numberCheck("What probability does sat hold at a temperature of 1 after every logit is raised by 1,000, to four places?", 0.6439, 0.0005, "Softmax depends on score differences. Subtracting the row maximum removes the common offset before exponentiation, so the shifted row produces the same distribution while avoiding unnecessary overflow. Temperature can still change the differences by scaling them.") , question: "Does changing every score by the same amount change the token probabilities?" },
             ),
             exercise(
               "Hold top-p at 0.80 and move the temperature",
@@ -266,7 +266,7 @@ temperature 1.0: 2 retained, final [0.7311, 0.2689, 0.0000, 0.0000]
 temperature 2.0: 3 retained, final [0.5065, 0.3072, 0.1863, 0.0000]
 temperature 3.0: 3 retained, final [0.4484, 0.3213, 0.2302, 0.0000]
 sat at a temperature of 3: 0.4484`,
-              { hints: ["top_p is the third argument of from_logits. Temperature is applied before it, so the threshold is measured on the scaled distribution.", "retained is an array of booleans, one per candidate. Summing it counts the candidates that survived.", "The probabilities on the returned object are the final ones, already rescaled to total one over the retained candidates."], check: numberCheck("What final share does sat hold at a temperature of 3 with top-p at 0.80, to four places?", 0.4484, 0.0005, "At a temperature of 3 the four shares are 0.3849, 0.2758, 0.1976 and 0.1416. The first two total 0.6608, short of 0.80, and the third brings the running total to 0.8584, so three are retained. Dividing 0.3849 by 0.8584 gives sat 0.4484.") },
+              { hints: ["top_p is the third argument of from_logits. Temperature is applied before it, so the threshold is measured on the scaled distribution.", "retained is an array of booleans, one per candidate. Summing it counts the candidates that survived.", "The probabilities on the returned object are the final ones, already rescaled to total one over the retained candidates."], check: numberCheck("What final share does sat hold at a temperature of 3 with top-p at 0.80, to four places?", 0.4484, 0.0005, "Temperature is applied before the cumulative top-p selection. A flatter distribution may need more candidates to reach the same threshold. After selection, the retained probabilities are renormalised, so the printed final share differs from that token’s share before truncation.") , question: "How many candidates survive the same top-p threshold as temperature changes?" },
             ),
             exercise(
               "Draw ten thousand times from a filtered policy",
@@ -306,7 +306,7 @@ slept: drawn 2237 times, share predicts 2227
 ran: drawn 0 times, share predicts 0
 sang: drawn 0 times, share predicts 0
 slept was drawn 2237 times`,
-              { hints: ["sample takes the generator and returns the position of the selected candidate as an integer, so it can index the counts directly.", "Pass the same generator to every draw. A fresh generator with the same seed would return the same first draw 10,000 times."], check: numberCheck("How many of the 10,000 draws selected slept?", 2237, 0, "After a temperature of 0.8 and a top-p of 0.9, slept holds 0.2227 of the final distribution, which predicts 2,227 selections in 10,000 draws. The seeded run selects it 2,237 times, ten more than that, which is ordinary variation for a count of draws. It never selects ran or sang, because a removed candidate has a share of exactly zero.") },
+              { hints: ["sample takes the generator and returns the position of the selected candidate as an integer, so it can index the counts directly.", "Pass the same generator to every draw. A fresh generator with the same seed would return the same first draw 10,000 times."], check: numberCheck("How many of the 10,000 draws selected slept?", 2237, 0, "The printed expected count comes from the final sampling distribution, while the observed count comes from random draws. A seeded experiment is reproducible without making those two counts identical. Candidates removed by top-p have zero sampling probability and must never appear.") , question: "Do repeated token draws resemble the probabilities we asked for?" },
             ),
             exercise(
               "Ask for a temperature of zero",
@@ -344,7 +344,7 @@ print(f"greedy selects {candidates[distribution.greedy()]}")
 `,
               `InvalidValuesError: temperature must be finite and positive
 greedy selects sat`,
-              { hints: ["Every refusal the library raises derives from MLLibError, so one except clause catches it. type(refusal).__name__ gives the specific kind.", "greedy takes no arguments and no generator. It returns the position of the largest share, and temperature cannot change which position that is."] },
+              { hints: ["Every refusal the library raises derives from MLLibError, so one except clause catches it. type(refusal).__name__ gives the specific kind.", "greedy takes no arguments and no generator. It returns the position of the largest share, and temperature cannot change which position that is."] , question: "How do we request a greedy token without an invalid temperature?" },
             ),
           ],
         },

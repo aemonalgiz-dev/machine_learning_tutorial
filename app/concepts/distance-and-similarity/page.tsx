@@ -84,9 +84,7 @@ export default function DistanceAndSimilarityPage() {
                 <p>
                   So the interesting object is not really the positions. It is the rule, and the positions are worth exactly what the rule can read out of them. Two people can hold the same table, ask the same question of it, and get different answers, and neither of them has made a mistake, because they picked up different rules.
                 </p>
-                <p>
-                  Everything else on this page is an elaboration of that sentence, and two whole sections of this site rest on it, since every method that learns positions for words, and every network that learns them for pictures, is judged by whether nearness in what it produced turns out to mean something. Nothing below is a fact about language.
-                </p>
+                <p>The rest of the page asks what each rule keeps and discards. A numerical comparison can be calculated correctly while giving poor search results. We will separate the properties of the comparison rule from evidence that its neighbours are useful for this collection of documents.</p>
                 <p>
                   The worked numbers use words because a table of them is small enough to check by hand, and the same six rules are asked of a picture in exactly the same way.
                 </p>
@@ -537,13 +535,17 @@ gap         =  1  −  similarity`}</Equation>
             several(
               "Which of these does the page report about the rule that reads coordinates as labels?",
               [
-                "Standing at sail it names flour nearest at 0.5 and every other word at exactly 1.0",
-                "Only six of the 253 pairs share even one coordinate exactly",
-                "Equality is exact, so a coordinate differing in the sixteenth digit counts as a full disagreement",
-                "It is the right rule for a table whose coordinates are quantities",
-              ],
+                              "Standing at sail it names flour nearest at 0.5 and every other word at exactly 1.0",
+                              "Only six of the 253 pairs share even one coordinate exactly",
+                              "Equality is exact, so a coordinate differing in the sixteenth digit counts as a full disagreement",
+                              "It is the right rule for a table whose coordinates are quantities",
+                            ],
               [0, 1, 2],
               "Twenty-one of the twenty-two candidates are tied for last, so the winner won by a coincidence. A rule that reads coordinates as labels has nothing to say about a table whose coordinates are quantities, and it suits codes standing for categories, where there is no sense in which one code is further from another. It is on the page because leaving it out would suggest all six are candidates for a fitted table.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "The rule counts the fraction of coordinates that differ by exact equality.\nFrom sail: flour scores 0.5; each of the other 21 candidates scores 1.0.\nAcross the 253 word pairs, only 6 share any coordinate exactly.\nThese coordinates are learned numerical quantities, not category labels."
+              },
             ),
         ],
         },
@@ -856,13 +858,17 @@ coordinates that differ   1 of 2                     =  0.5`}</Equation>
             several(
               "Every rule was asked for the nearest word to each of the twenty-three. Which of these does the count show?",
               [
-                "The summed gaps and the straight line name the same word all twenty-three times",
-                "The angle names the same word as the straight line fifteen times",
-                "All six rules name the same word fourteen times",
-                "The rule reading coordinates as labels agrees with the angle twice",
-              ],
+                              "The summed gaps and the straight line name the same word all twenty-three times",
+                              "The angle names the same word as the straight line fifteen times",
+                              "All six rules name the same word fourteen times",
+                              "The rule reading coordinates as labels agrees with the angle twice",
+                            ],
               [0, 1],
               "Fourteen is the count for the five rules that read the coordinates as quantities, which is a majority and not a consensus, and the sixth cannot join them, since it agrees with the straight line on two words and with the angle on none at all. Fifteen out of twenty-three is a disagreement rate a reader of a published nearest-word list has no way to see, since the list is printed under one rule and the other answers are never computed.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Nearest-word comparisons over 23 queries:\nsummed absolute gaps vs Euclidean distance: agree on 23\ncosine vs Euclidean distance: agree on 15\nexact-coordinate disagreement vs Euclidean distance: agree on 2\nexact-coordinate disagreement vs cosine: agree on 0\nAll five numerical-distance rules agree on 14 queries.\nThe exact-coordinate rule is a sixth rule."
+              },
             ),
         ],
         },
@@ -1268,7 +1274,10 @@ saved by the detour                          1.1066 − 0.6782  =  0.4284`}</Equ
           practice: [
             exercise(
               "Ask all six rules about three hand-counted words",
-              ["Part 2 counts three words against two contexts and gets bake at (5, 0), stir at (2, 0) and sail at (0, 5). The starter wraps each as a RowBlock of one row, which is what a rule takes, and adds bake counted three times over. Loop over DistanceMetric, which holds the six rules, and print each rule’s answer for bake against stir, for bake against sail, and for the tripled bake against stir, to four places.", "The first two columns should be the table of step 11. Step 12 counts bake twice and watches four rules move and two stay. Counting it three times is not on the page, so the third column is yours, and the same two rules should refuse to move."],
+              [
+  "Use the supplied count vectors for bake, stir and sail, plus bake with every count tripled. Run all six DistanceMetric rules on bake/stir, bake/sail and tripled-bake/stir.",
+  "Print distances to four decimal places in enum order. Cosine here is a distance, so aligned nonzero vectors give zero rather than similarity one."
+],
               `import numpy as np
 from oop_ml.core.data.row_block import RowBlock
 from oop_ml.core.distance.metric import DistanceMetric
@@ -1305,11 +1314,17 @@ chebyshev bake-stir 3.0000  bake-sail 5.0000  tripled bake-stir 13.0000
 cosine    bake-stir 0.0000  bake-sail 1.0000  tripled bake-stir 0.0000
 hamming   bake-stir 0.5000  bake-sail 1.0000  tripled bake-stir 0.5000
 canberra  bake-stir 0.4286  bake-sail 2.0000  tripled bake-stir 0.7647`,
-              { hints: ["DistanceMetric is an enum, so looping over it visits the six rules, and each one’s value is its name. The page’s summed gaps, straight line, worst coordinate, angle, coordinates that differ and gaps against their size are manhattan, euclidean, chebyshev, cosine, hamming and canberra.", "between answers a grid even for two single rows, so the one number is at [0, 0]."], check: numberCheck("With bake counted three times over, what does the canberra rule answer for bake against stir, to four places?", 0.7647, 5e-05, "The rule reads each gap against the size of the two numbers it sits between, so the first coordinate gives 13 over 17, which is 0.7647, and the second, where both hold zero, gives nothing. It was 3 over 7 at one count and 8 over 12 at two. The angle is still 0 and the share of coordinates that differ is still 0.5, because scaling one word’s own position is exactly what those two ignore, and nothing about how bake was used has changed.") },
+              { hints: [
+  "Each metric takes RowBlock inputs and returns pairwise distances.",
+  "Compare the effect of scaling within this specific example. Hamming counts unequal coordinates; it is not generally scale-invariant for arbitrary vectors."
+], check: numberCheck("With bake counted three times over, what does the canberra rule answer for bake against stir, to four places?", 0.7647, 5e-05, "Canberra distance is 0.7647. It scales each coordinate difference by the magnitudes present at that coordinate, so increasing one vector can change this distance."), question: "Which distance rules change when one word-count vector grows?" },
             ),
             exercise(
               "Ask every rule for every word’s nearest neighbour",
-              ["The starter fits the table of step 2 and wraps all twenty-three positions as one RowBlock. For each rule, take the grid of gaps between every word and every other, rule out a word being its own neighbour, and record each word’s nearest. Print what each rule names nearest to sail and at what gap, then how many of the twenty-three words each rule agrees with the straight line about, and with the angle.", "The six answers for sail should be step 15, three saying mast and two saying rope, with flour from the rule that reads labels. The agreement with the straight line should be the counts of step 16, which are 23, 21, 19, 15 and 2. The column against the angle is the one to read for the check."],
+              [
+  "Use the supplied fitted twenty-three-word vector table. For each metric compute the complete pairwise distance matrix and exclude self-matches.",
+  "Print sail’s selected neighbour/distance, then count agreement of all nearest-neighbour IDs with Euclidean and cosine distance. Use the same tie behaviour as the starter."
+],
               `import numpy as np
 from oop_ml.core.data.row_block import RowBlock
 from oop_ml.core.distance.metric import DistanceMetric
@@ -1428,11 +1443,17 @@ chebyshev agrees with the straight line on 21, with the angle on 15
 cosine    agrees with the straight line on 15, with the angle on 23
 hamming   agrees with the straight line on  2, with the angle on  0
 canberra  agrees with the straight line on 19, with the angle on 18`,
-              { hints: ["between(rows, rows) is a 23 by 23 grid of gaps. np.array makes a copy that can be written to, and np.fill_diagonal with np.inf stops every word winning its own row.", "argmin(axis=1) is the column of the smallest gap in each row, which indexes the list of words.", "zip pairs two lists of answers word by word, and summing a == b over the pairs counts the agreements."], check: numberCheck("On how many of the twenty-three words do canberra and the angle name the same nearest word?", 18, 0.0, "The rule that reads each gap against its size names rope for sail, as the angle does, and it agrees with the angle on 18 words where the straight line manages 15, while still agreeing with the straight line on 19, so on this table it sits between the two. A published nearest-word list is printed under one rule and the other five answers are never computed, which is why step 16 says the rule is part of the claim.") },
+              { hints: [
+  "Set diagonal distances to infinity before choosing row minima.",
+  "Keep each metric’s full neighbour-index array so the agreement counts compare corresponding words."
+], check: numberCheck("On how many of the twenty-three words do canberra and the angle name the same nearest word?", 18, 0.0, "The two rules agree on eighteen word neighbours. Changing a distance rule changes the ranking question even though the fitted vectors stay fixed."), question: "Can the distance rule change every word’s nearest neighbour?" },
             ),
             exercise(
               "Scale every position to length one",
-              ["Step 14 says that once every position has length one, the straight-line gap is a fixed function of the angle and the two rules rank alike. Divide every row of the table by its own length, take the straight-line gaps on the scaled rows and the angle’s gaps on the original ones, and print the largest difference between the first and the square root of twice the second, over every pair of different words. Then print how many words keep the angle’s nearest word under the straight line, before scaling and after, and the scaled gap from sail to rope.", "The identity should hold to rounding, the two counts should be the 15 of step 16 and all 23, and the last line is a figure the page does not print."],
+              [
+  "Normalise every nonzero word vector to length one. Compare Euclidean distances on those rows with cosine distances on the original rows.",
+  "Print the maximum residual in the supplied distance identity over distinct pairs, the count of cosine-neighbour matches before/after scaling and the unit-vector distance from sail to rope."
+],
               `import numpy as np
 from oop_ml.core.data.row_block import RowBlock
 from oop_ml.core.distance.metric import DistanceMetric
@@ -1545,11 +1566,17 @@ print(f"sail to rope on the unit sphere: {scaled[words.index('sail'), words.inde
               `largest gap in the identity: 1.8e-15
 same nearest word as the angle: 15 before scaling, 23 after
 sail to rope on the unit sphere: 0.1872`,
-              { hints: ["A RowBlock is built from an array with one row per word and a name per column, so RowBlock(unit, names) is the scaled table in the form a rule takes.", "The angle’s gap is one minus the cosine, so twice it is 2 minus twice the dot product of the two unit positions, which is what step 14 puts under the square root.", "A boolean grid that is False on the diagonal picks out the pairs of different words. The diagonal is left out because a word’s gap to itself is zero up to rounding, and a square root magnifies rounding near zero."], check: numberCheck("What is the straight-line gap between sail and rope once both have length one, to four places?", 0.1872, 5e-05, "On unit positions the squared gap is 2 minus twice the cosine. sail and rope have a cosine of 0.9825, so the squared gap is about 0.035 and its root is 0.1872. Before scaling the same pair was 0.3046 apart and lost first place to mast, because rope is the longer position. With the lengths divided out the straight line names rope, as the angle does, and it agrees with the angle on all 23 words where it agreed on 15.") },
+              { hints: [
+  "Divide each row by its own norm, retaining the coordinate axis.",
+  "Compare complete pair matrices using the specified identity, then exclude self-matches for ranking."
+], check: numberCheck("What is the straight-line gap between sail and rope once both have length one, to four places?", 0.1872, 5e-05, "The unit-vector distance is 0.1872. Once individual lengths are removed, Euclidean distance and cosine distance rank these nonzero vectors consistently."), question: "Will Euclidean and cosine rankings agree after unit-length scaling?" },
             ),
             exercise(
               "Move two words far from the origin and measure the same gap",
-              ["Step 20 measures the gap between sail and mast three ways after adding the same amount to every coordinate of both. For amounts of 0, ten thousand, a million and a hundred million, print the gap by subtracting first and squaring afterwards, the gap by the expanded form of step 19, and the gap the library’s euclidean rule returns, each to four places. Print beside them the step between neighbouring machine numbers at the size of the squared length, which np.spacing gives.", "The direct column and the library column should read 0.2750 all the way down. The expanded column should fail the way the page reports, in the fourth digit at a million and completely at a hundred million. Read the last column against it."],
+              [
+  "Translate sail and mast by the same supplied offsets, from zero through one hundred million in every coordinate. Their true separation is unchanged.",
+  "Print direct-subtraction distance, the supplied expanded-form distance, library Euclidean distance and np.spacing at squared-length scale for each offset. Use four decimal places for distances."
+],
               `import numpy as np
 from oop_ml.core.data.row_block import RowBlock
 from oop_ml.core.distance.metric import DistanceMetric
@@ -1654,7 +1681,10 @@ for shift in (0.0, 1e4, 1e6, 1e8):
      10,000 out: direct 0.2750  expanded 0.2750  library 0.2750  step 6.0e-08
   1,000,000 out: direct 0.2750  expanded 0.2742  library 0.2750  step 4.9e-04
 100,000,000 out: direct 0.2750  expanded 2.8284  library 0.2750  step 8.0e+00`,
-              { hints: ["a @ b is the dot product of two arrays, so a @ a is a squared length. The expanded form is the two squared lengths with twice the dot product taken away.", "a[None, :] turns a position into a grid of one row, which is the shape a RowBlock holds, and between then answers a grid of one number."], check: numberCheck("What does the expanded form return for the gap at a hundred million out, to four places?", 2.8284, 5e-05, "At that distance each squared length is near 4 followed by sixteen noughts, where neighbouring machine numbers are 8 apart, so the three terms can only combine to a multiple of 8 and the true squared gap of 0.0756 cannot survive. They came to 8, and its square root is 2.8284. The library’s rule subtracts a common point from both positions before it uses the identity, which is the repair of step 20, and reads 0.2750 at every distance.") },
+              { hints: [
+  "The expanded expression subtracts large nearly equal terms; inspect spacing where those terms are stored.",
+  "Compute the direct difference before squaring as an independent reference."
+], check: numberCheck("What does the expanded form return for the gap at a hundred million out, to four places?", 2.8284, 5e-05, "The expanded form returns 2.8284 at the largest translation. Large nearly equal squared terms lose the small separation through floating-point cancellation."), question: "Why can subtracting large squared lengths lose a small distance?" },
             ),
           ],
         },

@@ -105,7 +105,8 @@ test('the evaluation section is reachable and tables stay readable on mobile', a
   await page.goto('/concepts/model-evaluation-slices');
   await expect(page.getByRole('heading', {name:'Better for Which Cases?',exact:true})).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await page.getByRole('combobox',{name:'Choose a section',exact:true}).first().selectOption({label:'3. Distinguish equal readings from equal groups'});
+  await page.getByText('Lesson contents', { exact: true }).click();
+  await page.getByRole('combobox',{name:'Jump to a page',exact:true}).first().selectOption({label:'3. Distinguish equal readings from equal groups'});
   await expect(page.getByText('Equal-group MAE = (1 + 4) / 2 = 2.5',{exact:false})).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({path:test.info().outputPath('model-slices-mobile.png'),fullPage:true});

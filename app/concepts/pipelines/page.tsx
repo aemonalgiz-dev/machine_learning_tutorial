@@ -76,9 +76,8 @@ export default function PipelinesPage() {
 <p>
                   Take the grid search page&rsquo;s twelve people, measured by height in centimetres and weight in kilograms, and hold three of them out, the people at 153, 165 and 177 cm. A model that predicts weight from standardized height is fitted on the other nine, and now the first held-out person arrives to be scored. Their height has to be standardized before the model can read it, and the question is what centre and what spread to subtract and divide by.
                 </p>
-                <p>
-                  Their own are no use. One height has no spread at all, so asking to standardize a single person is refused, because the column is constant.
-                </p>
+                <p>A single arriving height cannot provide the training reference. Its own standard deviation is zero, so standardising it against itself cannot reproduce the scale on which the predictor was fitted.</p>
+              <p>Instead, retain the centre and spread calculated from the training people. Every later person must pass through that same fitted transformation before the prediction rule uses the result. A pipeline keeps those dependent steps together.</p>
 </>
                 <ChainTrace />
                 <>
@@ -895,10 +894,7 @@ export default function PipelinesPage() {
         {
           title: "Practice. Fitting, Folding and Searching the Chain",
           practice: [
-            exercise(
-              "Fit the chain on nine people and score the three held out",
-              ["The starter builds Part 2’s chain, an expansion to degree 2, a standardizer and a ridge at a penalty of one, and holds out the people at 153, 165 and 177 cm. Fit the chain on the other nine. Print the centre and spread its standardizer learned for each column it was handed, the weight it predicts for each held-out person, and the held-out R squared and mean squared error.", "Part 1 gives the centre and spread of height as 167.11 and 10.38, the three predictions as 52.75, 63.66 and 74.98 kg, and the held-out R squared as 0.9930. The mean squared error is not on the page."],
-              `from oop_ml import (
+            exercise("Fit the chain on nine people and score the three held out",["The starter builds Part 2’s chain, an expansion to degree 2, a standardizer and a ridge at a penalty of one, and holds out the people at 153, 165 and 177 cm. Fit the chain on the other nine. Print the centre and spread its standardizer learned for each column it was handed, the weight it predicts for each held-out person, and the held-out R squared and mean squared error.", "Part 1 gives the centre and spread of height as 167.11 and 10.38, the three predictions as 52.75, 63.66 and 74.98 kg, and the held-out R squared as 0.9930. The mean squared error is not on the page."],`from oop_ml import (
     Feature,
     PipelineSteps,
     PolynomialFeatures,
@@ -927,8 +923,7 @@ chain = RegressionPipeline(
 # name, centre and spread of every scaling it learned, to two places.
 # Predict the three held-out weights and print each beside the truth.
 # Evaluate on the held-out people and print the R squared and the mean
-# squared error, each to four places.`,
-              `from oop_ml import (
+# squared error, each to four places.`,`from oop_ml import (
     Feature,
     PipelineSteps,
     PolynomialFeatures,
@@ -963,20 +958,14 @@ for height, weight, predicted in zip(held_height.values, held_weight.values, pre
 
 evaluation = chain.evaluate([held_height], held_weight)
 print(f"held-out R squared {evaluation.r2_score:.4f}")
-print(f"held-out mean squared error {evaluation.mean_squared_error:.4f}")`,
-              `height: centre 167.11, spread 10.38
+print(f"held-out mean squared error {evaluation.mean_squared_error:.4f}")`,`height: centre 167.11, spread 10.38
 height^2: centre 28033.78, spread 3467.39
 153 cm weighs 52 kg, predicted 52.75 kg
 165 cm weighs 63 kg, predicted 63.66 kg
 177 cm weighs 76 kg, predicted 74.98 kg
 held-out R squared 0.9930
-held-out mean squared error 0.6773`,
-              { hints: ["A chain is fitted and asked for predictions exactly like a single model. fit takes a list of features and a target feature, and predict takes a list of features.", "The fitted copies of the steps are on the chain as fitted_steps and are addressed by the names the steps were given, so the standardizer is fitted_steps[\"scaler\"].transformer. Its scalings can be looped over, and each has a name, a mean and a standard_deviation.", "evaluate answers an object that has already paired each prediction with its truth. r2_score and mean_squared_error are properties of it."], check: numberCheck("What mean squared error does the chain score on the three held-out people, to four places?", 0.6773, 0.0005, "The three misses are about 0.75, 0.66 and 1.02 kg, whose squares add to about 2.03, and a third of that is 0.6773. Every one of those predictions was made from a height standardized by the nine training people’s centre of 167.11 and spread of 10.38, which the standardizer learned inside the chain’s own fit and the held-out people never touched.") },
-            ),
-            exercise(
-              "Read the configuration back, then break a refit",
-              ["Fit the same chain on the same nine people. Then ask the objects the chain was built from whether they are fitted, ask the fitted copy of the model the same question, and check whether the two models are the same object. After that, refit the chain on a height column that is constant, catch what the library raises, and see what the chain is left holding.", "Part 4 says the configuration is never fitted and that a refit which fails leaves the previous fit whole, with the predictions moved by exactly nothing."],
-              `from oop_ml import (
+held-out mean squared error 0.6773`,{...{ hints: ["A chain is fitted and asked for predictions exactly like a single model. fit takes a list of features and a target feature, and predict takes a list of features.", "The fitted copies of the steps are on the chain as fitted_steps and are addressed by the names the steps were given, so the standardizer is fitted_steps[\"scaler\"].transformer. Its scalings can be looped over, and each has a name, a mean and a standard_deviation.", "evaluate answers an object that has already paired each prediction with its truth. r2_score and mean_squared_error are properties of it."], check: numberCheck("What mean squared error does the chain score on the three held-out people, to four places?", 0.6773, 0.0005, "The held-out errors come from predictions made with preprocessing learned on the nine training people. The held-out rows are transformed by that retained preparation without contributing to its fitted centre or spread.") },question:"Can a fitted pipeline predict held-out weights using training-only preprocessing?"}),
+            exercise("Read the configuration back, then break a refit",["Fit the same chain on the same nine people. Then ask the objects the chain was built from whether they are fitted, ask the fitted copy of the model the same question, and check whether the two models are the same object. After that, refit the chain on a height column that is constant, catch what the library raises, and see what the chain is left holding.", "Part 4 says the configuration is never fitted and that a refit which fails leaves the previous fit whole, with the predictions moved by exactly nothing."],`from oop_ml import (
     Feature,
     MLLibError,
     PipelineSteps,
@@ -1009,8 +998,7 @@ chain.fit([train_height], train_weight)
 before = [float(value) for value in chain.predict([held_height])]
 # Try to fit the chain again on nine heights that are all 170.0. Catch the
 # library's error and print its name and message. Then print whether the
-# chain is still fitted and how far its three predictions moved.`,
-              `from oop_ml import (
+# chain is still fitted and how far its three predictions moved.`,`from oop_ml import (
     Feature,
     MLLibError,
     PipelineSteps,
@@ -1051,8 +1039,7 @@ except MLLibError as refusal:
 
 after = [float(value) for value in chain.predict([held_height])]
 print(f"still fitted: {chain.is_fitted}")
-print(f"predictions moved by {max(abs(new - old) for new, old in zip(after, before))}")`,
-              `configured model fitted: False
+print(f"predictions moved by {max(abs(new - old) for new, old in zip(after, before))}")`,`configured model fitted: False
 configured step terms fitted: False
 configured step scaler fitted: False
 fitted copy of the model fitted: True
@@ -1060,13 +1047,8 @@ copy is the configured object: False
 AllSameValuesError
 feature_values must not be constant (zero variance)
 still fitted: True
-predictions moved by 0.0`,
-              { hints: ["Every model and every transformer in the library answers is_fitted. The configuration is chain.model and chain.steps, and the results of the fit are chain.fitted_model and chain.fitted_steps.", "Looping over chain.steps gives each step in the order it runs, with a name and the transformer it wraps."] },
-            ),
-            exercise(
-              "Fold the chain, then let a search choose the degree",
-              ["Cross-validate Part 2’s chain over all twelve people, on four folds dealt with the page’s seed of 4, and print each fold’s held-out R squared and their mean. Then build a search space that varies the chain’s steps over degrees 1 to 4 and its model over penalties of 0.01, 0.1, 1 and 10, run the search on the same folds, and print every candidate’s score with the winner and the spread.", "Part 2 reports fold scores of 0.9986, 0.9916, 0.9234 and 0.9894, and Part 5 reports a winner of degree 1 at a penalty of 0.1, at 0.9796, with a spread of 0.3639. The lesson does not quote what degree 3 scores at a penalty of one."],
-              `from oop_ml import (
+predictions moved by 0.0`,{...{ hints: ["Every model and every transformer in the library answers is_fitted. The configuration is chain.model and chain.steps, and the results of the fit are chain.fitted_model and chain.fitted_steps.", "Looping over chain.steps gives each step in the order it runs, with a name and the transformer it wraps."] },question:"Does a failed refit preserve the previous fitted pipeline?"}),
+            exercise("Fold the chain, then let a search choose the degree",["Cross-validate Part 2’s chain over all twelve people, on four folds dealt with the page’s seed of 4, and print each fold’s held-out R squared and their mean. Then build a search space that varies the chain’s steps over degrees 1 to 4 and its model over penalties of 0.01, 0.1, 1 and 10, run the search on the same folds, and print every candidate’s score with the winner and the spread.", "Part 2 reports fold scores of 0.9986, 0.9916, 0.9234 and 0.9894, and Part 5 reports a winner of degree 1 at a penalty of 0.1, at 0.9796, with a spread of 0.3639. The lesson does not quote what degree 3 scores at a penalty of one."],`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1096,8 +1078,7 @@ chain = RegressionPipeline(
 # PipelineSteps, one per degree, and whose model is four whole
 # RidgeRegression objects, one per penalty. Search it with a GridSearch on
 # the same folds, print each candidate's degree, penalty and score, and
-# then the winner's score, the spread, and degree 3's score at a penalty of 1.`,
-              `from oop_ml import (
+# then the winner's score, the spread, and degree 3's score at a penalty of 1.`,`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1141,8 +1122,7 @@ for scored in search:
         asked = scored.score
 
 print(f"winner {search.best_score:.4f}, spread {search.score_spread:.4f}")
-print(f"degree 3 at a penalty of 1: {asked:.4f}")`,
-              `fold scores [0.9986, 0.9916, 0.9234, 0.9894]
+print(f"degree 3 at a penalty of 1: {asked:.4f}")`,`fold scores [0.9986, 0.9916, 0.9234, 0.9894]
 mean 0.9758
 degree 1, penalty 0.01: 0.9796
 degree 1, penalty 0.1: 0.9796
@@ -1161,13 +1141,8 @@ degree 4, penalty 0.1: 0.9717
 degree 4, penalty 1.0: 0.9717
 degree 4, penalty 10.0: 0.9081
 winner 0.9796, spread 0.3639
-degree 3 at a penalty of 1: 0.9751`,
-              { hints: ["CrossValidation is built with the folds and its evaluate takes the chain and the dataset. The result can be looped over, one evaluation per fold, and it carries mean_r2_score.", "SearchSpace.over takes the class being searched and then one list per field. The chain has two fields, steps and model, and each list holds whole objects that their own constructors have already checked.", "GridSearch is built with the folds, and its search takes a prototype, the space and the dataset. Looping over what it answers gives every scored candidate.", "A candidate hands back the object it carried for a field through value_for, so the degree is value_for(\"steps\")[\"terms\"].transformer.degree and the penalty is value_for(\"model\").penalty."], check: numberCheck("What mean held-out R squared does the degree 3 chain score at a penalty of one, to four places?", 0.9751, 0.0005, "It finishes just behind degree 2 at the same penalty, which is the 0.9758 the fold loop reported for the chain on its own, since that chain is one of the sixteen candidates. The degrees sit close together at every small penalty and the penalty of 10 ruins all four, which is why a spread of 0.3639 says the search chose a penalty and had little to say about the degree.") },
-            ),
-            exercise(
-              "Run the two steps in the other order",
-              ["Part 6 says the order of the steps is part of the model. Build the chain both ways round, expanding and then standardizing, and standardizing and then expanding, and cross-validate each on the same four folds at penalties of 0, 1 and 100.", "The lesson gives 0.9579 for both orders at a penalty of zero and 0.9758 against 0.9523 at a penalty of one. It stops at a penalty of ten, so the last pair of numbers is yours to find. Before running, decide whether the gap between the orders should keep growing."],
-              `from oop_ml import (
+degree 3 at a penalty of 1: 0.9751`,{...{ hints: ["CrossValidation is built with the folds and its evaluate takes the chain and the dataset. The result can be looped over, one evaluation per fold, and it carries mean_r2_score.", "SearchSpace.over takes the class being searched and then one list per field. The chain has two fields, steps and model, and each list holds whole objects that their own constructors have already checked.", "GridSearch is built with the folds, and its search takes a prototype, the space and the dataset. Looping over what it answers gives every scored candidate.", "A candidate hands back the object it carried for a field through value_for, so the degree is value_for(\"steps\")[\"terms\"].transformer.degree and the penalty is value_for(\"model\").penalty."], check: numberCheck("What mean held-out R squared does the degree 3 chain score at a penalty of one, to four places?", 0.9751, 0.0005, "This candidate is evaluated on the same folds as the other degree-and-penalty settings. Its score belongs to the complete refitted pipeline, including the transformations learned inside each training fold.") },question:"Can cross-validation and search refit every preprocessing stage within its fold?"}),
+            exercise("Run the two steps in the other order",["Part 6 says the order of the steps is part of the model. Build the chain both ways round, expanding and then standardizing, and standardizing and then expanding, and cross-validate each on the same four folds at penalties of 0, 1 and 100.", "The lesson gives 0.9579 for both orders at a penalty of zero and 0.9758 against 0.9523 at a penalty of one. It stops at a penalty of ten, so the last pair of numbers is yours to find. Before running, decide whether the gap between the orders should keep growing."],`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1191,8 +1166,7 @@ for penalty in (0.0, 1.0, 100.0):
     # penalty, cross-validate both on the folds, and print the two mean
     # scores to four places.
 
-# Print the expand-first score at a penalty of 100 on a line of its own.`,
-              `from oop_ml import (
+# Print the expand-first score at a penalty of 100 on a line of its own.`,`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1218,13 +1192,10 @@ for penalty in (0.0, 1.0, 100.0):
         scores.append(CrossValidation(folds=folds).evaluate(chain, dataset).mean_r2_score)
     print(f"penalty {penalty}: expand first {scores[0]:.4f}, standardize first {scores[1]:.4f}")
 
-print(f"expand first at a penalty of 100: {scores[0]:.4f}")`,
-              `penalty 0.0: expand first 0.9579, standardize first 0.9579
+print(f"expand first at a penalty of 100: {scores[0]:.4f}")`,`penalty 0.0: expand first 0.9579, standardize first 0.9579
 penalty 1.0: expand first 0.9758, standardize first 0.9523
 penalty 100.0: expand first 0.0257, standardize first -0.1614
-expand first at a penalty of 100: 0.0257`,
-              { hints: ["PipelineSteps.of runs its steps in the order the keywords are written, so swapping the two keywords is the whole of the change.", "Each cross-validation needs a chain of its own, built from one set of steps and a ridge at the penalty in hand. The folds are seeded, so both orders are judged on the same four deals."], check: numberCheck("What does the expand-first chain score at a penalty of 100, to four places?", 0.0257, 0.0005, "At a penalty of 100 the charge on the coefficients outweighs twelve people’s worth of evidence, so both orders are shrunk most of the way to predicting the mean weight, which is what an R squared near zero means. The chain’s own order still finishes ahead, 0.0257 against −0.1614, but a penalty this large has ruined both, and the order of the steps was never going to rescue it.") },
-            ),
+expand first at a penalty of 100: 0.0257`,{...{ hints: ["PipelineSteps.of runs its steps in the order the keywords are written, so swapping the two keywords is the whole of the change.", "Each cross-validation needs a chain of its own, built from one set of steps and a ridge at the penalty in hand. The folds are seeded, so both orders are judged on the same four deals."], check: numberCheck("What does the expand-first chain score at a penalty of 100, to four places?", 0.0257, 0.0005, "Changing step order changes the coordinates being penalised. At this large penalty both procedures lose much of their predictive fit; their score difference on these folds does not make either configuration useful.") },question:"Does the order of expansion and scaling change a regularised fit?"}),
           ],
         },
       ]}

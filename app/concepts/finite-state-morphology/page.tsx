@@ -61,10 +61,13 @@ export default function FiniteStateMorphologyPage() {
               <SubSection title="1. Every piece so far was found by counting">
                 <>
 <p>
-                  Byte pair encoding merges the pair of symbols that occurs most often. The unigram model starts from a large set of pieces and drops whichever is least missed. The method that searches for the set of pieces describing a corpus in the fewest bits is measuring the corpus too, and so is the one that picks the pieces covering the most text.
+                  In walked and walking, we can recognise walk as the part shared by both forms. The endings tell us different things about how the verb is used. Suppose we want our pieces to preserve those grammatical roles rather than simply shorten a sequence.
                 </p>
                 <p>
-                  Every one of them arrives at a vocabulary by asking a body of text a question and reading the answer off, which means every one of them inherits whatever that body of text happened to contain.
+                  The earlier vocabulary methods count patterns in text. Byte pair encoding joins frequent adjacent symbols; the unigram model removes candidates that contribute little to its scoring objective. Those procedures can discover useful recurring pieces, but they were not given the grammatical roles we just described.
+                </p>
+                <p>
+                  Those data-driven methods arrive at a vocabulary by measuring a corpus, so their choices depend on the writing that corpus contains. Here we will supply explicit rules instead. That trades the work of learning boundaries from counts for the work of deciding and maintaining a grammar.
                 </p>
 </>
                 <p>
@@ -1207,7 +1210,11 @@ export default function FiniteStateMorphologyPage() {
           practice: [
             exercise(
               "Write the dropped e into the grammar",
-              ["Part 3 built the small grammar both ways. Before the repair it has 3 states and 12 lines, reads bakeed as the past tense of bake and returns nothing at all for baked, and after the repair it has 5 states and 16 lines and does exactly the reverse. The starter builds the grammar before the repair. Write the repair, which is a second spelling of the stem, bak, still labelled as the verb bake, leading to a new state that holds only ed and ing, with the full stem bake redirected to another new state that holds only s.", "Then print, for each grammar, its states and lines and what it makes of baked, bakeed, bakes and walked. What should come out is the lesson’s table, the first two words swapping places and the other two exactly as they were. A word with no reading is handed on whole, so its cut is the word itself."],
+              [
+  "The starter’s grammar simply attaches endings to bake. It consequently recognises bakeed and misses baked. Repair the spelling paths while preserving bakes and walked.",
+  "Keep a bake stem path that can take s. Add a bak spelling labelled bake+V that can take ed or ing. Give those two sets of endings separate states, and include every state referenced by a path.",
+  "For the original and repaired grammars, print state and entry counts, then analyse baked, bakeed, bakes and walked in that order. Print the analysis tags or no reading, followed by the segmentation. An unrecognised word remains one whole piece."
+],
               `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
 from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
 
@@ -1300,11 +1307,21 @@ after: 5 states, 16 lines
   bakeed: no reading | cut bakeed
   bakes: bake+V +3SG | cut bake s
   walked: walk+V +PAST | cut walk ed`,
-              { hints: ["A line is LexiconEntry(spelling, label, next state), and a state is a Lexicon with a name and its lines. A line whose next state is END says the word may finish there.", "Every state a line names has to be among the lexicons handed to the analyser, or construction is refused, so the two new states go into the tuple beside the old ones.", "analyse answers every reading of a word, each with its tags, and is empty when no path spells the word. segment answers the pieces of the reading handed on, with their texts, or the whole word when there is no reading."] },
+              {
+question: "Can the grammar accept baked without also accepting bakeed?",
+ hints: [
+  "A LexiconEntry contains its consumed spelling, analysis label and next-state name. END allows a path to finish.",
+  "Use separate continuation lexicons for s and for ed/ing. The original full stem and shortened spelling must point to the appropriate one.",
+  "analyse returns the possible labelled readings; segment returns the selected pieces. A failed analysis and an unchanged segmentation are different observations."
+] },
             ),
             exercise(
               "Count the readings, then make talk a noun",
-              ["Part 2 counted every path through the small grammar and found fourteen paths for twelve words, with walk and walks spelled by two paths each because walk is listed as a verb and as a noun. The starter holds that grammar, 16 lines, and the twelve words it accepts. Read every one of the twelve and add up the readings, and name the words that have more than one.", "Talk is a noun in English as well. Add the two lines that say so, one leading to the noun ending and one ending the word, and count again. Then print which reading of talks is handed on. The lesson does not write these two lines, so the second count is not on the page."],
+              [
+  "The grammar already treats walk as both a verb and a noun. Add the same noun possibility for talk, which currently has only its verb paths.",
+  "Before and after the addition, analyse each of the twelve supplied words. Print the total number of readings and the words with more than one reading. Add both noun paths for talk: one ending the bare word and one continuing to the plural ending.",
+  "Finally print the selected reading of talks. Distinguish the number of possible analyses from the number of distinct accepted spellings."
+],
               `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
 from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
 
@@ -1396,11 +1413,21 @@ print(f"talks is handed on as {grammar.analyse('talks').shortest.tags}")`,
 with talk a noun: 16 readings of 12 words
   more than one reading: walk walks talk talks
 talks is handed on as talk+N +PL`,
-              { hints: ["analyse answers an object with an n_analyses, so the total is a sum over the twelve words.", "The two new lines are the two walk already has as a noun, with talk in place of walk in the spelling and in the label.", "The reading handed on is the shortest of an analysis, and its tags are the labels joined by spaces."], check: numberCheck("How many readings do the twelve words have once talk is a noun as well?", 16, 0, "Talk and talks were already accepted as a verb and each now has a noun reading too, so the twelve words go from 14 readings to 16 and not one new word is accepted. Two lines bought two readings and no coverage, which is Part 5’s point that more lines produce more readings, not fewer, once a stem can be two things. The reading handed on for talks is the plural noun for the same reason as for walks. Both readings have two pieces, and a label beginning with N sorts before one beginning with V.") },
+              {
+question: "Can the same spelling gain a second grammatical reading without adding a new word?",
+ hints: [
+  "Sum each result’s n_analyses over the supplied words. Keep the per-word counts to identify ambiguity.",
+  "Use walk’s two noun entries as the model for talk, changing both spelling and stem label.",
+  "The library selects among equally short analyses with its deterministic label ordering. That selection does not resolve the meaning in a sentence."
+], check: numberCheck("How many readings do the twelve words have once talk is a noun as well?", 16, 0, "The twelve spellings now have 16 readings. Talk and talks each gained a noun analysis, while the set of accepted spellings stayed the same.") },
             ),
             exercise(
               "Grow the readings on a grammar of four lines",
-              ["Part 5 wrote a grammar of four lines, a piece of one character and a piece of two, each of which may be followed by another or may end the word, and found 13 readings of a word of six characters, 89 of ten and 233 of twelve. Build it, with one state that leads back to itself, and read words of 5, 6, 10, 12 and 15 of the letter a.", "For each print the number of readings and the cut that is handed on. The lesson stops at twelve characters, and it never says which of the readings a tokenizer downstream would receive."],
+              [
+  "A grammar can have very few entries and still permit many readings. Build one state that accepts either a or aa, with each piece allowed either to end the word or to return to that state.",
+  "Analyse strings containing 5, 6, 10, 12 and 15 copies of a. For each, print its length, the number of analyses and the pieces of the selected shortest analysis.",
+  "Every transition must consume a character. This makes the set of readings finite for each supplied word even though the state has a loop."
+],
               `from oop_ml import FiniteStateAnalyzer, Lexicon, LexiconEntry
 from oop_ml.core.natural_language_processing.tokenization.morphology.finite_state import END
 
@@ -1436,7 +1463,13 @@ for length in [5, 6, 10, 12, 15]:
 10 characters: 89 readings, handed on as aa aa aa aa aa
 12 characters: 233 readings, handed on as aa aa aa aa aa aa
 15 characters: 987 readings, handed on as a aa aa aa aa aa aa aa`,
-              { hints: ["A line may name its own state as the next one. Every step still reads at least one character, so a walk cannot go round for ever, which is the rule Part 2 gave for why the search finishes.", "lexicons is a tuple, so a grammar of one state is written with a trailing comma after the one Lexicon.", "The reading handed on is the shortest of an analysis, and its morphs are the pieces as spelled."], check: numberCheck("How many readings does a word of fifteen characters have?", 987, 0, "A reading of n characters starts with the one-character piece followed by a reading of n − 1, or with the two-character piece followed by a reading of n − 2, so the counts add, and from the lesson’s 233 at twelve they run 377, 610 and 987. The cut handed on is the one with the fewest pieces, eight of them at fifteen characters, seven of two and one of one. Eight readings tie on that, one for each place the single a can stand, and the label string that sorts first puts it at the front. Nothing in the grammar chose that reading. The tie rule did.") },
+              {
+question: "How many segmentations can a tiny looping grammar produce?",
+ hints: [
+  "Each of the two spellings needs a finishing entry and a continuing entry, giving four entries in one Lexicon.",
+  "Pass the single lexicon as a one-element tuple. Its continuing entries can name that same state.",
+  "Read n_analyses for the full count and shortest.morphs for the selected cut. An arbitrary deterministic tie rule can choose between cuts with equal length."
+], check: numberCheck("How many readings does a word of fifteen characters have?", 987, 0, "The fifteen-character word has 987 readings. Only a few entries are needed because the loop reuses them at successive positions; the chosen shortest reading represents one of those possibilities.") },
             ),
           ],
         },

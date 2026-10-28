@@ -1,10 +1,13 @@
+import { mockAccountBackend, accountBackendFor, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { expect, test } from "@playwright/test";
 import { assemble } from "../lib/builds/engine";
 import { DELIVERY_PREDICTOR_BUILD, DELIVERY_STAGES } from "../lib/builds/regression-journey";
 import { TOOLS } from "../lib/builds/tools";
 
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
 test("regression opens on one problem brief with its reference material available on demand", async ({ page }) => {
-  await page.goto("/lab/simple-linear-regression");
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   const journey = page.getByTestId("regression-journey");
   const reference = journey.getByTestId("delivery-reference");
   await expect(reference).not.toHaveAttribute("open");
@@ -29,7 +32,7 @@ test("regression opens on one problem brief with its reference material availabl
 
   await journey.locator("summary", { hasText: "Name this dispatch machine" }).click();
   await journey.getByRole("textbox", { name: "Name your machine", exact: true }).fill("Neighbourhood dispatch");
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await expect(reference).not.toHaveAttribute("open");
   await journey.locator("summary", { hasText: "Name this dispatch machine" }).click();
   await expect(journey.getByRole("textbox", { name: "Name your machine", exact: true })).toHaveValue("Neighbourhood dispatch");
@@ -37,12 +40,8 @@ test("regression opens on one problem brief with its reference material availabl
 
 test("compact stage navigation keeps dispatch constants directly editable on a narrow page", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.addInitScript(graph => {
-    const key = "workshop:regression-delivery-rule:v1";
-    const value = { graph, attemptId: "layout-fixture", undo: [], redo: [], caseIndex: 0, results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0, example: false, animate: false, zoom: .75 };
-    localStorage.setItem(`fitlab.learning.v1:guest:${key}`, JSON.stringify({ key, value, revision: 0, mutationId: "layout-fixture", dirty: true }));
-  }, assemble(DELIVERY_PREDICTOR_BUILD.recipe, TOOLS));
-  await page.goto("/lab/simple-linear-regression");
+  accountBackendFor(page).seed("workshop:regression-delivery-rule:v1", { graph: assemble(DELIVERY_PREDICTOR_BUILD.recipe, TOOLS), attemptId: "layout-fixture", undo: [], redo: [], caseIndex: 0, results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0, example: false, animate: false, zoom: .75 });
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   const stages = page.getByRole("navigation", { name: "Delivery journey stages" });
   await expect(stages.getByRole("button")).toHaveCount(DELIVERY_STAGES.length);
   await stages.getByRole("button", { name: "Measure the mistakes", exact: true }).click();

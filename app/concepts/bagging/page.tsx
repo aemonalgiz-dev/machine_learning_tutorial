@@ -684,21 +684,8 @@ export default function BaggingPage() {
                 for a classifier and a mean for a regressor, as section 10
                 said.
               </p>
-              <p>
-                What the recipe needs from its learner is three things, and
-                this page has already shown all three on the deep tree. It
-                has to be sensitive to its training data, which is Part 1,
-                where one relabelled person moved the root question from
-                height to weight. It has to be able to reach low bias, which
-                is Part 4, where the committee&rsquo;s training score reaches
-                1.000 by eight members because every member can draw whatever
-                rectangles its sample asks for. And it has to produce
-                meaningfully different fits from different resamples, which
-                is the gallery in section 7, where the twenty members that
-                root on height do so at ten different thresholds between 144
-                and 158, and the five on weight at three. That is a
-                description of a deep tree and of little else on this site.
-              </p>
+              <p>Bagging can be applied to many kinds of fitted model. Its benefit depends on how much their predictions change across samples and how differently the members make errors. In our deep-tree example, one relabelled person can change the first question, and different resamples produce different fitted boundaries. Averaging those changing predictions has something useful to work on.</p>
+              <p>That does not make low bias or instability a requirement for running the algorithm. They help explain why deep trees are a common choice and why bagging a stable or severely limited model can offer less improvement. Training accuracy alone cannot establish low bias on the wider population.</p>
               <p>
                 A learner that is already stable, a straight line say, gives
                 nearly the same fit on every resample, and a committee of
@@ -710,20 +697,8 @@ export default function BaggingPage() {
                 that made it worth inventing.
               </p>
               <KeepInMind>
-                <p>
-                  The requirements are separate, and the stumps in section 25
-                  pass the first while failing the second. The twenty-five
-                  stumps ask thirteen different first questions between them,
-                  so there is variation to average, and the committee still
-                  scores 0.72 because no member can draw the second cut. A
-                  learner has to be unstable and capable at once, and the
-                  deep tree is the one on this site that is both. That
-                  reverses something from the trees page. On a lone tree the
-                  stopping rules are the only defence against reading too
-                  much into the sample. Inside a committee the averaging has
-                  taken that job over, which is why every member here is
-                  grown deep and left unpruned.
-                </p>
+                <p>The stumps in section 25 show the distinction. Their first questions vary, so there is variation to average, but the committee still scores 0.72 because each member can ask only one question. Averaging their predictions cannot supply every interaction that a deeper tree could express.</p>
+              <p>Our members are grown deep so each can represent those interactions, while aggregation reduces some of their sample sensitivity. Depth and pruning still remain choices to evaluate. A forest does not make overfitting impossible or remove every reason to restrict its members.</p>
               </KeepInMind>
             </SubSection>
           ),
@@ -845,10 +820,7 @@ export default function BaggingPage() {
         {
           title: "Practice. Growing the Committee With the Library",
           practice: [
-            exercise(
-              "Grow the committee of twenty-five and read its two scores",
-              ["Fit the page’s committee with the library. The crowd is the tangled crowd of twenty-five, the twenty-five members are deep trees, and the resamples come from seed 7, which is the seed every widget on this page draws from. Read the training score, the out-of-bag score, and which feature each member’s root question asks about.", "Part 7 arrived at 0.96 on the training crowd against 0.64 out of bag, and section 8 counted twenty roots on height and five on weight. All four numbers should come back exactly, since the seed fixes every draw."],
-              `from oop_ml import BaggingClassifier, Feature
+            exercise("Grow the committee of twenty-five and read its two scores",["Fit the page’s committee with the library. The crowd is the tangled crowd of twenty-five, the twenty-five members are deep trees, and the resamples come from seed 7, which is the seed every widget on this page draws from. Read the training score, the out-of-bag score, and which feature each member’s root question asks about.", "Part 7 arrived at 0.96 on the training crowd against 0.64 out of bag, and section 8 counted twenty roots on height and five on weight. All four numbers should come back exactly, since the seed fixes every draw."],`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -856,8 +828,7 @@ is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 
 
 committee = BaggingClassifier(n_members=25, random_seed=7)
 # Fit the committee, print its training score and its out-of-bag score to
-# three places, then count how many members root on height and on weight.`,
-              `from oop_ml import BaggingClassifier, Feature
+# three places, then count how many members root on height and on weight.`,`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -871,17 +842,11 @@ print(f"out-of-bag score {committee.out_of_bag_score():.3f}")
 
 roots = [member.root.split.feature_name for member in committee.members]
 print(f"members rooting on height {roots.count('height')}")
-print(f"members rooting on weight {roots.count('weight')}")`,
-              `training score 0.960
+print(f"members rooting on weight {roots.count('weight')}")`,`training score 0.960
 out-of-bag score 0.640
 members rooting on height 20
-members rooting on weight 5`,
-              { hints: ["Construction configures and fitting learns. The member count and the seed go to the constructor, and the two features and the target go to fit, features first as a list.", "The training score is score on the same features and target the committee was fitted to. The out-of-bag score needs no data at all, because the committee kept its training rows for exactly this purpose.", "The fitted members are a tuple on the committee, and each one is an ordinary tree, so its root is a node holding a split, and the split knows the name of the feature it asks about."], check: numberCheck("What out-of-bag score does the committee report?", 0.64, 0.0005, "Sixteen of the twenty-five people are called correctly by the members whose samples omitted them, and 16 over 25 is 0.64. The training score of 0.96 is the same committee asked about people most of its members memorised, and the gap between the two is the tangled middle being nearly noise.") },
-            ),
-            exercise(
-              "Count who each member left out",
-              ["Section 14 expects a sample of twenty-five to omit about nine people. Ask the fitted committee for its samples and count, for every member, how many of the twenty-five were never drawn.", "The first member’s sample is the one the bootstrap machine replays. Print its draws, its distinct people and its omitted count, then the smallest, largest and mean omitted count across the committee beside the expected 25 × (1 − 1/25)²⁵. The mean is a number the page does not quote."],
-              `from oop_ml import BaggingClassifier, Feature
+members rooting on weight 5`,{...{ hints: ["Construction configures and fitting learns. The member count and the seed go to the constructor, and the two features and the target go to fit, features first as a list.", "The training score is score on the same features and target the committee was fitted to. The out-of-bag score needs no data at all, because the committee kept its training rows for exactly this purpose.", "The fitted members are a tuple on the committee, and each one is an ordinary tree, so its root is a node holding a split, and the split knows the name of the feature it asks about."], check: numberCheck("What out-of-bag score does the committee report?", 0.64, 0.0005, "The out-of-bag score uses only predictions from members whose resamples omitted that person. Its gap from the training score shows why performance on rows used for fitting is a different measurement.") },question:"How does the fitted committee score on training rows and on people its members left out?"}),
+            exercise("Count who each member left out",["Every sample contains twenty-five draws with replacement from the twenty-five training people. Repeats mean some people are selected more than once and others are absent. For each member, count the distinct selected people and those omitted.","Print the first sample's draws, distinct-person count and omitted count. Then print the minimum, maximum and mean omitted counts across the committee, beside the theoretical expected omitted count computed from the sample size. Do not treat that expectation as a requirement for each sample."],`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -890,8 +855,7 @@ is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 
 committee = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
 # Print the first sample's draw count, distinct people and omitted count, then
 # the smallest, largest and mean omitted count over all twenty-five members,
-# and the expected omitted count from the formula in section 14.`,
-              `from oop_ml import BaggingClassifier, Feature
+# and the expected omitted count from the formula in section 14.`,`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -905,17 +869,11 @@ print(f"first member: {len(first)} draws, {int(first.in_bag.sum())} distinct peo
 omitted = [sample.out_of_bag.size for sample in committee.samples]
 print(f"omitted per member, smallest {min(omitted)} and largest {max(omitted)}")
 print(f"mean omitted {sum(omitted) / len(omitted):.2f}")
-print(f"expected omitted {25 * (1 - 1 / 25) ** 25:.2f}")`,
-              `first member: 25 draws, 18 distinct people, 7 omitted
+print(f"expected omitted {25 * (1 - 1 / 25) ** 25:.2f}")`,`first member: 25 draws, 18 distinct people, 7 omitted
 omitted per member, smallest 7 and largest 12
 mean omitted 8.76
-expected omitted 9.01`,
-              { hints: ["samples on a fitted committee is a tuple with one bootstrap sample per member, in member order, so the first member’s is at position zero.", "A sample knows the positions it drew, with repeats, and can report in_bag, one true or false per person, and out_of_bag, the positions it never drew. The length of the sample is the number of draws.", "Summing in_bag counts the distinct people, since a person drawn three times is still one true, and the size of out_of_bag is the omitted count."], check: numberCheck("What is the mean omitted count across the twenty-five members, to two places?", 8.76, 0.005, "Nine is the expectation and no member is obliged to hit it. Across these twenty-five members the counts run from 7 to 12 and average 8.76, a little under the 9.01 that 25 × (24/25)²⁵ predicts, which is the histogram in section 7 summarised in one number.") },
-            ),
-            exercise(
-              "Judge every person out of bag",
-              ["Section 22 says a person’s judges number between three and thirteen on this committee, and section 20 says the whole committee’s verdict and the judges’ verdict differ for eight people. Build the out-of-bag estimate and read both claims off it.", "Print the number of people with at least one judge, the minimum and maximum judge counts, the mean judge count, and how many people receive different verdicts from the two methods. Compare your mean judge count with the mean omitted count you calculated in the previous problem."],
-              `from oop_ml import BaggingClassifier, Feature
+expected omitted 9.01`,{...{ hints: ["samples on a fitted committee is a tuple with one bootstrap sample per member, in member order, so the first member’s is at position zero.", "A sample knows the positions it drew, with repeats, and can report in_bag, one true or false per person, and out_of_bag, the positions it never drew. The length of the sample is the number of draws.", "Summing in_bag counts the distinct people, since a person drawn three times is still one true, and the size of out_of_bag is the omitted count."], check: numberCheck("What is the mean omitted count across the twenty-five members, to two places?", 8.76, 0.005, "The expected omitted count describes an average over random draws, not a requirement for each member. This seeded committee has its own realised range and mean.") },question:"How many people did each bootstrap sample leave out?"}),
+            exercise("Judge every person out of bag",["Section 22 says a person’s judges number between three and thirteen on this committee, and section 20 says the whole committee’s verdict and the judges’ verdict differ for eight people. Build the out-of-bag estimate and read both claims off it.", "Print the number of people with at least one judge, the minimum and maximum judge counts, the mean judge count, and how many people receive different verdicts from the two methods. Compare your mean judge count with the mean omitted count you calculated in the previous problem."],`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -925,8 +883,7 @@ committee = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights
 estimate = committee.out_of_bag_estimate()
 # Print how many people are covered and uncovered, the fewest and most
 # judges any person has, the mean number of judges, and how many people's
-# out-of-bag verdict differs from the whole committee's verdict.`,
-              `from oop_ml import BaggingClassifier, Feature
+# out-of-bag verdict differs from the whole committee's verdict.`,`from oop_ml import BaggingClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -941,17 +898,11 @@ print(f"mean judges {estimate.mean_judges:.2f}")
 
 whole = committee.predict([heights, weights])
 differ = sum(1 for own, judged in zip(whole, estimate.predictions) if own != judged)
-print(f"people whose two verdicts differ {differ}")`,
-              `people with a judge 25, without 0
+print(f"people whose two verdicts differ {differ}")`,`people with a judge 25, without 0
 judges per person, fewest 3 and most 13
 mean judges 8.76
-people whose two verdicts differ 8`,
-              { hints: ["out_of_bag_estimate answers an object rather than a bare array, because a prediction means nothing without knowing which people it covers and how many members stood behind it. n_covered, n_uncovered, judges and mean_judges are all properties of it.", "judges is one count per person, so its smallest and largest entries are the fewest and most judges anyone has.", "predict on the fitted committee gives the whole committee’s verdict for every person, and the estimate’s predictions give the judges’ verdict in the same order, so zipping the two and counting the disagreements is the whole comparison."], check: numberCheck("For how many people does the judges’ verdict differ from the whole committee’s?", 8, 0.5, "To every member that drew a person, that person is a training example a deep tree remembers, so the whole committee tends to get them right. The judges never saw them, and on eight people in the tangled middle the two verdicts part company. The mean number of judges, 8.76, is the mean omitted count seen from the other side of the grid, since every omission is one judge for one person.") },
-            ),
-            exercise(
-              "Bag stumps and watch the bias stay",
-              ["Section 25 bags twenty-five stumps, trees allowed one question each, and finds they score 0.72 on the training crowd. Build that committee by handing the bagging frame a stump as its base model, and compare it with one stump and with the deep committee.", "Print the training scores for a single stump, the bagged stumps and the bagged deep trees. Then print the out-of-bag scores for both ensembles. Compare the stump ensemble's out-of-bag result with the deep trees' reported 0.64."],
-              `from oop_ml import BaggingClassifier, DecisionTreeClassifier, Feature
+people whose two verdicts differ 8`,{...{ hints: ["out_of_bag_estimate answers an object rather than a bare array, because a prediction means nothing without knowing which people it covers and how many members stood behind it. n_covered, n_uncovered, judges and mean_judges are all properties of it.", "judges is one count per person, so its smallest and largest entries are the fewest and most judges anyone has.", "predict on the fitted committee gives the whole committee’s verdict for every person, and the estimate’s predictions give the judges’ verdict in the same order, so zipping the two and counting the disagreements is the whole comparison."], check: numberCheck("For how many people does the judges’ verdict differ from the whole committee’s?", 8, 0.5, "The full committee includes members trained on each person; the out-of-bag prediction excludes those members. Their disagreements expose mistakes concealed by training accuracy. Every member-person omission is also one available out-of-bag vote.") },question:"Which people receive a different prediction from their out-of-bag judges?"}),
+            exercise("Bag stumps and watch the bias stay",["Section 25 bags twenty-five stumps, trees allowed one question each, and finds they score 0.72 on the training crowd. Build that committee by handing the bagging frame a stump as its base model, and compare it with one stump and with the deep committee.", "Print the training scores for a single stump, the bagged stumps and the bagged deep trees. Then print the out-of-bag scores for both ensembles. Compare the stump ensemble's out-of-bag result with the deep trees' reported 0.64."],`from oop_ml import BaggingClassifier, DecisionTreeClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -960,8 +911,7 @@ is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 
 deep = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
 # Fit one stump on the whole crowd, and a committee of twenty-five bagged
 # stumps under seed 7, then print the three training scores and the two
-# out-of-bag scores to two places.`,
-              `from oop_ml import BaggingClassifier, DecisionTreeClassifier, Feature
+# out-of-bag scores to two places.`,`from oop_ml import BaggingClassifier, DecisionTreeClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -976,13 +926,10 @@ stumps = BaggingClassifier(
 print(f"one stump, training score {one_stump.score([heights, weights], is_adult):.2f}")
 print(f"bagged stumps, training score {stumps.score([heights, weights], is_adult):.2f}")
 print(f"bagged deep trees, training score {deep.score([heights, weights], is_adult):.2f}")
-print(f"out of bag, stumps {stumps.out_of_bag_score():.2f} against deep trees {deep.out_of_bag_score():.2f}")`,
-              `one stump, training score 0.80
+print(f"out of bag, stumps {stumps.out_of_bag_score():.2f} against deep trees {deep.out_of_bag_score():.2f}")`,`one stump, training score 0.80
 bagged stumps, training score 0.72
 bagged deep trees, training score 0.96
-out of bag, stumps 0.68 against deep trees 0.64`,
-              { hints: ["A stump is a decision tree whose max_depth is 1, and a tree constructed that way is a model like any other, so it can be fitted on the crowd by itself.", "The bagging frame takes a base_model, the prototype every member is a copy of. Its default is an unpruned tree, and a stump handed in its place makes every member a stump.", "Both committees are fitted and scored exactly as the deep one was. Nothing about the frame changes when the member does."], check: numberCheck("What out-of-bag score do the bagged stumps report, to two places?", 0.68, 0.005, "Twenty-five stumps cannot draw the second cut the crowd needs, so their training score stays at 0.72 while the deep trees reach 0.96. Out of bag the stumps’ 0.68 sits beside the deep committee’s 0.64, because the extra flexibility the deep trees spent on the tangled middle was spent memorising noise, which a stranger never benefits from. Averaging removed the deep trees’ variance and could not touch the stumps’ bias, and on this crowd the two shortfalls come out close.") },
-            ),
+out of bag, stumps 0.68 against deep trees 0.64`,{...{ hints: ["A stump is a decision tree whose max_depth is 1, and a tree constructed that way is a model like any other, so it can be fitted on the crowd by itself.", "The bagging frame takes a base_model, the prototype every member is a copy of. Its default is an unpruned tree, and a stump handed in its place makes every member a stump.", "Both committees are fitted and scored exactly as the deep one was. Nothing about the frame changes when the member does."], check: numberCheck("What out-of-bag score do the bagged stumps report, to two places?", 0.68, 0.005, "The stump committee remains restricted by its one-question members. Its out-of-bag result on this sample is slightly above the deep-tree committee's, illustrating that extra training flexibility need not improve predictions for unseen rows.") },question:"Can averaging one-question trees repair a rule that is too restrictive?"}),
           ],
         },
       ]}

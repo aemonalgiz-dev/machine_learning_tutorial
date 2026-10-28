@@ -64,7 +64,10 @@ export default function BytePairEncodingPage() {
 <>
               <SubSection title="1. One sentence, and a corpus that never contained it">
                 <p>
-                  Every page in this section carries the same sentence, and this one carries a corpus beside it. The sentence is the one below, and I wrote the corpus myself, eighteen short sentences of ordinary English about reports and costs and analyses, chosen so that every character the sentence uses turns up somewhere in them and so that the words are plausible neighbours of the sentence&rsquo;s own.
+                  Suppose the training text contains lower and analysis, but never the complete expression low-cost re-analysis. A vocabulary containing only whole words would have trouble with that new expression. Could reusable parts give us a way to spell it?
+                </p>
+                <p>
+                  We will use eighteen short sentences about reports and costs. They supply the training corpus, meaning the text from which we count repeated patterns. The sentence shown below is kept out of that corpus so we can test a new arrangement of familiar characters.
                 </p>
                 <p>
                   The held-out sentence is absent from the corpus. We can therefore test how the learned pieces represent new text, while using familiar characters so that unknown-character handling does not obscure the first example.
@@ -1185,7 +1188,11 @@ export default function BytePairEncodingPage() {
           practice: [
             exercise(
               "Replay the ten merges on the four words",
-              ["Part 2 ran the loop ten times on low, lower, newest and widest and watched the twenty-two-row table assemble. Fit the same corpus with the library, asking for 22 rows with the structural byte rows switched off so that the table is exactly what the corpus taught, and print every merge with the count that chose it.", "Then encode lowest, which the corpus never contained, and decode it again. Part 3 arrived at lo, w and est with its marker. The first count ties e with s against s with the marked t at 9, and the library breaks a tie toward the alphabetically earlier pair, which is the branch the lesson walked."],
+              [
+  "The starter gives repeated occurrences of low, lower, newest and widest. Learn a vocabulary from those occurrences, then test a word that was absent: lowest.",
+  "Fit BytePairEncoding with vocabulary_size=22 and byte_fallback=False. Print each learned merge in order, including its left piece, right piece, merged spelling and score. Then print the vocabulary size, lowest’s pieces and count, and its decoded text.",
+  "Here a merge score is the pair’s weighted occurrence count. The library resolves equal scores alphabetically; keep the corpus and settings fixed so your report follows that rule."
+],
               `from oop_ml import BytePairEncoding
 
 corpus = [
@@ -1229,11 +1236,21 @@ merge 10: w + idest</w> -> widest</w> at 3
 rows 22
 lowest -> lo w est</w> in 3 pieces
 decoded lowest`,
-              { hints: ["Construction configures and fit learns, so the size goes to the constructor and the corpus to fit. Eleven symbols, one stand-in row and ten merges are the 22.", "merges is iterable in the order the merges were learned, and each merge has left, right, merged and score, where the score is the count that chose it.", "encode answers an object whose texts are the pieces and whose ids a model would read, and decode takes those ids and gives the text back with the markers turned into spaces."], check: numberCheck("What count chose the seventh merge, the one that joins lo to the marked w?", 5, 0, "The word low occurs five times and nothing else contains lo followed by the marked w, so the pair is worth 5 and joining it removes five pieces from the corpus. The counts have fallen from 9 at the first merge, since each merge is worth the largest count left and that can only fall.") },
+              {
+question: "Which repeated pairs become vocabulary entries, and how do they spell an unseen word?",
+ hints: [
+  "Pass vocabulary_size and byte_fallback to the constructor, then the corpus to fit.",
+  "model.merges records the learned order. Each merge exposes left, right, merged and score.",
+  "encoding.texts shows pieces, encoding.ids supplies decode, and encoding.n_tokens gives their count. The </w> marker belongs to a word ending."
+], check: numberCheck("What count chose the seventh merge, the one that joins lo to the marked w?", 5, 0, "The seventh merge has score 5 because that marked form of low occurs five times. Its score refers to occurrences in this corpus, rather than to a probability or a measure of meaning.") },
             ),
             exercise(
               "Turn the size dial on the eighteen sentences",
-              ["Part 4 fitted the eighteen sentences at fifteen sizes and drew the curve. Fit at 52, 54, 66, 80, 100, 137 and 300, and at each print how many rows the corpus taught, how many merges that took, what the corpus costs in pieces and what the sentence about Dr. Alvarez costs.", "The byte rows sit underneath the budget, so the rows the corpus taught are the whole table less 257. Part 4 prints the sentence at 52 rows as 46 pieces and at 137 as 26, with the corpus falling from 648 to 263, and says that asking for 300 gives 137. The row at 54 is one the lesson never prints."],
+              [
+  "Allowing another learned piece can shorten familiar text, but the saving may be different on the Dr. Alvarez sentence. Compare the two lengths as the vocabulary budget grows.",
+  "Fit BytePairEncoding at requested sizes 52, 54, 66, 80, 100, 137 and 300, leaving byte fallback enabled. For each fit print the learned-row count excluding its 257 structural fallback rows, the merge count, the total corpus tokens and the held-out sentence tokens.",
+  "Use the supplied sentences unchanged and report the actual fitted size when the learner stops below the requested budget."
+],
               `from oop_ml import BytePairEncoding
 
 sentences = [
@@ -1301,11 +1318,21 @@ asked  80: taught  80 rows in 28 merges, corpus 414 pieces, sentence 29
 asked 100: taught 100 rows in 48 merges, corpus 344 pieces, sentence 28
 asked 137: taught 137 rows in 85 merges, corpus 263 pieces, sentence 26
 asked 300: taught 137 rows in 85 merges, corpus 263 pieces, sentence 26`,
-              { hints: ["vocabulary.n_tokens is the whole table, byte rows included, and n_merges is how many merges the fit learned. The rows the corpus taught are the stand-in, the 51 symbols of the alphabet and the merges.", "A corpus costs the sum of what each of its texts encodes to, and encode answers an object with an n_tokens.", "Asking for more than the corpus can teach is not refused. The fit stops when no pair is left that occurs twice, and the readouts say what it managed."], check: numberCheck("How many pieces does the sentence come to at 54 rows, two merges in?", 44, 0, "The first merge joins h to the marked e and saves 31 pieces, the second joins t to the he it made and saves 19, so the word the is already one piece, and the sentence holds it once. Two merges take the sentence from 46 pieces to 44 and the corpus from 648 to 598, the steep start of the curve, where every merge is still worth more than any merge after it.") },
+              {
+question: "What does a larger vocabulary buy on the training text and on a new sentence?",
+ hints: [
+  "With fallback enabled, vocabulary.n_tokens includes 257 structural rows. Subtract those only for the displayed learned-row count.",
+  "Fit a fresh model at every size. Compute corpus length by summing encode(text).n_tokens over sentences.",
+  "Keep the corpus and held-out sentence separate. A merge can help one without appearing in the other."
+], check: numberCheck("How many pieces does the sentence come to at 54 rows, two merges in?", 44, 0, "At the requested learned size of 54, the held-out sentence uses 44 pieces. The first two merges help this sentence, but the size sweep is needed to see how later savings differ between familiar and held-out text.") },
             ),
             exercise(
               "Read the sentence as published, then with every character spellable",
-              ["Part 3 read the sentence about Dr. Alvarez and the Greek sentence twice, once under the method exactly as published and once with a byte spelling under every character. Fit the eighteen sentences both ways at 137 rows, encode both texts with each fit, decode the ids, and print the piece count, how many pieces are byte rows, and either that the text came back exactly or what came back instead.", "Under the published method the sentence loses the space after Alvarez and comes back shorter, with nothing raised. With the repair it comes back exact at 26 pieces, and the Greek sentence costs 46, 42 of them byte rows. The script prints a decoding only when it differs from the text, which keeps the output in characters every console can show."],
+              [
+  "A vocabulary learned from English sentences may leave parts of a new name or a Greek sentence unrepresentable. Compare the library’s end-marked BPE with and without its byte-fallback repair.",
+  "Fit both versions on sentences with vocabulary_size=137. Encode each probe with each fit, in the supplied order. Print its token count, the number of pieces spelled as <0x..> byte rows, and either exact or the changed decoded text.",
+  "The settings and corpus otherwise stay the same. Print the decoded string only on a mismatch so the successful Greek round trip does not require the console to display Greek."
+],
               `from oop_ml import BytePairEncoding
 
 sentences = [
@@ -1374,11 +1401,21 @@ for label, model in [("as published", published), ("every character spellable", 
 as published: 22 pieces, 0 byte rows, came back as [UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK][UNK].
 every character spellable: 26 pieces, 0 byte rows, exact
 every character spellable: 46 pieces, 42 byte rows, exact`,
-              { hints: ["The byte spelling is on by default, so the published method is the one that has to be asked for. Everything else about the two fits is the same, and so are their merges.", "A byte row is spelled the way Part 3 shows it, the letter A as <0x41>, so a piece that starts with <0x is one.", "Nothing is raised on the published side. The only sign that the sentence changed is that the decoded text is not the text that went in, which is why the script compares them rather than printing the Greek, which a Windows console may refuse to show."], check: numberCheck("How many of the Greek sentence’s pieces are byte rows under the repaired fit?", 42, 0, "Every letter of the Greek sentence is absent from the corpus, so each is written as the two byte rows of its spelling in bytes, and 21 letters cost 42 rows. The other four pieces are three bare end-of-word markers and the full stop with its marker, which the corpus did teach. Under the published method the same 21 letters are 21 stand-ins and the text does not come back.") },
+              {
+question: "Can byte fallback repair a learned tokenizer’s missing characters?",
+ hints: [
+  "byte_fallback=True is the default; pass False for the comparison without the repair.",
+  "Byte-fallback pieces have texts beginning with <0x. Count those pieces in encoding.texts.",
+  "Compare model.decode(encoding.ids) with the original string. The absence of an exception does not establish an exact round trip."
+], check: numberCheck("How many of the Greek sentence’s pieces are byte rows under the repaired fit?", 42, 0, "The repaired Greek encoding contains 42 byte-fallback pieces. The remaining pieces represent boundaries and punctuation already covered by this fit. Verify recovery independently of the piece count.") },
             ),
             exercise(
               "Keep the merges off a word’s joints",
-              ["Part 5 took undo, untie, redo and retie ten times each and fitted them twice at thirty rows, once merging by count alone and once with each word cut at its joint before counting. Build both fits, with the structural rows switched off on the plain one so that its table is what the corpus taught, and print the merges each learned, the rows each ended at, how the forty words read, and how undo is cut.", "The constrained vocabulary should be exactly the first fifteen entries of the other, and it should read the forty words as 80 pieces against 40."],
+              [
+  "The supplied words undo, untie, redo and retie share prefixes and endings. Compare freely merging their characters with a fit that first separates the known parts.",
+  "Fit both models at vocabulary_size=30. Disable byte fallback on the unconstrained BPE. Use the supplied pattern pre-tokenizer for the constrained fit so merges cannot join pieces on opposite sides of its cuts.",
+  "For each fit print its merge and vocabulary counts, the total tokens for the forty word occurrences, the learned merged spellings in order, and undo’s pieces. A boundary is a constraint supplied by us, not a linguistic discovery by the learner."
+],
               `from oop_ml import (
     BytePairEncoding,
     MorphemeConstrainedBytePairEncoding,
@@ -1421,7 +1458,13 @@ for label, model in [("may cross a joint", plain), ("may not cross a joint", con
 may not cross a joint: 5 merges, 15 rows, forty words as 80 pieces
   merges do</w> ie</w> re tie</w> un
   undo -> un do</w>`,
-              { hints: ["The constrained fit takes the joints as a pre-tokenizer whose pattern lists the parts, and it carries no byte rows underneath it, so its table is already only what the corpus taught.", "merged on a merge is the symbol the merge produced, and merges is in the order they were learned, so joining them in order shows where the constrained fit stopped.", "The corpus is one text here, so the pieces it costs are what that one text encodes to."], check: numberCheck("How many pieces does the constrained fit read the forty words as?", 80, 0, "Every part is a single symbol after five merges and every pair that remains straddles a joint, so no further merge can be proposed and each word stays two pieces, 80 for the forty words. The unconstrained fit goes on to join the parts, four more merges after the shared five, and reads each word as one piece.") },
+              {
+question: "What changes when merging cannot cross a known prefix boundary?",
+ hints: [
+  "The pre-tokenizer supplies the allowed regions before pairs are counted. Merging cannot undo that separation.",
+  "Read n_merges, vocabulary.n_tokens and each merge.merged from the fit.",
+  "The corpus is one string here. Its encoding counts all forty occurrences, while encoding undo shows one local consequence of the constraint."
+], check: numberCheck("How many pieces does the constrained fit read the forty words as?", 80, 0, "The constrained fit uses 80 pieces for the forty word occurrences. It preserves the supplied two-part boundaries and stops when every remaining possible join crosses one of them.") },
             ),
           ],
         },

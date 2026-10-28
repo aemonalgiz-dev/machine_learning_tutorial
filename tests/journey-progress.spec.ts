@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { newJourneyProgress, updateJourneyProgress, validJourneyProgress, journeyStatus, savedWorkshopStatus, journeyAttemptHistory } from "../lib/journey-progress";
 import { labHref, labLessons } from "../lib/labs";
 import { buildById } from "../lib/builds/catalog";
+import { lessonOrder } from "../lib/course-navigation";
 import { freshStageAttempt, recordStageAssistance, stageAssistance, type JourneyAssistance } from "../lib/builds/journey-attempts";
 
 const initial = () => newJourneyProgress("statistics", "Read the city records", "/lab/statistics");
@@ -118,7 +119,7 @@ test("journey contract: existing workshop saves distinguish a construction from 
 });
 
 test("journey contract: every published lesson has an accessible workshop and the guide remains separate", () => {
-  expect(labLessons).toHaveLength(322);
+  expect(labLessons.map(lesson => lesson.href)).toEqual(lessonOrder);
   const routes = labLessons.map(lesson => labHref(lesson.id));
   expect(new Set(routes).size).toBe(labLessons.length);
   for (const lesson of labLessons) {

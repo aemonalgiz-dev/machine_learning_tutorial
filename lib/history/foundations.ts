@@ -41,7 +41,7 @@ export const foundations = {
     source("Cox (1958), The Regression Analysis of Binary Sequences", "https://doi.org/10.1111/j.2517-6161.1958.tb00292.x"),
   ],
   "Suppose we record whether a component failed, along with the conditions under which it operated. We would like to know how those conditions relate to the chance of failure. A straight-line prediction can rise above certainty or fall below impossibility, so it cannot serve as a probability without further structure.",
-  "Logistic regression developed within the study of binary outcomes. David Cox's 1958 paper on binary sequences is an early treatment of regression for this kind of data. The useful change is in what we model with a linear relationship: the logarithm of the odds, rather than the probability itself.",
+  "David Cox's 1958 paper examines regression for sequences of two possible outcomes. Such outcomes are called binary: a component failed or it did not. One useful comparison is how likely failure is relative to no failure. That ratio is called the odds. Logistic regression models the logarithm of those odds with a linear rule. We will build up to that choice after seeing why a straight-line probability fails.",
   "We can think of the model as first collecting evidence into a score. The logistic function then turns that score into a probability between zero and one. Large positive scores approach one; large negative scores approach zero. This gives us a way to represent increasing confidence without leaving the range a probability is allowed to occupy."),
 
   "judging-a-classifier": history("What Does It Cost to Raise a False Alarm?", [

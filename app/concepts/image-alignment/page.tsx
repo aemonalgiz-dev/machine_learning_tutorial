@@ -69,17 +69,8 @@ export default function ImageAlignmentPage() {
               <p>
                 Recall the quarter-turn experiment in the keypoints lesson. Every corner was detected again in its expected position, with the same measured strength. But the corresponding descriptors were 1.443376 apart on a distance scale whose maximum is 2.0. That was as far apart as the square&apos;s top-left and top-right corners. We found the location successfully, yet its description changed enough to resemble another corner. Let&apos;s examine what the rotation did to the patch.
               </p>
-              <p>
-                The reason is where the patch is read from. The descriptor is the
-                square of brightness around the keypoint, with its mean removed
-                and its length divided out, and the square is cut with the
-                picture&rsquo;s up as up. Turn the picture and the brightness
-                around the corner turns with it, so the square is now cut across a
-                different arrangement of the same pixels. Two corners of one
-                square differ from each other in precisely that way, by a turn, so
-                a description that cannot tell a corner from its turned self also
-                cannot tell it from its neighbours.
-              </p>
+              <p>The descriptor reads a square of brightness around a keypoint. It subtracts the patch mean and divides by the length of the remaining value pattern, reducing sensitivity to a common brightness shift and positive rescaling. But it still reads the square with the image&apos;s up direction as up.</p>
+              <p>Rotate the image and the same physical corner presents its pixels in a different order. A neighbouring corner can resemble that turned pattern. We therefore need to examine orientation as well as brightness: which direction should count as up when we describe this particular keypoint?</p>
               <SubSection title="1. The cost, measured three ways">
                 <p>
                   The bar below is the shape the keypoints lesson&rsquo;s own
@@ -756,10 +747,7 @@ export default function ImageAlignmentPage() {
         {
           title: "Practice. Lining Up Pictures With the Library",
           practice: [
-            exercise(
-              "Read one corner before and after a quarter turn",
-              ["Draw the lesson's bent bar, turn it a quarter circle with numpy, and give the corners of both pictures a direction with the centre-of-brightness rule.", "Find the corner at row 14, column 14 in the first picture and the corner it lands on in the second, at row 34, column 14. Print the direction each faces in degrees, then read both with the binary descriptor and print how many of the 256 bits differ."],
-              `import numpy as np
+            exercise("Read one corner before and after a quarter turn",["Draw the lesson's bent bar, turn it a quarter circle with numpy, and give the corners of both pictures a direction with the centre-of-brightness rule.", "Find the corner at row 14, column 14 in the first picture and the corner it lands on in the second, at row 34, column 14. Print the direction each faces in degrees, then read both with the binary descriptor and print how many of the 256 bits differ."],`import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     BinaryDescriptor, IntensityCentroidRule, oriented_keypoints_of,
 )
@@ -774,8 +762,7 @@ turned = Picture(np.rot90(values))
 rule = IntensityCentroidRule()
 # Orient the keypoints of both pictures with a border of 12, pick out the
 # corner at (14, 14) and its turned self at (34, 14), print their directions
-# in degrees, and print the Hamming distance between their binary readings.`,
-              `import numpy as np
+# in degrees, and print the Hamming distance between their binary readings.`,`import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     BinaryDescriptor, IntensityCentroidRule, oriented_keypoints_of,
 )
@@ -797,24 +784,17 @@ print(f"before the turn the corner faces {np.degrees(corner.angle):.2f} degrees"
 print(f"after the turn it faces {np.degrees(twin.angle):.2f} degrees")
 reading = BinaryDescriptor.of(bar, corner)
 reading_after = BinaryDescriptor.of(turned, twin)
-print(f"bits that differ: {reading.distance_to(reading_after):.0f} of {reading.n_values}")`,
-              `before the turn the corner faces 45.00 degrees
+print(f"bits that differ: {reading.distance_to(reading_after):.0f} of {reading.n_values}")`,`before the turn the corner faces 45.00 degrees
 after the turn it faces -45.00 degrees
-bits that differ: 0 of 256`,
-              { hints: ["A border of 12 keeps every corner's patch inside the picture; the detector reports nothing nearer the frame than that.", "The oriented keypoints carry a row, a column and an angle in radians, so numpy's degrees turns the angle into what the lesson quotes.", "A descriptor is read from a picture and an oriented keypoint, and two descriptors of the same kind answer their distance to each other."], check: numberCheck("What direction, in degrees, does the corner face after the turn?", -45.0, 0.05, "The corner faced 45 degrees before, down and to the right where its brightness is. A counter-clockwise quarter turn carries that to minus 45 degrees, which is the direction turning with the corner. The pattern of pairs turns with it too, which is why no bit differs.") },
-            ),
-            exercise(
-              "Recover a planted move from three points",
-              ["Build a move with a scale of 1.3, a turn of 0.6 radians and a shift of four down and two to the left, carry three points through it, and fit a move back from the pairs.", "Part 5 says two pairs fix the four numbers and more make the fit a least-squares one. Print the recovered four numbers, the turn in degrees, and the largest gap between the recovered numbers and the planted ones."],
-              `import numpy as np
+bits that differ: 0 of 256`,{...{ hints: ["A border of 12 keeps every corner's patch inside the picture; the detector reports nothing nearer the frame than that.", "The oriented keypoints carry a row, a column and an angle in radians, so numpy's degrees turns the angle into what the lesson quotes.", "A descriptor is read from a picture and an oriented keypoint, and two descriptors of the same kind answer their distance to each other."], check: numberCheck("What direction, in degrees, does the corner face after the turn?", -45.0, 0.05, "The estimated orientation rotates with this ideal corner, and the descriptor rotates its comparison pattern with it. The bit agreement is measured on this exact quarter-turn example, not guaranteed for arbitrary rotated photographs.") },question:"Does rotating the sampling pattern preserve this corner's descriptor?"}),
+            exercise("Recover a planted move from three points",["Build a move with a scale of 1.3, a turn of 0.6 radians and a shift of four down and two to the left, carry three points through it, and fit a move back from the pairs.", "Part 5 says two pairs fix the four numbers and more make the fit a least-squares one. Print the recovered four numbers, the turn in degrees, and the largest gap between the recovered numbers and the planted ones."],`import numpy as np
 from oop_ml.core.computer_vision.alignment import SimilarityTransform
 
 planted = SimilarityTransform(1.3, 0.6, 4.0, -2.0)
 points = np.array([[1.0, 2.0], [5.0, 7.0], [3.0, -1.0]])
 # Carry the points through the planted move, fit a move from the pairs, and
 # print its scale, its turn in radians and degrees, its shift, and the largest
-# gap from the planted numbers.`,
-              `import numpy as np
+# gap from the planted numbers.`,`import numpy as np
 from oop_ml.core.computer_vision.alignment import SimilarityTransform
 
 planted = SimilarityTransform(1.3, 0.6, 4.0, -2.0)
@@ -831,17 +811,11 @@ gaps = [
     abs(recovered.row_shift - 4.0),
     abs(recovered.column_shift + 2.0),
 ]
-print(f"largest gap from the planted numbers {max(gaps):.2e}")`,
-              `scale 1.300000
+print(f"largest gap from the planted numbers {max(gaps):.2e}")`,`scale 1.300000
 turn 0.600000 radians, 34.38 degrees
 shift 4.000000 down, -2.000000 right
-largest gap from the planted numbers 1.33e-15`,
-              { hints: ["A move carries an array of (row, column) points with applied_to, and answers one landing position per point.", "The fit takes the first points and the second points as two arrays of the same shape, and answers a move of the same kind."], check: numberCheck("What turn, in degrees, does the recovered move report?", 34.38, 0.01, "A turn of 0.6 radians is 34.38 degrees. Three pairs over-determine the four numbers and the closed form recovers them to around 1e-15, which is the arithmetic rather than an approximation, so the degrees come back as the planted ones to every printed place.") },
-            ),
-            exercise(
-              "Line up a scene you drew yourself",
-              ["Draw a scene of your own, turn it a quarter circle about the middle of the frame with a shift of three down and five to the left, and run the whole method on the pair.", "Print how many keypoints each picture has, how many matches the ratio test kept, how many the vote named inliers and outliers, the turn it recovered, and the mean pixel difference between the pictures before and after the second is carried back."],
-              `import math
+largest gap from the planted numbers 1.33e-15`,{...{ hints: ["A move carries an array of (row, column) points with applied_to, and answers one landing position per point.", "The fit takes the first points and the second points as two arrays of the same shape, and answers a move of the same kind."], check: numberCheck("What turn, in degrees, does the recovered move report?", 34.38, 0.01, "The supplied point pairs recover the planted similarity transform to floating-point precision. Its angle agrees with the planted rotation; enough distinct, informative point correspondences are required to identify the transform.") },question:"Can the point pairs recover the transformation used to move them?"}),
+            exercise("Line up a scene you drew yourself",["Use the supplied scene generator so that the numeric checks describe the same scene. Rotate it a quarter turn about the frame centre and shift it three pixels down and five left. Run the keypoint, descriptor, matching and geometric-consensus procedure on the pair.","Print both keypoint counts, the retained match count, the inlier and outlier counts, the recovered turn, and the mean pixel difference before and after aligning the second image back. Inliers are matches supporting the fitted transformation; outliers are rejected correspondences."],`import math
 import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     AlignmentEstimate, DescriptorSet, IntensityCentroidRule, SimilarityTransform,
@@ -868,8 +842,7 @@ move = SimilarityTransform(1.0, angle, float(shift[0]), float(shift[1]))
 second = move.warp(first)
 # Orient the keypoints of both pictures (border 12, at most 40 each), read them
 # with the binary descriptor, match, estimate the move, and print the counts,
-# the recovered turn in degrees, and the difference before and after.`,
-              `import math
+# the recovered turn in degrees, and the difference before and after.`,`import math
 import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     AlignmentEstimate, DescriptorSet, IntensityCentroidRule, SimilarityTransform,
@@ -904,17 +877,11 @@ estimate = AlignmentEstimate.of(matches)
 print(f"keypoints {len(before)} and {len(after)}, matches {len(matches)}")
 print(f"inliers {estimate.n_inliers}, outliers {len(estimate.outliers)}")
 print(f"planted turn {math.degrees(move.angle):.2f} degrees, recovered {math.degrees(estimate.transform.angle):.2f} degrees")
-print(f"difference before {mean_absolute_difference(first, second):.4f}, after {mean_absolute_difference(first, estimate.aligned(second)):.4f}")`,
-              `keypoints 20 and 16, matches 10
+print(f"difference before {mean_absolute_difference(first, second):.4f}, after {mean_absolute_difference(first, estimate.aligned(second)):.4f}")`,`keypoints 20 and 16, matches 10
 inliers 6, outliers 4
 planted turn 90.00 degrees, recovered 90.00 degrees
-difference before 0.1805, after 0.0000`,
-              { hints: ["A quarter turn is exact, so every corner lands on a pixel and the matches that are right come back at zero bits.", "A set of descriptors is built from a picture and its oriented keypoints, and matched to another set with the ratio test at its default of 0.8.", "The estimate carries the recovered move as its transform, and aligned carries the second picture back into the first picture's frame."], check: numberCheck("How many matches did the ratio test keep?", 10.0, 0.5, "Twenty keypoints in the first picture and sixteen in the second give ten matches, of which the vote keeps six as inliers and names four as outliers. The four are corners of the squares and the L that look alike in their own frames, which is Part 3's repeated-structure case, and the turn is recovered exactly from the six.") },
-            ),
-            exercise(
-              "Turn it twenty degrees instead and see what survives",
-              ["Keep the scene from the last problem and turn it twenty degrees rather than a quarter circle, so that no pixel lands on a pixel and the second picture is resampled.", "Run the same pipeline. On this scene the ratio test is left with a single match, and fixing a move from one match is refused by name rather than answered. Catch the refusal and print it."],
-              `import math
+difference before 0.1805, after 0.0000`,{...{ hints: ["A quarter turn is exact, so every corner lands on a pixel and the matches that are right come back at zero bits.", "A set of descriptors is built from a picture and its oriented keypoints, and matched to another set with the ratio test at its default of 0.8.", "The estimate carries the recovered move as its transform, and aligned carries the second picture back into the first picture's frame."], check: numberCheck("How many matches did the ratio test keep?", 10.0, 0.5, "Some visually similar corners propose incorrect correspondences. The geometric consensus retains the matches agreeing on the planted move, allowing this supplied scene to align despite those outliers.") },question:"Can the supplied scene be aligned despite incorrect corner matches?"}),
+            exercise("Turn it twenty degrees instead and see what survives",["Keep the scene from the last problem and turn it twenty degrees rather than a quarter circle, so that no pixel lands on a pixel and the second picture is resampled.", "Run the same pipeline. On this scene the ratio test is left with a single match, and fixing a move from one match is refused by name rather than answered. Catch the refusal and print it."],`import math
 import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     AlignmentEstimate, DescriptorSet, IntensityCentroidRule, SimilarityTransform,
@@ -942,8 +909,7 @@ shift = centre - turn @ centre + np.array([3.0, -5.0])
 move = SimilarityTransform(1.0, angle, float(shift[0]), float(shift[1]))
 second = move.warp(first)
 # Detect, describe and match as before, print how many matches survived, then
-# try to estimate the move and print the name and message of the refusal.`,
-              `import math
+# try to estimate the move and print the name and message of the refusal.`,`import math
 import numpy as np
 from oop_ml.core.computer_vision.alignment import (
     AlignmentEstimate, DescriptorSet, IntensityCentroidRule, SimilarityTransform,
@@ -981,12 +947,9 @@ try:
     AlignmentEstimate.of(matches)
 except MLLibError as refusal:
     print(type(refusal).__name__)
-    print(refusal)`,
-              `keypoints 20 and 40, matches 1
+    print(refusal)`,`keypoints 20 and 40, matches 1
 TooFewValuesError
-two matches fix a similarity and one cannot; got 1`,
-              { hints: ["The resampled picture has jagged edges where the exact one had straight ones, and the corner detector finds far more candidates in it than in the original.", "The lesson's own scene survives a thirty-degree turn with fifteen matches because its shapes are more distinct within a patch than this one's; a scene with more texture inside each shape would too."] },
-            ),
+two matches fix a similarity and one cannot; got 1`,{...{ hints: ["The resampled picture has jagged edges where the exact one had straight ones, and the corner detector finds far more candidates in it than in the original.", "The lesson's own scene survives a thirty-degree turn with fifteen matches because its shapes are more distinct within a patch than this one's; a scene with more texture inside each shape would too."] },question:"What changes when rotation requires resampling the image?"}),
           ],
         },
       ]}

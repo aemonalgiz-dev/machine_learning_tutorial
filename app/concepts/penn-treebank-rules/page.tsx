@@ -67,12 +67,10 @@ export default function PennTreebankRulesPage() {
 <>
               <SubSection title="1. The pieces had to be the pieces a grammar talks about">
                 <p>
-                  Both rules on the two pages before this one were answering a
-                  question about writing. Splitting on spaces asks where the gaps
-                  are, and the boundary rules ask, at each position between two
-                  characters, whether a word is allowed to end there. Neither
-                  asks anything about English, and that is a strength when the
-                  text might be in Thai.
+                  Spaces help us separate ordinary word-like units, and Unicode boundary rules describe breaks between character classes. An English grammar annotator needs a more specific decision: which units should receive separate grammatical labels?
+                </p>
+                <p>
+                  The answer can differ from a whitespace split. A contraction can have a verb part and a negative part even though the writer placed no space between them. That is the reason for examining the Penn Treebank conventions next.
                 </p>
                 <p>
                   Now imagine annotating an English sentence with parts of speech and grammatical structure. What should count as one unit for that work? Some contractions need to be separated even though they contain no space. The Penn Treebank conventions answer that annotation question. Let&apos;s apply them to our familiar sentence and inspect the resulting units.
@@ -87,11 +85,12 @@ export default function PennTreebankRulesPage() {
                   stop at the end belongs to the sentence and is a separate thing
                   that has its own tag. And{" "}
                   <span className="font-mono">didn&rsquo;t</span> has to be two
-                  rows, since the verb takes one tag and the negation takes
-                  another, and a parser that saw them fused would have to learn a
-                  separate tag for every verb in English with a negation stuck to
-                  it. None of that is visible in the spaces, and none of it is
-                  visible in the characters either.
+                  rows under these conventions. That gives the verb and the
+                  negation separate part-of-speech tags, meaning grammatical
+                  labels for the roles those units play. It lets an annotator
+                  describe the verb and the negative element independently.
+                  Other annotation schemes could make a different choice; the
+                  spaces alone do not decide which convention we should use.
                 </p>
                 <KeepInMind>
                   These rules were asked which units the annotation would have a
@@ -1221,7 +1220,11 @@ export default function PennTreebankRulesPage() {
           practice: [
             exercise(
               "Cut the sentence about Dr. Alvarez, and check that every span is honest",
-              ["Put the sentence about Dr. Alvarez to the treebank rules and print each piece beside its span and the slice of the sentence that span names. Section 2 says every span is honest, in that the slice gives back the piece character for character. Then do the same for the sentence inside quotation marks, which Part 4 says is where that stops being true.", "Nine pieces for the bare sentence, every one of them its own slice. For the quoted sentence, count the pieces and count how many are not the slice their span names. The two that differ should be two characters wide while pointing at a span one character wide."],
+              [
+  "Split the supplied bare and quoted Dr. Alvarez sentences with PennTreebankPreTokenizer. Print every bare-sentence piece beside its half-open span and corresponding source slice.",
+  "Count pieces in each result. In the quoted result, print pieces whose spelling differs from their source slice and count those rewrites. Use the default bracket setting.",
+  "A span identifies where a piece came from. A rule may still rewrite its spelling, as the quotation-mark convention demonstrates."
+],
               `from oop_ml import PennTreebankPreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -1264,11 +1267,20 @@ print(f"{quoted_words.n_words} pieces in the quoted sentence, {rewritten} of the
 [ 0,  1)  \`\`  stands for  "
 [52, 53)  ''  stands for  "
 14 pieces in the quoted sentence, 2 of them rewritten`,
-              { hints: ["The rules take one setting, for the brackets, and the default leaves it off, so the rules are constructed with nothing and the text goes to split.", "Each word carries text, start and end, and the slice its span names is the text indexed from start to end. For the bare sentence the two are equal in every row.", "A rewritten piece is one whose text differs from that slice. Count those as the loop goes, and read n_words off the collection for the total."], check: numberCheck("How many pieces does the quoted sentence give?", 14, 0.0, "The sentence inside the quotation marks gives the same pieces as before with the final stop replaced by a comma, plus the two quotation marks, she, wrote and the stop that now ends the whole text. Two of the fourteen are the quotation marks, rewritten into two backquotes and two apostrophes while each still points at the one character it came from, which is the first place on the site where a piece’s text and its span disagree.") },
+              {
+question: "Does a token’s spelling always equal the source slice its span identifies?",
+ hints: [
+  "For each piece compare piece.text with source[piece.start:piece.end].",
+  "The rewritten opening and closing quote spellings each contain two characters while pointing to one source character. Count rewritten pieces separately from their lengths."
+], check: numberCheck("How many pieces does the quoted sentence give?", 14, 0.0, "The quoted sentence produces fourteen pieces, including two rewritten quotation marks. Their spans remain source locations even though the token spellings differ.") },
             ),
             exercise(
               "Hand the six sentences over one at a time, then joined",
-              ["Section 11 says the final stop rule assumes the text is exactly one sentence. Split the six sentences one at a time and count the pieces, then join them into one string with a space between each pair and count again. In both cases, count the pieces that are exactly a full stop, and list the pieces that are a word with a full stop still attached.", "The page arrives at 72 pieces separately and 67 joined, with six lone stops becoming one. Only Dr. should be on the attached list the first time, and it should have five sentence endings for company the second."],
+              [
+  "Split each of the six supplied sentences separately, then split one string formed by joining them with a single space.",
+  "For each approach print the total piece count, the number of pieces that are exactly a full stop and the list of pieces ending in a full stop while containing other characters.",
+  "This Treebank rule expects a sentence-sized input. Joining inputs changes which full stop it treats as sentence-final, even though the words have not changed."
+],
               `from oop_ml import PennTreebankPreTokenizer
 
 notebook = [
@@ -1309,11 +1321,21 @@ for name, pieces in [("one at a time", separately), ("joined", together)]:
   still wearing a stop: ['Dr.']
 joined: 67 pieces, 1 of them a lone full stop
   still wearing a stop: ['Dr.', 're-analysis.', 'room.', 'arrived.', 'afternoon.', 'expected.']`,
-              { hints: ["The collection split answers has a texts property, so one comprehension over the sentences gathers every piece of every sentence in order.", "Joining the six with a single space gives one text, and the rules read it as one sentence, so only the last character of the whole thing counts as a final stop.", "A lone stop is a piece equal to a full stop, and an attached one ends in a full stop without being one."], check: numberCheck("How many pieces do the six sentences give when they arrive joined into one string?", 67, 0.0, "Five pieces went missing, and they are the five full stops that stayed attached to the word in front of them, because a stop that is not the last thing in the text is read as an abbreviation’s. Six lone stops became one, and the joined corpus gained five entries that are a word with a stop on it, including re-analysis. beside the re-analysis that was already there. Only Dr. is an abbreviation, and the rules cannot tell it from the other five.") },
+              {
+question: "What happens when a sentence-oriented rule receives several sentences at once?",
+ hints: [
+  "Collect all split(text).texts for the separate-sentence report.",
+  "For the joined report, call split on \" \".join(sentences) once.",
+  "A detached full stop equals \".\". An attached one ends with \".\" but is not itself \".\"."
+], check: numberCheck("How many pieces do the six sentences give when they arrive joined into one string?", 67, 0.0, "The joined input gives 67 pieces. Several stops remain attached to preceding words because the rule sees one input whose final stop is at the very end.") },
             ),
             exercise(
               "Put the fifteen contraction probes to the rules",
-              ["Section 7 puts fifteen short texts to the rules, nine that a clause covers and six that none does. Split each, print what came back, and count how many were cut at all. A text is cut when it gives more pieces than it has runs of non-space characters.", "The first nine should come apart and the last six should come back whole, including the sentence about Dr. Alvarez’s own contraction typed with a curved apostrophe. Nothing in the output of a whole piece says whether a clause looked at it, which is the point."],
+              [
+  "Apply the Treebank rules to every supplied probe and print its pieces. Include all fifteen probes, keeping their order and exact apostrophe characters.",
+  "Count a probe as cut when the result has more pieces than Python’s whitespace split of that probe. Finish with the cut and uncut totals.",
+  "Print each source with ascii so a curved apostrophe remains distinguishable from the straight one. Returning a whole piece does not explain whether it was deliberately kept or absent from the rule list."
+],
               `from oop_ml import PennTreebankPreTokenizer
 
 probes = [
@@ -1360,11 +1382,21 @@ print(f"{cut} cut, {len(probes) - cut} returned whole")`,
 "y'all"              -> ["y'all"]
 "o'clock"            -> ["o'clock"]
 9 cut, 6 returned whole`,
-              { hints: ["Splitting the probe on white space with Python’s own split gives its runs, and the rules cut it when they answer more pieces than that.", "ascii gives a string’s repr with every character outside ASCII written as an escape, so the curved apostrophe prints as its code point and the two spellings of one contraction cannot be confused.", "The curved apostrophe is written by its code point in the list for the same reason, and only the straight one is on the rules’ list of endings."], check: numberCheck("How many of the fifteen probes come back whole?", 6, 0.0, "The clause is ten named forms and eight endings reached through a single straight apostrophe, so the curved spelling, the two foreign articles, two spoken forms nobody added and o’clock all come back as one piece. A form that is not on the list and a form examined and left alone give the same answer, and nothing reports that the list was consulted and came up empty.") },
+              {
+question: "Which typed contractions do these English rules recognise?",
+ hints: [
+  "Compare split(probe).n_words with len(probe.split()). Multiword probes need this baseline.",
+  "ascii(probe) escapes non-ASCII characters, making the curved apostrophe visible.",
+  "Keep the literal spelling of every supplied probe. Normalising the apostrophe would change the experiment."
+], check: numberCheck("How many of the fifteen probes come back whole?", 6, 0.0, "Six probes return whole. These rules have specific spellings and suffixes, so a familiar contraction typed with a different apostrophe can miss those branches.") },
             ),
             exercise(
               "Count the three rules over the six sentences",
-              ["Section 17 gives the three rules 72, 63 and 69 pieces on the six sentences, and section 19 says the treebank rules and the space rule both keep 318 of the 375 characters where the boundary rules keep 303. Count all of that from the library, and add a column the page does not print, how many distinct entries a table built over each rule’s pieces would need.", "The space rule and the boundary rules both come to 47 entries, which the earlier pages measured. The treebank rules should come to a different number, and the second part of the task is to say why."],
+              [
+  "Compare the Treebank, whitespace and Unicode word-boundary rules on the same six supplied sentences.",
+  "For each rule print total piece occurrences, distinct spellings and the number of source characters covered by returned spans out of the corpus’s full character count.",
+  "Count covered source characters from spans, not token-spelling lengths. A rule may rewrite a spelling or omit punctuation, so those are separate measurements."
+],
               `from oop_ml import Corpus, PennTreebankPreTokenizer, UnicodeWordPreTokenizer, WhitespacePreTokenizer
 
 notebook = [
@@ -1411,7 +1443,12 @@ for name, rule in rules.items():
               `the treebank rules: 72 pieces, 48 entries, 318 of 375 characters kept
 every run of spaces: 63 pieces, 47 entries, 318 of 375 characters kept
 every boundary: 69 pieces, 47 entries, 303 of 375 characters kept`,
-              { hints: ["Corpus.of takes the list and word_counts takes any of the three rules, answering one count per distinct entry with word and count on each.", "The sum of the counts is the pieces and the number of counts is the entries. The characters kept need the spans, so they come from split rather than from the counts."], check: numberCheck("How many distinct entries do the treebank rules produce over the six sentences?", 48, 0.0, "The space rule’s 47 lose the nine entries that were a word wearing a mark or the contraction, and gain ten, the seven bare words those marks came off, n’t, and the comma and the full stop as entries of their own. re-analysis. collapses into the re-analysis the table already held and didn’t gives did, which was already there too, so the count rises by one rather than by two. Every rule here keeps every character that is not a space, which is why the 318 matches the space rule’s and the boundary rules, which drop the marks, keep 303.") },
+              {
+question: "How do splitting conventions change both token counts and vocabulary size?",
+ hints: [
+  "Use Corpus.of(sentences).word_counts(rule) for occurrence and distinct-spelling counts.",
+  "Sum piece.end - piece.start over every result for source coverage. Keep the full source lengths as the denominator."
+], check: numberCheck("How many distinct entries do the treebank rules produce over the six sentences?", 48, 0.0, "The Treebank rules produce 48 distinct spellings. They separate punctuation and contractions differently from the other rules, so equal vocabulary size or character coverage would not imply equal pieces.") },
             ),
           ],
         },

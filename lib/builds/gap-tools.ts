@@ -49,7 +49,7 @@ export const GAP_TOOLS: Record<string, Tool> = {
     if (!joint.some(x => x > 0)) throw Error("Every cause assigns zero probability to this evidence. There is no nonzero evidence total to condition on.");
     return joint;
   }),
-  sequenceLikelihood: define("Compare Bernoulli sequence likelihoods", "For each supplied success probability, multiplies the probabilities of the observed zero-or-one sequence. Trials are assumed independent given that shared probability.", ["Candidate success probabilities", "Ordered zero-or-one observations"], ([p, y]) => {
+  sequenceLikelihood: define("Compare Bernoulli sequence likelihoods", "For each candidate success probability, returns the probability of this particular ordered zero-or-one sequence. A 1 contributes the success probability and a 0 its complement. Trials are independent given that shared probability; no binomial count multiplier is used.", ["Candidate success probabilities", "Ordered zero-or-one observations"], ([p, y]) => {
     const candidates = numbers(p).map(probability), observed = numbers(y);
     if (observed.length > 100) throw Error("Use at most 100 trials in this direct-product example. Longer sequences need log-likelihood arithmetic.");
     if (!observed.every(x => x === 0 || x === 1)) throw Error("Record each outcome as one for success or zero for failure.");
@@ -74,8 +74,8 @@ export const GAP_TOOLS: Record<string, Tool> = {
     if (distances.some(row => row.some(x => x < 0))) throw Error("Distances cannot be negative.");
     return distances.map(row => row.map(x => Number(x <= radius)));
   }),
-  erodeMask: define("Erode a binary mask", "Keeps a position only if every selected footprint offset is foreground. Uses a centred, odd-sized, centrally symmetric footprint and zero outside the image.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, true)),
-  dilateMask: define("Dilate a binary mask", "Keeps a position if any selected footprint offset reaches foreground. Uses the same symmetric-footprint and zero-padding convention as the erosion tool.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, false)),
+  erodeMask: define("Erode a binary mask", "A foreground value is 1. Keeps a position only when every selected footprint offset lands on foreground, so a narrow object may disappear. The footprint is centred, odd-sized and centrally symmetric; positions outside the image are zero.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, true)),
+  dilateMask: define("Dilate a binary mask", "Sets a position to foreground when any selected footprint offset reaches foreground, expanding surviving shapes. Uses the same centred symmetric footprint and outside-image zeros as Erode a binary mask.", ["Binary mask", "Footprint"], ([value, footprint]) => morphology(value, footprint, false)),
   labelRegions: define("Label connected foreground regions", "Flood-fills each reachable foreground group under four- or eight-neighbour connectivity. Scans rows in order, assigns consecutive positive IDs, and reserves zero for background.", ["Binary mask", "Connectivity: 4 or 8"], ([value, kind]) => {
     const input = binary(value), connectivity = scalar(kind);
     if (connectivity !== 4 && connectivity !== 8) throw Error("Choose four or eight neighbours by supplying 4 or 8.");
@@ -103,7 +103,7 @@ export const GAP_TOOLS: Record<string, Tool> = {
     const scores = numbers(value);
     return scores.map((_, i) => i).sort((a, b) => scores[b] - scores[a] || a - b);
   }),
-  suppressBoxes: define("Suppress overlapping alternatives", "Processes boxes in the supplied score order. Keeps the first available box, removes remaining boxes with IoU strictly above the threshold, then repeats. Removed candidates never suppress others. All boxes must belong to one class.", ["Rectangle rows", "Indices in score order", "IoU threshold"], ([value, indices, cutoff]) => {
+  suppressBoxes: define("Suppress overlapping alternatives", "Processes original box indices in the supplied score order. Keeps the first available box and removes remaining boxes whose intersection-over-union is strictly above the threshold, then repeats. Removed boxes never suppress others. Returns retained indices; all candidates must belong to one class.", ["Rectangle rows", "Indices in score order", "IoU threshold"], ([value, indices, cutoff]) => {
     const boxes = grid(value).map(box), order = numbers(indices), threshold = probability(scalar(cutoff));
     if (order.length !== boxes.length || new Set(order).size !== boxes.length || order.some(x => !Number.isInteger(x) || x < 0 || x >= boxes.length)) throw Error("The score order must contain every box index exactly once.");
     let waiting = [...order]; const kept: number[] = [];

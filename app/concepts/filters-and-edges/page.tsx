@@ -69,16 +69,8 @@ export default function FiltersAndEdgesPage() {
           content: (<>
 <>
               <SubSection title="1. One number per pixel, and a scene to work on">
-                <p>
-                  A greyscale picture is a grid of numbers, one to a pixel,
-                  saying how much light arrived there. The scene this page works
-                  on is forty eight pixels on a side and is drawn rather than
-                  photographed, so that everything in it is known. It holds a
-                  square, a disc, a diagonal bar and three small crosses, all of
-                  them at the same brightness, on ground that is much darker. Two
-                  thousand three hundred and four numbers in all, of which three
-                  hundred and seventy five belong to a shape.
-                </p>
+                <p>A greyscale picture stores a brightness value at every position in a grid. These are encoded image values; without a calibrated imaging process, we should not read them as direct physical measurements of arriving light.</p>
+              <p>Our scene is drawn rather than photographed and is 48 pixels on each side. It contains a square, a disc, a diagonal bar and three small crosses on a darker background. There are 2,304 positions, with 375 belonging to a shape. Because we constructed the scene, we can check a proposed edge rule against the shapes that actually produced it.</p>
                 <>
 <p>
                   There is also a gradual change in illumination. The right side is brighter than the left by 0.30, spread evenly across forty-eight columns, or about 0.00638 per column. We call this a brightness ramp. It gives us a simple way to investigate uneven lighting, as though the lamp were off to one side.
@@ -1142,10 +1134,7 @@ export default function FiltersAndEdgesPage() {
         {
           title: "Practice. Sweeping the Scene With the Library",
           practice: [
-            exercise(
-              "Sweep the six by six picture under every border rule",
-              ["Part 2 swept the six by six picture with the central difference and found 0.5 at columns two and three and nothing elsewhere, and found that reversing the weights answers −0.5 at the same two columns. Part 3 then ran the four border rules over it with the Sobel operator and found that two of them invent an edge the picture does not hold. Reproduce all of it with the library.", "The picture is the lesson’s own, six rows of 0, 0, 0, 1, 1, 1. The library sweeps by correlation, with the weights in the order written, so the sign of every answer is the sign you wrote down."],
-              `import numpy as np
+            exercise("Sweep the six by six picture under every border rule",["Part 2 swept the six by six picture with the central difference and found 0.5 at columns two and three and nothing elsewhere, and found that reversing the weights answers −0.5 at the same two columns. Part 3 then ran the four border rules over it with the Sobel operator and found that two of them invent an edge the picture does not hold. Reproduce all of it with the library.", "The picture is the lesson’s own, six rows of 0, 0, 0, 1, 1, 1. The library sweeps by correlation, with the weights in the order written, so the sign of every answer is the sign you wrote down."],`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField, GradientOperator
 from oop_ml.core.computer_vision.filtering import EdgeRule, swept
 from oop_ml.core.computer_vision.picture import Picture
@@ -1156,8 +1145,7 @@ picture = Picture([[0.0, 0.0, 0.0, 1.0, 1.0, 1.0]] * 6)
 # and print the middle row of the answer. Sweep it again with those weights
 # reversed and print the same row. Then, for each border rule, build the Sobel
 # gradient field under it and print the shape of its answer and the middle
-# row of its sharpness.`,
-              `import numpy as np
+# row of its sharpness.`,`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField, GradientOperator
 from oop_ml.core.computer_vision.filtering import EdgeRule, swept
 from oop_ml.core.computer_vision.picture import Picture
@@ -1173,19 +1161,13 @@ for rule in EdgeRule:
     field = GradientField.of(picture, GradientOperator.SOBEL, rule)
     magnitude = np.asarray(field.magnitude)
     middle = magnitude[min(3, field.shape[0] - 1)]
-    print(f"{rule.value:14} answer {field.shape[0]} by {field.shape[1]}, Sobel sharpness along a middle row {middle.tolist()}")`,
-              `weights as written, middle row [0.0, 0.0, 0.5, 0.5, 0.0, 0.0]
+    print(f"{rule.value:14} answer {field.shape[0]} by {field.shape[1]}, Sobel sharpness along a middle row {middle.tolist()}")`,`weights as written, middle row [0.0, 0.0, 0.5, 0.5, 0.0, 0.0]
 weights reversed, middle row  [0.0, 0.0, -0.5, -0.5, 0.0, 0.0]
 keep_valid     answer 4 by 4, Sobel sharpness along a middle row [0.0, 4.0, 4.0, 0.0]
 extend         answer 6 by 6, Sobel sharpness along a middle row [0.0, 0.0, 4.0, 4.0, 0.0, 0.0]
 wrap           answer 6 by 6, Sobel sharpness along a middle row [4.0, 0.0, 4.0, 4.0, 0.0, 4.0]
-pad_with_zero  answer 6 by 6, Sobel sharpness along a middle row [0.0, 0.0, 4.0, 4.0, 0.0, 4.0]`,
-              { hints: ["swept takes the Picture, the weights as a list of rows, and a border rule that defaults to repeating the edge pixel. It answers a Picture, and np.asarray turns one into a plain array whose row three is the middle row.", "GradientField.of takes the Picture, an operator and a border rule, and its magnitude is a Picture of the sharpness. Under the rule that answers only where the weights fit, the field is four by four, so its middle row is row one rather than row three.", "EdgeRule is an enum, so iterating over it visits all four rules, and each one’s value is its name as a string."], check: numberCheck("What does the Sobel sweep answer at the right border of the middle row when the outside is treated as black?", 4.0, 0.001, "The bright right side meets invented darkness, so the operator reports a change exactly as sharp as the one real boundary, 4, which is the sum of Sobel’s positive weights. Repeating the edge pixel answers 0 there, because a flat border stays flat; reading from the opposite side answers 4 at both ends and reports three boundaries where the picture holds one; and answering only where the weights fit invents nothing and comes back four by four.") },
-            ),
-            exercise(
-              "Relight the scene and watch what survives",
-              ["Part 1 drew the forty eight by forty eight scene, lit it again with the lamp turned up by 1.6 and a second lamp adding 0.15, and found that a threshold of 0.6 which labelled every pixel correctly now relabels 877 of them, while every sharpness was multiplied by 1.6 and no direction moved. The scene is rebuilt here from the numbers behind the page, so every pixel is the page’s own.", "The starter draws the square, the disc, the diagonal bar and the three crosses on ground of 0.12 at a brightness of 0.78, then adds the ramp of 0.30 across the columns. The last line, adding a row of forty eight numbers to a grid of forty eight columns, adds the ramp to every row at once."],
-              `import numpy as np
+pad_with_zero  answer 6 by 6, Sobel sharpness along a middle row [0.0, 0.0, 4.0, 4.0, 0.0, 4.0]`,{...{ hints: ["swept takes the Picture, the weights as a list of rows, and a border rule that defaults to repeating the edge pixel. It answers a Picture, and np.asarray turns one into a plain array whose row three is the middle row.", "GradientField.of takes the Picture, an operator and a border rule, and its magnitude is a Picture of the sharpness. Under the rule that answers only where the weights fit, the field is four by four, so its middle row is row one rather than row three.", "EdgeRule is an enum, so iterating over it visits all four rules, and each one’s value is its name as a string."], check: numberCheck("What does the Sobel sweep answer at the right border of the middle row when the outside is treated as black?", 4.0, 0.001, "Zero padding puts invented darkness beside a bright border, so the filter reports a border response. Repeating the edge value preserves a flat border; other padding rules make different assumptions about what lies outside the frame.") },question:"Which image boundaries do the filter and border rules report?"}),
+            exercise("Relight the scene and watch what survives",["Part 1 drew the forty eight by forty eight scene, lit it again with the lamp turned up by 1.6 and a second lamp adding 0.15, and found that a threshold of 0.6 which labelled every pixel correctly now relabels 877 of them, while every sharpness was multiplied by 1.6 and no direction moved. The scene is rebuilt here from the numbers behind the page, so every pixel is the page’s own.", "The starter draws the square, the disc, the diagonal bar and the three crosses on ground of 0.12 at a brightness of 0.78, then adds the ramp of 0.30 across the columns. The last line, adding a row of forty eight numbers to a grid of forty eight columns, adds the ramp to every row at once."],`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1209,8 +1191,7 @@ relit = scene * 1.6 + 0.15
 # in each picture and how many pixels the two labellings disagree about.
 # Then build the Sobel gradient field of both pictures and print the smallest
 # and largest ratio of relit sharpness to original, and the largest turn
-# of any direction between the two.`,
-              `import numpy as np
+# of any direction between the two.`,`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1240,18 +1221,12 @@ sharpness_here, sharpness_there = np.asarray(here.magnitude), np.asarray(there.m
 ratio = sharpness_there / sharpness_here
 print(f"sharpness multiplied by between {ratio.min():.6f} and {ratio.max():.6f}")
 turn = np.abs((np.asarray(there.direction) - np.asarray(here.direction) + np.pi) % (2 * np.pi) - np.pi)
-print(f"largest turn of any direction {turn.max():.2e} radians")`,
-              `shape pixels 375, brightest ground 0.4200, darkest shape 0.8119
+print(f"largest turn of any direction {turn.max():.2e} radians")`,`shape pixels 375, brightest ground 0.4200, darkest shape 0.8119
 relit, brightest ground 0.8220, darkest shape 1.4491
 threshold 0.6 keeps 375 pixels here and 1252 relit, disagreeing about 877
 sharpness multiplied by between 1.600000 and 1.600000
-largest turn of any direction 1.07e-14 radians`,
-              { hints: ["A comparison such as scene >= 0.7 answers a grid of booleans, which can index the scene to pick out the ground or the shapes, and .sum() counts how many are true.", "GradientField.of takes a Picture and defaults to the Sobel operator with the edge pixel repeated, so Picture(scene) is all the construction needed. Its magnitude and direction are Pictures, and np.asarray reads either as an array.", "The ramp makes every pixel of the scene change a little, so no sharpness is zero and the ratio can be taken everywhere without guarding against division by zero.", "Directions are angles, so the gap between two is taken the short way round, adding π, reducing modulo 2π and subtracting π again, which is what the page does before reporting the largest turn."], check: numberCheck("How many of the 2304 pixels does the threshold of 0.6 disagree with itself about between the two lightings?", 877, 0.5, "The threshold keeps 375 pixels on the scene as drawn, which is exactly the shape pixels, and 1252 on the relit scene, so 877 pixels are labelled differently, 38.06 per cent of the picture. The window of thresholds that works moved from between 0.42 and 0.8119 to between 0.822 and 1.4491, and the two windows do not overlap anywhere. The sharpness, meanwhile, was multiplied by 1.6 to fourteen places everywhere, and the largest turn of any direction is a rounding step rather than a movement.") },
-            ),
-            exercise(
-              "Put the four operators on a clean step and on a turned edge",
-              ["Part 4 says that on a clean step every operator answers the sum of its own positive weights, 0.5, 3, 4 and 16, all reporting the brightness rising at exactly zero radians, and that on an edge spread across a pixel the operators part company over the angle, Scharr’s worst miss being 0.28 degrees against the central difference’s 4.13. Measure both with the library.", "The step is five rows of 0, 0, 1, 1. The turned edge is drawn with numpy the way the page’s sweep draws it, a straight boundary at twenty degrees spread across about a pixel by a hyperbolic tangent, and read at its centre pixel. What each operator reports there is a number the page does not print."],
-              `import numpy as np
+largest turn of any direction 1.07e-14 radians`,{...{ hints: ["A comparison such as scene >= 0.7 answers a grid of booleans, which can index the scene to pick out the ground or the shapes, and .sum() counts how many are true.", "GradientField.of takes a Picture and defaults to the Sobel operator with the edge pixel repeated, so Picture(scene) is all the construction needed. Its magnitude and direction are Pictures, and np.asarray reads either as an array.", "The ramp makes every pixel of the scene change a little, so no sharpness is zero and the ratio can be taken everywhere without guarding against division by zero.", "Directions are angles, so the gap between two is taken the short way round, adding π, reducing modulo 2π and subtracting π again, which is what the page does before reporting the largest turn."], check: numberCheck("How many of the 2304 pixels does the threshold of 0.6 disagree with itself about between the two lightings?", 877, 0.5, "The fixed intensity threshold changes many decisions after relighting. The gradient calculation instead cancels a common additive offset and scales with the positive contrast multiplier under these boundary settings.") },question:"What survives a change in image brightness and contrast?"}),
+            exercise("Put the four operators on a clean step and on a turned edge",["Part 4 says that on a clean step every operator answers the sum of its own positive weights, 0.5, 3, 4 and 16, all reporting the brightness rising at exactly zero radians, and that on an edge spread across a pixel the operators part company over the angle, Scharr’s worst miss being 0.28 degrees against the central difference’s 4.13. Measure both with the library.", "The step is five rows of 0, 0, 1, 1. The turned edge is drawn with numpy the way the page’s sweep draws it, a straight boundary at twenty degrees spread across about a pixel by a hyperbolic tangent, and read at its centre pixel. What each operator reports there is a number the page does not print."],`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField, GradientOperator, weights_of
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1264,8 +1239,7 @@ rows, columns = np.mgrid[:21, :21]
 across = (columns - 10) * np.cos(angle) + (rows - 10) * np.sin(angle)
 edge = Picture(0.5 + 0.5 * np.tanh(across))
 # For each operator, print the angle in degrees it reports at the centre of
-# this edge, and how far that is from twenty.`,
-              `import numpy as np
+# this edge, and how far that is from twenty.`,`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField, GradientOperator, weights_of
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1283,21 +1257,15 @@ across = (columns - 10) * np.cos(angle) + (rows - 10) * np.sin(angle)
 edge = Picture(0.5 + 0.5 * np.tanh(across))
 for operator in GradientOperator:
     reported = np.degrees(np.asarray(GradientField.of(edge, operator).direction)[10, 10])
-    print(f"{operator.value:18} reports the twenty degree edge at {reported:.2f} degrees, out by {abs(reported - 20):.2f}")`,
-              `central_difference positive weights add to  0.5, answer on the step  0.5, direction 0.0000 radians
+    print(f"{operator.value:18} reports the twenty degree edge at {reported:.2f} degrees, out by {abs(reported - 20):.2f}")`,`central_difference positive weights add to  0.5, answer on the step  0.5, direction 0.0000 radians
 prewitt            positive weights add to  3.0, answer on the step  3.0, direction 0.0000 radians
 sobel              positive weights add to  4.0, answer on the step  4.0, direction 0.0000 radians
 scharr             positive weights add to 16.0, answer on the step 16.0, direction 0.0000 radians
 central_difference reports the twenty degree edge at 24.13 degrees, out by 4.13
 prewitt            reports the twenty degree edge at 17.01 degrees, out by 2.99
 sobel              reports the twenty degree edge at 18.90 degrees, out by 1.10
-scharr             reports the twenty degree edge at 20.27 degrees, out by 0.27`,
-              { hints: ["GradientOperator is an enum of the four, and weights_of(operator, vertical=False) answers the horizontal grid as a list of rows, so np.asarray and a boolean mask pick out the positive weights.", "GradientField.of takes the Picture and the operator, and its magnitude and direction are Pictures, so np.asarray and an index of [2, 1] read the answer at row 2, column 1.", "The direction is in radians, measured from pointing right towards pointing down, and np.degrees converts it. Twenty degrees is the direction the brightness rises in, which is across the drawn edge."], check: numberCheck("What angle does Scharr report at the centre of the twenty degree edge, in degrees?", 20.27, 0.01, "Scharr’s three and ten were chosen so that the reported angle is as close to independent of how the edge is turned as three columns of weights allow, and across every angle the page swept its worst miss was 0.28 degrees, against 1.16 for Sobel, 3.10 for Prewitt and 4.13 for the central difference. At twenty degrees the four misses line up in that order. On the clean step they all agree exactly, since the vertical sweep answers exactly zero on a picture whose rows are identical.") },
-            ),
-            exercise(
-              "Threshold the sharpness and find the overlap",
-              ["Part 6 says that on the scene as drawn every threshold between 0.0511 and 0.898 labels all 2304 pixels correctly, and that with a normal spread of 0.08 added to every pixel flat ground answers as high as 1.0157, so the two populations overlap and no threshold keeps every boundary pixel while dropping every flat one. Measure the overlap and score four thresholds.", "The two populations are read off the ramp-free scene, as the page does, so that the ramp’s own gentle change does not count as a boundary. The page quotes 0.4, 0.9 and 1.1; what 0.7 keeps and loses is a number it does not print."],
-              `import numpy as np
+scharr             reports the twenty degree edge at 20.27 degrees, out by 0.27`,{...{ hints: ["GradientOperator is an enum of the four, and weights_of(operator, vertical=False) answers the horizontal grid as a list of rows, so np.asarray and a boolean mask pick out the positive weights.", "GradientField.of takes the Picture and the operator, and its magnitude and direction are Pictures, so np.asarray and an index of [2, 1] read the answer at row 2, column 1.", "The direction is in radians, measured from pointing right towards pointing down, and np.degrees converts it. Twenty degrees is the direction the brightness rises in, which is across the drawn edge."], check: numberCheck("What angle does Scharr report at the centre of the twenty degree edge, in degrees?", 20.27, 0.01, "The operators agree on an axis-aligned step but differ on a sampled oblique boundary. On this measured angle sweep, Scharr has the smallest worst direction error; that observation concerns the supplied edge construction and operator conventions.") },question:"How accurately do the gradient operators recover a tilted edge's direction?"}),
+            exercise("Threshold the sharpness and find the overlap",["Part 6 says that on the scene as drawn every threshold between 0.0511 and 0.898 labels all 2304 pixels correctly, and that with a normal spread of 0.08 added to every pixel flat ground answers as high as 1.0157, so the two populations overlap and no threshold keeps every boundary pixel while dropping every flat one. Measure the overlap and score four thresholds.", "The two populations are read off the ramp-free scene, as the page does, so that the ramp’s own gentle change does not count as a boundary. The page quotes 0.4, 0.9 and 1.1; what 0.7 keeps and loses is a number it does not print."],`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1321,8 +1289,7 @@ ramped = scene + np.linspace(0.0, 0.30, 48)
 # boundary and flat pixels, and the faintest boundary reading.
 # Then add normal noise of spread 0.08 from a generator seeded with 0, and
 # for thresholds 0.4, 0.7, 0.9 and 1.1 print how many flat pixels survive
-# and how many boundary pixels are lost.`,
-              `import numpy as np
+# and how many boundary pixels are lost.`,`import numpy as np
 from oop_ml.core.computer_vision.edges import GradientField
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1350,16 +1317,13 @@ sharpness = np.asarray(GradientField.of(noisy).magnitude)
 print(f"with noise, flat ground answers up to {sharpness[on_flat].max():.4f}")
 for threshold in (0.4, 0.7, 0.9, 1.1):
     kept = sharpness >= threshold
-    print(f"threshold {threshold}: {(kept & on_flat).sum()} flat pixels kept, {(~kept & on_edge).sum()} boundary pixels lost")`,
-              `sharpest reading 2.9974, flat ground answers up to 0.0511 with the ramp and 0.0 without
+    print(f"threshold {threshold}: {(kept & on_flat).sum()} flat pixels kept, {(~kept & on_edge).sum()} boundary pixels lost")`,`sharpest reading 2.9974, flat ground answers up to 0.0511 with the ramp and 0.0 without
 450 boundary pixels, the faintest at 0.898, and 1854 flat pixels
 with noise, flat ground answers up to 1.0157
 threshold 0.4: 693 flat pixels kept, 0 boundary pixels lost
 threshold 0.7: 80 flat pixels kept, 15 boundary pixels lost
 threshold 0.9: 5 flat pixels kept, 35 boundary pixels lost
-threshold 1.1: 0 flat pixels kept, 63 boundary pixels lost`,
-              { hints: ["GradientField.of(Picture(scene)).magnitude is the Sobel sharpness under the default rule, and np.asarray turns it into a grid that comparisons such as > 0.2 can be made on.", "np.random.default_rng(0).normal(0.0, 0.08, ramped.shape) is the noise the page adds, one draw per pixel, and the same seed draws the same noise.", "Boolean grids combine with & and negate with ~, so (kept & on_flat).sum() counts the flat pixels that survive a threshold and (~kept & on_edge).sum() the boundary pixels that do not."], check: numberCheck("At a threshold of 0.7, how many boundary pixels are lost?", 15, 0.5, "At 0.4 nothing real is lost and 693 of the 1854 flat pixels survive as false edges; at 1.1 no flat pixel survives and 63 boundary pixels have gone. In between both happen at once, and 0.7 sits inside the overlap, keeping 80 flat pixels and losing 15 real ones, because the faint half of a real boundary, the obliquely crossed pixels on the disc’s rim and along the diagonal bar, and the loud half of the noise occupy the same range of sharpness. The best value in the whole sweep is 0.9, keeping 5 flat pixels and losing 35 real ones.") },
-            ),
+threshold 1.1: 0 flat pixels kept, 63 boundary pixels lost`,{...{ hints: ["GradientField.of(Picture(scene)).magnitude is the Sobel sharpness under the default rule, and np.asarray turns it into a grid that comparisons such as > 0.2 can be made on.", "np.random.default_rng(0).normal(0.0, 0.08, ramped.shape) is the noise the page adds, one draw per pixel, and the same seed draws the same noise.", "Boolean grids combine with & and negate with ~, so (kept & on_flat).sum() counts the flat pixels that survive a threshold and (~kept & on_edge).sum() the boundary pixels that do not."], check: numberCheck("At a threshold of 0.7, how many boundary pixels are lost?", 15, 0.5, "At this threshold both false edge responses and missed true boundary pixels remain. Their overlapping response ranges prevent a perfect scalar cutoff on this noisy scene.") },question:"Which threshold separates real edge responses from noise on this scene?"}),
           ],
         },
       ]}

@@ -33,7 +33,7 @@ const instant = (value: Data): number => {
 export const sqlAnalysisTools: Record<string, Tool> = {
   saText: { title: 'Set a text value', why: 'Supply a fixed text value for a comparison. The SQL exercise writes this as a quoted literal.', inputs: [], settings: [{ key: 'value', label: 'Text', initial: 'closed' }], run: (_, settings) => String(settings.value) },
   saScalar: {
-    title: 'Read the one-row result', why: 'Take one named value from a one-row table. This teaching boundary rejects multiple rows rather than silently choosing a result; an empty result becomes null.', inputs: ['Subquery result'], settings: [{ key: 'field', label: 'Result field', initial: 'mean_minutes' }],
+    title: 'Read the one-row result', why: "Read one named value from a one-row result so another comparison can use it. This single value is called a scalar. An unavailable aggregate stays null.", inputs: ['Subquery result'], settings: [{ key: 'field', label: 'Result field', initial: 'mean_minutes' }],
     run: ([value], settings) => { const input = rows(value); if (input.length > 1) throw Error('This comparison needs at most one result row.'); return input.length ? field(input[0], String(settings.field)) : null; },
   },
   saExists: {

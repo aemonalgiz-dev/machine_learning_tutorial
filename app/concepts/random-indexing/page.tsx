@@ -448,11 +448,13 @@ export default function RandomIndexingPage() {
                   draw produced.
                 </p>
                 <KeepInMind>
-                  A pair at exactly a right angle here is a pair whose non-zero
-                  entries do not share a single position, and that is what most
-                  pairs are once a direction is four non-zero entries in a few
-                  hundred slots. The rest of the interference is the pairs that
-                  do share one.
+                  Two nonzero signatures with no occupied position in common
+                  have a dot product of zero, so they are perpendicular. Sparse
+                  signatures often have this disjoint support. Sharing a position
+                  can introduce interference, but it does not always make the dot
+                  product nonzero: positive and negative contributions can cancel.
+                  We need the signed products to decide, rather than the overlap
+                  count alone.
                 </KeepInMind>
               </SubSection>
 
@@ -656,12 +658,13 @@ export default function RandomIndexingPage() {
                   do, and the gap has fallen by a factor of thirteen.
                 </p>
                 <InAModel>
-                  Look at 529 on that axis. That is how wide the table
-                  is on a side, so a fit at that width is not compressing
-                  anything at all, and the gap is still 0.0181 rather than zero.
-                  A random map is not the identity even when it has room to be,
-                  and eight pairs of directions were still sharing a position at
-                  that width.
+                  Look at 529 on that axis. The original count table has 23
+                  rows and 23 columns, with 529 entries altogether. At this
+                  setting, random indexing keeps 529 coordinates for every word,
+                  so its output takes more space than the count table. The mean
+                  cosine error is still 0.0181. Having enough coordinates does
+                  not make this random map preserve every similarity exactly;
+                  eight pairs of drawn directions still share a coordinate.
                 </InAModel>
               </SubSection>
 
@@ -958,15 +961,19 @@ export default function RandomIndexingPage() {
               "Every count doubles, every position doubles with it, and an angle is unchanged by a common scale. Measured, the gap is 0.14412102749793634 with the collection written once and 0.14412102749793634 with it written eight times, and one pair of words comes back at 0.6270095706410385 in both. More text gives better counts; it does nothing to the distortion the projection adds on top of them.",
             ),
             several(
-              "Which of these hold on this collection?",
+              "Which statements agree with this random-indexing sweep?",
               [
                 "At 16 numbers a word, 155 of the 253 pairs of drawn directions still share a position",
-                "A fit at 529 numbers a word compresses nothing and its gap is still 0.0181",
+                "At width 529 the output is larger than the original 23 × 23 count matrix, and its mean cosine error is still 0.0181",
                 "Flour’s whole list of six nearest words is recovered at 64 numbers and not before",
-                "The gap against the table turns at a definite width, which says where to cut",
+                "The gap against the table turns at a definite width, which says where to cut"
               ],
               [0, 1, 2],
-              "The shared positions at 16 numbers, the gap at 529 and flour’s six neighbours at 64 are all measured. A definite turning point is the one thing this method does not offer, since the gap falls from 0.3959 at 8 numbers to 0.0109 at 2048 without turning anywhere, so there is no elbow to find even if somebody went looking. A method that builds the table and squeezes it does produce such a figure; this one produces nothing during the reading that says whether the width was enough.",
+              "The sweep shows decreasing average error, but these sampled points do not identify a universally sufficient width. At width 529, storing one vector per word takes 23 × 529 numbers, compared with 529 for the whole count matrix, so this setting does not compress it. Recovering flour’s complete neighbour list happens at a particular tested width; a different query or random draw can need another.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Vocabulary: 23 words; count matrix: 23 × 23 = 529 numbers.\nRandom-indexed output stores 23 × width numbers.\n\nwidth  mean cosine error  pairs of sparse directions sharing a coordinate\n8      0.3959             not shown\n16     0.1441             155 of 253\n64     0.0542             not shown\n529    0.0181             8 of 253\n2048   0.0109             2 of 253\n\nFlour’s six exact-table nearest neighbours are all recovered first at width 64 in this sweep."
+              },
             ),
             trueFalse(
               "A word carrying no subject coming out 0.5064 alike to a word that does is damage the projection did.",
@@ -991,7 +998,10 @@ export default function RandomIndexingPage() {
           practice: [
             exercise(
               "Build the position of cat by hand and compare it with the fit",
-              ["Part 2 follows cat through the three sentences at a window of two positions with eight numbers a word, four of them non-zero in every direction, and arrives at 0, 1, 2, −3, 0, 0, 1, −1 after four additions. Fit the library's model at those settings with the draw fixed at seed 0 and read the drawn directions of the, sat and ran off it.", "Then do the reading yourself. Walk the sentences, and at every occurrence of cat add the direction of each word within two positions onto a running total that starts at eight zeros, in the order the reading meets them. Compare what you end with against the position the fit reports for cat."],
+              [
+  "Fit the supplied three sentences at window two, width eight, four nonzero index entries and seed zero. Print the drawn index vectors for the, sat and ran.",
+  "Independently visit cat’s context occurrences in source order and add their index vectors to an eight-zero accumulator, printing after every addition. Print the fitted cat vector and exact agreement check."
+],
               `from oop_ml import RandomIndexing
 
 sentences = ["the cat sat", "the dog sat", "the cat ran"]
@@ -1037,11 +1047,17 @@ after adding the: [0, 0, 2, -2, -1, 1, 1, -1]
 after adding ran: [0, 1, 2, -3, 0, 0, 1, -1]
 the fit reports [0, 1, 2, -3, 0, 0, 1, -1]
 agree: True`,
-              { hints: ["The drawn directions live on the fitted model as index_vectors, and vector_of(word) on them answers an object whose values are the eight entries. The same vector_of on the model itself answers the word's position.", "A neighbour is any word in the same sentence whose distance from cat is one or two, and cat is never its own neighbour. A sentence boundary stops the reach, so the dog sat contributes nothing to cat.", "The entries are whole numbers held as floats, so int() on each keeps the printed lists readable. The order of the additions does not change the total, only the trail of running totals."], check: numberCheck("What does the fourth number of cat's position come to?", -3, 0.5, "The direction of the holds −1 in the fourth position and was added twice, once from each sentence cat appears in, and the direction of ran holds −1 there as well. Sat holds 0 there, so nothing cancels the three subtractions. Every number in the position is a sum of that kind, which is why two words that keep the same company land near each other without a table ever being written down.") },
+              { hints: [
+  "A word’s random index vector differs from the context sum learned for that word.",
+  "Count context occurrences, including repeated words; use the same window and sentence boundaries as the fit."
+], check: numberCheck("What does the fourth number of cat's position come to?", -3, 0.5, "The fourth accumulated coordinate is -3. Index-vector contributions can cancel as well as reinforce because their nonzero entries have both signs."), question: "Can summing context index vectors reproduce cat’s learned representation?" },
             ),
             exercise(
               "Reproduce the sixteen-number fit",
-              ["Part 2 reads the twenty-four documents once with sixteen numbers a word and four non-zero entries in every direction, under the draw the whole page uses. It reports that the direction drawn for flour is non-zero at positions 5, 7, 8 and 9, that the six nearest words to flour are eggs, butter, bake, whisk, pan and sugar, and that two words of one subject come out at 0.6399 on average against 0.1247 for a word of each. Fit the model at those settings, with the draw fixed at seed 0, and reproduce all three.", "Then print the two pairs Part 4 builds its argument on, flour against sugar and flour against anchor, and one thing the lesson never prints, the six nearest words to anchor."],
+              [
+  "Fit the supplied twenty-four documents at width sixteen with four nonzero index entries and seed zero.",
+  "Print flour’s nonzero index positions, six neighbours, same-topic/cross-topic mean cosines, flour/sugar and flour/anchor cosines, then anchor’s six neighbours."
+],
               `from statistics import mean
 
 from oop_ml import RandomIndexing
@@ -1116,11 +1132,17 @@ two words of one subject 0.6399, a word of each 0.1247
 flour and sugar 0.6270
 flour and anchor -0.2437
 nearest to anchor boat tide wind crew harbour we`,
-              { hints: ["The page's settings are dimension=16, n_nonzero=4, window=5 and random_seed=0. The seed is the only randomness there is, so leaving it out gives a different draw and different numbers every run.", "most_similar(word, n) answers an object that can be iterated, each entry carrying a word and a similarity, and its words property is the names alone.", "Two words of one subject means every pair drawn from the cooking list plus every pair from the sailing list, 45 and 45. A word of each means every cooking word against every sailing word, 100 pairs. Neither average involves and, the or we."], check: numberCheck("What does the fit put flour and anchor at?", -0.2437, 0.0001, "The table of counts puts the pair at 0.1208, a small positive number from the company both halves share. The fit sends it to −0.2437, and nothing in the collection made anchor the opposite of flour. The interference from a few drawn directions that happened to share positions did, and a pair near zero is where that interference does its worst, because the signal that would hold the answer in place is smallest there.") },
+              { hints: [
+  "Distinguish sparse assigned index vectors from the accumulated embedding vectors used for similarity.",
+  "Keep the supplied topic-word groups unchanged when averaging pairs."
+], check: numberCheck("What does the fit put flour and anchor at?", -0.2437, 0.0001, "Flour/anchor cosine is -0.2437 for this draw. A finite random projection can distort the original context-table geometry in either direction."), question: "Can a short random representation preserve useful topic neighbours?" },
             ),
             exercise(
               "Price the width against the table it avoids",
-              ["Part 4 prices the shortcut by building the table it avoids and asking it the same questions. The fitted model keeps that table of counts on it, and the same value object that holds a fit's positions can hold the table's rows instead, so the table's angles come from the one similarity call rather than from arithmetic of your own. Wrap the counts, and confirm that the table puts flour and bake at 0.7551 although they never met and flour and anchor at 0.1208.", "Then, for widths of 8, 16, 64 and 2048 under the page's draw, average over all 190 pairs of two subject words how far the fit's angle sits from the table's. Part 4 reports 0.3959, 0.1441, 0.0542 and 0.0109. Finish with sixteen numbers under a second draw, seed 1, whose gap the lesson does not print."],
+              [
+  "Wrap the supplied full context-count rows as word embeddings and print the specified flour comparisons as the reference.",
+  "For widths eight, sixteen, sixty-four and two thousand forty-eight at seed zero, average absolute cosine error across all 190 supplied subject-word pairs. Also evaluate width sixteen at seed one."
+],
               `from statistics import mean
 
 from oop_ml import RandomIndexing, WordEmbeddings
@@ -1187,11 +1209,17 @@ width 16, draw 0: gap 0.1441 over 190 pairs
 width 64, draw 0: gap 0.0542 over 190 pairs
 width 2048, draw 0: gap 0.0109 over 190 pairs
 width 16, draw 1: gap 0.1087 over 190 pairs`,
-              { hints: ["The fitted model's cooccurrence property is the table, with a vocabulary and a counts block of 23 rows by 23 columns. WordEmbeddings takes exactly a vocabulary and a block with one row per word, so the table can be wrapped as if it were a set of 23-number positions.", "Once wrapped, table.similarity(first, second) is the cosine between two rows of counts, which is the reading Part 1 describes and the answer every fit is approximating.", "The gap for one pair is the absolute difference between the fit's cosine and the table's. Averaging over the 190 pairs is what makes it a price for the width rather than a fact about one pair.", "A new fit at each width draws its own directions, so the seed has to be stated every time for the first four rows to be the page's draw. The last row changes only the seed."], check: numberCheck("What is the gap at sixteen numbers a word under the second draw?", 0.1087, 0.0001, "Under the page's draw the gap at sixteen numbers is 0.1441, and under a second draw it is 0.1087. Nothing about the collection changed between the two fits, only which positions each direction was handed, so the difference between them is entirely the draw. Part 5 says the distortion is a fixed function of the draw and the width, and this is that claim with two numbers on it.") },
+              { hints: [
+  "Fit each width independently with the specified draw.",
+  "Compare the same pair list with the full count-row reference; a wider projected vector can reduce approximation error without changing the source counts."
+], check: numberCheck("What is the mean absolute cosine error at width sixteen and seed one?", 0.1087, 0.0001, "The width-sixteen second-draw mean absolute cosine error is 0.1087. Width and random draw both influence approximation error against the full context-count reference."), question: "How much similarity information does random projection lose at each width?" },
             ),
             exercise(
               "Ask about a word that kept no company",
-              ["Part 2 says a word with no company at all keeps the total it started with, which is a position of all zeros, and that the origin has no direction. That is the first line of the table at the end of Part 5. Add a one-word sentence to the three sentences, fit, and print the position the fit reports for the new word beside the direction that was drawn for it.", "Then ask the fit how similar that word is to cat, and which words are nearest to it, catching the library's own refusal each time and printing its class and its message. The fit itself does not refuse, which is worth noticing. The position exists; what does not exist is an angle to it."],
+              [
+  "Append the supplied one-word sentence and fit the stated random-indexing model. Print lantern’s accumulated vector and its separately assigned random index vector.",
+  "Ask for its cosine with cat and for its nearest words. Catch and print each library error’s class and message."
+],
               `from oop_ml import MLLibError, RandomIndexing
 
 sentences = ["the cat sat", "the dog sat", "the cat ran", "lantern"]
@@ -1223,7 +1251,10 @@ except MLLibError as refusal:
 direction drawn for lantern [0, 1, 0, -1, 1, -1, 0, 0]
 UndefinedMetricError cosine similarity is undefined for a zero vector, which has no direction
 UndefinedMetricError the zero vector has no direction, so nothing is similar to it`,
-              { hints: ["A sentence boundary stops the reach, so a word alone in its sentence has no neighbour at all, and nothing is ever added onto its total. It still gets a direction, because every word in the vocabulary is handed one before the reading starts.", "The two questions are refused with different messages, because one of them asks for a cosine involving the origin and the other asks what is similar to it, and neither is a number."] },
+              { hints: [
+  "The isolated word receives an index vector, but no surrounding words contribute to its context sum.",
+  "A stored zero context vector is valid data even though a direction-based metric cannot use it."
+], question: "What can be stored for an isolated word even when cosine cannot compare it?" },
             ),
           ],
         },

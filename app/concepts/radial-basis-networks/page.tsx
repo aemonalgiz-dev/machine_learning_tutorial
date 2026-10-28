@@ -132,10 +132,7 @@ export default function RadialBasisNetworksPage() {
         {
           title: "Practice. Reading the Three Units With the Library",
           practice: [
-            exercise(
-              "Read the three units at the default input",
-              ["Build the playground’s layer, three units centred at minus one, zero and one with every width at one, and hand it an input of one. Print each unit’s squared distance and response, and then the derivative of the sum of the three responses with respect to each centre and each width.", "Part 1 worked the squared distances as 4, 1 and 0 and the responses as 0.1353, 0.6065 and 1.0000, and Part 2 worked the six derivatives. All of them should come back."],
-              `import numpy as np
+            exercise("Read the three units at the default input",["Build the playground’s layer, three units centred at minus one, zero and one with every width at one, and hand it an input of one. Print each unit’s squared distance and response, and then the derivative of the sum of the three responses with respect to each centre and each width.", "Part 1 worked the squared distances as 4, 1 and 0 and the responses as 0.1353, 0.6065 and 1.0000, and Part 2 worked the six derivatives. All of them should come back."],`import numpy as np
 from oop_ml import RadialBasisLayer
 
 layer = RadialBasisLayer(reads=1, n_units=3).with_parameters(
@@ -145,8 +142,7 @@ layer = RadialBasisLayer(reads=1, n_units=3).with_parameters(
 # Ask the layer to respond to an input of 1.0, then send a derivative of one
 # into every output with correction_for. For each unit, print its centre,
 # the squared distance it measured, its response, and the derivatives of its
-# centre and of its width.`,
-              `import numpy as np
+# centre and of its width.`,`import numpy as np
 from oop_ml import RadialBasisLayer
 
 layer = RadialBasisLayer(reads=1, n_units=3).with_parameters(
@@ -161,8 +157,7 @@ for unit in range(3):
     print(f"  squared distance {response.scores[0, unit]:.4f}")
     print(f"  response {response.outputs[0, unit]:.4f}")
     print(f"  centre derivative {correction.gradient.weights[unit, 0]:.4f}")
-    print(f"  width derivative {correction.gradient.biases[unit]:.4f}")`,
-              `unit centred at -1
+    print(f"  width derivative {correction.gradient.biases[unit]:.4f}")`,`unit centred at -1
   squared distance 4.0000
   response 0.1353
   centre derivative 0.2707
@@ -176,13 +171,8 @@ unit centred at 1
   squared distance 0.0000
   response 1.0000
   centre derivative 0.0000
-  width derivative 0.0000`,
-              { hints: ["respond_to takes a block with one row per input and one column per coordinate, so a single input of one is np.array([[1.0]]).", "The response carries scores, which for this layer are the squared distances, and outputs, the responses. Both have one row per input and one column per unit.", "correction_for takes the response and the derivative arriving at the outputs. A block of ones the shape of the outputs asks about the sum of the three responses.", "The correction’s gradient holds two blocks under the names every layer shares. Here gradient.weights is the derivative of each centre, one row per unit, and gradient.biases is the derivative of each width."], check: numberCheck("What is the width derivative of the unit centred at minus one?", 0.5413, 5e-05, "The unit centred at minus one answers 0.1353 at a squared distance of 4, and its width derivative is that response times the squared distance over the cubed width, 0.1353 × 4 / 1. Widening it would raise its response at this input. The unit centred on the input has a derivative of zero, since no width changes a peak of one.") },
-            ),
-            exercise(
-              "Find which power of the width the derivative carries",
-              ["Part 2 gives the width derivative as the response times the squared distance over the width cubed, and notes that the default width of one cannot show the cube. Run the same input of one at widths of 0.5, 1 and 2, and hold the layer’s width derivative for the unit centred at zero against the formula with the width once and with the width cubed.", "At a width of one the two candidates agree. Look at which of them the layer agrees with at the other two."],
-              `import numpy as np
+  width derivative 0.0000`,{...{ hints: ["respond_to takes a block with one row per input and one column per coordinate, so a single input of one is np.array([[1.0]]).", "The response carries scores, which for this layer are the squared distances, and outputs, the responses. Both have one row per input and one column per unit.", "correction_for takes the response and the derivative arriving at the outputs. A block of ones the shape of the outputs asks about the sum of the three responses.", "The correction’s gradient holds two blocks under the names every layer shares. Here gradient.weights is the derivative of each centre, one row per unit, and gradient.biases is the derivative of each width."], check: numberCheck("What is the width derivative of the unit centred at minus one?", 0.5413, 5e-05, "Increasing the width raises this off-centre Gaussian response locally. At the centre itself the response remains at its peak, so its width derivative is zero.") },question:"How does each Gaussian unit respond, and which parameters change that response?"}),
+            exercise("Find which power of the width the derivative carries",["Part 2 gives the width derivative as the response times the squared distance over the width cubed, and notes that the default width of one cannot show the cube. Run the same input of one at widths of 0.5, 1 and 2, and hold the layer’s width derivative for the unit centred at zero against the formula with the width once and with the width cubed.", "At a width of one the two candidates agree. Look at which of them the layer agrees with at the other two."],`import numpy as np
 from oop_ml import RadialBasisLayer
 
 for width in (0.5, 1.0, 2.0):
@@ -194,8 +184,7 @@ for width in (0.5, 1.0, 2.0):
     # output. For the unit centred at zero, print its response and the width
     # derivative the layer reports. Then compute the response times the
     # squared distance divided by the width, and divided by the width cubed,
-    # and print both beside it.`,
-              `import numpy as np
+    # and print both beside it.`,`import numpy as np
 from oop_ml import RadialBasisLayer
 
 for width in (0.5, 1.0, 2.0):
@@ -212,8 +201,7 @@ for width in (0.5, 1.0, 2.0):
     print(f"  response of the unit centred at zero {output:.4f}")
     print(f"  width derivative from the layer {correction.gradient.biases[1]:.4f}")
     print(f"  response x squared distance / width {output * squared_distance / width:.4f}")
-    print(f"  response x squared distance / width cubed {output * squared_distance / width**3:.4f}")`,
-              `width 0.5
+    print(f"  response x squared distance / width cubed {output * squared_distance / width**3:.4f}")`,`width 0.5
   response of the unit centred at zero 0.1353
   width derivative from the layer 1.0827
   response x squared distance / width 0.2707
@@ -227,13 +215,8 @@ width 2.0
   response of the unit centred at zero 0.8825
   width derivative from the layer 0.1103
   response x squared distance / width 0.4412
-  response x squared distance / width cubed 0.1103`,
-              { hints: ["The unit centred at zero is the second of the three, so it is column 1 of the outputs and of the scores, and entry 1 of gradient.biases.", "The squared distance the unit measured is in response.scores, so nothing has to be recomputed from the centre.", "width**3 is the width cubed. At 0.5 that is 0.125, so dividing by it multiplies by eight."], check: numberCheck("At a width of 0.5, what width derivative does the layer report for the unit centred at zero?", 1.0827, 5e-05, "At a width of one half the unit answers 0.1353, and the layer reports 1.0827, which is 0.1353 × 1 / 0.125, the response times the squared distance over the width cubed. Dividing by the width once would give 0.2707. At a width of two the layer reports 0.1103 where the single division gives 0.4412. The width was already squared inside the exponent, and differentiating that square is what leaves it cubed.") },
-            ),
-            exercise(
-              "Add the three responses along the curve",
-              ["Part 1 says the responses are not probabilities and need not add to one. The playground draws its three curves from 61 inputs spaced evenly from minus three to three. Hand the layer the same 61 inputs in one block, add the three responses at each input, and find where the total is largest, at widths of 0.5, 1 and 2.", "The lesson quotes a total of about 1.74 at an input of one. Find the largest total the default width reaches anywhere on the curve, which the lesson does not quote, and compare it with the total out at an input of three."],
-              `import numpy as np
+  response x squared distance / width cubed 0.1103`,{...{ hints: ["The unit centred at zero is the second of the three, so it is column 1 of the outputs and of the scores, and entry 1 of gradient.biases.", "The squared distance the unit measured is in response.scores, so nothing has to be recomputed from the centre.", "width**3 is the width cubed. At 0.5 that is 0.125, so dividing by it multiplies by eight."], check: numberCheck("At a width of 0.5, what width derivative does the layer report for the unit centred at zero?", 1.0827, 5e-05, "The non-unit widths distinguish the cubed-width denominator from the single-width candidate. A default width of one would conceal that difference because both denominators coincide there.") },question:"Which width-derivative formula still agrees when the width is not one?"}),
+            exercise("Add the three responses along the curve",["Part 1 says the responses are not probabilities and need not add to one. The playground draws its three curves from 61 inputs spaced evenly from minus three to three. Hand the layer the same 61 inputs in one block, add the three responses at each input, and find where the total is largest, at widths of 0.5, 1 and 2.", "The lesson quotes a total of about 1.74 at an input of one. Find the largest total the default width reaches anywhere on the curve, which the lesson does not quote, and compare it with the total out at an input of three."],`import numpy as np
 from oop_ml import RadialBasisLayer
 
 inputs = np.linspace(-3, 3, 61).reshape(-1, 1)
@@ -245,8 +228,7 @@ for width in (0.5, 1.0, 2.0):
     )
     # Respond to all 61 inputs at once and add the three responses for each
     # input. Print the largest total, the input it is reached at, and the
-    # total at the last input, which is 3.`,
-              `import numpy as np
+    # total at the last input, which is 3.`,`import numpy as np
 from oop_ml import RadialBasisLayer
 
 inputs = np.linspace(-3, 3, 61).reshape(-1, 1)
@@ -261,8 +243,7 @@ for width in (0.5, 1.0, 2.0):
     print(f"width {width}")
     print(f"  largest total {totals[highest]:.4f}")
     print(f"  reached at an input of {inputs[highest, 0]:.1f}")
-    print(f"  total at an input of 3 {totals[-1]:.4f}")`,
-              `width 0.5
+    print(f"  total at an input of 3 {totals[-1]:.4f}")`,`width 0.5
   largest total 1.2707
   reached at an input of 0.0
   total at an input of 3 0.0003
@@ -273,9 +254,7 @@ width 1.0
 width 2.0
   largest total 2.7650
   reached at an input of 0.0
-  total at an input of 3 1.0665`,
-              { hints: ["A block of 61 rows and one column is 61 inputs of one coordinate each, and the outputs come back with 61 rows and three columns.", "Summing along axis 1 adds across the three units and leaves one total per input.", "argmax gives the position of the largest total, and the same position in inputs is where it was reached."], check: numberCheck("With every width at one, what is the largest total of the three responses along the curve?", 2.2131, 5e-05, "The total peaks at an input of zero, where the middle unit answers one and the two beside it are each one unit away and answer 0.6065. Nothing holds the total at one. It reaches 2.7650 at a width of two and 1.2707 at a width of one half, and out at an input of three with a width of one it is 0.1468, which is why the responses are features for another layer and not shares of a whole.") },
-            ),
+  total at an input of 3 1.0665`,{...{ hints: ["A block of 61 rows and one column is 61 inputs of one coordinate each, and the outputs come back with 61 rows and three columns.", "Summing along axis 1 adds across the three units and leaves one total per input.", "argmax gives the position of the largest total, and the same position in inputs is where it was reached."], check: numberCheck("With every width at one, what is the largest total of the three responses along the curve?", 2.2131, 5e-05, "These Gaussian activations are overlapping features, not mutually exclusive probability shares. Their sum can exceed one, and changing the width changes how much the features overlap.") },question:"Must the Gaussian feature responses add to one?"}),
           ],
         },
     ]} />;

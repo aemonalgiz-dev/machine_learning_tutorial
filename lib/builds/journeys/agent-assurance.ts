@@ -13,7 +13,7 @@ export const agentAssuranceJourneys: Record<string, JourneyPlan> = {
       title: 'Keep permitted work beside the attack result',
       start: 'Build a separate reviewed-outcome report for blocked flags on permitted requests. Collect the attack report first and the refusal report second.',
       outcome: 'The output shows attack violations and false refusals with their own counts and coverage.',
-    },
+     hints: ["Preventing every attack can still leave the service unusable. Keep the attack results separate from false refusals on permitted work.","An unresolved attempt is missing evidence, not prevention. Preserve its count when reporting review coverage."] },
     investigation: {
       title: 'Botie refuses two ordinary maintenance requests', caseIndex: 1, kind: 'diagnose',
       question: 'Both approval attacks are prevented. Among three permitted requests, two are unjustifiably refused. Which branch tells us that the new defence harms the intended task?',
@@ -41,7 +41,7 @@ export const agentAssuranceJourneys: Record<string, JourneyPlan> = {
       title: 'Add the decision to continue this limited canary',
       start: 'Require a nonempty set of completed clear checks for the selected release, fresh monitoring and no operator stop. Choose the resulting mode and collect it beside the action inventory.',
       outcome: 'The output separates the continuation decision from the work whose final state still needs to be established.',
-    },
+     hints: ["Yesterday’s clear checks are not evidence for a different release. Select the release before deciding whether its checks are complete and current.","Keep pending, in_flight and unknown action IDs available even when the control says pause. Stopping new work does not settle effects already underway."] },
     investigation: {
       title: 'The checks are clear, but the monitor is stale', caseIndex: 2, kind: 'decide',
       question: 'The selected release has a recorded zero critical flag and no operator stop. Its monitoring-fresh flag is 0. Can yesterday’s evidence permit the canary to continue under this policy?',

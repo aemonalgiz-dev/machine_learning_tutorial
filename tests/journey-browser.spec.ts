@@ -1,3 +1,4 @@
+import { mockAccountBackend, accountBackendFor, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { test, expect, type Page } from "@playwright/test";
 
 async function wire(page: Page, output: string, input: string) {
@@ -12,8 +13,10 @@ async function disableSignalAnimation(page: Page) {
   await controls.click();
 }
 
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
 test("a learner predicts a shorter reporting period and carries their mean into bagging", async ({ page }) => {
-  await page.goto("/lab/statistics");
+  await page.goto("/lab/statistics"); await waitForAccountReady(page);
   for (const name of ["Deaths recorded each week", "Add a list", "Count items", "Divide"]) await page.getByRole("button", { name, exact: true }).click();
   await wire(page, "Deaths recorded each week output", "Add a list input 1: Numbers");
   await wire(page, "Deaths recorded each week output", "Count items input 1: Items");
@@ -36,14 +39,14 @@ test("a learner predicts a shorter reporting period and carries their mean into 
   await page.getByRole("button", { name: "Test all examples", exact: true }).click();
   await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
   await expect(page.getByText(/Your prediction agrees with the tested result/)).toBeVisible();
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await page.locator("summary").filter({ hasText: /^Your starting explanation$/ }).click();
   await expect(page.getByText("Your prediction before opening this case", { exact: true })).toBeVisible();
   await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
-  await page.goto("/");
-  await page.getByRole("link", { name: "Return to your workshop →", exact: true }).click();
+  await page.goto("/"); await waitForAccountReady(page);
+  await page.getByRole("link", { name: "Return to your workshop", exact: true }).click();
   await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
-  await page.goto("/lab/bagging");
+  await page.goto("/lab/bagging"); await waitForAccountReady(page);
   await page.getByText("Use an earlier construction", { exact: true }).click();
   await page.getByRole("button", { name: "Bring my Average a supplied collection", exact: true }).click();
   await expect(page.getByRole("button", { name: "Predictions from three models output", exact: true })).toBeVisible();
@@ -53,7 +56,7 @@ test("a learner predicts a shorter reporting period and carries their mean into 
 });
 
 test("regression keeps final outcomes behind a recorded choice and preserves that choice", async ({ page }) => {
-  await page.goto("/lab/simple-linear-regression");
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   const stages = page.getByRole("navigation", { name: "Delivery journey stages" });
   await stages.getByRole("button", { name: "Try fresh deliveries", exact: true }).click();
   await expect(page.getByRole("heading", { name: /Committed model:/ })).toHaveCount(0);
@@ -91,15 +94,13 @@ test("regression keeps final outcomes behind a recorded choice and preserves tha
   await page.getByRole("spinbutton", { name: "Dispatch constant 2", exact: true }).fill("100");
   await stages.getByRole("button", { name: "Try fresh deliveries", exact: true }).click();
   await expect(page.getByTestId("final-delivery-score")).toHaveText("Final absolute error: 0.4 min");
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await expect(page.getByRole("heading", { name: "Committed model: Your dispatch machine", exact: true })).toBeVisible();
   await expect(page.getByTestId("final-delivery-score")).toHaveText("Final absolute error: 0.4 min");
   await stages.getByRole("button", { name: "Choose a model", exact: true }).click();
   await expect(page.getByRole("radio", { name: "Your dispatch machine", exact: true })).toBeDisabled();
-  const progress = await page.evaluate(() => {
-    const entry = localStorage.getItem("fitlab.learning.v1:guest:journey-progress:simple-linear-regression:v1");
-    return entry ? JSON.parse(entry).value : null;
-  });
+  await waitForAccountSync(page);
+  const progress = accountBackendFor(page).value<{ transferred: unknown }>("journey-progress:simple-linear-regression:v1")!;
   expect(progress).not.toBeNull();
   expect(progress.transferred).toBeNull();
 });

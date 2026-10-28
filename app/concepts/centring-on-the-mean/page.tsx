@@ -607,15 +607,18 @@ export default function CentringOnTheMeanPage() {
               "Centring makes the height column add to zero, which is exactly the condition for it to be at right angles to the column of ones that carries the intercept, so the matrix becomes diagonal. The 521.8 left over is the variance of the heights in square centimetres, a matter of units, and dividing by the spread takes it to one.",
             ),
             several(
-              "Which of these does centring repair?",
+              "Which problems does centring address in this comparison?",
               [
-                "The coupling between the intercept and a column",
-                "The correlation of 0.979 between height and weight used as two inputs",
-                "The correlation of 0.9980 between height and height squared",
-                "The reliability of extrapolating to a person of no height",
-              ],
+                              "The coupling between the intercept and a column",
+                              "The correlation of 0.979 between height and weight used as two inputs",
+                              "The correlation of 0.9980 between height and height squared",
+                              "The reliability of extrapolating to a person of no height",
+                            ],
               [0, 2],
               "A correlation is measured about the means already, so shifting the origin cannot touch a dependence between two different measurements. Squaring after centring measures distance from the average person in either direction, which is a different shape from the height, and the correlation falls to −0.229. A better condition number changes which parameter describes the central prediction and makes no extrapolation safer.",
+              {
+                "description": "Fit an unpenalised regression with an intercept. For the polynomial comparison, replace h and h² with h − mean(h) and (h − mean(h))². Height and weight are shifted by their own fixed column means.\n\nMeasured correlations:\nheight with weight: 0.979\nheight with height²: 0.9980\ncentred height with its square: −0.229"
+              },
             ),
         ],
         },
@@ -888,9 +891,7 @@ export default function CentringOnTheMeanPage() {
                 <p>
                   A column of codes has the same trouble more quietly. Numbering four blood groups 1 to 4 gives the column a mean, and taking it away gives every person a number, but no position on that line is a blood group and the gap from group 1 to group 3 is twice the gap from 1 to 2 only because of the order the numbers were handed out in.
                 </p>
-                <p>
-                  A column of zeros and ones is the exception worth knowing, since its mean is the share of ones, 6 adults of 11 in the crowd or 0.545, and a centred label measures how much more or less adult than the crowd&rsquo;s average a person is, which is a real quantity.
-                </p>
+                <p>A column of zero-and-one indicators is useful here because its mean is the fraction of ones. In this example six of eleven people have the adult label. Subtracting that fraction from each indicator centres the column. A positive result means that the indicator is one, above its sample mean; it does not measure a person as being more adult. The calculation describes the coding of this label.</p>
                 <KeepInMind>
                   Whether a column&rsquo;s mean is a meaningful place is a question
                   about what the numbers measure, and nothing in the arithmetic can
@@ -926,13 +927,16 @@ export default function CentringOnTheMeanPage() {
             several(
               "Which of these see the same crowd before and after centring?",
               [
-                "The straight-line distance between two people",
-                "A decision tree’s split",
-                "k-means asked for two groups",
-                "The cosine between two people",
-              ],
+                              "The straight-line distance between two people",
+                              "A decision tree’s split",
+                              "k-means asked for two groups",
+                              "The cosine between two people",
+                            ],
               [0, 1, 2],
               "A shared shift cancels from every difference, so the 110 distances agree to within 5.1 × 10⁻¹⁴ centimetres and k-means finds the same two groups with the same total of 2952.607. A tree’s threshold shifts by the same amount as every height and the eleven predictions stay the same. The cosine measures from zero itself, which is why moving zero changes it.",
+              {
+                "description": "Subtract the same fixed vector of column means from every person. Shift a tree’s thresholds and k-means starting centres by the corresponding amounts as well. Compare the same observations and use the same tie rules. We are checking the resulting partitions and distances, rather than whether an arbitrary fresh fit happens to choose the same solution."
+              },
             ),
             trueFalse(
               "Centring held-out rows on their own mean is defined arithmetic and the wrong operation.",
@@ -957,7 +961,10 @@ export default function CentringOnTheMeanPage() {
           practice: [
             exercise(
               "Centre the crowd",
-              ["Centre the eleven people with the library, read the centre it learned for each column, and check what Part 1 says a centred column keeps and loses.", "Part 1 quotes a mean height of 151.82 and a mean weight of 53.36, the first child at (−4.82, −12.36) once centred, centred heights that average 5.2 × 10⁻¹⁵ rather than exactly zero, and a variance of 521.79 before centring and after it. Print all of those."],
+              [
+  "Fit the centrer on both columns of the supplied eleven-person dataset. Print each learned centre and the first person’s centred height/weight.",
+  "Print centred heights’ mean and their variance before and after centring. Use the same variance convention for both. A tiny nonzero mean can reflect floating-point rounding."
+],
               `from statistics import pvariance
 
 from oop_ml import Feature, MeanCentrer
@@ -996,11 +1003,17 @@ weight centre 53.36
 first child centred (-4.82, -12.36)
 mean of centred heights 5.2e-15
 variance before 521.79, after 521.79`,
-              { hints: ["fit takes a list of Feature objects. What it learned is in scalings, one per column, each with a name and a centre, and a spread of exactly one, since centring divides by nothing.", "transform answers a list of Feature objects in the same order, and each one’s values are the centred numbers.", "pvariance from the standard library is the variance about the mean, which is the figure the page quotes; the mean of the centred heights is a sum over a count and will not be exactly zero."], check: numberCheck("What is the first child’s centred height, in centimetres?", -4.82, 0.005, "The first child is 147 centimetres tall and the mean height is 1670 over 11, so the centred value is 147 less 151.82. Negative means below the column average, the unit is still centimetres, and the variance is 521.79 either way, because spread is measured about the mean and the mean moved with the column.") },
+              { hints: [
+  "Fit stores one mean per feature; transform subtracts the matching mean from each value.",
+  "A constant shift changes location but preserves deviations between measurements. Compare variances rather than expecting every transformed value to shrink."
+], check: numberCheck("What is the first child’s centred height, in centimetres?", -4.82, 0.005, "The first centred height is -4.82 cm. Its negative sign means below this fitted sample mean, while its unit remains centimetres."), question: "What changes when height and weight use their sample means as zero?" },
             ),
             exercise(
               "Force the line through zero, then centre first",
-              ["Part 3 fits weight from height three ways. Fit the line with an intercept on the recorded columns, then force it through zero on the recorded columns, then force it through zero on columns centred first, and read the slope and the share of the variation explained each time.", "Part 3 quotes 0.890 and 0.9588 with an intercept of −81.77, then 0.363 and 0.6155 through zero, then 0.890 and 0.9588 again once both columns are centred. The third fit should agree with the first to every printed digit."],
+              [
+  "Fit weight from height three ways: recorded values with an intercept, recorded values constrained through zero, and both columns centred before a through-zero fit.",
+  "Print slopes and R-squared values for all three, plus the first fit’s intercept. Use the same eleven people and retain the target’s centring as well as the input’s."
+],
               `from oop_ml import Feature, MeanCentrer, MultipleLinearRegression
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1031,11 +1044,17 @@ print(f"centred, through zero: slope {centred_zero.coefficients['height']:.4f}, 
               `with an intercept: slope 0.8901, intercept -81.77, explains 0.9588
 through zero: slope 0.3634, explains 0.6155
 centred, through zero: slope 0.8901, explains 0.9588`,
-              { hints: ["fit_intercept is a field of the model, set at construction, and False is what forces the line through zero.", "coefficients is addressable by the feature’s name, intercept is a property, and score answers the share explained on the usual scale where one is perfect and zero is no better than guessing the mean weight.", "The centred fit takes the centred height and the centred weight, both from the one centrer fitted on both columns."], check: numberCheck("What slope does the line forced through zero have on the recorded columns?", 0.3634, 0.0005, "Dropping the intercept is a claim that a person of no height weighs nothing, and on the recorded columns the line has to honour it across a gap of 118 centimetres, so it swings down to split the difference between the children and the adults and explains only 0.6155. On centred columns zero is the average person, who does have the average weight, and the same claim costs nothing, which is why the centred fit through zero recovers the 0.8901 of the fit with an intercept.") },
+              { hints: [
+  "A through-zero constraint on raw measurements describes a different family of lines.",
+  "Centring both columns moves their means to the origin, where the fitted line can pass without that extra restriction."
+], check: numberCheck("What slope does the line forced through zero have on the recorded columns?", 0.3634, 0.0005, "The raw through-zero fit has slope 0.3634. Requiring a zero intercept in the original measurement coordinates restricts the line and changes its slope."), question: "Can centring preserve a fitted line while changing its intercept?" },
             ),
             exercise(
               "Centre the held-out rows on the training mean",
-              ["Part 7 holds out the three tallest adults and says their centre has to come from the eight training rows alone. Fit a centrer on the eight, use it to centre the three held-out heights, and then do the wrong thing on purpose by centring the three on their own mean.", "Part 7 quotes a training mean of 141.125, held-out values of 38.875, 41.875 and 36.875 averaging 39.21, and −0.33, 2.67 and −2.33 on their own mean of 180.33. Print all of them."],
+              [
+  "Fit a centrer on the supplied eight training heights, then transform the three held-out heights using that stored reference.",
+  "Print the training mean, held-out centred values and their mean. As a deliberately different procedure, centre the held-out values on their own mean and print that mean and result. Compare the two reference origins."
+],
               `from oop_ml import Feature, MeanCentrer
 
 training_heights = [147, 156, 145, 159, 162, 120, 122, 118]
@@ -1066,11 +1085,17 @@ print(f"centred on their own mean of {own.scalings['height'].centre:.2f}: {own_c
 held out, centred on the training mean: 38.875, 41.875, 36.875
 their mean 39.21
 centred on their own mean of 180.33: -0.33, 2.67, -2.33`,
-              { hints: ["A centrer fitted on one Feature can transform another Feature of the same name, which is exactly how a held-out row gets the training mean taken away unchanged.", "scalings is addressable by the column’s name, and the centre is the mean it learned.", "The second centrer is fitted on the held-out heights themselves, which is the defined arithmetic the page calls the wrong operation."], check: numberCheck("What do the three held-out heights average once centred on the training mean?", 39.21, 0.005, "The three are taller than anyone the mean was learned from, so centred on 141.125 they sit far above zero, and correctly so. Centred on their own mean of 180.33 one of the three tallest people in the crowd comes out below average, which hands a model numbers measured from a different zero from the one it learned on.") },
+              { hints: [
+  "Fit on training and call transform on held-out values without fitting again.",
+  "The second centrer is a comparison showing what changes when the test group chooses its own zero."
+], check: numberCheck("What do the three held-out heights average once centred on the training mean?", 39.21, 0.005, "The held-out centred mean is about 39.21 cm. That group is taller than the training reference, so its correctly transformed values need not average zero."), question: "Which mean should transform people the model has not seen?" },
             ),
             exercise(
               "Walk to the line from recorded heights and from centred ones",
-              ["Part 4 says the recorded heights make the bowl a gradient walk descends into long and narrow, and centring does not. Run the page’s two walks, one on the recorded heights and one on heights centred first, each stepping at half the rate that would make it diverge and each capped at twenty thousand passes, and read where each stops.", "Part 4 quotes a walk on the recorded heights that is still at a slope of 0.3732 and a level of −1.52 after all twenty thousand passes, against the fitted line’s 0.8901 and −81.77, and a centred walk that reaches a level of 53.36 when it stops at pass 8415. The two rates in the starter are one over twice the larger curvature the page quotes, 23,571.5 on the recorded heights and 521.8 on the centred ones."],
+              [
+  "Run the supplied regression gradient procedures on recorded heights and on heights centred with the training mean. Use the separate supplied learning rates and twenty-thousand-pass limit.",
+  "For each report slope, intercept, passes run and convergence flag. These rates depend on each problem’s curvature, so compare the complete procedures rather than claiming that only the input representation changed."
+],
               `from oop_ml import Feature, GradientDescentRegression, MeanCentrer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1097,7 +1122,10 @@ for label, column, rate in (("recorded", height, 2.1212e-05), ("centred", centre
     print(f"{label} heights: slope {walk.coefficients['height']:.4f}, level {walk.intercept:.2f}, passes {walk.epochs_run}, converged {walk.converged}")`,
               `recorded heights: slope 0.3732, level -1.52, passes 20000, converged False
 centred heights: slope 0.8901, level 53.36, passes 8415, converged True`,
-              { hints: ["learning_rate and max_epochs are set at construction, and the data goes to fit as a list of one Feature and the target Feature.", "coefficients is addressable by the column’s name, which the centrer kept as height, and intercept is the level.", "epochs_run and converged are the walk’s own record. A walk that used all twenty thousand passes reports converged False, which is what happens on the recorded heights."], check: numberCheck("What slope has the walk on the recorded heights reached after twenty thousand passes?", 0.3732, 0.0005, "On the recorded heights the column of ones and the height column point almost the same way, with curvatures of 0.0221 and 23,571.5 along the bowl’s two natural directions, so the first pass corrects the steep direction to a slope near the through-zero line’s 0.3634 and every later pass crawls along the shallow one. Centring makes the two columns perpendicular, the curvatures become 1 and 521.8, and the same walk lands on the fitted line at pass 8415.") },
+              { hints: [
+  "Keep the target weights and stopping rule fixed.",
+  "Use the supplied rate for the matching representation, then inspect the convergence flag as well as the final coefficients."
+], check: numberCheck("What slope has the walk on the recorded heights reached after twenty thousand passes?", 0.3732, 0.0005, "After the limit the raw-height procedure has slope 0.3732 and has not converged. A final coefficient should be read beside its stopping status."), question: "Does centring change how quickly this gradient procedure reaches its line?" },
             ),
           ],
         },

@@ -3,12 +3,16 @@ import {catalog,getActivity} from "../lib/practice-bank/catalog.mjs";
 import {readFile} from "node:fs/promises";
 import path from "node:path";
 import {openWorkspaceControls} from "./helpers/open-workshop";
+import {waitForAccountReady,waitForAccountSync} from "./helpers/account-backend";
+import {FREE_MEMBERSHIP} from "../lib/membership";
+
+const paidMembership = () => ({ practiceAccess: true, plan: "practice", status: "active", validUntil: Math.floor(Date.now()/1000)+86400 });
 
 async function service(page:Page, initial:string|null="alice"){
   const state={user:initial,fail:false,loads:[] as string[],saved:{} as Record<string,Record<string,unknown>>,uploads:[] as {owner:string;key:string}[]};
   await page.route("**/account-api/**",async route=>{
     const url=new URL(route.request().url()),pathname=url.pathname;
-    if(pathname.endsWith("/session"))return route.fulfill({json:{enabled:true,registrationEnabled:true,user:state.user?{id:state.user,name:state.user,email:null}:null}});
+    if(pathname.endsWith("/session"))return route.fulfill({json:{enabled:true,registrationEnabled:true,user:state.user?{id:state.user,name:state.user,email:null}:null,membership:state.user?paidMembership():FREE_MEMBERSHIP}});
     if(pathname.endsWith("/auth/login")||pathname.endsWith("/auth/register")){state.user="alice";return route.fulfill({status:303,headers:{location:"/account"}});}
     if(pathname.endsWith("/auth/logout")){state.user=null;return route.fulfill({json:{signedOut:true,redirect:null}});}
     const owner=route.request().headers()["x-fitlab-account"];
@@ -74,6 +78,7 @@ test("library filters cases and runs the Python challenge, retaining drafts by a
   await page.getByRole("button",{name:"Run tests",exact:true}).click();
   await expect(page.getByText("All tests passed",{exact:true})).toBeVisible();
   await expect.poll(()=>state.uploads.some(x=>x.owner==="alice"&&x.key.includes("practice:bank/"))).toBe(true);
+  await waitForAccountSync(page);
   await page.reload();
   await expect(page.locator(".cm-content")).toContainText("np.mean");
   state.user="bob";await page.evaluate(()=>window.dispatchEvent(new Event("focus")));
@@ -107,6 +112,7 @@ test("account workshop tests changed batches and keeps undo history out of synce
 test("quiz shows its data and Botie's explanation; unavailable service can be retried",async({page},info)=>{
   const state=await service(page);state.fail=true;
   await page.goto("/practice");
+  await waitForAccountReady(page);
   await expect(page.getByRole("alert").filter({hasText:"temporarily unavailable"})).toBeVisible();
   state.fail=false;await page.getByRole("button",{name:"Try again",exact:true}).click();
   await expect(page.getByText(/3,456 activities/)).toBeVisible();

@@ -392,15 +392,18 @@ export default function BackpropagationPage() {
               "The rectifier’s slope at −1 is 0, so the arriving gradient is multiplied by nothing. Nothing this neuron does reaches the loss on this row, so nothing on this row can tell it what to do. Switch the activation to a sigmoid or a tangent and every neuron receives something, and none receives all of it.",
             ),
             several(
-              "Which of these are jobs a layer does during the backward pass?",
+              "In the SDK’s cached-forward interface, which jobs does a dense layer perform during its backward pass?",
               [
-                "Calculate the gradients of its own parameters",
-                "Report how sensitive the loss is to each of its inputs",
-                "Re-run its forward calculation to recover the scores it needs",
-                "Consult which activation function the layer above used",
-              ],
+                              "Calculate the gradients of its own parameters",
+                              "Report how sensitive the loss is to each of its inputs",
+                              "Re-run its forward calculation to recover the scores it needs",
+                              "Consult which activation function the layer above used",
+                            ],
               [0, 1],
               "Those two jobs are the whole of the reusable layer interface, and the second is what lets the layer beneath do both in turn. The scores were kept by the forward pass, and once a layer has its arriving gradient every dense layer performs the same four lines whatever sits above or below it.",
+              {
+                "description": "The forward response already holds the layer’s inputs, scores and activations. The backward call receives this response and the gradient arriving from the layer above. It does not need to reconstruct the forward response."
+              },
             ),
         ],
         },
@@ -581,15 +584,19 @@ export default function BackpropagationPage() {
               "Calculating and applying are two phases and they must not overlap. Moving one parameter early would change the scores and activations that the remaining gradients are still being computed from, so every gradient is stored first and every parameter steps afterwards.",
             ),
             several(
-              "Which of these hold of the finite-difference check on the weight from h₁ into the output?",
+              "What can we conclude from this numerical gradient check?",
               [
-                "The chain rule says 12 and the nudge, at an ε of a millionth, says 11.999999998",
-                "The disagreement of 2.3e-9 is the rounding in a difference of two losses near eight, not a disagreement about the slope",
-                "It costs two forward passes per parameter, which is why it is a check rather than a method",
-                "A disagreement that small shows the chain rule’s answer is only approximate",
-              ],
+                              "The chain rule says 12 and the nudge, at an ε of a millionth, says 11.999999998",
+                              "The disagreement of 2.3e-9 is the rounding in a difference of two losses near eight, not a disagreement about the slope",
+                              "It costs two forward passes per parameter, which is why it is a check rather than a method",
+                              "A disagreement that small shows the chain rule’s answer is only approximate",
+                            ],
               [0, 1, 2],
               "Both figures are answers to the same question and they agree, and the same check on h₁’s weight from x₂ gives 8 against 8.000000001. A finite difference subtracts two nearby losses, and the digits lost in that subtraction are what the gap is made of. One backward walk finds every slope at once for about the price of a second forward pass, so once the analytic gradient is trusted the nudge has done its job.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Weight checked: hidden unit h₁ to the output\nAnalytic derivative: 12\nCentral-difference derivative: 11.999999998\nNudge ε: 0.000001\nUnrounded derivative disagreement: about 2.3e-9\nThe two losses being subtracted are near 8.\nEach central difference evaluates L(w + ε) and L(w − ε)."
+              },
             ),
             choice(
               "After every parameter has moved by a twentieth of its slope, what happens when the row (1, 2) goes through again?",
@@ -625,7 +632,7 @@ export default function BackpropagationPage() {
           practice: [
             exercise(
               "Run the row forward and measure the loss",
-              ["Build the 2-3-1 network of Part 1 with the library, three rectified hidden neurons with weights (1, 1), (1, −1) and (−1, 1) and one linear output neuron with weights (1, −1, 2), every bias zero. Send the row (1, 2) through it and score the answer against the target of 1 by half the squared miss.", "Part 1 traced the hidden outputs to (3, 0, 1), and Part 2 arrived at a prediction of 5, a loss of 8 and a slope of 4 at the prediction. Read all of those off the library and confirm them."],
+              ["The workshop followed one weight's effect on an error. This starter gives a complete two-input network with three ReLU hidden neurons and one linear output. Send its one-row input batch through the stack and compare the output with the supplied target.","Print the hidden outputs, prediction, half-squared loss and derivative of that loss with respect to the prediction. Keep the loss value separate from the derivative that will enter the backward pass."],
               `import numpy as np
 from oop_ml import DenseLayer, Identity, LayerStack, Neuron, RectifiedLinear, SquaredError
 
@@ -667,11 +674,11 @@ print(f"slope of the loss at the prediction {float(measured.gradient[0, 0]):.4f}
 prediction 5.0000
 loss 8.0000
 slope of the loss at the prediction 4.0000`,
-              { hints: ["respond_to takes a block with one row per example, so the single row goes in as a one-row array, and the stack answers with a response you can index by layer.", "The first layer’s response holds the hidden outputs, and the stack’s own outputs are the last layer’s answer, one row and one column here.", "SquaredError().measure takes the outputs and the targets as blocks of the same shape and answers an object carrying both the value and the gradient, which is the loss and its slope kept apart as Part 2 insists."], check: numberCheck("What loss does the library report for the untrained row?", 8.0, 0.001, "The prediction is 5 and the target is 1, so the miss is 4 and half its square is 8. The slope printed beside it is 4, the miss itself, and that slope rather than the loss is what travels back into the output neuron.") },
+              { hints: ["respond_to takes a block with one row per example, so the single row goes in as a one-row array, and the stack answers with a response you can index by layer.", "The first layer’s response holds the hidden outputs, and the stack’s own outputs are the last layer’s answer, one row and one column here.", "SquaredError().measure takes the outputs and the targets as blocks of the same shape and answers an object carrying both the value and the gradient, which is the loss and its slope kept apart as Part 2 insists."], check: numberCheck("What loss does the library report for the untrained row?", 8.0, 0.001, "The loss measures the prediction error, while its derivative describes the local change in that loss when the prediction changes. The backward pass receives that derivative and combines it with local derivatives inside the network."), question: "What do the untrained network’s forward response and loss tell us separately?" },
             ),
             exercise(
               "Walk the blame back down",
-              ["Ask the stack for one backward pass on the same row and read off every gradient Parts 2 and 3 worked by hand, the output neuron’s (12, 0, 4) with a bias gradient of 4, and the three hidden neurons’ weight and bias gradients.", "Part 3 only worked h₁’s gradients in full. Print h₃’s as well, and the largest slope anywhere in the network, a number the lesson never quotes."],
+              ["Run backward_pass on the same fixed network, input and target. It computes parameter gradients without applying an update. Read the output layer's weight and bias gradients, followed by those of each hidden neuron.","Print all the requested gradients and the largest absolute parameter-gradient value anywhere in the stack. A hidden layer's weight-gradient matrix has one row per neuron and one column per input; preserve that correspondence when reporting each neuron."],
               `import numpy as np
 from oop_ml import DenseLayer, Identity, LayerStack, Neuron, RectifiedLinear, SquaredError
 
@@ -721,11 +728,11 @@ h1 weight gradients [4.0, 8.0], bias gradient 4.0000
 h2 weight gradients [0.0, 0.0], bias gradient 0.0000
 h3 weight gradients [8.0, 16.0], bias gradient 8.0000
 largest slope anywhere 16.0000`,
-              { hints: ["backward_pass takes the inputs, the targets and the loss, runs the row forward itself, and answers one gradient per layer in the order the stack holds them, so the hidden layer is at position 0 and the output layer at position 1.", "Each gradient carries a weights block with a row per neuron and a column per input, and a biases vector with one entry per neuron, which is exactly the shape of the layer’s own weights, as Part 5 says it must be.", "largest_movement on the backward pass is the biggest single slope over every layer that has parameters to learn."], check: numberCheck("What is the largest slope anywhere in the network on this row?", 16.0, 0.001, "h₃ has a delta of 8, since 8 arrives at it and the rectifier’s slope at its score of 1 is 1, and its weight from x₂ multiplied an input of 2, so that one gradient is 16. It outranks the output neuron’s 12 because the second input is the largest number in the row.") },
+              { hints: ["backward_pass takes the inputs, the targets and the loss, runs the row forward itself, and answers one gradient per layer in the order the stack holds them, so the hidden layer is at position 0 and the output layer at position 1.", "Each gradient carries a weights block with a row per neuron and a column per input, and a biases vector with one entry per neuron, which is exactly the shape of the layer’s own weights, as Part 5 says it must be.", "largest_movement on the backward pass is the biggest single slope over every layer that has parameters to learn."], check: numberCheck("What is the largest slope anywhere in the network on this row?", 16.0, 0.001, "A parameter gradient combines the signal arriving at a neuron with the local activation derivative and the input carried by that connection. The largest magnitude here occurs in the third hidden neuron. That is an observed gradient for this input and target, before any learning-rate scaling."), question: "How does the backward pass distribute the loss derivative among the network’s parameters?" },
             ),
             exercise(
               "Step once and run the row again",
-              ["Take one step at the learning rate of 0.05 from the backward pass, read the new weights off the stepped stack, and send the row through again.", "Part 4 says the output weights become (0.4, −1, 1.8) with a bias of −0.2, that h₃ goes dark beside h₂ on the second pass, and that the loss falls from 8 to 0.1152. Confirm each of those from the library."],
+              ["Use the calculated backward pass to create a new network with learning rate 0.05. Print its layer parameters, then run the same input through the new network and measure the new loss.","The original stack remains available. Keep the old and updated responses separate so the final measurement describes the updated parameters, including any ReLU hidden neurons whose scores changed sign."],
               `import numpy as np
 from oop_ml import DenseLayer, Identity, LayerStack, Neuron, RectifiedLinear, SquaredError
 
@@ -778,11 +785,11 @@ h3 weights after [-1.4, 0.2], bias -0.4000
 hidden outputs after [1.8, 0.0, 0.0]
 prediction after 0.5200
 loss after 0.1152`,
-              { hints: ["stepped_by takes the backward pass and the learning rate and answers a new stack, leaving the old one untouched, which is Part 4’s rule that calculating and applying are two phases, kept by construction.", "A dense layer exposes weight_matrix, a row per neuron, and bias_vector, one entry per neuron. Index the stepped stack by position to reach each layer.", "The old response describes a network that no longer exists, so call respond_to on the stepped stack rather than reusing anything from the first pass."], check: numberCheck("What is the loss after one step at 0.05?", 0.1152, 0.0001, "The prediction on the second pass is 0.52, so the miss is 0.48 and half its square is 0.1152. One step took the loss from 8 to 0.1152, and two of the three hidden neurons now score below zero, so only h₁, at 1.8, reaches the output on this pass.") },
+              { hints: ["stepped_by returns a new stack. Save that return value rather than assuming the original network changed in place.","Read weight_matrix and bias_vector from each layer of the new stack.","Call respond_to on the updated stack before measuring its loss. The old response still describes the unchanged original stack."], check: numberCheck("What is the loss after one step at 0.05?", 0.1152, 0.0001, "The lower measured loss shows that this update helped on this example. The new parameters also change which hidden ReLU outputs are active. Another input or a different step size would need its own check."), question: "Does one parameter update lower the loss on this input?" },
             ),
             exercise(
               "Check one gradient by nudging",
-              ["Check the chain rule’s 12 for the weight from h₁ into the output without the chain rule. Nudge that one weight up by a millionth and measure the loss, nudge it down by a millionth and measure again, and divide the difference by the width of the nudge.", "Part 4 reports 11.999999998 against 12, a disagreement of 2.3e-9. Print the chain rule’s slope, the nudge’s slope to nine places, and the disagreement between them."],
+              ["Check the weight connecting the first hidden neuron to the output using two nearby forward evaluations. Increase only that weight by the supplied epsilon for one evaluation and decrease it for the other, keeping all other parameters fixed.","Use the symmetric difference of their losses to estimate the derivative. Print the analytical gradient, numerical estimate and absolute disagreement at the supplied precision. This is a check of one parameter, rather than another training step."],
               `import numpy as np
 from oop_ml import DenseLayer, Identity, LayerStack, Neuron, RectifiedLinear, SquaredError
 
@@ -837,7 +844,7 @@ print(f"disagreement {abs(numerical - analytic):.1e}")`,
               `chain rule 12.0000
 nudge 11.999999998
 disagreement 2.3e-09`,
-              { hints: ["weight_matrix is read-only, so copy it with np.array before changing an entry. Row 0, column 0 is the output neuron’s weight on h₁.", "with_parameters builds a new layer of the same shape and activations carrying the nudged weights and the old biases, and LayerStack accepts the untouched hidden layer beside it.", "The central difference is the loss at plus ε less the loss at minus ε, over 2ε. Print it to nine places, or the disagreement rounds away to nothing."], check: numberCheck("What slope does the nudge report for the weight from h₁ into the output, to four places?", 12.0, 0.001, "The nudge says 11.999999998 and the chain rule says 12, and the 2.3e-9 between them is the rounding in a difference of two losses near eight. It cost two forward passes for this one weight, where the backward pass of the previous problem found all thirteen slopes at once, which is why the nudge is a check and not a method.") },
+              { hints: ["weight_matrix is read-only, so copy it with np.array before changing an entry. Row 0, column 0 is the output neuron’s weight on h₁.", "with_parameters builds a new layer of the same shape and activations carrying the nudged weights and the old biases, and LayerStack accepts the untouched hidden layer beside it.", "The central difference is the loss at plus ε less the loss at minus ε, over 2ε. Print it to nine places, or the disagreement rounds away to nothing."], check: numberCheck("What slope does the nudge report for the weight from h₁ into the output, to four places?", 12.0, 0.001, "The close agreement supports the derivative calculation at these parameters and epsilon. Numerical differences still include finite-step approximation and floating-point effects. Checking every parameter this way needs additional forward evaluations, whereas one backward pass can obtain them together."), question: "Does a small numerical nudge agree with the backpropagated gradient?" },
             ),
           ],
         },

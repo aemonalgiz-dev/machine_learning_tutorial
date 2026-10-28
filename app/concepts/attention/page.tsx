@@ -33,9 +33,9 @@ export default function AttentionPage() {
         </SubSection>
         <SubSection title="2. Compare first, then decide the shares">
           <p>The calculation for one gathering token has four steps. We will follow the first red token through them, and the worked example below shows the arithmetic.</p>
-          <p>First, compare. We use a dot product to compare a query with each key. That means multiplying corresponding entries and adding the products. The red query scores 1 against each red key and 0 against the blue key, so its row of scores is 1, 0, 1.</p>
-          <p>Second, scale. Each score is divided by the square root of the vector width. The width is 4 here, so the row becomes 0.5, 0, 0.5. Part 2 explains what the division is for.</p>
-          <p>Third, turn the scores into shares. A function called softmax raises e to the power of each score, then divides each result by the total for the row. Every share is therefore positive, and the row totals one. A larger score receives a larger share. A score of zero still receives a share, because e to the power of zero is 1 and not 0.</p>
+          <p>First, compare. We use a dot product to compare a query with each key: multiply corresponding entries, then add the products. That gives one comparison score per available position. The worked calculation below follows the red query and keeps each score beside the key that produced it.</p>
+          <p>Second, scale. Divide each comparison score by the square root of the query and key width. The example below shows this division separately. Part 2 explains why the width matters to the sizes of the scores.</p>
+          <p>Third, turn the scores into shares. The function called softmax exponentiates each score, then divides each result by the row total. A larger finite score receives a larger share, and all allowed shares are positive and sum to one. In particular, a score of zero is still allowed to contribute. We will later use a mask to block a position completely.</p>
           <p>Fourth, combine. The model does not have to select a single token. It can combine information from several. Each share multiplies the corresponding value vector, and we add those contributions to get the result for the querying token.</p>
         </SubSection>
         <WorkedExample title="One red token reads three colour vectors">
@@ -112,21 +112,29 @@ export default function AttentionPage() {
           "Softmax is what bounds the shares and makes a row total one, so neither of those needs the scaling. The scaling rests on the usual assumption of roughly independent, centered coordinates with unit variance, and it does not normalize every possible input distribution.",
         ),
         trueFalse(
-          "With two heads in the colour example, each head compares in two coordinates and the two heads reach different rows of shares for the red token.",
-          true,
-          "The width of four is divided among the heads, so each compares in a smaller space. The first head reads the two coordinates where red and blue differ and gives red about 0.4011, 0.1978, 0.4011. The second head reads two coordinates that are zero for both colours, so every score is zero and every share is one third. Their results are placed side by side before an output projection mixes them.",
-        ),
+  "With two heads in this colour example, each head compares two coordinates and the two heads produce different share rows for the first red token.",
+  true,
+  "The width of four is divided among the heads, so each compares in a smaller space. The first head reads the two coordinates where red and blue differ and gives red about 0.4011, 0.1978, 0.4011. The second head reads two coordinates that are zero for both colours, so every score is zero and every share is one third. Their results are placed side by side before an output projection mixes them.",
+  {
+    "description": "Use one self-attention layer with identity query, key and value projections, no positional encoding, and no mask unless stated.",
+    "data": "Token order: red, blue, red\nred = [1,0,0,0]\nblue = [0,1,0,0]\nOne head has width 4. Each head divides dot products by sqrt(head width). Softmax is applied across available keys.\nFor two heads, head 1 reads coordinates 0 and 1; head 2 reads coordinates 2 and 3."
+  },
+),
         choice(
-          "The blue token gives its largest share, about 0.4519, to itself. What does its result hold?",
-          [
-            "More red than blue, about 0.5481 against 0.4519, because the two red shares of 0.2741 add",
-            "Only blue, since the token with the largest share supplies the result",
-            "Equal amounts of red and blue, since softmax evens a row out",
-            "More blue than red, since blue received the largest single share",
-          ],
-          0,
-          "Each share multiplies its value vector and the contributions are added, so two smaller shares for the same colour count together. The result is a combination of everything the token read and not a copy of its best match. That is why the row is a set of shares and not a choice.",
-        ),
+  "The blue query assigns its largest individual share to itself. What does its combined result contain?",
+  [
+              "More red than blue, about 0.5481 against 0.4519, because the two red shares of 0.2741 add",
+              "Only blue, since the token with the largest share supplies the result",
+              "Equal amounts of red and blue, since softmax evens a row out",
+              "More blue than red, since blue received the largest single share",
+            ],
+  0,
+  "Each share multiplies its value vector and the contributions are added, so two smaller shares for the same colour count together. The result is a combination of everything the token read and not a copy of its best match. That is why the row is a set of shares and not a choice.",
+  {
+    "description": "Use identity value projections. The two red positions have identical value vectors.",
+    "data": "Values, in token order:\nred = [1,0,0,0]\nblue = [0,1,0,0]\nred = [1,0,0,0]\nShares for the blue query: approximately [0.2741,0.4519,0.2741].\nUnrounded shares are calculated as softmax([0,0.5,0]); the displayed shares are rounded."
+  },
+),
       ] },
       { title: "Part 3. Order, Causality, and the Larger Network", content: <>
         <SubSection title="5. Prevent a token from reading the future">
@@ -164,32 +172,44 @@ export default function AttentionPage() {
           "Driving a score to negative infinity before softmax gives that position zero contribution while the allowed shares are still normalized among themselves. Zeroing shares afterwards would leave the row totalling less than one, which is a different operation.",
         ),
         trueFalse(
-          "With the mask enabled in this example, the first position gives itself a share of 1.",
-          true,
-          "This example allows each position to read itself, and the first position has nothing earlier to read, so its row of shares is 1, 0, 0 and its result is its own vector. Whether a position may attend to itself is a choice the mask makes, not a consequence of causality.",
-        ),
+  "With this causal mask, the first position gives itself a share of one.",
+  true,
+  "This example allows each position to read itself, and the first position has nothing earlier to read, so its row of shares is 1, 0, 0 and its result is its own vector. Whether a position may attend to itself is a choice the mask makes, not a consequence of causality.",
+  {
+    "description": "The mask permits the current position and every earlier position.",
+    "data": "At the first position, allowed keys: first position only. All later scores are excluded before softmax."
+  },
+),
         several(
-          "Blocking future tokens in the red, blue, red example changes which of these?",
-          [
-            "The blue token’s share for itself, which rises from about 0.4519 to 0.6225",
-            "The first red token’s result, which becomes its own vector [1, 0, 0, 0]",
-            "The last red token’s row of shares",
-            "The total of each row of shares, which falls below one",
-          ],
-          [0, 1],
-          "The blue token loses the red that follows it, and its two remaining shares are calculated from the allowed scores only, so they still total one and its share for itself rises. The first token may read only itself. The last token has no future to block, so its row stays at about 0.3837, 0.2327, 0.3837. Every row still totals one, which is the reason the mask acts on the scores and not on the finished shares.",
-        ),
+  "Which quantities change when future keys are blocked in this red, blue, red example?",
+  [
+              "The blue token’s share for itself, which rises from about 0.4519 to 0.6225",
+              "The first red token’s result, which becomes its own vector [1, 0, 0, 0]",
+              "The last red token’s row of shares",
+              "The total of each row of shares, which falls below one",
+            ],
+  [0, 1],
+  "The blue token loses the red that follows it, and its two remaining shares are calculated from the allowed scores only, so they still total one and its share for itself rises. The first token may read only itself. The last token has no future to block, so its row stays at about 0.3837, 0.2327, 0.3837. Every row still totals one, which is the reason the mask acts on the scores and not on the finished shares.",
+  {
+    "description": "Use one self-attention layer with identity query, key and value projections, no positional encoding, and no mask unless stated.",
+    "data": "Token order: red, blue, red\nred = [1,0,0,0]\nblue = [0,1,0,0]\nOne head has width 4. Each head divides dot products by sqrt(head width). Softmax is applied across available keys.\nThe causal mask permits the current position and earlier ones, and excludes later scores before softmax."
+  },
+),
         several(
-          "Which of these does this layer leave to something else?",
-          [
-            "Encoding where each token sits in the sequence",
-            "Padding masks",
-            "Turning a row of comparisons into shares that total one",
-            "Attending from one sequence to a different sequence",
-          ],
-          [0, 1, 3],
-          "Unmasked attention by itself does not encode sequence order, and positional encoding supplies that. Padding masks are a separate concern this layer does not implement, and the layer implements self-attention, where queries, keys and values come from the same sequence. The softmax is the one item on the list that happens inside it.",
-        ),
+  "Which features are outside the oop_ml self-attention layer used on this page?",
+  [
+              "Encoding where each token sits in the sequence",
+              "Padding masks",
+              "Turning a row of comparisons into shares that total one",
+              "Attending from one sequence to a different sequence",
+            ],
+  [0, 1, 3],
+  "Unmasked attention by itself does not encode sequence order, and positional encoding supplies that. Padding masks are a separate concern this layer does not implement, and the layer implements self-attention, where queries, keys and values come from the same sequence. The softmax is the one item on the list that happens inside it.",
+  {
+    "description": "Distinguish the course implementation from attention mechanisms in general.",
+    "data": "This layer forms Q, K and V from one sequence, supports its documented causal mask, and normalises allowed scores with softmax. Its interface has no positional-encoding, padding-mask or separate encoder-sequence argument."
+  },
+),
         trueFalse(
           "Reading off the attention shares establishes why the complete model made the decision it made.",
           false,
@@ -201,7 +221,11 @@ export default function AttentionPage() {
           practice: [
             exercise(
               "Reproduce the three colour tokens",
-              ["The starter builds the inputs of the page’s example, red, blue, red, and a layer of one head whose projections leave every vector unchanged. Pass the inputs through the layer with respond_to.", "Print the table of shares, one row per reading token, and then the result for each token, all to four places. Find the two rows Part 1 worked by hand."],
+              [
+  "The supplied red, blue, red sequence uses four-coordinate colour vectors and one attention head with identity projections. Send the input block through respond_to.",
+  "Print the attention-share table, one row per querying position and one column per source position. Then print the resulting four-coordinate vector for each position, all to four decimal places.",
+  "Two positions contain red. Their separate shares can contribute the same value vector to one combined result."
+],
               `import numpy as np
 from oop_ml import Embedding, MultiHeadAttention
 
@@ -253,11 +277,17 @@ results
   red   0.7673  0.2327  0.0000  0.0000
   blue  0.5481  0.4519  0.0000  0.0000
   red   0.7673  0.2327  0.0000  0.0000`,
-              { hints: ["layer.respond_to(inputs) answers a response. Its attention holds the shares and its outputs holds the results.", "Both carry a leading axis for the sequences in the batch, and attention carries a second one for the head, so the table for this one sequence and one head is response.attention[0][0].", "zip(tokens, table) pairs each token with its row, and an f-string with :.4f prints a number to four places."], check: numberCheck("How much red does the blue token’s result hold, to four places?", 0.5481, 5e-05, "Blue gives each red token a share of 0.2741 and itself 0.4519. The two red shares multiply the same value vector, so they add, and the result holds more red than blue although blue received the largest single share.") },
+              { hints: [
+  "Use the response’s attention table and outputs; do not confuse an individual source share with a colour’s total contribution.",
+  "Keep token-position order red, blue, red in both printed tables."
+], check: numberCheck("How much red does the blue token’s result hold, to four places?", 0.5481, 5e-05, "The blue query’s result contains red contribution 0.5481. Two red source positions contribute the same value direction, so their combined contribution can exceed blue’s larger individual share."), question: "How does each colour token combine information from the three positions?" },
             ),
             exercise(
               "Block the future and read the rows that changed",
-              ["Part 3 says the mask removes later positions before softmax, so the shares that remain still total one. Build the same layer with looks_ahead=False and pass the same three tokens through it.", "Print the table of shares to four places and the total of each row. Compare each row with the table from the first problem."],
+              [
+  "Use the same three colour vectors and identity projections, but construct the layer with looks_ahead=False. A query may use its own position and earlier positions only.",
+  "Print each row’s three shares and its total to four decimal places. Forbidden future entries must receive no share; the allowed entries must still sum to one."
+],
               `import numpy as np
 from oop_ml import Embedding, MultiHeadAttention
 
@@ -301,11 +331,17 @@ for token, row in zip(tokens, response.attention[0][0]):
               `red   1.0000  0.0000  0.0000   total 1.0000
 blue  0.3775  0.6225  0.0000   total 1.0000
 red   0.3837  0.2327  0.3837   total 1.0000`,
-              { hints: ["looks_ahead is the field that says whether a position may read later ones. False is the causal mask.", "with_parameters answers a new layer, so keep what it returns.", "Each row of response.attention[0][0] is an array, and row.sum() is its total."], check: numberCheck("With the future blocked, what share does the blue token give itself, to four places?", 0.6225, 5e-05, "Blue may read the first red token and itself, with scaled scores of 0 and 0.5. Softmax divides by the total of those two allowed entries only, so the share that was 0.4519 among three becomes 0.6225 between two, and the row still totals one.") },
+              { hints: [
+  "Mask future scores before normalising, rather than clearing probabilities after softmax.",
+  "Inspect the first, middle and final queries separately because they have different allowed source sets."
+], check: numberCheck("With the future blocked, what share does the blue token give itself, to four places?", 0.6225, 5e-05, "Blue assigns itself 0.6225. Removing its future source before softmax redistributes the allowed shares while retaining a row total of one."), question: "How should an attention row change when future positions are forbidden?" },
             ),
             exercise(
               "Give the second head something to read",
-              ["In Part 2 the second head saw only zeros, because red and blue live in the first two coordinates. Green is [0, 0, 1, 0], which the second head can see. Pass red, green, red through a layer of two heads.", "Print each head’s table of shares and then the results, to four places. The lesson quotes none of these numbers for a sequence holding green."],
+              [
+  "Use two heads on the supplied four-coordinate red, green, red sequence. The first head reads the first two coordinates and the second reads the last two.",
+  "Print both heads’ three-by-three attention tables and the resulting vector per token to four decimal places. Keep the identity projections from the starter so their visible coordinate split explains the differences."
+],
               `import numpy as np
 from oop_ml import Embedding, MultiHeadAttention
 
@@ -363,7 +399,10 @@ results
   red   0.8022  0.0000  0.3333  0.0000
   green 0.6667  0.0000  0.5035  0.0000
   red   0.8022  0.0000  0.3333  0.0000`,
-              { hints: ["n_heads=2 splits the width of four into two heads of two coordinates each, and layer.head_size reports the width of one head.", "response.attention[0] now holds two tables, one per head, so loop over range(2)."], check: numberCheck("In the second head, what share does the green token give itself, to four places?", 0.5035, 5e-05, "The second head reads the last two coordinates, where green is [1, 0] and red is [0, 0]. Green scores 1 against itself and 0 against each red, and the score is divided by √2 because the head is two wide, which gives 0.5035 for itself and 0.2483 for each red. The first head cannot tell green from nothing, so green reads all three tokens equally there.") },
+              { hints: [
+  "Green’s nonzero entry lies in the second head’s coordinates, while red’s lies in the first head’s.",
+  "Inspect each head’s scores and scale by its own width before comparing its normalised shares."
+], check: numberCheck("In the second head, what share does the green token give itself, to four places?", 0.5035, 5e-05, "The second head assigns green itself 0.5035. That head can see green’s nonzero coordinates; the first head receives a zero green query in this fixed projection."), question: "What can each attention head see in a red, green, red sequence?" },
             ),
           ],
         },

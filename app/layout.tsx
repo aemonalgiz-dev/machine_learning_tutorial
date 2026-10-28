@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CourseBreadcrumbs } from "@/components/course/CourseBreadcrumbs";
-import { LessonFooter } from "@/components/course/LessonFooter";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { AccountSync } from "@/components/site/AccountSync";
+import { LearningInteractionGuard } from "@/components/site/LearningInteractionGuard";
 import { SupportMessage } from "@/components/site/SupportMessage";
 import { Botie } from "@/components/site/Botie";
 import { REPOSITORY, SITE_NAME, SITE_ORIGIN, SITE_TITLE, SITE_DESCRIPTION, SITE_SOCIAL } from "@/lib/site";
@@ -48,8 +48,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <script dangerouslySetInnerHTML={{ __html: restoreTheme }} />
 
-        <header className="sticky top-0 z-40 border-b border-line bg-background/85 backdrop-blur">
-          <nav aria-label="Main navigation" className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-6 py-3">
+        <header className="game-header sticky top-0 z-40 border-b border-line bg-background/95 backdrop-blur">
+          <nav aria-label="Main navigation" className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-5 gap-y-2 px-5 py-3 sm:px-8">
             <Link
               href="/"
               className="flex items-center gap-2 font-mono text-base font-bold tracking-tight text-foreground"
@@ -77,8 +77,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
         <main className="flex-1">
           <CourseBreadcrumbs />
-          {children}
-          <LessonFooter />
+          <LearningInteractionGuard>{children}</LearningInteractionGuard>
         </main>
 
         <footer className="border-t border-line">

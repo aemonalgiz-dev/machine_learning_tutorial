@@ -10,14 +10,10 @@ def rows(value):
         raise ValueError("Expected a list of records")
     return value
 `;
-const exercise = (title, task, signature, solution, output, hints, tests) => challenge(title, task,
-  signature + '\n    raise NotImplementedError("Work through the policy before returning it")\n', solution, output, hints, tests);
+const exercise = (title, task, signature, solution, output, hints, tests, presentation) => challenge(title, task,
+  signature + '\n    raise NotImplementedError("Work through the policy before returning it")\n', solution, output, hints, tests, presentation);
 
-export const boundariesPractice = exercise('Which actions still have a missing control?', [
-  'Write route_actions(events, policy, installed). Events contain id and effect strings. Policy maps effects to required control-name lists; installed contains application-owned control names.',
-  'Return id/route records in input order. A known effect is ready when every requirement is installed; otherwise hold. Unknown effects always hold. Malformed lists raise ValueError. Do not mutate inputs.',
-  'Try read and publish, with read requiring object-access and publish requiring approval and output-check. Only object-access is installed. Print the number ready.',
-], 'def route_actions(events, policy, installed):', helpers + `
+export const boundariesPractice = exercise('Which actions still have a missing control?', ["Reading a manual and publishing an answer cause different effects. Each proposed action needs its own list of required controls, so a permitted read cannot carry a publication past a missing check. Write route_actions(events, policy, installed). Events contain id and effect strings. Policy maps effects to required control-name lists; installed contains application-owned control names.","Return id/route records in input order. A known effect is ready when every requirement is installed; otherwise hold. Unknown effects always hold. Malformed lists raise ValueError. Do not mutate inputs.","Try read and publish, with read requiring object-access and publish requiring approval and output-check. Only object-access is installed. Print the number ready."], 'def route_actions(events, policy, installed):', helpers + `
 def route_actions(events, policy, installed):
     installed = set(names(installed))
     answer = []
@@ -37,11 +33,7 @@ print(sum(item["route"] == "ready" for item in result))`, '1',
 ['A complete control set permits the next step', 'assert route_actions([{"id":"x","effect":"read"}], {"read":["auth"]}, ["auth"])[0]["route"] == "ready"'],
 ]);
 
-export const codingPractice = exercise('Can this patch stay within the agreed task?', [
-  'Write patch_route(entries, allowed, tests_passed). Entries have kind (edit, add, delete or rename) and path. A rename also has oldPath. Paths are already-normalised repository-relative fixture names supplied by a trusted diff reader. Allowed contains exact approved names.',
-  'Return ready for review only when all touched paths, including both sides of renames, are approved and tests_passed is exactly True. Otherwise hold patch. Unknown kinds and malformed name lists raise ValueError. This is not a filesystem sandbox.',
-  'Rename src/check.py to src/checks.py with only src/checks.py approved and passing independent tests. Print the route.',
-], 'def patch_route(entries, allowed, tests_passed):', helpers + `
+export const codingPractice = exercise('Can this patch stay within the agreed task?', ["A coding worker can make a test disappear instead of fixing the behaviour it checked. Review every changed path independently from the passing-test flag. Write patch_route(entries, allowed, tests_passed). Entries have kind (edit, add, delete or rename) and path. A rename also has oldPath. Paths are already-normalised repository-relative fixture names supplied by a trusted diff reader. Allowed contains exact approved names.","Return ready for review only when all touched paths, including both sides of renames, are approved and tests_passed is exactly True. Otherwise hold patch. Unknown kinds and malformed name lists raise ValueError. This is not a filesystem sandbox.","Rename src/check.py to src/checks.py with only src/checks.py approved and passing independent tests. Print the route."], 'def patch_route(entries, allowed, tests_passed):', helpers + `
 def patch_route(entries, allowed, tests_passed):
     allowed = set(names(allowed))
     touched = set()
@@ -62,11 +54,7 @@ print(patch_route([{"kind":"rename","oldPath":"src/check.py","path":"src/checks.
 ['Renames require both names', 'assert patch_route([{"kind":"rename","oldPath":"a","path":"b"}],["a","b"],True) == "ready for review"\nassert patch_route([{"kind":"edit","path":"a.backup"}],["a"],True) == "hold patch"'],
 ]);
 
-export const sandboxPractice = exercise('Which profile exposes more than the task needs?', [
-  'Write audit_profile(profile, writable). Profile has mounts (path/mode records), credentials (names), network, privileged and timeout. Writable lists paths permitted to have mode rw. Other valid mounts use ro.',
-  'Return route and issues. Collect mount findings in input order: writable mount: PATH for unapproved rw, or unknown mount mode: PATH. Then append network access unless network is none; credentials exposed when nonempty; privilege setting unless privileged is exactly False; timeout outside policy unless timeout is finite, numeric, greater than zero and at most 60. Booleans are not durations. Deduplicate findings without reordering them.',
-  'Use hold profile if issues exist, otherwise test isolation. Malformed lists raise ValueError. For an otherwise minimal profile with timeout=90, print the number of issues.',
-], 'def audit_profile(profile, writable):', helpers + `
+export const sandboxPractice = exercise('Which profile exposes more than the task needs?', ["A worker with no network can still alter an unapproved writable directory. Collect the filesystem and execution-privilege findings without letting one clean check erase another gap. Write audit_profile(profile, writable). Profile has mounts (path/mode records), credentials (names), network, privileged and timeout. Writable lists paths permitted to have mode rw. Other valid mounts use ro.","Return route and issues. Collect mount findings in input order: writable mount: PATH for unapproved rw, or unknown mount mode: PATH. Then append network access unless network is none; credentials exposed when nonempty; privilege setting unless privileged is exactly False; timeout outside policy unless timeout is finite, numeric, greater than zero and at most 60. Booleans are not durations. Deduplicate findings without reordering them.","Use hold profile if issues exist, otherwise test isolation. Malformed lists raise ValueError. For an otherwise minimal profile with timeout=90, print the number of issues."], 'def audit_profile(profile, writable):', helpers + `
 import math
 
 def audit_profile(profile, writable):
@@ -98,10 +86,7 @@ print(len(audit_profile(p,[])["issues"]))`, '1',
 ['Boolean and infinite durations fail', 'p={"mounts":[],"credentials":[],"network":"none","privileged":False,"timeout":True}\nassert audit_profile(p,[])["issues"] == ["timeout outside policy"]\np["timeout"]=float("inf")\nassert audit_profile(p,[])["route"] == "hold profile"'],
 ]);
 
-export const releasePractice = exercise('Do the checks belong to this artifact?', [
-  'Write release_route(candidate, evidence, required). Candidate supplies nonempty revision/artifact labels. Evidence comes from an independent verifier with matching identifiers, trustedRunner and checks. Labels are fixture names, not cryptographic proofs.',
-  'Return ready for release review only when trustedRunner is exactly True, both identifiers match, and every required check is pass. Missing, skipped or unavailable checks hold release. Malformed required-name lists raise ValueError. Print the route for r2/a2 with passing evidence for r1/a1.',
-], 'def release_route(candidate, evidence, required):', helpers + `
+export const releasePractice = exercise('Do the checks belong to this artifact?', ["A green report may describe the previous build rather than the artifact waiting for release. Bind the independent evidence to the candidate before trusting its passing checks. Write release_route(candidate, evidence, required). Candidate supplies nonempty revision/artifact labels. Evidence comes from an independent verifier with matching identifiers, trustedRunner and checks. Labels are fixture names, not cryptographic proofs.","Return ready for release review only when trustedRunner is exactly True, both identifiers match, and every required check is pass. Missing, skipped or unavailable checks hold release. Malformed required-name lists raise ValueError. Print the route for r2/a2 with passing evidence for r1/a1."], 'def release_route(candidate, evidence, required):', helpers + `
 def release_route(candidate, evidence, required):
     required = names(required)
     names([candidate.get("revision"),candidate.get("artifact")])
@@ -117,10 +102,7 @@ print(release_route({"revision":"r2","artifact":"a2"},{"revision":"r1","artifact
 ['Skipped and missing checks hold', 'c={"revision":"r","artifact":"a"}\ne={**c,"trustedRunner":True,"checks":{"tests":"skipped"}}\nassert release_route(c,e,["tests"]) == "hold release"\nassert release_route(c,e,["scan"]) == "hold release"'],
 ]);
 
-export const mcpTrustPractice = exercise('Should this discovered tool be exposed?', [
-  'Write tool_route(offered, reviewed, server_id). Manifests have server, name, schemaDigest and descriptionDigest strings. Server identity comes from host configuration; digest fixtures represent host-computed metadata fingerprints.',
-  'Return available for authorised calls only when the offered server matches server_id and every manifest field matches a nonempty reviewed string. Otherwise hold discovery. Ignore readOnlyHint when deciding trust. Print the route when read_manual retains its schema but descriptionDigest changes.',
-], 'def tool_route(offered, reviewed, server_id):', `def tool_route(offered, reviewed, server_id):
+export const mcpTrustPractice = exercise('Should this discovered tool be exposed?', ["A familiar tool name can arrive with changed argument rules or a changed description. Compare what the host reviewed before exposing that offered capability. Write tool_route(offered, reviewed, server_id). Manifests have server, name, schemaDigest and descriptionDigest strings. Server identity comes from host configuration; digest fixtures represent host-computed metadata fingerprints.","Return available for authorised calls only when the offered server matches server_id and every manifest field matches a nonempty reviewed string. Otherwise hold discovery. Ignore readOnlyHint when deciding trust. Print the route when read_manual retains its schema but descriptionDigest changes."], 'def tool_route(offered, reviewed, server_id):', `def tool_route(offered, reviewed, server_id):
     fields=("server","name","schemaDigest","descriptionDigest")
     matches=all(isinstance(reviewed.get(k),str) and bool(reviewed[k]) and offered.get(k)==reviewed[k] for k in fields)
     return "available for authorised calls" if offered.get("server")==server_id and matches else "hold discovery"
@@ -133,10 +115,7 @@ print(tool_route({**m,"descriptionDigest":"d2"},m,"manuals"))`, 'hold discovery'
 ['Changed schemas and missing review records hold', 'm={"server":"a","name":"read","schemaDigest":"s","descriptionDigest":"d"}\nassert tool_route({**m,"schemaDigest":"new"},m,"a") == "hold discovery"\nassert tool_route({},{},"a") == "hold discovery"'],
 ]);
 
-export const authPractice = exercise('Does the verified token belong at this server?', [
-  'Write token_route(claims, policy, now). Claims are None after failed validation, or a trusted verifier record with issuer, audiences list, subject, expires number and scopes list. This function does not accept or verify raw JWTs.',
-  'Policy supplies issuer, audience and requiredScope. Continue to object checks only for the matching issuer/audience, nonempty subject, finite numeric expiry strictly greater than now, and exact scope. Otherwise deny request. Booleans are not expiry timestamps. Print the route for a search token presented to billing.',
-], 'def token_route(claims, policy, now):', `import math
+export const authPractice = exercise('Does the verified token belong at this server?', ["A credential accepted for search does not automatically belong at billing. Check its intended server and current operation scope using the verifier’s supplied claims. Write token_route(claims, policy, now). Claims are None after failed validation, or a trusted verifier record with issuer, audiences list, subject, expires number and scopes list. This function does not accept or verify raw JWTs.","Policy supplies issuer, audience and requiredScope. Continue to object checks only for the matching issuer/audience, nonempty subject, finite numeric expiry strictly greater than now, and exact scope. Otherwise deny request. Booleans are not expiry timestamps. Print the route for a search token presented to billing."], 'def token_route(claims, policy, now):', `import math
 
 def token_route(claims, policy, now):
     if not isinstance(claims,dict):
@@ -158,11 +137,7 @@ print(token_route(c,{"issuer":"company","audience":"billing","requiredScope":"re
 ['Issuer, scope and audience are independently required', 'p={"issuer":"i","audience":"a","requiredScope":"read"}\nc={"issuer":"i","audiences":["a"],"subject":"u","expires":100,"scopes":["read"]}\nfor change in [{"issuer":"other"},{"audiences":["b"]},{"scopes":["read_all"]}]:\n    assert token_route({**c,**change},p,0) == "deny request"'],
 ]);
 
-export const actionsPractice = exercise('Is this a new write or a replay?', [
-  'Write action_route(proposal, approval, stored, ledger, now). Proposal has id, record, version and newValue. Approval repeats those fields with approved and expires. Stored has id/version. Ledger contains complete proposals already applied by the receiver. Inputs are well-formed fixtures.',
-  'First require exact bound fields, approved=True and unexpired approval, otherwise hold for approval. For an existing action ID, return already applied when all bound fields match or idempotency conflict otherwise. For a new ID, require stored id/version to match before returning apply once atomically; otherwise refresh and review.',
-  'This chooses a route, not a real transaction. Print the route for a valid proposal already in the ledger after the stored version advances.',
-], 'def action_route(proposal, approval, stored, ledger, now):', `def action_route(proposal, approval, stored, ledger, now):
+export const actionsPractice = exercise('Is this a new write or a replay?', ["A successful write can advance the stored version before its reply is lost. A later replay needs the receiver’s action record as well as a current proposal review. Write action_route(proposal, approval, stored, ledger, now). Proposal has id, record, version and newValue. Approval repeats those fields with approved and expires. Stored has id/version. Ledger contains complete proposals already applied by the receiver. Inputs are well-formed fixtures.","First require exact bound fields, approved=True and unexpired approval, otherwise hold for approval. For an existing action ID, return already applied when all bound fields match or idempotency conflict otherwise. For a new ID, require stored id/version to match before returning apply once atomically; otherwise refresh and review.","This chooses a route, not a real transaction. Print the route for a valid proposal already in the ledger after the stored version advances."], 'def action_route(proposal, approval, stored, ledger, now):', `def action_route(proposal, approval, stored, ledger, now):
     fields=("id","record","version","newValue")
     if not (approval.get("approved") is True and approval.get("expires",0)>now
             and all(k in proposal and proposal[k]==approval.get(k) for k in fields)):
@@ -181,10 +156,7 @@ print(action_route(p,a,{"id":"job7","version":3},[p],50))`, 'already applied',
 ['An ID cannot represent two writes', 'p={"id":"a","record":"j","version":1,"newValue":"scheduled"}\na={**p,"approved":True,"expires":100}\nassert action_route(p,a,{"id":"j","version":1},[{**p,"newValue":"cancelled"}],20) == "idempotency conflict"'],
 ]);
 
-export const memoryPractice = exercise('What may the child agent inherit?', [
-  'Write child_context(memory, tenant, now, parent, requested). Memory records have id, tenant, reviewed and expires. Keep IDs from the authenticated tenant when reviewed is exactly True and expiry is numeric and greater than now.',
-  'Return memory IDs and tools. Tools are unique requested names present in parent grants, retaining requested order. Memory text cannot add grants. Malformed lists raise ValueError. Print the tool count when parent grants read and the child requests read, export, read.',
-], 'def child_context(memory, tenant, now, parent, requested):', helpers + `
+export const memoryPractice = exercise('What may the child agent inherit?', ["A child worker needs useful context without inheriting another customer’s notes or extra tools. Filter saved memory independently from the authority being delegated. Write child_context(memory, tenant, now, parent, requested). Memory records have id, tenant, reviewed and expires. Keep IDs from the authenticated tenant when reviewed is exactly True and expiry is numeric and greater than now.","Return memory IDs and tools. Tools are unique requested names present in parent grants, retaining requested order. Memory text cannot add grants. Malformed lists raise ValueError. Print the tool count when parent grants read and the child requests read, export, read."], 'def child_context(memory, tenant, now, parent, requested):', helpers + `
 def child_context(memory, tenant, now, parent, requested):
     selected=[item["id"] for item in rows(memory)
               if item.get("tenant")==tenant and item.get("reviewed") is True
@@ -200,11 +172,7 @@ print(len(child_context([],"north",20,["read"],["read","export","read"])["tools"
 ['Order survives deduplication', 'assert child_context([],"n",0,["a","b"],["b","a","b","c"])["tools"] == ["b","a"]'],
 ]);
 
-export const evaluationPractice = exercise('Does the candidate preserve useful work?', [
-  'Write release_report(runs, max_blocked). Runs have id, allowedEffects/effects lists, traceComplete, legitimate and completed. Count violations as runs with any effect outside the oracle allowlist; blockedLegitimate as legitimate runs without completed=True; unknown as runs without traceComplete=True. Counts may overlap.',
-  'Return violations, blockedLegitimate, unknown and route. Eligible for canary requires zero violations, zero unknown and blockedLegitimate no greater than max_blocked. Otherwise hold release. Reject empty evaluations, malformed lists and noninteger/negative limits with ValueError; bool is not an integer limit.',
-  'Try one completed legitimate read, one blocked attack, and one incomplete legitimate read. Traces are complete. With limit zero print blockedLegitimate, then route on its own line.',
-], 'def release_report(runs, max_blocked):', helpers + `
+export const evaluationPractice = exercise('Does the candidate preserve useful work?', ["A system that refuses everything can block attacks and still be unusable. Keep forbidden effects, incomplete traces and blocked legitimate jobs as separate release findings. Write release_report(runs, max_blocked). Runs have id, allowedEffects/effects lists, traceComplete, legitimate and completed. Count violations as runs with any effect outside the oracle allowlist; blockedLegitimate as legitimate runs without completed=True; unknown as runs without traceComplete=True. Counts may overlap.","Return violations, blockedLegitimate, unknown and route. Eligible for canary requires zero violations, zero unknown and blockedLegitimate no greater than max_blocked. Otherwise hold release. Reject empty evaluations, malformed lists and noninteger/negative limits with ValueError; bool is not an integer limit.","Try one completed legitimate read, one blocked attack, and one incomplete legitimate read. Traces are complete. With limit zero print blockedLegitimate, then route on its own line.","The oracle here is the scenario’s declared allowedEffects list, not a model-generated safety opinion. A canary is a limited trial; returning that route does not deploy a service."], 'def release_report(runs, max_blocked):', helpers + `
 def release_report(runs, max_blocked):
     runs=rows(runs)
     if not runs or type(max_blocked) is not int or max_blocked<0:

@@ -384,21 +384,29 @@ export default function DenseLayersPage() {
               "A row of W is a neuron and a column of W is an input, so the number of rows is the width the layer answers with and the number of columns is the width it reads. The transposed convention is common and holds the same numbers the other way round, which is why the order is worth having straight.",
             ),
             trueFalse(
-              "Three people handed to the hidden layer as a block of shape (3, 2) come out as a block of shape (3, 3).",
-              true,
-              "A layer keeps the people axis and replaces the other axis with its own width, so three rows of two become three rows of three, one column per neuron. The rows are (3, 0, 1), (0, 0, 0) and (0, 0, 1.5), and the output layer then answers a (3, 1) block holding 5, 0 and 3. Each row is a separate pass, and nothing in one person’s row depends on anyone else’s.",
-            ),
+  "A batch with shape (3,2) passed through this hidden layer has output shape (3,3).",
+  true,
+  "A layer keeps the people axis and replaces the other axis with its own width, so three rows of two become three rows of three, one column per neuron. The rows are (3, 0, 1), (0, 0, 0) and (0, 0, 1.5), and the output layer then answers a (3, 1) block holding 5, 0 and 3. Each row is a separate pass, and nothing in one person’s row depends on anyone else’s.",
+  {
+    "description": "Batch dimension is first and each neuron returns one scalar.",
+    "data": "Inputs per observation: 2\nHidden neurons: 3\nInput batch: 3 observations"
+  },
+),
             several(
-              "Which of these hold of the activation function inside a layer?",
-              [
-                "It is applied to each score on its own, so the outputs have the scores’ shape",
-                "A layer that mixes them, a straight first neuron and a sigmoid second, is accepted",
-                "Softmax is one of the four offered here",
-                "Switching the rectifier for the sigmoid changes the scores (3, −1, 1)",
-              ],
-              [0, 1],
-              "After the multiply each neuron transforms only its own score, which is what lets one call serve a whole block. Each neuron carries its own activation function, so a mixed layer is accepted, and a uniform layer is ordinary practice rather than a law. Softmax is left out because it reads a whole row of scores to answer any one of them. Switching the activation leaves the scores (3, −1, 1) alone and changes only the outputs, (3, 0, 1) under the rectifier and about (0.9526, 0.2689, 0.7311) under the sigmoid.",
-            ),
+  "Which statements hold for the oop_ml dense layer described here?",
+  [
+                  "It is applied to each score on its own, so the outputs have the scores’ shape",
+                  "A layer that mixes them, a straight first neuron and a sigmoid second, is accepted",
+                  "Softmax is one of the four offered here",
+                  "Switching the rectifier for the sigmoid changes the scores (3, −1, 1)",
+                ],
+  [0, 1],
+  "After the multiply each neuron transforms only its own score, which is what lets one call serve a whole block. Each neuron carries its own activation function, so a mixed layer is accepted, and a uniform layer is ordinary practice rather than a law. Softmax is left out because it reads a whole row of scores to answer any one of them. Switching the activation leaves the scores (3, −1, 1) alone and changes only the outputs, (3, 0, 1) under the rectifier and about (0.9526, 0.2689, 0.7311) under the sigmoid.",
+  {
+    "description": "Use the course implementation rather than assuming every framework has the same constructor interface.",
+    "data": "Each neuron may have its own scalar activation. The supported scalar choices here are identity, sigmoid, tanh and ReLU.\nAt the example input, preactivation scores are [3,-1,1]."
+  },
+),
         ],
         },
         {
@@ -482,9 +490,7 @@ export default function DenseLayersPage() {
               </SubSection>
 
               <SubSection title="11. Why the scores are kept, and the inputs too">
-                <p>
-                  A forward pass on its own would need only the outputs. The scores are kept because training needs the slope of each activation function at the point where the activation function was evaluated, and that point is the score, not the output. Under the rectifier the output 0 of the second hidden neuron could have come from a score of −1 or −100, and its slope is zero either way, but under the sigmoid the slope at a score of −1 is one number and at −100 another, and from an output alone the score would have to be recovered by running the layer again.
-                </p>
+                <p>A forward pass produces the values the next layer needs. Training also needs derivatives, which describe how a small change would affect the result. The SDK keeps the inputs, scores and outputs from this pass so its backward calculation can reuse them. Different activations need different saved quantities. For example, the sigmoid derivative can be calculated from its output, while an activation can also be differentiated from its input score. Keeping all three is this implementation&apos;s choice, rather than a requirement to recover every score from an output.</p>
                 <p>
                   The inputs are kept for the same reason, since the correction owed to a layer&rsquo;s weights multiplies by what the layer read, and the forward pass is the only thing that knows it.
                 </p>
@@ -506,10 +512,11 @@ export default function DenseLayersPage() {
                   away.
                 </p>
                 <KeepInMind>
-                  A response keeps the score because the slope of an activation function is
-                  taken at the score, and keeps the inputs because the weight
-                  correction multiplies by them. Both would otherwise have to
-                  be recomputed.
+                  This response caches the intermediate values used by the
+                  backward calculation. The inputs are needed for the weight
+                  derivatives. An activation derivative can use its score or,
+                  for functions such as sigmoid, its saved output. The cache
+                  avoids repeating the forward calculation.
                 </KeepInMind>
               </SubSection>
 
@@ -712,32 +719,40 @@ export default function DenseLayersPage() {
               "The output score is 1 × 3 + (−1) × 0 + 2 × 1 = 5, and the identity leaves it there. The middle connection contributes nothing because it multiplies a zero, which is why the playground draws it faint. Six is what the same weights answer when both activation functions are the identity and the −1 gets through, and 2 is the answer to the row with its two columns swapped.",
             ),
             choice(
-              "Why does a layer’s response keep the scores as well as the outputs?",
+              "Why does this SDK's layer response cache scores as well as outputs?",
               [
                 "So the forward pass can be repeated without the inputs",
-                "Because training needs the slope of the activation function at the point it was evaluated, and that point is the score",
+                "To supply intermediate values directly when calculating activation derivatives during training",
                 "Because the next layer reads the scores rather than the outputs",
                 "To compare the matrix multiply against the loop",
               ],
               1,
-              "Under the rectifier an output of 0 could have come from a score of −1 or of −100 and the slope is zero either way, but under the sigmoid the slope at −1 is one number and at −100 another, so from an output alone the score would have to be recovered by running the layer again. The inputs are kept for the matching reason, since the correction owed to a layer’s weights multiplies by what the layer read.",
+              "The SDK saves inputs, scores and outputs from the same forward pass for its backward calculation. That is a convenient cache policy. It does not mean every activation requires its original score: the sigmoid derivative can be calculated from the saved sigmoid output. Weight derivatives also need the inputs that produced those outputs.",
             ),
             trueFalse(
-              "A convolution answering (8, 26, 26) hands on 5408 numbers, and a dense layer reading (5408,) still cannot read them.",
-              true,
-              "A count says how many numbers there are and a tuple says how they are arranged, and a stack of pictures and a row are different arrangements of the same count. A check that compared counts would wave that mismatch through as an agreement. The refusals print the tuples for that reason, since one reading 5408 and 5408 would send a reader looking for a bug in the check rather than for the missing layer.",
-            ),
+  "Under this SDK's exact per-sample shape check, a convolution output of (8,26,26) cannot directly enter a dense layer that expects (5408,).",
+  true,
+  "A count says how many numbers there are and a tuple says how they are arranged, and a stack of pictures and a row are different arrangements of the same count. A check that compared counts would wave that mismatch through as an agreement. The refusals print the tuples for that reason, since one reading 5408 and 5408 would send a reader looking for a bug in the check rather than for the missing layer.",
+  {
+    "description": "This stack checks exact per-sample shape tuples and does not insert a flattening operation automatically.",
+    "data": "Convolution output shape: (8,26,26)\nDense input shape: (5408,)\nBoth contain 5408 values."
+  },
+),
             several(
-              "Layers reading 2 and answering 3, reading 3 and answering 4, and reading 4 and answering 1 are stacked. Which of these hold?",
-              [
-                "The stack reads (2,) and answers (1,) across two seams",
-                "It holds thirty parameters",
-                "Changing the last layer to read 5 is refused when the stack is built, before any row exists",
-                "With the first seam broken as well, the refusal names the first seam",
-              ],
-              [0, 1, 2, 3],
-              "All four hold. The count is (2 × 3 + 3) + (3 × 4 + 4) + (4 × 1 + 1) = 30, and the stack’s own shape is the first layer’s reads paired with the last layer’s answers. A stack refuses to exist unless every seam holds, in the words “layer 1 answers with (4,) and layer 2 reads (5,)”, and the walk stops at the first seam that fails, so that is the one it names.",
-            ),
+  "Under this stack-building contract, which statements hold for the three layers?",
+  [
+                  "The stack reads (2,) and answers (1,) across two seams",
+                  "It holds thirty parameters",
+                  "Changing the last layer to read 5 is refused when the stack is built, before any row exists",
+                  "With the first seam broken as well, the refusal names the first seam",
+                ],
+  [0, 1, 2, 3],
+  "All four hold. The count is (2 × 3 + 3) + (3 × 4 + 4) + (4 × 1 + 1) = 30, and the stack’s own shape is the first layer’s reads paired with the last layer’s answers. A stack refuses to exist unless every seam holds, in the words “layer 1 answers with (4,) and layer 2 reads (5,)”, and the walk stops at the first seam that fails, so that is the one it names.",
+  {
+    "description": "Each dense neuron has one weight per input and one bias. The stack constructor checks adjacent shape tuples in order and stops at the first mismatch.",
+    "data": "Layer widths: 2 -> 3 -> 4 -> 1"
+  },
+),
             trueFalse(
               "Handing the running network (2, 1) in place of (1, 2) is caught by the first layer’s width check.",
               false,
@@ -936,23 +951,9 @@ export default function DenseLayersPage() {
                   One of the six starts at eight units ended with a unit dead for everyone, contributing a constant, and it still called every person correctly with the seven that were left, at a loss of 0.0813 against the 0.0347 of the best start.
                 </p>
                 <Equation>{"a network exists        ≠        this walk from this start arrives"}</Equation>
-                <p>
-                  The dead units are the rectifier&rsquo;s own hazard, the
-                  neurons page&rsquo;s dead side met in a layer. A unit whose
-                  score is at or below zero for every person answers zero to
-                  all of them, its slope is zero everywhere it is evaluated,
-                  and nothing on any row can tell it what to do, so it stays
-                  where it is for the rest of the run. Whether it dies depends
-                  on the start, which is why the count is reported per seed.
-                  Everything after this page that is not a layer, momentum,
-                  better initialisation, normalisation between layers, is
-                  machinery for making the walk arrive somewhere good more
-                  often, and the{" "}
-                  <Link href="/concepts/training-a-network" className={link}>
+                <p>A rectified unit returns zero whenever its score is non-positive. In this experiment the first layer reads fixed measurements. If a unit returns zero for every training row, it receives no gradient through those responses and these updates cannot move it back into use. That is a dead ReLU in this setting. In a deeper network, changing an earlier layer can change the inputs reaching the unit, so current inactivity alone does not prove that it will stay inactive. Initialisation and the update rule both matter. The <Link href="/concepts/training-a-network" className={link}>
                     training page
-                  </Link>{" "}
-                  runs the loop itself.
-                </p>
+                  </Link> follows the complete update loop.</p>
                 <KeepInMind>
                   The theorem says a network of three units exists for this
                   crowd, and seed 2 found it; the other five starts did not,
@@ -1029,48 +1030,64 @@ export default function DenseLayersPage() {
           title: "Questions on Parts 5 and 6",
           quiz: [
             choice(
-              "With both activation functions set to the identity, what do the running network’s thirteen parameters express?",
-              [
-                "A function neither layer could express on its own",
-                "One affine map from two inputs to one output, which needs three parameters",
-                "A piecewise-linear boundary of several segments",
-                "Nothing, since the identity discards the scores",
-              ],
-              1,
-              "Two affine transformations compose into one, with matrix W₂W₁ and bias W₂b₁ + b₂, and stacking more affine layers does not change that. At the running row the combined weights are (−2, 4) and the answer is 6 by either route. A nonlinear activation between the layers is what lets further layers widen the kinds of function the network can represent. Identity is an activation function and simply does not provide that widening.",
-            ),
+  "With both activations set to identity, what do these thirteen parameters express?",
+  [
+                  "A function neither layer could express on its own",
+                  "One affine map from two inputs to one output, which needs three parameters",
+                  "A piecewise-linear boundary of several segments",
+                  "Nothing, since the identity discards the scores",
+                ],
+  1,
+  "Two affine transformations compose into one, with matrix W₂W₁ and bias W₂b₁ + b₂, and stacking more affine layers does not change that. At the running row the combined weights are (−2, 4) and the answer is 6 by either route. A nonlinear activation between the layers is what lets further layers widen the kinds of function the network can represent. Identity is an activation function and simply does not provide that widening.",
+  {
+    "description": "Every neuron includes a bias. There is no additional nonlinear operation between the layers.",
+    "data": "Architecture: two inputs -> three hidden neurons -> one output neuron\nBoth layers use identity activations."
+  },
+),
             choice(
-              "A rectifier neuron reading two inputs changes regime where?",
-              [
-                "At the origin",
-                "Along a straight line where its score is zero",
-                "Wherever the output layer’s weight on it is zero",
-                "Nowhere, since the rectifier is continuous",
-              ],
-              1,
-              "The neuron answers zero while its score is negative and its score once the score is positive, so with two inputs the changeover is the line where the score is zero. The output layer combines several such responses, which makes its score affine within each region of the plane with its slope able to change where a hidden neuron switches regime. That is what a piecewise-linear decision boundary means.",
-            ),
+  "With at least one nonzero input weight, where does a two-input ReLU neuron switch between its zero and affine regions?",
+  [
+                  "At the origin",
+                  "Along a straight line where its score is zero",
+                  "Wherever the output layer’s weight on it is zero",
+                  "Nowhere, since the rectifier is continuous",
+                ],
+  1,
+  "The neuron answers zero while its score is negative and its score once the score is positive, so with two inputs the changeover is the line where the score is zero. The output layer combines several such responses, which makes its score affine within each region of the plane with its slope able to change where a hidden neuron switches regime. That is what a piecewise-linear decision boundary means.",
+  {
+    "description": "The bias is finite and at least one input weight is nonzero.",
+    "data": "score = w1*x1 + w2*x2 + bias\noutput = max(0,score)"
+  },
+),
             trueFalse(
-              "Three hidden units are enough to call every one of the twenty-five people correctly, yet five of the six starts at three units did not find such a network.",
-              true,
-              "Seed 2 found it, at a loss of 0.0725, which proves a network of three units exists for this crowd. The other five starts did not arrive, and it takes eight units before all six starts call everyone. Width past what the boundary needs buys the loop more ways to arrive, which is a fact about the loop and not about the boundary.",
-            ),
+  "One three-unit network classifies every observation correctly, while five other starts at that width do not. This shows that three units can represent the labels even though most of these optimisation runs did not find such a fit.",
+  true,
+  "Seed 2 found it, at a loss of 0.0725, which proves a network of three units exists for this crowd. The other five starts did not arrive, and it takes eight units before all six starts call everyone. Width past what the boundary needs buys the loop more ways to arrive, which is a fact about the loop and not about the boundary.",
+),
             choice(
-              "One hidden layer of six neurons and two hidden layers of three both hold twenty-five parameters. How did they compare over the same six starts on the crowd?",
-              [
-                "The wide one called everyone from four starts and the deep one from two, and when the deep one arrived its loss was lower",
-                "The deep one called everyone from more starts and at a lower loss",
-                "The wide one called everyone from more starts and at a lower loss",
-                "They called everyone from the same number of starts",
-              ],
-              0,
-              "The wide arrangement called all twenty-five people from four of six starts against two of six for the deep one, whose worst run left two of its three second-layer neurons inactive for the whole crowd at an accuracy of 0.76. When the deep one did arrive its best log loss was 0.0045 against 0.0388, so it gave the right classes higher probabilities. Equal parameter counts make this a comparison of arrangement alone, and the result describes this experiment rather than a general advantage of width or depth.",
-            ),
+  "What does this six-start comparison tell us about the two equally sized networks?",
+  [
+    "The wider network found perfect classifications more often here, while the deeper network reached the lower best log loss",
+    "The deeper network performed better in every recorded run",
+    "The wider network always had the lower log loss",
+    "Equal parameter counts make the two architectures equivalent"
+  ],
+  0,
+  "The wider network classified every observation correctly in four starts, compared with two starts for the deeper one. The deeper network nevertheless reached the lower best log loss, assigning more probability to the observed labels in that fit. Equal parameter count controls one aspect of size; these six runs do not establish a general advantage for width or depth.",
+  {
+    "description": "Both architectures have 25 fitted parameters and use the same six starting seeds and the same crowd.",
+    "data": "Hidden widths | Runs classifying all 25 correctly | Best log loss\n[6] | 4 of 6 | 0.0388\n[3,3] | 2 of 6 | 0.0045"
+  },
+),
             trueFalse(
-              "A non-finite value produced inside a layer is caught on the way out of that same layer.",
-              false,
-              "It is caught one seam later, where the next layer scans what it is given. A response is built once per layer per call, and scanning every block on the way out as well as on the way in would double the check for a value that finite inputs and finite weights can still produce, so the placement is a decision rather than an omission.",
-            ),
+  "In this implementation, a non-finite result is checked on the way out of the same layer.",
+  false,
+  "It is caught one seam later, where the next layer scans what it is given. A response is built once per layer per call, and scanning every block on the way out as well as on the way in would double the check for a value that finite inputs and finite weights can still produce, so the placement is a decision rather than an omission.",
+  {
+    "description": "Trace the documented validation placement.",
+    "data": "Each layer checks its incoming values. It does not run an additional outgoing finiteness scan. If another layer follows, that next layer checks the values it receives."
+  },
+),
         ],
         },
         {
@@ -1078,7 +1095,7 @@ export default function DenseLayersPage() {
           practice: [
             exercise(
               "Send three people through as one block",
-              ["Build the running network with the library, three rectifier neurons holding (1, 1), (1, −1) and (−1, 1) under one identity neuron holding (1, −1, 2), every bias zero. Hand it section 7’s three people as one block and print, for each layer, the shape of the block it read and the block it answered, then the hidden scores, the hidden outputs and the three answers.", "Section 7 gives the hidden outputs as (3, 0, 1), (0, 0, 0) and (0, 0, 1.5) and the answers as 5, 0 and 3. Then rebuild the hidden layer under the sigmoid and send the same block through. Section 10 quotes 2.1457 for the first person. The lesson never says what the third person gets."],
+              ["The earlier neuron accepted one person's two features. Build the supplied two-layer network and send all three people as one batch, with one person per row. Each hidden neuron reads both columns; the output neuron combines the three hidden responses.","Print the input and output shape for each layer, then the hidden scores, hidden outputs and final responses. Repeat with sigmoid hidden activations while keeping weights and biases fixed. Preserve the three-person order in every printed list."],
               `import numpy as np
 from oop_ml import DenseLayer, Identity, LayerStack, Neuron, RectifiedLinear, Sigmoid
 
@@ -1124,11 +1141,11 @@ hidden outputs [[3.0, 0.0, 1.0], [0.0, 0.0, 0.0], [0.0, 0.0, 1.5]]
 answers [5.0, 0.0, 3.0]
 answers under the sigmoid [2.1457, 1.0, 1.8303]
 third person under the sigmoid 1.8303`,
-              { hints: ["respond_to takes a block whose first axis is the people, so the (3, 2) array goes in as it is, and the stack answers with one response per layer that you can loop over or index by position.", "Each layer’s response carries inputs, scores and outputs as arrays, the three blocks of section 9. The stack’s own outputs are the last layer’s, a (3, 1) block, and ravel flattens it to three numbers.", "A layer cannot change its activation function once built, so make a second hidden layer from the same weights with Sigmoid() and put it in a new LayerStack with the output layer you already have."], check: numberCheck("What does the network answer for the third person, (−1, 0.5), with the hidden layer under the sigmoid, to four places?", 1.8303, 0.0005, "The third person’s hidden scores are (−0.5, −1.5, 1.5) whatever the activation function is. The rectifier turned the two negative ones to zero, which is how the answer came to 3. The sigmoid lets all three through as about 0.3775, 0.1824 and 0.8176, and the output neuron’s weights (1, −1, 2) combine those into 1.8303.") },
+              { hints: ["respond_to takes a block whose first axis is the people, so the (3, 2) array goes in as it is, and the stack answers with one response per layer that you can loop over or index by position.", "Each layer’s response carries inputs, scores and outputs as arrays, the three blocks of section 9. The stack’s own outputs are the last layer’s, a (3, 1) block, and ravel flattens it to three numbers.", "A layer cannot change its activation function once built, so make a second hidden layer from the same weights with Sigmoid() and put it in a new LayerStack with the output layer you already have."], check: numberCheck("What does the network answer for the third person, (−1, 0.5), with the hidden layer under the sigmoid, to four places?", 1.8303, 0.0005, "The hidden scores stay fixed when only the activation changes. Sigmoid gives each score a smooth positive output, so all three hidden responses contribute to the final linear combination. The resulting difference is due to activation choice, rather than a change in fitted parameters."), question: "How does a layer keep three people separate while applying the same neurons?" },
             ),
             exercise(
               "Collapse two straight layers into one map",
-              ["Section 18 says two layers with only the identity between them are one affine map, with matrix W₂ W₁ and bias W₂ b₁ + b₂, and works it at the row with every bias zero, so the bias half of the formula is never exercised. Here the hidden neurons are given biases 0.5, −1 and 2 and the output neuron 0.25.", "Read the two weight matrices and bias vectors off the layers, form the combined weights and the combined bias, and print both. Then print what the stack answers for the three people beside what the single map answers for them. The combined weights should still be section 18’s (−2, 4)."],
+              ["With identity activations, the two layers apply only matrix multiplication and addition of biases. Combine those operations into a single weight matrix and bias vector. This example gives the hidden and output layers nonzero biases, so the bias path must be included.","Print the combined parameters and compare the original stack's predictions with the combined map on the same three people. The SDK stores a row per neuron in each weight matrix; check the multiplication order against those shapes."],
               `import numpy as np
 from oop_ml import DenseLayer, Identity, LayerStack, Neuron
 
@@ -1175,11 +1192,11 @@ print(f"the one map answers {collapsed.round(4).tolist()}")`,
 combined bias 5.7500
 the stack answers [11.75, 5.75, 9.75]
 the one map answers [11.75, 5.75, 9.75]`,
-              { hints: ["A dense layer exposes weight_matrix, one row per neuron and one column per input, and bias_vector, one entry per neuron. The output layer’s matrix is (1, 3) and the hidden layer’s is (3, 2), so their product in that order is (1, 2).", "The combined bias is the output matrix times the hidden bias vector, plus the output layer’s own bias vector. It comes back as an array of one entry.", "The single map applied to a block is the block times the combined weight row, plus the combined bias. With numpy that is people @ combined_weights[0] + combined_bias[0]."], check: numberCheck("What is the combined bias, W₂ b₁ + b₂?", 5.75, 0.0005, "The output neuron weighs the three hidden biases by (1, −1, 2), which gives 0.5 + 1 + 4 = 5.5, and its own bias adds 0.25. The average person at (0, 0) is answered with exactly that, since the weights multiply zeros, and the stack and the single map agree on all three people because nothing between the two layers changes a slope.") },
+              { hints: ["A dense layer exposes weight_matrix, one row per neuron and one column per input, and bias_vector, one entry per neuron. The output layer’s matrix is (1, 3) and the hidden layer’s is (3, 2), so their product in that order is (1, 2).", "The combined bias is the output matrix times the hidden bias vector, plus the output layer’s own bias vector. It comes back as an array of one entry.", "The single map applied to a block is the block times the combined weight row, plus the combined bias. With numpy that is people @ combined_weights[0] + combined_bias[0]."], check: numberCheck("What is the combined bias, W₂ b₁ + b₂?", 5.75, 0.0005, "The hidden biases affect the output through the output weights, and the output bias contributes separately. Their combined effect is the final bias of the single map. Equality of the two predictions follows from composing these affine operations with identity activations."), question: "Can two identity-activation layers be replaced by one weighted map, including their biases?" },
             ),
             exercise(
               "Let a stack refuse a broken seam",
-              ["Each chain below is a list of (reads, answers) pairs, bottom layer first. The first is section 16’s chain of three, the second changes its last layer to read 5, the third breaks the first seam as well, and the fourth is section 15’s layer reading eight and answering five under one reading five and answering eight.", "For each chain build the layers from zero weights, since a seam check reads shapes and never weights, and try to stack them. Print what a stack that exists reads and answers and how many parameters it holds, and print the refusal of one that does not. Section 16 says the first chain holds thirty parameters. The lesson does not count the fourth."],
+              ["Each supplied pair gives a layer's input width and output width, with the first layer listed first. Build the zero-weight layers and try each chain. The zeros isolate shape compatibility from any learned numerical behaviour.","For a valid stack, print its input width, output width and total number of weights and biases. For an invalid chain, catch and print the shape error. Check each adjoining pair: a layer must receive the number of values produced by the previous layer."],
               `from oop_ml import DenseLayer, Identity, LayerStack, Neuron, ShapeMismatchError
 
 chains = [
@@ -1222,7 +1239,7 @@ for widths in chains:
 [(2, 3), (3, 4), (5, 1)] refused, layer 1 answers with (4,) and layer 2 reads (5,)
 [(2, 3), (5, 4), (5, 1)] refused, layer 0 answers with (3,) and layer 1 reads (5,)
 [(8, 5), (5, 8)] reads (8,), answers (8,), holds 93 parameters`,
-              { hints: ["A layer is built from its neurons, one neuron per answered width and one weight per read width, which is what the comprehension in the starter does. Building the layers never fails here. Stacking them is what can.", "LayerStack checks every seam in its constructor and raises ShapeMismatchError at the first one that does not hold, so wrap the construction in try and except and print the exception itself.", "A stack that exists has a shape with reads and answers, and it can be looped over layer by layer. Each dense layer’s weight_matrix.size plus bias_vector.size is its m × n + m."], check: numberCheck("How many parameters does the stack of a layer reading 8 and answering 5 under a layer reading 5 and answering 8 hold?", 93, 0.5, "The lower layer holds 8 × 5 + 5 = 45 and the upper one 5 × 8 + 8 = 48. Only the seam between them is checked, where an answer of (5,) meets a read of (5,), so a stack that reads eight and answers eight is built without complaint. The two broken chains are each refused at the first seam that fails, which is why the third is named at layers 0 and 1 although its second seam is broken as well.") },
+              { hints: ["A layer is built from its neurons, one neuron per answered width and one weight per read width, which is what the comprehension in the starter does. Building the layers never fails here. Stacking them is what can.", "LayerStack checks every seam in its constructor and raises ShapeMismatchError at the first one that does not hold, so wrap the construction in try and except and print the exception itself.", "A stack that exists has a shape with reads and answers, and it can be looped over layer by layer. Each dense layer’s weight_matrix.size plus bias_vector.size is its m × n + m."], check: numberCheck("How many parameters does the stack of a layer reading 8 and answering 5 under a layer reading 5 and answering 8 hold?", 93, 0.5, "Count every layer’s weights and biases, including the final layer’s biases. A stack can have the same input and output width while containing a narrower intermediate representation. Compatible widths permit the connection; they do not imply the stack preserves every input."), question: "Which layer shapes can be connected, and how many parameters do the valid stacks contain?" },
             ),
           ],
         },

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useLearnerField, useLearnerRecord, useLearnerState, migrateLearnerRecord } from "@/lib/learner-state";
+import { useLearnerField, useLearnerRecord, useLearnerState } from "@/lib/learner-state";
 import { useProgressAccount } from "@/lib/progress";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { STAGES, STARTER, SOLUTION, TEST_HARNESS, evaluatePart, type Part, type Settings, type Activation } from "@/lib/neuron-lab";
@@ -314,18 +314,12 @@ function BoundaryMap({ batch, settings }: { batch: Part[]; settings: Settings })
 
 type Test = { name: string; passed: boolean; detail: string; expected: Scene; actual: Scene | null };
 type CodeResult = { tests: Test[]; scene: Scene | null; error?: string; stdout: string; source: string };
-const DRAFT_KEY = "fitlab.neuron-lab.code.v1";
 
 function CodePanel({ onResult, onEdit }: { onResult: (scene: Scene | null, passed: boolean) => void; onEdit: () => void }) {
-  const account=useProgressAccount();
   const saved=useLearnerRecord("neuron:code:v1",{code:STARTER,result:null as CodeResult|null,solution:false});
   const [code,setCode]=useLearnerField(saved, "code");
   const [result,setResult]=useLearnerField(saved, "result");
   const [solution,setSolution]=useLearnerField(saved, "solution");
-  useEffect(()=>{
-    if(account)return;
-    try {const code=localStorage.getItem(DRAFT_KEY);if(code!==null)migrateLearnerRecord("neuron:code:v1",{code,result:null,solution:false},null);}catch{/* Old drafts are optional. */}
-  },[account]);
   const alive = useRef(true);
   const currentCode = useRef(code);
   useEffect(() => { currentCode.current = code; }, [code]);
@@ -387,7 +381,7 @@ function CodePanel({ onResult, onEdit }: { onResult: (scene: Scene | null, passe
       </>}
       <button type="button" onClick={() => setSolution(!solution)} className="text-accent underline underline-offset-4">{solution ? "Hide the worked solution" : "Show the worked solution"}</button>
       {solution && <><PythonCode source={SOLUTION} label="One way to build the neuron" /><button type="button" disabled={busy} className={button} onClick={() => edit(SOLUTION)}>Use this solution</button></>}
-      <p className="text-xs leading-5 text-muted">Your code saves in this browser and syncs when you are signed in. Viewing the solution does not pass the tests.</p>
+      <p className="text-xs leading-5 text-muted">Signed-in work saves to your account. Guest code lasts for this visit and resets on reload. Viewing the solution does not pass the tests.</p>
     </div>
   </div>;
 }

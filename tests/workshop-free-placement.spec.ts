@@ -1,6 +1,8 @@
 import { test, expect, type Page, type Locator } from "@playwright/test";
 import type { Construction } from "../lib/builds/engine";
-import { openFullWorkshop } from "./helpers/open-workshop";
+import { showEarlierWorkshop } from "./helpers/open-workshop";
+import { mockAccountBackend, waitForAccountReady, type MockAccountBackend } from "./helpers/account-backend";
+import { workshopRecord } from "./helpers/workshop-record";
 
 const graph: Construction = {
   pieces: [
@@ -16,9 +18,11 @@ const graph: Construction = {
   ],
 };
 
-async function open(page: Page, seeded = true) {
-  if (seeded) await page.addInitScript(value => localStorage.setItem("fitlab-construction-v1:workshop-guide", JSON.stringify(value)), graph);
-  await openFullWorkshop(page, "workshop-guide");
+async function open(page: Page, seeded = true, backend?: MockAccountBackend) {
+  if (!backend) await mockAccountBackend(page, { records: seeded ? [{ key: "workshop:workshop-guide:v1", value: workshopRecord(graph) }] : [] });
+  await page.goto("/lab/workshop-guide");
+  await waitForAccountReady(page);
+  await showEarlierWorkshop(page);
   const zoom = page.getByLabel("Construction zoom", { exact: true });
   if (!await zoom.isVisible()) await page.locator("summary").filter({ hasText: /workspace controls/i }).click();
   await zoom.selectOption("0.5");
@@ -87,13 +91,19 @@ test("a shelf drop can overlap an existing piece and be undone without removing 
   await page.mouse.up();
   const constant = page.getByRole("group", { name: "Set a constant machine", exact: true });
   await expect(constant).toHaveCount(1);
-  await expect.poll(() => position(constant)).toEqual({ x: 94, y: 104 });
+  // Native drag coordinates use screen pixels. At half zoom a fractional
+  // floor offset can put the drop between model-coordinate integers.
+  await expect.poll(async () => {
+    const placed = await position(constant);
+    return Math.max(Math.abs(placed.x - 94), Math.abs(placed.y - 104)) * 0.5;
+  }).toBeLessThanOrEqual(1);
+  const dropped = await position(constant);
   await expect.poll(() => position(sensor)).toEqual(sensorPosition);
   await page.getByRole("button", { name: "Undo", exact: true }).click();
   await expect(constant).toHaveCount(0);
   await expect(sensor).toHaveCount(1);
   await page.getByRole("button", { name: "Redo", exact: true }).click();
-  await expect.poll(() => position(constant)).toEqual({ x: 94, y: 104 });
+  await expect.poll(() => position(constant)).toEqual(dropped);
 });
 
 test("an overlapping source rises for selection but leaves the destination reachable while wiring", async ({ page }) => {
@@ -103,8 +113,8 @@ test("an overlapping source rises for selection but leaves the destination reach
       : piece.id === "constant" ? { ...piece, x: 80, y: 300 } : piece),
     connections: graph.connections.filter(wire => wire.from !== "source"),
   };
-  await page.addInitScript(value => localStorage.setItem("fitlab-construction-v1:workshop-guide", JSON.stringify(value)), overlap);
-  await open(page, false);
+  const backend = await mockAccountBackend(page, { records: [{ key: "workshop:workshop-guide:v1", value: workshopRecord(overlap) }] });
+  await open(page, false, backend);
   const source = page.getByRole("group", { name: "Sensor reading machine", exact: true });
   const input = page.getByRole("button", { name: "Multiply input 1: Value", exact: true });
   const reachable = () => input.evaluate(button => {

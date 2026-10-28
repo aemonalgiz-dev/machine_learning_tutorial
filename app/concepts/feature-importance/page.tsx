@@ -66,9 +66,8 @@ export default function FeatureImportancePage() {
           content: (<>
 <>
               <SubSection title="1. Three different questions">
-                <p>
-                  Suppose we ask a forest which input mattered most. We could count how often it split on that input. We could add up the impurity reductions from those splits. Or we could scramble the input in held-out data and measure how much worse prediction becomes. These ask different questions. A column used at many small splits may contribute little compared with one useful root split. A column may also be replaceable by another correlated column. Let&apos;s calculate the measures on the same forest and see why their answers differ.
-                </p>
+                <p>Suppose we ask a forest which input mattered most. We could count the questions it asked about each input. We could measure how much each question separated the training labels. Or we could scramble one input for new observations and check how much worse prediction becomes. These ask different questions.</p>
+              <p>The split-based calculation calls the remaining class mixture impurity, and credits a question for reducing it. A column used in many small questions may still contribute less than one useful first question. Another column may provide almost the same information. Let&apos;s calculate the measures on the same forest and see why their answers differ.</p>
                 <DerivationTable
                   expressionHeading="the question"
                   reasonHeading="what answers it"
@@ -987,10 +986,7 @@ export default function FeatureImportancePage() {
         {
           title: "Practice. Asking a Fitted Model Both Questions With the Library",
           practice: [
-            exercise(
-              "Read the ledger off the tangled crowd’s tree",
-              ["Part 2 keeps a ledger for the lone tree grown on the tangled crowd of twenty-five people and ends with height at 0.777 and weight at 0.223. Fit that tree with DecisionTreeClassifier, with no depth limit so that it grows until every leaf is pure, and read the same two shares off feature_importances.", "The tree should take eight splits to reach nine pure leaves, which its root reports as n_leaves. Print each column’s share to four places and compare it with the ledger’s 9.702 over 12.480."],
-              `from oop_ml import DecisionTreeClassifier, Feature
+            exercise("Read the ledger off the tangled crowd’s tree",["Part 2 keeps a ledger for the lone tree grown on the tangled crowd of twenty-five people and ends with height at 0.777 and weight at 0.223. Fit that tree with DecisionTreeClassifier, with no depth limit so that it grows until every leaf is pure, and read the same two shares off feature_importances.", "The tree should take eight splits to reach nine pure leaves, which its root reports as n_leaves. Print each column’s share to four places and compare it with the ledger’s 9.702 over 12.480."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145,
            151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143]
@@ -1003,8 +999,7 @@ label = Feature("is_adult", is_adult)
 
 tree = DecisionTreeClassifier().fit(crowd, label)
 # Print how many splits the tree grew, from the leaf count its root reports,
-# then each column's share of the split reading to four places.`,
-              `from oop_ml import DecisionTreeClassifier, Feature
+# then each column's share of the split reading to four places.`,`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145,
            151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143]
@@ -1019,16 +1014,10 @@ tree = DecisionTreeClassifier().fit(crowd, label)
 leaves = tree.root.n_leaves
 print(f"{leaves - 1} splits to {leaves} pure leaves, depth {tree.root.depth}")
 for share in tree.feature_importances:
-    print(f"{share.name} {share.value:.4f}")`,
-              `8 splits to 9 pure leaves, depth 5
+    print(f"{share.name} {share.value:.4f}")`,`8 splits to 9 pure leaves, depth 5
 height 0.7774
-weight 0.2226`,
-              { hints: ["The split reading is a property of the fitted tree, feature_importances, and it is iterable, one entry per column with a name and a value.", "A share can also be read by name, as tree.feature_importances[\"height\"]. Every column the tree was fitted on is present, at zero if it never won a split.", "The root is tree.root, and a node reports its depth and the number of leaves beneath it as depth and n_leaves."], check: numberCheck("What share does the split reading give height, to four places?", 0.7774, 0.0005, "Part 2’s ledger ends with 9.702 of credit for height against 2.778 for weight, a total of 12.480, and 9.702 over 12.480 is 0.777. The share is nothing more than that ledger normalised, every entry of which was recorded while the tree grew.") },
-            ),
-            exercise(
-              "Grow the seed-7 forest beside it",
-              ["Part 2 says the forest’s split reading is close to even because the feature lottery made it so, and that the bagged committee, with no lottery, leans on height nearly as hard as the lone tree. Grow both on the same twenty-five people with RandomForestClassifier, 25 members under seed 7, once offered one column per split and once offered both, which is bagging.", "Print each committee’s two shares beside the lone tree’s, and each committee’s out-of-bag accuracy, which this lesson does not quote. The lottery changes which column a member is allowed to ask about at a node, and the ledger credits whatever it asked."],
-              `from oop_ml import DecisionTreeClassifier, Feature, RandomForestClassifier
+weight 0.2226`,{...{ hints: ["The split reading is a property of the fitted tree, feature_importances, and it is iterable, one entry per column with a name and a value.", "A share can also be read by name, as tree.feature_importances[\"height\"]. Every column the tree was fitted on is present, at zero if it never won a split.", "The root is tree.root, and a node reports its depth and the number of leaves beneath it as depth and n_leaves."], check: numberCheck("What share does the split reading give height, to four places?", 0.7774, 0.0005, "This share is the tree's height-credit total divided by all credited impurity reduction. It records how that fitted tree used height while growing, rather than an intrinsic importance of height.") },question:"How much of this tree's impurity reduction is credited to each feature?"}),
+            exercise("Grow the seed-7 forest beside it",["Part 2 says the forest’s split reading is close to even because the feature lottery made it so, and that the bagged committee, with no lottery, leans on height nearly as hard as the lone tree. Grow both on the same twenty-five people with RandomForestClassifier, 25 members under seed 7, once offered one column per split and once offered both, which is bagging.", "Print each committee’s two shares beside the lone tree’s, and each committee’s out-of-bag accuracy, which this lesson does not quote. The lottery changes which column a member is allowed to ask about at a node, and the ledger credits whatever it asked."],`from oop_ml import DecisionTreeClassifier, Feature, RandomForestClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145,
            151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143]
@@ -1043,8 +1032,7 @@ tree = DecisionTreeClassifier().fit(crowd, label)
 # Grow the forest, 25 members offered one column per split under seed 7,
 # and the bagged committee, the same but offered both columns. Print the
 # height and weight shares of all three models to four places, and each
-# committee's out-of-bag accuracy to two.`,
-              `from oop_ml import DecisionTreeClassifier, Feature, RandomForestClassifier
+# committee's out-of-bag accuracy to two.`,`from oop_ml import DecisionTreeClassifier, Feature, RandomForestClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145,
            151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143]
@@ -1063,18 +1051,12 @@ for name, model in [("lone tree", tree), ("forest", forest), ("bagged", bagged)]
     shares = model.feature_importances
     print(f"{name}: height {shares['height']:.4f}, weight {shares['weight']:.4f}")
 print(f"forest out of bag {forest.out_of_bag_score():.2f}")
-print(f"bagged out of bag {bagged.out_of_bag_score():.2f}")`,
-              `lone tree: height 0.7774, weight 0.2226
+print(f"bagged out of bag {bagged.out_of_bag_score():.2f}")`,`lone tree: height 0.7774, weight 0.2226
 forest: height 0.5271, weight 0.4729
 bagged: height 0.7111, weight 0.2889
 forest out of bag 0.52
-bagged out of bag 0.64`,
-              { hints: ["A committee is configured at construction, with n_members, max_features and random_seed, and fitted exactly as the tree is.", "max_features is how many columns a split is offered. With two columns, 1 is the lottery and 2 offers every column at every split, which is bagging.", "out_of_bag_score takes no arguments. It scores each person by the members whose resample left that person out, so it is a held-out score that cost no held-out rows."], check: numberCheck("What share does the bagged committee’s split reading give height, to four places?", 0.7111, 0.0005, "Offered both columns at every split, the members ask about height where the lone tree did, so the averaged ledger stays near the lone tree’s 0.777. Under the lottery a member denied height at a node spends that node on weight and the ledger credits weight for it, which is what brings the forest’s reading down to 0.527, a figure the lottery decided as much as the crowd did.") },
-            ),
-            exercise(
-              "Ask the parity puzzle both questions",
-              ["The puzzle in Part 1 is three hundred rows from seed 4. Two coin flips, a column of standard normal noise, and a class that is 1 exactly when the flips disagree, drawn in that order from one generator. Fit the lone tree at depth 3 and the forest of twenty members, one column per split, depth 3, seed 0, exactly as the page does, and ask both models the split question and the forest the scramble question on the rows it learned.", "Part 3 gives the lone tree’s ledger 0.807 for the noise column and the forest’s 0.519. Part 4 scrambles the forest on its own rows and gets 0.479, 0.504 and 0.018. Print each model’s accuracy on these rows, each ledger, and the forest’s scramble, all shares to four places."],
-              `import numpy as np
+bagged out of bag 0.64`,{...{ hints: ["A committee is configured at construction, with n_members, max_features and random_seed, and fitted exactly as the tree is.", "max_features is how many columns a split is offered. With two columns, 1 is the lottery and 2 offers every column at every split, which is bagging.", "out_of_bag_score takes no arguments. It scores each person by the members whose resample left that person out, so it is a held-out score that cost no held-out rows."], check: numberCheck("What share does the bagged committee’s split reading give height, to four places?", 0.7111, 0.0005, "Restricting the available features changes which splits the trees can choose and therefore where their impurity credit goes. Compare that credit with predictive performance before treating the more even shares as an improvement.") },question:"Does restricting the available features change the forest's importance scores?"}),
+            exercise("Ask the parity puzzle both questions",["The puzzle in Part 1 is three hundred rows from seed 4. Two coin flips, a column of standard normal noise, and a class that is 1 exactly when the flips disagree, drawn in that order from one generator. Fit the lone tree at depth 3 and the forest of twenty members, one column per split, depth 3, seed 0, exactly as the page does, and ask both models the split question and the forest the scramble question on the rows it learned.", "Part 3 gives the lone tree’s ledger 0.807 for the noise column and the forest’s 0.519. Part 4 scrambles the forest on its own rows and gets 0.479, 0.504 and 0.018. Print each model’s accuracy on these rows, each ledger, and the forest’s scramble, all shares to four places."],`import numpy as np
 from oop_ml import DecisionTreeClassifier, Feature, PermutationImportance, RandomForestClassifier
 
 generator = np.random.default_rng(4)
@@ -1087,8 +1069,7 @@ parity = Feature("parity", (first != second).astype(float))
 tree = DecisionTreeClassifier(max_depth=3).fit(puzzle, parity)
 forest = RandomForestClassifier(n_members=20, max_features=1, max_depth=3, random_seed=0).fit(puzzle, parity)
 # Print both models' accuracy on these rows and the split reading of each,
-# then the forest's scramble on these same rows, five repeats under seed 0.`,
-              `import numpy as np
+# then the forest's scramble on these same rows, five repeats under seed 0.`,`import numpy as np
 from oop_ml import DecisionTreeClassifier, Feature, PermutationImportance, RandomForestClassifier
 
 generator = np.random.default_rng(4)
@@ -1108,8 +1089,7 @@ for name, model in [("lone tree", tree), ("forest", forest)]:
 
 scramble = PermutationImportance(n_repeats=5, random_seed=0)
 for share in scramble.measure(forest, puzzle, parity):
-    print(f"forest scramble {share.name} {share.value:.4f}")`,
-              `lone tree: accuracy 0.537
+    print(f"forest scramble {share.name} {share.value:.4f}")`,`lone tree: accuracy 0.537
   ledger first 0.0000
   ledger second 0.1929
   ledger distractor 0.8071
@@ -1119,13 +1099,8 @@ forest: accuracy 0.993
   ledger distractor 0.5187
 forest scramble first 0.4790
 forest scramble second 0.5035
-forest scramble distractor 0.0175`,
-              { hints: ["score takes the columns and the target and answers the accuracy as a float. max_depth=3 is enough for parity, which takes two questions, and far short of memorising three hundred rows.", "feature_importances is the split reading on a tree and on a forest alike. The forest averages its members’ shares, so the noise column keeps credit that every member’s search gave it.", "PermutationImportance is configured with n_repeats and random_seed, and its measure method takes the fitted model, the columns and the target. It refits nothing, and the model and rows it is handed are what decide the reading."], check: numberCheck("What share does the scramble on the forest’s own rows give the noise column, to four places?", 0.0175, 0.0005, "Intact the forest scores 0.993 on these rows, and shuffling the noise column barely moves it, to 0.977, a drop of 0.0167 against 0.4553 and 0.4787 for the two coins. Dividing by the 0.9507 total leaves the noise column under two hundredths, where its ledger share is 0.519. That is the disagreement the lesson is about, and it appears on the model that works.") },
-            ),
-            exercise(
-              "Scramble the rows the models never saw",
-              ["Part 4 says which rows are scrambled is part of the measurement. The page’s held-out rows are the next three hundred from the same generator, drawn after the training rows, which the draw function below reproduces. Score both models on them, then scramble each on them.", "Part 4 reports the forest’s held-out coins at 0.510 and 0.490 with the noise column at exactly zero, and the lone tree at chance, 0.497, with the noise column’s share at exactly 1.0. Print both held-out accuracies to three places and every held-out share to four."],
-              `import numpy as np
+forest scramble distractor 0.0175`,{...{ hints: ["score takes the columns and the target and answers the accuracy as a float. max_depth=3 is enough for parity, which takes two questions, and far short of memorising three hundred rows.", "feature_importances is the split reading on a tree and on a forest alike. The forest averages its members’ shares, so the noise column keeps credit that every member’s search gave it.", "PermutationImportance is configured with n_repeats and random_seed, and its measure method takes the fitted model, the columns and the target. It refits nothing, and the model and rows it is handed are what decide the reading."], check: numberCheck("What share does the scramble on the forest’s own rows give the noise column, to four places?", 0.0175, 0.0005, "The fitted forest depends strongly on the two coin columns even though the noise column received substantial split credit. Shuffling asks about prediction dependence, while the ledger asks about credited training splits.") },question:"Can a feature earn split credit without helping the model's predictions?"}),
+            exercise("Scramble the rows the models never saw",["Part 4 says which rows are scrambled is part of the measurement. The page’s held-out rows are the next three hundred from the same generator, drawn after the training rows, which the draw function below reproduces. Score both models on them, then scramble each on them.", "Part 4 reports the forest’s held-out coins at 0.510 and 0.490 with the noise column at exactly zero, and the lone tree at chance, 0.497, with the noise column’s share at exactly 1.0. Print both held-out accuracies to three places and every held-out share to four."],`import numpy as np
 from oop_ml import DecisionTreeClassifier, Feature, PermutationImportance, RandomForestClassifier
 
 generator = np.random.default_rng(4)
@@ -1142,8 +1117,7 @@ held_out, held_out_parity = draw(300)
 tree = DecisionTreeClassifier(max_depth=3).fit(puzzle, parity)
 forest = RandomForestClassifier(n_members=20, max_features=1, max_depth=3, random_seed=0).fit(puzzle, parity)
 # Score both models on the held-out rows, then scramble each on those rows,
-# five repeats under seed 0, and print every share to four places.`,
-              `import numpy as np
+# five repeats under seed 0, and print every share to four places.`,`import numpy as np
 from oop_ml import DecisionTreeClassifier, Feature, PermutationImportance, RandomForestClassifier
 
 generator = np.random.default_rng(4)
@@ -1164,17 +1138,14 @@ scramble = PermutationImportance(n_repeats=5, random_seed=0)
 for name, model in [("lone tree", tree), ("forest", forest)]:
     print(f"{name}: held-out accuracy {model.score(held_out, held_out_parity):.3f}")
     for share in scramble.measure(model, held_out, held_out_parity):
-        print(f"  {share.name} {share.value:.4f}")`,
-              `lone tree: held-out accuracy 0.497
+        print(f"  {share.name} {share.value:.4f}")`,`lone tree: held-out accuracy 0.497
   first 0.0000
   second 0.0000
   distractor 1.0000
 forest: held-out accuracy 0.960
   first 0.5102
   second 0.4898
-  distractor 0.0000`,
-              { hints: ["The held-out rows come from the same generator object after the training rows, so the two draws have to happen in that order and from one generator.", "score and measure both take the held-out columns and the held-out target. Neither refits the model; only the rows it is asked about change.", "A share of exactly 0.0000 or 1.0000 is the clamp at work. The library reports the clamped shares only, so a drop below nothing and a drop of exactly nothing both come back as zero."], check: numberCheck("What held-out share does the scramble give the first coin on the forest, to four places?", 0.5102, 0.0005, "Held out, the noise column’s drop is −0.004 and the clamp after the average takes it to exactly zero, so the two coins divide the whole of the explanation between them, 0.510 to 0.490. On the lone tree the opposite happens for the opposite reason. It is at chance, 0.497, so there is nothing to lose, and the one column whose shuffle happened to cost 0.0113 takes a share of exactly one.") },
-            ),
+  distractor 0.0000`,{...{ hints: ["The held-out rows come from the same generator object after the training rows, so the two draws have to happen in that order and from one generator.", "score and measure both take the held-out columns and the held-out target. Neither refits the model; only the rows it is asked about change.", "A share of exactly 0.0000 or 1.0000 is the clamp at work. The library reports the clamped shares only, so a drop below nothing and a drop of exactly nothing both come back as zero."], check: numberCheck("What held-out share does the scramble give the first coin on the forest, to four places?", 0.5102, 0.0005, "A held-out score drop is noisy, and this implementation clamps a negative mean drop to zero before normalising shares. A weak model can assign a large relative share to a tiny accidental drop, so inspect the score and unnormalised drops too.") },question:"Do the importance scores tell the same story on held-out people?"}),
           ],
         },
       ]}

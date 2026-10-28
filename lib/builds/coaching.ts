@@ -1,5 +1,6 @@
 import { expressionTools, same, show, type Build, type Construction, type Trace } from "./engine";
 import { TOOLS } from "./tools";
+import { journeyPlans } from "./journeys";
 
 export function resultFeedback(build: Build, graph: Construction, trace: Trace, caseIndex: number): string | undefined {
   if (trace.error || trace.output === undefined || same(trace.output, build.cases[caseIndex].expected)) return;
@@ -21,6 +22,8 @@ export function resultFeedback(build: Build, graph: Construction, trace: Trace, 
 
 export function constructionHints(build: Build): string[] {
   if (build.hints?.length) return build.hints;
+  const authored = journeyPlans[build.id]?.construction.hints;
+  if (authored?.length) return authored;
   if (build.id === "statistics") return [
     "Imagine sharing the recorded deaths equally across the weeks. First keep track of how much there is to share.",
     "The list also tells you how many weeks were recorded. That number changes between examples, so count the entries instead of entering a fixed divisor.",

@@ -26,9 +26,9 @@ export function lesson(record) {
     quiz: questions.slice(2),
   };
 }
-export function journey(premise, title, start, outcome, investigation, connections, prompt, carryForward, preparation) {
+export function journey(premise, title, start, outcome, investigation, connections, prompt, carryForward, preparation, constructionHints) {
   return { premise, order: investigation.kind === 'diagnose' ? 'investigate-first' : 'build-first',
-    construction: { title, start, outcome }, investigation, connections,
+    construction: { title, start, outcome, ...(constructionHints ? { hints: constructionHints } : {}) }, investigation, connections,
     reflection: { prompt, carryForward }, ...(preparation ? { preparation } : {}) };
 }
 export const predict = (title, question, outcome) => ({ title, question, outcome, caseIndex: 1, kind: 'predict', predictionLabel: 'Your prediction before running' });

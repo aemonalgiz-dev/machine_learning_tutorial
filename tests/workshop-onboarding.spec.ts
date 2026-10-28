@@ -3,6 +3,8 @@ import { assemble, evaluate, plug } from "../lib/builds/engine";
 import { calibrationRepair, calibrationShift, connectionIntroduction, firstConnectionGraph, independentIntroduction } from "../lib/builds/onboarding";
 import { testConstruction, validConstructionForBuild, workshopRecordKey } from "../lib/builds/workshop-session";
 import { TOOLS } from "../lib/builds/tools";
+import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
+import { workshopRecord } from "./helpers/workshop-record";
 
 test("onboarding contract: exactly one wire completes the introduction for changing inputs", () => {
   const graph = firstConnectionGraph();
@@ -54,12 +56,9 @@ test("onboarding contract: replacement exposes the old zero point and repair gen
 
 test("the changed sensor uses the learner's machine, then carries its repair into new readings", async ({page}) => {
   const graph = assemble(independentIntroduction.recipe, TOOLS);
-  await page.addInitScript(graph => {
-    const key = "workshop:guide:independent-build:v1";
-    localStorage.setItem(`fitlab.learning.v1:guest:${key}`, JSON.stringify({key, revision: 0, mutationId: "onboarding-test", dirty: false,
-      value: {graph, undo: [], redo: [], caseIndex: 0, results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0, example: false, animate: false, zoom: .75}}));
-  }, graph);
+  await mockAccountBackend(page, { records: [{ key: "workshop:guide:independent-build:v1", value: workshopRecord(graph, .75) }] });
   await page.goto("/lab/workshop-guide");
+  await waitForAccountReady(page);
   await page.getByRole("button", {name: "3. Repair a changed sensor", exact: true}).click();
   await page.getByRole("button", {name: "Try my machine on the replacement", exact: true}).click();
   await expect(page.getByRole("status").filter({hasText: "Your machine produced:"})).toContainText("0");
@@ -95,7 +94,9 @@ test("onboarding contract: malformed carried graphs cannot become a new workshop
 });
 
 test("the workshop guide opens on the floor, tests the connection, and keeps each draft", async ({ page }) => {
+  const backend = await mockAccountBackend(page);
   await page.goto("/lab/workshop-guide");
+  await waitForAccountReady(page);
   await expect(page.getByTestId("construction-floor")).toBeVisible();
   await expect(page.locator("[data-piece]")).toHaveCount(4);
   await expect(page.getByTestId("construction-counter")).toHaveText("0 passed · 0 failed · 3 not run");
@@ -112,6 +113,11 @@ test("the workshop guide opens on the floor, tests the connection, and keeps eac
   await page.getByRole("button", { name: /^1\. Connect a wire/ }).click();
   await expect(page.getByTestId("connection-path")).toHaveCount(3);
   await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
+  await backend.waitForRecord("workshop:guide:first-connection:v1", value => {
+    const draft = value as { graph?: { connections: unknown[] }; results?: Record<string, boolean> };
+    return draft.graph?.connections.length === 3 && Object.values(draft.results ?? {}).filter(Boolean).length === 3;
+  });
+  await waitForAccountSync(page);
   await page.reload();
   await expect(page.getByTestId("connection-path")).toHaveCount(3);
 });

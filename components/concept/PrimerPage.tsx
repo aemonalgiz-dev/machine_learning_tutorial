@@ -14,7 +14,6 @@
 import { Children, isValidElement, ReactNode } from "react";
 import { SectionNavigator, NavigableSection } from "./SectionNavigator";
 import { sectionId } from "./sectionId";
-import { LessonMeta, lessonSummary } from "./ConceptPage";
 import type { QuizQuestion } from "@/lib/quizzes";
 import type { Exercise } from "@/lib/exercises";
 import { lessonHistories, type HistoryLessonId } from "@/lib/history";
@@ -43,7 +42,6 @@ type PrimerChild = React.ReactElement<PrimerSectionProps | PrimerQuizProps | Pri
 export function PrimerPage({
   lessonId,
   title,
-  tagline,
   prerequisites,
   children,
 }: {
@@ -107,14 +105,11 @@ export function PrimerPage({
   // Construction follows the explanations it needs and leads into Python.
   const practiceAt = sections.findIndex(section => section.practice?.length);
   sections.splice(practiceAt < 0 ? sections.length : practiceAt, 0, { title: "Build with Botie", id: "workshop", game: lessonId, journey: journeyFor(lessonId) });
-  const { questions, problems } = lessonSummary(sections);
 
   return (
     <article className="mx-auto max-w-7xl px-6 py-12">
       <header className="mx-auto mb-6 max-w-[45rem]">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{title}</h1>
-        <p className="mt-3 text-lg text-muted">{tagline}</p>
-        <LessonMeta parts={sections.length} questions={questions} problems={problems} />
       </header>
 
       <SectionNavigator sections={sections} />

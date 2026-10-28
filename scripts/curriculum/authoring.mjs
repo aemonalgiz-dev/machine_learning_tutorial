@@ -8,7 +8,7 @@ export const example = (title, explanation, code, output, interpretation) => ({ 
 export const view = (title, explanation, rows, scene) => ({ title, explanation, rows, ...(scene ? { scene } : {}) });
 export const choice = (prompt, options, answer, because) => ({ kind: "choice", prompt, options, answer, because });
 export const truth = (prompt, answer, because) => ({ kind: "trueFalse", prompt, answer, because });
-export const exercise = (title, task, starter, solution, output, hints) => ({ title, question: title, task, starter, solution, output, hints });
+export const exercise = (title, task, starter, solution, output, hints, presentation = {}) => ({ title, question: presentation.question ?? title, task, starter, solution, output, hints });
 export const s = key => ({ source: key });
 export const op = (key, ...inputs) => ({ op: key, inputs });
 export const configured = (key, settings, ...inputs) => ({ op: key, inputs, settings });

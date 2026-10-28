@@ -504,15 +504,10 @@ export default function BytesAndCharactersPage() {
             <>
               <SubSection title="12. One character, one to four bytes">
                 <p>
-                  Everything so far has quietly used one sentence in which the
-                  two readings agree, and it is time to stop. The encoding that
-                  turns characters into bytes, which is UTF-8 everywhere on this
-                  page, does not use the same number of bytes for every
-                  character. It uses one byte for the characters
-                  of basic English, two for most accented Latin letters and for
-                  Greek, Cyrillic, Hebrew and Arabic, three for the Indic scripts
-                  and for Chinese, Japanese and Korean, and four for the rest,
-                  emoji included.
+                  Our running sentence uses ASCII only, so each of its code points occupies one UTF-8 byte. That is why its character and byte counts agree. UTF-8 does not use a fixed number of bytes for every code point.
+                </p>
+                <p>
+                  The selected é and θ below use two bytes, 报 uses three, and 👍 uses four. A script can include characters from more than one encoded range, so these are examples rather than fixed costs assigned to whole languages.
                 </p>
                 <NumberTable
                   headings={["one character", "bytes it takes"]}
@@ -526,18 +521,12 @@ export default function BytesAndCharactersPage() {
                   caption="Measured on one character at a time, so the count is the character’s own cost with nothing else in the text."
                 />
                 <p>
-                  That is why the sentence about Dr. Alvarez came to 51 either way. It is
-                  written entirely in characters that take one byte each, so the
-                  two readings cut it in exactly the same places and differ only
-                  in which number each piece goes in as. An English sentence
-                  cannot show the difference between the two methods on this
-                  page, and any measurement taken only on English will report
-                  that there is none.
+                  The sentence about Dr. Alvarez therefore comes to 51 positions under either reading, though the IDs have different meanings. An English sentence with an accented name, a curved quotation mark or an emoji can already need more bytes than code points.
                 </p>
                 <KeepInMind>
-                  The two readings coincide on basic English and on nothing else.
-                  A benchmark that establishes they behave alike has established
-                  it about one alphabet.
+                  Every ASCII code point occupies one UTF-8 byte. Agreement on
+                  these examples does not establish equal lengths for all English
+                  writing or for other scripts.
                 </KeepInMind>
               </SubSection>
 
@@ -624,7 +613,10 @@ export default function BytesAndCharactersPage() {
                   What comes back in place of a broken position is the mark above, which means that a character stood here and could not be read. The two halves of the letter fail for different reasons. The 195 opens a two-byte character and means nothing until the number after it arrives, and the 169 finishes a character and means nothing without the number that opened it.
                 </p>
                 <p>
-                  Of the 256 numbers in the table, exactly 128 stand for a character on their own, the values 0 to 127, which are the one-byte characters of basic English. The other 128, the values 128 to 255, are never a character alone. They occur only inside a character of two, three or four bytes, so a run that stops just after one of them may have stopped in the middle of a letter.
+                  Values from 0 to 127 are complete one-byte UTF-8 sequences, including ASCII letters and control characters. The remaining byte values do not decode as single characters on their own. Some continue a multi-byte sequence; some can begin one. Others, including 192 and 193 and values above 244, are forbidden in well-formed UTF-8.
+                </p>
+                <p>
+                  A vocabulary entry for every byte therefore does not make every possible run of those entries valid text. The decoder must still interpret their sequence under the encoding rules.
                 </p>
                 <p>
                   That is not an edge case reached by malformed input. It is what a model generating numbers one at a time walks into every time it is interrupted, and the widget below shows how often. The Greek sentence has 38 numbers and 17 of its 38 stopping points land in the middle of a letter; the English sentence has 24 numbers and none of them do.
@@ -746,13 +738,7 @@ export default function BytesAndCharactersPage() {
                   Compare table size with sequence length. On these examples, the byte table has 256 entries and ties for the longest sequences. The character table has 37 entries and gives sequences of the same length. The merged table lies between them in entry count and gives the shortest sequences. There is no single ordering that makes one representation smallest in both respects.
                 </p>
                 <p>
-                  Which is to say that on this corpus, and on English generally,
-                  the byte reading is worse than the character reading on both
-                  numbers at once. It carries nearly seven times the entries for
-                  exactly the same sequence length and the same exact round trip. Anybody
-                  measuring the two on English alone should conclude that the byte
-                  reading is a strictly worse choice, and on English alone they
-                  would be right.
+                  On this corpus, the byte reading carries nearly seven times the entries for the same sequence length and exact round trip. Those measurements favour the fitted character table on these examples. They do not settle English writing in general, because a new accented name can exceed the fitted alphabet. Coverage on new text remains part of the comparison.
                 </p>
                 <KeepInMind>
                   On this basic-English example, byte encoding does not shorten the sequence. Its fixed alphabet becomes more useful when the input contains characters absent from the training corpus. We should test that case before judging the representation from familiar English text alone.
@@ -878,10 +864,27 @@ export default function BytesAndCharactersPage() {
                   reader would point at in several ordinary cases.
                 </p>
                 <p>
-                  The word café can be written two ways that look identical on the page. One spells the last letter as a single codepoint; the other spells it as a plain e followed by a codepoint meaning &ldquo;put an acute accent on the thing before me&rdquo;. Those are 4 characters and 5 characters, 5 bytes and 6 bytes, and they are different texts by every comparison a computer makes, so a model reads them as different words.
+                  The word café can use one code point for the accented letter,
+                  or an e followed by a combining acute accent. A code point is
+                  the numerical identifier Unicode assigns to a character or
+                  other encoded unit. These spellings contain four and five code
+                  points respectively, even when they look identical to a reader.
+                  Their UTF-8 encodings use five and six bytes.
                 </p>
                 <p>
-                  Emoji make it worse, since a tinted thumb is two codepoints, a family is five and a Welsh flag is seven, and a reader would call each of those one mark.
+                  Comparing the raw code-point sequences distinguishes the two
+                  spellings. Unicode normalization can instead put canonically
+                  equivalent spellings into a shared form. A tokenizer that does
+                  no such normalization may therefore give them different IDs;
+                  one that normalizes first may treat them alike. We need to know
+                  which operation was applied before interpreting the result.
+                </p>
+                <p>
+                  A displayed emoji can also contain several code points. The
+                  tinted thumb, family and Welsh flag used in the table below
+                  contain two, five and seven respectively. Other family emoji
+                  sequences can have different lengths. A reader can still
+                  recognise each displayed example as one mark.
                 </p>
                 <NumberTable
                   headings={["one thing a reader would point at", "characters", "bytes"]}
@@ -896,16 +899,28 @@ export default function BytesAndCharactersPage() {
                   caption="Every one of these comes back exactly under the byte reading, which does not need to have an opinion about any of it."
                 />
                 <p>
-                  There are three defensible answers and each costs something. Counting codepoints is simple and splits marks a reader considers single. Counting what Unicode calls grapheme clusters matches a reader and needs a large body of tables that has to be shipped and updated. Rewriting every text into one preferred spelling before reading it makes the two cafés the same word and makes the round trip inexact, which is a real loss for anything that has to reproduce its input.
+                  Counting code points is straightforward, but can split a mark
+                  a reader considers single. Unicode&apos;s extended grapheme clusters
+                  group code points into useful units for operations such as
+                  moving a text cursor. They approximate user-perceived
+                  characters under documented rules; language and application
+                  needs can still require tailoring.
+                </p>
+                <p>
+                  Normalizing first answers a separate question about equivalent
+                  spellings. It can make the two cafés share a representation,
+                  but does not guarantee one code point per visible mark. It also
+                  changes the original sequence, so exact reconstruction needs
+                  additional information if that distinction matters.
                 </p>
                 <p>
                   The byte reading avoids the question entirely, and pays for that by having no notion of a character at all.
                 </p>
                 <KeepInMind>
-                  A character count is only defined once somebody says which of
-                  those three a character is. The counts on this page are
-                  codepoints, and a page that quotes character counts without
-                  saying so has quoted a number that is not determined.
+                  State whether a length counts bytes, code points or grapheme
+                  clusters, and whether normalization happened first. The
+                  character counts on this page count code points in the supplied
+                  spelling. A different choice can produce a different length.
                 </KeepInMind>
               </SubSection>
 
@@ -955,7 +970,7 @@ export default function BytesAndCharactersPage() {
                     {
                       expression: "what counts as one character",
                       reason:
-                        "a decision with three defensible answers. Codepoints are simple and split a tinted thumb into two; grapheme clusters match a reader and need Unicode’s segmentation tables; normalising first merges the two spellings of café and makes the round trip inexact. Every character count on this page is codepoints, and the choice changes the counts by up to a factor of seven on the marks in section 20.",
+                        "a choice that must be stated. Code-point counts can split one displayed mark into several units. Extended grapheme clusters approximate user-perceived characters under Unicode’s segmentation rules. Normalization is a separate preprocessing choice; it can merge canonical spellings without guaranteeing one code point per mark. The character counts on this page count the supplied code points.",
                     },
                     {
                       expression: "a run of numbers that stops mid-character",
@@ -965,12 +980,12 @@ export default function BytesAndCharactersPage() {
                     {
                       expression: "a number outside the table",
                       reason:
-                        "undefined, with no choice attached. A table of 256 entries owns the numbers 0 to 255 and 256 names nothing, so there is nothing to read. This is the case a model generating numbers can walk into, since nothing about a generated number guarantees it is in range.",
+                        "an invalid ID for this vocabulary. Its 256 entries use IDs 0 to 255, so 256 has no associated byte. Validate IDs supplied through an API. A model whose output head selects only among those 256 entries cannot normally generate 256 through that selection; this case concerns malformed or incompatible input to the decoder.",
                     },
                     {
                       expression: "a run of codepoints that is not text",
                       reason:
-                        "outside the guarantee, and this is where the word “every” in “every text is a run of bytes” does its work. The encoding has no spelling for the codepoints reserved for pairing up in another encoding, so a string carrying one is not text and there is nothing to read. The guarantee covers every text, which is not the same as every possible run of codepoints.",
+                        "outside strict UTF-8’s input contract. A Python string can contain an isolated surrogate code point, but a surrogate is not a Unicode scalar value and the strict UTF-8 encoder rejects it. State the malformed-input policy rather than treating every possible Python string as well-formed Unicode text.",
                     },
                     {
                       expression: "a text with nothing in it",
@@ -1053,7 +1068,11 @@ export default function BytesAndCharactersPage() {
           practice: [
             exercise(
               "Read three texts as characters and as bytes",
-              ["Fit the character reading on the eighteen sentences and build the byte reading, which is fitted on nothing. Put the sentence about Dr. Alvarez, the sentence with two Scandinavian letters and the Greek sentence to both, and print for each how many numbers it became, how many of them are the stand-in, and whether decoding the numbers gives the text back exactly.", "The rows should be the table of section 13 with the round trip of section 14 beside it. The two readings agree on the first text and on nothing else, and the byte reading should be exact three times out of three."],
+              [
+  "A character table can only name characters it has learned. A byte table already has an entry for every byte. Compare what happens when each meets unfamiliar letters.",
+  "Fit CharacterTokenizer on corpus. Construct ByteTokenizer without fitting it. Print the vocabulary sizes, then encode every text in texts in its listed order.",
+  "For each text and tokenizer, print the number of token IDs, the number of unknown stand-ins, and whether decoding its IDs exactly recovers the original string. Use the labels and line layout shown in Expected output."
+],
               `from oop_ml import ByteTokenizer, CharacterTokenizer
 
 corpus = [
@@ -1133,11 +1152,21 @@ accented  characters 69 numbers  2 unseen  exact False
 accented  bytes      71 numbers  0 unseen  exact True
 greek     characters 21 numbers  17 unseen  exact False
 greek     bytes      38 numbers  0 unseen  exact True`,
-              { hints: ["CharacterTokenizer is constructed with nothing and fitted on the list of sentences, and fit answers the fitted reading. ByteTokenizer is constructed with nothing and never fitted.", "Either reading’s table is its vocabulary, which knows n_tokens and its unknown_token. The byte table’s unknown token is None, so no token’s text can equal it and its count of stand-ins is always zero.", "encode answers an encoding with n_tokens and ids, and iterating over it gives tokens that carry text. decode takes the ids and answers a string to compare with the text."], check: numberCheck("How many numbers does the Greek sentence become under the byte reading?", 38, 0.0, "The Greek sentence is 21 characters, 17 of them letters at two bytes each and 4 of them spaces and a full stop at one byte each, which comes to 38. The character reading spends 21 numbers on it and 17 of those are the stand-in, so the shorter reading is the one that lost the sentence, and only the byte reading gives it back.") },
+              {
+question: "Can both tokenizers preserve text they did not learn?",
+ hints: [
+  "CharacterTokenizer().fit(corpus) learns the character table. ByteTokenizer() needs no corpus.",
+  "encoding.n_tokens counts IDs. Iterating an encoding gives tokens with text; compare that text with the vocabulary’s unknown_token. A byte vocabulary has no unknown token.",
+  "Pass encoding.ids to decode and compare the returned string with the original using ==. A shorter encoding can still have lost information."
+], check: numberCheck("How many numbers does the Greek sentence become under the byte reading?", 38, 0.0, "The Greek probe needs 38 byte IDs and is recovered exactly. Its shorter character encoding contains unknown stand-ins, so the count alone does not measure how much information was retained.") },
             ),
             exercise(
               "Charge one sentence in twelve languages",
-              ["Section 19 wrote one short sentence in twelve languages and measured what the byte reading charges for each. Encode each of the twelve under the byte reading, and print the characters, the bytes and the bytes per character to two places, then the totals across all twelve.", "The twelve rows should match the table in section 19, with Chinese cheapest at 18 and Hindi dearest at 48. The page does not add the column up, so read off how many numbers the twelve sentences cost altogether and what the ratio is across all of them."],
+              [
+  "The supplied dictionary expresses a short message in twelve languages. Measure the length of each supplied translation rather than assuming that equal meaning gives equal token counts.",
+  "Encode each translation with ByteTokenizer. Print its language label, Python character count, byte-token count and bytes per character to two decimal places.",
+  "Finish with the total character and byte counts and their overall ratio. Keep the dictionary’s order. Print the language labels rather than the translations so the report works in consoles without every script."
+],
               `from oop_ml import ByteTokenizer
 
 sentences = {
@@ -1201,11 +1230,20 @@ Japanese   11 characters  33 bytes  3.00
 Chinese     6 characters  18 bytes  3.00
 all twelve: 231 characters, 371 bytes
 bytes per character over all twelve: 1.61`,
-              { hints: ["The byte reading gives one number per byte, so the n_tokens of a sentence’s encoding is its length in bytes, and len of the sentence is its length in characters as the page counts them.", "Print only the language name and the counts. The sentences themselves are in a dozen scripts, and a terminal that cannot show one of them would stop the script part way.", "The ratio over all twelve is the total of the bytes divided by the total of the characters, which is not the average of the twelve ratios."], check: numberCheck("How many numbers do the twelve sentences cost altogether under the byte reading?", 371, 0.0, "The twelve sentences are 231 characters and 371 bytes, so the byte reading charges 1.61 numbers a character across the whole list. English contributes 24 of those and Hindi 48 for the same meaning, which is section 19’s point that the bill is set by the total a sentence comes to, where the per-character ratio says only what the writing system costs.") },
+              {
+question: "How many byte tokens do equivalent messages need in different scripts?",
+ hints: [
+  "len(text) counts Python Unicode code points. ByteTokenizer.encode(text).n_tokens counts UTF-8 bytes.",
+  "Accumulate both counts across the translations. Calculate the overall ratio from those totals, rather than averaging the individual ratios."
+], check: numberCheck("How many numbers do the twelve sentences cost altogether under the byte reading?", 371, 0.0, "The supplied translations require 371 byte tokens altogether. Their lengths reflect both the writing system and the wording of each translation; this small comparison does not establish a universal cost for a language.") },
             ),
             exercise(
               "Stop a run of byte numbers at every position",
-              ["Section 15 stopped the byte reading of a sentence after every number in turn and asked whether what had arrived so far was text. Do that for the Greek, the English and the Chinese sentence. Decode the first one, two, three numbers and so on, and count the stopping points where the decoded string holds the mark for a character that could not be read.", "Greek should break at 17 of its 38 stopping points and English at none of its 24, as the page says. The page does not print the Chinese figure, so work out what you expect for six characters of three bytes each before you run it."],
+              [
+  "A complete UTF-8 character may occupy several bytes. Test whether a stream stopped after any individual byte can still be decoded without a replacement character.",
+  "For the Greek, English and Chinese strings in the starter, encode the complete text, then decode every nonempty prefix of its IDs, including the complete sequence.",
+  "Count prefixes whose decoded string contains the Unicode replacement character, and print that count beside the number of stopping positions for each language."
+],
               `from oop_ml import ByteTokenizer
 
 sentences = {
@@ -1239,11 +1277,21 @@ for language, sentence in sentences.items():
               `Greek: 17 of 38 stopping points are not text
 English: 0 of 24 stopping points are not text
 Chinese: 12 of 18 stopping points are not text`,
-              { hints: ["The ids of an encoding can be turned into a list, and a slice of that list up to cut is the run a model would have produced had it been stopped there.", "decode does not refuse a run that stops inside a character. It answers a string with the broken-character mark at each broken position, so the test is whether that mark is in the string.", "A three-byte character has two stopping points inside it and one at its end. Only the one at its end leaves text behind."], check: numberCheck("At how many of its 18 stopping points is the Chinese sentence not text?", 12, 0.0, "Each of the six characters takes three bytes, so two of every three stopping points fall inside a character and 12 of the 18 leave a run that is not text. Greek breaks at 17 of 38 because its 17 letters are two bytes each, with one stopping point inside each letter, and English never breaks because every character is complete after one byte. The scripts that pay most in length are also the ones a half-finished run is most likely to break in.") },
+              {
+question: "What happens if a byte stream stops in the middle of a character?",
+ hints: [
+  "Convert encoding.ids to a list, then slice it at cut positions from 1 through its full length.",
+  "The byte decoder replaces an incomplete UTF-8 sequence with the character �. Test whether that character occurs in each decoded prefix.",
+  "A stopping position between characters is complete even when the next character would need several bytes."
+], check: numberCheck("At how many of its 18 stopping points is the Chinese sentence not text?", 12, 0.0, "Twelve Chinese prefixes end inside a multibyte character. The complete eighteen-byte sequence still decodes correctly; the failures concern stopping positions, not the ability to represent the complete message.") },
             ),
             exercise(
               "Price the byte reading against a vocabulary that was learned",
-              ["Fit the library’s byte pair encoder on the eighteen sentences the way Part 1 does, with no byte fallback and a vocabulary size of 300, which is more than this corpus can fill, so the merging runs until no pair occurs twice. Print the entries and merges it finished with, read the sentence about Dr. Alvarez with it and decode the numbers, then count what the whole corpus costs under it and under the byte reading.", "The table should come to 137 entries after 85 merges, the sentence to 25 numbers that do not decode to the sentence, and the corpus to 263 numbers against 763. The ratio of the last two, to two places, is the price Part 5 puts on refusing to learn a vocabulary."],
+              [
+  "The byte tokenizer preserves the complete text but spends an ID on every byte. Compare that length with a vocabulary learned from the supplied eighteen sentences.",
+  "Fit BytePairEncoding on corpus with vocabulary_size=300 and byte_fallback=False. Print the fitted vocabulary size and merge count. Encode the Dr. Alvarez sentence, then print its token count and decoded text.",
+  "Add the token counts over corpus for the fitted tokenizer and for ByteTokenizer. Print both totals and the byte total divided by the merged total, rounded to two decimal places. Check the decoded sentence as well as the length."
+],
               `from oop_ml import BytePairEncoding, ByteTokenizer
 
 corpus = [
@@ -1314,7 +1362,13 @@ the sentence: 25 numbers
 Dr. Alvare[UNK]didn't expect the low-cost re-analysis.
 the corpus: 263 merged, 763 as bytes
 ratio 2.90`,
-              { hints: ["The encoder takes its settings as keywords when it is constructed and the list of sentences when it is fitted. Fitted, it knows n_merges, and its vocabulary knows n_tokens.", "The cost of the corpus under a reading is the sum over the eighteen sentences of the n_tokens of each one’s encoding.", "Compare the decoded sentence with the original by eye here. The stand-in sits where the last letter of the surname was, and the space after it has gone with it."], check: numberCheck("How many times as many numbers does the corpus cost as bytes as it does merged, to two places?", 2.9, 0.005, "The eighteen sentences are 763 bytes and 263 merged pieces, and 763 over 263 is 2.90. That is the standing price of the coverage guarantee on English, where the byte reading is at its cheapest, and it buys the thing the merged reading just failed at, since the merged reading of the sentence put a stand-in where the z of the surname was and lost the space after it.") },
+              {
+question: "How much shorter is a learned vocabulary, and what can it fail to preserve?",
+ hints: [
+  "The requested vocabulary size is a ceiling. The learner can stop before reaching it when no eligible repeated pair remains.",
+  "Use vocabulary.n_tokens and n_merges for the learned table. Sum encode(text).n_tokens separately over the same corpus for each tokenizer.",
+  "The held-out surname contains a character position the fitted vocabulary cannot spell. decode reveals the resulting substitution and spacing loss."
+], check: numberCheck("How many times as many numbers does the corpus cost as bytes as it does merged, to two places?", 2.9, 0.005, "The byte encoding is about 2.90 times as long on this corpus. That is a result for these sentences and settings. The learned encoding is shorter here but fails the held-out sentence’s exact round trip.") },
             ),
           ],
         },

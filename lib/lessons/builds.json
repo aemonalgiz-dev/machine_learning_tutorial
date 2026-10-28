@@ -178,8 +178,8 @@
   {
     "id": "numpy-creation",
     "title": "Prepare the greenhouse target sheet",
-    "problem": "Botie needs a target for each day and greenhouse before recording comparisons.",
-    "challenge": "Choose a tool to create a rectangular sheet using the supplied day count, greenhouse count, and target. Then subtract the supplied readings from those targets to find how much warmer each position would need to become.",
+    "problem": "The greenhouse report already has a layout. Botie now needs the same target beside every recorded temperature, without treating an unfilled measurement as zero.",
+    "challenge": "Create a rectangular target sheet from the supplied day count, greenhouse count and target. Return targets minus readings in the same day-by-greenhouse layout. Positive means warmer is needed; negative means the reading is already above target.",
     "sources": {
       "days": "Number of days",
       "greenhouses": "Number of greenhouses",
@@ -297,7 +297,7 @@
     "id": "numpy-indexing",
     "title": "Retrieve the requested mornings",
     "problem": "Botie saved the row numbers needed for a comparison. The output must preserve the requested order and repeated requests.",
-    "challenge": "Gather the requested day rows, then swap rows and columns so each output row follows one greenhouse through those requested days.",
+    "challenge": "The requested days are zero-based row positions in the supplied table. Retrieve them in the given order, including repeats. Return one row per greenhouse, with its readings from those requested days kept in that order.",
     "sources": {
       "readings": "Days by greenhouse",
       "days": "Requested day indices"
@@ -686,7 +686,7 @@
       ]
     },
     "why": "The comparison makes the decisions; selection applies those decisions to the original temperatures.",
-    "limitation": "The limit is supplied by the task. It is not a learned or medically meaningful threshold.",
+    "limitation": "The alert limit is a supplied greenhouse policy. The comparison selects readings under that policy; it neither learns a threshold nor establishes which temperatures are suitable for a particular crop.",
     "extras": [
       "constant",
       "add",
@@ -871,7 +871,7 @@
   {
     "id": "numpy-linear-algebra",
     "title": "Apply a rule to the greenhouse feature table",
-    "problem": "Botie has one feature row per greenhouse and one coefficient per feature. We need a score for every row.",
+    "problem": "Each greenhouse row holds two measurements in a fixed feature order. Botie has a coefficient for each column and one shared offset. We need one score per row without mixing measurements from different greenhouses.",
     "challenge": "Apply the coefficient vector to each row, adding its weighted contributions, then add the supplied offset.",
     "sources": {
       "features": "Observation rows",
@@ -953,7 +953,7 @@
       ]
     },
     "why": "Matrix times vector collects each row's weighted contributions. The offset applies to every resulting score.",
-    "limitation": "The coefficients are supplied. Python separately introduces exact solving and least-squares fitting.",
+    "limitation": "These are illustrative supplied coefficients, not a learned crop-control rule. The Python lesson separately shows exact solving and least-squares fitting.",
     "extras": [
       "constant",
       "add",
@@ -1162,7 +1162,7 @@
     "id": "numpy-functions",
     "title": "Reuse the training reference on another report",
     "problem": "Botie wants a new report described relative to the training average. Replacing that average with the new report's average would change the comparison.",
-    "challenge": "Calculate the mean of the training readings, subtract it from the new report, and collect the reference and transformed report together in that order.",
+    "challenge": "Use the training readings to obtain one reference mean. Subtract that reference from every new-report reading. Return a two-item collection: the training mean first, then the transformed report in its original order. Do not recalculate the reference from the new report.",
     "sources": {
       "training": "Training readings",
       "report": "New report"
@@ -1388,8 +1388,8 @@
   },
   {
     "id": "sql-tables",
-    "title": "Keep four assets distinct",
-    "problem": "Several register entries describe pumps. The result must preserve each asset identity.",
+    "title": "Keep every registered asset distinct",
+    "problem": "Botie's register lists several pumps. The technician needs to see every physical asset, even when its kind matches another row. Keep the asset ID beside its kind so the report still identifies what can be inspected.",
     "challenge": "Choose asset_id and kind from the register, then order by asset_id.",
     "sources": {
       "rows": "Asset register"
@@ -1514,7 +1514,7 @@
         "order": "asset_id ASC"
       }
     },
-    "why": "Identity is retained while unrelated columns are left out.",
+    "why": "Each result row still means one registered asset. Selecting fewer columns removes unwanted details without merging different asset IDs.",
     "hints": [
       "Choose columns before deciding whether anything is a duplicate."
     ],
@@ -1647,7 +1647,7 @@
         "order": "site ASC, kind ASC"
       }
     },
-    "why": "Duplicate identity is defined by the selected result fields.",
+    "why": "After selecting site and kind, a result row means one equipment category at one site. Distinct-row removal compares that complete pair, so another pump at the same site does not create another category.",
     "hints": [
       "Do not carry asset_id through the distinct-row component for this report."
     ],
@@ -2586,7 +2586,7 @@
         "order": "asset_id ASC"
       }
     },
-    "why": "The row filter and group filter operate at different grains.",
+    "why": "First choose the visits that count as evidence, then count them within each asset. The final filter reads those asset totals; it does not decide which individual visits were loose.",
     "hints": [
       "Count only the rows that reach the grouping component."
     ],
@@ -3168,7 +3168,7 @@
   {
     "id": "sql-subqueries",
     "title": "Let the inspection records supply their own benchmark",
-    "problem": "A copied average will become stale when the next visit arrives.",
+    "problem": "The inspection filter worked with yesterday's average until another long visit arrived. Botie needs the comparison value to be recalculated from the same current visit log as the records it selects.",
     "challenge": "Average the known minutes, read that single result, filter inspections strictly above it, and return inspection_id and minutes in ID order.",
     "sources": {
       "visits": "Inspection records"
@@ -3788,7 +3788,7 @@
     "id": "sql-recursive-ctes",
     "title": "Trace the bounded supply network",
     "problem": "A supply fault can affect equipment several links away.",
-    "challenge": "Seed the supplied root at depth zero. Follow edges without revisiting a node on its path, up to max_depth. Report each reached node once with its minimum depth, ordered by node_id.",
+    "challenge": "Start the supplied root at depth zero. Follow parent_id to child_id, allowing at most max_depth connections and no revisit within the same path. Return one record per reached node, including the root, with its smallest discovered depth. Order by node_id.",
     "sources": {
       "root": "Starting node ID",
       "edges": "Supply connections",
@@ -4121,8 +4121,8 @@
   {
     "id": "sql-window-frames",
     "title": "Move a frame through each pump’s readings",
-    "problem": "Botie needs a total over recent observations without mixing pumps or assuming regular sampling.",
-    "challenge": "Sort by asset_id, measured_at and event_id ascending. Sum the current row with the supplied number of preceding rows within its asset. Return event_id, asset_id and recent_total in that order.",
+    "problem": "Each usage observation needs a recent total for its own pump. A missing hour should not silently turn a request for recent observations into a request for a fixed time interval.",
+    "challenge": "Sort by asset_id, measured_at and event_id ascending. For each row, total amount from that row and the supplied number of preceding rows of the same asset. Return event_id, asset_id and recent_total in that sorted order. A frame with no known amounts has a null total.",
     "sources": {
       "usage": "Usage observations",
       "preceding": "Number of preceding observations"
@@ -5065,7 +5065,7 @@
     "id": "sql-schema-design",
     "title": "Inspect equipment fields before accepting a record",
     "problem": "An import includes fields whose values do not fit the agreed equipment contract.",
-    "challenge": "Connect the incoming rows to the field checker, then return the IDs whose checks fail.",
+    "challenge": "The supplied contract names each required field and its value type. Check every incoming record against it, then return only the IDs that fail at least one check. Here integer cents must be a whole-number amount; a missing required field fails too.",
     "sources": {
       "rows": "Incoming equipment",
       "contract": "Expected value types"
@@ -5168,7 +5168,7 @@
     "id": "sql-constraints",
     "title": "Reject impossible maintenance jobs",
     "problem": "Proposed jobs need an existing asset and a usable duration.",
-    "challenge": "Apply the joint duration and parent check, then report failed job IDs.",
+    "challenge": "A job must name an asset in the supplied register and contain nonnegative integer minutes. Check both requirements on every job, then return the failed job IDs. Zero minutes is allowed; a missing duration is not.",
     "sources": {
       "jobs": "Proposed jobs",
       "assets": "Registered asset IDs"
@@ -5267,7 +5267,7 @@
     "id": "sql-normalization",
     "title": "Find conflicting current-site copies",
     "problem": "Repeated job records disagree about where an asset currently lives.",
-    "challenge": "Group site values by the asset field, require one distinct value per asset, and return the failing IDs.",
+    "challenge": "The supplied key field identifies the asset and the value field describes its current site. Collect the distinct site values under each asset. Return the asset IDs that do not have exactly one value. Equal repeated copies can agree; different current sites need investigation.",
     "sources": {
       "rows": "Repeated job facts",
       "key": "Determinant field",
@@ -5373,7 +5373,7 @@
     "id": "sql-insert-update-delete",
     "title": "Close one job without changing its neighbours",
     "problem": "A status update belongs to one selected job.",
-    "challenge": "Match the selector, patch its selected fields and merge the result into the original rows.",
+    "challenge": "The selector gives field values that must all match a job. Find those records, replace only the fields named in patch, and return the whole queue in its original order. Keep IDs and every unmatched record unchanged.",
     "sources": {
       "rows": "Current queue",
       "selector": "Write predicate",
@@ -5747,8 +5747,8 @@
   {
     "id": "sql-indexes",
     "title": "Find the asset region in a composite ordering",
-    "problem": "The table contains measurements from several pumps.",
-    "challenge": "Sort by the supplied index keys, keep the requested leading equality prefix, then return IDs in index order.",
+    "problem": "A reading lookup should avoid considering every pump. Arrange records by the supplied index fields and look at the consecutive region sharing the requested leading values.",
+    "challenge": "Sort by the key names in their supplied order. Keep records matching every field in the supplied leading-key prefix, then return their IDs in that index order. For keys asset then day, a prefix can name asset alone or asset followed by day.",
     "sources": {
       "rows": "Reading identities and key values",
       "keys": "Ordered index columns",
@@ -6287,8 +6287,8 @@
   {
     "id": "sql-incremental-pipelines",
     "title": "Checkpoint a versioned maintenance-reading batch",
-    "problem": "A source delivers corrections, deletions and late records after the last committed position.",
-    "challenge": "Select later change positions, apply the newest version per identity, and combine resulting state with the advanced cursor.",
+    "problem": "Botie's last upload position says which source changes have been processed. New arrivals can still contain old reading versions, including values from before a deletion. We need to advance through delivery history without restoring obsolete data.",
+    "challenge": "Keep changes whose seq is after cursor. Merge them by reading identity, retaining the greatest version and deletion markers. Use that same processed batch to advance the cursor. Return one checkpoint with state and cursor; processing an older payload can advance the cursor without changing the stored reading.",
     "sources": {
       "state": "Stored versioned readings",
       "changes": "Incoming source changes",
@@ -6566,7 +6566,7 @@
     "id": "nosql-key-value",
     "title": "Give the lookup its complete identity",
     "problem": "Two sites both use asset ID P1.",
-    "challenge": "Encode the ordered site and asset parts, read that exact key, and use the fallback only for a missing key.",
+    "challenge": "The parts input lists site first and asset second. Encode that pair without losing the field boundary, look up its exact key in store, and return the stored value when found. Return missing only when the key is absent, including when a found value is zero.",
     "sources": {
       "parts": "Requested site and asset",
       "store": "Stored status values",
@@ -6640,7 +6640,7 @@
   {
     "id": "nosql-cache-expiry",
     "title": "Check the deadline before returning the copy",
-    "problem": "Botie has a saved count, a clock and the current source count.",
+    "problem": "The lookup found the right saved count, but the source may already have changed. Botie must apply the agreed expiry deadline before letting that copy answer.",
     "challenge": "Read expires_at and value. Use the cached value only before the deadline; otherwise choose the source value.",
     "sources": {
       "entry": "Cached count and deadline",
@@ -6910,7 +6910,7 @@
     "id": "nosql-document-queries",
     "title": "Find high temperatures without borrowing another sensor’s value",
     "problem": "Each pump contains an array of typed readings.",
-    "challenge": "Make one row per reading, retain temperature members meeting the supplied threshold, and return one asset_id record per matching pump in first-appearance order.",
+    "challenge": "Expand each document's readings into separate rows while retaining asset_id. On the same reading row, match the supplied kind and require value at least minimum. Return one asset_id record per matching pump in first-appearance order, even if several readings qualify.",
     "sources": {
       "documents": "Pump documents and readings",
       "kind": "Requested reading kind",
@@ -7281,7 +7281,7 @@
         "paths": "asset_id"
       }
     },
-    "why": "The site bucket narrows the search while the residual predicate preserves the requested answer.",
+    "why": "Looking up site gives candidate documents from that site. Their temperatures still need checking against minimum before asset_id is selected. The bucket is a local illustration of narrowing a search, rather than a measured database index.",
     "hints": [
       "Inspect the whole site bucket before deciding which values qualify.",
       "Do not return every bucket member just because the key matched."
@@ -7443,7 +7443,7 @@
     "id": "nosql-partition-keys",
     "title": "Find the maintenance key that concentrates traffic",
     "problem": "Requests arrive with tenant, asset and measured work.",
-    "challenge": "Group requests by the supplied key fields, then flag keys exceeding the stated logical-key capacity.",
+    "challenge": "Use the supplied field names, in order, to form a complete logical key for each request. Total load under each equal key, then return each key, its load and an overloaded flag. The flag is true only when load exceeds capacity; matching capacity is allowed.",
     "sources": {
       "requests": "Request trace",
       "fields": "Chosen key fields",
@@ -7597,7 +7597,7 @@
     "id": "nosql-wide-column",
     "title": "Read the observations around P7’s fault",
     "problem": "The history contains several assets and daily buckets.",
-    "challenge": "Select the complete partition, keep the requested time interval, order the events and return at most limit IDs.",
+    "challenge": "The partition input names one tenant, asset and day bucket. Select that complete address. Keep times from window.start inclusive to window.end exclusive, order by time and then ID ascending, and return at most limit IDs. A nearby event from another bucket cannot contribute.",
     "sources": {
       "rows": "History records",
       "partition": "Complete bucket key",
@@ -7796,7 +7796,7 @@
     "id": "nosql-replication-consistency",
     "title": "Preserve the technician’s observed repair revision",
     "problem": "A session has already seen a revision that one replica has not received.",
-    "challenge": "Keep reachable copies, require the session’s minimum revision, then choose an eligible copy or return wait.",
+    "challenge": "Keep only reachable replica observations whose version is at least the session's minimum. Return the name of the greatest eligible version, breaking a version tie by name in ascending order. Return wait if none qualifies; do not lower minimum to make a copy eligible.",
     "sources": {
       "replicas": "Observed replica states",
       "minimum": "Minimum revision for this session"
@@ -8020,7 +8020,7 @@
     "id": "nosql-conflicts",
     "title": "Merge the disconnected teams’ inspection contributions",
     "problem": "Each replica owns a grow-only inspection count and receives delayed snapshots of the others.",
-    "challenge": "Take the maximum for every owner, then derive one total from the merged map.",
+    "challenge": "Each map holds a writer's own cumulative inspection count under its name. For each owner, keep the largest count seen in either snapshot; preserve owners absent from the other snapshot. Return the merged components and the total derived from them.",
     "sources": {
       "left": "First observed component map",
       "right": "Second observed component map"
@@ -8115,7 +8115,7 @@
     "id": "nosql-streams-projections",
     "title": "Repair the maintenance dashboard from current job images",
     "problem": "The job stream includes closures, reassignments and repeated images.",
-    "challenge": "Merge the latest full image for each identity. Count its current open contribution, then retain both state and projection.",
+    "challenge": "A full image is a complete current job record, not an extra job. Keep the greatest version for each job ID, including closed or deleted records. Count only current open jobs under their current asset, then return the retained state with open_by_asset. Assets with no open contribution are absent from that count map.",
     "sources": {
       "state": "Stored job images",
       "events": "Incoming full images"
@@ -8278,7 +8278,7 @@
     "id": "nosql-schema-evolution",
     "title": "Read the two sensor formats through a declared adapter",
     "problem": "The collection contains both old Celsius fields and new nested measurements.",
-    "challenge": "Read each supported schema into an explicit value-and-unit record, then produce the version-2 Celsius view.",
+    "challenge": "Use each document's schema number to read the supported measurement fields and declared unit. Return a version-2 document containing its ID and temperature as a value-and-unit object in Celsius, preserving input order. This is a derived view; the original documents are not rewritten.",
     "sources": {
       "documents": "Versioned sensor documents"
     },
@@ -8397,7 +8397,7 @@
     "id": "nosql-recovery",
     "title": "Restore stock to a supported point before the bad import",
     "problem": "A snapshot and retained full replacements describe an earlier stock history.",
-    "challenge": "Check the complete replay window, apply its replacements to a snapshot copy, then attach the selected target position.",
+    "challenge": "The snapshot is the starting state. Require every consecutive source position after its seq through target, then apply that interval's full replacements to a copy. Return the recovered state labelled with target. Do not skip the faulty import if the selected target includes it.",
     "sources": {
       "snapshot": "Backup snapshot",
       "events": "Retained recovery log",
@@ -8971,7 +8971,7 @@
     "id": "graph-pattern-matching",
     "title": "Follow the bound inspection to its technician",
     "problem": "A second pump’s technician must not enter the first pump’s result.",
-    "challenge": "Start at asset, extend by HAS_INSPECTION and then CARRIED_OUT_BY. Collect distinct current endpoint IDs.",
+    "challenge": "Begin a record at the requested asset. Follow HAS_INSPECTION to its inspection, then continue from that same inspection through CARRIED_OUT_BY. Return the distinct technician IDs in sorted order. In these components current names the endpoint reached so far.",
     "sources": {
       "graph": "Asset, inspection and technician graph",
       "asset": "Requested asset"
@@ -10264,7 +10264,7 @@
       "A visited set belongs inside reachability expansion.",
       "Filter out the zero-depth start after traversal."
     ],
-    "limitation": "These components operate on the supplied records in your browser. They do not run a graph database or interpret Cypher.",
+    "limitation": "The component computes a bounded set of reached nodes and their first-discovery depths. It does not expose every route or its internal queue, and it does not run a graph database. An omitted node may lie beyond the supplied hop limit.",
     "why": "The visited set stops repeated expansion through the cycle, while the depth record identifies the explicitly bounded reachable set.",
     "extras": [],
     "draftVersion": 1
@@ -10516,7 +10516,7 @@
       "Do not turn an unreachable result into zero."
     ],
     "limitation": "These components operate on the supplied records in your browser. They do not run a graph database or interpret Cypher.",
-    "why": "Relaxing accumulated nonnegative costs can improve a previously discovered route. The final lookup distinguishes an unreachable destination from cost zero.",
+    "why": "When a cheaper route is found, its accumulated cost replaces the earlier cost for that destination. This workshop requires nonnegative edge times. The final lookup keeps an unreachable destination distinct from the start, whose travel cost is zero.",
     "extras": [],
     "draftVersion": 1
   },
@@ -11169,7 +11169,7 @@
   {
     "id": "graph-rdf-sparql",
     "title": "Resolve resource dependencies from RDF records",
-    "problem": "The same identifier text occurs as a resource and as a literal.",
+    "problem": "An RDF resource has an identifier, called an IRI. A literal stores a value, even when its characters look like that identifier. Botie needs dependency links to the requested resource, so those two object types must remain distinct.",
     "challenge": "Project the resource-only graph, keep the expanded dependsOn predicate, match target to the requested resource and collect distinct subject IDs.",
     "sources": {
       "triples": "Expanded statement records",
@@ -11301,7 +11301,7 @@
       "The graph projection excludes literal objects.",
       "Match the expanded predicate before the target."
     ],
-    "limitation": "These components operate on the supplied records in your browser. They do not run a graph database or interpret Cypher.",
+    "limitation": "This local projection accepts the supplied expanded statement records and keeps resource links. It omits literal objects from this traversal; it is not a complete RDF model, SPARQL engine or graph database.",
     "why": "The resource projection preserves RDF object categories, then predicate and target matching yield distinct subject resources rather than literal lookalikes.",
     "extras": [],
     "draftVersion": 1
@@ -11310,7 +11310,7 @@
     "id": "graph-provenance",
     "title": "Select the evidence available for this decision",
     "problem": "The claims include conflicting, expired, future and unapproved records.",
-    "challenge": "Apply the supplied source policy, then the availability and exclusive expiry boundaries. Collect all surviving claim IDs without resolving disagreements.",
+    "challenge": "Keep claims from the supplied allowed sources. Here observed_at means the hour a claim became available to this decision process. Require that hour to be at or before at, and valid_until to be after at when present. Return every surviving claim ID in sorted order, even when the claims disagree.",
     "sources": {
       "claims": "Claim and provenance records",
       "allowed": "Permitted source IDs",
@@ -11498,7 +11498,7 @@
   {
     "id": "graph-ml-retrieval",
     "title": "Collect evidence through permitted routes",
-    "problem": "Future documents and routes through another tenant must not enter the context.",
+    "problem": "The pump's own manual does not explain a fault in its supply. Botie needs related manuals, but a route through another tenant and a manual uploaded after the decision cannot justify this answer.",
     "challenge": "Restrict the graph to tenant, find bounded Asset-only dependency reachability including the Asset start, follow HAS_MANUAL, resolve Document nodes and keep only those available by at. Return sorted document IDs.",
     "sources": {
       "graph": "Invented graph snapshot",
@@ -11968,7 +11968,7 @@
       "Depth zero includes the starting asset.",
       "Availability is tested on the resolved document record."
     ],
-    "limitation": "These components operate on the supplied records in your browser. They do not run a graph database or interpret Cypher.",
+    "limitation": "The browser checks a supplied tenant label, hop bound and document-availability hour on an invented snapshot. It does not authenticate a caller, enforce a deployed database's permissions or generate an answer from the retrieved documents.",
     "why": "Scope is applied before dependency expansion. Document availability then excludes future evidence while the permitted route structure excludes cross-tenant detours.",
     "extras": [],
     "draftVersion": 1
@@ -12574,8 +12574,8 @@
   {
     "id": "class-imbalance",
     "title": "Keep the rare sensor failures visible",
-    "problem": "Botie needs a score that gives each sensor class a place. Compute each class's recall before combining the results.",
-    "challenge": "Divide the correct count for each class by that class's total count, then return the mean of those recalls.",
+    "problem": "The detector correctly labels most sensors but misses the rare faulty class. An overall success rate can hide that failure. Give each class its own recall before combining them.",
+    "challenge": "For each class, divide its correct predictions by its total observations to get recall, the fraction of that class found correctly. Return the unweighted mean of those class recalls. Keep the class positions aligned in both inputs.",
     "sources": {
       "correct": "Correct predictions per class",
       "counts": "Total observations per class"
@@ -12850,7 +12850,7 @@
     "id": "decision-thresholds",
     "title": "Turn failure probabilities into inspection decisions",
     "problem": "Botie has failure probabilities and a simplified cost table. Correct decisions cost zero; false alarms and missed failures have the supplied costs.",
-    "challenge": "Derive the cutoff as false-alarm cost divided by the sum of both costs. Return one or zero for each probability, inspecting at equality.",
+    "challenge": "When is the expected cost of an inspection no greater than the expected cost of missing a failure? For the supplied zero-cost correct decisions, divide false-alarm cost by the sum of false-alarm and miss costs. Use that cutoff to return 1 for inspection and 0 otherwise, including inspection when the probability equals the cutoff.",
     "sources": {
       "probabilities": "Estimated failure probabilities",
       "falseAlarm": "False-alarm cost",
@@ -12957,7 +12957,7 @@
     "id": "probability-calibration",
     "title": "Audit one group of failure probabilities",
     "problem": "Botie needs to compare the group's confidence with its observed failure rate, while also reporting squared probability error.",
-    "challenge": "Return two entries: first a pair containing mean probability and observed failure frequency, then the Brier score. Outcomes are zero or one.",
+    "challenge": "Do the quoted probabilities agree with how often sensors actually failed? Return two entries: first [mean probability, observed failure frequency], then the Brier score, meaning the mean squared difference between each probability and its zero-or-one outcome. Keep this error score separate from the group-average comparison.",
     "sources": {
       "probabilities": "Failure probabilities in one group",
       "outcomes": "Observed failures"
@@ -14487,7 +14487,7 @@
     "id": "conditional-probability",
     "title": "Update the two possible causes of an alarm",
     "problem": "Botie sees an alarm. Combine the faulty and working groups' starting shares with their alarm rates, then calculate the updated shares.",
-    "challenge": "Build the two joint contributions and divide each by their total. Keep faulty first and working second.",
+    "challenge": "Among sensors that raised an alarm, what share belongs to each possible cause? The prior input gives faulty then working shares before the alarm. Multiply each by its corresponding alarm rate, then divide both contributions by their combined total. Return the updated shares in that same order.",
     "sources": {
       "prior": "Faulty and working priors",
       "rates": "Alarm rates given each cause"
@@ -14596,7 +14596,7 @@
     "id": "likelihood",
     "title": "Compare possible germination rules",
     "problem": "Botie has observed which seeds germinated. Each candidate rule gives a probability for one seed, but he needs the likelihood of the whole ordered batch.",
-    "challenge": "Calculate each candidate's sequence likelihood, find the largest likelihood's position, and retrieve the candidate at that position.",
+    "challenge": "Which supplied germination probability makes the observed seed outcomes most plausible? For each candidate, combine the independent success and failure probabilities across the ordered batch to get its sequence likelihood. Select the largest likelihood and return that candidate probability, rather than its position.",
     "sources": {
       "candidates": "Candidate germination probabilities",
       "outcomes": "Observed germination outcomes"
@@ -14981,7 +14981,7 @@
     "id": "hierarchical-clustering",
     "title": "Find the nearest bridge between groups",
     "problem": "Botie has two groups of sensor response times. He wants the single-linkage distance that would be used to consider joining them.",
-    "challenge": "Calculate every cross-group distance, flatten that table, and choose the smallest distance.",
+    "challenge": "How close are the nearest members of these two response-time groups? Calculate every cross-group absolute distance, then return the smallest. That nearest bridge is the single-linkage distance used when considering whether to join the groups.",
     "sources": {
       "a": "First group's response times",
       "b": "Second group's response times"
@@ -15070,7 +15070,7 @@
     "id": "density-based-clustering",
     "title": "Find the points that can grow a group",
     "problem": "Botie's sensor locations need a local density test before he can connect dense regions. A point counts itself among its neighbours.",
-    "challenge": "Calculate pairwise Euclidean distances, include distances at or below the supplied radius, add each neighbourhood row, and mark counts at or above the minimum.",
+    "challenge": "Which sensor locations have enough neighbours to support a dense region? Compare every pair's Euclidean distance with the inclusive radius. Count each point itself, then return 1 where its neighbour count reaches the minimum and 0 elsewhere. These are core-point flags, not cluster labels.",
     "sources": {
       "locations": "Sensor locations by row",
       "radius": "Neighbourhood radius",
@@ -15200,7 +15200,7 @@
   {
     "id": "images-as-arrays",
     "title": "Put the tray image on a known scale",
-    "problem": "Botie needs floating-point intensities between zero and one before comparing photographs stored on the same eight-bit scale.",
+    "problem": "Camera formats can store brightness with different numeric maxima. Botie needs a shared zero-to-one scale before comparing their pixel values.",
     "challenge": "Divide every pixel by the supplied maximum. Preserve the image's two-dimensional arrangement.",
     "sources": {
       "image": "Grayscale tray image",
@@ -15494,7 +15494,7 @@
     "id": "morphology",
     "title": "Remove the tray's isolated speck",
     "problem": "Botie's threshold mask contains a broad seed region and an isolated mark. Use the supplied footprint to perform an opening.",
-    "challenge": "Connect erosion before dilation and supply the same footprint to both. Return the cleaned mask.",
+    "challenge": "The supplied footprint describes a shape that must fit inside the foreground. Erosion keeps only positions where that footprint fits; dilation expands those surviving positions again. Connect erosion before dilation using the same footprint, and return the resulting opened mask.",
     "sources": {
       "mask": "Threshold mask",
       "footprint": "Symmetric footprint"
@@ -15728,7 +15728,7 @@
     "id": "connected-components",
     "title": "Count connected seed regions",
     "problem": "Botie has a foreground mask. Group reachable foreground pixels under the supplied neighbour rule, then count the resulting regions.",
-    "challenge": "Label the regions, flatten that label image, and take its maximum. This labeller uses consecutive positive IDs and reserves zero for background.",
+    "challenge": "Which foreground pixels belong to one reachable region? Label them using the supplied 4-neighbour or 8-neighbour rule, then return the number of regions. This labeller reserves zero for background and assigns consecutive positive IDs, so the largest ID gives the count.",
     "sources": {
       "mask": "Seed foreground mask",
       "connectivity": "Neighbour rule: 4 or 8"
@@ -16169,7 +16169,7 @@
     "id": "bounding-boxes",
     "title": "Measure the overlap of two seed rectangles",
     "problem": "Botie has a predicted rectangle and a labelled rectangle. Calculate their intersection over union using continuous boundary coordinates.",
-    "challenge": "Find both box areas and their intersection. Add the areas, subtract the intersection to form the union, then divide intersection by union.",
+    "challenge": "How much of the covered area do the predicted and labelled rectangles share? Coordinates are [left, top, right, bottom], treated as continuous boundaries. Find each area and the intersection, form the union without counting the intersection twice, then return intersection divided by union.",
     "sources": {
       "a": "Predicted rectangle",
       "b": "Labelled rectangle"
@@ -16320,7 +16320,7 @@
     "id": "non-maximum-suppression",
     "title": "Keep distinct seed detections",
     "problem": "Botie has multiple scored rectangles for the same object class. Keep strong candidates while removing their sufficiently overlapping alternatives.",
-    "challenge": "Rank original indices by descending score, apply greedy suppression using that order and the supplied IoU threshold, then gather the kept box rows.",
+    "challenge": "Several rectangles may describe the same seed. Rank original indices by descending score, using original order on ties. Greedily keep the next remaining rectangle and suppress remaining candidates whose intersection-over-union with it strictly exceeds the threshold. Gather and return the kept box rows in selection order.",
     "sources": {
       "boxes": "Candidate seed rectangles",
       "scores": "Candidate scores",
@@ -16625,7 +16625,7 @@
     "id": "lagged-features",
     "title": "Build a trailing-mean forecast",
     "problem": "Botie wants one prediction for each day that has enough preceding readings. The supplied lag count defines the history window.",
-    "challenge": "Create past-only lag rows, then average across each row.",
+    "challenge": "How could Botie forecast from only the readings available before a target day? Use the supplied lag count to form past-only windows in chronological order, then return each window's mean. The first target follows the first complete window; the final observed reading is a target, not an extra future input.",
     "sources": {
       "history": "Demand in chronological order",
       "lags": "Number of preceding readings"
@@ -16714,8 +16714,8 @@
   {
     "id": "seasonality-and-differencing",
     "title": "Measure change across matching cycle positions",
-    "problem": "Botie wants to remove a supplied repeating period from the demand record before inspecting its changes.",
-    "challenge": "Extract aligned current and seasonal-reference lists, then subtract references from current values.",
+    "problem": "Demand repeats across the supplied period, but its level may also change. Botie wants to compare each reading with the corresponding position one cycle earlier.",
+    "challenge": "Make two aligned lists: readings that have a full earlier cycle, and their readings one supplied period earlier. Subtract the earlier references from the current readings. Return those seasonal differences in chronological order.",
     "sources": {
       "history": "Chronological demand",
       "period": "Seasonal period in observations"
@@ -16895,8 +16895,8 @@
   {
     "id": "autoregressive-forecasting",
     "title": "Apply fitted lag contributions",
-    "problem": "Botie has a past-demand window and supplied autoregressive coefficients. Calculate its next forecast.",
-    "challenge": "Take the dot product of the history window and lag weights, then add the intercept.",
+    "problem": "A plain history average gives every lag equal influence. Botie has fitted a separate coefficient for each past-demand position and wants to apply that rule to a new window.",
+    "challenge": "Each weight belongs to the corresponding older-to-newer reading in the window. Multiply those pairs, add the contributions, then add the fitted intercept. Return one next-step demand forecast.",
     "sources": {
       "window": "Older-to-newer demand window",
       "weights": "Lag coefficients in the same order",
@@ -17191,7 +17191,7 @@
     "id": "states-actions-and-transitions",
     "title": "Compare the states each action may lead to",
     "problem": "Botie has a transition row for each action and a value for each possible next state.",
-    "challenge": "Validate the transition rows, then multiply the transition matrix by the state-value vector.",
+    "challenge": "Each action can lead to several next states. A transition row lists those chances in the same state order as the values. Validate that the rows are probability distributions, then use matrix-vector multiplication to return the expected next-state value for each action.",
     "sources": {
       "transitions": "Next-state probabilities per action",
       "values": "Values in next-state order"
@@ -17383,7 +17383,7 @@
     "id": "bellman-value-iteration",
     "title": "Compare immediate rewards and future states",
     "problem": "Botie knows the transition rows and immediate expected reward for each action in the current state.",
-    "challenge": "Validate the transition rows, calculate expected next-state values, discount them, add immediate rewards, then choose the largest score's index.",
+    "challenge": "Which action has the largest immediate reward plus discounted expected continuation? Validate the transition probability rows, use them to average the supplied next-state values, then apply the discount and add each action's immediate reward. Return the winning zero-based action index.",
     "sources": {
       "transitions": "Next-state probabilities per action",
       "values": "Next-state value estimates",
@@ -17652,8 +17652,8 @@
   {
     "id": "distributions-and-expectations",
     "title": "Average over possible damage",
-    "problem": "Botie has the possible damage counts and a probability for each.",
-    "challenge": "Multiply matching outcomes and probabilities, then add the contributions.",
+    "problem": "Botie needs to plan for possible damage counts, but the outcomes do not all have the same chance. A plain average would give unlikely outcomes too much influence.",
+    "challenge": "Keep each possible damage count beside its supplied probability. Multiply each pair and add the contributions. Return the expected count, a probability-weighted average that need not itself be a possible outcome.",
     "sources": {
       "outcomes": "Possible counts",
       "p": "Probabilities"
@@ -17738,8 +17738,8 @@
   {
     "id": "parameter-posteriors",
     "title": "Update a failure probability",
-    "problem": "Botie records new failures and working sensors.",
-    "challenge": "Update alpha and beta independently, then divide updated alpha by their updated total.",
+    "problem": "New inspections found some faulty sensors and some working ones. Botie wants those observations to update the failure-rate belief represented by two positive prior parameters.",
+    "challenge": "Alpha records prior support for failures; beta records support for working sensors in this Beta model. Add the corresponding new counts to each parameter. Divide updated alpha by the sum of both updated parameters and return the posterior mean failure rate.",
     "sources": {
       "a": "Prior alpha",
       "b": "Prior beta",
@@ -17840,7 +17840,7 @@
     "id": "gaussian-sensor-fusion",
     "title": "Combine thermometer readings",
     "problem": "Botie needs one estimate from independently noisy thermometers.",
-    "challenge": "Take reciprocal variances, form their weighted reading total, and divide by total precision.",
+    "challenge": "Which temperature do these independently noisy thermometers jointly support? Each positive variance describes squared error in the same temperature units. Its reciprocal is called precision, so a less noisy instrument gets more weight. Return the precision-weighted reading total divided by the total precision.",
     "sources": {
       "readings": "Temperature readings",
       "variance": "Positive error variances"
@@ -17944,7 +17944,7 @@
     "id": "hidden-state-filtering",
     "title": "Update the hidden pump condition",
     "problem": "Botie has yesterday’s belief, a transition model, and likelihoods for today’s reading.",
-    "challenge": "Transpose the row-stochastic transition matrix, multiply by the belief, weight by evidence, and normalise the result.",
+    "challenge": "State order is working, faulty. Each transition row says where probability can move from one old state. Transpose that matrix and multiply by the previous belief to predict today's state shares. Weight those shares by today's reading likelihoods and divide by their total. Return the updated state probabilities in the same order.",
     "sources": {
       "belief": "Previous state probabilities",
       "P": "Transition matrix",
@@ -18091,7 +18091,7 @@
     "id": "gaussian-process-regression",
     "title": "Predict a residual temperature",
     "problem": "Botie is given a valid noisy training covariance, observed residuals, and query covariances.",
-    "challenge": "Solve the covariance system for observation weights, then take their dot product with query covariances.",
+    "challenge": "The supplied covariance matrix includes training noise and describes how residual observations vary together. Solve that matrix times observation weights equals the residual vector. Take the weights' dot product with the query-to-training covariances and return the query's predicted residual mean.",
     "sources": {
       "A": "Noisy training covariance",
       "y": "Observed residuals",
@@ -18202,7 +18202,7 @@
     "id": "minibatch-gradients",
     "title": "Update a weight from a batch",
     "problem": "Botie has aligned inputs and targets for a small training batch.",
-    "challenge": "Predict, subtract targets, multiply residuals by inputs, average, then subtract the scaled gradient from the weight.",
+    "challenge": "Every record contributes to the same weight update. Predict each target as input times current weight. Subtract targets, multiply those residuals by their inputs, then average to get the gradient of half mean squared error. Subtract learning rate times that gradient and return the new weight.",
     "sources": {
       "x": "Batch inputs",
       "y": "Batch targets",
@@ -18420,8 +18420,8 @@
   {
     "id": "adaptive-gradients",
     "title": "Scale a corrected Adam direction",
-    "problem": "Botie already calculated bias-corrected moments and now needs the parameter update.",
-    "challenge": "Take the square root of corrected second moments, add epsilon, divide corrected first moments by that denominator, scale, and subtract.",
+    "problem": "Botie has retained averages of gradients and squared gradients for each parameter. Bias correction has already been applied. The remaining Adam step must use each coordinate's own scale.",
+    "challenge": "The supplied first moments are corrected gradient averages; the second moments are corrected squared-gradient averages. Take each second moment's square root and add epsilon. Divide the matching first moment by that denominator, scale by learning rate, and subtract from the old parameter. Return the parameter vector.",
     "sources": {
       "w": "Parameters",
       "m": "Corrected first moments",
@@ -18551,7 +18551,7 @@
     "id": "initialisation-and-gradient-checks",
     "title": "Check a local derivative",
     "problem": "Botie evaluated the same loss above and below a parameter.",
-    "challenge": "Subtract lower loss from upper loss and divide by twice the positive perturbation.",
+    "challenge": "The same deterministic loss was evaluated with the parameter raised by h and lowered by h. Subtract the lower-parameter loss from the upper-parameter loss, then divide by the full parameter distance, twice h. Return this approximate local gradient.",
     "sources": {
       "plus": "Loss at w+h",
       "minus": "Loss at w-h",
@@ -18800,7 +18800,7 @@
     "id": "content-based-ranking",
     "title": "Match topic directions",
     "problem": "Botie has one reader profile and one candidate guide.",
-    "challenge": "Take their dot product and divide by the product of their lengths.",
+    "challenge": "Does this guide point toward the topics in the reader's profile? Multiply matching coordinates and sum them for a dot product. Divide by the product of the two vector lengths and return their cosine similarity. Both vectors use the same topic coordinates and have nonzero length.",
     "sources": {
       "reader": "Reader topic vector",
       "item": "Guide topic vector"
@@ -19207,7 +19207,7 @@
     "id": "robust-anomaly-scores",
     "title": "Score new pressure readings",
     "problem": "Botie has reference records and separate incoming readings.",
-    "challenge": "Find the reference median, calculate its MAD, then divide incoming absolute deviations by that spread.",
+    "challenge": "How unusual is each incoming reading relative to the reference records? Find the reference median, then the median of absolute reference deviations from it, called MAD. Return each incoming absolute deviation divided by that fixed MAD. Do not refit the reference using incoming readings.",
     "sources": {
       "reference": "Reference readings",
       "new": "Incoming readings"
@@ -19341,7 +19341,7 @@
     "id": "local-density-anomalies",
     "title": "Compare a point with its local surroundings",
     "problem": "Botie has reachability distances and the neighbours’ own densities.",
-    "challenge": "Average reachability, take its reciprocal, divide neighbour densities by that density, then average the ratios.",
+    "challenge": "Is this point in a sparser neighbourhood than its neighbours? The positive reachability distances are already supplied. Their reciprocal mean gives the point's local reachability density. Divide each supplied neighbour density by that density, then return the mean ratio, the local outlier factor.",
     "sources": {
       "reach": "Positive reachability distances",
       "neighbours": "Neighbour local densities"
@@ -19440,7 +19440,7 @@
     "id": "isolation-forests",
     "title": "Score isolation paths",
     "problem": "Botie has this reading’s path length in each tree and the positive sample-size normaliser.",
-    "challenge": "Average paths, divide by the normaliser, negate, then raise two to that exponent.",
+    "challenge": "How quickly did the fitted trees isolate this reading? Average its supplied path lengths, divide by the positive sample-size reference c(n), negate the result and raise two to that power. Return the anomaly score; shorter average paths should give larger scores.",
     "sources": {
       "paths": "Paths across trees",
       "normaliser": "Positive c(n)"
@@ -19669,7 +19669,7 @@
     "id": "graph-representations",
     "title": "Count the network’s connections",
     "problem": "Botie wants the degree of every pump in an undirected binary network.",
-    "challenge": "Add the entries in each adjacency row.",
+    "challenge": "An adjacency row belongs to one pump, and a 1 in a column marks a connection to that pump. Sum each row and return one neighbour count per pump in the same order.",
     "sources": {
       "A": "Undirected binary adjacency matrix"
     },
@@ -19757,7 +19757,7 @@
       ]
     },
     "why": "Each row retains its node identity while its edge entries are counted.",
-    "limitation": "For weighted graphs, row sums measure total weight instead of neighbour count.",
+    "limitation": "The supplied graphs are undirected, binary and have no self-loops, so row sums count neighbours. Weighted row sums instead measure total weight; a directed graph needs an explicit incoming or outgoing convention.",
     "extras": [
       "constant",
       "add",
@@ -19775,7 +19775,7 @@
     "id": "graph-random-walks",
     "title": "Advance a probability distribution",
     "problem": "Botie has a row-stochastic transition matrix and current node probabilities.",
-    "challenge": "Transpose the transition matrix, then multiply it by the current probability vector.",
+    "challenge": "Where does the current probability mass move after one step? Each transition row gives the next-node probabilities from one starting node and sums to one. Transpose the matrix and multiply by the current node-probability vector. Return the destination shares in the same node order.",
     "sources": {
       "P": "Transition matrix",
       "p": "Current probabilities"
@@ -19896,7 +19896,7 @@
     "id": "neighbour-aggregation",
     "title": "Read neighbouring pumps",
     "problem": "Botie has an undirected adjacency matrix and aligned scalar readings.",
-    "challenge": "Gather neighbouring readings with matrix multiplication, then divide each sum by its degree, returning zero for degree zero.",
+    "challenge": "What do the connected pumps report on average? Matrix-vector multiplication sums neighbouring readings for each adjacency row. Divide each sum by that row's neighbour count, returning zero for an isolated pump. Keep one output per original pump.",
     "sources": {
       "A": "Binary adjacency matrix",
       "x": "Node readings"
@@ -20033,7 +20033,7 @@
     "id": "graph-convolution",
     "title": "Pass measurements through one graph layer",
     "problem": "Botie has an undirected adjacency matrix, node features, and supplied feature weights.",
-    "challenge": "Add identity, calculate symmetric degree scaling, mix features, apply weights, then ReLU.",
+    "challenge": "Each node should retain its own reading while also receiving information from neighbours. Add the identity matrix to create self-connections. Scale each connection by the reciprocal square roots of its endpoints' resulting neighbour counts. Use that matrix to mix node-feature rows, apply the shared feature weights, then replace negative outputs with zero. Return one feature row per node.",
     "sources": {
       "A": "Undirected adjacency, zero diagonal",
       "X": "Node feature rows",
@@ -20211,7 +20211,7 @@
     "id": "link-prediction",
     "title": "Score a possible connection",
     "problem": "Botie has supplied representations for two candidate nodes.",
-    "challenge": "Take their dot product and pass the logit through sigmoid.",
+    "challenge": "How compatible are these two supplied node representations under the chosen decoder? Take their dot product as an unrestricted score, then pass it through sigmoid to return a number between zero and one. That bounded score is not automatically a reliable link probability.",
     "sources": {
       "u": "First node embedding",
       "v": "Second node embedding"
@@ -20295,7 +20295,7 @@
     "id": "confounding-and-comparisons",
     "title": "Compare the observed group mixtures",
     "problem": "Botie has means within dry and moist beds and each group’s own proportions.",
-    "challenge": "Calculate each weighted group mean, then subtract control from treatment.",
+    "challenge": "The treatment and control groups contain different shares of dry and moist beds. Average each group's stratum means using its own proportions, then return treatment mean minus control mean. A stratum here is one shared starting-condition group.",
     "sources": {
       "treated": "Treatment stratum means",
       "control": "Control stratum means",
@@ -20517,7 +20517,7 @@
     "id": "causal-adjustment",
     "title": "Standardise the schedule comparison",
     "problem": "Botie has both outcome means for each starting condition and one target population.",
-    "challenge": "Subtract control stratum means from treatment stratum means, then take their weighted average using target proportions.",
+    "challenge": "What comparison would use the same mix of dry and moist beds for both schedules? Subtract control mean from treatment mean within each starting-condition group, then average those differences using the target population's supplied proportions. Return that adjusted difference.",
     "sources": {
       "treated": "Treatment stratum means",
       "control": "Control stratum means",
@@ -20622,7 +20622,7 @@
     "id": "treatment-effects-and-overlap",
     "title": "Calculate an inverse-probability contrast",
     "problem": "Botie has outcomes, binary treatment assignments, and valid supplied propensities.",
-    "challenge": "Weight treatment and control outcomes by their respective probabilities, subtract contributions, then average over all units.",
+    "challenge": "The propensity for a bed is its supplied probability of receiving treatment given the measured starting conditions. Weight each treated outcome by the reciprocal of that propensity, and each control outcome by the reciprocal of one minus its propensity. Subtract control contributions from treatment contributions and average across all beds.",
     "sources": {
       "T": "Binary treatment assignments",
       "y": "Observed outcomes",
@@ -21012,7 +21012,7 @@
       ]
     },
     "why": "Validation checks the data boundary before downstream operations run.",
-    "limitation": "This numerical check cannot infer feature names or units. The request parser must enforce those separately.",
+    "limitation": "All listed examples are valid inputs; the validator tool rejects wrong widths and non-finite values, but these cases alone do not demonstrate rejection behaviour. Numeric shape checks cannot infer feature names or units, which need their own request contract.",
     "extras": [
       "constant",
       "add",
@@ -21326,7 +21326,7 @@
     "id": "project-sensor-investigation",
     "title": "Build the inspection rule",
     "problem": "Botie has retained reference values and a validation-selected threshold.",
-    "challenge": "Subtract the retained centre, divide absolute differences by retained MAD, and alert strictly above the fixed threshold.",
+    "challenge": "Use the retained reference rather than learning from the later pressure window. Subtract the saved median from each reading and divide the absolute differences by saved MAD, the median absolute deviation. Return 1 only where that score strictly exceeds the fixed threshold, and 0 elsewhere.",
     "sources": {
       "readings": "Later pressure readings",
       "centre": "Saved reference median",
@@ -31266,7 +31266,7 @@
     "id": "robot-actuator-windup",
     "title": "Limit the command and correct stored demand",
     "problem": "Botie’s actuator saturates while the integral contribution keeps growing.",
-    "challenge": "Build requested = kp × error + J, clip it to the supplied bounds, then return applied command and J + ki × error × dt + kaw × (applied - requested) × dt.",
+    "challenge": "Calculate the command requested by the proportional term and the stored integral contribution, then clip it to the actuator bounds. Update the stored contribution using both the integrated error and a correction for applied minus requested command over this timestep. Return the applied command first and the next stored contribution second.",
     "sources": {
       "error": "Position error",
       "J": "Stored integral contribution",

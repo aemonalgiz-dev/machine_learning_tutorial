@@ -372,13 +372,17 @@ export default function SearchingACollectionOfPicturesPage() {
             several(
               "The same 240 questions were asked of the same 4000 pictures under three networks trained from different starting weights. Which of these did that report?",
               [
-                "The ten nearest share the question’s kind 0.9775, 0.9646 and 0.9779 of the time across the three",
-                "Seed 1’s network names only 0.9208 of the held-out pictures correctly with its own last layer, while its single nearest picture shares the kind 0.9917 of the time",
-                "Two cells of the inverted file recover the same 0.9583 of the true ten under every seed",
-                "The network that is weakest at naming its held-out pictures also arranged them worst for the search",
-              ],
+                              "The ten nearest share the question’s kind 0.9775, 0.9646 and 0.9779 of the time across the three",
+                              "Seed 1’s network names only 0.9208 of the held-out pictures correctly with its own last layer, while its single nearest picture shares the kind 0.9917 of the time",
+                              "Two cells of the inverted file recover the same 0.9583 of the true ten under every seed",
+                              "Seed 1 has the lowest same-kind nearest-neighbour rate of the three networks",
+                            ],
               [0, 1],
               "A network trained from different starting weights gives every picture a different position, which is exactly why the three seeds are worth running. Two cells of the inverted file recover 0.9583, 0.9404 and 0.9450 of the true ten across them, three different figures that agree closely rather than one repeated, so neither headline figure belongs to one lucky network. Seed 1 names only 0.9208 with its own last layer and its nearest picture still shares the kind 0.9917 of the time, as often as under any of the three, so the weakest namer arranged its pictures as well as the others did.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Same 240 queries against the same 4,000 pictures:\n                                     seed 0  seed 1  seed 2\nprecision at 10                       0.9775  0.9646  0.9779\nrecall at 10, two of 32 cells opened  0.9583  0.9404  0.9450\n\nSeed 1 classifier held-out accuracy: 0.9208\nSeed 1 nearest picture shares query kind: 0.9917\nThe other seeds do not exceed this nearest-kind rate."
+              },
             ),
             choice(
               "An exact search has measured every picture but one and has a best so far. Why can it not skip the last one?",
@@ -639,13 +643,16 @@ export default function SearchingACollectionOfPicturesPage() {
             several(
               "Which of these hold of the cells as they are built here?",
               [
-                "They are fixed before any question is asked, and cost one k-means fit over the whole collection",
-                "A picture added later goes into the cell of its nearest centre, and the centres stay where they were",
-                "A question that was never in the collection still falls in exactly one cell",
-                "The 32 centres were placed using the four kinds, so each kind has its own group of cells",
-              ],
+                              "They are fixed before any question is asked, and cost one k-means fit over the whole collection",
+                              "A picture added later goes into the cell of its nearest centre, and the centres stay where they were",
+                              "A question that was never in the collection still falls in exactly one cell",
+                              "The 32 centres were placed using the four kinds, so each kind has its own group of cells",
+                            ],
               [0, 1, 2],
-              "k-means puts centres where the pictures are dense and knows nothing about kinds, so the cells follow the pictures and several of them land on each kind. Each cell stands for a region every point of which is nearer its centre than any other centre, which is what gives an unseen question exactly one cell.",
+              "k-means uses positions rather than class labels. Assignment to the nearest fixed centre defines the cells, and the stated tie rule makes assignment unique even on a boundary. Later pictures can be inserted using these centres without refitting, although changing distributions may eventually make the index less effective.",
+              {
+                "description": "Build a 32-centre k-means index without class labels. Keep these centres fixed for later inserts and queries. Assign each point to a nearest centre; resolve exact distance ties by choosing the lowest centre index. A query need not already be in the collection."
+              },
             ),
         ],
         },
@@ -992,13 +999,17 @@ export default function SearchingACollectionOfPicturesPage() {
             several(
               "Which of these hold of the ratio of the nearest distance to the farthest, as measured on this page?",
               [
-                "On the picture vectors it averages 0.0775, so the nearest picture is much nearer than the farthest",
-                "On random vectors it rises with the width, from 0.0072 at two numbers to 0.8842 at 1024",
-                "The raw pixels, with 256 numbers each, give a higher ratio than random vectors of sixteen numbers",
-                "A ratio near one means an index has plenty of far pictures to skip",
-              ],
+                              "On the picture vectors it averages 0.0775, so the nearest picture is much nearer than the farthest",
+                              "On random vectors it rises with the width, from 0.0072 at two numbers to 0.8842 at 1024",
+                              "The raw pixels, with 256 numbers each, give a higher ratio than random vectors of sixteen numbers",
+                              "A ratio near one means an index has plenty of far pictures to skip",
+                            ],
               [0, 1],
-              "A ratio near one means every picture is about as far away as every other, which leaves an index nothing it can tell apart, and at 1024 numbers the nearest of 4000 random points is only 12% nearer than the farthest. The raw pixels average 0.2243, below the 0.3230 of random sixteen-number vectors despite having 256 numbers, so the pictures’ sixteen numbers do not behave like random sixteen numbers at all, and the count of coordinates does not decide the question.",
+              "A ratio near one means the nearest and farthest distances are close, making them harder to distinguish by distance alone. Here random vectors show that concentration as width rises. The raw pixels have a smaller ratio than random width-16 vectors, despite their larger width, so dimension alone does not predict the observed geometry. This ratio by itself does not prove that every index will fail.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Mean nearest-distance / farthest-distance ratio among 4,000 candidates:\nlearned picture vectors, width 16: 0.0775\nraw pixels, width 256: 0.2243\nrandom vectors, width 2: 0.0072\nrandom vectors, width 16: 0.3230\nrandom vectors, width 1024: 0.8842"
+              },
             ),
             choice(
               "The rule of thumb says an index stops helping past ten or twenty dimensions. What happened here?",
@@ -1035,13 +1046,16 @@ export default function SearchingACollectionOfPicturesPage() {
             several(
               "Which of these leave the search with no defined answer, or leave an index unable to return k pictures?",
               [
-                "A collection with no pictures in it",
-                "A question of sixteen numbers asked of pictures with fifteen",
-                "A k of 20 with one cell of the 64 opened, for a question landing in the cell that holds 16 pictures",
-                "A question that is itself one of the pictures in the collection",
-              ],
+                              "A collection with no pictures in it",
+                              "A question of sixteen numbers asked of pictures with fifteen",
+                              "A k of 20 with one cell of the 64 opened, for a question landing in the cell that holds 16 pictures",
+                              "A question that is itself one of the pictures in the collection",
+                            ],
               [0, 1, 2],
               "A minimum over an empty set does not exist, and the sum of squared gaps pairs each number of one vector with the same number of the other, so vectors of different widths have no distance at all. A cell of 16 pictures cannot supply 20, so recall there has a ceiling of the number read over k. A question that is in the collection does have an answer, itself at a distance of zero, which is correct and says nothing, so a search usually leaves that picture out and asks for the k after it.",
+              {
+                "description": "Distance pairs each coordinate of one vector with the corresponding coordinate of another. The index can return candidates only from cells it opens. Here no extra search is attempted when a selected cell contains fewer than k pictures."
+              },
             ),
         ],
         },
@@ -1050,7 +1064,10 @@ export default function SearchingACollectionOfPicturesPage() {
           practice: [
             exercise(
               "Answer one question exactly",
-              ["The page’s pictures are drawn by the site and placed by a network it trains, so these problems search the other collection the page uses, the random vectors of Part 5, which a seed reproduces exactly. The starter draws them the way the page does, 4000 vectors of sixteen numbers between −1 and 1 and 240 questions. Measure question 0 against every vector with the library’s straight-line distance.", "Pick out the ten nearest the way Part 2 describes, by splitting the 4000 distances around the tenth smallest and sorting only the ten in front of it. Print the ten, the nearest distance beside the same distance worked by hand from the sixteen gaps, the tenth and the eleventh with the gap between them, the farthest, and how many multiply-adds the question cost. Part 2 puts the cost at 64,000 and, for the page’s picture 0, the tenth and eleventh 0.0417 apart."],
+              [
+  "This exercise uses seeded synthetic vectors rather than the page’s learned picture vectors: four thousand sixteen-coordinate collection rows and 240 queries. Measure query zero against every collection row with Euclidean distance.",
+  "Use the supplied partial-selection procedure to find its ten nearest, sorting the selected candidates. Print those IDs, nearest distance beside direct verification, tenth/eleventh distances and gap, farthest distance, nearest/farthest ratio and the stated multiply-add count."
+],
               `import numpy as np
 from oop_ml import EuclideanDistance, RowBlock
 
@@ -1089,11 +1106,17 @@ the nearest is 1.6156 away, and by hand 1.6156
 the tenth is 1.8944 away and the eleventh 1.9095, a gap of 0.0151
 the farthest is 4.7502 away, so the nearest over the farthest is 0.3401
 multiply-adds for one question 64000`,
-              { hints: ["A RowBlock pairs a block of rows with the names of its columns, and EuclideanDistance().between takes the questions’ block and then the collection’s and answers one row of distances per question. questions[:1] keeps question 0 as a block of one row.", "np.argpartition(distances, 10) puts the ten smallest in the first ten places in no particular order, in one pass, and sorting only those ten by their distances puts them nearest first.", "By hand, the distance is the square root of the sum of the squared gaps between the question’s sixteen numbers and the vector’s.", "The eleventh nearest distance is the entry at position 10 of the sorted distances, and the cost of one question is one multiply-add for every number in the collection."], check: numberCheck("How far away is the nearest vector to question 0, to four places?", 1.6156, 0.0005, "The nearest of the 4000 is 1.6156 away and the farthest 4.7502, so the nearest is already 0.3401 of the way to the farthest. For the page’s picture 0 the nearest was 0.5278 away and the farthest 5.3240, about a tenth. The tenth and eleventh here are 0.0151 apart where the page’s were 0.0417 apart, so the place where the answer is cut is less sharp on random vectors. The cost is the same 64,000 multiply-adds either way, since it depends only on how many vectors there are and how wide they are.") },
+              { hints: [
+  "Keep synthetic collection IDs as row indices and exclude no collection row unless the supplied query contract says so.",
+  "Partial selection finds the candidate set; sort that set for ordered output. The complete distance scan remains the reference for later approximation."
+], check: numberCheck("How far away is the nearest vector to question 0, to four places?", 1.6156, 0.0005, "The nearest synthetic vector is 1.6156 away. The independent coordinate-difference calculation verifies the exact-scan reference used by later approximate searches."), question: "Can a complete scan establish the exact nearest-neighbour reference?" },
             ),
             exercise(
               "Build the inverted file and sweep the cells opened",
-              ["Part 3 cuts the collection into 32 cells with k-means and searches only the cells whose centres are nearest the question, and Part 5 runs that same index on random vectors. Build it on the sixteen-number random vectors. The starter draws them, measures every question against every vector and keeps each question’s exact ten. Fit k-means with 32 clusters, three seedings and a seed of 0, which is how the page fits its own.", "Print the smallest and largest cell and the share of the collection one cell is expected to read, the sum of the squared cell sizes over the squared total from Part 3. Then, opening 1, 2, 4, 8, 16 and 24 cells, print the recall of the true ten averaged over the 240 questions, the share of the collection read and the distances a question costs with the centres counted. Part 5’s table gives the recalls as 0.3113, 0.4837, 0.6921, 0.8692, 0.9763 and 0.9983. The shares read are not on the page."],
+              [
+  "Fit the synthetic collection’s k-means index with thirty-two cells, three initialisations and seed zero. Keep the starter’s exact ten neighbours for every query as ground truth.",
+  "Print smallest/largest cell sizes and the supplied size-weighted one-cell occupancy statistic. Then open 1, 2, 4, 8, 16 and 24 nearest-centre cells, reporting mean exact-ten recall, fraction of collection candidates read and mean distance evaluations including centre comparisons. The occupancy statistic and query-measured candidate share are different measurements."
+],
               `import numpy as np
 from oop_ml import EuclideanDistance, Feature, KMeans, RowBlock
 
@@ -1152,11 +1175,17 @@ for opened in (1, 2, 4, 8, 16, 24):
  8 cells: recall 0.8692, share read 0.2514, distances 1037.7
 16 cells: recall 0.9763, share read 0.5026, distances 2042.5
 24 cells: recall 0.9983, share read 0.7519, distances 3039.5`,
-              { hints: ["KMeans takes its settings when it is built and its data in fit, as a list of Feature, one per column, each a name and that column of the collection. The fit’s clustering.labels holds the cell of every vector.", "The fit’s centroids answer squared_distances_to a RowBlock of questions with one row per question and one column per centre, so sorting each row ranks the cells for that question, nearest first.", "np.isin(cell_of, opened_cells) marks the vectors whose cell is one of those opened, and np.flatnonzero turns the marks into positions in the collection. The distances to them are already in the question’s row of distances.", "Recall is the share of the exact ten that also appear among the ten found, and a question costs one distance per centre plus one per vector read."], check: numberCheck("What share of the collection do 24 of the 32 cells read on these vectors, to four places?", 0.7519, 0.0005, "Opening 24 of 32 cells reads 0.7519 of the collection, 3039.5 distances a question with the centres, to recover 0.9983 of the true ten, and two cells recover 0.4837 where two cells of the page’s pictures recovered 0.9583. The cut itself is not at fault. These cells are nearly even, between 94 and 151 vectors, so one cell is expected to read 0.0316 against 0.03125 for perfectly even cells, where the pictures’ cells ran from 44 to 356. That is Part 5’s point, that what decides whether an index helps is how concentrated the collection is and not how many numbers a vector has.") },
+              { hints: [
+  "Build candidate IDs from the union of selected cells, then rank actual candidates by their query distance.",
+  "Recall compares returned IDs with the exact-ten set. Count centre comparisons separately before adding candidate comparisons."
+], check: numberCheck("What share of the collection do 24 of the 32 cells read on these vectors, to four places?", 0.7519, 0.0005, "The query-measured candidate fraction is 0.7519 at twenty-four cells. This empirical fraction differs from the separately reported size-weighted occupancy statistic."), question: "How much exact-neighbour recall is lost when only a few index cells are searched?" },
             ),
             exercise(
               "Measure the nearest against the farthest as the vectors widen",
-              ["Part 5 divides each question’s nearest distance by its farthest and averages over the questions, on random vectors of 2, 16, 64, 256 and 1024 numbers. Draw each set the way the page does, from one generator seeded with 5, the 4000 vectors of a width first and then its 240 questions, and measure every question against every vector.", "Print, for each width, the mean nearest distance, the mean farthest, the mean gap between them and the mean ratio. The page gives the ratios as 0.0072, 0.3230, 0.5982, 0.7798 and 0.8842, and prints none of the distances behind them."],
+              [
+  "For each supplied width, draw four thousand uniform collection vectors and then 240 queries from the single generator seeded with five, continuing its state across widths as in the starter.",
+  "Print mean nearest distance, mean farthest distance, their mean gap and mean per-query nearest/farthest ratio. Average the individual ratios, not the ratio of two averages."
+],
               `import numpy as np
 from oop_ml import EuclideanDistance, RowBlock
 
@@ -1187,11 +1216,17 @@ for width in (2, 16, 64, 256, 1024):
   64 numbers: nearest 4.8010, farthest 8.0269, gap 3.2259, ratio 0.5982
  256 numbers: nearest 11.3932, farthest 14.6113, gap 3.2181, ratio 0.7798
 1024 numbers: nearest 24.4989, farthest 27.7089, gap 3.2100, ratio 0.8842`,
-              { hints: ["EuclideanDistance().between takes a RowBlock of the questions and a RowBlock of the collection, each a block of rows with the names of its columns, and answers 240 rows of 4000 distances.", "Each question’s nearest and farthest are the smallest and largest of its row, and the ratio is taken question by question before it is averaged."], check: numberCheck("How far apart are the nearest and the farthest on average at 1024 numbers, to four places?", 3.21, 0.0005, "From 16 numbers to 1024 the nearest vector moves from 1.5055 away to 24.4989 and the farthest from 4.6613 to 27.7089, so the gap between them hardly moves, 3.1558 and then 3.2100, while the ratio climbs from 0.3230 to 0.8842. The nearest is only 12% nearer than the farthest at 1024 numbers because both distances grew, not because the gap closed. An index skips a vector by telling that it is far, and a gap of about three on distances of twenty-five leaves it little to tell.") },
+              { hints: [
+  "Preserve draw order and seeding so the comparison matches its fixtures.",
+  "Keep one nearest and farthest measurement per query before reducing them across queries."
+], check: numberCheck("How far apart are the nearest and the farthest on average at 1024 numbers, to four places?", 3.21, 0.0005, "The mean distance gap is 3.2100 at width 1024. The relative contrast shrinks as distances themselves grow; the absolute gap alone hides that change."), question: "How does random-vector width change nearest/farthest distance contrast?" },
             ),
             exercise(
               "Check the probability of a shared bit",
-              ["The library has no class for hashing by random hyperplanes, and the page’s own code writes it from the definition, a sign for each plane. Do the same on the sixteen-number random vectors. Take question 0 and the first 200 vectors of the collection, get the angle between the question and each from the library’s cosine distance, and work out the share of planes Part 4’s formula expects to put the two on the same side.", "Then draw 2000 planes from a standard normal with a seed of 0, give the question and each vector one bit per plane, and measure the share of planes on which their bits agree. Print the range of the angles, the mean and the largest gap between the measured share and the expected one over the 200 pairs, and the spread Part 4 allows a share of 2000 coin flips. The page found a mean gap of 0.0059 and a largest of 0.0232 on its own pictures."],
+              [
+  "Use query zero and the first two hundred synthetic collection vectors. Convert cosine distance to angle, then compute each pair’s expected same-side probability using the supplied formula.",
+  "Draw two thousand standard-normal planes at seed zero and compare the sign bits of query/vector projections. Print angle range, mean/largest absolute agreement error and the supplied maximum single-pair standard-error reference."
+],
               `import numpy as np
 from oop_ml import CosineDistance, RowBlock
 
@@ -1230,7 +1265,10 @@ print(f"spread of a share of 2000 coin flips, at most {np.sqrt(0.25 / 2000):.4f}
               `the 200 angles run from 49.2 to 130.0 degrees
 mean gap 0.0098, largest gap 0.0299
 spread of a share of 2000 coin flips, at most 0.0112`,
-              { hints: ["CosineDistance().between answers one minus the cosine of the angle, so the angle is the arccosine of one minus the distance, and the share expected to agree is one minus the angle over pi.", "A plane through the origin is one row of sixteen numbers, and a vector’s bit is whether its dot product with that row is above zero. planes @ questions[0] gives the question’s 2000 dot products at once, and collection[:200] @ planes.T gives a row of 2000 for each vector.", "Two rows of bits agree where they are equal, and the mean of that along a row is the share of planes on which the pair agrees."], check: numberCheck("What is the mean gap between the measured and the expected share over the 200 pairs, to four places?", 0.0098, 0.0005, "The mean gap is 0.0098 and the largest 0.0299, against a spread of at most 0.0112 for a share of 2000 coin flips. A mean a little under that spread and a largest of 200 between two and three times it are what the noise of a finite count of planes should give, so the formula holds on these vectors as it did on the page’s pictures, where the gaps were 0.0059 and 0.0232. The 200 angles run from 49.2 to 130.0 degrees, so none of these vectors is close to the question by angle, where the page’s picture 0 had a picture 10.1 degrees away.") },
+              { hints: [
+  "Clip cosine into its valid range before arccos.",
+  "For each pair, average its bit agreements across planes. The reference is a single-pair variability scale, not a simultaneous maximum-error guarantee."
+], check: numberCheck("What is the mean absolute difference between measured and expected same-side shares over the two hundred pairs?", 0.0098, 0.0005, "The mean absolute agreement discrepancy is 0.0098 over these pairs. Finite random-plane sampling need not equal its angular probability exactly."), question: "Do random hyperplane bits agree at the rate predicted by the pair’s angle?" },
             ),
           ],
         },

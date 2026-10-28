@@ -28,7 +28,7 @@ export default function Page() {
     sections={[
 { title: "Part 1. Define the Behavior Before Training", content: <>
 <SubSection title="1. Start with a pretrained model and target responses">
-<p>{"A pretrained language model has learned patterns through predicting text continuations. Its training data may include questions and answers, but the prediction objective alone does not require every response to follow our intended task or format. We can demonstrate the behaviour we want with selected prompt-response pairs and continue training on them. That is supervised fine-tuning."}</p>
+<p>{"A language model can continue a question with another question even when we wanted an answer. Learning patterns in text does not by itself define our intended response format. We can supply the input and a response that demonstrates what we want, then continue training toward those selected responses. Continuing from weights learned earlier is fine-tuning; supplying target responses makes this supervised fine-tuning."}</p>
 <p>{"Supervised fine-tuning continues training from existing parameters using examples selected for a task or behavior. A prompt-response pair might demonstrate answering a question, extracting fields, summarizing a passage, or following a required output format."}</p>
 <p>{"The target response is labeled data: it specifies what the model should be encouraged to produce. More examples are not automatically better if their responses conflict, contain errors, or fail to represent the intended use."}</p>
 <p>{"This page follows one pair all the way through. The prompt is a start token and two words, and the response is one word and an end token."}</p>
@@ -234,7 +234,7 @@ the    response only +0.0000  all targets -0.1721
 cat    response only +0.0000  all targets -0.1721
 sat    response only -0.3441  all targets -0.1721
 <end>  response only -0.3441  all targets -0.1721`,
-              { hints: ["measure takes the logits, the target ids and, as an optional third argument, one boolean per row saying whether that row is scored. Leave the third argument out to score every row.", "The answer carries value, which is the mean over the scored rows, and gradient, which has the same shape as the logits.", "The derivative at a target’s own logit is the gradient entry in that target’s row and that target’s column, so gradient[row, target].", "A masked entry is a negative number multiplied by zero, which Python prints with a minus sign in front of the zero. Adding 0.0 to the entry before formatting prints it as a plain zero."], check: numberCheck("What derivative does the sat target’s own logit receive under the response-only mask?", -0.3441, 0.0005, "Each target has a probability of about 0.312, and the derivative at a scored target’s logit is that probability minus one, divided by the number of scored targets. The mask scores two, so the figure is −0.688 halved. With all four scored the same quantity is divided by four and comes to −0.172, and the two prompt targets under the mask get zero. The two means are both 1.1654 only because every target was given the same logit.") },
+              { hints: ["measure takes the logits, the target ids and, as an optional third argument, one boolean per row saying whether that row is scored. Leave the third argument out to score every row.", "The answer carries value, which is the mean over the scored rows, and gradient, which has the same shape as the logits.", "The derivative at a target’s own logit is the gradient entry in that target’s row and that target’s column, so gradient[row, target].", "A masked entry is a negative number multiplied by zero, which Python prints with a minus sign in front of the zero. Adding 0.0 to the entry before formatting prints it as a plain zero."], check: numberCheck("What derivative does the sat target’s own logit receive under the response-only mask?", -0.3441, 0.0005, "The mask removes prompt-target contributions and averages the remaining loss over the response targets. That also changes the gradient’s denominator. The equal reported means in this toy example come from equal target probabilities; they do not mean the two gradient arrays are equivalent.") , question: "Which token predictions should contribute to learning the response?" },
             ),
             exercise(
               "Build the mask from the input row and see what it drops",
@@ -269,7 +269,7 @@ the    derivative +0.0000
 cat    derivative +0.0000
 sat    derivative +0.0000
 <end>  derivative -0.6882`,
-              { hints: ["The mask is one boolean per row, in the order of the targets. Scoring only the last row is three False values and then True.", "Read the derivatives the same way as in the first problem, with gradient[row, target], and add 0.0 before formatting so that a masked zero prints without a minus sign."], check: numberCheck("What derivative does the end token’s own logit receive under the wrong mask?", -0.6882, 0.0005, "Only one target is scored, so its probability minus one, about −0.688, is divided by one and the whole update lands on the end token. The sat target’s derivative is zero, so nothing teaches the model how the response begins. The mean is still 1.1654, which is why this mistake does not show in the loss. It shows in what the model is trained to do.") },
+              { hints: ["The mask is one boolean per row, in the order of the targets. Scoring only the last row is three False values and then True.", "Read the derivatives the same way as in the first problem, with gradient[row, target], and add 0.0 before formatting so that a masked zero prints without a minus sign."], check: numberCheck("What derivative does the end token’s own logit receive under the wrong mask?", -0.6882, 0.0005, "The first response token is predicted from the final prompt token’s row. Masking that row because its input belongs to the prompt removes the signal for how the response begins. The final end-token target remains scored alone. Equal toy token losses can hide this mistake in the mean while the gradients reveal it.") , question: "What goes wrong if the response mask follows input tokens instead of target tokens?" },
             ),
             exercise(
               "Give the prompt targets an easy time",
@@ -307,7 +307,7 @@ sat    token loss 1.1654
 <end>  token loss 1.1654
 all-targets mean 0.6348
 response-only mean 1.1654`,
-              { hints: ["per_token on the answer holds one loss per row, whether or not the mask scored that row.", "value is the mean of per_token over the scored rows only, so the two calls differ in which rows they average."], check: numberCheck("What mean does the loss report when all four targets are scored?", 0.6348, 0.0005, "The two prompt targets cost 0.1043 each and the two response targets 1.1654 each, and the mean of all four is 0.6348. The response-only mean is 1.1654, the same as on the page, because the response has not changed. Scoring the prompt nearly halved the reported loss without the model answering any better, which is the reason Part 2 gives for keeping the loss a statement about the response alone.") },
+              { hints: ["per_token on the answer holds one loss per row, whether or not the mask scored that row.", "value is the mean of per_token over the scored rows only, so the two calls differ in which rows they average."], check: numberCheck("What mean does the loss report when all four targets are scored?", 0.6348, 0.0005, "Including easy prompt targets lowers the combined average even though the response predictions have not improved. The response-only mean stays focused on the same response targets. This is why the selection of scored positions belongs beside a reported loss.") , question: "Can easy prompt predictions make an unchanged response look better?" },
             ),
             exercise(
               "Exclude every target",
@@ -335,7 +335,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `InvalidValuesError
 at least one position must be scored`,
-              { hints: ["type(refusal).__name__ gives the name of the class that was raised."] },
+              { hints: ["type(refusal).__name__ gives the name of the class that was raised."] , question: "What should the loss return when no target is selected for scoring?" },
             ),
           ],
         },

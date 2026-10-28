@@ -1,3 +1,4 @@
+import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { test, expect, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -19,10 +20,12 @@ async function send(page: Page, counts: string) {
   await expect(page.getByLabel("Routing results", { exact: true })).toHaveText(counts);
 }
 
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
 test("the workshop teaches weights, bias and activation through actual routing", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", e => errors.push(e.message));
-  await page.goto("/lab/neuron/bench");
+  await page.goto("/lab/neuron/bench"); await waitForAccountReady(page);
   await page.getByRole("button", { name: "Open calculation and Python bench", exact: true }).click();
   await expect(page.getByRole("slider", { name: "Bias", exact: true })).toBeDisabled();
   await send(page, "4 correct · 4 incorrect");
@@ -46,7 +49,7 @@ test("the workshop teaches weights, bias and activation through actual routing",
 });
 
 test("NumPy results operate the belt and checks reject hardcoded or malformed answers", async ({ page }) => {
-  await page.goto("/lab/neuron/bench");
+  await page.goto("/lab/neuron/bench"); await waitForAccountReady(page);
   await page.getByRole("button", { name: "Open calculation and Python bench", exact: true }).click();
   await page.getByRole("navigation", { name: "Workshop experiments" }).getByRole("button", { name: "NumPy" }).click();
   await expect(page.locator(".cm-editor")).toBeVisible();
@@ -73,14 +76,14 @@ test("NumPy results operate the belt and checks reject hardcoded or malformed an
   await page.locator(".cm-content").fill("raise ValueError('inspect this failure')");
   await page.getByRole("button", { name: "Run code & test", exact: true }).click();
   await expect(page.getByLabel("Code test counts", { exact: true })).toHaveText("0 passed · 1 failed · 5 not run");
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await expect(page.locator(".cm-content")).toContainText("inspect this failure");
   await expect(page.getByLabel("Code test counts", { exact: true })).toHaveText("0 passed · 1 failed · 5 not run");
 });
 
 test("the final experiment reveals the limit and remains usable on small screens", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/lab/neuron/bench");
+  await page.goto("/lab/neuron/bench"); await waitForAccountReady(page);
   await page.getByRole("button", { name: "Open calculation and Python bench", exact: true }).click();
   await page.getByRole("navigation", { name: "Workshop experiments" }).getByRole("button", { name: "The limit" }).click();
   await send(page, "3 correct · 1 incorrect");

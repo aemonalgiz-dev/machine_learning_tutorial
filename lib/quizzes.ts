@@ -30,11 +30,12 @@ export type QuizQuestion = { given?: QuizGiven } & (
   | { kind: "several"; prompt: string; options: string[]; answers: number[]; because: string });
 
 /** A claim the reader marks true or false. */
-export const trueFalse = (prompt: string, answer: boolean, because: string): QuizQuestion => ({
+export const trueFalse = (prompt: string, answer: boolean, because: string, given?: QuizGiven): QuizQuestion => ({
   kind: "trueFalse",
   prompt,
   answer,
   because,
+  ...(given ? { given } : {}),
 });
 
 /** One right answer among several. The answer is the index into options. */

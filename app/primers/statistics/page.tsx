@@ -224,16 +224,20 @@ export default function StatisticsPrimerPage() {
             "Identical means, and nobody would describe the two groups as the same. Their deviations tell them apart at once, running from −1 to 1 in one group and from −30 to 30 in the other, so whatever separates them is not centre, and a second summary is needed to say how far from the centre the values tend to sit.",
           ),
           several(
-            "Which of these hold for the five people as sections 1 to 3 set them up?",
-            [
-              "An observation is one person, one row, everything measured about a single case",
-              "A variable is one of the two measurements taken across all five, one column",
-              "The mean height is 170 and the mean weight is 68",
-              "Every summary of a column discards something",
-            ],
-            [0, 1, 2, 3],
-            "Almost everything in this primer is a statement about a column, or about how two columns relate. The rows are what we have and the columns are what we describe, and the two means are the first summaries computed down them. The cost is stated up front, which is that every summary trades detail for something a person can hold in mind.",
-          ),
+  "Which statements describe the supplied measurements and their mean summaries?",
+  [
+    "An observation is one person, one row, everything measured about a single case",
+    "A variable is one of the two measurements taken across all five, one column",
+    "The mean height is 170 and the mean weight is 68",
+    "The two means alone do not retain every height and weight in the table"
+  ],
+  [0, 1, 2, 3],
+  "Each row joins measurements from one person, while a column follows one variable across people. The supplied heights average 170 cm and the weights average 68 kg. Those means do not tell us every individual measurement or how the two measurements were paired.",
+  {
+    "description": "Each row describes the same person across the two measurements. Use population variance and covariance, dividing by five.",
+    "data": "Person | Height (cm) | Weight (kg)\nA | 160 | 58\nB | 165 | 66\nC | 170 | 68\nD | 175 | 74\nE | 180 | 74"
+  },
+),
           trueFalse(
             "One reason a summary is worth having is that it can be compared across columns and across datasets in a way a list of raw values cannot.",
             true,
@@ -444,27 +448,35 @@ export default function StatisticsPrimerPage() {
             "It is the root-mean-square distance, which squares first, averages, then takes the root, and that is a different number. For the five heights the average absolute distance is 6 while the standard deviation is 7.07, because squaring gives the far-out values more say.",
           ),
           several(
-            "Which of these hold for the spread of the five heights as sections 6 and 7 compute it?",
-            [
-              "The variance is 50, and it is in square centimetres",
-              "The standard deviation is about 7.07 cm, the square root of the variance",
-              "Averaging the deviations themselves would also have come to 50",
-              "Dividing the 250 by 4 instead of 5 gives 62.5, which is the figure this primer uses throughout",
-            ],
-            [0, 1],
-            "Averaging the deviations gives zero for every column that has ever existed, which is the whole reason for squaring them first. Squaring squares the units too, which is why the root is taken. The 62.5 is the sample variance, for when the five stand for a larger group, and section 16 is where they do; this primer divides by 5 because the five are the group being described.",
-          ),
+  "Which statements describe the spread of these five heights using the stated convention?",
+  [
+                "The variance is 50, and it is in square centimetres",
+                "The standard deviation is about 7.07 cm, the square root of the variance",
+                "Averaging the deviations themselves would also have come to 50",
+                "Dividing the 250 by 4 instead of 5 gives 62.5, which is the figure this primer uses throughout",
+              ],
+  [0, 1],
+  "Averaging the deviations gives zero for every column that has ever existed, which is the whole reason for squaring them first. Squaring squares the units too, which is why the root is taken. The 62.5 is the sample variance, for when the five stand for a larger group, and section 16 is where they do; this primer divides by 5 because the five are the group being described.",
+  {
+    "description": "Each row describes the same person across the two measurements. Use population variance and covariance, dividing by five.",
+    "data": "Person | Height (cm) | Weight (kg)\nA | 160 | 58\nB | 165 | 66\nC | 170 | 68\nD | 175 | 74\nE | 180 | 74"
+  },
+),
           several(
-            "Which of these hold once the deviations are paired up person by person, as sections 8 and 9 do?",
-            [
-              "A person below average in both height and weight gives a positive product",
-              "A person above average in both gives a negative product",
-              "If taller people tend to be heavier, knowing someone’s height says something about their weight, which is what a prediction is",
-              "Every product among the five is positive or zero, so nobody here is tall and light",
-            ],
-            [0, 2, 3],
-            "A negative times a negative is positive, and so is a positive times a positive, so agreement in either direction gives a positive product. Only disagreement goes negative, tall but light or short but heavy. The 160 cm person is 10 below in both and gives the largest product, 100, the 170 cm person sits on both means and gives 0, and the five sum to 200.",
-          ),
+  "Which statements hold when the height and weight deviations are paired person by person?",
+  [
+                "A person below average in both height and weight gives a positive product",
+                "A person above average in both gives a negative product",
+                "If taller people tend to be heavier, knowing someone’s height says something about their weight, which is what a prediction is",
+                "Every product among the five is positive or zero, so nobody here is tall and light",
+              ],
+  [0, 2, 3],
+  "A negative times a negative is positive, and so is a positive times a positive, so agreement in either direction gives a positive product. Only disagreement goes negative, tall but light or short but heavy. The 160 cm person is 10 below in both and gives the largest product, 100, the 170 cm person sits on both means and gives 0, and the five sum to 200.",
+  {
+    "description": "Each row describes the same person across the two measurements. Use population variance and covariance, dividing by five.",
+    "data": "Person | Height (cm) | Weight (kg)\nA | 160 | 58\nB | 165 | 66\nC | 170 | 68\nD | 175 | 74\nE | 180 | 74"
+  },
+),
         ]}
       />
 
@@ -1175,49 +1187,61 @@ export default function StatisticsPrimerPage() {
             "The people drawn are as varied at four hundred as they were at forty. It is the mean that steadies, not the population, which is why the solid line stops making large excursions while the scatter of the people does not change.",
           ),
           several(
-            "Which of these does drawing more people from the population do?",
-            [
-              "Steadies the sample mean, with the typical gap to the truth shrinking with the square root of the count",
-              "Fills in the shape of the population, since the people are piled into bins",
-              "Pulls each person drawn closer to the true mean",
-              "Repairs a sample whose drawing process favours some people over others",
-            ],
-            [0, 1],
-            "The pulls above and below the truth cancel more completely as the count grows, so the typical gap goes from about 3.1 cm for five people to 1.1 cm for forty and 0.35 cm for four hundred, while each person drawn is as far from the mean as people ever are. More of a biased sample produces a more confident wrong answer rather than a right one, since the law needs observations that represent the population you mean to describe.",
-          ),
+  "With independent representative draws from one fixed population of finite variance, which effects follow as we increase the sample size?",
+  [
+                "Steadies the sample mean, with the typical gap to the truth shrinking with the square root of the count",
+                "Fills in the shape of the population, since the people are piled into bins",
+                "Pulls each person drawn closer to the true mean",
+                "Repairs a sample whose drawing process favours some people over others",
+              ],
+  [0, 1],
+  "The pulls above and below the truth cancel more completely as the count grows, so the typical gap goes from about 3.1 cm for five people to 1.1 cm for forty and 0.35 cm for four hundred, while each person drawn is as far from the mean as people ever are. More of a biased sample produces a more confident wrong answer rather than a right one, since the law needs observations that represent the population you mean to describe.",
+  {
+    "description": "The simulation adds individual observations and displays their histogram, while also calculating the sample mean.",
+    "data": "Sampling is independent from an unchanged population. The collection process does not favour particular people."
+  },
+),
           choice(
-            "The box draws individual people and piles them into bins. Which result does that demonstrate?",
-            [
-              "The law of large numbers, with the empirical distribution converging alongside it",
-              "The central limit theorem, since the piles come out bell shaped",
-              "Both at once, since a sample mean and a distribution are each on show",
-              "Neither, because the population it draws from is already normal",
-            ],
-            0,
-            "What fills in as you press is the shape of the population itself, and what settles is the one sample mean. The central limit theorem is a claim about a different quantity, the distribution of many sample means across repeated samples, and showing it would mean drawing many separate samples and plotting the distribution of those means instead of the people.",
-          ),
+  "Which result is illustrated by this simulation?",
+  [
+                "The law of large numbers, with the empirical distribution converging alongside it",
+                "The central limit theorem, since the piles come out bell shaped",
+                "Both at once, since a sample mean and a distribution are each on show",
+                "Neither, because the population it draws from is already normal",
+              ],
+  0,
+  "What fills in as you press is the shape of the population itself, and what settles is the one sample mean. The central limit theorem is a claim about a different quantity, the distribution of many sample means across repeated samples, and showing it would mean drawing many separate samples and plotting the distribution of those means instead of the people.",
+  {
+    "description": "The bars display individual sampled heights, not a histogram of means from repeated samples.",
+    "data": "Repeat: draw one person independently from a fixed population, add that height to the histogram, and recalculate the mean of all heights drawn so far."
+  },
+),
           several(
-            "Which of these hold for the normal distribution as section 21 introduces it?",
-            [
-              "It is symmetric about its mean",
-              "Two numbers fix it completely",
-              "About two thirds of the population sits within one standard deviation of the mean, between 163 and 177 cm for the box’s population",
-              "A column being numerical is a reason to expect it",
-            ],
-            [0, 1, 2],
-            "The mean slides the bell left or right and the standard deviation makes it narrow and tall or wide and flat, and fixing both fixes the shares, about 68% within one standard deviation and about 95% within two. Being numerical is not a reason to assume the bell. Incomes, waiting times, city populations and word frequencies are all strongly skewed, and treating any of them as normal produces confident nonsense about their tails.",
-          ),
+  "Which statements hold for the normal population described here?",
+  [
+                "It is symmetric about its mean",
+                "Two numbers fix it completely",
+                "About two thirds of the population sits within one standard deviation of the mean, between 163 and 177 cm for the box’s population",
+                "A column being numerical is a reason to expect it",
+              ],
+  [0, 1, 2],
+  "The mean slides the bell left or right and the standard deviation makes it narrow and tall or wide and flat, and fixing both fixes the shares, about 68% within one standard deviation and about 95% within two. Being numerical is not a reason to assume the bell. Incomes, waiting times, city populations and word frequencies are all strongly skewed, and treating any of them as normal produces confident nonsense about their tails.",
+  {
+    "description": "The stated normal model is an assumption of this simulation, not a conclusion from numerical data alone.",
+    "data": "Population mean: 170 cm\nPopulation standard deviation: 7 cm\nPopulation distribution: normal"
+  },
+),
           choice(
-            "The slope of 0.8 was computed from five people. What follows from treating it as a statistic?",
-            [
-              "Five different people would have given a different number, and more relevant data would make such estimates steadier",
-              "It is the population slope, since it was computed exactly",
-              "It cannot be used for prediction until the population is known",
-              "More data of any kind would bring it closer to the truth",
-            ],
-            0,
-            "A fitted coefficient is a statistic like any other and the training data is the sample, so these estimates steady with more relevant data for the same reason sample means steady. More data from the wrong source instead makes the model more confident about the wrong thing. That is the closing section’s point that a model is a summary too, computed from a sample and discarding whatever its form cannot represent, so the questions worth asking of a mean are the questions worth asking of it.",
-          ),
+  "The slope 0.8 was calculated from five sampled people. What follows from treating it as a statistic?",
+  [
+    "Five different people could give a different number, and more relevant representative data can make such estimates steadier",
+    "It is the population slope, since it was computed exactly",
+    "It cannot be used for prediction until the population is known",
+    "More data of any kind would bring it closer to the truth"
+  ],
+  0,
+  "A fitted coefficient is a statistic like any other and the training data is the sample, so these estimates steady with more relevant data for the same reason sample means steady. More data from the wrong source instead makes the model more confident about the wrong thing. That is the closing section’s point that a model is a summary too, computed from a sample and discarding whatever its form cannot represent, so the questions worth asking of a mean are the questions worth asking of it.",
+),
         ]}
       />
 
@@ -1227,11 +1251,7 @@ export default function StatisticsPrimerPage() {
         exercises={[
           exercise(
             "Take one column apart around its mean",
-            [
-              "We have five heights and five weights. A mean gives us a centre, but it does not tell us how far each person sits from it. Work through the same steps as sections 3 to 7 using the two NumPy arrays below.",
-              "For each column, add the values and divide by the count to find the mean. Subtract that mean from every value, square the deviations, and add those squares. Divide by the count for the population variance, then take its square root for the standard deviation. Here the five people are the whole group we are describing.",
-              "Replace the missing calculations. The print statements are supplied so you can concentrate on where the numbers come from. Use array arithmetic, np.sum and np.sqrt here, rather than np.mean, np.var or np.std. Both deviation totals should be zero, even though the spreads are different.",
-            ],
+            ["The workshop averaged weekly records. Here we will use that same total-and-count idea for five people's heights and weights, then look beyond the centre to describe how much each column varies. The two complete NumPy arrays are supplied below.","For each column, add the values and divide by the count to find the mean. Subtract that mean from every value, square the deviations, and add those squares. Divide by the count for the population variance, then take its square root for the standard deviation. Here the five people are the whole group we are describing.","Replace the missing calculations. The print statements are supplied so you can concentrate on where the numbers come from. Use array arithmetic, np.sum and np.sqrt here, rather than np.mean, np.var or np.std. Both deviation totals should be zero, even though the spreads are different."],
             `import numpy as np
 
 people = {

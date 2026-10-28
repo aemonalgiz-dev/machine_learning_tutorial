@@ -1,3 +1,4 @@
+import { mockAccountBackend, accountBackendFor, waitForAccountReady } from "./helpers/account-backend";
 import { test, expect, type Page } from "@playwright/test";
 import { assemble, type Construction } from "../lib/builds/engine";
 import { DELIVERY_PREDICTOR_BUILD } from "../lib/builds/regression-journey";
@@ -17,21 +18,17 @@ async function disableSignalAnimation(page: Page) {
 }
 
 async function seedPredictor(page: Page, graph: Construction) {
-  await page.addInitScript(savedGraph => {
-    const key = "workshop:regression-delivery-rule:v1";
-    const storageKey = `fitlab.learning.v1:guest:${key}`;
-    if (localStorage.getItem(storageKey)) return;
-    const value = {
-      graph: savedGraph, attemptId: "test-draft", undo: [], redo: [], caseIndex: 0,
-      results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0,
-      example: false, animate: false, zoom: .75,
-    };
-    localStorage.setItem(storageKey, JSON.stringify({ key, value, revision: 0, mutationId: "test-fixture", dirty: true }));
-  }, graph);
+  accountBackendFor(page).seed("workshop:regression-delivery-rule:v1", {
+    graph, attemptId: "test-draft", undo: [], redo: [], caseIndex: 0,
+    results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0,
+    example: false, animate: false, zoom: .75,
+  });
 }
 
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
 test("dispatch follows a hand-wired machine, exposes omitted preparation, and traces its repair", async ({ page }) => {
-  await page.goto("/lab/simple-linear-regression");
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   await disableSignalAnimation(page);
   const dispatch = page.getByRole("region", { name: "The waiting orders", exact: true });
   await dispatch.getByRole("button", { name: "Run dispatch batch", exact: true }).click();
@@ -75,7 +72,7 @@ test("dispatch follows a hand-wired machine, exposes omitted preparation, and tr
 
 test("unrepaired and untested checkers cannot unlock validation evidence", async ({ page }) => {
   await seedPredictor(page, assemble(DELIVERY_PREDICTOR_BUILD.recipe, TOOLS));
-  await page.goto("/lab/simple-linear-regression");
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   const stages = page.getByRole("navigation", { name: "Delivery journey stages" });
   await stages.getByRole("button", { name: "Choose a model", exact: true }).click();
   const compare = page.getByRole("button", { name: "Compare on separate validation deliveries", exact: true });
@@ -120,7 +117,7 @@ test("a disconnected saved predictor fails dispatch without substituting a refer
   const graph = assemble(DELIVERY_PREDICTOR_BUILD.recipe, TOOLS);
   graph.connections = graph.connections.filter(wire => wire.to !== "output");
   await seedPredictor(page, graph);
-  await page.goto("/lab/simple-linear-regression");
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   const dispatch = page.getByRole("region", { name: "The waiting orders", exact: true });
   await dispatch.getByRole("button", { name: "Run dispatch batch", exact: true }).click();
   await expect(dispatch.getByText(/dispatch machine needs a repair/)).toBeVisible();
@@ -131,18 +128,14 @@ test("a disconnected saved predictor fails dispatch without substituting a refer
 test("an unreadable saved comparison returns to a usable workshop without exposing a final report", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
-  await page.addInitScript(() => {
-    const key = "delivery-journey:v2";
-    const value = {
-      stage: 4, machineName: "My dispatch machine", metric: "absolute",
-      runs: 1, predictorTested: false, scoreTested: "", outlierGuess: "", lateMinutes: 16,
-      outlierRun: false, selection: "line", selectionReason: "validation",
-      comparison: { graph: { pieces: [], connections: [] }, metric: "absolute" },
-      commitment: { model: "line", reason: "validation" },
-    };
-    localStorage.setItem(`fitlab.learning.v1:guest:${key}`, JSON.stringify({ key, value, revision: 0, mutationId: "damaged-draft", dirty: true }));
+  accountBackendFor(page).seed("delivery-journey:v2", {
+    stage: 4, machineName: "My dispatch machine", metric: "absolute",
+    runs: 1, predictorTested: false, scoreTested: "", outlierGuess: "", lateMinutes: 16,
+    outlierRun: false, selection: "line", selectionReason: "validation",
+    comparison: { graph: { pieces: [], connections: [] }, metric: "absolute" },
+    commitment: { model: "line", reason: "validation" },
   });
-  await page.goto("/lab/simple-linear-regression");
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   await expect(page.getByRole("heading", { name: "How long should we tell the customer?", exact: true })).toBeVisible();
   await expect(page.getByTestId("final-delivery-score")).toHaveCount(0);
   await page.getByRole("navigation", { name: "Delivery journey stages" }).getByRole("button", { name: "Measure the mistakes", exact: true }).click();

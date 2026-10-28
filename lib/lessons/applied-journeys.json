@@ -5,7 +5,11 @@
     "construction": {
       "title": "Repair the model input boundary",
       "start": "Build a name-to-position branch, gather the readings, and connect the coefficients last.",
-      "outcome": "A transport change no longer changes feature meaning."
+      "outcome": "A transport change no longer changes feature meaning.",
+      "hints": [
+        "A coefficient belongs to a named measurement. First find the incoming position of each name in the model’s required order.",
+        "Gather values using those positions before the dot product. Rearranging the weights to follow an unverified response would move the contract into the wrong place."
+      ]
     },
     "investigation": {
       "title": "The response arrives backwards",
@@ -43,7 +47,11 @@
     "construction": {
       "title": "Separate training from serving",
       "start": "Connect the training mean to the reference input, then route all request values through subtraction.",
-      "outcome": "The model reference survives a change in request grouping."
+      "outcome": "The model reference survives a change in request grouping.",
+      "hints": [
+        "The reference comes from the training readings. A new request must not help set the mean used to judge itself.",
+        "Calculate the training mean on one branch and share it across the request values. An extreme neighbouring request should not move that reference."
+      ]
     },
     "investigation": {
       "title": "Another request joins the batch",
@@ -71,7 +79,11 @@
     "construction": {
       "title": "Preserve identities through ranking",
       "start": "Rank the score positions, then use them to gather IDs without sorting the ID list.",
-      "outcome": "Each selected ID still belongs to the score that earned its position."
+      "outcome": "Each selected ID still belongs to the score that earned its position.",
+      "hints": [
+        "Keep the scores attached to their record IDs. Sorting scores alone loses which record each score described.",
+        "Find positions in descending score order, then gather IDs with those same positions. Equal scores retain their incoming order."
+      ]
     },
     "investigation": {
       "title": "Two manuals tie for the remaining slots",
@@ -99,7 +111,11 @@
     "construction": {
       "title": "Calculate readiness from the declared graph",
       "start": "Count completed dependencies separately for each waiting job and compare with its required count.",
-      "outcome": "Unrelated completions cannot release a dependent task."
+      "outcome": "Unrelated completions cannot release a dependent task.",
+      "hints": [
+        "Each matrix row names one waiting job’s prerequisites. An unrelated completed job cannot satisfy that row.",
+        "Count completed prerequisites per row and compare with that row’s required count. A row requiring none is ready even when no earlier work has finished."
+      ]
     },
     "investigation": {
       "title": "Fitting finishes without the required preparation",
@@ -137,7 +153,11 @@
     "construction": {
       "title": "Combine the worker reports",
       "start": "Keep sum and count on separate branches until their final division.",
-      "outcome": "The merged mean agrees with reading all records together."
+      "outcome": "The merged mean agrees with reading all records together.",
+      "hints": [
+        "A small partition and a large partition do not deserve equal weight merely because each produced one mean.",
+        "Add the partition sums together and the partition counts together, then divide those totals. An empty partition contributes no observations."
+      ]
     },
     "investigation": {
       "title": "One worker receives only a single hot reading",
@@ -165,7 +185,11 @@
     "construction": {
       "title": "Reconstruct the eligible records",
       "start": "Keep event and availability comparisons separate until you combine their masks.",
-      "outcome": "Only values known at the decision reach the selection stage."
+      "outcome": "Only values known at the decision reach the selection stage.",
+      "hints": [
+        "A reading can occur before the decision and still arrive too late. Check both timestamps against the cutoff.",
+        "Combine the two inclusive checks record by record, then select the aligned values. Keep the original record order; this step filters eligible readings rather than choosing the latest one."
+      ]
     },
     "investigation": {
       "title": "A newer event arrived after the decision",
@@ -203,7 +227,11 @@
     "construction": {
       "title": "Report what cleaning removed",
       "start": "Build the range mask, use it to select values, and count its rejected complement.",
-      "outcome": "A small accepted file can no longer conceal a large rejection."
+      "outcome": "A small accepted file can no longer conceal a large rejection.",
+      "hints": [
+        "Keep a flag beside each reading. Both endpoints belong to the accepted interval.",
+        "Use that flag to select accepted readings in their original order. Count the rejected flags separately so a discarded record does not disappear from the report."
+      ]
     },
     "investigation": {
       "title": "The firmware batch arrives",
@@ -231,7 +259,11 @@
     "construction": {
       "title": "Build the event-time boundary",
       "start": "Keep the lower comparison inclusive and the upper comparison strict before selecting readings.",
-      "outcome": "Every boundary event has exactly one adjacent window."
+      "outcome": "Every boundary event has exactly one adjacent window.",
+      "hints": [
+        "The lower boundary belongs to this window; the upper boundary belongs to the next one. Using the same inclusive gate at both ends would count a boundary event twice.",
+        "Combine the lower and upper timestamp checks before selecting the aligned readings. Input arrival order need not be timestamp order."
+      ]
     },
     "investigation": {
       "title": "An event lands exactly on the upper boundary",
@@ -269,7 +301,11 @@
     "construction": {
       "title": "Check the cache’s dependencies",
       "start": "Compare the input and code identities on separate branches, then require both checks.",
-      "outcome": "A successful prior run is reusable only for compatible dependencies."
+      "outcome": "A successful prior run is reusable only for compatible dependencies.",
+      "hints": [
+        "An artifact depends on the input version and the transformation version. Keeping its filename does not keep those dependencies unchanged.",
+        "Compare both requested identities with their stored identities, then require both matches. A mismatch on either branch prevents reuse."
+      ]
     },
     "investigation": {
       "title": "The file was replaced in place",
@@ -307,7 +343,11 @@
     "construction": {
       "title": "Put waiting back into the latency report",
       "start": "Connect dispatch and execution to a common completion, then subtract the arrival vector.",
-      "outcome": "The report follows each user rather than dividing a shared duration."
+      "outcome": "The report follows each user rather than dividing a shared duration.",
+      "hints": [
+        "Requests share a completion time but have different arrival times. The earliest request also pays for waiting while the batch fills.",
+        "Combine dispatch time and execution duration first. Subtract each request’s arrival from that common completion; dividing execution time by batch size would measure something else."
+      ]
     },
     "investigation": {
       "title": "The third image delays dispatch",
@@ -335,7 +375,11 @@
     "construction": {
       "title": "Carry the budget through the run",
       "start": "Subtract elapsed work and reserve before connecting the allowance to the next step.",
-      "outcome": "Later calls cannot spend time that earlier calls already consumed."
+      "outcome": "Later calls cannot spend time that earlier calls already consumed.",
+      "hints": [
+        "The next tool must fit inside what remains of the whole run. It cannot begin again with the original timeout.",
+        "Remove elapsed time and the response reserve before setting a new-call allowance. If that leaves less than zero, return zero rather than a negative timeout."
+      ]
     },
     "investigation": {
       "title": "The response reserve has already started",
@@ -373,7 +417,11 @@
     "construction": {
       "title": "Account for cached tokens",
       "start": "Add the retained sequence lengths, then connect the storage needed per token.",
-      "outcome": "The estimate grows when conversations grow, even with fixed weights."
+      "outcome": "The estimate grows when conversations grow, even with fixed weights.",
+      "hints": [
+        "The cache keeps per-token state for every active sequence. A completed sequence with no retained tokens contributes no token storage to this estimate.",
+        "Total the current retained lengths before applying the supplied bytes per token. This counts dense logical storage; allocator blocks and other runtime allocations are outside this small estimate."
+      ]
     },
     "investigation": {
       "title": "The second conversation reaches fifty tokens",
@@ -401,7 +449,11 @@
     "construction": {
       "title": "Include the context in reuse",
       "start": "Compare the question and context records on independent branches, then require both.",
-      "outcome": "A matching question cannot override a context mismatch."
+      "outcome": "A matching question cannot override a context mismatch.",
+      "hints": [
+        "The same question can have a different answer for another team or another manual version. Keep the question and its context as separate dependencies.",
+        "Compare the whole supplied context record as well as the question, then require both matches. These equality checks assume permissions and expiry have already been checked elsewhere."
+      ]
     },
     "investigation": {
       "title": "Another team asks the same question",
@@ -439,7 +491,11 @@
     "construction": {
       "title": "Connect the coordinate frames",
       "start": "Rotate the point first, then add the destination-frame offset.",
-      "outcome": "The same observed point can be expressed in the planner’s frame."
+      "outcome": "The same observed point can be expressed in the planner’s frame.",
+      "hints": [
+        "Camera coordinates describe directions from the camera. First express that direction using the robot’s axes.",
+        "Apply the rotation to the point before adding the camera origin expressed in the robot frame. Rotating the translation too would describe a different transformation."
+      ]
     },
     "investigation": {
       "title": "The camera rotates on its mount",
@@ -477,7 +533,11 @@
     "construction": {
       "title": "Add a motion prediction after the frame adapter",
       "start": "Use velocity and elapsed time to calculate displacement in the same frame as the position.",
-      "outcome": "A captured location becomes a time-qualified prediction."
+      "outcome": "A captured location becomes a time-qualified prediction.",
+      "hints": [
+        "The detector reports where the object was when the image was captured. Velocity describes how that position changes while the result travels.",
+        "Find displacement from velocity and observation age, then add it to the captured position in the same frame. This assumes constant velocity over that interval."
+      ]
     },
     "investigation": {
       "title": "The image is four tenths of a second old",
@@ -505,7 +565,11 @@
     "construction": {
       "title": "Close the correction loop",
       "start": "Calculate target minus position, scale the correction, and update the position.",
-      "outcome": "A new measured position changes the next command."
+      "outcome": "A new measured position changes the next command.",
+      "hints": [
+        "The correction must point towards the target. A position beyond the target therefore needs an error with the opposite sign.",
+        "Find target minus measured position, scale by the gain and update interval, then add the movement to the current position. A large gain can carry the next position past the target."
+      ]
     },
     "investigation": {
       "title": "The gain increases to 1.5",
@@ -533,7 +597,11 @@
     "construction": {
       "title": "Feed actuator limits back to memory",
       "start": "Keep requested and clipped commands on separate branches, then use their difference in the integral update.",
-      "outcome": "The next stored contribution reflects the applied command."
+      "outcome": "The next stored contribution reflects the applied command.",
+      "hints": [
+        "The requested command uses the old integral contribution. Keep it separate from the bounded command the actuator can actually apply.",
+        "Update the stored contribution using the ordinary error term and the applied-minus-requested mismatch, both over the supplied time interval. When the upper limit clips a request, that mismatch pulls back against further accumulation."
+      ]
     },
     "investigation": {
       "title": "The request exceeds the actuator limit",
@@ -571,7 +639,11 @@
     "construction": {
       "title": "Place permission before evidence consumption",
       "start": "Combine tenant membership and the resolved document grant before selecting IDs.",
-      "outcome": "Only authorised evidence can enter a later ranking or prompt."
+      "outcome": "Only authorised evidence can enter a later ranking or prompt.",
+      "hints": [
+        "A relevant document can still belong to another customer. Relevance does not supply permission.",
+        "Require both the current tenant match and the application’s resolved document grant before selecting the corresponding IDs. The supplied grant flags stand in for checks made by a trusted service."
+      ]
     },
     "investigation": {
       "title": "A high score crosses a customer boundary",
@@ -609,7 +681,11 @@
     "construction": {
       "title": "Calculate influence before adding any noise",
       "start": "Clip values on the mean branch and use the public range and count on the sensitivity branch.",
-      "outcome": "The influence bound remains visible separately from the statistic."
+      "outcome": "The influence bound remains visible separately from the statistic.",
+      "hints": [
+        "Bound each person’s contribution before calculating the mean. Use the declared public bounds, not bounds fitted to the observed values.",
+        "The second output measures how much one replacement contribution could change that mean, using the public range and fixed participant count. The exact mean remains an exact release; this construction has not added a privacy mechanism."
+      ]
     },
     "investigation": {
       "title": "One contribution jumps to one hundred",
@@ -637,7 +713,11 @@
     "construction": {
       "title": "Put verification before loading",
       "start": "Combine trusted byte verification with loader-policy acceptance before selecting artifact IDs.",
-      "outcome": "The selected path requires both provenance evidence and an acceptable loading method."
+      "outcome": "The selected path requires both provenance evidence and an acceptable loading method.",
+      "hints": [
+        "Matching approved bytes and using an approved loader answer different questions. Neither check can replace the other.",
+        "Require both flags for each artifact, then select its ID. The workshop consumes verifier results; it does not inspect a downloaded file or execute its loader."
+      ]
     },
     "investigation": {
       "title": "A trusted digest meets an unsafe loader",
@@ -675,7 +755,11 @@
     "construction": {
       "title": "Expose the numerical update",
       "start": "Build the cooling rate from excess temperature, multiply by elapsed step, and update state.",
-      "outcome": "The source of the overshoot is visible in the arithmetic."
+      "outcome": "The source of the overshoot is visible in the arithmetic.",
+      "hints": [
+        "Cooling depends on how far the current temperature is above ambient. Recalculate that excess for the current state.",
+        "Turn that excess into a cooling rate, apply the step duration, and update the temperature. A coarse step can cross ambient even though the exact cooling model would approach it without crossing."
+      ]
     },
     "investigation": {
       "title": "The timestep triples",
@@ -713,7 +797,11 @@
     "construction": {
       "title": "Pair the policy outcomes",
       "start": "Subtract costs on aligned scenarios before taking a mean.",
-      "outcome": "The comparison describes changes on shared conditions."
+      "outcome": "The comparison describes changes on shared conditions.",
+      "hints": [
+        "Each candidate cost must be compared with the baseline on the same simulated shift. Mixing shifts would mix policy effects with easier conditions.",
+        "Keep baseline-minus-candidate gains separate until the final mean. A candidate that costs more on a shift must retain its negative gain."
+      ]
     },
     "investigation": {
       "title": "The unusual shift becomes more expensive",
@@ -741,7 +829,11 @@
     "construction": {
       "title": "Estimate the unknown parameter",
       "start": "Keep command-response agreement and command energy on separate dot-product branches.",
-      "outcome": "The fitted value is tied to measured excitation rather than a guessed constant."
+      "outcome": "The fitted value is tied to measured excitation rather than a guessed constant.",
+      "hints": [
+        "The fitted gain should explain all command-response pairs together under the stated through-origin model. It is not the average response or the average of separate response-to-command ratios.",
+        "Use the dot product of commands with responses on one branch and commands with themselves on the other. Their ratio fits the shared gain when the commands contain nonzero excitation."
+      ]
     },
     "investigation": {
       "title": "One response changes from four to five",
@@ -773,8 +865,12 @@
     "order": "investigate-first",
     "construction": {
       "title": "Keep the difficult condition visible",
-      "start": "Build separate mean and maximum branches before comparing with the declared requirement.",
-      "outcome": "Average improvement cannot erase the worst observed condition."
+      "start": "Calculate the mean tested cost and the largest tested cost on separate branches. Return them in that order so the individual-condition requirement can be considered beside the average.",
+      "outcome": "Average improvement cannot erase the worst observed condition.",
+      "hints": [
+        "An ordinary average can hide a difficult condition. Keep the mean and the worst tested cost visible separately.",
+        "Build a mean branch and a maximum branch from the same cost list, returning them in that order. A maximum over these tested conditions cannot establish safety in every untested environment."
+      ]
     },
     "investigation": {
       "title": "One condition becomes much harder",

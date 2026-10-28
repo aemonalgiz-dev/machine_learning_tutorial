@@ -55,7 +55,7 @@ export const agentObservabilityTools: Record<string, Tool> = {
   },
   agentObsRoot: {
     title: 'Find the request span',
-    why: 'Selects the one record whose parent is null. Use this after selecting one trace. Multiple roots or a missing root need investigation.',
+    why: "Select the span covering the whole request: its parent field is null. First filter to one trace, so spans from another request cannot supply the root. A missing root or several roots needs investigation.",
     inputs: ['One trace’s span records'],
     run: ([data]) => {
       const found = rows(data).filter(row => field(row, 'parent') === null);

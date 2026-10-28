@@ -4,7 +4,7 @@ import { list, scalar, vector, map } from './tools';
 export const appliedTools: Record<string, Tool> = {
   mlFieldOrder: {
     title: 'Locate named columns', inputs: ['Incoming names', 'Required order'],
-    why: 'Find each required field in the incoming schema. Missing or repeated names stop the calculation instead of guessing a column.',
+    why: "For each column name required by the model, find its position in the incoming column names. Missing or repeated names stop the calculation instead of guessing which measurement a column holds.",
     run: ([incoming, required]) => {
       const names = list(incoming), wanted = list(required);
       if (![...names, ...wanted].every(x => typeof x === 'string') || new Set(names).size !== names.length || new Set(wanted).size !== wanted.length) throw Error('Use distinct text names for both schemas.');

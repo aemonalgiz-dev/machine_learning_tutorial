@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { SavedRecord } from "../lib/learner-state";
+import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 
 const intro = "Start by connecting something";
 function deferred() {
@@ -13,16 +14,20 @@ function recent(title: string, id: string): SavedRecord {
   } };
 }
 
-test("a new guest sees the introduction and building replaces it with their saved workshop", async ({ page, context }) => {
-  await context.route("**/account-api/session", route => route.fulfill({ json: { enabled: false, user: null } }));
+test("a new signed-in learner sees the introduction and building replaces it with their saved workshop", async ({ page }) => {
+  await mockAccountBackend(page);
   await page.goto("/lab");
+  await waitForAccountReady(page);
   await expect(page.getByRole("heading", { name: intro, exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Continue with Botie", exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Build your first machine →", exact: true })).toHaveAttribute("href", "/lab/workshop-guide");
 
   await page.goto("/lab/statistics");
+  await waitForAccountReady(page);
   await page.getByRole("button", { name: "Deaths recorded each week", exact: true }).click();
+  await waitForAccountSync(page);
   await page.goto("/lab");
+  await waitForAccountReady(page);
   await expect(page.getByRole("heading", { name: "Continue with Botie", exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { name: intro, exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Return to your workshop →", exact: true })).toHaveAttribute("href", "/lab/statistics");
@@ -30,8 +35,9 @@ test("a new guest sees the introduction and building replaces it with their save
   await page.screenshot({ path: "page_feedback/workshop-returning-learner.png" });
 
   await page.goto("/");
+  await waitForAccountReady(page);
   await expect(page.getByRole("heading", { name: "Continue with Botie", exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Return to your workshop →", exact: true })).toHaveAttribute("href", "/lab/statistics");
+  await expect(page.getByRole("link", { name: "Return to your workshop", exact: true })).toHaveAttribute("href", "/lab/statistics");
 });
 
 test("delayed account work never flashes a new-user introduction or another account's workshop", async ({ page, context }) => {
@@ -52,12 +58,12 @@ test("delayed account work never flashes a new-user introduction or another acco
     }
     const owner = request.headers()["x-fitlab-account"];
     if (owner !== user) return route.fulfill({ status: 409, json: {} });
-    if (path.endsWith("/progress")) return route.fulfill({ json: request.postDataJSON() });
+    if (path.endsWith("/progress")) return route.fulfill({ json: request.method() === "GET" ? { done: {}, required: {} } : request.postDataJSON() });
     if (path.endsWith("/learner-state")) {
       if (request.method() === "GET") {
         workRequested.resolve();
         await work.promise;
-        return route.fulfill({ json: { records: records[owner] ?? [] } });
+        return route.fulfill({ json: { records: records[owner] ?? [], nextCursor: null } });
       }
       const sent = request.postDataJSON() as SavedRecord;
       return route.fulfill({ json: { ...sent, revision: sent.revision + 1 } });
@@ -106,19 +112,28 @@ test("delayed account work never flashes a new-user introduction or another acco
 });
 
 for (const failure of ["session", "learner-state"] as const) {
-  test(`the introduction stays available without saved work when ${failure} cannot load`, async ({ page, context }) => {
+  test(`a first-load ${failure} failure keeps reading available and can restore learning controls`, async ({ page, context }) => {
+    let unavailable = true;
     if (failure === "session") await page.addInitScript(() => {
       sessionStorage.setItem("fitlab.account.last", JSON.stringify({ id: "offline-reader", name: "Reader", email: null }));
     });
     await context.route("**/account-api/**", async route => {
       const request = route.request(), path = new URL(request.url()).pathname;
-      if (path.endsWith(`/${failure}`)) return route.fulfill({ status: 503, json: {} });
+      if (unavailable && path.endsWith(`/${failure}`)) return route.fulfill({ status: 503, json: {} });
       if (path.endsWith("/session")) return route.fulfill({ json: { enabled: true, user: { id: "new-reader", name: "Reader", email: null } } });
-      if (path.endsWith("/progress")) return route.fulfill({ json: request.postDataJSON() });
+      if (path.endsWith("/progress")) return route.fulfill({ json: request.method() === "GET" ? { done: {}, required: {} } : request.postDataJSON() });
+      if (path.endsWith("/learner-state")) return route.fulfill({ json: request.method() === "GET" ? { records: [], nextCursor: null } : { ...request.postDataJSON(), revision: request.postDataJSON().revision + 1 } });
       return route.fulfill({ status: 404, json: {} });
     });
     await page.goto("/lab");
+    const guard = page.getByTestId("learning-restore-guard");
+    await expect(guard.getByRole("heading", { name: "Your saved work could not be loaded", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: intro, exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Build your first machine →", exact: true })).toHaveAttribute("href", "/lab/workshop-guide");
+    unavailable = false;
+    await guard.getByRole("button", { name: "Retry loading saved work", exact: true }).click();
+    await expect(guard).toHaveCount(0);
+    await waitForAccountReady(page);
+    await expect(page.getByRole("heading", { name: intro, exact: true })).toBeVisible();
   });
 }

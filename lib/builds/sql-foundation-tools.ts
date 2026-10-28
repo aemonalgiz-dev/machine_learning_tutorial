@@ -47,7 +47,7 @@ export const sqlFoundationTools: Record<string, Tool> = {
     run: (_,settings) => String(settings.value),
   },
   sqlProject: {
-    title: "Choose table columns", why: "Keep the named fields on every row. Projection does not remove duplicate rows.", inputs: ["Rows"], settings: [{ key: "columns", label: "Columns, separated by commas", initial: "asset_id,site" }],
+    title: "Choose table columns", why: "Select the named columns from each row, keeping its values together. This is projection. Repeated result rows remain until a separate distinct-row operation removes them.", inputs: ["Rows"], settings: [{ key: "columns", label: "Columns, separated by commas", initial: "asset_id,site" }],
     run: ([value],settings) => { const fields = names(settings.columns); return rows(value).map(row => Object.fromEntries(fields.map(key => [key,cell(row,key)]))); },
   },
   sqlDistinct: {
@@ -88,7 +88,7 @@ export const sqlFoundationTools: Record<string, Tool> = {
     run: ([value],settings) => [{[String(settings.output)]:aggregate(rows(value),String(settings.field),String(settings.operation))}],
   },
   sqlGroup: {
-    title: "Summarise each group", why: "Collect rows sharing the group key and calculate an aggregate inside each group. Null group keys form one group.", inputs: ["Rows"], settings: [{key:"key",label:"Group field",initial:"asset_id"},...aggregateSettings],
+    title: "Summarise each group", why: "Collect records sharing the selected key, then summarise values inside each collection. The output has one row per key. Null keys belong to one group here.", inputs: ["Rows"], settings: [{key:"key",label:"Group field",initial:"asset_id"},...aggregateSettings],
     run: ([value],settings) => {const groups=new Map<string,{key:Data;rows:Row[]}>(); for(const row of rows(value)){const key=scalar(cell(row,String(settings.key))),id=JSON.stringify(key);if(!groups.has(id))groups.set(id,{key,rows:[]});groups.get(id)!.rows.push(row);}return [...groups.values()].map(group=>({[String(settings.key)]:group.key,[String(settings.output)]:aggregate(group.rows,String(settings.field),String(settings.operation))}));},
   },
   sqlJoin: {

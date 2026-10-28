@@ -72,7 +72,10 @@ export default function HashingCharactersPage() {
               <SubSection title="1. Where this picks up, and the number that rules the complete table out">
                 <>
 <p>
-                  The previous page ends on a table nobody builds. Reading a text as its characters means giving every character an entry, and a table with an entry for every character Unicode has room for is complete in the way the byte table is complete, so nothing can ever be unfamiliar to it. The arithmetic is what stops it.
+                  An embedding table gives each input ID its own row of numbers to learn. If we reserve an ID for every position in Unicode’s code-point range, even a character absent from training has an address. A code point is Unicode’s numerical identifier for an encoded unit; reserving every possible position also reserves many unused rows.
+                </p>
+                <p>
+                  The question is how to keep storage bounded without requiring a separate learned row for every possible input. Hashing will let several inputs share a limited set of rows, and we will inspect the ambiguity that creates.
                 </p>
                 <p>
                   A model gives every entry a row of numbers to learn, and at an ordinary width of 768 those 1,114,112 entries come to 855,638,016 numbers, which is more than many whole models, for a table almost every row of which no text will ever reach.
@@ -80,7 +83,10 @@ export default function HashingCharactersPage() {
 </>
                 <>
 <p>
-                  Fitting the table to a corpus instead is what the previous page measured, and it is the failure this page starts from. Every character of our eighteen English sentences gives a table of 37 entries, which is cheap and covers English. Put one short sentence of Greek to it and 17 of the 21 characters come back as the stand-in, so the sentence arrives at the model as the fact that something unreadable was there, seventeen times over.
+                  A corpus-fitted character table is much smaller. The eighteen English sentences give 37 entries, including the unknown marker. It can represent those sentences, but that does not establish coverage of all English writing. A later name with an unseen character can exceed it.
+                </p>
+                <p>
+                  The short Greek sentence makes the limitation easy to see: seventeen of its twenty-one code points become the same unknown marker under that fitted table. The original distinctions have disappeared before a later model can use them.
                 </p>
                 <p>
                   That gap does not close with a bigger corpus, since Han alone has tens of thousands of characters and whatever text we gather is finite.
@@ -1203,7 +1209,11 @@ export default function HashingCharactersPage() {
           practice: [
             exercise(
               "Hash the sentence about Dr. Alvarez, then narrow the table",
-              ["Build a HashedCharacterTokenizer at its defaults, which are the published 16,384 buckets and eight hashes, and encode the sentence about Dr. Alvarez. Print how many positions and how many numbers it became, the eight buckets of the letter a, and whether the text comes back exactly. Then encode the same sentence at 16,384, 64, 32 and 16 buckets, and print for each how many distinct sets of buckets its characters produce and which characters share one.", "The first three lines should be the figures of sections 4 and 5, and the rows for 64 and 32 buckets should be section 11, with the full stop and n merging first and then D with d and A with a. The page stops at 32, so the row for 16 buckets is yours to read."],
+              [
+  "Hashing replaces a character with bucket numbers. Check which distinct characters receive the same complete bucket signature when the table becomes small.",
+  "At the default HashedCharacterTokenizer settings, encode sentence and print its position count, total bucket-number count, the signature of a and whether the stored text is unchanged.",
+  "Repeat with 16384, 64, 32 and 16 buckets. Group the sentence’s distinct characters by their bucket_ids tuple. Print the number of signatures and the sorted character groups sharing a signature. The encoded object retaining text does not make a colliding signature reversible."
+],
               `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
     HashedCharacterTokenizer,
 )
@@ -1244,11 +1254,21 @@ text comes back exactly: True
    64 buckets: 23 distinct sets, merged ['.n']
    32 buckets: 21 distinct sets, merged ['.n', 'Aa', 'Dd']
    16 buckets: 15 distinct sets, merged [' p', "'w", '.n', 'Aa', 'Ddt', 'cs', 'hx', 'iy']`,
-              { hints: ["HashedCharacterTokenizer() with no arguments is the published arrangement, and n_buckets is the keyword that narrows it. encode answers an object with n_characters and text, and bucket_ids_of takes a character number, which ord gives you.", "Iterating over what encode answers gives one hashed character per position, each carrying its character and its bucket_ids, which is a tuple and so can be the key of a dictionary.", "Group with a dictionary from bucket_ids to the set of characters that produced them. The number of keys is the number of distinct sets, and a value holding two or more characters is a merge."], check: numberCheck("How many distinct sets of buckets do the sentence’s 24 characters produce at 16 buckets?", 15, 0.0, "At a height that is a power of two no odd multiplier changes which characters land together, so two characters merge exactly when their numbers differ by a multiple of 16. D, d and t are 68, 100 and 116 and become one kind, and seven pairs go with them, the space and p among them, so nine of the 24 distinctions are lost and 15 are left. Section 11 found 23 at 64 buckets and 21 at 32 by the same rule.") },
+              {
+question: "Which character distinctions disappear when the hash table shrinks?",
+ hints: [
+  "n_buckets changes the table size; the default uses eight hash functions. bucket_ids_of(ord(\"a\")) gives a’s signature.",
+  "Iterating the encoding gives objects with character and bucket_ids. Collect characters in a set for each tuple so repeated occurrences do not inflate the group.",
+  "Report only groups with more than one distinct character. Two characters collide here only when their entire tuple agrees."
+], check: numberCheck("How many distinct sets of buckets do the sentence’s 24 characters produce at 16 buckets?", 15, 0.0, "The sixteen-bucket setting leaves fifteen distinct signatures for the sentence’s twenty-four distinct characters. Several different characters therefore become indistinguishable if only their bucket numbers are retained.") },
             ),
             exercise(
               "Count the characters A cannot be told apart from",
-              ["Section 9 arrives at sixty-seven others by dividing. Count them instead. Take the eight buckets of the capital A at the published settings, run every one of the 1,114,112 character numbers through bucket_ids_of, and keep the ones that produce the same eight. Print how many there are, the nearest four, and every distinct gap between one of them and the next.", "The count should be the 67 of section 9 and the first of them should be 16,449, the ideograph of section 8. Look at the gaps. There should be one value only, and it is the condition the whole of Part 3 turns on."],
+              [
+  "Matching every hash value still does not guarantee a unique character. At the default settings, find every other integer code point with the same complete signature as capital A.",
+  "Visit range(0x110000), excluding ord(\"A\"). Compare bucket_ids_of for each integer with A’s tuple. Print A’s number and signature, the count of other matches, the first four matching numbers and the distinct gaps between successive matches.",
+  "This deliberately scans the entire integer code-point range, including reserved values. It does not claim that every visited value is an assigned Unicode character."
+],
               `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
     HashedCharacterTokenizer,
 )
@@ -1281,11 +1301,21 @@ print(f"gaps between neighbours: {gaps}")`,
 others with the same eight buckets: 67
 the nearest four: [16449, 32833, 49217, 65601]
 gaps between neighbours: [16384]`,
-              { hints: ["0x110000 is 1,114,112, the number of character numbers Unicode has room for, so range(0x110000) visits every one of them. bucket_ids_of answers a tuple, and two tuples compare equal when every entry agrees.", "A list comprehension with a condition does the collecting. Leave A itself out, or the count comes to 68, which is the size of the crowd rather than the number of others in it.", "zip(sharers, sharers[1:]) pairs each sharer with the next one, and a set of the differences shows at a glance whether they are all the same."], check: numberCheck("How many other character numbers share all eight of A’s buckets?", 67, 0.0, "The pattern of buckets repeats every 16,384 character numbers, and 1,114,112 divided by 16,384 is 68, so each set of buckets stands for 68 characters and A shares its set with the other 67. The only gap the script prints is 16,384, which is the whole condition. It is a count fixed by the height, the same for a letter in daily use and for a number Unicode has assigned nothing to.") },
+              {
+question: "How often does A’s complete hash signature repeat over the code-point range?",
+ hints: [
+  "Compute A’s signature once before the loop. Tuple equality checks every bucket position.",
+  "Exclude A itself so the count describes other matches. Iterating range in order also gives sorted matching numbers.",
+  "Pair neighbouring numbers with zip(matches, matches[1:]) and collect their differences in a set."
+], check: numberCheck("How many other character numbers share all eight of A’s buckets?", 67, 0.0, "There are 67 other matching integer code points in the scanned range. Their constant spacing exposes a periodic collision in this hash construction, rather than evidence that those values represent similar characters.") },
             ),
             exercise(
               "Count what a second hash buys",
-              ["Part 4 counts how many kinds of character an arrangement can tell apart by running every character number through it and counting the distinct sets of buckets. Do that at 93 buckets, at 62 buckets and at the published 16,384, with one hash, two and eight each time. The keyword for the number of hashes is n_hash_functions. Nine sweeps of the whole space make this the slowest script of the four, so give it a moment.", "The rows for 93 should be section 15, where one hash sees 3 kinds and two see all 93, and the rows for 16,384 should be section 13, the same figure three times. 62 is not a height the page tries. Before running it, work out from 62 being 2 times 31 what one hash will see there."],
+              [
+  "Compare complete bucket signatures under different table sizes and numbers of hash functions. A second hash helps only if it separates values the first hash merged.",
+  "For bucket counts 93, 62 and 16384, test 1, 2 and 8 hash functions. At each setting visit every integer in range(0x110000) and count the distinct bucket_ids_of tuples. Print one row per setting in that order.",
+  "This is a comparison of the library’s fixed multipliers over an integer range. The sweeps include unassigned code points and may take a moment."
+],
               `from oop_ml.core.natural_language_processing.tokenization.hashing.hashed_characters import (
     HashedCharacterTokenizer,
 )
@@ -1314,11 +1344,21 @@ for n_buckets in (93, 62, 16384):
 16384 buckets, hashes 1: 16384 kinds of character
 16384 buckets, hashes 2: 16384 kinds of character
 16384 buckets, hashes 8: 16384 kinds of character`,
-              { hints: ["HashedCharacterTokenizer takes n_buckets and n_hash_functions as keywords, and the hashes it uses are the first so many of the eight multipliers, so one hash means the multiplier 31 alone.", "A set comprehension over range(0x110000) keeps one copy of each distinct tuple of buckets, and its len is the number of kinds the arrangement can tell apart."], check: numberCheck("How many kinds of character does one hash tell apart at 62 buckets?", 2, 0.0, "62 is 2 times 31 and the first multiplier is 31, so every product is a multiple of 31 and its remainder on dividing by 62 can only be 0 or 31. The second multiplier, 43, shares nothing with 62 and shuffles the remainders, so two hashes see all 62 and the other six add nothing. It is section 15 over again at one of the 64 heights section 16 counted, the ones that are multiples of 31.") },
+              {
+question: "Does adding another hash always distinguish more code points?",
+ hints: [
+  "Pass n_buckets and n_hash_functions at construction. One hash uses the first fixed multiplier, 31.",
+  "A set of bucket tuples retains one representative per distinct signature. Its length measures how many signatures this setting can produce.",
+  "If a multiplier and bucket count share a factor, some remainders cannot occur. Compare the one-hash and two-hash results before interpreting the eight-hash result."
+], check: numberCheck("How many kinds of character does one hash tell apart at 62 buckets?", 2, 0.0, "One hash at sixty-two buckets produces only two signatures. The first multiplier shares a factor with that bucket count; the second multiplier separates the remaining remainders in this example.") },
             ),
             exercise(
               "Fingerprint words by their runs of three",
-              ["Build a TrigramHashTokenizer at 8,192 buckets, which is the width Part 5 uses, with its one hash. For each pair of words below, take the activations of both and print how many buckets each lights, how many they share, which the overlap function counts, and whether the two sets of buckets are identical. Finish by printing the runs of three that expected is cut into.", "cat with cats, cat with dog and analysis with reanalysis should be section 18, and the two pairs of repeated letters should be section 20, one identical and one not. The sentence about Dr. Alvarez says expect where the eighteen sentences say expected, and the page never compares the two."],
+              [
+  "Represent each supplied word by the hash buckets activated by its overlapping three-character pieces, then compare the two words in every pair.",
+  "Construct TrigramHashTokenizer with 8192 buckets. For each pair print the active-bucket counts, their overlap count and whether their bucket sets are equal. Finally print expected’s character triples.",
+  "An active-bucket set records presence, so repeating an already present triple need not change it. An overlap can also include hash collisions; it does not establish a linguistic relationship."
+],
               `from oop_ml.core.natural_language_processing.tokenization.hashing.trigram_hashing import (
     TrigramHashTokenizer,
     overlap,
@@ -1365,7 +1405,13 @@ expect   expected   light 6 and 8, share 5, identical False
 aaa      aaaa       light 3 and 3, share 3, identical True
 baa      baaa       light 3 and 4, share 3, identical False
 ('_ex', 'exp', 'xpe', 'pec', 'ect', 'cte', 'ted', 'ed_')`,
-              { hints: ["TrigramHashTokenizer has no default width, so n_buckets has to be given. activations_of takes one word and answers the set of buckets its runs of three light, with n_active for how many and bucket_ids for which.", "overlap is a function rather than a method. It takes two activations and answers how many buckets they have in common.", "Compare the bucket_ids of the two activations rather than the activations themselves, since an activation also remembers which word it came from."], check: numberCheck("How many buckets do expect and expected share?", 5, 0.0, "Wrapped in the boundary mark, expect is cut into _ex, exp, xpe, pec, ect and ct_, and expected keeps the first five of those and then continues with cte, ted and ed_ where the shorter word ended. So five of the six buckets expect lights are among the eight expected lights, and a model meeting one of the two words already holds most of the rows it built for the other, with nothing anywhere recording that they are related.") },
+              {
+question: "Can shared character triples make related spellings overlap?",
+ hints: [
+  "activations_of(word) returns n_active and bucket_ids. Use the supplied overlap function on the two activations.",
+  "Compare bucket_ids for set equality, rather than comparing objects that also remember their source words.",
+  "Use the tokenizer’s trigram listing for expected to see which boundary-marked pieces the hash consumes."
+], check: numberCheck("How many buckets do expect and expected share?", 5, 0.0, "Expect and expected share five active buckets in this fixture. Their shared opening triples explain that overlap, while their different endings produce different boundary triples.") },
             ),
           ],
         },

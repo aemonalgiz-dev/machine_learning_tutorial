@@ -94,17 +94,8 @@ export default function GridSearchPage() {
                   ]}
                   caption="The twelve people every widget on this page searches over. Persons 5, 9 and 12 are the ones the page holds back."
                 />
-                <p>
-                  A number like k is called a hyperparameter, and the word
-                  marks a difference in kind from the numbers a fit finds.
-                  The line page&rsquo;s slope and intercept are chosen by the
-                  fit to make the misses small; k is chosen before the fit
-                  and changes what fitting means. The same is true of the
-                  ridge page&rsquo;s penalty, the polynomial page&rsquo;s
-                  degree, a tree&rsquo;s depth and the number of rounds of
-                  boosting, and every one of them has to be set by the
-                  procedure on this page or by something like it.
-                </p>
+                <p>We choose the neighbour count k before fitting. It changes how the prediction rule uses the stored examples, rather than being a coefficient fitted from their errors. A setting like this is called a hyperparameter.</p>
+              <p>A line&apos;s slope and intercept are fitted parameters. A tree&apos;s depth limit, a polynomial degree or a ridge penalty are examples of hyperparameters. We need a selection procedure for them too, while keeping separate observations for assessing the final choice. Grid search is one such procedure; it does not have exclusive claim to choosing these settings.</p>
                 <KeepInMind>
                   A hyperparameter is a number the fit takes as given. The
                   fit optimises everything else with it held fixed, so the
@@ -991,10 +982,7 @@ export default function GridSearchPage() {
         {
           title: "Practice. Running the Search on the Twelve People",
           practice: [
-            exercise(
-              "Search the neighbour count on the nine people",
-              ["The starter makes the page’s deal, with persons 5, 9 and 12 held back and the other nine folded three ways under the page’s seed. Search neighbour counts from one to five on the nine, and print each candidate’s score beside the score the same setting earns on the nine rows it was fitted to. Then print the winner, its score and the spread.", "Part 3’s table gives candidate scores of 0.8944, 0.9252, 0.7695, 0.6010 and 0.2448, and Part 4 gives a spread of 0.6804. The table stops at five neighbours. Cross-validate six neighbours on the same folds yourself, and before you run it, work out what a six-neighbour guess is when a training fold holds six people."],
-              `from oop_ml import (
+            exercise("Search the neighbour count on the nine people",["The starter makes the page’s deal, with persons 5, 9 and 12 held back and the other nine folded three ways under the page’s seed. Search neighbour counts from one to five on the nine, and print each candidate’s score beside the score the same setting earns on the nine rows it was fitted to. Then print the winner, its score and the spread.", "Part 3’s table gives candidate scores of 0.8944, 0.9252, 0.7695, 0.6010 and 0.2448, and Part 4 gives a spread of 0.6804. The table stops at five neighbours. Cross-validate six neighbours on the same folds yourself, and before you run it, work out what a six-neighbour guess is when a training fold holds six people."],`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1026,8 +1014,7 @@ space = SearchSpace.over(KNearestNeighboursRegressor, n_neighbours=[1, 2, 3, 4, 
 # nine and scored on the nine. Then print the winner, its score and the spread.
 
 # Cross-validate a six-neighbour model on the same folds and print its mean
-# R squared on a line of its own, to four places.`,
-              `from oop_ml import (
+# R squared on a line of its own, to four places.`,`from oop_ml import (
     CrossValidation,
     Dataset,
     Feature,
@@ -1066,20 +1053,14 @@ winner = result.best.candidate.value_for("n_neighbours")
 print(f"winner k = {winner} at {result.best_score:.4f}, spread {result.score_spread:.4f}")
 
 six = CrossValidation(folds=folds).evaluate(KNearestNeighboursRegressor(n_neighbours=6), searched)
-print(f"six neighbours: {six.mean_r2_score:.4f}")`,
-              `k = 1: held-out folds 0.8944, its own rows 1.0000
+print(f"six neighbours: {six.mean_r2_score:.4f}")`,`k = 1: held-out folds 0.8944, its own rows 1.0000
 k = 2: held-out folds 0.9252, its own rows 0.9758
 k = 3: held-out folds 0.7695, its own rows 0.9560
 k = 4: held-out folds 0.6010, its own rows 0.9258
 k = 5: held-out folds 0.2448, its own rows 0.8564
 winner k = 2 at 0.9252, spread 0.6804
-six neighbours: -0.2141`,
-              { hints: ["SearchSpace.over names the model’s class and one list per dial. GridSearch is built with the folds, and its search takes a prototype model, the space and the dataset.", "Looping over the result gives every scored candidate, losers included. A candidate hands back the value it assigned through value_for(\"n_neighbours\").", "A Dataset carries its columns as input_features and its target as target_feature, which is what fit and score take.", "CrossValidation is built with the same folds, and evaluate takes a model and the dataset. The mean over folds is mean_r2_score."], check: numberCheck("What mean held-out R squared do six neighbours score on the page’s folds, to four places?", -0.2141, 0.0005, "Each training fold holds exactly six people, so six neighbours is all of them and every guess on a fold is the same number, the mean weight of the other six. That is a flat guess centred on the wrong people, so it does worse than the held-out three’s own mean would and the score falls below zero. One more neighbour is not a worse score, it is a refusal, because a fold of six cannot supply seven.") },
-            ),
-            exercise(
-              "The honest score, and the score that wears its name",
-              ["Run the same search, then ask it for the honest score of its winner, which refits the winner on the nine searched people and scores it on the three held back. Print the three predictions behind that score. Beside it, fit the winner on the nine and score it on those same nine, which is the procedure Part 6 warns against. Then repeat both readings for a search whose only candidate is one neighbour.", "Part 6 gives 0.8720 against 0.9758 at two neighbours, and 0.7825 against exactly 1.0 at one. The worked example there predicts 60, 73.5 and 77 kg for the three held-back people."],
-              `from oop_ml import (
+six neighbours: -0.2141`,{...{ hints: ["SearchSpace.over names the model’s class and one list per dial. GridSearch is built with the folds, and its search takes a prototype model, the space and the dataset.", "Looping over the result gives every scored candidate, losers included. A candidate hands back the value it assigned through value_for(\"n_neighbours\").", "A Dataset carries its columns as input_features and its target as target_feature, which is what fit and score take.", "CrossValidation is built with the same folds, and evaluate takes a model and the dataset. The mean over folds is mean_r2_score."], check: numberCheck("What mean held-out R squared do six neighbours score on the page’s folds, to four places?", -0.2141, 0.0005, "With six training people and six neighbours, every query in a fold receives that fold's training mean. Its negative held-out R squared means it loses to the held-out targets' own mean on that fold. Asking for seven neighbours instead exceeds the available training rows.") },question:"Which neighbour count wins validation, and what happens when every training person votes?"}),
+            exercise("The honest score, and the score that wears its name",["Run the same search, then ask it for the honest score of its winner, which refits the winner on the nine searched people and scores it on the three held back. Print the three predictions behind that score. Beside it, fit the winner on the nine and score it on those same nine, which is the procedure Part 6 warns against. Then repeat both readings for a search whose only candidate is one neighbour.", "Part 6 gives 0.8720 against 0.9758 at two neighbours, and 0.7825 against exactly 1.0 at one. The worked example there predicts 60, 73.5 and 77 kg for the three held-back people."],`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1111,8 +1092,7 @@ for counts in ([1, 2, 3, 4, 5], [1]):
     # the winning count on the searched people yourself, and print its three
     # predictions for the holdout and its score on the searched people.
 
-# Print the honest score of the five-candidate search on a line of its own.`,
-              `from oop_ml import (
+# Print the honest score of the five-candidate search on a line of its own.`,`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1153,20 +1133,14 @@ for counts in ([1, 2, 3, 4, 5], [1]):
     print(f"  held-back predictions {predictions}")
     print(f"  honest {honest:.4f}, same rows {same_rows:.4f}")
 
-print(f"honest score at two neighbours: {honest_scores[0]:.4f}")`,
-              `candidates [1, 2, 3, 4, 5], winner k = 2, search score 0.9252
+print(f"honest score at two neighbours: {honest_scores[0]:.4f}")`,`candidates [1, 2, 3, 4, 5], winner k = 2, search score 0.9252
   held-back predictions [60.0, 73.5, 77.0]
   honest 0.8720, same rows 0.9758
 candidates [1], winner k = 1, search score 0.8944
   held-back predictions [57.0, 76.0, 78.0]
   honest 0.7825, same rows 1.0000
-honest score at two neighbours: 0.8720`,
-              { hints: ["honest_score_on takes a prototype model, the dataset that was searched and the dataset that was held out, in that order, and answers one number.", "The same-rows score needs no help from the search. Fit a model at the winning count on the searched people and call score with those same people.", "The held-back people are 162, 174 and 183 cm. The last has nobody taller among the nine, so both of their neighbours sit below them."], check: numberCheck("What honest score does the two-neighbour winner earn on the three held-back people, to four places?", 0.872, 0.0005, "The three predictions are 60, 73.5 and 77 kg against true weights of 61, 72 and 82, so the squared misses total 28.25, and the three weights are spread 220.67 about their own mean. One less 28.25 over 220.67 is 0.8720, below the 0.9252 the search reported and far below the 0.9758 the same model scores on the rows it was fitted to. At one neighbour the same-rows score is exactly one, which no honest procedure could read.") },
-            ),
-            exercise(
-              "Three searches that cannot run",
-              ["Part 2 says a misspelt dial is refused when the range is written down, and Part 7 lists a range with nothing in it and a neighbour count larger than a training fold. Ask for all three and print the name and message of each refusal.", "The third is the one that catches people out. Seven neighbours fit comfortably inside nine people, and the refusal only appears once the folds are cut."],
-              `from oop_ml import (
+honest score at two neighbours: 0.8720`,{...{ hints: ["honest_score_on takes a prototype model, the dataset that was searched and the dataset that was held out, in that order, and answers one number.", "The same-rows score needs no help from the search. Fit a model at the winning count on the searched people and call score with those same people.", "The held-back people are 162, 174 and 183 cm. The last has nobody taller among the nine, so both of their neighbours sit below them."], check: numberCheck("What honest score does the two-neighbour winner earn on the three held-back people, to four places?", 0.872, 0.0005, "The searched setting is refitted on development rows before the untouched rows are scored. A higher same-row score measures fit to known data, not the winner's ability to predict unseen people; a perfect same-row score can occur without resolving that question.") },question:"Does the chosen setting perform similarly on untouched people?"}),
+            exercise("Three searches that cannot run",["Part 2 says a misspelt dial is refused when the range is written down, and Part 7 lists a range with nothing in it and a neighbour count larger than a training fold. Ask for all three and print the name and message of each refusal.", "The third is the one that catches people out. Seven neighbours fit comfortably inside nine people, and the refusal only appears once the folds are cut."],`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1195,8 +1169,7 @@ folds = KFold(n_folds=3, random_seed=3)
 # prints the name of the refusal and its message.
 # 1. A space whose dial is spelled n_neighbors.
 # 2. A space whose range for n_neighbours is an empty list.
-# 3. A search over neighbour counts of 5, 6 and 7 on the searched people.`,
-              `from oop_ml import (
+# 3. A search over neighbour counts of 5, 6 and 7 on the searched people.`,`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1235,16 +1208,10 @@ try:
     space = SearchSpace.over(KNearestNeighboursRegressor, n_neighbours=[5, 6, 7])
     GridSearch(folds=folds).search(KNearestNeighboursRegressor(), space, searched)
 except MLLibError as refusal:
-    print(f"{type(refusal).__name__}: {refusal}")`,
-              `InvalidValuesError: KNearestNeighboursRegressor has no hyperparameter 'n_neighbors'; it has ['metric', 'n_neighbours']
+    print(f"{type(refusal).__name__}: {refusal}")`,`InvalidValuesError: KNearestNeighboursRegressor has no hyperparameter 'n_neighbors'; it has ['metric', 'n_neighbours']
 EmptyValuesError: the range for 'n_neighbours' holds no values, so the grid would be empty
-TooFewValuesError: 7 neighbours were asked for and only 6 rows were supplied`,
-              { hints: ["The first two never reach a search. The space checks the dial’s name against the model’s declared fields, and its range for emptiness, as it is built.", "The third space builds without complaint, since seven is a legal neighbour count. It is the fit inside a fold that refuses, so the search call belongs inside the try as well."] },
-            ),
-            exercise(
-              "Search two dials at once, and score that winner honestly",
-              ["Build Part 2’s lattice on the nine searched people. The model is a chain that expands height to a degree, standardizes, and fits a ridge, and the search varies the degree over 1, 2 and 3 and the penalty over 0.01, 0.1, 1 and 10. Print the number of candidates and of fits before running anything, then every cell’s score, the winner, the spread and the winner’s honest score on the three held-back people.", "Part 2 reports twelve candidates, thirty-six fits and a winner of degree 1 at a penalty of 0.1 scoring 0.9883, and Part 4 a spread of 0.4579. The lesson never scores this winner on the held-back quarter. Compare what you get with the 0.8720 the neighbour search earned there."],
-              `from oop_ml import (
+TooFewValuesError: 7 neighbours were asked for and only 6 rows were supplied`,{...{ hints: ["The first two never reach a search. The space checks the dial’s name against the model’s declared fields, and its range for emptiness, as it is built.", "The third space builds without complaint, since seven is a legal neighbour count. It is the fit inside a fold that refuses, so the search call belongs inside the try as well."] },question:"Which invalid search configurations fail before fitting, and which fail inside a fold?"}),
+            exercise("Search two dials at once, and score that winner honestly",["Build Part 2’s lattice on the nine searched people. The model is a chain that expands height to a degree, standardizes, and fits a ridge, and the search varies the degree over 1, 2 and 3 and the penalty over 0.01, 0.1, 1 and 10. Print the number of candidates and of fits before running anything, then every cell’s score, the winner, the spread and the winner’s honest score on the three held-back people.", "Part 2 reports twelve candidates, thirty-six fits and a winner of degree 1 at a penalty of 0.1 scoring 0.9883, and Part 4 a spread of 0.4579. The lesson never scores this winner on the held-back quarter. Compare what you get with the 0.8720 the neighbour search earned there."],`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1281,8 +1248,7 @@ prototype = RegressionPipeline(steps=chains[0], model=ridges[0])
 # Build a SearchSpace over RegressionPipeline whose steps are the three
 # chains and whose model is the four ridges. Print its candidate count and
 # that count times the three folds. Search it, print every cell, then the
-# winner's score, the spread and the honest score on the holdout.`,
-              `from oop_ml import (
+# winner's score, the spread and the honest score on the holdout.`,`from oop_ml import (
     Dataset,
     Feature,
     GridSearch,
@@ -1327,8 +1293,7 @@ for scored in result:
     print(f"degree {degree}, penalty {penalty}: {scored.score:.4f}")
 
 print(f"winner {result.best_score:.4f}, spread {result.score_spread:.4f}")
-print(f"honest score {result.honest_score_on(prototype, searched, holdout):.4f}")`,
-              `12 candidates, 36 fits
+print(f"honest score {result.honest_score_on(prototype, searched, holdout):.4f}")`,`12 candidates, 36 fits
 degree 1, penalty 0.01: 0.9879
 degree 1, penalty 0.1: 0.9883
 degree 1, penalty 1.0: 0.9696
@@ -1342,9 +1307,7 @@ degree 3, penalty 0.1: 0.9868
 degree 3, penalty 1.0: 0.9863
 degree 3, penalty 10.0: 0.8468
 winner 0.9883, spread 0.4579
-honest score 0.9957`,
-              { hints: ["The chain has two fields, steps and model, so the space takes two lists of whole objects. Nothing inside a step is ever named by a string.", "A space knows its n_candidates as soon as it is built, which is the count worth reading before a search starts.", "A candidate hands back the whole object it carried, so the degree is value_for(\"steps\")[\"terms\"].transformer.degree and the penalty is value_for(\"model\").penalty.", "honest_score_on takes the prototype, the searched dataset and the held-out dataset, exactly as it did for the neighbour search."], check: numberCheck("What honest score does the lattice’s winner earn on the three held-back people, to four places?", 0.9957, 0.0005, "The winner is a straight line in height under a light penalty, and a line carries its trend past the edge of the nine people it was fitted to, so it reaches the person at 183 cm where a neighbour average fell 5 kg short. That is the gap between 0.9957 here and the 0.8720 the neighbour winner earned on the same three people. It is still one reading from a jury of three, and here it came out above the winner’s own search score of 0.9883, which is the direction Part 6 says single deals can go.") },
-            ),
+honest score 0.9957`,{...{ hints: ["The chain has two fields, steps and model, so the space takes two lists of whole objects. Nothing inside a step is ever named by a string.", "A space knows its n_candidates as soon as it is built, which is the count worth reading before a search starts.", "A candidate hands back the whole object it carried, so the degree is value_for(\"steps\")[\"terms\"].transformer.degree and the penalty is value_for(\"model\").penalty.", "honest_score_on takes the prototype, the searched dataset and the held-out dataset, exactly as it did for the neighbour search."], check: numberCheck("What honest score does the lattice’s winner earn on the three held-back people, to four places?", 0.9957, 0.0005, "The lightly penalised linear rule extrapolates beyond the searched height range differently from a neighbour average. It scores better on these three held-out people, but such a small test set does not establish general superiority.") },question:"Which degree and penalty win the search, and how do they score on untouched people?"}),
           ],
         },
       ]}

@@ -1,3 +1,4 @@
+import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { test,expect,type Page,type Locator } from "@playwright/test";
 import { BUILDS,buildById } from "../lib/builds/catalog";
 import { TOOLS } from "../lib/builds/tools";
@@ -6,6 +7,8 @@ import { labLessons } from "../lib/labs";
 import { journeyFor } from "../lib/builds/journey";
 import { validConstructionForBuild } from "../lib/builds/workshop-session";
 import { openWorkspaceControls, openLessonNotes, showEarlierWorkshop } from "./helpers/open-workshop";
+
+
 
 test("every lesson has an executable construction, coherent tools and an empty starting task",()=>{
   expect(BUILDS).toHaveLength(labLessons.length + 1);
@@ -67,7 +70,7 @@ async function openEarlierWorkspace(page:Page){
   await showEarlierWorkshop(page);
 }
 async function openBuild(page:Page,slug:string){
-  await page.goto(`/lab/${slug}`);
+  await page.goto(`/lab/${slug}`); await waitForAccountReady(page);
   if(slug==="workshop-guide"){
     await page.getByRole("navigation",{name:"Workshop introduction"}).getByRole("button",{name:/Build from an empty floor/}).click();
     await openWorkspaceControls(page);
@@ -83,7 +86,8 @@ async function wire(page:Page,a:string,b:string){await page.getByRole("button",{
 async function run(page:Page|Locator,counts:string){await page.getByRole("button",{name:"Test all examples",exact:true}).click();await expect(page.getByTestId("construction-counter")).toHaveText(counts);}
 
 test("Botie carries the city's records from the history into the tools and construction",async({page})=>{
-  await page.goto("/primers/statistics#workshop");
+  await mockAccountBackend(page);
+  await page.goto("/primers/statistics#workshop"); await waitForAccountReady(page);
   const journey=page.getByTestId("workshop-journey");
   await expect(journey.getByTestId("construction-floor")).toBeVisible();
   await openLessonNotes(page);
@@ -104,6 +108,7 @@ test("Botie carries the city's records from the history into the tools and const
 });
 
 test("a learner builds a real mean from an empty floor, inspects a mistake, and keeps their work",async({page})=>{
+  await mockAccountBackend(page);
   const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
   await openBuild(page,"statistics");
   await expect(page.locator("[data-piece]")).toHaveCount(1);
@@ -123,7 +128,7 @@ test("a learner builds a real mean from an empty floor, inspects a mistake, and 
   await page.getByRole("button",{name:"Fit construction",exact:true}).click();
   await page.getByRole("button",{name:"Inspect or move Divide",exact:true}).click();
   await expect(page.getByLabel("Construction inspector")).toContainText("Amount144");
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await page.getByRole("button",{name:"Full workspace and earlier draft",exact:true}).click();
   await expect(page.locator("[data-piece]")).toHaveCount(5);
   await expect(page.getByTestId("construction-counter")).toHaveText("3 passed · 0 failed · 0 not run");
@@ -131,7 +136,8 @@ test("a learner builds a real mean from an empty floor, inspects a mistake, and 
 });
 
 test("Botie introduces the tools, carries earlier tools forward and keeps later lessons open",async({page})=>{
-  await page.goto("/lab/workshop-guide");
+  await mockAccountBackend(page);
+  await page.goto("/lab/workshop-guide"); await waitForAccountReady(page);
   await expect(page.getByTestId("construction-floor")).toBeVisible();
   await expect(page.locator("[data-piece]")).toHaveCount(4);
   await wire(page,"Sensor reading output","Multiply input 1: Value");
@@ -141,7 +147,7 @@ test("Botie introduces the tools, carries earlier tools forward and keeps later 
   await page.getByRole("button",{name:"Try the replacement sensor",exact:true}).click();
   await page.getByRole("link",{name:"Start with city records",exact:true}).click();
   await expect(page.getByTestId("workshop-journey")).toBeVisible();
-  await page.goto("/lab/attention");
+  await page.goto("/lab/attention"); await waitForAccountReady(page);
   await openLessonNotes(page);
   await page.getByRole("button",{name:"Look inside the tools",exact:true}).click();
   const tools=page.getByRole("region",{name:"Get to know the tools"});
@@ -151,6 +157,7 @@ test("Botie introduces the tools, carries earlier tools forward and keeps later 
 });
 
 test("learners configure, move and remove their pieces, and undo restores the construction",async({page})=>{
+  await mockAccountBackend(page);
   await openBuild(page,"workshop-guide");
   for(const name of ["Sensor reading","Multiply","Set a constant"])await page.getByRole("button",{name,exact:true}).click();
   await page.getByLabel("Set a constant Number",{exact:true}).fill("2");
@@ -181,6 +188,7 @@ test("learners configure, move and remove their pieces, and undo restores the co
 });
 
 test("every workshop's worked construction executes in the browser and still requires testing",async({page})=>{
+  await mockAccountBackend(page);
   test.setTimeout(420_000);
   await page.emulateMedia({reducedMotion:"reduce"});
   const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));
@@ -196,8 +204,9 @@ test("every workshop's worked construction executes in the browser and still req
 });
 
 test("construction stays usable on narrow screens and inside lessons",async({page})=>{
+  await mockAccountBackend(page);
   await page.emulateMedia({reducedMotion:"reduce"});
-  await page.goto("/concepts/neurons-and-activations#workshop");
+  await page.goto("/concepts/neurons-and-activations#workshop"); await waitForAccountReady(page);
   await openEarlierWorkspace(page);
   await page.getByText("Stuck? Inspect a worked construction",{exact:true}).click();
   await page.getByRole("button",{name:"Assemble an example",exact:true}).click();

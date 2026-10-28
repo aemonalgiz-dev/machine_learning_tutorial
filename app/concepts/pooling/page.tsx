@@ -452,13 +452,16 @@ export default function PoolingPage() {
             several(
               "A bank of eight detectors answers with eight maps of twenty-six by twenty-six. Which of these hold when that goes through a pooling layer?",
               [
-                "Each map is pooled by itself and the answers are never combined across maps",
-                "At a window of two and a stride of two the arrangement becomes eight maps of thirteen by thirteen",
-                "A shape that counted only the 5408 numbers could not tell that stack from a single row of 5408",
-                "The channel count shrinks along with the two spatial extents",
-              ],
+                              "Each map is pooled by itself and the answers are never combined across maps",
+                              "At a window of two and a stride of two the arrangement becomes eight maps of thirteen by thirteen",
+                              "A shape that counted only the 5408 numbers could not tell that stack from a single row of 5408",
+                              "The channel count shrinks along with the two spatial extents",
+                            ],
               [0, 1, 2],
               "Two detectors are two different questions, and the largest response of one says nothing whatever about the other, so the leading extent is carried through untouched. That is why an arrangement has to be written as extents per side rather than as one count, since the stack of maps is something a pooling layer can read and the single row is not.",
+              {
+                "description": "This is spatial pooling applied independently to each channel, with no padding. The input shape is (channels, height, width) = (8, 26, 26). The proposed window and stride are both 2 in each spatial direction."
+              },
             ),
             choice(
               "One window holds a single 8 among three zeros and another holds four 2s. What do the two summaries answer?",
@@ -1112,13 +1115,13 @@ export default function PoolingPage() {
             several(
               "Which of these are named as things pooling does not buy?",
               [
-                "Invariance to shift in general, rather than to shift inside a window",
+                "General shift invariance: a shift can change which values fall in each window",
                 "Invariance to rotation",
                 "Invariance to scale",
-                "Removal of the window boundary, once several such layers are stacked",
+                "Removal of the window boundary, once several such layers are stacked"
               ],
               [0, 1, 2, 3],
-              "Nothing in a window summary addresses rotation or scale, and the measured shift tolerance ends exactly where the second column crosses a boundary. Stacking widens the window in the original picture rather than removing the boundary, so the same knife edge is there at a coarser spacing. A network can also be tolerant to shift with no such layer at all, by learning from examples at many positions, which is more expensive.",
+              "Pooling summarises values within fixed windows. Some local changes leave a particular summary unchanged, but moving values across a window boundary can change it. Stacking pooling layers gives coarser windows rather than eliminating boundaries. Rotation and scale tolerance need further architectural choices or training evidence.",
             ),
             choice(
               "A window of three at a stride of one and a window of two at a stride of two both answer two by two from a four by four patch. What happens if a response from the first is handed to the second?",
@@ -1138,7 +1141,10 @@ export default function PoolingPage() {
           practice: [
             exercise(
               "Pool the running patch both ways",
-              ["Build a maximum pooling layer and an average pooling layer that each read one channel of four by four with a window of two at a stride of two, hand each the page’s patch as a block of one row and one channel, and print the arrangement each answers with and its pooled map.", "Part 2 arrived at a maximum map of 5, 4, 2 and 7 and an average map of 3, 2, 1 and 4. Then add up the four averages, which the page does not do, and think about why that total is a quarter of the patch’s own total."],
+              [
+  "Apply maximum and average pooling to the supplied four-by-four one-channel patch, using two-by-two windows at stride two.",
+  "Print each output shape, pooled map and sum of all pooled outputs. Compare the average-map total with the original patch total; the same relationship is not promised for maxima."
+],
               `import numpy as np
 from oop_ml import AveragePool2d, MaxPool2d
 
@@ -1168,11 +1174,17 @@ AveragePool2d answers (1, 2, 2)
 [[3. 2.]
  [1. 4.]]
 the four answers add up to 10`,
-              { hints: ["A pooling layer takes the arrangement it reads as three extents, channels then height then width, and a window and a stride that default to two.", "A layer reads a block whose leading axis is rows, so one four by four patch goes in as patch[None, None], one row holding one channel.", "The response’s outputs are arranged the same way, so the map for the one row and the one channel is the slice at [0, 0]."], check: numberCheck("What do the four averages add up to?", 10, 0.5, "At a window of two and a stride of two the four windows cover the patch exactly once each, so each average is a quarter of its window’s total and the four averages together are a quarter of the patch’s total of 40. The maximum map adds up to 18, which says nothing so tidy, because a maximum keeps the strongest reading in each window and discards how much else there was.") },
+              { hints: [
+  "The nonoverlapping windows cover every original cell once.",
+  "Use the identical layout and window settings for both summaries."
+], check: numberCheck("What do the four averages add up to?", 10, 0.5, "The four averages total ten. Each nonoverlapping window contributes its local mean, so their sum is reduced relative to the sum of all original cells."), question: "What does a maximum retain that an average combines?" },
             ),
             exercise(
               "Hand a slope of one back down, at both strides",
-              ["Part 4 sends a slope of one to each answer at a stride of two, and Part 5 drops the stride to one so that the windows overlap. Do both, for both kinds. Build the layer, respond to the patch, build a block of ones the shape of the answer, and ask the layer for its correction.", "For each layer print how many windows there were, the total blame handed down, how many cells received anything, and what the 4 at row 1, column 2 received. Part 5 says that cell wins three of the nine overlapping windows and receives 3, and that the total handed down always equals the total that arrived."],
+              [
+  "For maximum and average pooling, run the supplied patch at strides two and one with window size two. Send derivative one to every output.",
+  "Print window count, total input derivative, nonzero input-derivative count and the derivative at zero-based row 1/column 2 for every setting."
+],
               `import numpy as np
 from oop_ml import AveragePool2d, MaxPool2d
 
@@ -1206,11 +1218,17 @@ for stride in (2, 1):
 AveragePool2d at stride 2: 4 windows, total blame 4, cells receiving anything 16, the 4 at row 1, column 2 receives 0.25
 MaxPool2d at stride 1: 9 windows, total blame 9, cells receiving anything 5, the 4 at row 1, column 2 receives 3.00
 AveragePool2d at stride 1: 9 windows, total blame 9, cells receiving anything 16, the 4 at row 1, column 2 receives 1.00`,
-              { hints: ["correction_for takes the response the forward pass produced and the slope arriving at each answer, and what it hands down to the input is passed_down, arranged like the patch.", "The number of windows is the number of answers, which is the size of the arriving block.", "Counting the cells whose blame is not zero is what separates a maximum, which trains only its winners, from an average, which trains everything in every window a little."], check: numberCheck("Under a maximum at a stride of one, how many of the sixteen cells receive anything?", 5, 0.5, "Nine overlapping windows have nine winners, but a cell that is large relative to a whole neighbourhood wins every window that contains it. The 4 at row 1, column 2 wins three windows, the 5 and the 7 win two each, and the other 4 in that row and the 2 in the bottom left corner win one each, so only five distinct cells collect the nine units of blame. The total is still 9, the same as what arrived, because overlap redistributes correction rather than adding any.") },
+              { hints: [
+  "Maximum pooling routes a contribution to its selected winner; average pooling distributes it over the window.",
+  "An input participating in several overlapping windows accumulates their contributions."
+], check: numberCheck("Under a maximum at a stride of one, how many of the sixteen cells receive anything?", 5, 0.5, "Five input cells receive nonzero derivatives. Some cells win more than one overlapping maximum window and collect repeated contributions."), question: "How do overlapping pooling windows combine backward contributions?" },
             ),
             exercise(
               "Ask one window for its summary and its shares, then test the sum",
-              ["Part 2 says a kind of pooling amounts to two functions of one window, the number it keeps and the shares it owes. Ask both kinds for both, on the page’s top left window of 1, 5, 4 and 2, through summarise and shares_of.", "Part 4 then says the shares sum to one only to within float64. Build an average over a window that is the whole picture at every side from one to eight, add up its shares, and print each total exactly. One of the eight sides should miss."],
+              [
+  "Use the supplied top-left two-by-two window to inspect summarise and shares_of for both pooling rules. Print its summary, share map and share sum.",
+  "For average-pooling square windows of sides one through eight, print the exact floating-point sum of all shares. Do not round the total before inspecting it."
+],
               `import numpy as np
 from oop_ml import AveragePool2d, MaxPool2d
 
@@ -1256,11 +1274,17 @@ side 5: 25 shares add up to 1.0
 side 6: 36 shares add up to 1.0
 side 7: 49 shares add up to 0.9999999999999999
 side 8: 64 shares add up to 1.0`,
-              { hints: ["summarise and shares_of each take one square window of plain numbers rather than a block, and shares_of answers a grid the same shape holding the derivative of the summary with respect to each position.", "An average’s shares do not depend on the values in the window at all, so a window of zeros is as good as any other for adding them up.", "Printing a Python float with !r shows every digit it holds, which is what separates 1.0 from a total one rounding step short of it, and float() turns the number numpy hands back into one."], check: numberCheck("At which window side between one and eight do the shares fail to add up to exactly one?", 7, 0.5, "A window of seven hands out forty-nine shares of one forty-ninth, which has no exact representation in float64, and the forty-nine of them add up to 0.9999999999999999. Sides 2, 4 and 8 are exact because their reciprocals are, and the other sides up to eight happen to round back to one. A test asserting that the sum is exactly one would pass at every side but seven, which is why such a check needs a tolerance.") },
+              { hints: [
+  "shares_of supplies how an upstream derivative is distributed locally.",
+  "Exact mathematical totals can acquire a tiny floating-point residual when many equal fractions are summed."
+], check: numberCheck("At which window side between one and eight do the shares fail to add up to exactly one?", 7, 0.5, "The side-seven window shows the tiny residual. Floating-point summation of equal shares can differ from the exact mathematical total without a missing contribution."), question: "What local derivative shares does each pooling rule assign?" },
             ),
             exercise(
               "Measure the shift tolerance",
-              ["Part 6 lights the third column of an eight by eight patch, pools it at a window of two and a stride of two, and moves the stroke one column at a time. Draw the patch with a stroke of 9 down column 2, pool it under both kinds, then slide it one and two columns right with zeros entering at the left and pool again.", "Print, for each kind and each shift, how many of the 64 picture cells changed, how many of the 16 pooled cells changed, and the largest change in any pooled cell. The page says a shift of one changes nothing in the pooled map and a shift of two changes 8 of its 16 cells, by 9 under a maximum and by 4.5 under an average."],
+              [
+  "Draw the supplied eight-by-eight image with value nine in zero-based column two and zero elsewhere. Compare maximum and average pooling at window two/stride two.",
+  "Move the stroke right by one and two columns. For every method/shift print changed input cells, changed pooled cells and largest pooled-value change relative to the original."
+],
               `import numpy as np
 from oop_ml import AveragePool2d, MaxPool2d
 
@@ -1295,7 +1319,10 @@ for kind in (MaxPool2d, AveragePool2d):
 MaxPool2d shift 2: 16 of 64 picture cells changed, 8 of 16 pooled cells changed, largest change 9.0
 AveragePool2d shift 1: 16 of 64 picture cells changed, 0 of 16 pooled cells changed, largest change 0.0
 AveragePool2d shift 2: 16 of 64 picture cells changed, 8 of 16 pooled cells changed, largest change 4.5`,
-              { hints: ["A picture moved one column right holds, at column j, what the original held at column j minus one, so slice the first seven columns into the last seven and leave column 0 dark.", "Columns 2 and 3 share a window at a stride of two, so a stroke moving from column 2 to column 3 stays inside the same windows and the summaries cannot notice. Moving on to column 4 crosses into the next window."], check: numberCheck("How many of the sixteen pooled cells change when the stroke has moved two columns?", 8, 0.5, "At a window of two and a stride of two the third and fourth columns share a window, so the first move changes 16 picture cells and no pooled cell. The second move carries the stroke across a window boundary, the bright column of the pooled map moves one cell along, and the eight cells in the two affected columns change, by the stroke’s own 9 under a maximum and by half of it under an average. The tolerance is exactly as wide as a window and no wider.") },
+              { hints: [
+  "Use the same original response as the reference for both shifts.",
+  "A shift within the same nonoverlapping window can preserve its summary; crossing into the next window can move that summary."
+], check: numberCheck("How many of the sixteen pooled cells change when the stroke has moved two columns?", 8, 0.5, "Eight pooled cells change after the two-column move. The stroke crosses into neighbouring pooling windows rather than staying inside its original ones."), question: "Does moving a stroke within a pooling window differ from crossing its boundary?" },
             ),
           ],
         },

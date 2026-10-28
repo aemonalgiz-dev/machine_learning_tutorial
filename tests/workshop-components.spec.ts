@@ -1,8 +1,15 @@
 import { test, expect, type Page } from "@playwright/test";
-import { openFullWorkshop } from "./helpers/open-workshop";
+import { openFullWorkshop, showEarlierWorkshop } from "./helpers/open-workshop";
+import { mockAccountBackend, waitForAccountReady } from "./helpers/account-backend";
+import { workshopRecord } from "./helpers/workshop-record";
+import type { Construction } from "../lib/builds/engine";
 
-async function open(page: Page, slug: string, example = false) {
-  await openFullWorkshop(page, slug);
+async function open(page: Page, slug: string, example = false, signedIn = false) {
+  if (signedIn) {
+    await page.goto(`/lab/${slug}`);
+    await waitForAccountReady(page);
+    await showEarlierWorkshop(page);
+  } else await openFullWorkshop(page, slug);
   await page.getByRole("checkbox", { name: "Animate signals", exact: true }).uncheck();
   if (example) {
     await page.getByText("Stuck? Inspect a worked construction", { exact: true }).click();
@@ -85,7 +92,7 @@ test("three-input components keep their sockets attached as values, zoom and pos
 });
 
 test("arranging an old crowded draft preserves its work and can be undone", async ({ page }) => {
-  const graph = {
+  const graph: Construction = {
     pieces: [
       { id: "s", tool: "source:reading", x: 32, y: 70, settings: {} },
       { id: "c", tool: "constant", x: 32, y: 260, settings: { value: 2 } },
@@ -94,8 +101,8 @@ test("arranging an old crowded draft preserves its work and can be undone", asyn
     ],
     connections: [{ from: "s", to: "m", port: 0 }, { from: "c", to: "m", port: 1 }, { from: "m", to: "output", port: 0 }],
   };
-  await page.addInitScript(graph => localStorage.setItem("fitlab-construction-v1:workshop-guide", JSON.stringify(graph)), graph);
-  await open(page, "workshop-guide");
+  await mockAccountBackend(page, { records: [{ key: "workshop:workshop-guide:v1", value: workshopRecord(graph) }] });
+  await open(page, "workshop-guide", false, true);
   await page.getByRole("button", { name: "Arrange pieces", exact: true }).click();
   const overlap = await page.locator("[data-piece]").evaluateAll(nodes => {
     const boxes = nodes.map(n => n.getBoundingClientRect());

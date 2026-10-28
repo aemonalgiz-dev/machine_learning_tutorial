@@ -45,7 +45,7 @@ test("every practice construction matches the independent oracle on all changed 
   }
 });
 
-test("practice API verifies the backend session before serving definitions",async()=>{
+test("practice API requires the backend's paid membership before serving definitions",async()=>{
   const previous=process.env.OOP_ML_ACCOUNTS_URL,fetch=globalThis.fetch;
   process.env.OOP_ML_ACCOUNTS_URL="https://accounts.example.test";
   let status=200,body:unknown={enabled:true,user:null},cookie="";
@@ -56,6 +56,15 @@ test("practice API verifies the backend session before serving definitions",asyn
     let response=await GET(request("forged"),context);expect(response.status).toBe(401);expect(await response.text()).not.toContain("def solve");
     body={enabled:true,user:{id:"alice",name:"Alice"}};
     response=await GET(request("bob"),context);expect(response.status).toBe(409);
+    response=await GET(request("alice"),context);expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({code:"practice_subscription_required"});
+    const active={practiceAccess:true,plan:"practice",status:"active",validUntil:Math.floor(Date.now()/1000)+86400};
+    for(const membership of [null,{},true,{...active,practiceAccess:"true"},{...active,plan:"free"},{...active,status:"inactive"},{...active,validUntil:Math.floor(Date.now()/1000)-1},{...active,validUntil:null}]){
+      body={enabled:true,user:{id:"alice",name:"Alice"},membership};
+      response=await GET(request("alice"),context);expect(response.status).toBe(403);
+      expect(await response.text()).not.toContain("def solve");
+    }
+    body={enabled:true,user:{id:"alice",name:"Alice"},membership:active};
     response=await GET(request("alice"),context);expect(response.status).toBe(200);expect(cookie).toContain("opaque");
     expect(response.headers.get("cache-control")).toBe("private, no-store");
     const result=await response.json();expect(result.account).toBe("alice");expect(result.data.exercise.solution).toContain("def solve");
@@ -63,6 +72,23 @@ test("practice API verifies the backend session before serving definitions",asyn
     status=503;response=await GET(request("alice"),context);expect(response.status).toBe(503);
     status=200;body={enabled:false,user:null};response=await GET(request("alice"),context);expect(response.status).toBe(503);
     body={enabled:true,user:null};response=await GET(request("alice"),context);expect(response.status).toBe(401);
+    for(const malformed of [null,[],"paid"]){body=malformed;response=await GET(request("alice"),context);expect(response.status).toBe(503);}
   }finally{globalThis.fetch=fetch;if(previous===undefined)delete process.env.OOP_ML_ACCOUNTS_URL;else process.env.OOP_ML_ACCOUNTS_URL=previous;}
+});
+
+test("free accounts cannot request any additional practice format or catalog",async()=>{
+  const previous=process.env.OOP_ML_ACCOUNTS_URL, originalFetch=globalThis.fetch;
+  process.env.OOP_ML_ACCOUNTS_URL="https://accounts.example.test";
+  globalThis.fetch=async()=>Response.json({enabled:true,user:{id:"alice",name:"Alice"},membership:{practiceAccess:false,plan:"free",status:"inactive",validUntil:null}});
+  try{
+    for(const parts of [["catalog"],...["quiz","code","workshop"].map(mode=>["activity",activityId("sensor-mean",0,mode)])]){
+      const request=new NextRequest("https://perceptronlab.example/practice-api/"+parts.join("/")+"?paid=true",{headers:{cookie:"fitlab_session=opaque","X-FitLab-Account":"alice","X-Practice-Paid":"true"}});
+      const response=await GET(request,{params:Promise.resolve({path:parts})});
+      expect(response.status).toBe(403);
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+      const result=await response.json();expect(result.code).toBe("practice_subscription_required");
+      expect(result.data).toBeUndefined();expect(result.families).toBeUndefined();expect(result.build).toBeUndefined();
+    }
+  }finally{globalThis.fetch=originalFetch;if(previous===undefined)delete process.env.OOP_ML_ACCOUNTS_URL;else process.env.OOP_ML_ACCOUNTS_URL=previous;}
 });
 

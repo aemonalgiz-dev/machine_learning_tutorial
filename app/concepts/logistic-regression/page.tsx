@@ -43,8 +43,8 @@ export default function LogisticRegressionPage() {
       intuition={lessonIntuitions["logistic-regression"]}
       technicalStart="Part 2. Score, Probability, and Decision"
       openingTitle="A Prediction Between Yes and No"
-      playgroundTitle="Turn a height measurement into a probability"
-      playgroundIntro="Read the score, probability, and predicted class as three different quantities. Move the query point and watch where the class changes."
+      playgroundTitle="Estimate the chance of passing from study hours"
+      playgroundIntro="Each point records one student's study hours and exam outcome. Click near the bottom to add a failure or near the top to add a pass. Drag a point sideways to change its study hours, then watch how the fitted probability curve changes. We will explain how that curve becomes a yes-or-no decision below."
       title="Logistic Regression"
       tagline={"Suppose our answer needs to be yes or no. We can first estimate a probability from the measurements, then decide how large that probability needs to be before we choose yes."}
       prerequisites={
@@ -101,8 +101,10 @@ export default function LogisticRegressionPage() {
             <>
               <SubSection title="3. Score, probability, and decision">
                 <p>
-                  Three quantities run through this page, and keeping them
-                  separate is most of understanding the model.
+                  We want a chance of passing, but our calculation begins with a
+                  number that can be any size. We also need a rule for deciding
+                  when to call the outcome a pass. Those are different jobs, so
+                  let&apos;s give each result its own name.
                 </p>
                 <NumberTable
                   headings={["Quantity", "What it is", "Range"]}
@@ -113,17 +115,19 @@ export default function LogisticRegressionPage() {
                   ]}
                 />
                 <p>
-                  They are related, and each is computed from the one before,
-                  and they are not the same thing. The score is what the
-                  straight line produces. The probability is what the score
-                  becomes. The decision is a rule laid on top of the
-                  probability, and it is the only one of the three that has a
-                  threshold in it.
+                  The straight-line rule produces the score. A second rule
+                  converts it into an estimated probability. Finally, we compare
+                  that estimate with a cutoff, called a threshold, to choose pass
+                  or fail. Moving the cutoff changes the decision while leaving
+                  the probability estimate alone.
                 </p>
               </SubSection>
 
               <SubSection title="4. The linear score">
-                <p>Start with the calculation every linear model starts with.</p>
+                <p>Multiply the study hours by a coefficient and add an intercept.
+                  The coefficient controls the change in score for another hour;
+                  the intercept is the score at zero study hours. Here x stands
+                  for hours, β for the coefficient, and α for the intercept.</p>
                 <Equation>{"z = β·x + α"}</Equation>
                 <>
                   <p>
@@ -202,9 +206,11 @@ export default function LogisticRegressionPage() {
             <>
               <SubSection title="7. Probability and odds">
                 <p>
-                  A probability of 0.75 is three passes in every four
-                  students. Said the other way, it is three passes for every
-                  one fail, and that is the odds, three to one.
+                  If the estimated probability of passing is 0.75, the remaining
+                  probability is 0.25 for failing. The first is three times the
+                  second. We describe that comparison as odds of three to one.
+                  It does not promise exactly three passes in each group of four
+                  students; individual groups can turn out differently.
                 </p>
                 <Equation>{"odds = p / (1 − p)"}</Equation>
                 <NumberTable
@@ -875,20 +881,24 @@ export default function LogisticRegressionPage() {
                       ["0.5 to 0.75", "1", "0.610", "1.00"],
                       ["0.75 to 1", "5", "0.924", "0.80"],
                     ]}
-                    caption="The shape is right at the ends and the middle bins hold one student each, which says nothing. And these are the students the curve was fitted to. Calibration has to be judged on students it never saw."
+                    caption="The middle bins contain only one student each, so their rates give very uncertain evidence. These are also the students used to fit the curve. Check calibration on new students, with enough observations to assess the differences."
                   />
                 </WorkedExample>
                 <p>
                   The lowest bin holds the five students who studied three and
                   a half hours or less. The curve put them at 0.074 on average
-                  and none of them passed, so claim and outcome agree. The
+                  and none of them passed. That is a lower observed rate, but
+                  five students give little evidence about the size of the
+                  difference. The
                   highest bin holds the five who studied five hours or more.
                   The curve put them at 0.924 on average and four of the five
                   passed, the five-hour fail being the exception, so the curve
                   claimed a little more there than it delivered. The two middle
                   bins are the four-hour pass at 0.401 and the
                   four-and-a-half-hour pass at 0.610, one student each, and a
-                  pass rate over one student is not a rate.
+                  each observed rate is therefore either zero or one. A rate
+                  calculated from one student tells us very little about the
+                  chance of passing for similar students.
                 </p>
                 <KeepInMind>
                   Accuracy and calibration are different tests of the same
@@ -956,48 +966,64 @@ export default function LogisticRegressionPage() {
           title: "Questions on Scoring and Fitting",
           quiz: [
             choice(
-              "Lowering the threshold from 0.5 to 0.3 moves the boundary to 3.74 hours and raises accuracy from 0.833 to 0.917. What happens to the log loss?",
-              [
-                "It stays at 0.2933, because the probabilities never changed",
-                "It falls, since more students are classified correctly",
-                "It rises, since the threshold has moved away from one half",
-                "It becomes undefined once the threshold is below one half",
-              ],
-              0,
-              "The threshold is a decision rule laid on top of the probabilities and not part of the model, so sliding it moves the boundary on the hours axis and nothing else. Accuracy evaluates the thresholded decisions and says nothing about the probabilities that produced them, which is why it can change while the log loss, which reads only the probabilities, cannot. Raise the threshold to 0.8 instead and the boundary moves to 5.06 hours, the five-hour fail is caught and two passes are missed.",
-            ),
+  "The same fitted probability model is used before and after lowering its decision threshold. What happens to log loss?",
+  [
+                  "It stays at 0.2933, because the probabilities never changed",
+                  "It falls, since more students are classified correctly",
+                  "It rises, since the threshold has moved away from one half",
+                  "It becomes undefined once the threshold is below one half",
+                ],
+  0,
+  "The threshold is a decision rule laid on top of the probabilities and not part of the model, so sliding it moves the boundary on the hours axis and nothing else. Accuracy evaluates the thresholded decisions and says nothing about the probabilities that produced them, which is why it can change while the log loss, which reads only the probabilities, cannot. Raise the threshold to 0.8 instead and the boundary moves to 5.06 hours, the five-hour fail is caught and two passes are missed.",
+  {
+    "description": "Only the decision threshold changes; do not refit the model or recalculate its probabilities.",
+    "data": "Before: threshold 0.5, accuracy 0.833, binary log loss 0.2933\nAfter: threshold 0.3, accuracy 0.917\nBinary log loss is calculated from probabilities and observed labels, not thresholded decisions."
+  },
+),
             trueFalse(
-              "A student who passed, predicted at 0.9 and at 0.6, is scored the same by accuracy.",
-              true,
-              "Both predictions cross a threshold of one half, so both count as a correct pass and accuracy cannot separate them. The first gave more probability to what actually happened and ought to count as the better prediction, which is why fitting needs a loss over probabilities rather than a count of correct decisions.",
-            ),
+  "With a decision threshold of 0.5, a student who passed is scored the same by accuracy whether the predicted passing probability is 0.9 or 0.6.",
+  true,
+  "Both predictions cross a threshold of one half, so both count as a correct pass and accuracy cannot separate them. The first gave more probability to what actually happened and ought to count as the better prediction, which is why fitting needs a loss over probabilities rather than a count of correct decisions.",
+),
             choice(
-              "The walk starts with both coefficients at zero. What is the loss there?",
-              [
-                "About 0.693, because every student is given a probability of one half",
-                "Zero, because the model has not yet made a mistake",
-                "0.293, which is the optimum on this dataset",
-                "0.743, the value the first update reaches",
-              ],
-              0,
-              "Both coefficients at zero make every score zero, and the sigmoid of zero is one half for every student whatever their hours. Giving a half to each outcome costs the negative logarithm of a half, which is ln 2. The optimum of 0.293 and the overshoot of 0.743 both come later in the same walk.",
-            ),
+  "Both coefficients start at zero. Under this binary log-loss convention, what is the initial loss?",
+  [
+                  "About 0.693, because every student is given a probability of one half",
+                  "Zero, because the model has not yet made a mistake",
+                  "0.293, which is the optimum on this dataset",
+                  "0.743, the value the first update reaches",
+                ],
+  0,
+  "Both coefficients at zero make every score zero, and the sigmoid of zero is one half for every student whatever their hours. Giving a half to each outcome costs the negative logarithm of a half, which is ln 2. The optimum of 0.293 and the overshoot of 0.743 both come later in the same walk.",
+  {
+    "description": "Use natural logarithms and average the losses over the observations.",
+    "data": "score = intercept + slope*hours\nprobability = sigmoid(score)\nloss = mean(-y*log(probability) - (1-y)*log(1-probability))\nInitial intercept = 0; initial slope = 0; labels are binary."
+  },
+),
             several(
-              "Which of these hold for the walk on this dataset?",
-              [
-                "The optimum is near an intercept of −7.18 and a slope of 1.69",
-                "At a learning rate of 0.5 the first update raises the loss before it falls",
-                "The loss falls on every pass, starting from the first",
-                "The walk settles within a few dozen passes",
-              ],
-              [0, 1],
-              "The first update at that rate overshoots, taking the loss to 0.743 before it begins to fall, so the descent is not downhill from the very first step. It settles after a few thousand passes rather than a few dozen, and the optimum it reaches carries a loss of 0.293.",
-            ),
+  "Which statements agree with this training report?",
+  [
+                  "The optimum is near an intercept of −7.18 and a slope of 1.69",
+                  "At a learning rate of 0.5 the first update raises the loss before it falls",
+                  "The loss falls on every pass, starting from the first",
+                  "The walk settles within a few dozen passes",
+                ],
+  [0, 1],
+  "The first update at that rate overshoots, taking the loss to 0.743 before it begins to fall, so the descent is not downhill from the very first step. It settles after a few thousand passes rather than a few dozen, and the optimum it reaches carries a loss of 0.293.",
+  {
+    "description": "This is a recorded run on the overlapping twelve-student example. Interpret the report rather than remembering the plot.",
+    "data": "Learning rate: 0.5\nInitial coefficients: intercept 0, slope 0\nLoss: initially 0.693; after first update 0.743; final 0.293\nFinal coefficients: intercept approximately -7.18, slope approximately 1.69\nThe run settles after a few thousand passes."
+  },
+),
             trueFalse(
-              "On the twelve students with no mixed middle, the climb reaches an accuracy of one by pass 100 and then settles on a finite slope.",
-              false,
-              "Accuracy reaches one by pass 100 and never changes again, and the slope keeps growing, 1.05 at pass 100, 2.32 at pass 1000 and 3.50 at pass 5000, while the log loss keeps falling, 0.133, 0.024 and 0.006. Every steepening makes the observed outcomes more likely because there is no student in the middle to be wrong about, so the climb never finds a top and what is reported is wherever the pass budget ran out, labelled as not converged. Overlap is what holds the answer finite, and a penalty on the size of the coefficients is the repair.",
-            ),
+  "In this unregularised, separable example, accuracy reaches one by pass 100 and the slope then settles to a finite optimum.",
+  false,
+  "The accuracy has already reached one, but the slope and log loss keep changing. With completely separable labels and no coefficient penalty, scaling a separating score can keep making the observed labels more probable. The unregularised logistic likelihood has no finite maximiser in this setting. A finite pass budget returns a finite iterate; it does not establish convergence.",
+  {
+    "description": "The labels are linearly separable and the objective is binary log loss with no coefficient penalty.",
+    "data": "Pass | Accuracy | Slope | Log loss\n100 | 1.000 | 1.05 | 0.133\n1000 | 1.000 | 2.32 | 0.024\n5000 | 1.000 | 3.50 | 0.006"
+  },
+),
         ],
         },
         {
@@ -1005,7 +1031,7 @@ export default function LogisticRegressionPage() {
           practice: [
             exercise(
               "Fit the twelve students",
-              ["Fit the curve of Part 4 to the twelve students with the library, at the learning rate of 0.5 the page’s widgets use, and read off the slope, the intercept, where the probability crosses one half, and what one more hour multiplies the odds by.", "Part 4 quotes a slope of about 1.69, an intercept of about −7.18, a boundary at 4.24 hours and an odds multiplier of 5.44. Print how many passes the climb took as well, which the page does not say."],
+              ["The workshop separated a model score, its pass probability and the final decision. Now fit the score coefficients from the twelve students' study hours and recorded outcomes using LogisticRegression with learning_rate=0.5.","Print the fitted slope and intercept, the study-hour boundary for probability one half, and the factor by which another hour changes the model's odds. Also report epochs_run and converged. Use the named result format shown by the required-output panel; the coefficients are measured outputs of this fit, not values to enter by hand."],
               `from oop_ml import Feature, LogisticRegression
 
 hours = [1, 1.5, 2, 3, 3.5, 5, 4, 4.5, 5.5, 6, 7, 8]
@@ -1033,11 +1059,11 @@ intercept -7.1789
 boundary 4.24 hours
 odds multiplier per hour 5.44
 passes run 6453, converged True`,
-              { hints: ["The inputs go in as a list of Feature objects and the outcome as one Feature of zeros and ones. Construction takes the learning rate; the data goes to fit.", "coefficients is addressable by the feature’s name, and intercept is a property of its own.", "decision_boundary_at and odds_multiplier_for each take the feature’s name. The first is minus the intercept over the slope, where the score is zero; the second is e to the slope.", "epochs_run and converged are the walk’s own record of how it ended."], check: numberCheck("Where does the fitted curve cross one half, in hours?", 4.24, 0.005, "The probability is one half where the score is zero, so the boundary is the intercept divided by the slope with the sign flipped, 7.18 over 1.69. Everyone to the right of it is called a pass at a threshold of one half, which is how the curve gets ten of the twelve right and misses the five-hour fail and the four-hour pass.") },
+              { hints: ["The inputs go in as a list of Feature objects and the outcome as one Feature of zeros and ones. Construction takes the learning rate; the data goes to fit.", "coefficients is addressable by the feature’s name, and intercept is a property of its own.", "decision_boundary_at and odds_multiplier_for each take the feature’s name. The first is minus the intercept over the slope, where the score is zero; the second is e to the slope.", "epochs_run and converged are the walk’s own record of how it ended."], check: numberCheck("Where does the fitted curve cross one half, in hours?", 4.24, 0.005, "The boundary is where the fitted score is zero, giving probability one half. It describes this model’s decision at a one-half cutoff. It does not say that studying for that many hours guarantees a pass, and the overlapping observations prevent a perfect classification here."), question: "What pass-probability rule does the model learn from these twelve students?" },
             ),
             exercise(
               "Score the probabilities rather than the decisions",
-              ["Part 6 scores a curve by how much probability it gave to what actually happened. Take the fitted curve’s probability for each student, keep p for a pass and 1 − p for a fail, and turn each into a loss, minus its logarithm.", "Print the probability and the loss for the five-hour fail and the four-hour pass, the two students in the mixed middle, then the likelihood, which is the product over all twelve, and the log loss, which is the mean of the twelve losses. Part 6 quotes 1.536 and 0.914 for the two students, a likelihood of 0.0296 and a log loss of 0.2933."],
+              ["A correct-or-incorrect decision discards information about confidence. Use the fitted probabilities to score the observed outcomes themselves. For a passing student, use the assigned pass probability; for a failing student, use the assigned failure probability.","Print the pass probability and negative-log loss for the five-hour failure and the four-hour pass. Then print the product of the twelve assigned-outcome probabilities and their mean negative-log loss. The starter fits the same model again, so this challenge does not depend on a previous editor's variables."],
               `import math
 
 from oop_ml import Feature, LogisticRegression
@@ -1072,11 +1098,11 @@ print(f"log loss {sum(losses) / len(losses):.4f}")`,
 4 hours, passed 1: p 0.401, loss 0.914
 likelihood 0.0296
 log loss 0.2933`,
-              { hints: ["predict_probability answers one probability per student, in the order the hours were given, so position 5 is the five-hour fail and position 6 the four-hour pass.", "The probability assigned to what happened is p when the outcome is 1 and 1 − p when it is 0, which is the exponent trick of Part 6 written as a choice.", "math.prod multiplies a list together and math.log is the natural logarithm, so a loss is -math.log of the assigned probability."], check: numberCheck("What log loss does the fitted curve earn on the twelve students?", 0.2933, 0.0005, "The likelihood of 0.0296 is the chance of twelve specific things all happening, and it is small because it is a product. Taking logarithms turns the product into a sum, and averaging the twelve negative logarithms gives 0.2933. The two largest terms are the two students in the mixed middle, 1.536 for the five-hour fail the curve put at 0.785 and 0.914 for the four-hour pass it put at 0.401, which is log loss penalising confidence in the wrong outcome.") },
+              { hints: ["predict_probability answers one probability per student, in the order the hours were given, so position 5 is the five-hour fail and position 6 the four-hour pass.", "The probability assigned to what happened is p when the outcome is 1 and 1 − p when it is 0, which is the exponent trick of Part 6 written as a choice.", "math.prod multiplies a list together and math.log is the natural logarithm, so a loss is -math.log of the assigned probability."], check: numberCheck("What log loss does the fitted curve earn on the twelve students?", 0.2933, 0.0005, "Under the model’s conditional independent-outcome assumption, the likelihood is a product of the probabilities assigned to the observed outcomes. Mean log loss summarises their negative logarithms. The two overlapping students receive relatively high losses because the fitted model assigns low probability to what happened to them."), question: "How strongly did the fitted model support the outcomes that actually happened?" },
             ),
             exercise(
               "Move the threshold without refitting",
-              ["Part 5 slides the threshold while the curve stays put. Call a pass wherever the fitted probability reaches the threshold, at 0.3, at 0.5 and at 0.8, and score those decisions against the outcomes each time.", "Print the accuracy beside the boundary on the hours axis, which is the threshold’s own log-odds less the intercept, over the slope. Part 5 quotes 0.917 at 0.3 with the boundary at 3.74 hours, and 0.833 at 0.5 with it at 4.24."],
+              ["Keep this fitted curve fixed. At cutoffs 0.3, 0.5 and 0.8, predict a pass whenever the estimated probability reaches the cutoff, including equality. Compare those decisions with the students' recorded outcomes.","For each cutoff, print accuracy and the matching boundary on the hours axis. Use the cutoff's log odds together with the fitted slope and intercept to find that boundary. No refitting is needed: the only change is the rule used to turn probabilities into decisions."],
               `import math
 
 from oop_ml import ClassificationEvaluation, Feature, LogisticRegression
@@ -1112,11 +1138,11 @@ for threshold in (0.3, 0.5, 0.8):
               `threshold 0.3: accuracy 0.917, boundary 3.737 hours
 threshold 0.5: accuracy 0.833, boundary 4.237 hours
 threshold 0.8: accuracy 0.833, boundary 5.055 hours`,
-              { hints: ["A decision is 1 where the probability is at least the threshold and 0 elsewhere, which is one comparison per student.", "ClassificationEvaluation pairs the actual outcomes with the decisions, in that order, and accuracy is a property of it. Its confusion_matrix holds the four counts under the widget in Part 5.", "logit(t) is the natural logarithm of t over 1 − t, and the boundary is where the score reaches it, so subtract the intercept and divide by the slope."], check: numberCheck("What accuracy do the decisions reach at a threshold of 0.3?", 0.917, 0.0005, "Lowering the threshold moves the boundary down to 3.74 hours, so the four-hour pass is now called a pass and eleven of the twelve are right, with nothing about the curve changed. At 0.8 the boundary moves up past five hours, the five-hour fail is caught instead and two passes are missed, so accuracy is back at 0.833. The log loss is the same number at all three thresholds, because it reads the probabilities and never the decisions.") },
+              { hints: ["A decision is 1 where the probability is at least the threshold and 0 elsewhere, which is one comparison per student.", "ClassificationEvaluation pairs the actual outcomes with the decisions, in that order, and accuracy is a property of it. Its confusion_matrix holds the four counts under the widget in Part 5.", "logit(t) is the natural logarithm of t over 1 − t, and the boundary is where the score reaches it, so subtract the intercept and divide by the slope."], check: numberCheck("What accuracy do the decisions reach at a threshold of 0.3?", 0.917, 0.0005, "The lower cutoff includes the four-hour pass while retaining the five-hour false positive, so these particular decisions improve their accuracy. Raising the cutoff changes which observations are missed. The probabilities and their log loss remain fixed; a different dataset or mistake cost can favour another cutoff."), question: "Which decisions change when we move the cutoff but keep the fitted probabilities?" },
             ),
             exercise(
               "Separate the classes completely",
-              ["Part 9 fits the twelve students with no mixed middle, every fail at three and a half hours or less and every pass at five and a half or more. Fit them at a learning rate of 0.5 with pass budgets of 100, 1000 and 5000, and read the slope each climb reached.", "Part 9 quotes slopes of 1.05, 2.32 and 3.50, an accuracy of one from pass 100 onward, and a climb that never converges. Print all three for each budget and see whether the library says the same."],
+              ["The new data have no overlapping middle: every failure studied fewer hours than every pass. Fit independent LogisticRegression models with learning_rate=0.5 and budgets of 100, 1000 and 5000 epochs.","For each budget, print the fitted slope, accuracy at the default one-half cutoff, and converged. Compare the coefficient movement with the decisions. Restrict your conclusion to the observed runs and the unregularised model being fitted."],
               `from oop_ml import Feature, LogisticRegression
 
 hours = [1, 1.5, 2, 2.5, 3, 3.5, 5.5, 6, 6.5, 7, 7.5, 8]
@@ -1139,7 +1165,7 @@ for budget in (100, 1000, 5000):
               `budget 100: slope 1.05, accuracy 1.000, converged False
 budget 1000: slope 2.32, accuracy 1.000, converged False
 budget 5000: slope 3.50, accuracy 1.000, converged False`,
-              { hints: ["max_epochs is the pass budget, set at construction beside the learning rate.", "score answers the accuracy at a threshold of one half, which is the fraction of the twelve the curve calls correctly.", "converged is False when the walk ran out of passes before its steps fell under the tolerance, which on separated data is every time."], check: numberCheck("What slope has the climb reached when a budget of 5000 passes runs out?", 3.5, 0.005, "With no student in the middle to be wrong about, every steepening of the curve makes the observed outcomes more likely, so the slope keeps growing, 1.05 at 100 passes, 2.32 at 1000 and 3.50 at 5000, and the climb never finds a top. Accuracy is one throughout, which is exactly why it cannot be the thing to check. What the library reports is wherever the budget ran out, honestly labelled as not converged, and overlap is what would hold the answer finite.") },
+              { hints: ["Create a fresh model for each max_epochs budget so every comparison starts from the same initialisation.","score reports classification accuracy at the default cutoff. It does not establish that the likelihood has a finite optimum.","On perfectly separable data the unregularised logistic likelihood has no finite maximiser. A numerical stopping rule can still report small updates, so interpret converged together with the stated algorithm and budget."], check: numberCheck("What slope has the climb reached when a budget of 5000 passes runs out?", 3.5, 0.005, "These supplied runs achieve perfect classification while their slopes continue growing. Perfect separation lets the unregularised likelihood approach its supremum with increasingly large coefficients; it does not provide a finite maximum-likelihood coefficient. Numerical tolerance and regularisation are separate considerations."), question: "Can perfect classifications make these unregularised coefficients settle?" },
             ),
           ],
         },

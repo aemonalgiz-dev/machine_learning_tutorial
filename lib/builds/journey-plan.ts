@@ -3,9 +3,9 @@ export interface JourneyPlan {
   premise: string;
   /** Opening on a comparison is useful when the learner first needs to notice a problem. */
   order: "build-first" | "investigate-first";
-  construction: { title: string; start: string; outcome: string };
+  construction: { title: string; start: string; outcome: string; hints?: string[] };
   /** An intentional subtree of the recipe, never selected by operation count. */
-  preparation?: { path: number[]; title: string; challenge: string; why: string };
+  preparation?: { path: number[]; title: string; challenge: string; why: string; hints?: string[] };
   investigation: {
     title: string;
     caseIndex: number;

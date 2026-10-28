@@ -1,14 +1,13 @@
 // The reusable shell every concept page is poured into.
 //
-// A lesson is one flat run of sections, shown one at a time, with the arrows
-// and the section list at the top of the page. The opening, the guided visual
+// A lesson is one flat run of pages, with navigation beneath the current page.
+// The opening, the guided visual
 // introduction and the worked example are the first of those sections rather
 // than a preamble standing above them, so a reader moving to a later part is
 // not made to scroll past the introduction every time.
 //
-// The separate lesson-navigation panel is gone with it. It offered a link to
-// the opening, a link to the mechanism and a collapsed list of every section,
-// and the section list at the top of the page now answers all three.
+// The lesson title stays above the content. The footer contains the contents
+// menu and handles both page changes and neighbouring lessons.
 
 import { ReactNode } from "react";
 import { SectionNavigator, NavigableSection } from "./SectionNavigator";
@@ -52,34 +51,9 @@ interface ConceptPageProps {
   prerequisites?: ReactNode;
 }
 
-// What a lesson holds, for the line under its title.
-export function lessonSummary(sections: { quiz?: QuizQuestion[]; practice?: Exercise[] }[]) {
-  const questions = sections.reduce((sum, section) => sum + (section.quiz?.length ?? 0), 0);
-  const problems = sections.reduce((sum, section) => sum + (section.practice?.length ?? 0), 0);
-  return { questions, problems };
-}
-
-export function LessonMeta({
-  parts,
-  questions,
-  problems,
-}: {
-  parts: number;
-  questions: number;
-  problems: number;
-}) {
-  const pieces = [
-    `${parts} ${parts === 1 ? "section" : "sections"}`,
-    questions > 0 ? `${questions} ${questions === 1 ? "question" : "questions"}` : null,
-    problems > 0 ? `${problems} coding ${problems === 1 ? "challenge" : "challenges"}` : null,
-  ].filter((piece): piece is string => piece !== null);
-  return <p className="mt-4 font-mono text-xs text-muted">{pieces.join(" · ")}</p>;
-}
-
 export function ConceptPage({
   lessonId,
   title,
-  tagline,
   openingTitle,
   history,
   intuition,
@@ -151,14 +125,11 @@ export function ConceptPage({
   ];
   const practiceAt = all.findIndex(section => section.practice?.length);
   all.splice(practiceAt < 0 ? all.length : practiceAt, 0, { title: "Build with Botie", id: "workshop", game: lessonId, journey: journeyFor(lessonId) });
-  const { questions, problems } = lessonSummary(sections);
 
   return (
     <article className="mx-auto max-w-7xl px-6 py-12">
       <header className="mx-auto mb-6 max-w-[45rem]">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{title}</h1>
-        <p className="mt-3 text-lg text-muted">{tagline}</p>
-        <LessonMeta parts={all.length} questions={questions} problems={problems} />
       </header>
 
       <SectionNavigator sections={all} />

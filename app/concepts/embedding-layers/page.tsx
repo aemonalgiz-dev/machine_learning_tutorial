@@ -100,7 +100,7 @@ export default function EmbeddingLayersPage() {
         <WorkedExample title="The rows go where the objective sends them">
           <p>The starting rows for cat and dog are [0.2, 0.0] and [−0.2, 0.0], which point in exactly opposite directions. Nothing about cats and dogs put them there. The values were chosen for the exercise. The playground&rsquo;s targets describe a different arrangement, in which cat at [1, 1] and dog at [−1, 1] agree in their second coordinate and differ in their first. Repeat the playground&rsquo;s step on the sequence cat, dog, cat, each time starting from the table the last step left.</p>
           <NumberTable headings={["Steps taken", "cat row", "dog row", "mat row", "Loss"]} rows={[["0", "[0.2, 0.0]", "[−0.2, 0.0]", "[0.0, −0.2]", "2.4600"], ["1", "[0.36, 0.2]", "[−0.28, 0.1]", "[0.0, −0.2]", "1.7138"], ["5", "[0.7379, 0.6723]", "[−0.5276, 0.4095]", "[0.0, −0.2]", "0.4620"], ["20", "[0.9908, 0.9885]", "[−0.9027, 0.8784]", "[0.0, −0.2]", "0.0123"]]} caption="The same step repeated at a learning rate of 0.1. The playground itself takes the first of these steps." />
-          <p>Three things in that table hold beyond this example. The rows end up arranged the way the objective asked, and no longer the way they started. The cat row arrives sooner than the dog row, because cat is read twice in the sequence and its gradient is twice as large. And the mat row has not moved at all, although it has a target like the others, because the sequence never read it. A word the training data never contains keeps the vector it started with, and a word it seldom contains moves only a little.</p>
+      <p>In this example the cat row receives two identical contributions because the sequence reads it twice and both occurrences are given the same target. Both contributions update the same stored row, while the dog row receives one contribution. Repeated IDs generally accumulate all their gradient contributions, but those contributions need not be equal or even point the same way in a larger model. The unused mat row receives no update from this lookup. What a rare word learns depends on its training signals, not its count alone.</p>
           <p>The second coordinate came to hold something cat and dog share only because these targets were written that way. Turn every target by the same angle and the rows would settle on different numbers with the same distances between them, so no single coordinate can be said to mean anything by itself.</p>
         </WorkedExample>
         <KeepInMind><p>There is no fixed dictionary meaning for each coordinate. Changing the vocabulary order requires changing the corresponding table rows. Unknown tokens need an explicit vocabulary policy, and sequence position requires additional information. The layer itself only performs lookup and learning of the selected rows.</p></KeepInMind>
@@ -113,16 +113,19 @@ export default function EmbeddingLayersPage() {
           "There is no such meaning to read off a coordinate. Vector similarity becomes useful when the training objective makes it useful, as predicting neighbouring words does by encouraging related contexts to produce related representations. Changing the vocabulary order means changing the corresponding table rows.",
         ),
         several(
-          "Which of these are the layer’s own job?",
-          [
-            "Looking up the selected rows",
-            "Learning the selected rows",
-            "Deciding what happens to an unknown token",
-            "Supplying where in the sequence a token sat",
-          ],
-          [0, 1],
-          "The layer only performs the lookup and the learning of the rows it selected. Unknown tokens need an explicit vocabulary policy, and sequence position requires additional information. Padding and the treatment of padding tokens belong to the surrounding data and model design as well.",
-        ),
+              "Which jobs belong to a plain trainable embedding lookup?",
+              [
+                          "Looking up the selected rows",
+                          "Learning the selected rows",
+                          "Deciding what happens to an unknown token",
+                          "Supplying where in the sequence a token sat",
+                        ],
+              [0, 1],
+              "The layer only performs the lookup and the learning of the rows it selected. Unknown tokens need an explicit vocabulary policy, and sequence position requires additional information. Padding and the treatment of padding tokens belong to the surrounding data and model design as well.",
+              {
+                "description": "The surrounding tokenizer supplies valid integer row IDs. This layer selects rows from a trainable matrix, returns their vectors and accumulates gradients for the selected rows. It has no positional-encoding component or unknown-token policy."
+              },
+            ),
         choice(
           "With the number of tokens per sequence fixed at construction, what does the layer answer with?",
           [
@@ -156,7 +159,10 @@ export default function EmbeddingLayersPage() {
           practice: [
             exercise(
               "Take the playground’s step",
-              ["Build the lesson’s table for cat, dog and mat, look up the sequence cat, dog, cat, measure the loss against the playground’s targets, and take one training step at a learning rate of 0.1.", "Part 1 worked the loss before the step as 2.46 and Part 2 moved the cat row to [0.36, 0.2] and the dog row to [−0.28, 0.1], with the mat row left alone. Check all of those, and the loss after the step."],
+              [
+  "Look up the supplied cat/dog/cat sequence from the three-row embedding table. Measure SquaredError against the supplied targets, treating the full sequence as one observation.",
+  "Take one step at learning rate 0.1. Print initial loss, each row’s gradient and updated value, then remeasure loss using the updated layer."
+],
               `import numpy as np
 from oop_ml import Embedding, SquaredError
 
@@ -205,11 +211,17 @@ mat
   gradient [0.0, 0.0]
   row after [0.0, -0.2]
 loss after the step 1.7138`,
-              { hints: ["Embedding(3, 2, 3) is three table rows, two numbers in each, and three tokens per sequence. respond_to takes the identifiers and answers with outputs arranged one sequence by three tokens by two numbers.", "SquaredError().measure takes predictions and targets with one row per observation. Flattening the lookups to a single row makes the whole sequence one observation, which is how the lesson counts it. The measurement has value and gradient.", "The gradient comes back as one row of six numbers, and correction_for wants it in the shape of the layer’s outputs, so reshape it to response.outputs.shape.", "correction.gradient.weights holds one row of slopes per table row. stepped_by takes the gradient and a learning rate and answers a new layer, whose table is the updated one."], check: numberCheck("What is the loss after the step?", 1.7138, 5e-05, "The cat row moved a fifth of the way to its target, since two occurrences each pulled with a learning rate of 0.1, and the dog row moved a tenth of the way. Looking the three words up again leaves squared differences that add to 3.4276, and half of that is 1.7138, down from 2.46. The mat row was never read, so its gradient is zero and it stayed at [0.0, −0.2].") },
+              { hints: [
+  "Flatten the lookup output for the loss convention, then reshape its gradient back to response.outputs.shape for correction_for.",
+  "The repeated cat lookups contribute to the same table row; mat is not looked up in this sequence."
+], check: numberCheck("What is the loss after the step?", 1.7138, 5e-05, "The updated loss is 1.7138. Repeated cat lookups accumulate into the same table-row gradient, while the unused mat row stays unchanged."), question: "How does a repeated token combine its two embedding updates?" },
             ),
             exercise(
               "Replace the second cat with mat",
-              ["The playground suggests replacing one occurrence of cat with mat to see which rows receive an update. Take the same single step from the same starting table on cat, dog, cat and then on cat, dog, mat, and print the whole table after each.", "Part 2 says the cat row lands on [0.28, 0.1] when it is read once and that the mat row moves to [0.0, −0.28]. The losses for the second sequence are not in the lesson, so read those off your own run."],
+              [
+  "Start separately from the same supplied embedding table for cat/dog/cat and cat/dog/mat. Take one learning-rate-0.1 step against the same position targets.",
+  "For each sequence print every updated row, loss before the step and loss after it. Do not carry the first experiment’s updated layer into the second."
+],
               `import numpy as np
 from oop_ml import Embedding, SquaredError
 
@@ -258,11 +270,17 @@ cat dog mat
   mat row after [0.0, -0.28]
   loss before 1.9600
   loss after 1.5876`,
-              { hints: ["Each pass of the loop starts again from the starting table, so build the layer inside the loop with with_parameters(table).", "The steps are the ones from the first problem, respond_to, measure, correction_for with the reshaped gradient, then stepped_by.", "updated.table has one row per vocabulary entry, in vocabulary order, whichever words the sequence held."], check: numberCheck("On cat, dog, mat, what is the loss after the step?", 1.5876, 5e-05, "With mat in the third position every word is read once, so every row receives one occurrence’s gradient and moves a tenth of the way to its target. The cat row lands on [0.28, 0.1] and the mat row, read for the first time, on [0.0, −0.28]. The loss starts lower than before, at 1.96, because the mat row begins nearer its target than the cat row does to its own, and the step takes it to 1.5876.") },
+              { hints: [
+  "Rebuild with with_parameters(table) inside the comparison loop.",
+  "Keep positional targets fixed while changing only the third lookup ID."
+], check: numberCheck("On cat, dog, mat, what is the loss after the step?", 1.5876, 5e-05, "The cat/dog/mat loss after its step is 1.5876. Replacing a lookup changes both which row receives a derivative and the initial loss being compared."), question: "Which table rows change when the last cat becomes mat?" },
             ),
             exercise(
               "Take ten steps instead of one",
-              ["The playground takes one step from the starting table. Part 3 repeats that step and shows the table after one, five and twenty steps. Repeat it ten times on cat, dog, cat, each step starting from the layer the last one left, and print the loss before every step and the table at the end.", "Watch which of the three rows is nearest its target after ten steps and which has not moved, and find the loss at that point, which the lesson’s table does not list."],
+              [
+  "Train the supplied cat/dog/cat lookup for ten consecutive steps, carrying each updated layer into the next step.",
+  "Print loss immediately before each update. Then make a fresh lookup to print loss after all ten updates and the final cat, dog and mat rows."
+],
               `import numpy as np
 from oop_ml import Embedding, SquaredError
 
@@ -313,7 +331,10 @@ loss after ten steps 0.1186
 cat row [0.9141, 0.8926]
 dog row [-0.7211, 0.6513]
 mat row [0.0, -0.2]`,
-              { hints: ["stepped_by answers a new layer and leaves the old one as it was, so assigning its answer back to layer is what carries the table from one step to the next.", "The loss printed inside the loop is measured before that step is taken, so the loss after the tenth step needs one more lookup and one more measurement after the loop.", "layer.table is the table of whichever layer the name currently holds, which after the loop is the one ten steps on."], check: numberCheck("What is the loss after ten steps?", 0.1186, 5e-05, "Every step closes a fifth of the cat row’s remaining distance to its target and a tenth of the dog row’s, so after ten steps cat is at [0.9141, 0.8926] and dog, read once in the sequence, only at [−0.7211, 0.6513]. Most of the 0.1186 that is left belongs to the one dog lookup. The mat row is still [0.0, −0.2], since nothing in the sequence ever read it.") },
+              { hints: [
+  "stepped_by returns a new layer; assign it back to the variable used next.",
+  "The last in-loop loss precedes the tenth update. Evaluate once more afterward for the requested final loss."
+], check: numberCheck("What is the loss after ten steps?", 0.1186, 5e-05, "The final loss is 0.1186. It is measured after the tenth update, whereas the last line inside the loop reports the loss before that update."), question: "What happens when embedding updates continue from the previous step?" },
             ),
           ],
         },

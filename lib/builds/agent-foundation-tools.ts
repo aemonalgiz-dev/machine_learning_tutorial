@@ -87,7 +87,7 @@ export const agentFoundationTools: Record<string, Tool> = {
     },
   },
   agentFilterRecords: {
-    title: 'Keep permitted records', why: 'Keep records whose selected field occurs in the allowed list, preserving input order. The input list must already be ranked if rank matters.', inputs: ['Records', 'Allowed field values'],
+    title: 'Keep permitted records', why: "Keep a record when its selected field, such as asset, occurs in the application’s allowed list. Preserve incoming order; this tool does not rank the records itself.", inputs: ['Records', 'Allowed field values'],
     settings: [{ key: 'field', label: 'Field to match', initial: 'asset' }],
     run: ([rows, allowed], settings) => {
       const records = list(rows), values = list(allowed);

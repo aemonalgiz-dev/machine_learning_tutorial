@@ -1,3 +1,4 @@
+import { mockAccountBackend, accountBackendFor, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { test, expect, type Page } from "@playwright/test";
 import path from "node:path";
 import { journeyFor } from "../lib/builds/journey";
@@ -13,19 +14,14 @@ async function seedIncorrectDivisor(page: Page) {
   const divide = graph.pieces.find(piece => piece.tool === "divide")!;
   graph.connections = graph.connections.map(wire => wire.to === divide.id && wire.port === 1 ? { ...wire, from: total.id } : wire);
   const key = workshopRecordKey(data.challenges.construction, journeyDraftId(data.build, "construction", data.plan!.investigation.caseIndex));
-  await page.addInitScript(({ key, graph }) => {
-    if (sessionStorage.getItem("repair-layout-seeded")) return;
-    localStorage.setItem(`fitlab.learning.v1:guest:${key}`, JSON.stringify({
-      key, value: { graph, undo: [], redo: [], caseIndex: 0, results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0, example: false, animate: false, zoom: .75 },
-      revision: 0, mutationId: "repair-layout-seed", dirty: false,
-    }));
-    sessionStorage.setItem("repair-layout-seeded", "yes");
-  }, { key, graph });
+  accountBackendFor(page).seed(key, { graph, undo: [], redo: [], caseIndex: 0, results: {}, tested: {}, customData: null, prediction: "", hintsShown: 0, example: false, animate: false, zoom: .75 });
 }
+
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
 
 test("a fresh-case repair keeps the floor ahead of its preserved first-run evidence", async ({ page }) => {
   await seedIncorrectDivisor(page);
-  await page.goto("/lab/statistics");
+  await page.goto("/lab/statistics"); await waitForAccountReady(page);
   await page.locator("summary").filter({ hasText: "Weeks with no recorded deaths" }).click();
   const fresh = page.getByTestId("journey-fresh-case");
   await expect(fresh.getByText("Required result", { exact: true })).toHaveCount(0);
@@ -53,10 +49,8 @@ test("a fresh-case repair keeps the floor ahead of its preserved first-run evide
   await expect(first).toBeHidden();
   await evidence.locator("summary").first().click();
   await expect(first).toContainText("0 of 4 checks passed on that first run.");
-  const snapshot = await page.evaluate(() => {
-    const key = Object.keys(localStorage).find(key => key.startsWith("fitlab.learning.v1:guest:journey-fresh:statistics:"))!;
-    return JSON.parse(localStorage.getItem(key)!).value;
-  });
+  await waitForAccountSync(page);
+  const snapshot = accountBackendFor(page).find<{ committedPrediction: string; firstRun: { trace: { output: number }; outcomes: boolean[] } }>(key => key.startsWith("journey-fresh:statistics:"))!;
   expect(snapshot.committedPrediction).toBe("6");
   expect(snapshot.firstRun.trace.output).toBe(1);
   expect(snapshot.firstRun.outcomes).toEqual([false, false, false, false]);
@@ -68,7 +62,7 @@ test("a fresh-case repair keeps the floor ahead of its preserved first-run evide
 
 test("committing a diagnostic decision opens the workspace and folds the earlier comparison away", async ({ page }) => {
   await seedIncorrectDivisor(page);
-  await page.goto("/lab/statistics");
+  await page.goto("/lab/statistics"); await waitForAccountReady(page);
   await page.getByRole("navigation", { name: "Journey stages" }).getByRole("button", { name: "Three weeks instead of five", exact: true }).click();
   await page.getByRole("textbox", { name: "Mean deaths per recorded week", exact: true }).fill("32");
   await page.getByRole("button", { name: "Save my prediction and try it", exact: true }).click();

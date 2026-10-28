@@ -41,15 +41,15 @@ export default function WhatATokenIsPage() {
       tagline={"We can read the word cat, but a numerical model needs a representation it can process. A tokenizer divides text into pieces and maps those pieces to IDs, giving us a starting point for working with language."}
       prerequisites={
         <>
-          Nothing before this, beyond the one fact every page in the rest of
-          this site rests on, that a model reads a block of numbers and nothing
-          else. The{" "}
+          You do not need an earlier lesson. We will begin with ordinary text
+          and work out how to prepare it for a numerical model. The{" "}
           <Link href="/concepts/dense-layers" className={link}>
             dense layers
           </Link>{" "}
-          page is where that block is first multiplied by something. Every page
-          in the section after this one answers the same checklist this page
-          ends with, in a different way.
+          lesson later explains how a layer calculates with numerical inputs.
+          Token IDs are one interface for preparing language; image and
+          measurement models use other input representations. The later
+          tokenization lessons compare different ways to choose the pieces.
         </>
       }
 
@@ -77,9 +77,14 @@ export default function WhatATokenIsPage() {
                   alone so those decisions are easy to see.
                 </p>
                 <p>
-                  The numerical layers on this site need numbers in place of
-                  those text pieces. The tokenizer supplies the IDs, and an
-                  embedding layer can then look up trainable vectors. If{" "}
+                  The tokenizer first supplies an ID for each piece. A later
+                  layer can use that ID to look up a row of numbers for the piece.
+                  That lookup is called an embedding. Its row is a vector, an
+                  ordered list of numerical values, and training can adjust those
+                  values as the model learns from examples.
+                </p>
+                <p>
+                  The ID and its looked-up row have different jobs. If{" "}
                   <span className="font-mono">re-analysis.</span> and{" "}
                   <span className="font-mono">re-analysis</span> are two
                   separate vocabulary entries, as the scheme in Part 3 makes
@@ -111,9 +116,10 @@ export default function WhatATokenIsPage() {
                   Cutting the sentence about Dr. Alvarez at every space gives seven
                   pieces, and against the table Part 2 builds those seven pieces
                   carry the numbers 3, 2, 14, 19, 43, 28 and 32. A model sees
-                  only that second list. Everything it will ever know about the
-                  sentence has to arrive through those seven numbers and through
-                  the order they came in.
+                  those IDs in order as its input representation. Its learned
+                  parameters may already contain useful patterns from training,
+                  but details of this particular sentence can reach the model
+                  only if the encoding preserved them.
                 </p>
                 <WorkedExample title="Seven pieces, seven numbers">
                   <Equation>
@@ -1080,7 +1086,11 @@ export default function WhatATokenIsPage() {
           practice: [
             exercise(
               "Build the whole-word table and number two sentences",
-              ["Build the table Part 2 reads from. Count the pieces the six sentences give when they are cut at spaces, sort the distinct ones alphabetically, and put the stand-in in front so that it sits at number 0. Then print the numbers the sentence about Dr. Alvarez and the fifth sentence go in as.", "The sentence about Dr. Alvarez should come out as the seven numbers of section 2, and the fifth as the thirteen of section 5 with the at 43 in both. Then count how many of the entries the six sentences use exactly once, which the page does not print and which is what section 7 means by a row learned from very little text."],
+              [
+  "Use the supplied six-sentence notebook to build a whole-word vocabulary. Split on whitespace, collect distinct spellings and sort them with Python’s normal string ordering.",
+  "Put \"[UNK]\" first and declare it the unknown token, giving it ID zero. Print distinct-piece and vocabulary sizes, then the ID sequences for notebook[0] and notebook[4].",
+  "Finish by printing how many observed spellings occur exactly once and the occurrence count of the exact lowercase piece the. Punctuation and case stay part of each whitespace-delimited spelling."
+],
               `from oop_ml import Corpus, Vocabulary, WhitespacePreTokenizer
 
 notebook = [
@@ -1126,11 +1136,21 @@ print(f"the is met {counts.count_of('the')} times")`,
 6 15 47 40 44 26 47 27 42 43 17 39 20
 entries met once: 39 of 47
 the is met 9 times`,
-              { hints: ["The counts know their distinct pieces as words, and sorted puts those in alphabetical order with the capitals first, which is the order the page’s numbers assume.", "Vocabulary takes the list of entries and, by keyword, which of them is the unknown_token. Putting the stand-in first in the list is what makes it number 0.", "The rule’s split answers a collection whose texts are the pieces alone, and the table’s ids_of turns a sequence of pieces into their numbers.", "count_of answers how many times one piece occurred, so the entries met once are a sum over the distinct pieces of whether that count equals one."], check: numberCheck("How many of the 47 pieces do the six sentences use exactly once?", 39, 0.0, "Thirty-nine of the 47 entries occur once in the six sentences, so 39 of the 48 rows a model would carry are each learned from a single occurrence, while the is met nine times. That is section 7’s point about a rare entry, and it is the usual shape of a word table, a few entries seen often and most of them seen hardly at all.") },
+              {
+question: "How can a word become a stable vocabulary ID?",
+ hints: [
+  "Corpus.of(notebook).word_counts(rule) provides words, n_words and count_of.",
+  "Construct Vocabulary([\"[UNK]\", *sorted(counts.words)], unknown_token=\"[UNK]\"). The order assigns IDs; the integers themselves do not express similarity.",
+  "Apply ids_of to rule.split(sentence).texts. Count rare spellings from their occurrence counts, not their assigned IDs."
+], check: numberCheck("How many of the 47 pieces do the six sentences use exactly once?", 39, 0.0, "Thirty-nine observed spellings occur only once. This small table therefore has many entries supported by a single occurrence, while the lowercase piece the has repeated evidence.") },
             ),
             exercise(
               "Grow both tables one sentence at a time",
-              ["Section 11 fed the six sentences in one at a time and measured both tables after each. Do the same. After each sentence, fit the character scheme on the sentences read so far and count the distinct space-delimited pieces in them, and print the size of each table with its stand-in counted.", "The first, fourth and sixth rows should be the 25 against 8, 37 against 30 and 38 against 48 the page quotes. The page says the lines cross between the fourth and the fifth sentence without printing the fifth row, so read off what the whole-word table holds there."],
+              [
+  "Reveal the six notebook sentences in order. After each addition, fit a character tokenizer on the prefix seen so far and count distinct whitespace-delimited spellings from that same prefix.",
+  "Print the number of sentences seen and both vocabulary sizes, including one unknown entry in each. Use a fresh character fit for each prefix.",
+  "The two tables represent different units. Compare their growth here without assuming that this short sample proves how every corpus behaves."
+],
               `from oop_ml import CharacterTokenizer, Corpus, WhitespacePreTokenizer
 
 notebook = [
@@ -1172,11 +1192,20 @@ for size in range(1, len(notebook) + 1):
 4 sentences  characters 37  whole words 30
 5 sentences  characters 37  whole words 40
 6 sentences  characters 38  whole words 48`,
-              { hints: ["A slice of the list up to size is the sentences read so far, and both the tokenizer’s fit and Corpus.of take that list as it is.", "A fitted tokenizer carries its table as vocabulary, and the table’s n_tokens counts every entry, the stand-in included.", "The word counts know n_words, the number of distinct pieces. The page’s whole-word table has one reserved entry on top of those, so add one."], check: numberCheck("How many entries does the whole-word table hold after the fifth sentence?", 40, 0.0, "After five sentences the whole-word table holds 40 entries against the character table’s 37, which is the first row where it is the larger. The character table gained nothing from the fifth sentence, since its alphabet was nearly complete after four, while the word table gained ten there and eight more at the sixth, the line section 11 says has not slowed.") },
+              {
+question: "Which grows faster here: a character table or a whole-word table?",
+ hints: [
+  "notebook[:size] supplies the same visible prefix to both measurements.",
+  "The character vocabulary’s n_tokens already includes its unknown entry. Add one to the distinct whole-word count for the matching reserved entry."
+], check: numberCheck("How many entries does the whole-word table hold after the fifth sentence?", 40, 0.0, "After five sentences the whole-word table has forty entries. It has overtaken the character table on this sample because the new sentence introduces new combinations of largely familiar characters.") },
             ),
             exercise(
               "Two sentences, one run of numbers, and a table that refuses",
-              ["Part 4 put two sentences to the whole-word table that differ in one word the six sentences never used. Encode both against the table with a stand-in, print the numbers, and glue the pieces the numbers name back together with single spaces. Then build the same table without a stand-in and put the first sentence to it.", "The two runs of numbers should be identical, with 0 in the second place, and both should read back as the same sentence with the same gap. The table without a stand-in should refuse, and its refusal should name the piece it could not place."],
+              [
+  "Build the supplied whole-word table with an unknown entry. Encode both new probe sentences, print their ID sequences and reconstruct each with single-space joins of the looked-up token spellings.",
+  "Then build the same observed vocabulary without an unknown entry. Try the first probe, catch UnknownTokenError and print the refusal message.",
+  "The probes differ at one unseen word. Compare their IDs to see whether the stand-in preserves that distinction. The exception comparison shows a different policy for missing spellings."
+],
               `from oop_ml import Corpus, UnknownTokenError, Vocabulary, WhitespacePreTokenizer
 
 notebook = [
@@ -1232,11 +1261,21 @@ The [UNK] drift was larger than expected.
 6 0 15 47 27 42 20
 The [UNK] drift was larger than expected.
 refused: token 'calibration' is not in this vocabulary of 47, which has no unknown token to fall back on`,
-              { hints: ["A Vocabulary given no unknown_token has no entry to fall back on, so the same list of words without the stand-in is the table that refuses.", "ids_of turns pieces into numbers and tokens_of turns numbers back into pieces, and the whole-word scheme’s glue is a single space, so the reading back is one join.", "The refusal is an UnknownTokenError. Catch it by that name around the call on the second table, and print the exception itself, which is its own sentence."] },
+              {
+question: "What information is lost when two unknown words share one stand-in ID?",
+ hints: [
+  "ids_of converts pieces to IDs; tokens_of looks them up again. The substituted string is the stand-in’s spelling, not the original unknown word.",
+  "Omit unknown_token when constructing the closed table, and omit the stand-in from its entries.",
+  "Catch UnknownTokenError around the closed-table lookup only, so the refusal remains visible without stopping the report."
+] },
             ),
             exercise(
               "Put two awkward texts to the character table and the byte table",
-              ["Fit the character scheme on the six sentences and build the byte scheme, which is fitted on nothing. Encode the sentence with two accented letters and the sentence about Dr. Alvarez with a doubled space and a line break under each, and print how many numbers each text became, how many of them are the stand-in, and whether decoding the numbers gives back the text exactly.", "The character table should substitute twice on the first text and once on the second, as sections 16 and 19 say, and the byte table should come back exact on both. Read off how many numbers the accented sentence costs under bytes."],
+              [
+  "Fit CharacterTokenizer with \"[UNK]\" on the six supplied notebook sentences. Construct ByteTokenizer without fitting it.",
+  "For both supplied probe texts under both tokenizers, print token count, unknown-piece count and whether decoding the IDs exactly restores the original string. Finish with the byte vocabulary size.",
+  "One probe introduces accented letters; the other introduces a doubled space and a line break. Test exact strings so a spacing change is visible as a failure even when the sentence looks readable."
+],
               `from oop_ml import ByteTokenizer, CharacterTokenizer
 
 notebook = [
@@ -1291,7 +1330,13 @@ accented  bytes       71 numbers  0 stand-ins  exact True
 respaced  characters  52 numbers  1 stand-ins  exact False
 respaced  bytes       52 numbers  0 stand-ins  exact True
 the byte table holds 256 entries`,
-              { hints: ["Both schemes answer encode with an encoding that knows n_tokens and its ids, and iterating over it gives tokens that each carry text and token_id.", "A substituted piece is a token whose text is the stand-in’s own spelling, so counting the tokens whose text equals \"[UNK]\" counts the substitutions.", "decode takes the encoding’s ids and answers a string. Compare that string with the text using ==, which is the test section 17 asks for in place of reading the output."], check: numberCheck("How many numbers does the accented sentence become under the byte table?", 71, 0.0, "The sentence is 69 characters, and 67 of them are one byte each while the two accented letters are two bytes each, which comes to 71. The character table spends 69 numbers and loses both letters, where the byte table spends two more and loses nothing, because its 256 entries were complete before it read any text. That is section 16’s trade, coverage paid for in length.") },
+              {
+question: "Can characters and bytes preserve unfamiliar letters and unfamiliar whitespace equally?",
+ hints: [
+  "Iterate the encoding and count tokens whose text equals \"[UNK]\".",
+  "Compare decode(encoding.ids) directly with the original source.",
+  "Byte-token length counts UTF-8 bytes. Python len(text) counts code points, so their values can differ on the accented probe."
+], check: numberCheck("How many numbers does the accented sentence become under the byte table?", 71, 0.0, "The accented sentence needs 71 byte IDs and is recovered exactly. The trained character table uses fewer IDs but substitutes its unfamiliar accented letters.") },
             ),
           ],
         },

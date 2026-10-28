@@ -65,10 +65,13 @@ export default function UnigramLanguageModelPage() {
               <SubSection title="1. The corpus, the sentence, and what is being chosen">
                 <>
 <p>
-                  Every page in this section carries the same sentence, and this one carries two corpora beside it. The large one is eighteen short sentences of ordinary English about reports and costs and analyses, holding 72 distinct words across 133 occurrences and spelled in 51 symbols. The small one is four words with their counts, low five times, lower twice, newest six times and widest three, which is the example the original subword paper worked through and is small enough that every number on this page can be checked by hand.
+                  Merging commits to one sequence of joins. Here we want to compare alternative ways of representing the same word, with a score attached to each complete segmentation. That requires a probability for each available piece.
                 </p>
                 <p>
-                  Neither corpus contains the sentence.
+                  We use two familiar corpora: eighteen report-related sentences, and the four-word low, lower, newest and widest example from the earlier merging lesson. The small case lets us follow the scoring decisions before comparing the larger vocabulary.
+                </p>
+                <p>
+                  Neither corpus contains the sentence below. The large corpus has 72 distinct words across 133 occurrences. This implementation also distinguishes a character inside a word from its marked word-final form, giving it 51 initial symbols. Keep that convention in view when comparing its symbol count with an ordinary alphabet count.
                 </p>
 </>
                 <Equation>{SENTENCE}</Equation>
@@ -107,7 +110,7 @@ export default function UnigramLanguageModelPage() {
                   as lo, then w, then e, then r with its end-of-word mark, four
                   pieces for a word the corpus definitely contains. The pieces are all
                   frequent and the cut is defensible at every step, and yet the
-                  finished vocabulary spends four rows on a word it holds and
+                  resulting encoding needs four positions for a word it holds and
                   cannot say that spelling it whole would have been better.
                 </p>
                 <p>
@@ -1189,7 +1192,11 @@ export default function UnigramLanguageModelPage() {
           practice: [
             exercise(
               "Shrink the four words to 22 rows",
-              ["Part 1 merged the four words to 22 rows and got lower back in four pieces, and Part 4 said that asking the shrinking for the same 22 keeps the four words themselves and, beside them, de, des, dest, er, es and est. Fit both on the four words at 22 rows, the merging with its byte rows switched off, and print the shrunk vocabulary. Then, for lower and for lowest, print the likeliest spelling with its log probability to two places beside the cut merging gives.", "The 28 spellings of lowest in Part 2 were read off the starting table of 49 candidates. The fitted model has pruned that table to the pieces it prints, so its answer for lowest is a different one, and the lesson never states it."],
+              [
+  "Fit the supplied four-word corpus with the unigram vocabulary learner and BPE at twenty-two rows. Disable byte fallback for BPE.",
+  "Print the unigram fit’s vocabulary. For lower and lowest print its best segmentation, piece count and log probability to two decimal places, followed by BPE’s pieces and count.",
+  "The unigram learner removes candidate pieces during fitting. Search the fitted vocabulary rather than reusing a segmentation possible only in its initial candidate set."
+],
               `from oop_ml import BytePairEncoding, UnigramLanguageModel
 
 corpus = [
@@ -1227,11 +1234,21 @@ lower: lower</w> (1) at -2.09
   merged: lo w e r</w> (4)
 lowest: l o w est</w> (4) at -25.70
   merged: lo w est</w> (3)`,
-              { hints: ["Both take the size at construction and the corpus in fit. The vocabulary is iterable, the stand-in first, then the eleven symbols, then the learned pieces by falling probability.", "best_segmentation takes one word and answers an object with the pieces, an n_tokens and a log_probability, which is the sum of its pieces’ log probabilities.", "encode answers an object whose texts are the pieces. Both fits write the end-of-word mark as </w> on a word’s last character."], check: numberCheck("What log probability does the fitted model give the likeliest spelling of lowest, to two places?", -25.7, 0.005, "The four whole words carry the corpus, so the two rounds of re-estimation before every size check leave the letters and endings almost nothing. The pieces lo and west that the starting table preferred have been pruned, so lowest is spelled from four leftovers, l, o, w and est with its mark, and four very small probabilities multiply to a log probability of −25.70 where lower, a row of its own, scores −2.09. That is Part 4’s certainty inside a finished fit, a word the corpus lacks made very improbable while staying spellable, and it costs four pieces where merging’s cut costs three.") },
+              {
+question: "Does the most probable segmentation have the same pieces as BPE?",
+ hints: [
+  "best_segmentation(word) exposes pieces, n_tokens and log_probability.",
+  "The </w> suffix is part of the learned spelling of a word-ending piece.",
+  "BPE.encode(word).texts shows the separate comparison. The two learning objectives need not favour the same inventory or cut."
+], check: numberCheck("What log probability does the fitted model give the likeliest spelling of lowest, to two places?", -25.7, 0.005, "The fitted unigram model scores lowest at about -25.70. Its very low-probability remaining components can spell the word, while the familiar lower has a complete learned row.") },
             ),
             exercise(
               "Take two vocabularies of the same size apart",
-              ["Part 5 fitted both methods to the eighteen sentences at 100 rows and found the shrunk vocabulary spending all 48 of its learned rows on whole words of the corpus where merging spends 8, with the corpus read in 229 pieces against 344 and the held-out sentence in 32 against 27. Reproduce that row, and produce the same row at 90, which the lesson’s tables do not print.", "Both vocabularies list the stand-in first and the 51 symbols next, so the learned pieces are everything after the first 52 rows. A whole word of the corpus is a word followed by the end-of-word mark."],
+              [
+  "Fit unigram and BPE vocabularies at ninety and one hundred rows on the eighteen supplied sentences, with BPE byte fallback disabled.",
+  "For each fit print how many learned rows are complete corpus words, how many learned rows it has in total, total corpus tokens and held-out Dr. Alvarez sentence tokens.",
+  "For these particular vocabularies the first fifty-two rows are reserved and alphabet entries. Exclude them from the learned-row comparison, and keep the end marker when deciding whether a row spells a complete word."
+],
               `from oop_ml import BytePairEncoding, UnigramLanguageModel
 
 sentences = [
@@ -1306,11 +1323,21 @@ for size in [90, 100]:
 90 merged: 8 of 38 learned pieces are whole words, corpus 374, sentence 27
 100 shrunk: 48 of 48 learned pieces are whole words, corpus 229, sentence 32
 100 merged: 8 of 48 learned pieces are whole words, corpus 344, sentence 27`,
-              { hints: ["list(model.vocabulary) is every row in order, and slicing it from 52 leaves the pieces the fit learned above the alphabet.", "A corpus costs the sum of what each of its texts encodes to, and encode answers an object with an n_tokens."], check: numberCheck("How many pieces does the corpus cost under the shrunk vocabulary at 90 rows?", 274, 0, "At 90 rows the shrinking has 38 rows to spend above the alphabet and spends every one on a whole word of the corpus, where merging spends 8 of its 38 that way. A whole word costs one piece wherever it occurs, so the corpus falls to 274 pieces against merging’s 374. The held-out sentence runs the other way, 32 pieces against 27, because a vocabulary of whole words has almost nothing to offer a word it does not hold.") },
+              {
+question: "How do equally large vocabularies divide their rows between whole words and reusable parts?",
+ hints: [
+  "Slice list(model.vocabulary) after its first 52 entries for this fixture.",
+  "Build a set of corpus words with </w> attached before testing learned-row membership.",
+  "Measure corpus length and held-out length independently. A row devoted to one familiar whole word may offer little to another word."
+], check: numberCheck("How many pieces does the corpus cost under the shrunk vocabulary at 90 rows?", 274, 0, "At ninety rows the unigram vocabulary gives 274 corpus tokens. It spends its learned rows on complete familiar words here, which shortens training text without giving the same benefit on the held-out sentence.") },
             ),
             exercise(
               "Find the word whose likeliest cut is not its shortest",
-              ["Part 6 examined 88 words at a vocabulary of 200 and found one, didn’t, whose likeliest spelling is longer than the shortest the same pieces allow, at −2122.86 for six pieces against −2246.46 for five. Fit the eighteen sentences at 200, print the likeliest spelling of didn’t with its log probability, and score the five-piece spelling yourself by adding up its pieces’ log probabilities.", "The two spellings differ only in whether the apostrophe and the marked t are one piece or two. Print what the joined piece scores and what the two score apart, to two places, which the lesson does not give. Then print what the corpus costs in pieces at this size, since that says why every number here is so large."],
+              [
+  "Fit the unigram learner at vocabulary_size=200 on the supplied eighteen sentences. Inspect the supplied didn’t probe using the exact apostrophe spelling in the code.",
+  "Print its best segmentation, count and log probability. Independently score the supplied five-piece alternative by summing its pieces’ log probabilities.",
+  "Print the score of the joined apostrophe/final-t piece, the combined score of those characters kept separate, and total corpus tokens. This compares the model’s probability objective with a shortest-piece objective."
+],
               `from oop_ml import UnigramLanguageModel
 
 sentences = [
@@ -1382,7 +1409,13 @@ print(f"corpus: {corpus_pieces} pieces")`,
 shorter: d i d n 't</w> (5) at -2246.46
 joined -726.53, apart -602.93
 corpus: 133 pieces`,
-              { hints: ["best_segmentation takes the word as written, without any mark, and its log_probability is the score of the whole spelling.", "log_probability_of takes one piece exactly as the vocabulary writes it, so a piece that ends a word carries </w>. The score of a spelling is the sum over its pieces.", "The corpus costs the sum of encode(text).n_tokens over the eighteen sentences."], check: numberCheck("What log probability does the joined piece, the apostrophe and the marked t together, hold on its own, to two places?", -726.53, 0.005, "Taken apart, the apostrophe and the marked t add to −602.93, so splitting them is worth 123.60, and that is the whole of the gap between −2122.86 and −2246.46, since the other four pieces are the same in both spellings. All of these numbers are enormous for the reason Part 4 measured on the four words. At 200 rows the corpus reads at 133 pieces, one per word, so no word’s likeliest spelling needs the letters inside it and re-estimation has left them with almost nothing. The model is comparing leftovers, correctly by its own objective, and the longer answer wins.") },
+              {
+question: "Can a more probable spelling use more pieces?",
+ hints: [
+  "best_segmentation returns the chosen cut and its complete log_probability.",
+  "log_probability_of expects the exact vocabulary spelling, including </w> where present.",
+  "Compare the scores of the two alternatives. A less negative log score means higher probability, regardless of how many pieces it uses."
+], check: numberCheck("What log probability does the joined piece, the apostrophe and the marked t together, hold on its own, to two places?", -726.53, 0.005, "The joined piece scores about -726.53. Keeping its characters separate is more probable under this fitted inventory, so the best probability path uses an extra piece.") },
             ),
           ],
         },

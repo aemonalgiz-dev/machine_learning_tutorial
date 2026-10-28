@@ -52,13 +52,8 @@ export default function KNearestNeighboursPage() {
           defaultOpen: true,
           content: (<>
 <>
-              <p>
-                The dots in the box above are people we have already measured
-                and labelled, amber for children and indigo for adults, placed
-                by height and weight. The ringed point is someone new, measured
-                but not yet labelled, and the question is which group they
-                belong to.
-              </p>
+              <p>Imagine a chart of people we have already measured and labelled, using height and weight as coordinates. The interactive example colours children amber and adults indigo. A ring marks someone new: we have their measurements but have not supplied their label.</p>
+              <p>Can the nearby labelled examples give us a useful prediction? We must decide both what nearby means and how many neighbours should contribute before we can turn resemblance into a rule.</p>
               <p>
                 We will use resemblance as our starting rule. The dashed lines connect the new person to the k nearest stored people. Each neighbour votes for its own label, and the majority decides the prediction. Move the ringed point and watch which neighbours it reaches. Where does the prediction change?
               </p>
@@ -368,10 +363,7 @@ export default function KNearestNeighboursPage() {
         {
           title: "Practice. Polling the Eleven People With the Library",
           practice: [
-            exercise(
-              "Put the borderline query to its neighbours",
-              ["Fit the library’s classifier on the eleven people of the widget’s borderline case, with the query at a height of 150 and a weight of 45, and let it find the neighbours the worked example found by hand. Do it once at k of 3 and once at k of 5.", "The worked example arrived at distances of 5, 10, 13, 15 and 20 and an answer that flips from child to adult between the two. The library takes the same route, so the distances should come out exactly, and the share of adults among the neighbours is the p̂ of the derivation, one third at k of 3 and three fifths at k of 5."],
-              `from oop_ml import Feature, KNearestNeighboursClassifier
+            exercise("Put the borderline query to its neighbours",["Fit the library’s classifier on the eleven people of the widget’s borderline case, with the query at a height of 150 and a weight of 45, and let it find the neighbours the worked example found by hand. Do it once at k of 3 and once at k of 5.", "The worked example arrived at distances of 5, 10, 13, 15 and 20 and an answer that flips from child to adult between the two. The library takes the same route, so the distances should come out exactly, and the share of adults among the neighbours is the p̂ of the derivation, one third at k of 3 and three fifths at k of 5."],`from oop_ml import Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -383,8 +375,7 @@ query = [Feature("height", [150]), Feature("weight", [45])]
 
 # For k of 3 and then k of 5, fit a classifier on the eleven people, print
 # the answer for the query and the share of its neighbours who are adults,
-# then print each neighbour's label and distance, nearest first.`,
-              `from oop_ml import Feature, KNearestNeighboursClassifier
+# then print each neighbour's label and distance, nearest first.`,`from oop_ml import Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -402,8 +393,7 @@ for k in (3, 5):
     for seen in model.neighbour_search(query):
         for distance, target in zip(seen.chosen_distances, seen.chosen_targets):
             voter = "adult" if target == 1 else "child"
-            print(f"  {voter} at distance {distance:.0f}")`,
-              `k 3  answer child  adult share 0.3333
+            print(f"  {voter} at distance {distance:.0f}")`,`k 3  answer child  adult share 0.3333
   child at distance 5
   adult at distance 10
   child at distance 13
@@ -412,13 +402,8 @@ k 5  answer adult  adult share 0.6000
   adult at distance 10
   child at distance 13
   adult at distance 15
-  adult at distance 20`,
-              { hints: ["Construction configures and fitting learns, so n_neighbours goes to the constructor and the people go to fit. The target is the label column, 0 for a child and 1 for an adult.", "predict answers one class per query row, 0.0 or 1.0, and predict_probabilities answers one row per query with one column per class, so the adult share of the single query is row 0, column 1.", "neighbour_search answers one entry per query. Iterate it, and each entry carries chosen_distances and chosen_targets, both nearest first."], check: numberCheck("What share of the five neighbours are adults at k of 5?", 0.6, 0.001, "Three of the five nearest people are adults, so the share is 3/5. That is the derivation’s p̂, above one half, which is why the vote goes to adult, where at k of 3 the share is 1/3 and the same rule says child.") },
-            ),
-            exercise(
-              "Walk k all the way up to everyone",
-              ["The lesson slides k from 3 to 5 and stops. Keep going, at every odd k from 1 up to 11, which is everybody, and print at each the number of adults among the voters, their share, how far away the farthest voter is, and the answer.", "What k Trades says that pushed toward the size of the whole dataset the answer drifts toward whichever class simply has more members. Six of the eleven people are adults, so at k of 11 the query’s own position has stopped mattering. Watch what happens in between, where the lesson does not look."],
-              `from oop_ml import Feature, KNearestNeighboursClassifier
+  adult at distance 20`,{...{ hints: ["Construction configures and fitting learns, so n_neighbours goes to the constructor and the people go to fit. The target is the label column, 0 for a child and 1 for an adult.", "predict answers one class per query row, 0.0 or 1.0, and predict_probabilities answers one row per query with one column per class, so the adult share of the single query is row 0, column 1.", "neighbour_search answers one entry per query. Iterate it, and each entry carries chosen_distances and chosen_targets, both nearest first."], check: numberCheck("What share of the five neighbours are adults at k of 5?", 0.6, 0.001, "A majority of the five selected neighbours are adults, whereas the nearest three have a child majority. The class changes because the neighbourhood changed, not because the training labels were refitted.") },question:"Which neighbours decide the borderline person's class at each neighbour count?"}),
+            exercise("Walk k all the way up to everyone",["The lesson slides k from 3 to 5 and stops. Keep going, at every odd k from 1 up to 11, which is everybody, and print at each the number of adults among the voters, their share, how far away the farthest voter is, and the answer.", "What k Trades says that pushed toward the size of the whole dataset the answer drifts toward whichever class simply has more members. Six of the eleven people are adults, so at k of 11 the query’s own position has stopped mattering. Watch what happens in between, where the lesson does not look."],`from oop_ml import Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -430,8 +415,7 @@ query = [Feature("height", [150]), Feature("weight", [45])]
 
 # For each odd k from 1 to 11, fit a classifier and print how many of the
 # query's neighbours are adults, their share of k, the distance to the
-# farthest neighbour consulted, and the answer.`,
-              `from oop_ml import Feature, KNearestNeighboursClassifier
+# farthest neighbour consulted, and the answer.`,`from oop_ml import Feature, KNearestNeighboursClassifier
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -447,19 +431,13 @@ for k in (1, 3, 5, 7, 9, 11):
     for seen in model.neighbour_search(query):
         adults = int(seen.chosen_targets.sum())
         farthest = seen.chosen_distances[-1]
-        print(f"k {k:2d}  adults {adults} of {k}  share {adults / k:.4f}  farthest voter {farthest:.2f}  answer {answer}")`,
-              `k  1  adults 0 of 1  share 0.0000  farthest voter 5.00  answer child
+        print(f"k {k:2d}  adults {adults} of {k}  share {adults / k:.4f}  farthest voter {farthest:.2f}  answer {answer}")`,`k  1  adults 0 of 1  share 0.0000  farthest voter 5.00  answer child
 k  3  adults 1 of 3  share 0.3333  farthest voter 13.00  answer child
 k  5  adults 3 of 5  share 0.6000  farthest voter 20.00  answer adult
 k  7  adults 3 of 7  share 0.4286  farthest voter 36.06  answer child
 k  9  adults 4 of 9  share 0.4444  farthest voter 43.28  answer child
-k 11  adults 6 of 11  share 0.5455  farthest voter 50.33  answer adult`,
-              { hints: ["The same constructor and fit each time round, with only k changing. k of 11 is allowed, since eleven rows were supplied, and it polls everyone.", "neighbour_search gives each query its chosen_targets, which sum to the number of adults, and its chosen_distances, whose last entry is the farthest voter."], check: numberCheck("At k of 11, when every stored person votes, what share of the votes are for adult?", 0.5455, 0.0001, "Every one of the eleven people votes and six are adults, so the share is 6/11 whatever the query. Between the flip to adult at k of 5 and this, k of 7 and k of 9 go back to child, because the three far children are admitted before the three far adults, and the answer settles on adult only once the last two adults have arrived. That is the poll stopping being local at all.") },
-            ),
-            exercise(
-              "Record the heights in millimetres, then standardise",
-              ["The Scaling Trap multiplies every height by ten and watches the ranking change. Do that to the eleven people and the query, fit at k of 3, and print each neighbour with their original height and weight and their distance in the new units. Then standardise the millimetre features with the library, refit, and print the neighbours again.", "In millimetres the child at (145, 57) should overtake the adult at (156, 53) for second nearest. After standardising, the distances are in spreads rather than units, the centimetre order should be back, and the two spreads the standardiser learned are the ones the lesson quotes, in millimetres and kilograms."],
-              `from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
+k 11  adults 6 of 11  share 0.5455  farthest voter 50.33  answer adult`,{...{ hints: ["The same constructor and fit each time round, with only k changing. k of 11 is allowed, since eleven rows were supplied, and it polls everyone.", "neighbour_search gives each query its chosen_targets, which sum to the number of adults, and its chosen_distances, whose last entry is the farthest voter."], check: numberCheck("At k of 11, when every stored person votes, what share of the votes are for adult?", 0.5455, 0.0001, "At the full training count every reference votes, so the local query position no longer affects this unweighted class share. Intermediate counts can reverse the majority as different groups enter the neighbourhood.") },question:"How does the vote change as increasingly distant people join it?"}),
+            exercise("Record the heights in millimetres, then standardise",["The Scaling Trap multiplies every height by ten and watches the ranking change. Do that to the eleven people and the query, fit at k of 3, and print each neighbour with their original height and weight and their distance in the new units. Then standardise the millimetre features with the library, refit, and print the neighbours again.", "In millimetres the child at (145, 57) should overtake the adult at (156, 53) for second nearest. After standardising, the distances are in spreads rather than units, the centimetre order should be back, and the two spreads the standardiser learned are the ones the lesson quotes, in millimetres and kilograms."],`from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -474,8 +452,7 @@ query = [Feature("height", [1500]), Feature("weight", [45])]
 # neighbours with their original height and weight and their distance.
 # Then standardise the millimetre features, refit at k of 3, print the
 # spread the standardiser learned for each feature, and print the
-# neighbours again with their standardised distances.`,
-              `from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
+# neighbours again with their standardised distances.`,`from oop_ml import Feature, KNearestNeighboursClassifier, Standardizer
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -503,8 +480,7 @@ print("standardised")
 for seen in scaled.neighbour_search(standardizer.transform(query)):
     for index, distance in zip(seen.chosen_indices, seen.chosen_distances):
         voter = "adult" if is_adult[index] else "child"
-        print(f"  {voter} at ({heights[index]}, {weights[index]})  distance {distance:.4f}")`,
-              `in millimetres
+        print(f"  {voter} at ({heights[index]}, {weights[index]})  distance {distance:.4f}")`,`in millimetres
   child at (147, 41)  distance 30.27
   child at (145, 57)  distance 51.42
   adult at (156, 53)  distance 60.53
@@ -513,13 +489,8 @@ weight spread 20.76
 standardised
   child at (147, 41)  distance 0.2332
   adult at (156, 53)  distance 0.4663
-  child at (145, 57)  distance 0.6180`,
-              { hints: ["A Feature takes a name and a list, so the millimetre column is the heights each multiplied by ten under the same name, and the query’s height is 1500.", "Each entry of neighbour_search has chosen_indices, positions into the people in the order they were supplied, which is how to print the original height and weight beside each distance.", "Standardizer learns on fit_transform and is applied to the query with transform, so the people and the query pass through the same scaling. Its scalings can be iterated, and each one has a name and a standard_deviation."], check: numberCheck("In millimetres, how far is the second nearest person from the query?", 51.42, 0.01, "The child at (145, 57) is 50 millimetres and 12 kilograms from the query, and the root of 2500 plus 144 is about 51.42, where the adult at (156, 53) is 60 millimetres and 8 kilograms away, about 60.53. The weight differences are what they were, but the height differences are ten times larger and their squares a hundred times larger, so height now decides nearly everything, and the one-centimetre edge the child has in height beats the four-kilogram edge the adult has in weight.") },
-            ),
-            exercise(
-              "Ask for more neighbours than there are people",
-              ["The widget’s slider goes up to 15 and the borderline case has eleven people. Ask the library for fifteen neighbours on the eleven and see what it does.", "A vote cannot have more voters than people. Catch what the library raises, and print its name and its message."],
-              `from oop_ml import Feature, KNearestNeighboursClassifier, MLLibError
+  child at (145, 57)  distance 0.6180`,{...{ hints: ["A Feature takes a name and a list, so the millimetre column is the heights each multiplied by ten under the same name, and the query’s height is 1500.", "Each entry of neighbour_search has chosen_indices, positions into the people in the order they were supplied, which is how to print the original height and weight beside each distance.", "Standardizer learns on fit_transform and is applied to the query with transform, so the people and the query pass through the same scaling. Its scalings can be iterated, and each one has a name and a standard_deviation."], check: numberCheck("In millimetres, how far is the second nearest person from the query?", 51.42, 0.01, "The millimetre conversion changes the relative height and weight contributions to raw distance. Standardisation then uses training spreads to put both columns on a declared common numerical scale.") },question:"How do millimetres and standardisation change the neighbour order?"}),
+            exercise("Ask for more neighbours than there are people",["The widget’s slider goes up to 15 and the borderline case has eleven people. Ask the library for fifteen neighbours on the eleven and see what it does.", "A vote cannot have more voters than people. Catch what the library raises, and print its name and its message."],`from oop_ml import Feature, KNearestNeighboursClassifier, MLLibError
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -529,8 +500,7 @@ people = [Feature("height", heights), Feature("weight", weights)]
 labels = Feature("is_adult", is_adult)
 
 # Try to fit a classifier that consults fifteen neighbours. Catch the
-# library's own error, and print the name of its class and its message.`,
-              `from oop_ml import Feature, KNearestNeighboursClassifier, MLLibError
+# library's own error, and print the name of its class and its message.`,`from oop_ml import Feature, KNearestNeighboursClassifier, MLLibError
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -543,11 +513,8 @@ try:
     KNearestNeighboursClassifier(n_neighbours=15).fit(people, labels)
 except MLLibError as refusal:
     print(type(refusal).__name__)
-    print(refusal)`,
-              `TooFewValuesError
-15 neighbours were asked for and only 11 rows were supplied`,
-              { hints: ["The refusal happens at fit rather than at construction, because fitting is the first moment the model knows how many rows there are."] },
-            ),
+    print(refusal)`,`TooFewValuesError
+15 neighbours were asked for and only 11 rows were supplied`,{...{ hints: ["The refusal happens at fit rather than at construction, because fitting is the first moment the model knows how many rows there are."] },question:"What happens when we ask for more neighbours than the training table contains?"}),
           ],
         },
       ]}

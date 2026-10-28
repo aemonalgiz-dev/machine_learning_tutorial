@@ -94,9 +94,7 @@ export default function RestrictedBoltzmannMachinePage() {
 <p>
                   This time, the visible cells have no connections to one another. They connect to the hidden units shown as bars below the shapes. The hidden units also have no connections among themselves. Click the T and watch the hidden responses: two of the three bars rise while the other stays low. We will work out what those responses represent.
                 </p>
-                <p>
-                  Click the L and a different pair stands. Each shape has become a short code over the hidden units, and nobody gave the machine that code. It arrived at one, because three hidden units were all it had to tell three shapes apart with.
-                </p>
+                <p>Click the L and a different pair of hidden responses becomes large. The training procedure was never given those hidden codes as answers. It adjusted the connections so the hidden and visible units could model the training patterns together. Three hidden units provide a compact description here; they are not class labels for the three shapes.</p>
 </>
                 <KeepInMind>
                   Nothing on this page stores a shape. What the three shapes
@@ -106,26 +104,8 @@ export default function RestrictedBoltzmannMachinePage() {
               </SubSection>
 
               <SubSection title="2. What it means to learn a distribution">
-                <p>
-                  Every model on this site before the memory page learned a
-                  mapping. Heights and weights went in, an answer came out, and
-                  the question the model could answer was always of the form
-                  what is the answer for this row. A model of a distribution
-                  answers a different question. Handed a grid, it says how
-                  plausible that grid is, and it has an opinion about all
-                  thirty-three million grids the twenty-five cells can make,
-                  though it was only ever shown three of them.
-                </p>
-                <p>
-                  That is a strictly larger claim than a mapping, and it buys
-                  three things a mapping cannot. It can be asked about a grid it
-                  has never seen, and answer with a number rather than a
-                  refusal. It can be asked to produce a grid, since a
-                  distribution can be drawn from. And it can be asked to finish
-                  a grid, filling in the cells that are missing from the ones
-                  that are there, which is the same question a mapping answers
-                  only if you decided in advance which cells were the inputs.
-                </p>
+                <p>A supervised predictor might read a person&apos;s measurements and estimate one specified target. Here the question concerns an entire grid: which arrangements should receive more probability? Twenty-five binary cells allow many possible grids, while the training set contains only three shapes. We need a model that uses those examples to describe regularities across arrangements it has not observed.</p>
+                <p>A joint distribution gives a probability model for the cells together. We can use it to compare how plausible complete grids are, sample proposed grids, or condition on some cells while considering the rest. A supervised mapping can also make predictions for unseen inputs; novelty is not the distinction. The difference here is that we are modelling the whole arrangement rather than fixing one particular set of inputs and targets in advance.</p>
                 <DerivationTable
                   expressionHeading="the question"
                   reasonHeading="who can answer it"
@@ -1385,12 +1365,15 @@ export default function RestrictedBoltzmannMachinePage() {
               "Which of these hold for the free energy?",
               [
                 "Lower means the machine finds the grid more plausible",
-                "A single value on its own means nothing, and only differences carry information",
+                "For comparing grids within one fixed model, free-energy differences determine probability ratios without knowing the partition function",
                 "The sum done in closed form is the one over the hidden layer, not the one over the cells",
-                "With eight hidden units it turns a sum over 256 hidden states into eight logarithms",
+                "With eight hidden units it turns a sum over 256 hidden states into eight logarithms"
               ],
               [0, 1, 2, 3],
-              "The free energy is a log probability with an unknown constant subtracted from it, and the constant is the same for every grid, so a difference between two of them is a real difference of log probabilities. That constant is the sum over all thirty-three million grids here and over every possible image in general, and nobody computes it, which is why every readout on this page puts one grid’s score beside another’s. The sum that is done is the one over the hidden layer, which factorises into one small sum per unit, eight logarithms in place of 256 states and eight hundred in place of a number with 241 digits.",
+              "Negative log probability is F(v) + log Z. Consequently log[p(v₁)/p(v₂)] = F(v₂) − F(v₁): lower free energy means higher probability within the same model. Summing over hidden units factorises, replacing enumeration of 2⁸ hidden states with eight log(1 + exp(score)) terms. Obtaining Z still requires summing the unnormalised probabilities over visible states.",
+              {
+                "description": "Use a binary restricted Boltzmann machine with conditionally independent hidden units. Its visible probability is p(v) = exp(−F(v)) / Z, where the same Z normalises every visible grid under this fixed model. There are eight hidden units."
+              },
             ),
             trueFalse(
               "The ranking of free energies after five hundred passes is a ranking of how shape-like a grid looks.",
@@ -1411,18 +1394,21 @@ export default function RestrictedBoltzmannMachinePage() {
             several(
               "Which of these hold of the machine behind this page?",
               [
-                "A rate of zero is accepted, and the walk then stops after a single pass calling itself settled",
-                "A probe with its cells given in a different order is accepted and answers identically",
-                "A grid and its reversal score identically, as they do under the memory",
-                "A cell that is dark in every pattern is refused, since a column that never varies has no spread to divide by",
-              ],
+                              "A rate of zero is accepted, and the walk then stops after a single pass calling itself settled",
+                              "A probe with its cells given in a different order is accepted and answers identically",
+                              "A grid and its reversal score identically, as they do under the memory",
+                              "A cell that is dark in every pattern is refused, since a column that never varies has no spread to divide by",
+                            ],
               [0, 1],
-              "The acceptances are the rows worth rereading. A rate of zero goes through and the walk calls itself settled, which is correct under the definition of settled and misleading to anyone reading it as finished, and a column that is always zero is ordinary data here rather than a division by a spread, so both are mistakes a wrong number can be shipped out of without a message. A reordered probe answers identically because cells are matched by name rather than by position, a promise that hides a reordering bug rather than catching it. Reversal is where the two models part for good. The memory’s energy flips two signs in every term and stays put, so its largest reversal gap across the five grids is exactly 0.0, while here the T scores −24.50 against its reversal at +2.06, a gap of 26.57.",
+              "With zero rate the parameters do not move, so this stopping test reports convergence without learning. Reordering correctly named columns preserves the query; this is deliberate column matching, not a reordering bug. A mislabeled column can still be wrong. Constant zero columns are ordinary binary observations. Complementing a binary image is not an RBM symmetry in general.",
+              {
+                "description": "This SDK matches probe columns by cell name, not arrival order. It accepts zero learning rate and constant-valued visible columns. Its convergence test checks parameter movement. Unlike a sign-symmetric Hopfield memory, an RBM can assign different probabilities to a binary grid and its complement."
+              },
             ),
             trueFalse(
-              "Two correct fits under different seeds can agree entirely about which shapes differ and disagree about every number they use to say so.",
+              "Two RBMs can assign identical visible probabilities while giving their hidden units different coordinate labels.",
               true,
-              "Every one of the six seeds gives the three shapes three different codes, with the gap on the shapes running from 0.0057 to 0.0215 across them, so all six have learned to tell the shapes apart. But under the first seed the T reads as 110 and under the second as 011, and neither is more correct, because the units have no names and no order and a machine that has swapped two of them is the same machine wearing different labels. Two fits under one seed agree to the last bit, their matching weights exactly 0.0 apart, while two seeds hold weights 5.25 apart, which is why a model fitted on one machine’s codes cannot be used on another’s.",
+              "Permuting the hidden units together with their biases and connecting weights leaves the visible model unchanged. The hidden code coordinates are therefore not automatically aligned between fits. A downstream model that reads one fit’s codes needs a compatible coordinate order; equality of visible probabilities alone does not supply it.",
             ),
         ],
         },
@@ -1431,7 +1417,10 @@ export default function RestrictedBoltzmannMachinePage() {
           practice: [
             exercise(
               "Learn the three shapes and read their codes",
-              ["Fit the machine Part 1 describes with the library rather than through the playground. Three hidden units, five hundred passes, the constant rate of 0.1 and the seed of 0 are what every figure on the page was quoted under.", "Part 1 says the T ends up at 110, the L at 011 and the cross at 101, and Part 4 says the mean squared gap on the three shapes is 0.0057 after five hundred passes. Read all four off the fitted machine, and read whether it reports itself settled."],
+              [
+  "Fit the supplied binary shape dataset with three hidden units, five hundred passes, constant rate 0.1 and seed zero.",
+  "Print the hidden code for T, L and cross, mean squared reconstruction difference, passes run and convergence flag. Keep the code-threshold and reconstruction conventions used in the starter."
+],
               `from oop_ml import Feature, RestrictedBoltzmannMachine
 
 T = [int(cell == "#") for cell in "#####..#....#....#....#.."]
@@ -1464,11 +1453,17 @@ the L reads as 011
 the cross reads as 101
 mean squared gap on the three shapes 0.0057
 passes run 500, settled False`,
-              { hints: ["Construction configures and fit learns. The width, the pass cap and the seed are the constructor fields n_hidden_units, max_epochs and random_seed, and the rate defaults to the constant 0.1 the page uses, so it need not be passed.", "The machine takes one Feature per cell, each holding that cell’s value in every shape, so the data is twenty-five features of three values rather than three lists of twenty-five. The starter already builds them.", "hidden_probabilities answers a block with one row per shape and one column per hidden unit, read through its values. A shape’s code is its row rounded to noughts and ones.", "The passes run and whether the walk settled are the properties epochs_run and converged, and the gap is reconstruction_error on the same features the fit saw."], check: numberCheck("What mean squared gap does the fit report on the three shapes?", 0.0057, 0.0001, "Part 4 quotes the gap falling from 0.2437 after one pass to 0.0057 after five hundred, with no single shape ending above 0.01. It is the only cheap thing to watch during a fit and it is not what is being minimised, so the walk reports itself unsettled at five hundred passes even though the shapes come back cell for cell, because the drawing keeps the two counts jittering.") },
+              { hints: [
+  "The fitted model’s hidden activations and thresholded code are different representations.",
+  "A good reconstruction does not imply that the training stopping condition was met."
+], check: numberCheck("What mean squared gap does the fit report on the three shapes?", 0.0057, 0.0001, "The reconstruction mean squared difference is about 0.0057. The fit reaches its pass ceiling while reporting that its convergence criterion was not met."), question: "Which hidden codes does this small generative model learn for the three shapes?" },
             ),
             exercise(
               "Score five grids the machine never saw",
-              ["Part 5 puts five grids to the fitted machine and reads their free energies, the T at −24.50, the T with five cells flipped at −11.82, thirteen cells scattered at random at −3.71, the square at −0.77 and the T reversed at +2.06. Reproduce the five scores from the same fit.", "Then use the one fact Part 5 insists on, that a difference of free energies is a real difference of log probabilities. Take the gap between the damaged T and the T and turn it into how many times as probable the machine finds the T, a number the page never prints."],
+              [
+  "Use the unchanged fitted model to print free energies of the supplied T, damaged T, random grid, square and reversed T.",
+  "Print the damaged-T versus T free-energy difference and the corresponding probability ratio. Use full-precision energies for the ratio rather than their two-decimal display values."
+],
               `from math import exp
 
 from oop_ml import Feature, RestrictedBoltzmannMachine
@@ -1519,11 +1514,17 @@ the T with five cells flipped -11.82
                the T reversed +2.06
 the damaged T sits 12.6836 above the T
 the machine finds the T 322422 times as probable as the damaged T`,
-              { hints: ["The fit is the one from the first problem. A probe is a second block of features over the same twenty-five cell names, and five grids are five values per cell.", "free_energy answers one number per row in the order the rows were handed over, so the first is the T’s score and the second the damaged T’s.", "The score is a log probability with the same unknown constant subtracted from every grid’s, so the constant cancels out of a difference, and the exponential of the difference is the ratio of the two probabilities themselves."], check: numberCheck("How many times as probable as the damaged T does the machine find the T?", 322422, 1, "The T scores −24.50 and the damaged T −11.82, a gap of 12.68 in free energy, and a free energy is a log probability with an unknown constant subtracted from it. The constant is the same for both grids, so the exponential of the gap is the ratio of their probabilities with nothing unknown left in it. Five flipped cells cost a grid a factor of about three hundred thousand, which is what Part 5 means by the machine having learned that a T has a full top row and a stem.") },
+              { hints: [
+  "Both patterns share the same fitted model, so its unknown normalising constant cancels in their probability ratio.",
+  "Lower free energy means higher model probability. Use the sign of that relationship before exponentiating the difference."
+], check: numberCheck("How many times as probable as the damaged T does the machine find the T?", 322422, 1, "The complete T is about 322422 times as probable under this fitted model. The comparison uses its free-energy difference, not an independently known absolute probability."), question: "How does the fitted model rank complete and damaged grids?" },
             ),
             exercise(
               "Measure the width instead of guessing it",
-              ["Part 6 chooses the hidden width by measurement. Refit the three shapes at every width from one unit to eight, each from the same seed for the same five hundred passes, and print the mean squared gap beside how many distinct codes the three shapes were given.", "The page says one unit gives all three shapes the same code at a gap of 0.1700, two units give three different codes at 0.0351, and above three the curve is not monotone, with five units worse than four. Look for both facts in the printout."],
+              [
+  "Refit the same three shapes with hidden widths one through eight, retaining seed zero, five hundred passes and all other settings.",
+  "Print mean squared reconstruction difference and distinct thresholded code count for every width. This is a fixed-budget comparison, not a search proving the best possible objective at each width."
+],
               `from oop_ml import Feature, RestrictedBoltzmannMachine
 
 T = [int(cell == "#") for cell in "#####..#....#....#....#.."]
@@ -1556,11 +1557,17 @@ for width in range(1, 9):
 6 hidden units: gap 0.0052, 3 distinct codes
 7 hidden units: gap 0.0024, 3 distinct codes
 8 hidden units: gap 0.0030, 3 distinct codes`,
-              { hints: ["Everything inside the loop stays as it was in the first problem except n_hidden_units. The shared seed and pass cap are what make the eight fits comparable with one another.", "hidden_probabilities(cells).values has one row per shape. Round each row into a string of noughts and ones and put the strings in a set, whose size is the number of codes the width managed to keep apart."], check: numberCheck("What mean squared gap do two hidden units reach?", 0.0351, 0.0001, "Two units are simultaneous switches rather than alternatives, so they offer four codes and not two, which is enough to give three shapes three different codes, and the gap falls from 0.1700 at one unit to 0.0351 with two of the three shapes coming back cell for cell. Three units reach 0.0057 and all three shapes. Above that the printout is not monotone, five units scoring 0.0165 against four at 0.0042, which is the seed deciding rather than the width.") },
+              { hints: [
+  "Count unique complete hidden codes, not individually active bits.",
+  "A wider model and a particular finite optimisation run are separate factors; inspect the measured errors rather than expecting monotonicity."
+], check: numberCheck("What mean squared gap do two hidden units reach?", 0.0351, 0.0001, "Two hidden units give error about 0.0351 and distinct codes for the three supplied shapes. A distinct code is possible before reconstruction becomes nearly exact."), question: "Does giving the model more hidden units always improve this finite training run?" },
             ),
             exercise(
               "Watch a fit call itself settled",
-              ["Part 3 traces the learning rule on two rows of four cells, lit in the first two, dark in the third and differing in the fourth, with two hidden units. Fit that set for up to five hundred passes under seed 0 and read how many passes the walk actually took and whether it calls itself settled.", "The page says the fit stops after ten passes with the two rows still coming back at a gap of 0.1598 and the first cell rebuilt at 0.65 rather than at 1. Confirm all three, then print what the other three cells come back as, which the page does not say."],
+              [
+  "Fit the supplied two four-cell observations with two hidden units, seed zero and a five-hundred-pass ceiling.",
+  "Print actual passes, settled flag, mean squared reconstruction difference and every reconstructed cell for the first observation. Compare the stopping decision with the remaining reconstruction error."
+],
               `from oop_ml import Feature, RestrictedBoltzmannMachine
 
 rows = [[1, 1, 0, 0], [1, 1, 0, 1]]
@@ -1586,7 +1593,10 @@ cell_1 comes back at 0.65 for the first row
 cell_2 comes back at 0.70 for the first row
 cell_3 comes back at 0.42 for the first row
 cell_4 comes back at 0.49 for the first row`,
-              { hints: ["Two rows of four cells are four features of two values each, which the starter already builds.", "max_epochs reads back off the model, since construction configures it, and epochs_run is how many passes the fit actually took. converged is the settled flag.", "reconstruct answers one feature per cell, each holding one probability per row, so the first row’s rebuild is the first value of every feature."], check: numberCheck("After how many passes does the four-cell fit stop?", 10, 0.5, "At the tenth update the machine happens to draw exactly the two rows it was shown, so both counts are the same number for every wire, every difference is zero and nothing moves, which is all that settled means here. Nothing was climbing a likelihood, so the walk stops with the first cell at 0.65 rather than at 1 and a gap of 0.1598, and the eleventh update in the ledger shows the weights moving again immediately had it carried on.") },
+              { hints: [
+  "Use the returned convergence status without translating it into perfect reconstruction.",
+  "Inspect all four reconstructed probabilities; a small update criterion and a correct binary target are different conditions."
+], check: numberCheck("After how many passes does the four-cell fit stop?", 10, 0.5, "The learner stops after ten passes with visible reconstruction error remaining. Its settled flag reports the implemented stopping rule, not perfect recovery of every training bit."), question: "What does the learner’s settled flag actually establish?" },
             ),
           ],
         },

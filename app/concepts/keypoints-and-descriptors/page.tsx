@@ -64,9 +64,8 @@ export default function KeypointsAndDescriptorsPage() {
 <>
               <SubSection title="1. What two photographs of one scene actually ask">
                 <>
-<p>
-                  The scene above is 48 pixels on a side, and it holds a square, a disc, a diagonal bar, three copies of a small cross and a brightness ramp that makes the left side of it darker than the right. Photograph it twice, moving the camera a little between the two, and the question that matters is which position in the first picture is which position in the second.
-                </p>
+<p>Suppose we photograph the same scene twice after moving the camera. Which position in the second image corresponds to a corner in the first? To answer, we need locations worth comparing and a way to describe the image near each one.</p>
+              <p>Our drawn scene is 48 pixels on each side. It contains a square, a disc, a diagonal bar and three small crosses, with a brightness ramp making one side lighter. We know where those objects were placed, so we can check whether a proposed match found the same feature or merely a similar-looking piece elsewhere.</p>
                 <p>
                   Answering it by describing every position is the obvious plan. It is expensive, and the more serious trouble is that most of the descriptions it produces do not distinguish anything from anything.
                 </p>
@@ -1161,10 +1160,7 @@ distance     =  length of ( one description − the other )`}
         {
           title: "Practice. Scoring, Describing And Matching The Square",
           practice: [
-            exercise(
-              "Score the square’s corner, edge and ground",
-              ["Draw the bright square Part 2 works by hand, nine pixels on a side in a frame of twenty-one, and read its structure tensor at three positions, the top-left corner, the middle of the left edge and a patch of empty ground. Print the total energy, the shape term, the smaller eigenvalue and the Harris score at each.", "Part 3’s table gives the corner 11.555556, 30.222222, 4.0 and 24.880988, with the Harris sensitivity at 0.04. Reproduce the table, then score the same three positions with the sensitivity at 0.06, the other end of the range Part 3 mentions, which the lesson does not quote."],
-              `import numpy as np
+            exercise("Score the square’s corner, edge and ground",["Draw the bright square Part 2 works by hand, nine pixels on a side in a frame of twenty-one, and read its structure tensor at three positions, the top-left corner, the middle of the left edge and a patch of empty ground. Print the total energy, the shape term, the smaller eigenvalue and the Harris score at each.", "Part 3’s table gives the corner 11.555556, 30.222222, 4.0 and 24.880988, with the Harris sensitivity at 0.04. Reproduce the table, then score the same three positions with the sensitivity at 0.06, the other end of the range Part 3 mentions, which the lesson does not quote."],`import numpy as np
 from oop_ml.core.computer_vision.keypoints import CornerResponse, HarrisMeasure, StructureTensor
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1179,8 +1175,7 @@ smaller = CornerResponse.of(picture)
 # Then, for each position, print the tensor's trace and determinant there,
 # the smaller eigenvalue and the two Harris scores, to six places.
 
-# Print the corner's Harris score at 0.06 on a line of its own, to four places.`,
-              `import numpy as np
+# Print the corner's Harris score at 0.06 on a line of its own, to four places.`,`import numpy as np
 from oop_ml.core.computer_vision.keypoints import CornerResponse, HarrisMeasure, StructureTensor
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1202,8 +1197,7 @@ for name, (row, column) in positions.items():
     print(f"  Harris at 0.04 {harris.at(row, column):.6f}")
     print(f"  Harris at 0.06 {strict.at(row, column):.6f}")
 
-print(f"corner, Harris at 0.06: {strict.at(6, 6):.4f}")`,
-              `corner
+print(f"corner, Harris at 0.06: {strict.at(6, 6):.4f}")`,`corner
   total energy 11.555556
   shape term 30.222222
   smaller eigenvalue 4.000000
@@ -1221,13 +1215,8 @@ ground
   smaller eigenvalue 0.000000
   Harris at 0.04 0.000000
   Harris at 0.06 0.000000
-corner, Harris at 0.06: 22.2104`,
-              { hints: ["CornerResponse.of takes the picture and, optionally, a measure. With no measure it scores by the smaller eigenvalue. HarrisMeasure takes its sensitivity as a keyword.", "The tensor’s trace and determinant are each a picture of their own, one number per pixel, so their values are indexed by row and column like any array.", "A response answers one position through at(row, column), which is less to hold than its whole table of scores."], check: numberCheck("What does the corner score under Harris at a sensitivity of 0.06, to four places?", 22.2104, 0.0005, "The corner’s shape term is 30.222222 and its squared energy is 133.530864, so the score is 30.222222 less 0.06 lots of 133.530864. Raising the sensitivity from 0.04 took the corner down from 24.880988 and pushed the edge further below zero, from −4.551111 to −6.826667, while the smaller eigenvalue beside them has no dial to move.") },
-            ),
-            exercise(
-              "Describe one corner and measure how far it is from the others",
-              ["Describe the square’s top-left corner by its five-wide patch, print the twenty-five numbers as five rows, and then print how far that description is from the top-right corner’s, from the bottom-right corner’s, from the same corner with every pixel raised by ten, and from the same corner with the brightness reversed.", "Part 4 works the patch by hand to 0.266667 and −0.15, puts two neighbouring corners 1.443376 apart, and puts a corner 2.0 from its own reverse. The diagonally opposite corner is not on the page. Before running it, count how many of the twenty-five entries it should disagree in."],
-              `import numpy as np
+corner, Harris at 0.06: 22.2104`,{...{ hints: ["CornerResponse.of takes the picture and, optionally, a measure. With no measure it scores by the smaller eigenvalue. HarrisMeasure takes its sensitivity as a keyword.", "The tensor’s trace and determinant are each a picture of their own, one number per pixel, so their values are indexed by row and column like any array.", "A response answers one position through at(row, column), which is less to hold than its whole table of scores."], check: numberCheck("What does the corner score under Harris at a sensitivity of 0.06, to four places?", 22.2104, 0.0005, "Increasing Harris sensitivity increases the penalty applied to total local gradient energy. The corner score changes, while the smaller-eigenvalue criterion has no such sensitivity parameter.") },question:"How do a corner, an edge and a flat patch differ under corner scores?"}),
+            exercise("Describe one corner and measure how far it is from the others",["Describe the square’s top-left corner by its five-wide patch, print the twenty-five numbers as five rows, and then print how far that description is from the top-right corner’s, from the bottom-right corner’s, from the same corner with every pixel raised by ten, and from the same corner with the brightness reversed.", "Part 4 works the patch by hand to 0.266667 and −0.15, puts two neighbouring corners 1.443376 apart, and puts a corner 2.0 from its own reverse. The diagonally opposite corner is not on the page. Before running it, count how many of the twenty-five entries it should disagree in."],`import numpy as np
 from oop_ml.core.computer_vision.keypoints import Keypoint, PatchDescriptor
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1241,8 +1230,7 @@ top_left = PatchDescriptor.of(picture, Keypoint(6, 6, 4.0), 5)
 # (6, 6) of two new pictures, values + 10.0 and -values.
 # Print the distance from top_left to each of the four.
 
-# Print the distance to the bottom-right corner on a line of its own, to four places.`,
-              `import numpy as np
+# Print the distance to the bottom-right corner on a line of its own, to four places.`,`import numpy as np
 from oop_ml.core.computer_vision.keypoints import Keypoint, PatchDescriptor
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1264,8 +1252,7 @@ print(f"to the bottom-right corner {top_left.distance_to(bottom_right):.6f}")
 print(f"to itself, ten brighter {top_left.distance_to(brighter):.1e}")
 print(f"to itself, reversed {top_left.distance_to(negative):.6f}")
 
-print(f"opposite corner: {top_left.distance_to(bottom_right):.4f}")`,
-              `-0.150000  -0.150000  -0.150000  -0.150000  -0.150000
+print(f"opposite corner: {top_left.distance_to(bottom_right):.4f}")`,`-0.150000  -0.150000  -0.150000  -0.150000  -0.150000
 -0.150000  -0.150000  -0.150000  -0.150000  -0.150000
 -0.150000  -0.150000   0.266667   0.266667   0.266667
 -0.150000  -0.150000   0.266667   0.266667   0.266667
@@ -1274,13 +1261,8 @@ to the top-right corner 1.443376
 to the bottom-right corner 1.666667
 to itself, ten brighter 1.2e-15
 to itself, reversed 2.000000
-opposite corner: 1.6667`,
-              { hints: ["A Keypoint is a row, a column and a strength. The strength plays no part in the description, so any finite number will do for a place you chose by hand.", "A description’s values are one flat run of twenty-five numbers read row by row, so reshape(5, 5) puts them back in the patch’s own arrangement.", "distance_to takes another description and answers one number. The patch around the opposite corner is bright in the one quarter this one is dark in, and the two share only the centre pixel."], check: numberCheck("How far is the top-left corner’s description from the bottom-right corner’s, to four places?", 1.6667, 0.0005, "Each patch has nine bright entries and the two share only the centre pixel, so sixteen of the twenty-five entries hold 0.266667 in one description and −0.15 in the other. Sixteen gaps of 0.416667 give a distance of four times 0.416667. A neighbouring corner disagrees in twelve entries and sits at 1.443376, so the opposite corner is further off, and both are well short of the 2.0 of an exact reverse.") },
-            ),
-            exercise(
-              "Match a moved square, then a square against its twin",
-              ["Photograph one square twice, the second time moved down four rows and right five columns, as Part 5 does. The starter finds and describes the corners of every picture. Match the first picture’s descriptions against the moved one’s and print where each match went, its distance, its runner-up’s distance and its ratio. Then match a single seven-wide square against a picture holding two identical copies of it, once with the ratio test turned off so that every match is reported, and once with it on.", "Part 5 reports four matches at a ratio of 0.0 on the moved square, and four at a ratio of 1.0 on the twins, all refused."],
-              `import numpy as np
+opposite corner: 1.6667`,{...{ hints: ["A Keypoint is a row, a column and a strength. The strength plays no part in the description, so any finite number will do for a place you chose by hand.", "A description’s values are one flat run of twenty-five numbers read row by row, so reshape(5, 5) puts them back in the patch’s own arrangement.", "distance_to takes another description and answers one number. The patch around the opposite corner is bright in the one quarter this one is dark in, and the two share only the centre pixel."], check: numberCheck("How far is the top-left corner’s description from the bottom-right corner’s, to four places?", 1.6667, 0.0005, "Opposite corners disagree over more positions in their normalised patches than adjacent corners do. Adding a uniform brightness offset disappears during centring, while reversing contrast changes the descriptor direction.") },question:"Which image changes alter the corner's patch descriptor?"}),
+            exercise("Match a moved square, then a square against its twin",["Photograph one square twice, the second time moved down four rows and right five columns, as Part 5 does. The starter finds and describes the corners of every picture. Match the first picture’s descriptions against the moved one’s and print where each match went, its distance, its runner-up’s distance and its ratio. Then match a single seven-wide square against a picture holding two identical copies of it, once with the ratio test turned off so that every match is reported, and once with it on.", "Part 5 reports four matches at a ratio of 0.0 on the moved square, and four at a ratio of 1.0 on the twins, all refused."],`import numpy as np
 from oop_ml.core.computer_vision.keypoints import CornerResponse, Descriptors
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1302,8 +1284,7 @@ for name, values in pictures.items():
 
 # Match described["one"] against described["twins"] twice, with
 # maximum_ratio=1.0 and at the default. Print each ratio from the first, and
-# how many matches each of the two kept.`,
-              `import numpy as np
+# how many matches each of the two kept.`,`import numpy as np
 from oop_ml.core.computer_vision.keypoints import CornerResponse, Descriptors
 from oop_ml.core.computer_vision.picture import Picture
 
@@ -1328,8 +1309,7 @@ for match in described["first"].matched_to(described["moved"]):
 everything = described["one"].matched_to(described["twins"], maximum_ratio=1.0)
 print("ratios on the twins", [round(match.ratio, 4) for match in everything])
 print(f"reported with the test off {len(everything)}")
-print(f"kept by the test {len(described['one'].matched_to(described['twins']))}")`,
-              `(6, 6) to (10, 11)
+print(f"kept by the test {len(described['one'].matched_to(described['twins']))}")`,`(6, 6) to (10, 11)
   distance 0.0000, runner-up 1.4434, ratio 0.0000
 (6, 14) to (10, 19)
   distance 0.0000, runner-up 1.4434, ratio 0.0000
@@ -1339,13 +1319,8 @@ print(f"kept by the test {len(described['one'].matched_to(described['twins']))}"
   distance 0.0000, runner-up 1.4434, ratio 0.0000
 ratios on the twins [1.0, 1.0, 1.0, 1.0]
 reported with the test off 4
-kept by the test 0`,
-              { hints: ["matched_to is called on one set of descriptions with the other as its argument, and what it answers can be looped over. Each match carries first, second, distance, runner_up_distance and ratio.", "A match’s first and second are descriptions, and a description knows the keypoint it was cut around, which is where the row and column are.", "maximum_ratio is the largest ratio still counted as a match. At one, everything is kept, which is the only way to see a ratio the test would otherwise have refused."], check: numberCheck("On the moved square, how far away is each match’s runner-up, to four places?", 1.4434, 0.0005, "Every corner of the moved square finds its own moved self at a distance of exactly zero, and the next best candidate is a neighbouring corner of the same square, twelve entries out at 1.443376. A zero over 1.443376 is a ratio of zero, the most distinctive a match can be. On the twins the runner-up is the other copy at zero as well, the ratio is decided as one, and none of the four is kept.") },
-            ),
-            exercise(
-              "Search a set that holds one description",
-              ["Part 7 lists a set of one description as a case where the ratio test cannot be asked. Describe the square’s corners, keep only the strongest one as the set to search in, and try to match all four corners against it. Catch what the library raises and print its name and its message.", "A search that answered here would be answering the nearest because it was the only candidate, which is the behaviour the test exists to stop."],
-              `import numpy as np
+kept by the test 0`,{...{ hints: ["matched_to is called on one set of descriptions with the other as its argument, and what it answers can be looped over. Each match carries first, second, distance, runner_up_distance and ratio.", "A match’s first and second are descriptions, and a description knows the keypoint it was cut around, which is where the row and column are.", "maximum_ratio is the largest ratio still counted as a match. At one, everything is kept, which is the only way to see a ratio the test would otherwise have refused."], check: numberCheck("On the moved square, how far away is each match’s runner-up, to four places?", 1.4434, 0.0005, "The unique moved counterpart is clearly closer than the runner-up. Identical copies create equally good alternatives, so the ratio test rejects their ambiguity under this implementation's stated equal-distance convention.") },question:"Can the ratio test distinguish a unique moved match from identical alternatives?"}),
+            exercise("Search a set that holds one description",["Part 7 lists a set of one description as a case where the ratio test cannot be asked. Describe the square’s corners, keep only the strongest one as the set to search in, and try to match all four corners against it. Catch what the library raises and print its name and its message.", "A search that answered here would be answering the nearest because it was the only candidate, which is the behaviour the test exists to stop."],`import numpy as np
 from oop_ml import MLLibError
 from oop_ml.core.computer_vision.keypoints import CornerResponse, Descriptors
 from oop_ml.core.computer_vision.picture import Picture
@@ -1359,8 +1334,7 @@ everything = Descriptors.of(picture, response.peaks(minimum_strength=0.5), 5)
 # Describe only the strongest corner, which peaks will hand over if its limit
 # is one. Print how many descriptions each set holds, then try to match
 # everything against the set of one, and print the name and the message of
-# the library's refusal.`,
-              `import numpy as np
+# the library's refusal.`,`import numpy as np
 from oop_ml import MLLibError
 from oop_ml.core.computer_vision.keypoints import CornerResponse, Descriptors
 from oop_ml.core.computer_vision.picture import Picture
@@ -1378,12 +1352,9 @@ try:
     everything.matched_to(only_one)
 except MLLibError as refusal:
     print(type(refusal).__name__)
-    print(refusal)`,
-              `asking with 4, searching in 1
+    print(refusal)`,`asking with 4, searching in 1
 TooFewValuesError
-the ratio test needs a runner-up to compare against, so it needs at least two descriptors to search in; got 1`,
-              { hints: ["peaks takes a limit, the most places it will hand back, and it hands them back strongest first."] },
-            ),
+the ratio test needs a runner-up to compare against, so it needs at least two descriptors to search in; got 1`,{...{ hints: ["peaks takes a limit, the most places it will hand back, and it hands them back strongest first."] },question:"Why does a ratio test need at least two candidate descriptors?"}),
           ],
         },
       ]}

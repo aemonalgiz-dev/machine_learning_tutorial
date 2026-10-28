@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useAccount } from "@/lib/accounts";
 const key = "fitlab.practice.return";
-const safe = (path: unknown): path is string => typeof path === "string" && /^\/practice(?:\/[a-z][a-z0-9-]*--\d{2}--(?:quiz|code|workshop))?$/.test(path);
+const safe = (path: unknown): path is string => typeof path === "string" && (path === "/membership" || /^\/practice(?:\/[a-z][a-z0-9-]*--\d{2}--(?:quiz|code|workshop))?$/.test(path));
 export function PracticeReturn() {
     const account = useAccount();
     useEffect(() => {

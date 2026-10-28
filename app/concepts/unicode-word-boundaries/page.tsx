@@ -62,9 +62,10 @@ export default function UnicodeWordBoundariesPage() {
 <>
               <SubSection title="1. What a space assumes, and the writing it fails on">
                 <p>
-                  We carry one sentence through this page, the same one the rest
-                  of this section carries, because it is short enough to check by
-                  hand and awkward in four separate places.
+                  A space can mark a word boundary, but punctuation can also separate useful units and some writing contains no spaces between words. We need a rule whose decisions can be inspected one character at a time.
+                </p>
+                <p>
+                  We will reuse the Dr. Alvarez sentence to compare that rule with splitting at whitespace. A second example without spaces will show where the familiar cue stops helping.
                 </p>
                 <Equation>
                   {"Dr. Alvarez didn't expect the low-cost re-analysis."}
@@ -1110,7 +1111,11 @@ export default function UnicodeWordBoundariesPage() {
           practice: [
             exercise(
               "Read the sentence about Dr. Alvarez by both rules, then the six sentences",
-              ["Put the sentence about Dr. Alvarez to the boundary rules and to the space rule, and for each print how many words came back, how many of the 51 characters they hold between them, and whether gluing them back with single spaces returns the sentence. Then do the same count over the six sentences the page measures.", "Section 3 arrived at nine words holding 41 characters against seven pieces holding 45, and section 14 at 303 of 375 characters against 318. The share kept, to one decimal place, should be the 80.8 and 84.8 per cent the page quotes."],
+              [
+  "Apply UnicodeWordPreTokenizer and WhitespacePreTokenizer to the supplied Dr. Alvarez sentence and six-sentence notebook.",
+  "For each rule print the sentence’s piece count, covered source-character count and single-space-join equality. Then print notebook pieces, covered characters out of all source characters and coverage percentage to one decimal place.",
+  "Compute source coverage from spans. The boundary tokenizer’s default word filter omits some punctuation, while whitespace runs retain attached punctuation; neither coverage percentage alone determines a useful word segmentation."
+],
               `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -1165,11 +1170,21 @@ at every run of spaces: 7 words holding 45 of 51 characters
   glued with single spaces, exact: True
   six sentences: 63 pieces holding 318 of 375 characters
   share kept 84.8 per cent`,
-              { hints: ["Both rules take no settings and answer the same kind of collection from split, so one loop over the two serves, and each word carries text, start and end.", "The characters a rule keeps are the sum of end minus start over its words, for the sentence, and over the words of every sentence for the notebook.", "The collection has a texts property, so the glue is a single join with one space, compared with the sentence it came from."], check: numberCheck("What share of the six sentences’ characters do the boundary rules keep inside a word, in per cent to one place?", 80.8, 0.05, "The words hold 303 of the 375 characters, and 303 over 375 is 80.8 per cent, against 318 and 84.8 for the space rule. The rule that keeps more of the writing is the one that cannot separate a comma from a word, so neither number says anything about whether the words are good words.") },
+              {
+question: "What does a word-boundary filter omit that whitespace splitting retains?",
+ hints: [
+  "Each piece exposes start and end. Sum their half-open lengths for coverage.",
+  "For the corpus sum lengths over all supplied sentences as the denominator.",
+  "Compare a single-space join with the original sentence separately from counting retained characters."
+], check: numberCheck("What share of the six sentences’ characters do the boundary rules keep inside a word, in per cent to one place?", 80.8, 0.05, "The word-boundary filter covers 80.8 percent of notebook characters. That describes source retention for this output policy, rather than an accuracy score for its word choices.") },
             ),
             exercise(
               "Put one mark between two letters, then between two digits",
-              ["Section 7 took twelve marks, put each between the letters a and b and then between the digits 1 and 2, and read both by the rules. Repeat the experiment, building each mark from its code point, and report for each whether the two letters were held together and whether the two digits were.", "Three rows should answer differently on the two sides, the colon, the middle dot and the comma. Count how many of the twelve hold two letters together, which the page does not state in words."],
+              [
+  "For each of the twelve supplied marks, build a/mark/b and 1/mark/2 probes using chr(code). Split both with UnicodeWordPreTokenizer.",
+  "Print the code point, name and whether each probe remains one word. Then print totals for marks joining letters, marks joining digits and marks whose two decisions differ.",
+  "The same visible punctuation can belong to different boundary classes depending on its neighbours. Keep those two contexts side by side in the report."
+],
               `from oop_ml import UnicodeWordPreTokenizer
 
 marks = {
@@ -1236,11 +1251,20 @@ U+0020  space                         letters False  digits False
 7 of 12 hold two letters together
 6 of 12 hold two digits together
 3 marks answer differently on the two sides`,
-              { hints: ["chr turns a code point into the character, so the two probe texts are the letter a, chr of the code, the letter b, and the digit 1, chr of the code, the digit 2.", "A mark holds a pair together exactly when split answers one word, so each side is a test of n_words against one.", "A boolean adds as one or zero, so the three totals are running sums of the two tests and of whether they differ."], check: numberCheck("How many of the twelve marks hold two letters together?", 7, 0.0, "Seven hold two letters together and six hold two digits together, and the two columns differ in three rows. The colon and the middle dot are in the class that may stand between two letters and not the one for digits, the comma is the reverse, and the low line and the narrow no-break space are in the class that joins whatever it finds on both sides. The hyphen, the quotation mark, the solidus and the space are in none of the joining classes, so they separate on both sides.") },
+              {
+question: "Does punctuation join letters and digits in the same way?",
+ hints: [
+  "A result with n_words == 1 is joined for this probe.",
+  "Keep both Boolean results before accumulating their totals and testing whether they differ."
+], check: numberCheck("How many of the twelve marks hold two letters together?", 7, 0.0, "Seven marks join the two letters. The digit comparison differs for some punctuation, showing that the rule considers surrounding character classes rather than the mark alone.") },
             ),
             exercise(
               "Count the segments, then the words, then the marks kept",
-              ["Section 12 says the rules cut a text into segments that tile it, and a separate decision says which segments are words. Ask the rules for the segments of the sentence about Dr. Alvarez, confirm that joining them gives the sentence back, and then read the sentence three ways, as every segment, as everything that is not spacing, and as words alone. Repeat the three counts over the six sentences.", "The page gives 19, 13 and 9 for the sentence and 141, 84 and 69 for the corpus. It does not say how many distinct entries the six sentences produce once every mark is kept as a piece of its own, so print that beside the 47 the words alone give."],
+              [
+  "Ask UnicodeWordPreTokenizer for every segment of the supplied sentence and verify that concatenating those segments recovers it.",
+  "Compare segment count, non-whitespace pieces with keep_punctuation=True, and default word-only pieces. Repeat the counts over the six-sentence notebook and print distinct-entry counts for the two filtered outputs.",
+  "Boundary segmentation cuts the source into adjacent spans. Selecting which of those spans to return is a later policy, so do not confuse the full segmentation with the word-only output."
+],
               `from oop_ml import Corpus, UnicodeWordPreTokenizer
 
 sentence = "Dr. Alvarez didn't expect the low-cost re-analysis."
@@ -1292,11 +1316,21 @@ keeping words alone: 9 words
 six sentences, segments: 141
 six sentences, keeping every mark: 84 pieces, 50 entries
 six sentences, keeping words alone: 69 pieces, 47 entries`,
-              { hints: ["segments_of answers the same kind of collection as split, so it has n_words and texts, and the texts joined with nothing between them are the whole text.", "The second reading is the same rules constructed with keep_punctuation set, which keeps every segment that does not begin with white space.", "Corpus.of takes the list and word_counts takes a rule. The sum of the counts is the pieces and the number of counts is the entries, under whichever rule was handed in."], check: numberCheck("How many distinct entries do the six sentences produce when every mark is kept as a piece of its own?", 50, 0.0, "The 47 entries of the words alone, plus three. The full stop, the hyphen and the comma are the only marks the six sentences use, and each becomes an entry of its own, counted 7, 6 and 2 times, which are the 15 extra pieces that take 69 to 84. The choice of reading sits outside the rules, which is why two implementations of one standard can hand back different tables without either having got the standard wrong.") },
+              {
+question: "How does cutting the full text differ from selecting only its word segments?",
+ hints: [
+  "segments_of(text) gives the complete segmentation, including punctuation and spacing.",
+  "Construct a second rule with keep_punctuation=True for the non-whitespace comparison.",
+  "Use Corpus.word_counts on each filtered rule for piece occurrences and distinct spellings."
+], check: numberCheck("How many distinct entries do the six sentences produce when every mark is kept as a piece of its own?", 50, 0.0, "Keeping punctuation gives fifty distinct notebook entries. The extra punctuation entries come from a different output filter applied after boundary segmentation.") },
             ),
             exercise(
               "Writing that separates the two rules, in both directions",
-              ["Section 10 put nine texts to both rules, three scripts written without spaces, Korean as the control, a French thousands group, two flags, an address, a file name and a single emoji. Read each by both rules and by segments, and print the three counts side by side.", "The Japanese sentence should give seven words to the rules against one piece on spaces, the Chinese and Thai lines one word per character, and the flags and the emoji no words at all while still being found as segments. The thousands group is written with the narrow no-break space, so write that character by its code point."],
+              [
+  "The starter supplies nine contrasting texts, including unspaced scripts, flags, an address, a file name and an emoji. Keep every supplied code point unchanged.",
+  "For each labelled text print default Unicode word count, whitespace piece count and complete Unicode segment count. Preserve the listed order.",
+  "Compare words with segments: a symbol can form a segment while the default word-only filter returns no word. These default rules are not a dictionary-based linguistic word segmenter for every language."
+],
               `from oop_ml import UnicodeWordPreTokenizer, WhitespacePreTokenizer
 
 texts = {
@@ -1346,7 +1380,13 @@ two flags                      words 0  pieces on spaces 1  segments 2
 an address                     words 2  pieces on spaces 1  segments 3
 a file name                    words 3  pieces on spaces 1  segments 5
 a single approving hand        words 0  pieces on spaces 1  segments 1`,
-              { hints: ["Both rules answer a collection with n_words from split, and the boundary rules also answer one from segments_of, so each row is three calls on one text.", "A text can come back with zero words and still have segments, since the word test asks for a letter or a digit after the segments are cut."], check: numberCheck("How many words do the boundary rules find in the eleven characters of Japanese?", 7, 0.0, "The five katakana characters at the front are held together into one word, because katakana has a class of its own and a rule that joins it to itself, and everything after them is one word per character, because the standard leaves the kanji and the hiragana out of the letter class. The space rule gives one piece, since there is no white space anywhere in the eleven characters.") },
+              {
+question: "How do the rules behave on scripts and symbols that spaces do not separate?",
+ hints: [
+  "Call boundary.split(text), spaces.split(text) and boundary.segments_of(text) separately.",
+  "Use the labels to display the report without requiring every script in the console.",
+  "The narrow no-break space is an explicit code point in the starter; replacing it with an ordinary space changes the numeric grouping probe."
+], check: numberCheck("How many words do the boundary rules find in the eleven characters of Japanese?", 7, 0.0, "The Japanese probe returns seven default word pieces. Some character classes join into a run and others remain separate under these default rules, so this count is not a claim of seven linguistic words.") },
             ),
           ],
         },

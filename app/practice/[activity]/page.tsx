@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AccountActivity } from "@/components/practice/AccountPractice";
-export const metadata: Metadata = { title: "Account practice | Perceptron Lab", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Additional practice | Perceptron Lab", robots: { index: false, follow: false } };
 export default async function Page({ params }: {
     params: Promise<{
         activity: string;

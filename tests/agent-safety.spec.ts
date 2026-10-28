@@ -88,7 +88,8 @@ test('the guardrail section and its MCP explanation remain readable on mobile', 
   await page.setViewportSize({width:390,height:844});
   await page.goto('/concepts/agent-guardrail-mcp-auth');
   await expect(page.getByRole('heading',{name:'A Valid Token for Which Service?',exact:true})).toBeVisible();
-  await page.getByRole('combobox',{name:'Choose a section',exact:true}).first().selectOption({label:'4. Use a verifier before reading claims as facts'});
+  await page.getByText('Lesson contents', { exact: true }).click();
+  await page.getByRole('combobox',{name:'Jump to a page',exact:true}).first().selectOption({label:'4. Use a verifier before reading claims as facts'});
   await expect(page.getByText('Do not replace signature verification with Base64 decoding.',{exact:false})).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({path:testInfo.outputPath('guardrails-mobile.png'),fullPage:true});

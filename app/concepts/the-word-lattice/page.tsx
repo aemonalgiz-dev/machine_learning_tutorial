@@ -1236,7 +1236,11 @@ export default function TheWordLatticePage() {
           practice: [
             exercise(
               "Score both readings under both sets of counts",
-              ["Part 2 scored the research reading of 研究生命起源 at −4.4981 and the graduate-student reading at −5.7020 under the first table of counts, then moved two counts and reversed the answer. Build each table as a dictionary with counts, ask the segmenter for its best path and total, and score both readings yourself from the definition, as the sum of the logarithms of the shares.", "The best path’s total should match the definition’s score for whichever reading won. The lesson quotes the gap of 1.0986 after the counts move but never prints either total under the second table."],
+              [
+  "Build both supplied word-count dictionaries and segment 研究生命起源 with each lattice model.",
+  "Print the dictionary total, selected reading and total log score. Also score both supplied candidate readings directly from their word-frequency shares, printing each to four decimal places.",
+  "Compare a model-selected score with your direct calculation under the same dictionary. The available candidate words stay fixed while their counts change."
+],
               `import math
 from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
 
@@ -1276,11 +1280,21 @@ for label, counts in tables.items():
 student favoured, total 55: 研究生 | 命 | 起源 scores -4.9319
   research reading from the definition -6.0305
   student reading from the definition -4.9319`,
-              { hints: ["A dictionary with counts is WordDictionary built from DictionaryEntry(word, count) objects, one per word. from_words would give every word a count of one, which is the other page.", "DictionaryLatticeSegmenter takes the dictionary at construction, and best_path answers an object whose words and total_log_score are the reading and its score.", "The dictionary answers frequency_of(word) and total_frequency, so a reading’s score from the definition is the sum over its words of math.log(frequency_of(word) / total_frequency)."], check: numberCheck("What does the best path score under the counts that favour the graduate student?", -4.9319, 0.0005, "With the graduate-student entry at 20 and the lone character at 12 the total is 55, and the winning reading is ln(20/55) + ln(12/55) + ln(5/55). The research reading scores −6.0305 under the same counts, 1.0986 behind, which is ln 3 and is the gap Part 2 quotes. The lattice is the same ten candidates either way, and only the counts moved.") },
+              {
+question: "Can changing word counts reverse the best complete segmentation?",
+ hints: [
+  "Construct WordDictionary from DictionaryEntry(word, count), rather than from_words, which would discard the counts.",
+  "best_path exposes words and total_log_score.",
+  "Use frequency_of and total_frequency to compute each word’s share, take its logarithm and sum over a reading."
+], check: numberCheck("What does the best path score under the counts that favour the graduate student?", -4.9319, 0.0005, "The best path under the student-favouring counts scores about -4.9319. The changed frequencies reverse the ranking while leaving the available spellings unchanged.") },
             ),
             exercise(
               "Lay out the lattice and read every candidate",
-              ["Part 1 drew ten candidates for the six characters, five entries and five single characters no entry covers. Build the lattice with the research-favouring counts, print every candidate with its span and its score, and then ask the lattice itself for its best path.", "Part 5 says a character no entry covers scores the logarithm of one over the total, which is −3.4965 at a total of 33. The fallbacks should all show that score and the entries should show their own shares."],
+              [
+  "Build the research-favouring dictionary from the supplied counts and ask its segmenter for the lattice of 研究生命起源.",
+  "Print the candidate-edge count and character count, then every candidate’s word, half-open span, log score and entry/fallback label. Finish with the lattice’s own best path and score.",
+  "An edge represents one possible piece over a source span. Single-character fallback edges keep otherwise uncovered positions traversable; they do not claim that each character is a meaningful word."
+],
               `from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
 
 sentence = "研究生命起源"
@@ -1316,11 +1330,21 @@ print(f"best path {' | '.join(best.words)} scores {best.total_log_score:.4f}")`,
   起源 [4, 6) scores -1.8871 (entry)
   源 [5, 6) scores -3.4965 (fallback)
 best path 研究 | 生命 | 起源 scores -4.4981`,
-              { hints: ["lattice_of on the segmenter answers a Lattice, which knows its n_edges and n_positions and iterates its candidates by start position.", "Each candidate is a LatticeEdge with word, start, end and log_score. The dictionary supports the in operator, which is what separates an entry from a fallback.", "The lattice has its own best_path, which runs the recurrence of Part 4 over the candidates it holds and answers the same words the segmenter does."], check: numberCheck("How many candidates does the lattice hold for the six characters?", 10, 0.5, "Five entries fit somewhere in the sentence, and every one of the six characters that no entry covers on its own gets a fallback candidate, except 命, which is an entry already. That makes five entries and five fallbacks, and the search in Part 4 does one addition per candidate, ten in all, to settle a choice among the ten readings they spell out.") },
+              {
+question: "Which candidate edges does the lattice actually search?",
+ hints: [
+  "lattice_of(text) returns n_edges, n_positions and iterable LatticeEdge records.",
+  "Each edge exposes word, start, end and log_score. Membership in the dictionary distinguishes listed entries from fallback characters.",
+  "Call lattice.best_path() after inspecting the edges to compare the complete selected route."
+], check: numberCheck("How many candidates does the lattice hold for the six characters?", 10, 0.5, "The lattice has ten candidate edges: dictionary entries fitting the text and single-character fallbacks. Its edge count is not a count of complete segmentations, since a complete path combines compatible edges.") },
             ),
             exercise(
               "Repair the greedy scan on five English words",
-              ["Part 3 runs thewaterunderthetable past the greedy scan, which takes the Greek letter and strands three characters, and then past the lattice, which does not. The page uses the list of 810 words, which is too long to type, so use a list of five words counted once each that holds the four the sentence uses and theta. Run both methods and score both answers.", "With every count one the score of a reading is its number of words times the logarithm of one over the total, so the greedy reading can be scored from the definition without a lattice. The totals differ from the page’s, since the list is smaller, and the shape of the repair should not."],
+              [
+  "Build the supplied five-entry dictionary with equal counts and segment thewaterunderthetable with both forward maximum matching and the dictionary lattice.",
+  "Print both cuts and piece counts. Score the greedy cut using the same per-piece frequency rule, and print the lattice path’s score, their score gap and corresponding likelihood ratio.",
+  "The dictionary includes theta as well as the words needed for the intended sentence. That longer local match can leave less useful pieces afterward."
+],
               `import math
 from oop_ml import DictionaryLatticeSegmenter, MaximumMatchingSegmenter, WordDictionary
 
@@ -1353,11 +1377,21 @@ print(f"gap {gap:.4f}, two words at {one_word:.4f} each, so one part in {math.ex
 best path: the | water | under | the | table in 5 words
   scores -8.0472
 gap 3.2189, two words at -1.6094 each, so one part in 25`,
-              { hints: ["MaximumMatchingSegmenter scans from the left by default and answers Words, with texts and n_words. It will take theta at the fourth word exactly as the page describes.", "DictionaryLatticeSegmenter over the same dictionary answers its best_path, whose n_edges is the number of words it used and whose total_log_score is the sum of their scores.", "A stranded character is scored like a word counted once, so with every count one every piece of the greedy reading costs the same one_word, and its score is the count of pieces times that."], check: numberCheck("What does the lattice’s best path score on the five-word list?", -8.0472, 0.0005, "Every word is worth ln(1/5), which is −1.6094, and the reading a person gives uses five of them. The greedy reading spends seven pieces at the same price, four words and three stranded characters, so it scores two words less and is one part in 25 as likely. On the page the list held 810 words, so the same two extra pieces cost 810 twice over and made the greedy reading one part in 656,100 as likely.") },
+              {
+question: "Can considering a complete path avoid a locally tempting word?",
+ hints: [
+  "Use MaximumMatchingSegmenter for the greedy result and DictionaryLatticeSegmenter.best_path for the complete-path result.",
+  "All listed entries and single-character fallbacks have the same score with this equal-count dictionary.",
+  "Compare complete scores under the same five-entry dictionary. Scores from the lesson’s larger dictionary are a separate experiment."
+], check: numberCheck("What does the lattice’s best path score on the five-word list?", -8.0472, 0.0005, "The lattice path scores about -8.0472 and uses five words. Its complete score beats the longer greedy result, which takes theta and leaves trailing single characters.") },
             ),
             exercise(
               "Count a word the sentence never uses",
-              ["Part 3 took six words in which the compound meaning life is counted 3 times and each of its characters 10, with the whole list counted 32 times, and then counted one more word that occurs nowhere in the sentence. Build the table, count 很 zero, one, two and three times, and print the best path and its score at each total.", "The page says splitting wins at 32 and the compound wins once the total reaches 34. Then multiply every count by a hundred as the control, and confirm the score does not move at all."],
+              [
+  "Build the supplied research-sentence dictionary, then add 很 with counts zero, one, two and three in separate fits. The added word does not occur in the text being segmented.",
+  "For each dictionary print the added count, total frequency, best reading and log score. As a separate control, multiply all original counts by one hundred and print that result.",
+  "The added word changes the total used to normalise every word frequency without adding a candidate in this sentence. The control changes numerator and denominator together."
+],
               `from oop_ml import DictionaryEntry, DictionaryLatticeSegmenter, WordDictionary
 
 sentence = "研究生命起源"
@@ -1394,7 +1428,13 @@ print(f"every count times 100, total {scaled.total_frequency}: {' | '.join(path.
 很 counted 2, total 34: 研究 | 生命 | 起源 scores -6.9956
 很 counted 3, total 35: 研究 | 生命 | 起源 scores -7.0825
 every count times 100, total 3200: 研究 | 生 | 命 | 起源 scores -6.7729`,
-              { hints: ["The added word shares no character with the sentence, so it adds no candidate to the lattice. All it changes is total_frequency, which every score is divided by.", "A dictionary is built fresh for each table, since its total is fixed at construction.", "The control multiplies every count, so every share is a count over a total that both grew by the same factor, and the path and its score should come back identical."], check: numberCheck("What does the best path score once 很 is counted twice, at a total of 34?", -6.9956, 0.0005, "At a total of 34 the compound reading scores −6.9956 and the split reading −7.0154, so the compound wins by the 0.0198 Part 3 quotes, where at 32 the split reading won by 0.0408. The tie total is 100 over 3, about 33.3333, and it was crossed without a single count belonging to the sentence moving. Multiplying every count by a hundred leaves the split reading winning at −6.7729, to the last bit, because every share is a count over a total and both grew alike.") },
+              {
+question: "Can an unrelated dictionary count change a segmentation?",
+ hints: [
+  "Construct a new WordDictionary for each count setting.",
+  "Keep the input sentence fixed and inspect both path and score.",
+  "For the control multiply every original count, rather than only counts of words used by the winning path."
+], check: numberCheck("What does the best path score once 很 is counted twice, at a total of 34?", -6.9956, 0.0005, "At total frequency thirty-four the best score is about -6.9956 and the compound reading wins. Its changed ranking comes from normalisation, while uniformly scaling all counts leaves frequency shares unchanged.") },
             ),
           ],
         },

@@ -228,20 +228,8 @@ export default function DecisionTreesPage() {
                 <p>
                   The best of these three questions is easy to spot because its two groups have clearer labels. A computer needs a numerical comparison to choose it. There are seventeen other candidate splits here too, so in the next part we will build a score that can compare all of them.
                 </p>
-                <p>
-                  Cleaner is the right test because of what a node is for. A
-                  node that stops splitting becomes a leaf, and a leaf
-                  predicts its majority for everyone who reaches it, so every
-                  person in the minority of a mixed node is a mistake the tree
-                  is committed to making. The third question above leaves no
-                  minority on either side, and so gets all eleven people right
-                  on its own. The first leaves three children among six adults
-                  on its nine-person side, three mistakes waiting to happen,
-                  and the second leaves one. A question is useful to the
-                  extent that knowing its answer tells you something about the
-                  label, and a smaller mixture on each side is what that
-                  means.
-                </p>
+                <p>A leaf predicts its majority class for everyone who reaches it. Every minority observation in that leaf is therefore a training mistake under this rule. A useful split sends observations into groups where that majority prediction makes fewer errors or where class mixing is reduced.</p>
+              <p>In this example, the third question leaves no minority on either side and correctly classifies all eleven people. The first leaves three children on a side with six adults. The second leaves one minority observation. We now have concrete groups to compare before introducing a numerical impurity score.</p>
               </SubSection>
 
               <SubSection title="9. Pure and mixed nodes">
@@ -1162,10 +1150,7 @@ export default function DecisionTreesPage() {
         {
           title: "Practice. Growing the Crowds With the Library",
           practice: [
-            exercise(
-              "Grow the one-question tree",
-              ["Grow a tree on the eleven people of the ideal case, five children and six adults, with no restriction at all, and read the whole tree back as text. Then read the root question, its Gini and its gain off the root node, and the depth, leaf count and training accuracy off the model.", "Section 22 lists what should come back: height below 151.5, a root Gini of 0.496, a gain of 0.496, two pure leaves, a depth of one and a training accuracy of 1.000. The tree stops after one question because no question inside a pure node can remove any mixture."],
-              `from oop_ml import DecisionTreeClassifier, Feature
+            exercise("Grow the one-question tree",["Grow a tree on the eleven people of the ideal case, five children and six adults, with no restriction at all, and read the whole tree back as text. Then read the root question, its Gini and its gain off the root node, and the depth, leaf count and training accuracy off the model.", "Section 22 lists what should come back: height below 151.5, a root Gini of 0.496, a gain of 0.496, two pure leaves, a depth of one and a training accuracy of 1.000. The tree stops after one question because no question inside a pure node can remove any mixture."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
@@ -1173,8 +1158,7 @@ is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1])
 
 tree = DecisionTreeClassifier().fit([heights, weights], is_adult)
 # Print the tree as text, then the root's question, Gini and gain, and
-# the depth, leaf count and training accuracy.`,
-              `from oop_ml import DecisionTreeClassifier, Feature
+# the depth, leaf count and training accuracy.`,`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
@@ -1186,19 +1170,13 @@ print(tree.describe())
 root = tree.root
 print(f"root question {root.split.feature_name} < {root.split.threshold}")
 print(f"root Gini {root.impurity:.3f}, gain {root.split.gain:.3f}")
-print(f"depth {tree.depth}, leaves {tree.n_leaves}, training accuracy {tree.score([heights, weights], is_adult):.3f}")`,
-              `height < 151.5 ?  [n=11, impurity=0.4959, gain=0.4959]
+print(f"depth {tree.depth}, leaves {tree.n_leaves}, training accuracy {tree.score([heights, weights], is_adult):.3f}")`,`height < 151.5 ?  [n=11, impurity=0.4959, gain=0.4959]
   predict 0  [n=5, impurity=0.0000]
   predict 1  [n=6, impurity=0.0000]
 root question height < 151.5
 root Gini 0.496, gain 0.496
-depth 1, leaves 2, training accuracy 1.000`,
-              { hints: ["The classes are a feature like the others, 0 for a child and 1 for an adult, and describe answers the grown tree as indented text, one question or one answer per line.", "root is the top node. A node that asks a question carries split, with feature_name, threshold and gain, and its own impurity, which is the Gini of the people who reached it.", "depth and n_leaves are properties of the fitted model, and score answers the share of people it labels correctly."], check: numberCheck("What gain does the root question earn, to three places?", 0.496, 0.0005, "The root holds five children and six adults, a Gini of 60/121, and height below 151.5 sends every child left and every adult right, so both children of the split are pure and the weighted impurity after it is zero. The gain is the whole of the parent impurity, which is the most any question on this crowd could remove and why the search stops there.") },
-            ),
-            exercise(
-              "Grow the muddled crowd to purity, then hold it back",
-              ["Grow the fourteen people of the muddled crowd four ways: with no restriction, under the growth widget’s default depth cap of six, under a depth cap of two, and with a leaf minimum of four people. For each print the depth reached, the number of leaves and the training accuracy.", "Section 23 says the unrestricted tree needs eleven leaves and a depth of seven to reach 1.000 and that the cap of six stops it at nine leaves and 0.857, section 24 says the leaf minimum of four stops it at three leaves and 0.714, and Part 1 says the cap of two gives four leaves. The page does not say what the four-leaf tree scores."],
-              `from oop_ml import DecisionTreeClassifier, Feature
+depth 1, leaves 2, training accuracy 1.000`,{...{ hints: ["The classes are a feature like the others, 0 for a child and 1 for an adult, and describe answers the grown tree as indented text, one question or one answer per line.", "root is the top node. A node that asks a question carries split, with feature_name, threshold and gain, and its own impurity, which is the Gini of the people who reached it.", "depth and n_leaves are properties of the fitted model, and score answers the share of people it labels correctly."], check: numberCheck("What gain does the root question earn, to three places?", 0.496, 0.0005, "The root split sends the two classes to pure leaves, removing all of the parent node's impurity. There is no remaining mixture for another split to reduce.") },question:"Which question separates the supplied children and adults?"}),
+            exercise("Grow the muddled crowd to purity, then hold it back",["Grow the fourteen people of the muddled crowd four ways: with no restriction, under the growth widget’s default depth cap of six, under a depth cap of two, and with a leaf minimum of four people. For each print the depth reached, the number of leaves and the training accuracy.", "Section 23 says the unrestricted tree needs eleven leaves and a depth of seven to reach 1.000 and that the cap of six stops it at nine leaves and 0.857, section 24 says the leaf minimum of four stops it at three leaves and 0.714, and Part 1 says the cap of two gives four leaves. The page does not say what the four-leaf tree scores."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = Feature("height", [145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1206,8 +1184,7 @@ is_adult = Feature("is_adult", [0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
 
 # Grow the tree with no restriction, with max_depth=6, with max_depth=2
 # and with min_samples_leaf=4, and for each print the depth, the number
-# of leaves and the training accuracy.`,
-              `from oop_ml import DecisionTreeClassifier, Feature
+# of leaves and the training accuracy.`,`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = Feature("height", [145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1215,17 +1192,11 @@ is_adult = Feature("is_adult", [0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0])
 
 for label, controls in [("no restriction", {}), ("depth cap 6", {"max_depth": 6}), ("depth cap 2", {"max_depth": 2}), ("leaf minimum 4", {"min_samples_leaf": 4})]:
     tree = DecisionTreeClassifier(**controls).fit([heights, weights], is_adult)
-    print(f"{label}: depth {tree.depth}, leaves {tree.n_leaves}, training accuracy {tree.score([heights, weights], is_adult):.3f}")`,
-              `no restriction: depth 7, leaves 11, training accuracy 1.000
+    print(f"{label}: depth {tree.depth}, leaves {tree.n_leaves}, training accuracy {tree.score([heights, weights], is_adult):.3f}")`,`no restriction: depth 7, leaves 11, training accuracy 1.000
 depth cap 6: depth 6, leaves 9, training accuracy 0.857
 depth cap 2: depth 2, leaves 4, training accuracy 0.643
-leaf minimum 4: depth 2, leaves 3, training accuracy 0.714`,
-              { hints: ["The growth controls are constructor fields, max_depth, min_samples_leaf, min_samples_split and min_impurity_decrease, and an unrestricted tree is the constructor with none of them set.", "The same crowd and the same two features go to every fit, so only the controls change between the four lines.", "A tree at the cap of two is a root with two questions beneath it and four leaves, which is the tree Part 1 describes, and its accuracy is what those four leaves’ majorities get right."], check: numberCheck("What training accuracy does the tree capped at a depth of two reach on the muddled crowd?", 0.643, 0.0005, "Four leaves on fourteen interleaved people leave several of them mixed, and each mixed leaf predicts its majority, so nine of the fourteen are labelled correctly. Two questions cannot carve this crowd, which is why the unrestricted tree spends ten of them, and why the held-out score rather than the training score is what decides how many are worth asking.") },
-            ),
-            exercise(
-              "Sweep the depth cap on the overlapping crowd",
-              ["Reproduce section 26. The page holds back thirteen of the forty-four people by a seeded shuffle, the positions listed in the script, grows a tree on the other thirty-one at every depth cap from one to six, and scores each tree on both shares. Print the depth cap, the leaves, the training accuracy and the held-out accuracy for each.", "The table in section 26 reads 0.935 and 0.846 at caps of one and two, then 1.000 and 0.692 from three onward, where two extra leaves took the training score to perfect and cost two of the thirteen held-out people."],
-              `from oop_ml import DecisionTreeClassifier, Feature
+leaf minimum 4: depth 2, leaves 3, training accuracy 0.714`,{...{ hints: ["The growth controls are constructor fields, max_depth, min_samples_leaf, min_samples_split and min_impurity_decrease, and an unrestricted tree is the constructor with none of them set.", "The same crowd and the same two features go to every fit, so only the controls change between the four lines.", "A tree at the cap of two is a root with two questions beneath it and four leaves, which is the tree Part 1 describes, and its accuracy is what those four leaves’ majorities get right."], check: numberCheck("What training accuracy does the tree capped at a depth of two reach on the muddled crowd?", 0.643, 0.0005, "The depth-two tree leaves mixed classes in some leaves and predicts each leaf's majority. Its training score describes that restricted rule; held-out observations are needed to assess whether more splits help.") },question:"What changes when we restrict how far the tree can grow?"}),
+            exercise("Sweep the depth cap on the overlapping crowd",["Reproduce section 26. The page holds back thirteen of the forty-four people by a seeded shuffle, the positions listed in the script, grows a tree on the other thirty-one at every depth cap from one to six, and scores each tree on both shares. Print the depth cap, the leaves, the training accuracy and the held-out accuracy for each.", "The table in section 26 reads 0.935 and 0.846 at caps of one and two, then 1.000 and 0.692 from three onward, where two extra leaves took the training score to perfect and cost two of the thirteen held-out people."],`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = [142, 135, 162, 136, 143, 152, 136, 145, 147, 142, 150, 144, 128, 165, 119, 150, 153, 143, 138, 126, 143, 131, 158, 162, 143, 177, 167, 166, 193, 162, 173, 163, 173, 147, 179, 183, 156, 164, 154, 169, 162, 176, 156, 154]
 weights = [39, 16, 59, 54, 38, 41, 35, 44, 38, 34, 47, 50, 54, 25, 27, 47, 54, 48, 55, 40, 67, 32, 80, 84, 82, 51, 83, 80, 71, 59, 66, 67, 55, 39, 69, 68, 74, 53, 89, 73, 60, 67, 66, 70]
@@ -1241,8 +1212,7 @@ hidden_target = Feature("is_adult", [is_adult[position] for position in hidden])
 for cap in range(1, 7):
     # Grow a tree under this depth cap on the training share, then print
     # the cap, its leaf count, and its accuracy on each share.
-    pass`,
-              `from oop_ml import DecisionTreeClassifier, Feature
+    pass`,`from oop_ml import DecisionTreeClassifier, Feature
 
 heights = [142, 135, 162, 136, 143, 152, 136, 145, 147, 142, 150, 144, 128, 165, 119, 150, 153, 143, 138, 126, 143, 131, 158, 162, 143, 177, 167, 166, 193, 162, 173, 163, 173, 147, 179, 183, 156, 164, 154, 169, 162, 176, 156, 154]
 weights = [39, 16, 59, 54, 38, 41, 35, 44, 38, 34, 47, 50, 54, 25, 27, 47, 54, 48, 55, 40, 67, 32, 80, 84, 82, 51, 83, 80, 71, 59, 66, 67, 55, 39, 69, 68, 74, 53, 89, 73, 60, 67, 66, 70]
@@ -1257,19 +1227,13 @@ hidden_target = Feature("is_adult", [is_adult[position] for position in hidden])
 
 for cap in range(1, 7):
     tree = DecisionTreeClassifier(max_depth=cap).fit(training_inputs, training_target)
-    print(f"cap {cap}: leaves {tree.n_leaves}, training accuracy {tree.score(training_inputs, training_target):.3f}, held-out accuracy {tree.score(hidden_inputs, hidden_target):.3f}")`,
-              `cap 1: leaves 2, training accuracy 0.935, held-out accuracy 0.846
+    print(f"cap {cap}: leaves {tree.n_leaves}, training accuracy {tree.score(training_inputs, training_target):.3f}, held-out accuracy {tree.score(hidden_inputs, hidden_target):.3f}")`,`cap 1: leaves 2, training accuracy 0.935, held-out accuracy 0.846
 cap 2: leaves 4, training accuracy 0.935, held-out accuracy 0.846
 cap 3: leaves 6, training accuracy 1.000, held-out accuracy 0.692
 cap 4: leaves 6, training accuracy 1.000, held-out accuracy 0.692
 cap 5: leaves 6, training accuracy 1.000, held-out accuracy 0.692
-cap 6: leaves 6, training accuracy 1.000, held-out accuracy 0.692`,
-              { hints: ["The tree is grown on the training share alone, so the training features and target are what go to fit, and the hidden share is only ever handed to score.", "score takes a list of features and a target and answers the share labelled correctly, so one call on each share gives the two columns of the table.", "From a cap of three onward the tree is the same tree, six leaves and a perfect training score, because every leaf is already pure and nothing is left to split, which is why the cap stops mattering."], check: numberCheck("What held-out accuracy does the tree reach at a depth cap of three?", 0.692, 0.0005, "Nine of the thirteen held-out people, where the caps of one and two got eleven. The two extra leaves that took the training score from 0.935 to 1.000 fenced off rectangles around individual training observations, and the held-out observations do not respect those fences. Training accuracy never falls as the cap rises, and the held-out score is what says when the extra questions stopped being worth asking.") },
-            ),
-            exercise(
-              "Ask for trees that cannot be grown",
-              ["Grow a tree on the crossed crowd of section 20, four children on one diagonal and four adults on the other, and read it back. Then hand the library two cases Part 16 says it refuses by name, a target holding one class only and a height that is not a number, and print the name and message of each refusal.", "On the crossed crowd every candidate question earns a gain of zero, so the search admits nothing and the tree should be one leaf at an accuracy of 0.5. The two refusals should arrive before any growth, one from the fit and one from the feature itself."],
-              `from oop_ml import DecisionTreeClassifier, Feature, MLLibError
+cap 6: leaves 6, training accuracy 1.000, held-out accuracy 0.692`,{...{ hints: ["The tree is grown on the training share alone, so the training features and target are what go to fit, and the hidden share is only ever handed to score.", "score takes a list of features and a target and answers the share labelled correctly, so one call on each share gives the two columns of the table.", "From a cap of three onward the tree is the same tree, six leaves and a perfect training score, because every leaf is already pure and nothing is left to split, which is why the cap stops mattering."], check: numberCheck("What held-out accuracy does the tree reach at a depth cap of three?", 0.692, 0.0005, "The deeper tree gains training accuracy while losing accuracy on these held-out people. That result belongs to this split; it is evidence to examine model flexibility, not a guarantee about every deeper tree.") },question:"Does a deeper tree improve predictions for the people held out?"}),
+            exercise("Ask for trees that cannot be grown",["Grow a tree on the crossed crowd of section 20, four children on one diagonal and four adults on the other, and read it back. Then hand the library two cases Part 16 says it refuses by name, a target holding one class only and a height that is not a number, and print the name and message of each refusal.", "On the crossed crowd every candidate question earns a gain of zero, so the search admits nothing and the tree should be one leaf at an accuracy of 0.5. The two refusals should arrive before any growth, one from the fit and one from the feature itself."],`from oop_ml import DecisionTreeClassifier, Feature, MLLibError
 
 heights = Feature("height", [130, 135, 170, 175, 130, 135, 170, 175])
 weights = Feature("weight", [30, 35, 70, 75, 70, 75, 30, 35])
@@ -1279,8 +1243,7 @@ tree = DecisionTreeClassifier().fit([heights, weights], is_adult)
 # Print the tree as text with its leaf count, depth and training accuracy.
 # Then try a fit on an all-child target, and try to build a height feature
 # holding float("nan"), catching the library's own error each time and
-# printing its class name and message.`,
-              `from oop_ml import DecisionTreeClassifier, Feature, MLLibError
+# printing its class name and message.`,`from oop_ml import DecisionTreeClassifier, Feature, MLLibError
 
 heights = Feature("height", [130, 135, 170, 175, 130, 135, 170, 175])
 weights = Feature("weight", [30, 35, 70, 75, 70, 75, 30, 35])
@@ -1298,13 +1261,10 @@ except MLLibError as refusal:
 try:
     Feature("height", [130, 135, float("nan"), 175, 130, 135, 170, 175])
 except MLLibError as refusal:
-    print(f"{type(refusal).__name__}: {refusal}")`,
-              `predict 0  [n=8, impurity=0.5000]
+    print(f"{type(refusal).__name__}: {refusal}")`,`predict 0  [n=8, impurity=0.5000]
 leaves 1, depth 0, training accuracy 0.500
 SingleClassError: feature_values holds only class [0.0], so there is nothing to discriminate between
-InvalidValuesError: feature_values must contain only finite values`,
-              { hints: ["A tree that admits no split is a single leaf predicting the majority, and with four of each the majority is a tie broken toward the lower class, so describe prints one line and depth is zero.", "The non-finite value is refused by the feature before any model sees it, which is the coercion boundary doing its job once, so the second try block needs no fit in it at all."] },
-            ),
+InvalidValuesError: feature_values must contain only finite values`,{...{ hints: ["A tree that admits no split is a single leaf predicting the majority, and with four of each the majority is a tie broken toward the lower class, so describe prints one line and depth is zero.", "The non-finite value is refused by the feature before any model sees it, which is the coercion boundary doing its job once, so the second try block needs no fit in it at all."] },question:"When does this tree stop growing, and which inputs does the library reject?"}),
           ],
         },
       ]}

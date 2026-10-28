@@ -1031,19 +1031,8 @@ export default function JudgingAClassifierPage() {
                 <p>A score needs a defined question. Name the positive class and accepted labels, state whether a value equal to the threshold counts as positive, and give a policy for each rate whose denominator can be zero. An F-score also needs its beta value.</p>
                 <p>Curves add further choices. Are thresholds taken from every distinct score or a fixed grid? Is precision-recall area a step sum or a trapezoid, and is a conventional first point inserted? How do tied scores contribute to ROC area?</p>
                 <p>For several classes, distinguish macro from micro averaging and explain what happens to an undefined class rate. State whether the class count is supplied or inferred. Reliability diagrams need a bin count and a rule for equal-width or equal-count bins; cross-validation summaries need to say whether folds were pooled or their scores averaged.</p>
-                <p>
-                  The choices on this page are these. Adult is positive and
-                  the labels are 0 and 1; a person is called adult at or
-                  above the threshold; an empty denominator gives an
-                  undefined rate rather than zero; the sweep reads every
-                  hundredth and both curves read every distinct chance; the
-                  average precision is a step sum with no conventional first
-                  point; a tied pair counts a half; the three betas are a
-                  half, one and two; both multiclass averages are reported and
-                  the macro one is undefined if any class is; the width can
-                  be stated and is inferred otherwise; five equal-width bins;
-                  and folds are pooled, with a spread for accuracy alone.
-                </p>
+                <p>To reproduce these results, begin with the label convention: adult is positive, and a score at or above the threshold predicts adult. An empty denominator produces an undefined rate here. That choice matters when comparing software that substitutes zero.</p>
+              <p>The threshold sweep uses every hundredth, while the ROC and precision-recall curves use every distinct predicted probability. Average precision uses a step sum, and a tied positive-negative pair receives half credit in the ranking calculation. The page also states its multiclass averaging, calibration-bin and cross-validation pooling conventions beside those calculations. Keep those choices with the report instead of comparing similarly named scores blindly.</p>
               </SubSection>
 
               <SubSection title="26. No positive calls, missing classes and threshold ties" id="26-the-edges-each-one-run">
@@ -1134,10 +1123,7 @@ export default function JudgingAClassifierPage() {
         {
           title: "Practice. Judging the Crowds With the Library",
           practice: [
-            exercise(
-              "Fill the four cells",
-              ["Fit the page’s boundary to the twelve, standardising the two columns first as the page does and giving the climb the page’s 2000 passes, and read the chance it gives the tall child and the short adult, the two people whose measurements overlap the other class.", "Part 1 quotes 0.8669 and 0.4911, and a table of five, one, one and five with accuracy, precision and recall all at 0.8333. Part 6 says this fit ran its full 2000 passes without converging, so print that as well."],
-              `from oop_ml import Feature, LogisticRegression, Standardizer
+            exercise("Fill the four cells",["Fit the page’s boundary to the twelve, standardising the two columns first as the page does and giving the climb the page’s 2000 passes, and read the chance it gives the tall child and the short adult, the two people whose measurements overlap the other class.", "Part 1 quotes 0.8669 and 0.4911, and a table of five, one, one and five with accuracy, precision and recall all at 0.8333. Part 6 says this fit ran its full 2000 passes without converging, so print that as well."],`from oop_ml import Feature, LogisticRegression, Standardizer
 
 heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
 weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
@@ -1149,8 +1135,7 @@ model = LogisticRegression(learning_rate=1.0, max_epochs=2000, tolerance=1e-6)
 # Fit the boundary on the standardised columns and print the chance it gives
 # the tall child (position 5) and the short adult (position 6). Then evaluate
 # it and print the four cells of the table, the accuracy, the precision and
-# the recall, and how the climb ended.`,
-              `from oop_ml import Feature, LogisticRegression, Standardizer
+# the recall, and how the climb ended.`,`from oop_ml import Feature, LogisticRegression, Standardizer
 
 heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
 weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
@@ -1168,18 +1153,12 @@ cells = evaluation.confusion_matrix
 print(f"true positives {cells.true_positives}, false negatives {cells.false_negatives}")
 print(f"false positives {cells.false_positives}, true negatives {cells.true_negatives}")
 print(f"accuracy {evaluation.accuracy:.4f}, precision {evaluation.precision:.4f}, recall {evaluation.recall:.4f}")
-print(f"passes run {model.epochs_run}, converged {model.converged}")`,
-              `tall child 0.8669, short adult 0.4911
+print(f"passes run {model.epochs_run}, converged {model.converged}")`,`tall child 0.8669, short adult 0.4911
 true positives 5, false negatives 1
 false positives 1, true negatives 5
 accuracy 0.8333, precision 0.8333, recall 0.8333
-passes run 2000, converged False`,
-              { hints: ["fit takes the standardised features and the label Feature, and predict_probability answers one chance per person in the order the rows were given, so positions 5 and 6 are the 168 cm child and the 150 cm adult.", "evaluate pairs the calls at the model’s threshold of one half with the truth and answers an evaluation whose confusion_matrix carries true_positives, false_negatives, false_positives and true_negatives.", "accuracy, precision and recall are properties of the evaluation, and epochs_run and converged are the climb’s own record."], check: numberCheck("What chance does the boundary give the tall child?", 0.8669, 0.0005, "The child at 168 centimetres and 66 kilograms sits among the adults on both measurements, so the boundary gives them a higher adult chance than it gives the short adult at 0.4911, and no single threshold can classify both correctly. At one half the child is called an adult and the adult a child, which is the one false positive and the one false negative in the table.") },
-            ),
-            exercise(
-              "Score the rare crowd beside its baseline",
-              ["Part 1 says accuracy is misleading where one class is rare. Fit the same boundary to the thirty people of whom four are adults, score the laziest classifier there is, which calls everybody a child, and then score the boundary at thresholds of 0.5 and 0.7.", "Part 1 quotes 0.8667 for the lazy classifier and 0.9333 for the boundary at both thresholds, one of which finds three of the four adults and the other two. Print the accuracy beside the precision and the recall each time, so the two 0.9333s can be told apart."],
-              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, Standardizer
+passes run 2000, converged False`,{...{ hints: ["fit takes the standardised features and the label Feature, and predict_probability answers one chance per person in the order the rows were given, so positions 5 and 6 are the 168 cm child and the 150 cm adult.", "evaluate pairs the calls at the model’s threshold of one half with the truth and answers an evaluation whose confusion_matrix carries true_positives, false_negatives, false_positives and true_negatives.", "accuracy, precision and recall are properties of the evaluation, and epochs_run and converged are the climb’s own record."], check: numberCheck("What chance does the boundary give the tall child?", 0.8669, 0.0005, "The tall child receives a larger adult score than the short adult. A single threshold cannot label both correctly in this fitted score ordering, which produces the two opposite mistakes in the confusion table.") },question:"Which people does the fitted boundary misclassify?"}),
+            exercise("Score the rare crowd beside its baseline",["Part 1 says accuracy is misleading where one class is rare. Fit the same boundary to the thirty people of whom four are adults, score the laziest classifier there is, which calls everybody a child, and then score the boundary at thresholds of 0.5 and 0.7.", "Part 1 quotes 0.8667 for the lazy classifier and 0.9333 for the boundary at both thresholds, one of which finds three of the four adults and the other two. Print the accuracy beside the precision and the recall each time, so the two 0.9333s can be told apart."],`from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, Standardizer
 
 heights = [110, 113, 115, 118, 120, 121, 122, 124, 125, 127, 128, 130, 131, 133, 134,
            136, 137, 139, 140, 142, 144, 145, 147, 149, 152, 155, 150, 156, 178, 183]
@@ -1194,8 +1173,7 @@ chances = [float(chance) for chance in model.predict_probability(scaled)]
 
 # Evaluate a call of child for everybody and print its accuracy and recall.
 # Then for thresholds 0.5 and 0.7, call an adult wherever the chance reaches
-# the threshold and print the accuracy, the precision and the recall.`,
-              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, Standardizer
+# the threshold and print the accuracy, the precision and the recall.`,`from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, Standardizer
 
 heights = [110, 113, 115, 118, 120, 121, 122, 124, 125, 127, 128, 130, 131, 133, 134,
            136, 137, 139, 140, 142, 144, 145, 147, 149, 152, 155, 150, 156, 178, 183]
@@ -1213,16 +1191,10 @@ print(f"everybody a child: accuracy {lazy.accuracy:.4f}, recall {lazy.recall:.4f
 for threshold in (0.5, 0.7):
     calls = [1 if chance >= threshold else 0 for chance in chances]
     judged = ClassificationEvaluation(is_adult, calls)
-    print(f"threshold {threshold}: accuracy {judged.accuracy:.4f}, precision {judged.precision:.4f}, recall {judged.recall:.4f}")`,
-              `everybody a child: accuracy 0.8667, recall 0.0000
+    print(f"threshold {threshold}: accuracy {judged.accuracy:.4f}, precision {judged.precision:.4f}, recall {judged.recall:.4f}")`,`everybody a child: accuracy 0.8667, recall 0.0000
 threshold 0.5: accuracy 0.9333, precision 0.7500, recall 0.7500
-threshold 0.7: accuracy 0.9333, precision 1.0000, recall 0.5000`,
-              { hints: ["ClassificationEvaluation takes the true labels and the calls, in that order, and the lazy classifier’s calls are thirty zeros.", "A call at a threshold is 1 wherever the chance is at or above it, one comparison per person, which is what the dial in Part 3 does without refitting.", "Recall is a property of the evaluation, the share of the four adults found, and precision the share of the people called adult who were."], check: numberCheck("What recall does the boundary have at a threshold of 0.7?", 0.5, 0.0005, "Raising the threshold from 0.5 to 0.7 drops the adult the boundary gave a chance of 0.6292, so two of the four adults are found rather than three, and the one child wrongly called at 0.5, whose chance is 0.5072, is left alone. The two kinds of mistake traded one for one, which is why accuracy reads 0.9333 both times and says nothing about which classifier found more adults.") },
-            ),
-            exercise(
-              "Turn the dial to 0.9, then past everybody",
-              ["Part 4 says the arithmetic mean of a precision of 1.0 and a recall of 0.5 flatters a model that missed half the adults. Call an adult wherever the twelve’s chances reach 0.9 and read the precision, the recall and the F1 score the library reports.", "Then turn the dial to 0.99, above every chance in the crowd, and ask for the precision. Part 2 says it is zero over zero and comes back undefined rather than as zero. Print the accuracy and the recall there, which do exist, and catch what the library raises when you ask for the precision, printing its name and its message."],
-              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, MLLibError, Standardizer
+threshold 0.7: accuracy 0.9333, precision 1.0000, recall 0.5000`,{...{ hints: ["ClassificationEvaluation takes the true labels and the calls, in that order, and the lazy classifier’s calls are thirty zeros.", "A call at a threshold is 1 wherever the chance is at or above it, one comparison per person, which is what the dial in Part 3 does without refitting.", "Recall is a property of the evaluation, the share of the four adults found, and precision the share of the people called adult who were."], check: numberCheck("What recall does the boundary have at a threshold of 0.7?", 0.5, 0.0005, "Raising the threshold removes a true adult detection and a false adult detection here. The total correct count stays the same, while recall and precision expose the changed kinds of mistake.") },question:"Can two thresholds have equal accuracy while finding different numbers of adults?"}),
+            exercise("Turn the dial to 0.9, then past everybody",["Part 4 says the arithmetic mean of a precision of 1.0 and a recall of 0.5 flatters a model that missed half the adults. Call an adult wherever the twelve’s chances reach 0.9 and read the precision, the recall and the F1 score the library reports.", "Then turn the dial to 0.99, above every chance in the crowd, and ask for the precision. Part 2 says it is zero over zero and comes back undefined rather than as zero. Print the accuracy and the recall there, which do exist, and catch what the library raises when you ask for the precision, printing its name and its message."],`from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, MLLibError, Standardizer
 
 heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
 weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
@@ -1235,8 +1207,7 @@ chances = [float(chance) for chance in model.predict_probability(scaled)]
 
 # At a threshold of 0.9 print the precision, the recall and the F1 score of
 # the calls. Then at 0.99 print the accuracy and the recall, ask for the
-# precision, and print the name and the message of what the library raises.`,
-              `from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, MLLibError, Standardizer
+# precision, and print the name and the message of what the library raises.`,`from oop_ml import ClassificationEvaluation, Feature, LogisticRegression, MLLibError, Standardizer
 
 heights = [118, 120, 122, 125, 140, 168, 150, 159, 162, 178, 180, 183]
 weights = [24, 25, 28, 31, 45, 66, 50, 57, 61, 78, 80, 83]
@@ -1255,16 +1226,10 @@ print(f"at 0.99: accuracy {nobody.accuracy:.4f}, recall {nobody.recall:.4f}")
 try:
     print(nobody.precision)
 except MLLibError as refusal:
-    print(f"{type(refusal).__name__}: {refusal}")`,
-              `at 0.9: precision 1.0000, recall 0.5000, F1 0.6667
+    print(f"{type(refusal).__name__}: {refusal}")`,`at 0.9: precision 1.0000, recall 0.5000, F1 0.6667
 at 0.99: accuracy 0.5000, recall 0.0000
-UndefinedMetricError: precision is undefined when nothing was predicted positive`,
-              { hints: ["f1_score is a property of the evaluation beside precision and recall, and it is the harmonic mean of the two.", "The accuracy and the recall at 0.99 are ordinary numbers, since there are twelve people to be right about and six adults to find; only the precision has nobody underneath it."], check: numberCheck("What F1 score do the calls at 0.9 earn?", 0.6667, 0.0005, "Only the three adults above 0.9 are called, so precision is a perfect 1.0 and recall is 0.5. The harmonic mean is pulled towards whichever rate is worse, and 2 times 1.0 times 0.5 over 1.5 is 0.6667 where the arithmetic mean would say 0.75. At 0.99 nobody is called, the precision is zero over zero, and the library refuses it by name rather than reporting a precision of zero for a model that made no wrong claim.") },
-            ),
-            exercise(
-              "Judge three classes with the width stated",
-              ["Part 5 grows the table to three rows by three columns and gives each class its own precision and recall. Fit the three-class model to the sixteen, standardised first and with the page’s 500 passes, and read the per-class rates, the macro precision and the accuracy.", "Part 5 quotes five sixths each way for teenagers, 0.8 each way for adults, five of five for children, a macro precision of 0.8778 and an accuracy of 0.875. Then judge only the rows that are not adults, with the width stated as three, and ask for the adult class’s recall. Part 5 says an absent class should show up as an empty row with an undefined recall, so catch what the library raises and print it."],
-              `from oop_ml import Feature, MLLibError, MultiClassEvaluation, MultinomialLogisticRegression, Standardizer
+UndefinedMetricError: precision is undefined when nothing was predicted positive`,{...{ hints: ["f1_score is a property of the evaluation beside precision and recall, and it is the harmonic mean of the two.", "The accuracy and the recall at 0.99 are ordinary numbers, since there are twelve people to be right about and six adults to find; only the precision has nobody underneath it."], check: numberCheck("What F1 score do the calls at 0.9 earn?", 0.6667, 0.0005, "At the higher cutoff the model finds only part of the adult class. F1 reflects the imbalance between precision and recall. When no adult prediction is issued, precision has no denominator and this library reports it as undefined.") },question:"What happens to precision and recall when we raise the threshold?"}),
+            exercise("Judge three classes with the width stated",["Part 5 grows the table to three rows by three columns and gives each class its own precision and recall. Fit the three-class model to the sixteen, standardised first and with the page’s 500 passes, and read the per-class rates, the macro precision and the accuracy.", "Part 5 quotes five sixths each way for teenagers, 0.8 each way for adults, five of five for children, a macro precision of 0.8778 and an accuracy of 0.875. Then judge only the rows that are not adults, with the width stated as three, and ask for the adult class’s recall. Part 5 says an absent class should show up as an empty row with an undefined recall, so catch what the library raises and print it."],`from oop_ml import Feature, MLLibError, MultiClassEvaluation, MultinomialLogisticRegression, Standardizer
 
 heights = [118, 120, 122, 125, 145, 147, 156, 159, 162, 178, 180, 183, 186, 172, 160, 141]
 weights = [24, 25, 28, 31, 57, 41, 53, 57, 61, 78, 80, 83, 77, 70, 58, 40]
@@ -1277,8 +1242,7 @@ model = MultinomialLogisticRegression(learning_rate=1.0, max_epochs=500, toleran
 # Evaluate the model on the sixteen and print each class's precision and
 # recall, then the macro precision and the accuracy. Then build a
 # MultiClassEvaluation from only the rows that are not adults, with
-# n_classes=3, ask for the adult class's recall, and print what is raised.`,
-              `from oop_ml import Feature, MLLibError, MultiClassEvaluation, MultinomialLogisticRegression, Standardizer
+# n_classes=3, ask for the adult class's recall, and print what is raised.`,`from oop_ml import Feature, MLLibError, MultiClassEvaluation, MultinomialLogisticRegression, Standardizer
 
 heights = [118, 120, 122, 125, 145, 147, 156, 159, 162, 178, 180, 183, 186, 172, 160, 141]
 weights = [24, 25, 28, 31, 57, 41, 53, 57, 61, 78, 80, 83, 77, 70, 58, 40]
@@ -1299,14 +1263,11 @@ without_adults = MultiClassEvaluation([age_group[position] for position in kept]
 try:
     print(without_adults.recall_for(2))
 except MLLibError as refusal:
-    print(f"{type(refusal).__name__}: {refusal}")`,
-              `child: precision 1.0000, recall 1.0000
+    print(f"{type(refusal).__name__}: {refusal}")`,`child: precision 1.0000, recall 1.0000
 teenager: precision 0.8333, recall 0.8333
 adult: precision 0.8000, recall 0.8000
 macro precision 0.8778, accuracy 0.8750
-UndefinedMetricError: recall for class 2 is undefined because no row belongs to it`,
-              { hints: ["evaluate on a three-class model answers a MultiClassEvaluation whose precision_for and recall_for take a class index, 0 for child, 1 for teenager and 2 for adult, and whose macro_precision and accuracy are properties.", "predict answers one class per row as a float, so int turns each into the class index, and the rows to keep are those whose true class is not 2.", "MultiClassEvaluation takes the true classes, the calls and n_classes, and stating the width is what gives the table an empty adult row rather than a table that quietly shrank."], check: numberCheck("What macro precision does the model earn on the sixteen?", 0.8778, 0.0005, "The three per-class precisions are one for children, five sixths for teenagers and four fifths for adults, and the macro average gives each class an equal vote however many people it holds, so it is their plain mean. Pooling the counts first and dividing once gives the micro figure instead, 14 of 16 or 0.875, which is also the accuracy, since every person gets exactly one call.") },
-            ),
+UndefinedMetricError: recall for class 2 is undefined because no row belongs to it`,{...{ hints: ["evaluate on a three-class model answers a MultiClassEvaluation whose precision_for and recall_for take a class index, 0 for child, 1 for teenager and 2 for adult, and whose macro_precision and accuracy are properties.", "predict answers one class per row as a float, so int turns each into the class index, and the rows to keep are those whose true class is not 2.", "MultiClassEvaluation takes the true classes, the calls and n_classes, and stating the width is what gives the table an empty adult row rather than a table that quietly shrank."], check: numberCheck("What macro precision does the model earn on the sixteen?", 0.8778, 0.0005, "Macro precision gives each class's precision equal weight. Pooled single-label accuracy gives each person equal weight. Their values can differ because the classes have different sizes.") },question:"How do per-class and pooled scores describe the three-class predictions?"}),
           ],
         },
       ]}

@@ -65,12 +65,12 @@ export const agentSafetyTools: Record<string, Tool> = {
   }),
   sgReleaseDecision: tool('Hold unverified releases', 'Both the artifact binding and all required checks must pass before human release review.', ['Evidence matches?', 'Unsatisfied checks'], ([bound, missing]) => boolean(bound) && !strings(missing).length ? 'ready for release review' : 'hold release'),
   sgServerIdentity: tool('Match the configured server', 'Match the locally configured server ID. The server cannot choose a trusted identity by writing it in its description.', ['Discovered tool', 'Configured server ID'], ([raw, id]) => record(raw).server === text(id)),
-  sgManifestMatch: tool('Compare reviewed tool metadata', 'Compare tool name and both reviewed digests. These fixture strings represent hashes computed by the host.', ['Discovered tool', 'Reviewed manifest'], ([a, b]) => {
+  sgManifestMatch: tool('Compare reviewed tool metadata', "Compare the offered tool with the reviewed tool name and the recorded hashes of its argument schema and description. These supplied digest strings stand in for hashes computed by the host; this operation does not calculate them.", ['Discovered tool', 'Reviewed manifest'], ([a, b]) => {
     const offered = record(a), reviewed = record(b);
     return ['server', 'name', 'schemaDigest', 'descriptionDigest'].every(key => typeof reviewed[key] === 'string' && !!reviewed[key] && offered[key] === reviewed[key]);
   }),
   sgToolDecision: tool('Expose only the reviewed tool', 'A known server with changed metadata still needs review. Availability is followed by per-call authorisation.', ['Server matches?', 'Manifest matches?'], ([server, manifest]) => boolean(server) && boolean(manifest) ? 'available for authorised calls' : 'hold discovery'),
-  sgTokenBoundary: tool('Check verified token claims', 'These fixtures stand in for claims returned by a trusted validator. This operation does not verify a JWT signature.', ['Verified claims or null', 'Server policy', 'Current time'], ([raw, rules, now]) => {
+  sgTokenBoundary: tool('Check verified token claims', "Check the issuer, intended server, subject and expiry in already verified token claims. These fixture records stand in for a trusted validator’s result; this operation does not verify a token signature.", ['Verified claims or null', 'Server policy', 'Current time'], ([raw, rules, now]) => {
     if (raw === null) return false;
     const claims = record(raw), policy = record(rules);
     return claims.issuer === text(policy.issuer) && strings(claims.audiences).includes(text(policy.audience)) && typeof claims.subject === 'string' && !!claims.subject && number(claims.expires) > number(now);
@@ -92,8 +92,8 @@ export const agentSafetyTools: Record<string, Tool> = {
   }),
   sgMemoryFilter: tool('Select reviewed memory for this tenant', 'Exclude expired, unreviewed and foreign-tenant records before placing memory in context.', ['Memory records', 'Authenticated tenant', 'Current time'], ([items, tenant, now]) => rows(items).filter(row => row.tenant === text(tenant) && row.reviewed === true && typeof row.expires === 'number' && row.expires > number(now)).map(row => text(row.id))),
   sgGrantedIntersection: tool('Narrow the delegated tools', 'A child receives only requested tools that the parent currently holds. No request can create a new grant.', ['Parent grants', 'Requested child tools'], ([parent, requested]) => { const grants = strings(parent); return [...new Set(strings(requested).filter(name => grants.includes(name)))]; }),
-  sgBundleContext: tool('Prepare the child context', 'Keep filtered memory IDs and attenuated grants separate. Memory text cannot add tools.', ['Reviewed memory IDs', 'Child grants'], ([memory, tools]) => ({ memory: strings(memory), tools: strings(tools) })),
-  sgTraceVerdicts: tool('Inspect recorded effects', 'Compare independently recorded effects with the scenario oracle. An unknown trace cannot establish that no forbidden action happened.', ['Evaluation runs'], ([items]) => rows(items).map(row => {
+  sgBundleContext: tool('Prepare the child context', "Keep reviewed memory IDs beside the reduced set of tools delegated to the child. Narrowing grants is sometimes called attenuation; memory text cannot add tools.", ['Reviewed memory IDs', 'Child grants'], ([memory, tools]) => ({ memory: strings(memory), tools: strings(tools) })),
+  sgTraceVerdicts: tool('Inspect recorded effects', "Compare independently recorded effects with the scenario’s declared permitted effects, which are its test oracle. An incomplete trace cannot establish that no forbidden action happened.", ['Evaluation runs'], ([items]) => rows(items).map(row => {
     const known = row.traceComplete === true, allowed = strings(row.allowedEffects), effects = strings(row.effects);
     return { id: text(row.id), violation: effects.some(effect => !allowed.includes(effect)), blocked: row.legitimate === true && row.completed !== true, unknown: !known };
   })),

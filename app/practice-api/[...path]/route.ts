@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { accountProxy } from "@/lib/server/account-transport";
 import { catalog, getActivity } from "@/lib/practice-bank/catalog.mjs";
+import { readMembership } from "@/lib/membership";
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "private, no-store", Vary: "Cookie, X-FitLab-Account", "X-Content-Type-Options": "nosniff" };
 export async function GET(request: NextRequest, context: {
@@ -20,12 +21,16 @@ export async function GET(request: NextRequest, context: {
     catch {
         return Response.json({ error: "Account verification is temporarily unavailable." }, { status: 503, headers });
     }
-    if (!identity.enabled)
+    if (!identity || typeof identity !== "object" || Array.isArray(identity))
+        return Response.json({ error: "Account verification is temporarily unavailable." }, { status: 503, headers });
+    if (identity.enabled !== true)
         return Response.json({ error: "Accounts are not configured on this server yet." }, { status: 503, headers });
     if (!identity.user || typeof identity.user.id !== "string" || !identity.user.id)
         return Response.json({ error: "Sign in to open account practice." }, { status: 401, headers });
     if (request.headers.get("x-fitlab-account") !== identity.user.id)
         return Response.json({ error: "The signed-in account changed. Check your session and try again." }, { status: 409, headers });
+    if (!readMembership(identity.membership).practiceAccess)
+        return Response.json({ code: "practice_subscription_required", error: "A Practice membership opens the additional practice library. The main course and account progress saving are free." }, { status: 403, headers });
     const parts = (await context.params).path;
     if (!(parts.length === 1 && parts[0] === "catalog") && !(parts.length === 2 && parts[0] === "activity"))
         return Response.json({ error: "Practice not found." }, { status: 404, headers });

@@ -29,12 +29,13 @@ export default function Page() {
     sections={[
 { title: "Part 1. Describe a Distribution Before Drawing From It", content: <>
 <SubSection title="1. Distinguish the inferred distribution from the prior">
-<p>{"The encoder's distribution depends on the input. It describes plausible latent codes for that particular observation and is often called an approximate posterior. The prior is a separate distribution chosen as the source of codes before an observation is given."}</p>
-<p>{"In the common diagonal Gaussian setup, the encoder supplies a mean and variance for each coordinate. Diagonal means the coordinates are modeled as independent within this conditional Gaussian. Implementations often predict log variance so the variance remains positive after exponentiation."}</p>
+<p>{"An ordinary autoencoder can reconstruct a digit from the code its encoder supplies. That leaves a question for generation: if we choose a fresh code ourselves, has the decoder learned what to do with it? We want a source of codes we can sample without first supplying a digit image."}</p>
+<p>{"A variational autoencoder lets the encoder describe a distribution of codes for each input. Imagine a centre and an amount of variation around it, rather than one fixed point. A sampled code goes to the decoder. Because that distribution was inferred from a particular observation, it is called an approximate posterior. The prior is the separate distribution we choose as a source of codes before seeing an observation."}</p>
+<p>{"A common choice uses a bell-shaped Gaussian distribution for each coordinate. The encoder supplies its centre, called the mean, and its variance, which controls the spread. In the diagonal Gaussian setup these coordinates are independent within the distribution for this input. Implementations often predict log variance so exponentiation gives a positive variance."}</p>
 
 </SubSection>
 <SubSection title="2. Give reconstruction and regularization different jobs">
-<p>{"The decoder describes how an input can be generated from a code. The reconstruction term rewards codes that help account for the observed input. The KL term measures how far the inferred code distribution is from the prior."}</p>
+<p>{"The decoder describes how an input can be generated from a code. One part of the training loss rewards codes from which the decoder can reconstruct the observed input. Another compares the encoder's code distribution with the prior. That mismatch penalty is called Kullback–Leibler divergence, or KL divergence. It is zero when these distributions agree, but it is not a symmetric distance between them."}</p>
 <p>{"These objectives compete. A code that ignores the input can match the prior well but reconstruct poorly. An overly powerful decoder can also learn to ignore its latent code, a failure called posterior collapse. Merely making KL small does not establish a useful representation."}</p>
 
 </SubSection>
@@ -206,7 +207,7 @@ print(f"sampled code {code[0]:.4f}")
 print(f"KL to the standard normal {posterior.kl_to_standard_normal:.4f}")`,
               `sampled code 0.8000
 KL to the standard normal 0.8181`,
-              { hints: ["sample takes the noise draw as a one-dimensional array with one entry per code coordinate, so a single coordinate still goes in as an array of one.", "The KL term is a property rather than a method, since it depends only on the mean and the deviation the posterior was built with."], check: numberCheck("What KL term does the posterior report, to four places?", 0.8181, 0.0005, "The variance is 0.25 and its logarithm is about −1.3863, so half of 1 plus 0.25 less 1 less that logarithm is 0.8181. The draw has no part in it, which is the point Part 2 makes about KL comparing distributions rather than sampled points.") },
+              { hints: ["sample takes the noise draw as a one-dimensional array with one entry per code coordinate, so a single coordinate still goes in as an array of one.", "The KL term is a property rather than a method, since it depends only on the mean and the deviation the posterior was built with."], check: numberCheck("What KL term does the posterior report, to four places?", 0.8181, 0.0005, "Sampling uses the supplied noise draw, while KL compares the posterior distribution’s mean and variance with the standard-normal prior. Changing the draw cannot change that distribution-level comparison. The printed sample and KL term answer different questions.") , question: "Which part of a sampled code depends on the draw, and which penalty does not?" },
             ),
             exercise(
               "Move the draw, then widen the code",
@@ -233,7 +234,7 @@ print(f"two such coordinates  KL {wider.kl_to_standard_normal:.4f}")`,
 draw +0.0  sample 1.0000  KL 0.8181
 draw +2.0  sample 2.0000  KL 0.8181
 two such coordinates  KL 1.6363`,
-              { hints: ["A posterior of two coordinates takes a mean array of two entries and a deviation array of two entries, and the two arrays have to be the same length.", "The KL formula in Part 2 carries a sum over j, one term per coordinate, so two identical coordinates cost exactly twice one."], check: numberCheck("What KL term does the two-coordinate posterior report, to four places?", 1.6363, 0.0005, "KL is summed over coordinates, so two coordinates each at a mean of 1 and a deviation of 0.5 cost twice 0.8181. The three draws before it moved the sample from 0 to 2 and the term not at all.") },
+              { hints: ["A posterior of two coordinates takes a mean array of two entries and a deviation array of two entries, and the two arrays have to be the same length.", "The KL formula in Part 2 carries a sum over j, one term per coordinate, so two identical coordinates cost exactly twice one."], check: numberCheck("What KL term does the two-coordinate posterior report, to four places?", 1.6363, 0.0005, "Moving the draw changes a sampled point without changing its posterior distribution. Adding another independent coordinate adds another term to the diagonal-Gaussian KL sum. Use full-precision terms rather than doubling a previously rounded display value.") , question: "What changes when we move the sample draw or add another code coordinate?" },
             ),
             exercise(
               "Find where the deviation is free",
@@ -258,11 +259,11 @@ mean 0  deviation 0.5  KL 0.3181
 mean 0  deviation 1.0  KL 0.0000
 mean 0  deviation 2.0  KL 0.8069
 log of 0.01 -4.6052`,
-              { hints: ["Each deviation needs its own posterior, since the deviation is fixed at construction and there is nothing to set afterwards.", "With the mean at zero the term is half of the variance, less one, less the logarithm of the variance. The logarithm is what dominates for a narrow posterior."], check: numberCheck("What KL term does a deviation of 0.1 report, to four places?", 1.8076, 0.0005, "A deviation of 0.1 has a variance of 0.01, whose logarithm is −4.6052, so the term is half of 0.01 less 1 plus 4.6052, which is 1.8076. A deviation of 2 costs 0.8069 on the other side, so a posterior is penalised for being too narrow more sharply than for being too wide by the same factor, and only a deviation of one is free.") },
+              { hints: ["Each deviation needs its own posterior, since the deviation is fixed at construction and there is nothing to set afterwards.", "With the mean at zero the term is half of the variance, less one, less the logarithm of the variance. The logarithm is what dominates for a narrow posterior."], check: numberCheck("What KL term does a deviation of 0.1 report, to four places?", 1.8076, 0.0005, "With a zero mean and unit standard deviation, this posterior equals the prior and its KL term is zero. Narrower and wider distributions both differ from that prior. The cost is asymmetric: reciprocal changes in standard deviation do not receive equal penalties, and widening by a given factor can cost more than narrowing by its reciprocal.") , question: "Which posterior spread matches the standard-normal prior when the mean is zero?" },
             ),
             exercise(
               "Ask for a deviation of zero",
-              ["A deviation of zero would turn the posterior into a single point. Try to build one and see what the library does about it.", "The KL formula takes the logarithm of the variance, and the logarithm of zero has no finite value, so a term reported for this posterior would be a number standing in for nothing. Catch what the library raises, and print its name and its message."],
+              ["A deviation of zero would turn the posterior into a single point. Try to build one and see what the library does about it.","This API represents a Gaussian with a strictly positive standard deviation. At zero spread it would become a point mass, whose KL to the continuous standard-normal prior is not finite. Catch the constructor’s exception and print its class name and message; do not draw a sample from an invalid posterior."],
               `import numpy as np
 from oop_ml import DiagonalGaussian, MLLibError
 
@@ -278,7 +279,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `InvalidValuesError
 deviations must be strictly positive`,
-              { hints: ["The refusal comes from the constructor, before any sample is drawn, because a posterior that cannot be scored should not exist at all."] },
+              { hints: ["The refusal comes from the constructor, before any sample is drawn, because a posterior that cannot be scored should not exist at all."] , question: "Why does this Gaussian posterior reject a zero standard deviation?" },
             ),
             exercise(
               "Can you train the complete one-coordinate model?",
@@ -330,7 +331,7 @@ print(np.round(p[2] * np.array([-1., 0., 1.]) + p[3], 4).tolist())`,
               { hints: ["Calculate mu, variance and the residual before either loss term. The residual uses the decoder at the encoder mean; the variance contribution is a separate term.", "Each slope derivative needs its input as a multiplier. The log-variance parameter is shared, so its derivative is one scalar, not one entry per observation."], tests: [
                 {name:"Five derivatives agree with numerical loss changes",code:"x=np.array([-3.,.5,2.]); p=np.array([.4,.2,-.7,.3,-.4])\nloss,g=loss_and_grad(p,x)\nassert np.shape(g)==(5,) and np.isfinite(g).all()\na,b,w,d,c=p; mu=a*x+b; v=np.exp(c)\nexpected=np.mean(.5*((x-w*mu-d)**2+w*w*v)+.5*(mu*mu+v-1-c))\nnp.testing.assert_allclose(loss,expected)\nfor i in range(5):\n    delta=np.zeros(5); delta[i]=1e-5\n    numerical=(loss_and_grad(p+delta,x)[0]-loss_and_grad(p-delta,x)[0])/(2e-5)\n    np.testing.assert_allclose(g[i],numerical,rtol=1e-5,atol=1e-7)"},
                 {name:"Training improves another dataset without changing the inputs in place",code:"x=np.array([-1.,0.,2.,3.]); p=np.array([.2,0.,.3,0.,0.]); old=p.copy(); data=x.copy()\ninitial,_=loss_and_grad(p,x)\nnp.testing.assert_array_equal(p,old); np.testing.assert_array_equal(x,data)\nfor _ in range(600):\n    _,g=loss_and_grad(p,x); p=p-.02*g\nassert loss_and_grad(p,x)[0]<initial-.05, 'The full objective should fall on this dataset'"}
-              ] },
+              ] , question: "Can we train both the encoder and decoder using one consistent objective?" },
             ),
           ],
         },

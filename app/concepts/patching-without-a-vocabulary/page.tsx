@@ -71,14 +71,10 @@ export default function PatchingWithoutAVocabularyPage() {
 <>
               <SubSection title="1. Where this picks up, and the bill it picks up">
                 <p>
-                  The previous page ended on a bill. Our sentence about Dr
-                  Alvarez is 51 bytes, and the vocabulary merged out of eighteen
-                  ordinary English sentences reads it as 25 numbers. Across all
-                  eighteen of those sentences the byte reading takes 763 numbers
-                  and the merged one takes 263, which is a little under three
-                  times as many for the same writing, and a model that compares
-                  every position with every other does work in proportion to the
-                  square of it.
+                  Reading every byte preserves unfamiliar spellings, but gives a model more positions to process. Our example sentence becomes 51 byte IDs, compared with 25 IDs under the vocabulary fitted to eighteen report sentences. Across that corpus the counts are 763 and 263.
+                </p>
+                <p>
+                  Could we combine nearby byte representations before the expensive stage that compares positions? A patch is such a group. We will first choose groups of a fixed size, then investigate boundaries chosen from a model’s predictions.
                 </p>
                 <Equation>
                   {"the sentence, as bytes      51\n" +
@@ -87,15 +83,7 @@ export default function PatchingWithoutAVocabularyPage() {
                     "the corpus, as bytes      763\n" +
                     "the corpus, merged        263"}
                 </Equation>
-                <p>
-                  So the coverage guarantee is real and it is not free. Nothing
-                  can be unfamiliar to a table holding all 256 byte values, and
-                  what that buys is paid for in a sequence nearly three times as
-                  long, in around eight times the work for the expensive part of
-                  a model, and in a distance nearly three times as far for
-                  anything the model has to relate across a paragraph. This page
-                  is the attempt to get most of that back.
-                </p>
+
                 <KeepInMind>
                   Everything measured here uses the same eighteen English
                   sentences and the same held-out sentence the two previous pages
@@ -1219,7 +1207,11 @@ export default function PatchingWithoutAVocabularyPage() {
           practice: [
             exercise(
               "Cut at a fixed size",
-              ["Cut the sentence about Dr. Alvarez every four bytes with a FixedSizePatcher and print how many blocks it comes to and what they spell. Then cut the sentence with Ångström in it the same way, and print how many blocks it makes and the offsets at which a block, read on its own, is not text. Last, cut all eighteen sentences at block sizes of 4, 6, 8 and 12 and print the total number of blocks at each.", "The first line should be the thirteen blocks of section 5, the offsets should be the two either side of the split letter in section 7, and the totals for 4, 8 and 12 should be the table of section 6. The table has no row for a size of 6."],
+              [
+  "Use FixedSizePatcher with patch_size=4 on the Dr. Alvarez sentence and the supplied accented sentence. This patcher counts bytes, without looking for words or character boundaries.",
+  "Print the first sentence’s block count and block texts. For the accented sentence print its block count and the start offsets of blocks containing the replacement character when decoded separately.",
+  "Finally print the total blocks over the eighteen supplied sentences at sizes 4, 6, 8 and 12. Each sentence starts a new block sequence; do not join the corpus before counting."
+],
               `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
     FixedSizePatcher,
 )
@@ -1299,11 +1291,21 @@ every  4 bytes: 197 blocks over the eighteen sentences
 every  6 bytes: 135 blocks over the eighteen sentences
 every  8 bytes: 102 blocks over the eighteen sentences
 every 12 bytes: 72 blocks over the eighteen sentences`,
-              { hints: ["FixedSizePatcher takes patch_size and is never fitted. Its patch method takes a text and answers the blocks, which know n_patches and can be looped over.", "Each block carries its text, its start and its end as byte offsets. The accented sentence is written with escapes so that the script holds only plain characters, and nothing here prints a letter a terminal might refuse.", "The corpus total is a sum over the eighteen sentences of each one’s n_patches, with a new patcher for each size."], check: numberCheck("How many blocks do the eighteen sentences come to at a block size of 6?", 135, 0.0, "The number of blocks is the bytes divided by the size and rounded up, taken one sentence at a time. 763 bytes over 6 is a little over 127, and rounding up once for each of the eighteen sentences brings the total to 135. The quality of the cuts has not moved, which is section 6’s point, since a rule that does not read the text only ever changes how many blocks there are.") },
+              {
+question: "Where can a fixed byte-sized block split a character?",
+ hints: [
+  "patch(text) returns n_patches and iterable blocks with text and byte-based start/end offsets.",
+  "A UTF-8 character can cross a block boundary. Inspect each block’s decoded text for the replacement mark.",
+  "Sum patch(text).n_patches separately over the sentences at each size."
+], check: numberCheck("How many blocks do the eighteen sentences come to at a block size of 6?", 135, 0.0, "Six-byte blocks produce 135 blocks over the corpus. Each sentence’s final partial block still counts, so its boundaries affect the total as well as the overall byte length.") },
             ),
             exercise(
               "Cut where the next byte is hard to guess, under both rules",
-              ["Fit an EntropyPatcher on twenty copies of the eighteen sentences, looking back four bytes, with a threshold of one bit and a thousandth credited to every unseen byte, which are the settings behind Parts 3 and 5. Do it once for each of the two rules of section 11. For each, print the blocks of the first corpus sentence, the number of blocks the sentence about Dr. Alvarez comes to, and the total over the corpus with the bytes per block to two places. Then print how many of the sentence about Dr. Alvarez’s positions score 8 bits.", "Under the level rule you should get the six blocks of section 12, the 30 of section 20 and the 129 of section 19, and 26 positions at the ceiling. Under the rise rule the sentence about Dr. Alvarez should come to the 7 of section 11. The page never puts the rise rule to the whole corpus."],
+              [
+  "Fit EntropyPatcher on twenty copies of the supplied corpus, using order=4, threshold=1.0 and smoothing=0.001. Run both supplied cut rules: absolute uncertainty level and increase from the preceding position.",
+  "For each rule print the first corpus sentence’s blocks, the held-out sentence’s block count, the original corpus’s total blocks and average bytes per block to two decimal places.",
+  "Finish by counting held-out byte positions whose uncertainty is within a billionth of eight bits. Both fits use the same probability estimates; only the rule deciding where to cut changes."
+],
               `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
     EntropyPatcher,
     PatchingRule,
@@ -1387,11 +1389,21 @@ relative_increase
   the running sentence: 7 blocks
   the corpus: 79 blocks, 9.66 bytes to a block
 positions at 8 bits: 26 of 51`,
-              { hints: ["EntropyPatcher takes order, threshold, smoothing and rule as keywords, and fit takes a list of texts and answers the fitted patcher, so the two can be chained. corpus * 20 is the list repeated twenty times.", "patch answers the same kind of blocks the fixed rule does, with n_patches and a text on each. A rule is an enum member, and its value is the readable name.", "The uncertainties do not depend on the rule, only the cuts do, so entropies_of from either fitted patcher gives the same numbers. A stretch the corpus never held scores 8 to within rounding, so compare against 8 less a billionth rather than against 8 exactly."], check: numberCheck("How many blocks do the eighteen sentences come to under the rise rule?", 79, 0.0, "An uncertainty is never negative, so a position that has risen more than a bit above the one before it is also above one bit, and every cut the rise rule makes is one the level rule makes too. It makes 61 of the level rule’s 111, which is 79 blocks against 129. On the sentence the guesser read it joins expected, on and Monday into one block, because the uncertainty at those two word starts was above one bit without being a whole bit above the position before.") },
+              {
+question: "How do an uncertainty threshold and a rise threshold make different cuts?",
+ hints: [
+  "Pass the rule enum at construction and corpus * 20 to fit.",
+  "Count blocks over the original corpus for the report, not its twenty repeated training copies.",
+  "entropies_of gives the byte-position uncertainty values. Use the supplied near-eight comparison rather than exact floating-point equality."
+], check: numberCheck("How many blocks do the eighteen sentences come to under the rise rule?", 79, 0.0, "The rise rule gives 79 blocks over the original corpus. It omits positions whose uncertainty is high but did not rise enough from the preceding position, so its boundaries differ from a simple level threshold.") },
             ),
             exercise(
               "Look further back, on text the guesser has and has not read",
-              ["Section 18 lengthens the stretch the guess is conditioned on and watches the corpus come out in fewer blocks. Do the same from one byte back to six, and beside the corpus total print what the page does not, which is the number of blocks the sentence about Dr. Alvarez comes to and how many of its 51 positions score 8 bits.", "The corpus column should be the table of section 18 with a sixth row added. Watch the other two columns move the opposite way, and find the context length at which the sentence the guesser never read is shortest."],
+              [
+  "Fit the same entropy patcher at context lengths one through six, retaining the previous training repetition, one-bit threshold and smoothing settings. Use the default level rule.",
+  "At each context length print total blocks for the original corpus, blocks for the held-out Dr. Alvarez sentence and the number of its byte positions scoring approximately eight bits.",
+  "The context length is how many preceding bytes condition the prediction. Compare familiar and held-out text separately; a longer context can become less frequently observed."
+],
               `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
     EntropyPatcher,
 )
@@ -1462,11 +1474,20 @@ for order in (1, 2, 3, 4, 5, 6):
 4 back: corpus 129 blocks, running sentence 30 blocks, 26 positions at 8 bits
 5 back: corpus 110 blocks, running sentence 34 blocks, 31 positions at 8 bits
 6 back: corpus  98 blocks, running sentence 38 blocks, 36 positions at 8 bits`,
-              { hints: ["order is the number of preceding bytes the guess is conditioned on. Everything else stays as it was in the problem before, with the rule left at its default, which is the level rule.", "entropies_of answers one uncertainty per byte of the text. Summing a comparison over them counts the positions for which it holds."], check: numberCheck("How many blocks does the sentence about Dr. Alvarez come to when the guesser looks back two bytes?", 25, 0.0, "Two bytes back is the shortest the sentence gets. From there every byte of context added makes the corpus shorter and this sentence longer, 27, 30, 34 and 38 blocks, because a longer stretch occurs less often and more of an unread text is scored under stretches the corpus never held, 10 positions at 8 bits with two bytes back and 36 of the 51 with six. One byte back is worse again for the opposite reason, since nothing is at the ceiling and a single letter says too little, which is the first row of the table in section 18.") },
+              {
+question: "Does a longer byte context help unfamiliar text as much as familiar text?",
+ hints: [
+  "order is the preceding-byte count for this patcher. Create and fit a fresh model for every order.",
+  "Keep the near-eight tolerance used in the preceding exercise. Count the held-out positions independently of its final blocks."
+], check: numberCheck("How many blocks does the sentence about Dr. Alvarez come to when the guesser looks back two bytes?", 25, 0.0, "The held-out sentence uses 25 blocks at a two-byte context. Longer contexts reduce familiar-corpus blocks here while leaving more held-out contexts unobserved.") },
             ),
             exercise(
               "Find the edge between seven copies and eight",
-              ["Take the six-word sentence about the cat. For seven, eight and twenty copies of it, fit an EntropyPatcher that looks back two bytes with a threshold of half a bit and a thousandth credited to unseen bytes, and print the blocks it cuts the sentence into, with the uncertainty at the second byte to four places. Then fit one copy with a twenty thousandth credited, and print the largest difference between its uncertainties and those of the twenty copies, and whether the two cut the sentence into the same blocks.", "You should see the sixteen blocks and the five of section 15, and the agreement of section 16 to about sixteen decimal places. Read the uncertainty at the second byte against the threshold at seven copies and at eight, and the sharpness of the edge is explained."],
+              [
+  "Fit the supplied cat sentence at seven, eight and twenty copies with order=2, threshold=0.5 and smoothing=0.001. Print each block layout and the uncertainty at the second byte to four decimal places.",
+  "Then fit one copy with smoothing=0.00005. Compare its uncertainties with the twenty-copy fit: print the largest absolute difference and whether their block layouts match.",
+  "A cut is a threshold decision. Inspect the second-byte uncertainty before interpreting a sudden change in the number of blocks."
+],
               `from oop_ml.core.natural_language_processing.tokenization.characters.patching import (
     EntropyPatcher,
 )
@@ -1506,7 +1527,13 @@ print(f"largest difference {gap:.1e}, same blocks {many.patch(cat) == one.patch(
 20 copies:  5 blocks, second byte at 0.1981 bits
            ['the ', 'cat ', 'sat ', 'on the ', 'mat']
 largest difference 1.7e-16, same blocks True`,
-              { hints: ["[cat] * copies is a list holding the sentence that many times, which is what fit takes. The settings are order=2, threshold=0.5 and smoothing=0.001.", "entropies_of(cat) is one number per byte, so index 1 is the h of the first word, an ordinary position inside a word.", "Two sets of blocks compare equal with == when they cut the text at the same places, and zip pairs the two lists of uncertainties position by position."], check: numberCheck("What is the uncertainty at the second byte at seven copies, to four places?", 0.5005, 5e-05, "The threshold is half a bit, and at seven copies an ordinary position inside a word scores 0.5005, which is over it by about five ten-thousandths, so the rule cuts there, the eleven other positions at the same figure go the same way, and the sentence is letters and fragments. At eight copies the same position scores 0.4457 and is left alone, and only the four word starts are still above the threshold. The edge is where one class of positions crosses a number somebody chose.") },
+              {
+question: "Why can one more training copy suddenly change the block layout?",
+ hints: [
+  "The second byte is index 1 of entropies_of(cat). Keep the threshold fixed across the first three fits.",
+  "Pair the uncertainty arrays with zip and take the largest absolute difference.",
+  "Changing the balance between observed counts and smoothing can move an entire class of positions across the threshold together."
+], check: numberCheck("What is the uncertainty at the second byte at seven copies, to four places?", 0.5005, 5e-05, "At seven copies the second byte scores 0.5005 bits, just above the chosen threshold. At eight it is below the threshold, so a small numerical change produces a discrete change in the layout.") },
             ),
           ],
         },

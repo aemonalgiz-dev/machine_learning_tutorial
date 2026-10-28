@@ -431,6 +431,10 @@ export default function ConvolutionalNetworksPage() {
               "The seed that finished with the lowest loss on the training half also gave the best held-out score.",
               false,
               "The lowest final loss belongs to seed 2 and the best held-out score to seed 0, so the training loss did not order them. All three name every training picture by the end, which is why a training accuracy of 1.000 cannot tell the arrangements apart, and why a difference smaller than the 0.05 spread between seeds is not evidence about an arrangement.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "the network | seed 0 | seed 1 | seed 2\nheld-out accuracy after pass 40 | 0.971 | 0.921 | 0.967\nbest held-out accuracy, and the pass | 0.971, 36 | 0.938, 27 | 0.967, 25\ntraining-half accuracy after pass 40 | 1.000 | 1.000 | 1.000\nloss over pass 40 | 0.0190 | 0.0133 | 0.0122"
+              },
             ),
             choice(
               "At seed 0 the four first-layer filters score 0.675, 0.543, 0.814 and 0.794 against the nearest of eight turned Sobel grids. Why is that not yet evidence of edge detectors?",
@@ -448,17 +452,25 @@ export default function ConvolutionalNetworksPage() {
               "Of the two edge-like filters at seed 0, one was learned and the other was already edge-like when its weights were drawn.",
               true,
               "The fourth filter was at 0.754 when its weights were drawn, and training moved them by 0.09 of their starting length, so it resembles an edge detector because the random draw put one there. The third filter did move, by 1.86 times its starting length, and rose from 0.594 to 0.814. Comparing a trained filter against its own starting weights is the only way to tell the two apart.",
+              {
+                "description": "The table compares each filter with its closest edge template. Relative movement is the size of its weight change divided by its initial weight length. Use these observations to judge the statement.",
+                "data": "seed 0 | closest direction | closeness at start | trained | moved\nfilter 1 | brighter below | 0.309 | 0.675 | 1.33\nfilter 2 | brighter to the right | 0.552 | 0.543 | 0.01\nfilter 3 | brighter to the upper left | 0.594 | 0.814 | 1.86\nfilter 4 | brighter to the lower right | 0.754 | 0.794 | 0.09"
+              },
             ),
             several(
               "Which of these does the page report about the two nearly silent filters at seed 0?",
               [
-                "They answer above zero on 0.08% and 2.3% of positions across the held-out pictures",
-                "Where the activation answers zero it passes no slope back, so they receive almost no correction",
-                "Their weights sum below zero, to −3.395 and −0.738",
-                "They are why seed 0 is the worst of the three networks",
-              ],
+                              "They answer above zero on 0.08% and 2.3% of positions across the held-out pictures",
+                              "Where the activation answers zero it passes no slope back, so they receive almost no correction",
+                              "Their weights sum below zero, to −3.395 and −0.738",
+                              "They are why seed 0 is the worst of the three networks",
+                            ],
               [0, 1, 2],
-              "Seed 0 names 0.971 of the held-out pictures with half its first layer effectively switched off, and it is the best of the three. On pictures brighter than zero nearly everywhere, weights summing below zero are enough to keep a filter quiet from the first step. Four filters is few enough for this to be visible, and in a layer of hundreds it would pass unnoticed, since nothing in the loss says so.",
+              "Seed 0 has the highest held-out score despite two filters being nearly silent. Negative weight sums help explain weak responses on broadly bright patches, but the actual response also depends on the patch and bias. Where ReLU receives a negative score its local derivative is zero, so that position supplies no weight correction through this activation.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Seed 0, first layer, ReLU activation:\nfilter 2: positive at 0.08% of held-out positions; weights sum to −3.395\nfilter 4: positive at 2.3% of held-out positions; weights sum to −0.738\n\nReLU derivative is zero for negative scores.\nHeld-out accuracy, seeds 0/1/2: 0.971 / 0.921 / 0.967"
+              },
             ),
         ],
         },
@@ -757,15 +769,19 @@ export default function ConvolutionalNetworksPage() {
               "No pixel outside a window ever moved its unit at any depth, and inside the counts are 9 of 9, 14 of 16, 63 of 64 and 92 of 100. The shortfall is the pooling and the activation function, since a pixel feeding only a losing position in a maximum never reaches the unit, and neither does one feeding a unit whose activation answered zero. The geometry gives the most a unit can see, and what it responds to is a subset that changes with the picture.",
             ),
             choice(
-              "Taking the two poolings out and training from the same three seeds gives what?",
+              "Which statement agrees with the matched-seed pooling comparison?",
               [
-                "Held-out scores of 0.875, 0.821 and 0.817 against 0.971, 0.921 and 0.967",
-                "A network that can no longer fit even its training half",
-                "Scores inside the spread between seeds, so no difference in the arrangement",
-                "A smaller network, since the poolings were holding weights",
-              ],
+                              "Held-out scores of 0.875, 0.821 and 0.817 against 0.971, 0.921 and 0.967",
+                              "A network that can no longer fit even its training half",
+                              "Scores inside the spread between seeds, so no difference in the arrangement",
+                              "A smaller network, since the poolings were holding weights",
+                            ],
               0,
               "The gap at matching seeds runs from 0.096 to 0.150, larger than the spread of either arrangement across its own seeds, so it is a difference in the arrangement. The network without pooling still names every training picture. It also carries 13.4 times the parameters and 3.9 times the arithmetic, because removing the pooling removes the shrinking that kept the dense layer small, so the measurement carries both at once.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "                         seed 0   seed 1   seed 2\nheld-out, with pooling    0.971    0.921    0.967\nheld-out, without pooling 0.875    0.821    0.817\n\nBoth arrangements reach training accuracy 1.000.\nParameters: with pooling 2,468; without pooling 33,188.\nMultiply counts: with pooling 29,760; without pooling 115,776."
+              },
             ),
             trueFalse(
               "Pooling made the network indifferent to a one-pixel move, which is the reason usually given for having it.",
@@ -775,13 +791,17 @@ export default function ConvolutionalNetworksPage() {
             choice(
               "A move of two pixels lines up with the first pooling’s two-pixel windows. What did moving the held-out pictures by two pixels do at seed 0?",
               [
-                "It changed 8.1% of answers, between the 6.7% at one pixel and the 12.0% at three",
-                "It changed no answers, since every pattern stayed inside its window",
-                "It changed fewer answers than a move of one pixel, since the alignment helped",
-                "It changed more answers than a move of three pixels",
-              ],
+                              "It changed 8.1% of answers, between the 6.7% at one pixel and the 12.0% at three",
+                              "It changed no answers, since every pattern stayed inside its window",
+                              "It changed fewer answers than a move of one pixel, since the alignment helped",
+                              "It changed more answers than a move of three pixels",
+                            ],
               0,
               "The first pooled maps simply move by one position, but the second pooling’s windows are four pixels wide, and a move of one position in its input crosses its boundaries just as a move of one pixel crossed the first. So the measurement shows no sign that the alignment helped. Pooling gives a little tolerance inside each window and none across windows.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "Seed 0, fraction of classifications changed by a shift:\n1 pixel: 6.7%\n2 pixels: 8.1%\n3 pixels: 12.0%\n\nTwo successive pooling layers each have window 2 and stride 2."
+              },
             ),
         ],
         },
@@ -1019,13 +1039,17 @@ export default function ConvolutionalNetworksPage() {
             several(
               "Which of these hold of the probabilities the last layer gives a picture of a kind it was never shown?",
               [
-                "They sum to one over the four kinds it was built with, so no picture can be given to none of them",
-                "On sixty rings the probability of the call averaged 0.861, against 0.948 on the kinds the network knows",
-                "A blank picture of even brightness is spread evenly over the four kinds",
-                "A probability above 0.9 is kept for the kinds it trained on, so a lower one marks a picture from outside the set",
-              ],
+                              "They sum to one over the four kinds it was built with, so no picture can be given to none of them",
+                              "On sixty rings the probability of the call averaged 0.861, against 0.948 on the kinds the network knows",
+                              "A blank picture of even brightness is spread evenly over the four kinds",
+                              "A probability above 0.9 is kept for the kinds it trained on, so a lower one marks a picture from outside the set",
+                            ],
               [0, 1],
               "Every picture is shared out among the four kinds, and the network called 48 of the 60 rings a square outline, a reasonable guess for a closed outline with nothing inside. Its confidence dropped only a little, and 63% of the rings were called with more than 0.9, so a high probability does not mark a known kind. A blank picture of even brightness 0.15 is called a diagonal bar with a probability of 0.892, which is nowhere near an even spread.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "The output is a softmax over four known kinds, with no “unknown” class.\nMean top-class probability:\nknown kinds: 0.948\n60 unseen rings: 0.861\n63% of rings receive a top-class probability above 0.9.\nA flat picture of brightness 0.15 is called a bar at probability 0.892."
+              },
             ),
             trueFalse(
               "Of the four arrangements trained on this page, the dense network on the raw pixels is the only one that does not name every training picture after 40 passes.",
@@ -1039,7 +1063,10 @@ export default function ConvolutionalNetworksPage() {
           practice: [
             exercise(
               "Count the weights and the multiplications",
-              ["Part 1 lists the network layer by layer and Part 6 counts what each arrangement costs to run. The starter builds the seven layers as a stack for a sixteen by sixteen picture of one channel. Walk it, printing for each layer the arrangement it answers with, how many parameters it holds and how many multiplications it does on one picture, counting a multiplication the way Part 6 does, one per weight per position the weight is used at.", "The page gives 40, 296, 2,064 and 68 parameters, 2,468 in all, and 9,216, 18,432 and 2,048 multiplications among 29,760. Then print the share of the parameters and the share of the multiplications that belong to the two convolutions, which the page states as counts and not as shares."],
+              [
+  "Inspect the supplied seven-layer network on one sixteen-by-sixteen single-channel picture. For each layer print output shape, learned parameters and weight multiplications per picture.",
+  "Count one multiplication per weight at each position using it; exclude additions and activation/pooling work. Finish with totals and the shares belonging to the two convolutions."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear
 
@@ -1103,11 +1130,17 @@ DenseLayer answers (16,), holds 2064, multiplies 2048 times
 DenseLayer answers (4,), holds 68, multiplies 64 times
 2468 parameters, 336 of them in the convolutions, a share of 0.136
 29760 multiplications, 27648 of them in the convolutions, a share of 0.929`,
-              { hints: ["A stack can be walked like a list, and isinstance tells a convolution from a dense layer. A convolution keeps what it learns in kernels and bias_vector, a dense layer in weight_matrix and bias_vector, and each of those has a size.", "A convolution uses every kernel weight once at every position of its answer. Its shape.answers holds filters, height and width, so the positions are the last two extents multiplied together.", "A dense layer uses each weight once per picture, so its multiplications are the size of its weight matrix. The biases are added and not multiplied, so they count as parameters only."], check: numberCheck("What share of the network’s multiplications do the two convolutions do, to three places?", 0.929, 0.0005, "The two convolutions hold 336 of the 2,468 parameters, a share of 0.136, and do 27,648 of the 29,760 multiplications, a share of 0.929. A dense weight is used once per picture, while a kernel weight is used at every position it is swept to, 256 positions in the first convolution and 64 in the second, so the layers holding the fewest weights do nearly all the arithmetic. That is the split Part 6 comes back to when it says the two counts come apart.") },
+              { hints: [
+  "A dense weight is used once per observation; a kernel weight is reused at every output position.",
+  "Keep this narrow operation count distinct from runtime or complete hardware cost."
+], check: numberCheck("What share of the network’s multiplications do the two convolutions do, to three places?", 0.929, 0.0005, "The convolution share is 0.929 of the counted multiplications. Small parameter storage can still mean much arithmetic when each weight is reused over many positions."), question: "Does the layer storing most parameters also do most multiplications?" },
             ),
             exercise(
               "Work out how far one unit sees, and add a third round",
-              ["Part 4 works out how far one unit sees from two rules. The field grows by the window less one, times the spacing the layer’s inputs arrive with, and the spacing is then multiplied by the stride. Apply both to the layers themselves, reading each window and each stride off the layer. The starter holds the two rounds of the page’s network.", "Add a third round, a convolution of sixteen filters reading what the second pooling answers and a pooling after it, and print the arrangement, the field and the spacing after every layer. The page gives fields of 3, 4, 8 and 10 for the first four layers. The third round is not on the page."],
+              [
+  "Extend the supplied two convolution/pooling rounds with a sixteen-filter convolution and another pooling layer. Read window sizes and strides from each layer.",
+  "For every layer print output shape, theoretical receptive-field width and spacing between neighbouring responses in original-pixel units. Begin with width and spacing one; preserve the starter’s padding settings."
+],
               `from oop_ml import Conv2d, LayerStack, MaxPool2d, RectifiedLinear
 
 stack = LayerStack([
@@ -1147,11 +1180,17 @@ Conv2d    answers (8, 8, 8), field 8, spacing 2
 MaxPool2d answers (8, 4, 4), field 10, spacing 4
 Conv2d    answers (16, 4, 4), field 18, spacing 4
 MaxPool2d answers (16, 2, 2), field 22, spacing 8`,
-              { hints: ["The third convolution reads (8, 4, 4), which is what the second pooling answers. A convolution with a padding of one answers at the size it reads, so with sixteen filters the pooling after it reads (16, 4, 4).", "A convolution keeps its window as kernel_size and a pooling keeps its own as window, and both keep a stride.", "Grow the field before widening the spacing, since a layer’s window is laid over inputs at the spacing they arrive with."], check: numberCheck("How many pixels across does one unit see after the third pooling?", 22, 0.5, "The third convolution’s inputs sit four pixels apart, so its window of three adds eight and takes the field from 10 to 18, and the pooling after it adds four more. A field of 22 is wider than the picture’s 16 pixels, so every unit that deep has part of its window outside the picture and reads the padding’s zeros there, the case Part 7 lists as a unit whose window runs past the picture. Each pooling doubled the spacing, which is why the third round widened the view by twelve pixels where the first widened it by three.") },
+              { hints: [
+  "Before updating spacing, enlarge the field using the incoming spacing and the additional window positions.",
+  "Then multiply spacing by stride. The theoretical field can extend into padding beyond the actual image."
+], check: numberCheck("How many pixels across does one unit see after the third pooling?", 22, 0.5, "The theoretical field is twenty-two pixels wide. It extends beyond the sixteen-pixel image, so some locations in that field refer to padding rather than measured pixels."), question: "How much of the original image can one deeper response depend on?" },
             ),
             exercise(
               "Offer the dense layer a picture of another size",
-              ["Part 7 says the convolutions and the poolings can be laid over a picture of any size and the dense layer cannot, because its weights are one per number of the flattened row. The starter holds a dense layer of sixteen units reading 128 numbers, the width the network was built with, and for each side in its list it builds the two rounds and the flattening for a picture of that side. Offer the dense layer to a stack on top of them.", "Print what the two poolings leave, the length of the flattened row, and whether the dense layer joins or what the library says when it does not. The page’s table has sides 12, 15, 16, 17, 20 and 32. Side 24 is not in it."],
+              [
+  "For every supplied picture side, construct the same two convolution/pooling rounds and Flatten, then attempt to attach the dense layer expecting 128 features.",
+  "Print the second pooling’s output shape, flattened width and either successful join or the library refusal. Keep convolution and pooling settings fixed across sides."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, HyperbolicTangent, LayerStack, MaxPool2d, MLLibError, Neuron, RectifiedLinear
 
@@ -1195,11 +1234,17 @@ side 17: two poolings leave (8, 4, 4), a row of 128, the dense layer joins
 side 20: two poolings leave (8, 5, 5), a row of 200, refused, layer 4 answers with (200,) and layer 5 reads (128,)
 side 24: two poolings leave (8, 6, 6), a row of 288, refused, layer 4 answers with (288,) and layer 5 reads (128,)
 side 32: two poolings leave (8, 8, 8), a row of 512, refused, layer 4 answers with (512,) and layer 5 reads (128,)`,
-              { hints: ["A LayerStack checks every join when it is built and raises a refusal deriving from MLLibError when one does not hold, so building one inside a try block is the whole test. No picture is needed.", "A stack can be unpacked like a list, so [*front, dense] is the five front layers with the dense layer after them.", "A stack’s own shape reports what its last layer answers, so the length of the flattened row is front.shape.n_outputs, and front[3] is the second pooling."], check: numberCheck("How long is the flattened row for a picture 24 pixels on a side?", 288, 0.5, "Two halvings of 24 leave six by six, and eight maps of six by six flatten to 288 numbers, which a dense layer built for 128 cannot read. Only sides 16 and 17 join, and 17 joins only because a two by two pooling of an odd side keeps whole windows and drops the last row and column, the quiet loss Part 7 points out. Every refusal here arrives when the stack is built, in a comparison of two arrangements, before any picture exists.") },
+              { hints: [
+  "Recompute each output arrangement from its immediate predecessor.",
+  "A convolutional spatial stack can change its output width with image size, while the existing dense weight matrix cannot."
+], check: numberCheck("How long is the flattened row for a picture 24 pixels on a side?", 288, 0.5, "The flattened width is 288. That arrangement cannot feed the already fixed dense layer expecting 128 inputs without changing its contract."), question: "Which picture sizes still fit the network’s fixed dense input?" },
             ),
             exercise(
               "Train a small one end to end, then move its pictures",
-              ["The page’s pictures are drawn by the site and not by the library, so this problem draws a smaller collection of its own. Two hundred pictures twelve pixels on a side, half crosses and half square outlines five pixels across, each placed at random with its left edge in columns 1 to 6, lit at 0.6 on a ground of 0.1 with a little noise. The network is the page’s arrangement cut down to fit. The first hundred pictures train it and the second hundred are held out.", "Write the loop of Part 2, thirty passes over the training hundred in shuffled batches of ten at a step size of 0.1, and print the loss over the first and the last pass beside the logarithm of the number of kinds, which Part 2 says a loss should start near. Then print the held-out accuracy and repeat Part 5’s test. Move every held-out picture one pixel right, filling the strip left behind from the picture’s own edge, and count how many calls change, separately for the shapes the move pushed against the right edge, where no training shape sat."],
+              [
+  "The starter supplies two hundred noisy twelve-pixel pictures, split into one hundred training and one hundred held-out images. Complete thirty shuffled-batch training passes using the supplied rate and batch size.",
+  "Print first/last training loss and the two-class uniform reference loss. Report held-out accuracy, then move each held-out image one pixel right using the specified edge fill. Count changed calls overall, at the right-edge subgroup and elsewhere."
+],
               `import numpy as np
 from oop_ml import Conv2d, DenseLayer, Flatten, HyperbolicTangent, Identity, LayerStack, MaxPool2d, Neuron, RectifiedLinear, SoftmaxCrossEntropy
 
@@ -1288,7 +1333,10 @@ held-out accuracy 1.000
 moved one pixel right, 20 of 100 calls changed
 pushed against the right edge, 20 of 22 changed
 everywhere else, 0 of 78 changed`,
-              { hints: ["One step is backward_pass on the stack with a batch of pictures, their rows of targets and the loss, followed by stepped_by with what came back and the step size, which answers a new stack. The batch’s loss is on what backward_pass returns.", "What a stack’s respond_to answers has outputs, the last layer’s scores with one row per picture, and the call is the position of the largest score in the row.", "A picture moved one pixel right is its first column repeated, followed by every column but the last, joined along the last axis.", "The second number in each row of corners is the column of the shape’s left edge, and a shape five pixels across whose left edge starts in column 6 is the one the move leaves against the right edge."], check: numberCheck("How many of the hundred held-out calls change when every picture moves one pixel right?", 20, 1.5, "The network names every held-out picture, and a move of one pixel still changes twenty of its calls. All twenty are among the 22 shapes the move pushed against the right edge, a place no training shape sat, and none of the other 78 changed. That is what Part 5 says of the dense layer at the end, which gives each flattened number its own weights and so is not indifferent to which window a pattern landed in. The page’s own network changed 5.5 to 11.5 percent of its calls under a move of one pixel.") },
+              { hints: [
+  "Use held-out labels only for evaluation. Retain the generator’s edge-subgroup indicator for the final split.",
+  "A translation can move a shape beyond positions seen during training. Compare subgroup errors rather than only overall accuracy."
+], check: numberCheck("How many of the hundred held-out calls change when every picture moves one pixel right?", 20, 1.5, "Twenty held-out calls change after shifting. The right-edge subgroup exposes sensitivity that the original perfect held-out accuracy did not show."), question: "Can high held-out accuracy hide sensitivity to where a shape sits?" },
             ),
           ],
         },

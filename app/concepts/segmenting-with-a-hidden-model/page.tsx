@@ -1110,7 +1110,11 @@ export default function SegmentingWithAHiddenModelPage() {
           practice: [
             exercise(
               "Read the three tables off two sentences",
-              ["Part 3 counts the tables of a corpus of two sentences, ab followed by c and then abc on its own, and smooths every admissible outcome by one. Fit the model on those two sentences and print the start shares, every step share the model allows, and the share each of two places gives to a, to c and to a character the corpus never contained.", "The eight refused steps come back as a log probability of minus infinity rather than a number, so print only the steps whose share is above zero. Part 3 worked P(E | M) out as two thirds and P(c | S) as two fifths."],
+              [
+  "Fit the supplied two-sentence labelled corpus: [\"ab\", \"c\"] and [\"abc\"]. Use the model’s default add-one smoothing.",
+  "Print its alphabet, allowed start probabilities and every allowed transition probability. Then print a, c and unseen z’s emission probabilities for the beginning and single-character states.",
+  "B begins a multi-character word, M is inside one, E ends one and S is a one-character word. The API stores log probabilities; convert them to ordinary probabilities for the four-decimal report. Omit forbidden transitions."
+],
               `import math
 from oop_ml import BoundaryTag, HiddenMarkovSegmenter
 
@@ -1153,11 +1157,21 @@ P(S | S) = 0.5000
 P(a | B) = 0.5000, P(a | S) = 0.2000
 P(c | B) = 0.1667, P(c | S) = 0.4000
 P(z | B) = 0.1667, P(z | S) = 0.2000`,
-              { hints: ["fit takes a list of sentences, each a list of its words. A sentence given as one string would be read as one-character words, which the corpus refuses.", "The four places are the members of BoundaryTag, and the model answers initial_log_probability, transition_log_probability and emission_log_probability, all in log space, so math.exp turns each into a share.", "A forbidden step answers minus infinity, which math.exp turns into zero, so testing the log value against -math.inf is what leaves the eight admissible steps."], check: numberCheck("What share does the model give to a word ending straight after a middle character, P(E | M)?", 0.6667, 0.0005, "The only observed middle character, b in abc, was followed by an end once and by another middle zero times. Add-one smoothing gives the two permitted successors probabilities of two thirds and one third. The unseen but allowed transition can now participate in a scored path.") },
+              {
+question: "Which small count tables determine the hidden boundary model’s probabilities?",
+ hints: [
+  "Keep each sentence as a list of word strings. Passing a bare string would supply the wrong training structure.",
+  "Iterate BoundaryTag for the states. math.exp converts initial_log_probability, transition_log_probability and emission_log_probability to probabilities.",
+  "Forbidden transitions have log probability -math.inf. They remain forbidden rather than receiving an added count."
+], check: numberCheck("What share does the model give to a word ending straight after a middle character, P(E | M)?", 0.6667, 0.0005, "The M-to-E probability is about 0.6667. One observed ending and the permitted-transition smoothing determine that value; forbidden transitions are outside the smoothing choices.") },
             ),
             exercise(
               "Find three words the sentences never held",
-              ["Part 1 fits the model on three sentences, ab cd, ab ef and cd ef, counts a word list from the same three, and hands both the six characters adcfeb. Do the same, print the places the model chooses and the words each method answers, and then print the share of the character a under each of the four places.", "The lesson says a only ever began a word in those sentences, so the place that begins a word should give it a much larger share than the place that ends one. That ratio is the whole mechanism."],
+              [
+  "Fit the supplied labelled corpus containing ab/cd, ab/ef and cd/ef. Build a word dictionary from those same sentences, then segment adcfeb with the boundary model and the dictionary-only lattice.",
+  "Print the model’s state sequence, both segmentations and a’s emission probability under all four states to four decimal places.",
+  "The dictionary can only match listed words or its single-character fallback. The state model instead scores character positions, so it can propose a word never listed as a unit."
+],
               `import math
 from oop_ml import BoundaryTag, DictionaryLatticeSegmenter, HiddenMarkovSegmenter, WordDictionary
 
@@ -1193,11 +1207,21 @@ P(a | B) = 0.2308
 P(a | M) = 0.1429
 P(a | E) = 0.0769
 P(a | S) = 0.1429`,
-              { hints: ["tags_of answers one BoundaryTag per character, and each tag's value is its letter, so joining the values gives the run of places.", "WordDictionary.from_segmented_corpus counts a list from the same sentences, and a lattice segmenter over it answers only single characters here, since none of its three words is in the text.", "The default smoothing is one, and the alphabet is the six characters a to f plus the spare slot, so a place that produced six characters divides by six plus seven."], check: numberCheck("What share does the place that begins a word give to the character a?", 0.2308, 0.0005, "The place that begins a word produced six characters in those three sentences, two of them a, and the alphabet is six characters plus the spare slot, so the share is (2 + 1) over (6 + 7). Under the place that ends a word the same character scores (0 + 1) over (6 + 7), which is 0.0769, and that gap at the first character, with its mirror image for d at the second, is what makes the winning run alternate and give three words that were never in the corpus.") },
+              {
+question: "Can a boundary-state model form words absent from its training dictionary?",
+ hints: [
+  "tags_of(text) returns one BoundaryTag per character. Join each tag.value for the displayed sequence.",
+  "Use WordDictionary.from_segmented_corpus for a dictionary drawn from the same labels.",
+  "Compare a’s probability under B, the beginning state, and E, the ending state. Their differing counts help choose its role in a new sequence."
+], check: numberCheck("What share does the place that begins a word give to the character a?", 0.2308, 0.0005, "The beginning state assigns a probability of about 0.2308 to a. Its different distribution from the ending state helps score unfamiliar character combinations without requiring those words in a dictionary.") },
             ),
             exercise(
               "Walk the helping down on a corpus that contradicts itself",
-              ["Part 3 fits four sentences in which the first two of three characters are a word twice and all three are a word once, and watches the reading of 研究生很多 turn over as the helping shrinks. Fit at seven values from two down to a hundredth, print what the model answers at each, say whether it reproduces the training sentence, and print the share the place inside a word gives to 究.", "The lesson quotes that share at 0.1429 for a helping of two and 0.9182 for a hundredth, and says the answer turns at about 0.238. The value at the usual helping of one is not on the page."],
+              [
+  "The supplied labelled corpus contains conflicting ways to group the same opening characters. Fit it at each of the seven smoothing values supplied in the starter.",
+  "For each fit print the segmentation of 研究生很多, whether it equals the supplied training reading, and the emission probability of 究 under M, the within-word state.",
+  "Smoothing adds a positive amount to possible outcomes before normalising their counts. Keep the data fixed so the report isolates that amount’s effect on a sparsely observed state."
+],
               `import math
 from oop_ml import BoundaryTag, HiddenMarkovSegmenter
 
@@ -1228,11 +1252,21 @@ helping 0.25: 研究 | 生 | 很 | 多 (majority reading), P(究 | M) = 0.3571
 helping 0.23: 研究生 | 很 | 多 (as written), P(究 | M) = 0.3727
 helping 0.1: 研究生 | 很 | 多 (as written), P(究 | M) = 0.5500
 helping 0.01: 研究生 | 很 | 多 (as written), P(究 | M) = 0.9182`,
-              { hints: ["smoothing is a field of the constructor, so each value needs its own model fitted on the same sentences.", "The middle place produced exactly one character in the corpus, the 究 of 研究生, and the alphabet holds nine characters plus the spare slot, so the share is (1 + a) over (1 + 10a).", "Comparing the words to the training sentence is an ordinary list comparison, since texts answers the pieces as strings."], check: numberCheck("What share does the place inside a word give to 究 at the usual helping of one?", 0.1818, 0.0005, "That place produced one character in the whole corpus and it was 究, so the count is one over one, and the helping of one spread over the nine-character alphabet and the spare slot makes it (1 + 1) over (1 + 10), two elevenths. At a helping of two the same fraction is 3 over 21, the 0.1429 the lesson quotes, and at a hundredth it is 1.01 over 1.1, the 0.9182. The answer turns between 0.24 and 0.23, which is the 0.238 nothing in the method predicts.") },
+              {
+question: "How strongly can smoothing change an ambiguous boundary decision?",
+ hints: [
+  "Construct a fresh model with the current smoothing value, then fit the same corpus.",
+  "Compare the returned texts with the supplied reference as lists. Convert the M emission’s log probability with math.exp.",
+  "The M state has very little training evidence here. Added counts can therefore materially change its distribution."
+], check: numberCheck("What share does the place inside a word give to 究 at the usual helping of one?", 0.1818, 0.0005, "At smoothing 1.0, the M state assigns 究 probability about 0.1818. The sweep shows that the changed smoothing can alter the best complete state path, not only its displayed confidence.") },
             ),
             exercise(
               "Hand the stretch nothing covered to the places",
-              ["Part 5 ends with the arrangement a working segmenter uses. Fit the model on the five sentences that agree with themselves, count a word list from the same five, and read the surname sentence 阿尔瓦雷斯研究生命起源 three ways, with the list alone, with the places alone, and with the list handing its uncovered stretches to the places.", "The lesson says the places glue the first two characters of the name together and the combination changes nothing on this sentence. Print the places the model gives the surname on its own to see why."],
+              [
+  "Fit the boundary model on the supplied five labelled sentences and build a dictionary from those same sentences. Read 阿尔瓦雷斯研究生命起源 with the dictionary alone, the model alone and the dictionary with unknown_segmenter set to the fitted model.",
+  "Print each segmentation and piece count. Then print the state sequence assigned to the five-character surname alone.",
+  "The combined method hands an uncovered run to the model; it does not replace every dictionary decision. Compare that restricted delegation with the model-only result."
+],
               `from oop_ml import DictionaryLatticeSegmenter, HiddenMarkovSegmenter, WordDictionary
 
 sentences = [
@@ -1269,7 +1303,13 @@ print(f"the surname alone is tagged {places}")`,
 places: 阿尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源 (7 pieces)
 both: 阿尔 | 瓦 | 雷 | 斯 | 研究 | 生命 | 起源 (7 pieces)
 the surname alone is tagged BESSS`,
-              { hints: ["DictionaryLatticeSegmenter takes an optional unknown_segmenter, a fitted tagger it hands every stretch of consecutive single characters no entry covers. An unfitted one is refused at the first split.", "All three answer Words, so texts and n_words read the same way for each.", "The five characters of the surname are all unfamiliar, so every one of them scores the same under every place and only the steps decide, which is why the run comes back the way Part 6 describes."], check: numberCheck("How many pieces does the combination answer for the eleven characters?", 7, 0.5, "The list answers eight pieces, five lone characters and three words. Those five characters are exactly a stretch no entry covers, so they are handed to the places, which tag them B E S S S and glue the first two together, four pieces where the list had five. The places alone answer the same seven, since the three words after the name are ones the corpus taught, so on this sentence the combination cannot do better than its second half on the stretch where its first half had nothing.") },
+              {
+question: "Can a dictionary delegate only its uncovered stretches to a learned segmenter?",
+ hints: [
+  "Pass the already fitted model as unknown_segmenter to DictionaryLatticeSegmenter.",
+  "All three results expose texts and n_words, so compare the same measurements.",
+  "The surname’s characters are absent from the training alphabet. Their fallback scores leave transition preferences to decide much of its state sequence."
+], check: numberCheck("How many pieces does the combination answer for the eleven characters?", 7, 0.5, "The combined result has seven pieces. Its learned fallback joins the first two surname characters, but this output alone does not establish that the name was analysed correctly.") },
             ),
           ],
         },

@@ -78,9 +78,8 @@ export default function KMeansPage() {
                 </p>
 </>
                 <>
-<p>
-                  Press the crowd button for the less tidy version, the classification pages&rsquo; eleven people with their labels stripped away, and notice the method still carves confident groups. It always will. Ask for k groups and k groups come back, whether or not the data has any, which is worth keeping in mind through everything that follows, and Part 4 returns to it.
-                </p>
+<p>Load the less tidy crowd: the same eleven people used in classification, with their labels removed. The method still assigns them to the requested centres even if the measurements do not contain clearly separated natural groups.</p>
+              <p>That is a consequence of the task we gave it. K-means seeks a low-distance partition for a chosen number of centres; it does not first prove that this many meaningful types exist. Distinct data, initialisation and empty-group handling also affect which fitted groups are returned. Part 4 examines how to judge a partition instead of trusting its colours.</p>
                 <p>
                   Drag a dot from one clump toward the other and watch the colours and the X marks renegotiate; the groups are not stored anywhere, they are re-derived from the geometry every time anything moves.
                 </p>
@@ -900,10 +899,7 @@ export default function KMeansPage() {
         {
           title: "Practice. Grouping the People With the Library",
           practice: [
-            exercise(
-              "Group the eight people and check the centres by hand",
-              ["Section 3 says a resting centre is the plain mean of its group and section 4 sums the inertia of the eight people to 64. Fit two groups with the library, seeded with 3 as the playground is, and read the centres, the group sizes, the inertia and the passes to rest off the fitted model.", "Then fit one group and read its inertia, which section 4 gives as 13096.0, the total squared deviation of the eight about their grand mean. Print every centre coordinate to one place and both inertias to one place."],
-              `from oop_ml import Feature, KMeans
+            exercise("Group the eight people and check the centres by hand",["Section 3 says a resting centre is the plain mean of its group and section 4 sums the inertia of the eight people to 64. Fit two groups with the library, seeded with 3 as the playground is, and read the centres, the group sizes, the inertia and the passes to rest off the fitted model.", "Then fit one group and read its inertia, which section 4 gives as 13096.0, the total squared deviation of the eight about their grand mean. Print every centre coordinate to one place and both inertias to one place."],`from oop_ml import Feature, KMeans
 
 heights = Feature("height", [118, 120, 122, 124, 178, 180, 182, 184])
 weights = Feature("weight", [24, 25, 28, 27, 78, 80, 83, 79])
@@ -911,8 +907,7 @@ weights = Feature("weight", [24, 25, 28, 27, 78, 80, 83, 79])
 model = KMeans(n_clusters=2, random_seed=3)
 # Fit the model to the two features, print each centre's height and weight,
 # the group sizes, the inertia and the passes to rest, then fit one group and
-# print its inertia.`,
-              `from oop_ml import Feature, KMeans
+# print its inertia.`,`from oop_ml import Feature, KMeans
 
 heights = Feature("height", [118, 120, 122, 124, 178, 180, 182, 184])
 weights = Feature("weight", [24, 25, 28, 27, 78, 80, 83, 79])
@@ -927,19 +922,13 @@ print(f"inertia {model.inertia:.1f}")
 print(f"passes to rest {model.iterations_run}")
 
 one = KMeans(n_clusters=1, random_seed=3).fit([heights, weights])
-print(f"inertia with one group {one.inertia:.1f}")`,
-              `cluster_1 rests at (181.0, 80.0)
+print(f"inertia with one group {one.inertia:.1f}")`,`cluster_1 rests at (181.0, 80.0)
 cluster_2 rests at (121.0, 26.0)
 sizes (4, 4)
 inertia 64.0
 passes to rest 2
-inertia with one group 13096.0`,
-              { hints: ["A clusterer takes no target, so fit takes the list of features and nothing else.", "centroids on the fitted model is iterable, one centre per group, and each centre answers coordinate_for a feature name. inertia and iterations_run are properties of the model, and the sizes live on its clustering.", "The group a centre is numbered is an accident of seeding, so the tall clump may come first. What to check is that each centre sits on its clump’s mean."], check: numberCheck("What inertia does the two-group fit report?", 64.0, 0.05, "Within the short clump the height deviations from 121 square to 20 and the weight deviations from 26 to 10, and the tall clump gives 20 and 14, so the total is 64. The one-group fit has to serve both clumps from the grand mean (151, 53) and pays 13096.0, which is the drop the elbow in Part 4 calls unmistakable.") },
-            ),
-            exercise(
-              "Run ten starts on the crowd one at a time",
-              ["Section 11 lines up ten single-start fits of the crowd at two groups and finds three different valleys, 2952.6, 3185.9 and 3141.7. Fit the crowd once from each of the seeds 0 to 9 with a single start each, and print every seed’s resting inertia and its passes to rest, which the page does not quote seed by seed.", "Then count the distinct resting values and fit once more with ten starts under seed 0, which is how the playground gets its 2952.6. The library keeps the lowest by a strict comparison, so a later start that only ties an earlier one does not replace it."],
-              `from oop_ml import Feature, KMeans
+inertia with one group 13096.0`,{...{ hints: ["A clusterer takes no target, so fit takes the list of features and nothing else.", "centroids on the fitted model is iterable, one centre per group, and each centre answers coordinate_for a feature name. inertia and iterations_run are properties of the model, and the sizes live on its clustering.", "The group a centre is numbered is an accident of seeding, so the tall clump may come first. What to check is that each centre sits on its clump’s mean."], check: numberCheck("What inertia does the two-group fit report?", 64.0, 0.05, "Every fitted centre equals its assigned group's coordinate mean. Combining the separated groups into one centre greatly increases within-group squared distance on these data.") },question:"Do the fitted centres equal their groups' coordinate means?"}),
+            exercise("Run ten starts on the crowd one at a time",["Section 11 lines up ten single-start fits of the crowd at two groups and finds three different valleys, 2952.6, 3185.9 and 3141.7. Fit the crowd once from each of the seeds 0 to 9 with a single start each, and print every seed’s resting inertia and its passes to rest, which the page does not quote seed by seed.", "Then count the distinct resting values and fit once more with ten starts under seed 0, which is how the playground gets its 2952.6. The library keeps the lowest by a strict comparison, so a later start that only ties an earlier one does not replace it."],`from oop_ml import Feature, KMeans
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
@@ -947,8 +936,7 @@ weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
 # For each seed from 0 to 9, fit two groups with a single start and print the
 # seed, its resting inertia to one place and its passes to rest. Then print how
 # many distinct resting values there were, and the inertia of a fit under seed
-# 0 that is allowed ten starts.`,
-              `from oop_ml import Feature, KMeans
+# 0 that is allowed ten starts.`,`from oop_ml import Feature, KMeans
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
@@ -962,8 +950,7 @@ for seed in range(10):
 print(f"distinct resting values {len(set(resting))}")
 
 best = KMeans(n_clusters=2, n_initialisations=10, random_seed=0).fit([heights, weights])
-print(f"best of ten starts under seed 0: inertia {best.inertia:.1f}")`,
-              `seed 0: inertia 3185.9, passes to rest 5
+print(f"best of ten starts under seed 0: inertia {best.inertia:.1f}")`,`seed 0: inertia 3185.9, passes to rest 5
 seed 1: inertia 2952.6, passes to rest 2
 seed 2: inertia 3185.9, passes to rest 2
 seed 3: inertia 3185.9, passes to rest 5
@@ -974,13 +961,8 @@ seed 7: inertia 2952.6, passes to rest 2
 seed 8: inertia 2952.6, passes to rest 2
 seed 9: inertia 3141.7, passes to rest 2
 distinct resting values 3
-best of ten starts under seed 0: inertia 2952.6`,
-              { hints: ["n_initialisations is how many starts one fit runs before keeping the lowest. One start per fit is what makes each seed’s valley visible.", "Each fit is a fresh model, since construction configures and fitting learns, so the loop constructs a new model for every seed.", "A set of the rounded inertias counts the valleys, and the library’s ten-start fit from seed 0 runs exactly the ten starts listed, so its answer is the lowest of them."], check: numberCheck("What inertia does the single start from seed 3 rest at?", 3185.9, 0.05, "Seed 3 is the walk the staircase in section 7 follows, four updates and four assignments down to 3185.9, where one more of the middle people has been pulled into the short group. Five of the ten starts rest at 2952.6, three at 3185.9 and two at 3141.7, and the ten-start fit keeps the lowest, which is why the playground reports 2952.6 and the stepper on seed 3 does not.") },
-            ),
-            exercise(
-              "Add one stray person and watch a centre move",
-              ["Section 20 adds a stray at 196 centimetres and 14 kilograms to the eight people and finds the tall centre dragged from (181, 80) to (184, 66.8) at two groups, and the two clumps restored at three groups with the stray given a private centre. Fit both and read the centres and inertias.", "Then ask the density clusterer, with a radius of six and a neighbourhood of two, what it makes of the same nine people. It needs no group count and can leave a person in no group, and section 20 says that is what it does with the stray. Print its labels, where a label of −1 is a person in no group, and how many people it left out."],
-              `from oop_ml import DBSCAN, Feature, KMeans
+best of ten starts under seed 0: inertia 2952.6`,{...{ hints: ["n_initialisations is how many starts one fit runs before keeping the lowest. One start per fit is what makes each seed’s valley visible.", "Each fit is a fresh model, since construction configures and fitting learns, so the loop constructs a new model for every seed.", "A set of the rounded inertias counts the valleys, and the library’s ten-start fit from seed 0 runs exactly the ten starts listed, so its answer is the lowest of them."], check: numberCheck("What inertia does the single start from seed 3 rest at?", 3185.9, 0.05, "Different initial centres reach different local solutions on this crowd. The multi-start fit retains the lowest recorded inertia, rather than treating one seeded result as the unique grouping.") },question:"Do different starting centres reach the same final grouping?"}),
+            exercise("Add one stray person and watch a centre move",["Section 20 adds a stray at 196 centimetres and 14 kilograms to the eight people and finds the tall centre dragged from (181, 80) to (184, 66.8) at two groups, and the two clumps restored at three groups with the stray given a private centre. Fit both and read the centres and inertias.", "Then ask the density clusterer, with a radius of six and a neighbourhood of two, what it makes of the same nine people. It needs no group count and can leave a person in no group, and section 20 says that is what it does with the stray. Print its labels, where a label of −1 is a person in no group, and how many people it left out."],`from oop_ml import DBSCAN, Feature, KMeans
 
 heights = Feature("height", [118, 120, 122, 124, 178, 180, 182, 184, 196])
 weights = Feature("weight", [24, 25, 28, 27, 78, 80, 83, 79, 14])
@@ -988,8 +970,7 @@ weights = Feature("weight", [24, 25, 28, 27, 78, 80, 83, 79, 14])
 # Fit two groups and three groups under seed 3, printing each fit's centres to
 # one place and its inertia to one place. Then fit the density clusterer with
 # radius 6 and min_neighbourhood_size 2, and print its labels and how many
-# people it left in no group.`,
-              `from oop_ml import DBSCAN, Feature, KMeans
+# people it left in no group.`,`from oop_ml import DBSCAN, Feature, KMeans
 
 heights = Feature("height", [118, 120, 122, 124, 178, 180, 182, 184, 196])
 weights = Feature("weight", [24, 25, 28, 27, 78, 80, 83, 79, 14])
@@ -1004,25 +985,18 @@ for k in (2, 3):
 
 density = DBSCAN(radius=6, min_neighbourhood_size=2).fit([heights, weights])
 print(f"density labels {[int(label) for label in density.labels]}")
-print(f"people in no group {density.n_noise}")`,
-              `2 groups: centres (184.0, 66.8), (121.0, 26.0), inertia 3728.8
+print(f"people in no group {density.n_noise}")`,`2 groups: centres (184.0, 66.8), (121.0, 26.0), inertia 3728.8
 3 groups: centres (181.0, 80.0), (121.0, 26.0), (196.0, 14.0), inertia 64.0
 density labels [0, 0, 0, 0, 1, 1, 1, 1, -1]
-people in no group 1`,
-              { hints: ["The same two features fit both group counts, and the stray is the ninth person in each list.", "The density clusterer is constructed with a radius and a min_neighbourhood_size and fitted the same way, with no k. Its labels and n_noise are properties of the fitted model.", "At two groups the stray is nearest the tall centre, joins it, and the update averages them in. At three groups it gets a centre of its own and the other two centres return to the means of their clumps."], check: numberCheck("What inertia does the two-group fit of the nine people report?", 3728.8, 0.05, "The stray joins the tall group and drags its centre thirteen kilograms off the clump it is supposed to mark, and the clump’s four people plus the stray now sit far from a centre that suits none of them, so the inertia rises from 64.0 to 3728.8. At three groups the stray has a private centre and the inertia is 64.0 again. The density clusterer never averages, so it calls the stray a person in no group and leaves the two clumps alone.") },
-            ),
-            exercise(
-              "Rewrite the heights in millimetres",
-              ["Section 22 refits the crowd with its heights in millimetres and finds the two-group fit splitting the crowd by height into 6 and 5, where centimetres give 4 and 7. Multiply every height by ten, fit both versions under seed 3, and compare the sizes and the inertias.", "The two inertias cannot be compared with each other at all, since they are in different squared units, and the page gives 155104.7 for millimetres beside 2952.6 for centimetres. Print each fit’s sizes, its labels and its inertia to one place."],
-              `from oop_ml import Feature, KMeans
+people in no group 1`,{...{ hints: ["The same two features fit both group counts, and the stray is the ninth person in each list.", "The density clusterer is constructed with a radius and a min_neighbourhood_size and fitted the same way, with no k. Its labels and n_noise are properties of the fitted model.", "At two groups the stray is nearest the tall centre, joins it, and the update averages them in. At three groups it gets a centre of its own and the other two centres return to the means of their clumps."], check: numberCheck("What inertia does the two-group fit of the nine people report?", 3728.8, 0.05, "The distant person pulls a mean-based centre away from the original tall group. Adding a third centre can isolate that person; the density method instead applies its neighbourhood rule and can leave a point unassigned.") },question:"How does one distant person affect the fitted groups?"}),
+            exercise("Rewrite the heights in millimetres",["Fit the supplied people twice under seed 3, once with height in centimetres and once after converting height to millimetres. Leave weights in kilograms. Print each fit's group sizes, labels and inertia to one decimal place.","Compare which people share a group, rather than comparing the arbitrary group IDs. The numeric inertias use different relative feature scales, so their magnitudes are not a fair comparison of grouping quality."],`from oop_ml import Feature, KMeans
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
 millimetres = Feature("height", [height * 10 for height in heights.values])
 
 # Fit two groups under seed 3 with the heights in centimetres and again with
-# the heights in millimetres, and print each fit's sizes, labels and inertia.`,
-              `from oop_ml import Feature, KMeans
+# the heights in millimetres, and print each fit's sizes, labels and inertia.`,`from oop_ml import Feature, KMeans
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78])
@@ -1031,11 +1005,8 @@ millimetres = Feature("height", [height * 10 for height in heights.values])
 for unit, feature in (("centimetres", heights), ("millimetres", millimetres)):
     model = KMeans(n_clusters=2, random_seed=3).fit([feature, weights])
     labels = [int(label) for label in model.predict([feature, weights])]
-    print(f"{unit}: sizes {model.clustering.sizes}, labels {labels}, inertia {model.inertia:.1f}")`,
-              `centimetres: sizes (4, 7), labels [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1], inertia 2952.6
-millimetres: sizes (6, 5), labels [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0], inertia 155104.7`,
-              { hints: ["A feature’s values are the numbers it was built from, so a new feature in millimetres is the same name over ten times each value.", "predict on the fitted model gives each person’s group in the order the people were given, and the group numbers are an accident of seeding, so compare which people share a number rather than the numbers themselves.", "Every horizontal gap is ten times larger in millimetres while the vertical gaps stay put, so height alone decides who is near whom."], check: numberCheck("What inertia does the millimetre fit report, to one place?", 155104.7, 0.05, "In millimetres the squared height gaps are a hundred times what they were and the weight gaps are unchanged, so the fit sorts the crowd by height alone, 6 against 5, and its inertia is in squared millimetres, which is why 155104.7 says nothing against 2952.6. Standardise first, or decide deliberately which feature should count for more, since two measurements in different units have no natural common distance.") },
-            ),
+    print(f"{unit}: sizes {model.clustering.sizes}, labels {labels}, inertia {model.inertia:.1f}")`,`centimetres: sizes (4, 7), labels [0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1], inertia 2952.6
+millimetres: sizes (6, 5), labels [1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0], inertia 155104.7`,{...{ hints: ["A feature’s values are the numbers it was built from, so a new feature in millimetres is the same name over ten times each value.", "predict on the fitted model gives each person’s group in the order the people were given, and the group numbers are an accident of seeding, so compare which people share a number rather than the numbers themselves.", "Every horizontal gap is ten times larger in millimetres while the vertical gaps stay put, so height alone decides who is near whom."], check: numberCheck("What inertia does the millimetre fit report, to one place?", 155104.7, 0.05, "Changing centimetres to millimetres magnifies the height contribution to this mixed-coordinate squared-distance objective while leaving kilograms unchanged. The resulting inertia is not in squared millimetres alone, and its magnitude is not directly comparable with the old objective.") },question:"Can changing height units change the grouping?",hints:["Convert only the height values and preserve feature names. A change of units leaves the observed people unchanged.","Group labels can be permuted by seeding, so compare memberships and sizes rather than insisting that one group keeps its numeric label.","Height differences receive a larger numerical contribution after the conversion. Weight still contributes; it has not been removed from the distance."]}),
           ],
         },
       ]}

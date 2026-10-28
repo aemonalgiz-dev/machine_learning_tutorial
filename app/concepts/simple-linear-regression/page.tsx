@@ -270,13 +270,17 @@ export default function SimpleLinearRegressionPage() {
             choice(
               "A candidate line predicts 60, 64, 68, 72 and 76 for the five people. Why is adding up its five residuals a poor way to score it?",
               [
-                "The five residuals add to zero, and a line that predicted every weight exactly would report the same total",
-                "A residual carries no sign, so there is nothing to add up",
-                "The residuals are measured perpendicular to the line, which is the wrong distance",
-                "Five people is too few for any total to mean anything",
-              ],
+                              "The five residuals add to zero, and a line that predicted every weight exactly would report the same total",
+                              "A residual carries no sign, so there is nothing to add up",
+                              "The residuals are measured perpendicular to the line, which is the wrong distance",
+                              "Five people is too few for any total to mean anything",
+                            ],
               0,
               "The signs cancel. Missing by 2 above and 2 below is reported as not missing at all, so the total is zero from a line that is wrong about four of the five people. No summary that cannot tell that line apart from a perfect one is worth having.",
+              {
+                "description": "Residual = observed weight − predicted weight. Compare the candidate predictions in the question with these observations.",
+                "data": "height (cm): 160 165 170 175 180\nweight (kg):  58  66  68  74  74"
+              },
             ),
             choice(
               "Under squared error, one residual of 4 costs the same as how many separate residuals of 2?",
@@ -288,12 +292,12 @@ export default function SimpleLinearRegressionPage() {
               "Which of these hold for the residual sum of squares as this page describes it?",
               [
                 "Its units are the square of the outcome’s, so an RSS of 16 on these five people is 16 squared kilograms",
-                "It is a total rather than an average, so adding more people raises it whether or not the line got worse",
+                "For a fixed line it cannot decrease when observations are added, even if its prediction quality has not worsened",
                 "It answers how far off the line was, typically",
-                "It is meaningful only in comparison, between two lines judged on the same observations",
+                "For comparing fit quality, it should be read alongside a baseline scored on the same observations"
               ],
               [0, 1, 3],
-              "RSS collapses a whole line to one number and lower is better between two lines scored on the same rows. What it is not is a typical miss, since it is a total in squared units rather than an average in the outcome’s own.",
+              "RSS is a sum of squared residuals and has squared outcome units. Each extra observation adds a nonnegative contribution for a fixed line; a perfectly predicted extra row adds zero. It is not a typical miss in kilograms. Comparing models on the same observations avoids confusing more rows with worse predictions.",
             ),
         ],
         },
@@ -593,13 +597,17 @@ export default function SimpleLinearRegressionPage() {
             several(
               "Which of these are true of the fit on the five people?",
               [
-                "The slope of 0.8 is in kilograms per centimetre, the outcome’s units over the input’s",
-                "The intercept of minus 68 kg is the predicted weight of a person zero centimetres tall, and is not a claim about anything",
-                "The five residuals of the fitted line add to zero",
-                "The fitted line’s residual sum of squares on these five people is 16",
-              ],
+                              "The slope of 0.8 is in kilograms per centimetre, the outcome’s units over the input’s",
+                              "The intercept of minus 68 kg is the predicted weight of a person zero centimetres tall, and is not a claim about anything",
+                              "The five residuals of the fitted line add to zero",
+                              "The fitted line’s residual sum of squares on these five people is 16",
+                            ],
               [0, 1, 2, 3],
               "All four hold. Reading the slope in units is what makes the number readable, and the intercept’s job here is to position the line rather than to mean something on its own, since zero is far outside the range anybody was measured at. Running every height through the line gives residuals of minus 2, 2, 0, 2 and minus 2, which square to a total of 16 and add to zero. The zero total is a consequence of fitting an intercept by least squares rather than a general property of good models, and fitting without one, or by a different loss, generally breaks it.",
+              {
+                "description": "Fit unpenalised ordinary least squares with a freely fitted intercept. Its resulting prediction rule is weight_hat = 0.8 × height − 68.",
+                "data": "height (cm): 160 165 170 175 180\nweight (kg):  58  66  68  74  74"
+              },
             ),
         ],
         },
@@ -849,29 +857,32 @@ export default function SimpleLinearRegressionPage() {
             choice(
               "Suppose all five people are exactly 170 cm tall, with the weights unchanged. What has actually failed?",
               [
-                "How the prediction should change as height changes cannot be determined, though a prediction at 170 cm is still available",
-                "There is no line at all, so no prediction can be made",
-                "The mean weight of 68 kg stops being the best constant guess",
-                "The slope is still computable, but is almost entirely noise",
-              ],
+                              "How the prediction should change as height changes cannot be determined, though a prediction at 170 cm is still available",
+                              "There is no line at all, so no prediction can be made",
+                              "The mean weight of 68 kg stops being the best constant guess",
+                              "The slope is still computable, but is almost entirely noise",
+                            ],
               0,
               "Every height deviation is zero, so the slope formula divides by zero. The prediction at 170 cm is the mean weight of 68 kg as always; what is gone is the tilt, because infinitely many slope and intercept pairs pass through that point and fit equally well. A slope that is computable but almost entirely noise is the nearby case of a column that barely varies rather than one that does not vary at all.",
+              {
+                "description": "The five weights are 58, 66, 68, 74 and 74 kg. Replace every height with 170 cm. Fit unpenalised least squares with an intercept."
+              },
             ),
             several(
               "A point sits well away from the others and the line leans toward it. Which of these hold?",
               [
                 "The pull is the squaring doing what it was chosen to do, since a residual of 10 contributes a hundred where a residual of 2 contributes four",
-                "Of the possibilities the lesson lists, only a measurement or entry error is a case for removing the point",
-                "The data can say which kind of unusual point it is looking at",
-                "Deleting whatever sits far from the line is a sound way to arrive at a model that is right",
+                "A confirmed measurement or entry error is a reason to correct the record, or exclude it if it cannot be recovered",
+                "The scatter plot alone proves which process produced the unusual point",
+                "Deleting whatever sits far from the line is a sound way to arrive at a model that is right"
               ],
               [0, 1],
-              "Squaring was chosen so that a line would rather be a little wrong about many people than very wrong about one, and a distant point is that choice at work. The point might be a genuine rare observation, an entry error, someone from a different population or a sign that a variable nobody recorded is doing the work, and the data cannot say which. Those call for different responses, and deleting whatever sits far from the line guarantees a model that fits, which is not the same as one that is right.",
+              "Squaring gives a large residual a larger contribution to the objective. It does not identify the cause of that residual. An unusual point may be genuine, mistyped, outside the target population or evidence of a missing input. Investigate its origin and the intended prediction population before deciding whether to correct, keep or exclude it.",
             ),
             trueFalse(
-              "The R-squared of 0.909 describes how well the line fits the five people it was built from, and says nothing about how well it would predict a sixth.",
+              "An R-squared of 0.909 on the five training people does not, by itself, establish how accurately the line will predict a sixth person.",
               true,
-              "Those are different questions, and a model can score well on the first while doing poorly on the second. Separating them properly means holding data back, fitting on part of it and scoring on the part the model never saw, which is what the held-out evaluation page does and what every score after it measures.",
+              "Training R-squared describes these fitted observations. It may be encouraging, but cannot substitute for evaluation on new cases. Holding data out before fitting or using an appropriate cross-validation scheme helps estimate predictive performance on comparable unseen observations.",
             ),
         ],
         },
@@ -880,7 +891,7 @@ export default function SimpleLinearRegressionPage() {
           practice: [
             exercise(
               "Fit the five people and predict a sixth",
-              ["Fit the line from Part 4 with the library rather than by hand, read the slope and intercept off the fitted model, and then ask it for the weight of somebody 172 cm tall, a height nobody in the data has.", "The table in Part 4 arrived at a slope of 0.8 and an intercept of minus 68. The library takes the same route, so the two should agree exactly, and the prediction is the line read at 172."],
+              ["The five measured people give us a relationship to fit. Use SimpleLinearRegression on the supplied heights and weights, then ask the fitted model about a person who is 172 cm tall. This applies the calculation you worked through in the lesson.","Print the fitted slope in kilograms per centimetre, the intercept in kilograms, and the predicted weight. Keep the height and weight lists paired in their original order. Use the labels and precision in the required-output panel when printing."],
               `from oop_ml import SimpleLinearRegression
 
 heights = [160, 165, 170, 175, 180]
@@ -905,11 +916,11 @@ print(f"predicted weight at 172 cm {predicted:.2f} kg")`,
               `slope 0.8000 kg per cm
 intercept -68.0000 kg
 predicted weight at 172 cm 69.60 kg`,
-              { hints: ["Construction configures and fitting learns, so the data goes to fit rather than to the constructor.", "The fitted values are properties named for what they are, slope and intercept. Reading either before fitting raises rather than returning nothing.", "predict takes a list of heights and answers one prediction per height, so a single height still goes in as a list of one."], check: numberCheck("What weight does the model predict for 172 cm, in kilograms?", 69.6, 0.05, "The line read at 172 is 0.8 times 172 less 68, which is 137.6 less 68. The height sits inside the range the five people cover, so this is the line doing the one job it was fitted for rather than a guess beyond the data.") },
+              { hints: ["Construction configures and fitting learns, so the data goes to fit rather than to the constructor.", "The fitted values are properties named for what they are, slope and intercept. Reading either before fitting raises rather than returning nothing.", "predict takes a list of heights and answers one prediction per height, so a single height still goes in as a list of one."], check: numberCheck("What weight does the model predict for 172 cm, in kilograms?", 69.6, 0.05, "The prediction reads the fitted line at a height inside the observed range. Its output is an estimate in kilograms, rather than a new measurement of that person. Being inside the range avoids extrapolation, but does not establish that this small sample describes everyone."), question: "What weight does the line predict for someone we have not measured?" },
             ),
             exercise(
               "Score the line against the flat guess",
-              ["Evaluate the fitted line on the same five people and read off the residual sum of squares, the total sum of squares and R squared.", "Part 5 scored the flat guess at 176 and the line at 16. Confirm both from the evaluation, confirm that R squared is one minus their ratio by computing that ratio yourself, and then find the mean squared error, which the lesson does not quote."],
+              ["The first challenge produced a fitted line. This starter fits that same line again so the challenge can run on its own. Compare its squared prediction errors with the errors of the constant mean-weight prediction.","Print the residual sum of squares, total sum of squares and R squared from the evaluation. Independently recover R squared from the two sums, then print mean squared error. Keep the supplied labels and precision so the tests can identify each result."],
               `from oop_ml import SimpleLinearRegression
 
 heights = [160, 165, 170, 175, 180]
@@ -939,11 +950,11 @@ TSS 176.0
 R squared 0.9091
 1 - RSS / TSS 0.9091
 mean squared error 3.20`,
-              { hints: ["evaluate answers an object that has already paired every prediction with its truth. The figures are properties of that object rather than separate calls.", "The residuals are on the same object. Squaring and summing them yourself should give the residual sum of squares exactly, which is a good check that the two are the same five numbers."], check: numberCheck("What mean squared error does the evaluation report?", 3.2, 0.01, "The residual sum of squares is 16 and there are five people, so the mean squared error is 16 over 5. It is the same miss as RSS in different units, per person rather than in total, and it is the number that stays comparable when two datasets have different sizes.") },
+              { hints: ["evaluate answers an object that has already paired every prediction with its truth. The figures are properties of that object rather than separate calls.", "The residuals are on the same object. Squaring and summing them yourself should give the residual sum of squares exactly, which is a good check that the two are the same five numbers."], check: numberCheck("What mean squared error does the evaluation report?", 3.2, 0.01, "Mean squared error averages the squared residuals over the five observations. It has units of squared kilograms, as does each squared residual. Averaging removes the direct dependence on the number of entries, but comparisons across populations still require comparable targets and sampling."), question: "How much does the fitted line improve on predicting the same weight for everyone?" },
             ),
             exercise(
               "Swap the roles",
-              ["Part 1 says the scatter looks the same either way round and the question is not. Fit height from weight, and compare the new slope with the reciprocal of 0.8.", "If the two fits were one line written two ways, the new slope would be 1.25. Print both, and then print the product of the two slopes."],
+              ["The scatter contains the same pairs when we exchange the axes, but the prediction question changes. Fit a second model with weight as the input and height as the target.","Print both slopes with their units, the reciprocal of the forward slope, and the product of the two fitted slopes. Use those values to investigate whether reversing a fitted prediction is equivalent to solving its equation backwards."],
               `from oop_ml import SimpleLinearRegression
 
 heights = [160, 165, 170, 175, 180]
@@ -968,11 +979,11 @@ print(f"product of the two slopes {forward.slope * reverse.slope:.4f}")`,
 reverse slope 1.1364 cm per kg
 reciprocal of the forward slope 1.2500
 product of the two slopes 0.9091`,
-              { hints: ["The same class fits either way round. What changes is which list goes first in fit.", "Least squares minimises vertical misses, and swapping the roles changes which measurement is vertical. That is why the two lines differ."], check: numberCheck("What slope does the reversed fit report, in centimetres per kilogram?", 1.1364, 0.001, "The reversed fit minimises misses in height rather than in weight, which is a different criterion, so it is a different line and its slope is 1.1364 rather than 1.25. The product of the two slopes comes out at 0.9091, the R squared of Part 5, and the two lines coincide only when that is one, which is to say only when the fit is perfect.") },
+              { hints: ["The same class fits either way round. What changes is which list goes first in fit.", "Least squares minimises vertical misses, and swapping the roles changes which measurement is vertical. That is why the two lines differ."], check: numberCheck("What slope does the reversed fit report, in centimetres per kilogram?", 1.1364, 0.001, "The reverse model minimises errors in height, while the forward model minimises errors in weight. Those objectives produce different lines for these imperfect observations. Here their slope product equals R squared; this relationship assumes the nonzero variances and intercepts used by these simple fits."), question: "Does predicting height from weight recover the same fitted line?" },
             ),
             exercise(
               "Ask for a line that cannot be identified",
-              ["Part 7 says no line can be singled out when every height is the same. Give the fit five people of one height and see what the library does about it.", "A fit that answered something here would be answering a question with no answer. Catch what the library raises, and print its name and its message."],
+              ["All five people now have the same height, while their weights still differ. There is no variation in the input from which to identify a unique slope. Investigate how this SDK handles that case.","Attempt the fit, catch MLLibError, and print the exception's class name followed by its message. A constant mean-weight predictor could still be defined, but this class declines to report an identified regression slope."],
               `from oop_ml import SimpleLinearRegression, MLLibError
 
 heights = [170, 170, 170, 170, 170]
@@ -992,7 +1003,7 @@ except MLLibError as refusal:
     print(refusal)`,
               `AllSameValuesError
 input_values must not be constant (zero variance)`,
-              { hints: ["The denominator of the slope in Part 6 is the sum of squared height deviations, and five equal heights make it zero. The refusal is that division declined by name rather than attempted."] },
+              { hints: ["The denominator used for the slope depends on variation in height. It is zero for this input, even though the weights vary.","Put the fit inside try and except MLLibError. type(error).__name__ gives the exception class name; str(error) gives its message."], question: "Can these constant heights identify a unique regression slope?" },
             ),
           ],
         },

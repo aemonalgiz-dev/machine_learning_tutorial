@@ -1023,19 +1023,8 @@ export default function PcaPage() {
                   the left and the answer falls out.
                 </p>
                 <Equation>{"uᵀ C u = λ uᵀ u = λ"}</Equation>
-                <p>
-                  The variance achieved along an eigenvector is its
-                  eigenvalue, so the maximum is the eigenvector with the
-                  largest eigenvalue, and that is the first principal
-                  component. Fourth, the second component solves the same
-                  problem with one more constraint, u₂ᵀu₁ = 0, which
-                  prevents it from rediscovering the same direction, and the
-                  argument continues for each later component inside the
-                  space perpendicular to all the earlier ones. A symmetric
-                  matrix&rsquo;s eigenvectors for distinct eigenvalues are
-                  perpendicular to one another already, which is why the
-                  constraint costs nothing.
-                </p>
+                <p>For a unit-length direction that is an eigenvector of the covariance matrix, the variance of the projected data equals its eigenvalue. The largest eigenvalue therefore identifies a direction with the greatest variance. That direction is the first principal component.</p>
+              <p>For the second component, maximise variance while requiring a direction perpendicular to the first. Otherwise we could rediscover the same projection. Continue with directions perpendicular to all those already chosen. A real symmetric covariance matrix admits an orthonormal eigenbasis, so we can choose perpendicular unit-length eigenvectors even when an eigenvalue is repeated.</p>
                 <KeepInMind>
                   The unit direction maximising projected variance must be an
                   eigenvector of the covariance matrix, its eigenvalue is the
@@ -1243,18 +1232,14 @@ export default function PcaPage() {
         {
           title: "Practice. Turning the Crowd Onto Its Own Axes With the Library",
           practice: [
-            exercise(
-              "Work the four people with the library",
-              ["Part 7 works the four people by hand to directions of (0.707, 0.707) and (0.707, −0.707), variances of 100 and 25 under the population divisor, and shares of 0.8 and 0.2, and says the playground reports sample variances of 133.3 and 33.3 instead. Fit PrincipalComponentAnalysis on the four and read all of that off the fitted components.", "Then transform the four people and print each one's two scores. Part 8 has person 1 at 14.14 and 0 and person 3 at 0 and 7.07. Expect the sign of the second component, and so of person 3's second score, to come back as the solver chose it, which Part 4 says is a convention and not a fact."],
-              `from oop_ml import Feature, PrincipalComponentAnalysis
+            exercise("Work the four people with the library",["Part 7 works the four people by hand to directions of (0.707, 0.707) and (0.707, −0.707), variances of 100 and 25 under the population divisor, and shares of 0.8 and 0.2, and says the playground reports sample variances of 133.3 and 33.3 instead. Fit PrincipalComponentAnalysis on the four and read all of that off the fitted components.", "Then transform the four people and print each one's two scores. Part 8 has person 1 at 14.14 and 0 and person 3 at 0 and 7.07. Expect the sign of the second component, and so of person 3's second score, to come back as the solver chose it, which Part 4 says is a convention and not a fact."],`from oop_ml import Feature, PrincipalComponentAnalysis
 
 people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
 
 fitted = PrincipalComponentAnalysis().fit(people)
 # For each component print its name, its direction rounded to three places,
 # its variance and its share of the total. Then transform the four people and
-# print each person's score along the first and the second component.`,
-              `from oop_ml import Feature, PrincipalComponentAnalysis
+# print each person's score along the first and the second component.`,`from oop_ml import Feature, PrincipalComponentAnalysis
 
 people = [Feature("height", [180, 160, 175, 165]), Feature("weight", [78, 58, 63, 73])]
 
@@ -1265,19 +1250,13 @@ for component, share in zip(fitted.components, fitted.components.variance_shares
 
 first, second = fitted.transform(people)
 for person in range(4):
-    print(f"person {person + 1}: scores {first.values[person]:.2f} and {second.values[person]:.2f}")`,
-              `component_1: direction [0.707, 0.707], variance 133.33, share 0.80
+    print(f"person {person + 1}: scores {first.values[person]:.2f} and {second.values[person]:.2f}")`,`component_1: direction [0.707, 0.707], variance 133.33, share 0.80
 component_2: direction [-0.707, 0.707], variance 33.33, share 0.20
 person 1: scores 14.14 and 0.00
 person 2: scores -14.14 and 0.00
 person 3: scores 0.00 and -7.07
-person 4: scores 0.00 and 7.07`,
-              { hints: ["The fitted components can be iterated, and variance_shares on the same object answers one share per component in the same order, so zip pairs them.", "A component carries name, direction and variance as properties. The direction is an array, one entry per feature in the order they were fitted.", "transform answers one Feature per component, named component_1 and component_2, whose values are the scores of the four people in the order they went in."], check: numberCheck("What variance does the library report for the first component?", 133.33, 0.01, "The library divides by one fewer than the number of people, the sample divisor, so the first component's variance is 100 times 4/3, which is 133.33, and the second is 33.33, exactly as Part 7 says the playground reports. The directions and the shares of 0.8 and 0.2 are the same under either divisor, because a common factor on both eigenvalues cancels in the ratio and moves no direction.") },
-            ),
-            exercise(
-              "Flatten the crowd and the arc onto one axis",
-              ["Part 5 says the crowd's first component carries 98.97 percent of the variance and Part 3 puts it at 42.2 degrees; Part 12 says the arc's carries 68 percent and that keeping one component leaves a reconstruction error of 3,316 on the arc against 108 on the crowd. Fit each cloud whole for its directions and shares, then fit it again with n_components=1, transform and inverse_transform, and total the squared gaps between the people and their rebuilt copies.", "Report the first component's angle modulo a half turn, since its sign is conventional, and both components' variances, which the lesson does not quote."],
-              `import math
+person 4: scores 0.00 and 7.07`,{...{ hints: ["The fitted components can be iterated, and variance_shares on the same object answers one share per component in the same order, so zip pairs them.", "A component carries name, direction and variance as properties. The direction is an array, one entry per feature in the order they were fitted.", "transform answers one Feature per component, named component_1 and component_2, whose values are the scores of the four people in the order they went in."], check: numberCheck("What variance does the library report for the first component?", 133.33, 0.01, "Changing the common variance divisor changes reported component variances without changing their relative shares or directions. Component signs remain conventions, so compare equivalent projections with that sign freedom in mind.") },question:"Can the library recover the supplied principal directions and coordinates?"}),
+            exercise("Flatten the crowd and the arc onto one axis",["Part 5 says the crowd's first component carries 98.97 percent of the variance and Part 3 puts it at 42.2 degrees; Part 12 says the arc's carries 68 percent and that keeping one component leaves a reconstruction error of 3,316 on the arc against 108 on the crowd. Fit each cloud whole for its directions and shares, then fit it again with n_components=1, transform and inverse_transform, and total the squared gaps between the people and their rebuilt copies.", "Report the first component's angle modulo a half turn, since its sign is conventional, and both components' variances, which the lesson does not quote."],`import math
 from oop_ml import Feature, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1289,8 +1268,7 @@ for label, people in (("the crowd", crowd), ("the arc", arc)):
     whole = PrincipalComponentAnalysis().fit(people)
     # Print the first component's angle in degrees modulo 180, the two
     # variances, and the first share. Then fit with n_components=1, rebuild
-    # the people from their one score, and print the total squared error.`,
-              `import math
+    # the people from their one score, and print the total squared error.`,`import math
 from oop_ml import Feature, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1311,17 +1289,11 @@ for label, people in (("the crowd", crowd), ("the arc", arc)):
         for original, copy in zip(people, rebuilt)
         for before, after in zip(original.values, copy.values)
     )
-    print(f"  one-component reconstruction error {error:.2f}")`,
-              `the crowd: first component at 42.2 degrees, variances 1037.41 and 10.81, first share 0.9897
+    print(f"  one-component reconstruction error {error:.2f}")`,`the crowd: first component at 42.2 degrees, variances 1037.41 and 10.81, first share 0.9897
   one-component reconstruction error 108.10
 the arc: first component at 1.0 degrees, variances 641.44 and 301.50, first share 0.6803
-  one-component reconstruction error 3316.45`,
-              { hints: ["Unpacking the fitted components into two names works because a two-feature fit has exactly two of them, in order of variance.", "atan2 of the direction's second entry over its first is the angle; taking it modulo 180 removes the sign the solver chose, since (−0.74, −0.67) and (0.74, 0.67) are one axis.", "inverse_transform takes what transform answered and hands back one Feature per original column, so the error is a double loop, over the two columns and over the people in each."], check: numberCheck("What variance does the crowd's second component carry?", 10.81, 0.01, "The crowd's two components carry 1037.41 and 10.81, which is why the first claims 98.97 percent and the stubs left by flattening total only 108.10. The arc's two carry 641.44 and 301.50, a first share of 68 percent, and the stubs total 3316.45, because twelve people along a curve have no straight axis to follow and the first component lays a line across the bend. The numbers say the straight axis is a poor summary of the arc; the picture says why.") },
-            ),
-            exercise(
-              "Add one stranger to the crowd",
-              ["Part 12 adds one tall, light person, 195 cm and 30 kg, to the eleven and reports that the first component turns by 4.6 degrees and its share falls from 0.990 to 0.841. Fit the crowd with and without the stranger and print the first component's angle and share for each.", "Print the second component's variance as well, before and after, which the lesson does not quote and which is where the stranger's say shows most plainly."],
-              `import math
+  one-component reconstruction error 3316.45`,{...{ hints: ["Unpacking the fitted components into two names works because a two-feature fit has exactly two of them, in order of variance.", "atan2 of the direction's second entry over its first is the angle; taking it modulo 180 removes the sign the solver chose, since (−0.74, −0.67) and (0.74, 0.67) are one axis.", "inverse_transform takes what transform answered and hands back one Feature per original column, so the error is a double loop, over the two columns and over the people in each."], check: numberCheck("What variance does the crowd's second component carry?", 10.81, 0.01, "The one-dimensional reconstruction loses variation orthogonal to the retained direction. The arc has substantial variation outside one straight axis, so its reconstruction error is much larger than the elongated crowd's.") },question:"What information is lost when each cloud is reconstructed from one component?"}),
+            exercise("Add one stranger to the crowd",["Part 12 adds one tall, light person, 195 cm and 30 kg, to the eleven and reports that the first component turns by 4.6 degrees and its share falls from 0.990 to 0.841. Fit the crowd with and without the stranger and print the first component's angle and share for each.", "Print the second component's variance as well, before and after, which the lesson does not quote and which is where the stranger's say shows most plainly."],`import math
 from oop_ml import Feature, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1330,8 +1302,7 @@ weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
 for label, extra_height, extra_weight in (("the crowd", [], []), ("with the stranger", [195], [30])):
     people = [Feature("height", heights + extra_height), Feature("weight", weights + extra_weight)]
     # Fit the cloud, then print the label, the first component's angle in
-    # degrees modulo 180, its share, and the second component's variance.`,
-              `import math
+    # degrees modulo 180, its share, and the second component's variance.`,`import math
 from oop_ml import Feature, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
@@ -1343,15 +1314,9 @@ for label, extra_height, extra_weight in (("the crowd", [], []), ("with the stra
     first, second = fitted.components
     angle = math.degrees(math.atan2(first.direction[1], first.direction[0])) % 180
     share = fitted.components.variance_shares[0]
-    print(f"{label}: first component at {angle:.2f} degrees with share {share:.4f}, second component variance {second.variance:.2f}")`,
-              `the crowd: first component at 42.21 degrees with share 0.9897, second component variance 10.81
-with the stranger: first component at 37.62 degrees with share 0.8409, second component variance 183.55`,
-              { hints: ["The stranger is appended to both lists before the Features are built, so the second fit sees twelve people and the first sees eleven.", "The angle and the share are read exactly as in the previous problem. The turn is the difference between the two printed angles."], check: numberCheck("What share of the variance does the first component carry once the stranger is in?", 0.8409, 0.0005, "One person in twelve turns the first component from 42.21 to 37.62 degrees, the 4.6 degrees Part 12 reports, and cuts its share from 0.9897 to 0.8409, because a squared deviation grows with the square of the distance and a distant person contributes far more than a twelfth. The second component's variance goes from 10.81 to 183.55, which is the stranger's whole say, since they sit far off the crowd's long axis and the short axis has to grow to reach them.") },
-            ),
-            exercise(
-              "Write the heights in three units, then standardize",
-              ["Part 11 writes the crowd's heights in millimetres, where the first component is (−0.996, −0.089) and claims 99.97 percent, and in metres, where it is (0.011, 1.000) and claims all of it. Fit the crowd with the heights in millimetres, centimetres and metres, raw and with standardize=True, and print the first component's direction and share for each of the six fits.", "Then ask the fit for three components of two features and print what the library raises, which the table in Part 16 says is a refusal at the fit."],
-              `from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
+    print(f"{label}: first component at {angle:.2f} degrees with share {share:.4f}, second component variance {second.variance:.2f}")`,`the crowd: first component at 42.21 degrees with share 0.9897, second component variance 10.81
+with the stranger: first component at 37.62 degrees with share 0.8409, second component variance 183.55`,{...{ hints: ["The stranger is appended to both lists before the Features are built, so the second fit sees twelve people and the first sees eleven.", "The angle and the share are read exactly as in the previous problem. The turn is the difference between the two printed angles."], check: numberCheck("What share of the variance does the first component carry once the stranger is in?", 0.8409, 0.0005, "A distant observation contributes a large squared deviation and changes the fitted covariance. Here it increases the second component's variance and rotates the first direction; the result depends on that observation's position.") },question:"How much can one distant observation change the principal directions?"}),
+            exercise("Write the heights in three units, then standardize",["Part 11 writes the crowd's heights in millimetres, where the first component is (−0.996, −0.089) and claims 99.97 percent, and in metres, where it is (0.011, 1.000) and claims all of it. Fit the crowd with the heights in millimetres, centimetres and metres, raw and with standardize=True, and print the first component's direction and share for each of the six fits.", "Then ask the fit for three components of two features and print what the library raises, which the table in Part 16 says is a refusal at the fit."],`from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1363,8 +1328,7 @@ for unit, factor in (("millimetres", 10), ("centimetres", 1), ("metres", 0.01)):
     # to three places, and its share to four.
 
 # Try to fit a PrincipalComponentAnalysis with n_components=3 on the last
-# cloud, catching the library's own error and printing its name and message.`,
-              `from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
+# cloud, catching the library's own error and printing its name and message.`,`from oop_ml import Feature, MLLibError, PrincipalComponentAnalysis
 
 heights = [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178]
 weights = [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78]
@@ -1381,16 +1345,13 @@ for unit, factor in (("millimetres", 10), ("centimetres", 1), ("metres", 0.01)):
 try:
     PrincipalComponentAnalysis(n_components=3).fit(people)
 except MLLibError as refusal:
-    print(f"{type(refusal).__name__}: {refusal}")`,
-              `millimetres, raw: direction [-0.996, -0.089], share 0.9997
+    print(f"{type(refusal).__name__}: {refusal}")`,`millimetres, raw: direction [-0.996, -0.089], share 0.9997
 millimetres, standardized: direction [0.707, 0.707], share 0.9896
 centimetres, raw: direction [-0.741, -0.672], share 0.9897
 centimetres, standardized: direction [0.707, 0.707], share 0.9896
 metres, raw: direction [0.011, 1.0], share 1.0000
 metres, standardized: direction [0.707, 0.707], share 0.9896
-InvalidValuesError: cannot keep 3 components from 2 features`,
-              { hints: ["standardize is a field of the constructor, so each unit needs two fits, one with it off and one with it on.", "A component can be read by name from components, and the first is component_1.", "The refusal happens at fit, when the number of features is first known, so the try has to wrap the fit rather than the construction."], check: numberCheck("What share does the first component carry once the heights are standardized, in any of the three units?", 0.9896, 0.0005, "Standardized, all three units give the same fit, a direction of (0.707, 0.707) and a share of 0.9896, because dividing each feature by its own spread removes the unit before the covariance is built, and the question changes from how the features vary together in their units to how they vary relative to their own scales. Raw, the share runs from 0.9897 in centimetres to 0.9997 in millimetres and 1.0000 in metres while the direction swings from almost pure height to almost pure weight. Same people, and the covariance matrix is built from the numbers.") },
-            ),
+InvalidValuesError: cannot keep 3 components from 2 features`,{...{ hints: ["standardize is a field of the constructor, so each unit needs two fits, one with it off and one with it on.", "A component can be read by name from components, and the first is component_1.", "The refusal happens at fit, when the number of features is first known, so the try has to wrap the fit rather than the construction."], check: numberCheck("What share does the first component carry once the heights are standardized, in any of the three units?", 0.9896, 0.0005, "Training standardisation removes these positive unit conversions before covariance is calculated. Raw covariance instead uses the changed numerical scales, so it favours different feature directions even for the same people.") },question:"Do raw and standardised PCA react differently to changes of units?"}),
           ],
         },
       ]}

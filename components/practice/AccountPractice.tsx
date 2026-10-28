@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { refreshAccount, useAccount } from "@/lib/accounts";
 import { useLearnerState } from "@/lib/learner-state";
 import { BotieSays } from "@/components/site/Botie";
+import { PracticeMembership } from "@/components/membership/PracticeMembership";
 import type { PracticeActivity, PracticeCatalog, PracticeFamily, PracticeMode } from "@/lib/practice-bank/types";
 const QuizDeck = dynamic(() => import("@/components/concept/QuizDeck").then(m => m.QuizDeck));
 const PracticeDeck = dynamic(() => import("@/components/concept/PracticeDeck").then(m => m.PracticeDeck), { ssr: false });
@@ -23,10 +24,11 @@ function usePractice<T>(path: string) {
         owner: string;
         path: string;
         message: string;
+        subscriptionRequired?: boolean;
     } | null>(null);
     const [attempt, retry] = useState(0);
     useEffect(() => {
-        if (account.status !== "ready" || !id)
+        if (account.status !== "ready" || !id || !account.membership.practiceAccess)
             return;
         const abort = new AbortController();
         const timer = setTimeout(() => { setFailure({ owner: id, path, message: "Loading practice timed out. Please try again." }); abort.abort(); }, 20000);
@@ -34,6 +36,11 @@ function usePractice<T>(path: string) {
             .then(async (response) => {
             const body = await response.json();
             if (!response.ok) {
+                if (response.status === 403 && [body.code, body.error, body.detail].includes("practice_subscription_required")) {
+                    if (!abort.signal.aborted) setFailure({ owner: id, path, message: "Practice membership is required.", subscriptionRequired: true });
+                    void refreshAccount();
+                    return;
+                }
                 if (response.status === 401 || response.status === 409)
                     void refreshAccount();
                 throw Error(body.error ?? "Practice could not be loaded.");
@@ -48,9 +55,11 @@ function usePractice<T>(path: string) {
             setFailure({ owner: id, path, message: error instanceof Error ? error.message : "Practice could not be loaded." }); })
             .finally(() => clearTimeout(timer));
         return () => { clearTimeout(timer); abort.abort(); };
-    }, [path, id, account.status, attempt]);
-    return { account, data: account.status === "ready" && result && result.owner === id && result.path === path ? result.data : null,
-        error: failure && failure.owner === id && failure.path === path ? failure.message : null,
+    }, [path, id, account.status, account.membership.practiceAccess, attempt]);
+    const currentFailure = failure && failure.owner === id && failure.path === path ? failure : null;
+    return { account, data: account.status === "ready" && account.membership.practiceAccess && !currentFailure?.subscriptionRequired && result && result.owner === id && result.path === path ? result.data : null,
+        error: currentFailure?.subscriptionRequired ? null : currentFailure?.message,
+        subscriptionRequired: Boolean(currentFailure?.subscriptionRequired),
         retry: () => { setFailure(null); setResult(null); retry(x => x + 1); } };
 }
 function Gate({ destination }: {
@@ -60,11 +69,11 @@ function Gate({ destination }: {
     if (account.status === "checking")
         return <p role="status" className="py-8 text-muted">Checking your account…</p>;
     if (account.status === "unavailable")
-        return <div role="alert" className="space-y-4 rounded-xl border border-line p-6"><p>Your account could not be checked. Your saved work stays in this browser.</p><button className={control} onClick={() => void refreshAccount()}>Check account again</button></div>;
+        return <div role="alert" className="space-y-4 rounded-xl border border-line p-6"><p>Your account could not be checked. Account work remains on the server. Keep this tab open for any changes that have not saved yet.</p><button className={control} onClick={() => void refreshAccount()}>Check account again</button></div>;
     return <div className="space-y-5 rounded-xl border border-line bg-surface p-6">
-    <BotieSays mood="curious"><p>Want another problem to work through? Sign in to open the practice library and keep your code and constructions with your account.</p></BotieSays>
+    <BotieSays mood="curious"><p>Want more problems to work through? Sign in to choose a practice membership for this additional library.</p></BotieSays>
     <Link className="inline-flex min-h-11 items-center rounded-lg bg-accent-fill px-4 py-2 font-semibold text-accent-ink" href={"/account?returnTo=" + encodeURIComponent(destination)}>Sign in or create an account</Link>
-    <p className="text-sm text-muted">The lessons and their existing quizzes, coding challenges and workshops remain open to everyone. These are additional practice cases.</p>
+    <p className="text-sm leading-6 text-muted">The course and its existing exercises stay free. A free account keeps your learning progress and drafts; membership adds these extra practice cases.</p>
   </div>;
 }
 function Failure({ message, retry }: {
@@ -96,10 +105,12 @@ function FamilyRow({ family, mode, variant }: {
   </article>;
 }
 export function PracticeLibrary() {
-    const { account, data, error, retry } = usePractice<PracticeCatalog>("catalog");
+    const { account, data, error, retry, subscriptionRequired } = usePractice<PracticeCatalog>("catalog");
     const [group, setGroup] = useState("All topics"), [search, setSearch] = useState(""), [mode, setMode] = useState<PracticeMode>("quiz"), [variant, setVariant] = useState(0);
     if (account.status !== "ready" || !account.user)
         return <Gate destination="/practice"/>;
+    if (!account.membership.practiceAccess || subscriptionRequired)
+        return <PracticeMembership accessDenied={subscriptionRequired} onAccessRetry={retry}/>;
     if (error)
         return <Failure message={error} retry={retry}/>;
     if (!data || !account.learnerStateReady)
@@ -121,9 +132,11 @@ export function PracticeLibrary() {
 export function AccountActivity({ id }: {
     id: string;
 }) {
-    const { account, data, error, retry } = usePractice<PracticeActivity>("activity/" + encodeURIComponent(id));
+    const { account, data, error, retry, subscriptionRequired } = usePractice<PracticeActivity>("activity/" + encodeURIComponent(id));
     if (account.status !== "ready" || !account.user)
         return <Gate destination={"/practice/" + id}/>;
+    if (!account.membership.practiceAccess || subscriptionRequired)
+        return <PracticeMembership accessDenied={subscriptionRequired} onAccessRetry={retry}/>;
     if (error)
         return <Failure message={error} retry={retry}/>;
     if (!data || !account.learnerStateReady)

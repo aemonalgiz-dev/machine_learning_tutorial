@@ -137,3 +137,97 @@ body {
 .tok-b {
   color: var(--code-builtin);
 }
+
+/* Botie's laboratory: brass controls, lit circuits, and a path made by doing. */
+:root {
+  --success: #16765b;
+  --panel-shadow: 0 4px 0 #c9cfd7, 0 12px 30px #18213208;
+}
+:root[data-theme="dark"] {
+  --background: #10151e;
+  --surface: #192230;
+  --raised: #232f40;
+  --line: #364355;
+  --foreground: #eef0ee;
+  --muted: #a7b3c4;
+  --accent: #f4c66a;
+  --accent-fill: #efbc58;
+  --accent-soft: #f4c66a12;
+  --success: #7ddbb6;
+  --panel-shadow: 0 4px 0 #090f18, 0 16px 40px #0002;
+}
+body {
+  background-image: radial-gradient(ellipse at 50% 0, var(--accent-soft), transparent 65%), radial-gradient(var(--grid) 1px, transparent 1px);
+  background-size: 100% 900px, 24px 24px;
+}
+.game-header { box-shadow: 0 3px 0 #0002; }
+.game-eyebrow { font-family: var(--font-geist-mono), monospace; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.game-button { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; gap: 1rem; border: 1px solid var(--line); border-radius: 7px; background: var(--raised); padding: .7rem 1.1rem; font-size: .875rem; font-weight: 650; box-shadow: 0 3px 0 var(--line); transition: transform .15s, box-shadow .15s, filter .15s; }
+.game-button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.game-button:active { transform: translateY(2px); box-shadow: none; }
+.game-button-primary { color: var(--accent-ink); background: var(--accent-fill); border-color: #bd8b37; box-shadow: 0 3px 0 #966b25; }
+.learning-dashboard { position: relative; display: grid; grid-template-columns: 1fr 290px; border: 1px solid var(--line); border-top: 3px solid var(--accent-fill); border-radius: 12px; background: var(--surface); box-shadow: var(--panel-shadow); overflow: hidden; }
+.dashboard-content { grid-column: 1; grid-row: 1; padding: 2.5rem; }
+.dashboard-art { position: relative; grid-column: 2; grid-row: 1; display: flex; min-height: 310px; align-items: center; justify-content: center; isolation: isolate; background: radial-gradient(ellipse at center, var(--accent-soft), transparent 70%); }
+.dashboard-art > svg { position: relative; z-index: 2; transform: translateY(-8px); }
+.diagram-label { position: absolute; top: 2rem; font: 10px var(--font-geist-mono), monospace; letter-spacing: .12em; color: var(--muted); }
+.botie-platform { position: absolute; bottom: 63px; width: 156px; height: 30px; border-radius: 50%; border: 1px solid var(--accent); box-shadow: 0 7px 0 var(--raised), 0 8px 0 var(--line); background: var(--raised); z-index: -1; }
+.orbit { position: absolute; width: 230px; height: 230px; border: 1px dashed var(--line); border-radius: 50%; }
+.orbit-two { width: 190px; height: 190px; border-style: solid; opacity: .65; }
+.workbench-pieces { position: absolute; bottom: 18px; display: flex; align-items: center; gap: 8px; font: 11px var(--font-geist-mono), monospace; }
+.workbench-pieces span { padding: 5px 9px; border: 1px solid var(--line); background: var(--background); border-radius: 4px; }
+.workbench-pieces i { color: var(--accent); font-style: normal; }
+.dashboard-milestones { grid-column: 1 / -1; padding: 1.4rem 2.5rem; border-top: 1px solid var(--line); background: var(--background); }
+.milestone-road { display: flex; justify-content: space-between; gap: 1rem; }
+.milestone-road li { position: relative; flex: 1; display: flex; align-items: center; gap: .7rem; font-size: 12px; color: var(--muted); }
+.milestone-road li:not(:last-child)::after { content: ""; flex: 1; min-width: 12px; height: 1px; background: var(--line); }
+.milestone-seal { display: grid; place-items: center; flex-shrink: 0; width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 50%; font: 11px var(--font-geist-mono), monospace; }
+.milestone-road [data-earned="true"] { color: var(--success); }
+[data-earned="true"] .milestone-seal { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); }
+.learning-areas { display: flex; flex-direction: column; gap: 1rem; }
+.area-card { display: flex; align-items: center; gap: 1.6rem; position: relative; border: 1px solid var(--line); border-radius: 9px; padding: 1.5rem; background: var(--surface); box-shadow: 0 3px 0 #0002; transition: background .15s, border-color .15s, transform .15s; }
+.area-card:hover { background: var(--raised); border-color: var(--accent); transform: translateX(3px); }
+.area-card.is-current, .trail-card.is-current { border-color: var(--accent); background: linear-gradient(110deg, var(--accent-soft), transparent 70%), var(--surface); }
+.area-emblem { display: grid; place-items: center; flex-shrink: 0; width: 64px; height: 64px; border: 1px solid var(--line); border-radius: 16px; background: var(--background); color: var(--accent); font: 26px var(--font-geist-mono), monospace; box-shadow: inset 0 -4px 0 #0002; }
+.area-arrow { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 50%; color: var(--accent); }
+.current-label { color: var(--accent); font: 10px var(--font-geist-mono), monospace; letter-spacing: .08em; text-transform: uppercase; }
+.current-label::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent-soft); }
+.path-progress { max-width: 34rem; padding: 1.1rem 1.3rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.path-track { height: 7px; margin-top: 12px; border-radius: 8px; background: var(--raised); overflow: hidden; }
+.path-track > span { display: block; height: 100%; background: var(--accent-fill); border-radius: inherit; transition: width .3s; }
+.lesson-trail { position: relative; margin-left: 22px; border-left: 2px solid var(--line); padding-left: 32px; }
+.lesson-trail > li + li { margin-top: 1.25rem; }
+.trail-card { position: relative; border: 1px solid var(--line); border-radius: 9px; padding: 1.5rem; background: var(--surface); box-shadow: var(--panel-shadow); }
+.trail-node { position: absolute; top: 24px; left: -55px; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--line); background: var(--background); font: 12px var(--font-geist-mono), monospace; color: var(--muted); }
+.is-current .trail-node { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+.is-earned .trail-node { border-color: var(--success); color: var(--success); }
+.milestone-tags { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 1rem; font-size: 11px; color: var(--muted); }
+.milestone-tags [data-earned="true"] { color: var(--success); }
+.journey-stage-track { display: flex; flex: 1; flex-wrap: wrap; gap: .65rem; padding: .75rem 0; }
+.journey-stage { display: flex; flex: 1; min-width: 150px; align-items: center; gap: .65rem; min-height: 56px; padding: .65rem .8rem; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); font-size: 12px; text-align: left; }
+.journey-stage[aria-current="step"] { border-color: var(--accent); box-shadow: inset 0 -2px 0 var(--accent); }
+.journey-stage .stage-number { display: grid; place-items: center; flex-shrink: 0; width: 25px; height: 25px; border-radius: 50%; border: 1px solid var(--line); font: 11px var(--font-geist-mono), monospace; }
+.journey-stage[data-complete="true"] .stage-number { color: var(--success); border-color: var(--success); }
+.journal-panel { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--panel-shadow); }
+@media (max-width: 640px) {
+  .learning-dashboard { grid-template-columns: 1fr; }
+  .dashboard-content { padding: 1.5rem; grid-row: 2; }
+  .dashboard-art { grid-column: 1; grid-row: 1; min-height: 180px; }
+  .dashboard-art > svg { width: 110px; height: 110px; }
+  .diagram-label { top: 1rem; left: 1rem; max-width: 100px; line-height: 1.8; }
+  .orbit { width: 160px; height: 160px; }.orbit-two { width: 130px; height: 130px; }
+  .botie-platform { bottom: 28px; width: 115px; height: 20px; }
+  .workbench-pieces { bottom: -8px; }
+  .dashboard-milestones { padding: 1.25rem 1.5rem; }
+  .milestone-road { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem .5rem; }
+  .milestone-road li::after { display: none; }
+  .area-card { gap: .85rem; padding: 1.1rem; align-items: flex-start; }
+  .area-emblem { width: 39px; height: 43px; font-size: 20px; border-radius: 8px; }
+  .area-arrow { display: none; }
+  .lesson-trail { margin-left: 16px; padding-left: 22px; }
+  .trail-card { padding: 1rem; }.trail-node { width: 32px; height: 32px; left: -40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-button, .area-card, .path-track > span { transition: none; }
+  .game-button:hover, .area-card:hover { transform: none; }
+}

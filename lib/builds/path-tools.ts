@@ -37,8 +37,8 @@ export const PATH_TOOLS: Record<string, Tool> = {
   lagInputs: define("Build earlier-value windows", "Each row contains the preceding observations for one already observed target, oldest first. The target itself is excluded.", ["Ordered history", "Number of lags"], ([history, lag]) => {
     const [xs,k] = lagged(history,lag); return xs.slice(k).map((_,i) => xs.slice(i,i+k));
   }),
-  lagTargets: define("Read later targets", "Drops the initial lag-length prefix, keeping the observations paired with earlier-value windows.", ["Ordered history", "Lag distance"], ([history,lag]) => { const [xs,k] = lagged(history,lag); return xs.slice(k); }),
-  lagReference: define("Read earlier references", "Drops the final lag-length suffix, retaining the earlier values aligned with later targets.", ["Ordered history", "Lag distance"], ([history,lag]) => { const [xs,k] = lagged(history,lag); return xs.slice(0,-k); }),
+  lagTargets: define("Read later targets", "Returns the observations that have a complete earlier lag window, in chronological order. These are targets at later dates, not values that can enter their own prediction windows.", ["Ordered history", "Lag distance"], ([history,lag]) => { const [xs,k] = lagged(history,lag); return xs.slice(k); }),
+  lagReference: define("Read earlier references", "Returns earlier observations paired with targets one supplied lag later. The two lists have matching positions so subtraction compares the intended dates.", ["Ordered history", "Lag distance"], ([history,lag]) => { const [xs,k] = lagged(history,lag); return xs.slice(0,-k); }),
   subtractRows: define("Subtract a shared reference row", "Subtracts the same reference vector from every table row. Columns must align, and the result preserves the original rows.", ["Rows to compare", "Shared reference vector"], ([value,reference]) => {
     const a = rows(value), b = numbers(reference);
     if (a[0].length !== b.length) throw Error("The reference needs one value per column.");
@@ -52,7 +52,7 @@ export const PATH_TOOLS: Record<string, Tool> = {
     if (xs.some(x => x < 0) || !Number.isFinite(total) || total <= 0) throw Error("Use non-negative weights with a finite positive total.");
     return xs.map(x => x/total);
   }),
-  positiveReciprocal: define("Take positive reciprocals", "Returns one divided by each strictly positive input. For error variances, these are precisions.", ["Positive values"], ([value]) => {
+  positiveReciprocal: define("Take positive reciprocals", "Returns one divided by each strictly positive entry. When entries are error variances, the results are precisions: lower variance gives greater weight.", ["Positive values"], ([value]) => {
     const xs = numbers(value); if (xs.some(x => x <= 0)) throw Error("Reciprocals here require strictly positive values."); return xs.map(x => 1/x);
   }),
   discountWeights: define("Build discount weights", "Returns one weight per reward, starting with one for the immediate reward and multiplying by gamma at each later position.", ["Reward sequence", "Discount gamma"], ([value,gamma]) => {
@@ -94,7 +94,7 @@ export const PATH_TOOLS: Record<string, Tool> = {
     const x=numbers(a),y=numbers(b); if(x.length!==y.length) throw Error("Numerators and denominators need matching lengths."); return x.map((v,i)=>y[i]===0?0:v/y[i]);
   }),
   addIdentity: define("Add self-connections", "Adds one to each diagonal entry of a square matrix while preserving other edges.", ["Adjacency matrix"], ([value]) => square(value).map((row,i)=>row.map((x,j)=>x+Number(i===j)))),
-  symmetricDegrees: define("Scale by both endpoint degrees", "For an undirected non-negative adjacency matrix, divides each edge by the square root of the product of its endpoint degrees.", ["Adjacency including self-loops"], ([value]) => {
+  symmetricDegrees: define("Scale by both endpoint degrees", "Each node degree is its adjacency-row total. Divides every connection weight by the square root of the product of its two endpoint degrees, reducing domination by highly connected nodes. Requires a non-negative undirected adjacency matrix; add the stated self-connections first.", ["Adjacency including self-loops"], ([value]) => {
     const a=square(value),d=a.map(sum);
     if(a.some((row,i)=>row.some((x,j)=>x<0||Math.abs(x-a[j][i])>1e-8))||d.some(x=>x<=0)) throw Error("Use symmetric non-negative adjacency with positive degree at every node.");
     return a.map((row,i)=>row.map((x,j)=>x/Math.sqrt(d[i]*d[j])));

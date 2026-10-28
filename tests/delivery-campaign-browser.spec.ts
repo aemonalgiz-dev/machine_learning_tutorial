@@ -1,3 +1,4 @@
+import { mockAccountBackend, waitForAccountReady, waitForAccountSync } from "./helpers/account-backend";
 import { expect, test, type Page } from "@playwright/test";
 
 async function loadWorkedMachine(page: Page) {
@@ -7,8 +8,10 @@ async function loadWorkedMachine(page: Page) {
   await expect(page.getByTestId("construction-counter").filter({ visible: true })).toHaveText("4 passed · 0 failed · 0 not run");
 }
 
+test.beforeEach(async ({ page }) => { await mockAccountBackend(page); });
+
 test("delivery campaign carries real machines, withholds outcomes, and retains attempt-specific evidence", async ({ page }, testInfo) => {
-  await page.goto("/lab/simple-linear-regression");
+  await page.goto("/lab/simple-linear-regression"); await waitForAccountReady(page);
   const stages = page.getByRole("navigation", { name: "Delivery journey stages" });
   await stages.getByRole("button", { name: "Keep the service running", exact: true }).click();
   await expect(page.getByTestId("delivery-campaign")).toBeVisible();
@@ -35,7 +38,7 @@ test("delivery campaign carries real machines, withholds outcomes, and retains a
   await page.getByRole("textbox", { name: "Name this correction", exact: true }).fill("Long-route adjustment");
   await page.getByText("Follow the batch through your saved error checker", { exact: true }).click();
   await expect(page.getByText(/^Batch score: 0.*0$/)).toBeVisible();
-  await page.reload();
+  await waitForAccountSync(page); await page.reload(); await waitForAccountReady(page);
   await expect(page.getByTestId("campaign-score")).toHaveText("0 min");
   await expect(page.getByText("Long-route adjustment: inspect the block", { exact: true })).toBeVisible();
 

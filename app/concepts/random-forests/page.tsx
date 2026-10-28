@@ -68,16 +68,8 @@ export default function RandomForestsPage() {
           content: (<>
 <>
               <SubSection title="1. The similarity left behind by bagging">
-                <p>
-                  Here is where the bagging page left the tangled crowd. The
-                  resamples gave the trees different people to learn from,
-                  the fitted trees became more varied than one tree refitted
-                  on nudged data, and the vote steadied the map. But 20 of
-                  the 25 trees still opened with a question about height, and
-                  across every pair of members the two agreed on 72.4 percent
-                  of the people neither had seen. The committee is more
-                  varied than one tree and still largely of one mind.
-                </p>
+                <p>Bagging trained trees on different resampled crowds and combined their answers. Their boundaries varied, but they still often chose the same first measurement: height. Different training rows did not remove every similarity between the members.</p>
+              <p>In the saved tangled-crowd run, 20 of 25 trees begin with height. On people that neither member saw in training, pairs agree on 72.4 percent of labels. Random forests add another source of variation by restricting which features a split can consider. Let&apos;s see how that changes the questions before judging the final vote.</p>
                 <NumberTable
                   headings={["the bagged committee, 25 trees", "reading"]}
                   rows={[
@@ -1150,10 +1142,7 @@ export default function RandomForestsPage() {
         {
           title: "Practice. Growing the Forest With the Library",
           practice: [
-            exercise(
-              "Switch the lottery on and read the dashboard’s top rows",
-              ["Fit the bagged committee and the forest the dashboard in section 7 compares. Both have twenty-five members and draw their resamples from seed 7, so they grow on the same twenty-five samples in the same order, and the forest offers each split one feature of the two. Read each committee’s out-of-bag score and count its roots on height and on weight.", "Section 7 reported the roots spreading from 20 and 5 to 8 and 17 and the out-of-bag score falling from 0.64 to 0.52. The seed fixes every draw, so the four numbers should come back exactly."],
-              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+            exercise("Switch the lottery on and read the dashboard’s top rows",["Fit the bagged committee and the forest the dashboard in section 7 compares. Both have twenty-five members and draw their resamples from seed 7, so they grow on the same twenty-five samples in the same order, and the forest offers each split one feature of the two. Read each committee’s out-of-bag score and count its roots on height and on weight.", "Section 7 reported the roots spreading from 20 and 5 to 8 and 17 and the out-of-bag score falling from 0.64 to 0.52. The seed fixes every draw, so the four numbers should come back exactly."],`from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1162,8 +1151,7 @@ is_adult = Feature("is_adult", [0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 
 bagged = BaggingClassifier(n_members=25, random_seed=7).fit([heights, weights], is_adult)
 # Fit the forest with the same members and seed, offering one feature per
 # split, then print each committee's out-of-bag score to two places and how
-# many of its members root on height and on weight.`,
-              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+# many of its members root on height and on weight.`,`from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1177,15 +1165,9 @@ forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit
 for name, committee in (("bagging", bagged), ("forest", forest)):
     roots = [member.root.split.feature_name for member in committee.members]
     print(f"{name}: out of bag {committee.out_of_bag_score():.2f}, "
-          f"roots on height {roots.count('height')}, on weight {roots.count('weight')}")`,
-              `bagging: out of bag 0.64, roots on height 20, on weight 5
-forest: out of bag 0.52, roots on height 8, on weight 17`,
-              { hints: ["The forest is constructed like the bagged committee with one more setting, max_features, which is how many features each split is offered. On two features the only forest possible is max_features of 1.", "The forest builds its own trees, so it takes no base_model. Depth and the minimum sizes, if you want them, are fields on the forest itself.", "The members are a tuple on either committee, and each member is a tree whose root holds a split, and the split knows the name of the feature it asks about."], check: numberCheck("What out-of-bag score does the forest report, to two places?", 0.52, 0.005, "Thirteen of the twenty-five people are called correctly by the members whose samples omitted them, and 13 over 25 is 0.52, against bagging’s 0.64 on the very same samples. The lottery spread the roots, which section 7 calls the easy part, and on this crowd under this seed it paid for the spread in strength without making the members’ mistakes less shared.") },
-            ),
-            exercise(
-              "Measure each member’s strength out of bag",
-              ["Section 13 defines a member’s strength as its accuracy on the people its own resample omitted, and section 7 reported the mean falling from 0.641 under bagging to 0.572 in the forest. Compute both means yourself from the members and their samples.", "For each member, ask it about the whole crowd, keep only the people in its sample’s out-of-bag positions, and score those against the truth. Print the mean strength of each committee to three places and the weakest and strongest member in each, which the page does not quote."],
-              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+          f"roots on height {roots.count('height')}, on weight {roots.count('weight')}")`,`bagging: out of bag 0.64, roots on height 20, on weight 5
+forest: out of bag 0.52, roots on height 8, on weight 17`,{...{ hints: ["The forest is constructed like the bagged committee with one more setting, max_features, which is how many features each split is offered. On two features the only forest possible is max_features of 1.", "The forest builds its own trees, so it takes no base_model. Depth and the minimum sizes, if you want them, are fields on the forest itself.", "The members are a tuple on either committee, and each member is a tree whose root holds a split, and the split knows the name of the feature it asks about."], check: numberCheck("What out-of-bag score does the forest report, to two places?", 0.52, 0.005, "The feature lottery spreads the root choices but lowers this seeded committee's out-of-bag score. Diversity in chosen features alone does not establish a better ensemble.") },question:"How does offering fewer features at each split change this committee?"}),
+            exercise("Measure each member’s strength out of bag",["Section 13 defines a member’s strength as its accuracy on the people its own resample omitted, and section 7 reported the mean falling from 0.641 under bagging to 0.572 in the forest. Compute both means yourself from the members and their samples.", "For each member, ask it about the whole crowd, keep only the people in its sample’s out-of-bag positions, and score those against the truth. Print the mean strength of each committee to three places and the weakest and strongest member in each, which the page does not quote."],`from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1198,8 +1180,7 @@ forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit
 )
 # For each committee, score every member on the people its own sample omitted,
 # then print the mean strength to three places and the weakest and strongest
-# member to two places.`,
-              `from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
+# member to two places.`,`from oop_ml import BaggingClassifier, Feature, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1219,15 +1200,9 @@ for name, committee in (("bagging", bagged), ("forest", forest)):
         right = sum(1 for person in omitted if answers[person] == truth[person])
         strengths.append(right / len(omitted))
     print(f"{name}: mean strength {sum(strengths) / len(strengths):.3f}, "
-          f"weakest {min(strengths):.2f}, strongest {max(strengths):.2f}")`,
-              `bagging: mean strength 0.641, weakest 0.43, strongest 0.88
-forest: mean strength 0.572, weakest 0.33, strongest 0.75`,
-              { hints: ["members and samples are two tuples in the same order, so zipping them pairs every tree with the resample it grew on.", "A sample’s out_of_bag is the list of positions it never drew. Those positions index into the crowd, so they pick out the same people in the member’s answers and in the truth.", "A member answers the whole crowd at once through predict, and the truth is the target’s values. Comparing the two at the omitted positions and dividing by how many there are is the member’s strength."], check: numberCheck("What is the forest’s mean member strength, to three places?", 0.572, 0.0005, "A member denied height at a node takes a weaker question there, and sometimes needs more questions to recover what one would have captured, so the forest’s members are weaker on the people they never saw, 0.572 against bagging’s 0.641. That 0.07 is the price of the lottery, and section 14 is about whether a drop in shared error pays for it, which on this crowd it did not.") },
-            ),
-            exercise(
-              "Ask the forest which feature mattered",
-              ["Section 28 reads impurity importance off the forest as height 0.527 and weight 0.473, against height 0.711 and weight 0.289 on the bagged committee, and section 29 reads permutation importance as height 0.64 and weight 0.36 over five shuffles. Reproduce all three readings.", "Impurity importance is a property of each fitted committee. Permutation importance is a separate measurer that takes the fitted forest, the features and the target, shuffles one column at a time, and reads the drop in score. Five repeats under seed 1 give the page’s figures. Print each share to three places."],
-              `from oop_ml import Feature, BaggingClassifier, PermutationImportance, RandomForestClassifier
+          f"weakest {min(strengths):.2f}, strongest {max(strengths):.2f}")`,`bagging: mean strength 0.641, weakest 0.43, strongest 0.88
+forest: mean strength 0.572, weakest 0.33, strongest 0.75`,{...{ hints: ["members and samples are two tuples in the same order, so zipping them pairs every tree with the resample it grew on.", "A sample’s out_of_bag is the list of positions it never drew. Those positions index into the crowd, so they pick out the same people in the member’s answers and in the truth.", "A member answers the whole crowd at once through predict, and the truth is the target’s values. Comparing the two at the omitted positions and dividing by how many there are is the member’s strength."], check: numberCheck("What is the forest’s mean member strength, to three places?", 0.572, 0.0005, "Limiting available features can force less effective splits and reduce individual-tree performance. The ensemble benefits only if reduced dependence between their errors compensates sufficiently; this crowd does not show such a benefit under the given seed.") },question:"What happens to each tree's out-of-bag accuracy under feature sampling?"}),
+            exercise("Ask the forest which feature mattered",["Section 28 reads impurity importance off the forest as height 0.527 and weight 0.473, against height 0.711 and weight 0.289 on the bagged committee, and section 29 reads permutation importance as height 0.64 and weight 0.36 over five shuffles. Reproduce all three readings.", "Impurity importance is a property of each fitted committee. Permutation importance is a separate measurer that takes the fitted forest, the features and the target, shuffles one column at a time, and reads the drop in score. Five repeats under seed 1 give the page’s figures. Print each share to three places."],`from oop_ml import Feature, BaggingClassifier, PermutationImportance, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1239,8 +1214,7 @@ forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit
 )
 # Print the impurity importances of both committees, then the permutation
 # importances of the forest over five shuffles under seed 1, each share to
-# three places.`,
-              `from oop_ml import Feature, BaggingClassifier, PermutationImportance, RandomForestClassifier
+# three places.`,`from oop_ml import Feature, BaggingClassifier, PermutationImportance, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1257,16 +1231,10 @@ for name, committee in (("bagging", bagged), ("forest", forest)):
 
 shuffled = PermutationImportance(n_repeats=5, random_seed=1).measure(forest, [heights, weights], is_adult)
 shares = ", ".join(f"{each.name} {each.value:.3f}" for each in shuffled)
-print(f"forest, permutation importance: {shares}")`,
-              `bagging, impurity importance: height 0.711, weight 0.289
+print(f"forest, permutation importance: {shares}")`,`bagging, impurity importance: height 0.711, weight 0.289
 forest, impurity importance: height 0.527, weight 0.473
-forest, permutation importance: height 0.640, weight 0.360`,
-              { hints: ["feature_importances on a fitted committee is the members’ impurity shares averaged, and it is iterable, each entry carrying a name and a value.", "PermutationImportance is constructed with n_repeats and random_seed, and its measure takes the fitted model, the features and the target. It never refits anything.", "Both readings are shares that sum to one, so the two numbers on each line should add up to 1.000."], check: numberCheck("What permutation importance does the forest give height, to two places?", 0.64, 0.005, "Shuffling the height column so it keeps its distribution and loses its relationship with the label costs the forest more than shuffling weight does, nearly two to one, which is the same ordering the root board in section 4 gave. The impurity reading is nearly even, 0.527 to 0.473, because the lottery made the trees spend roughly equal impurity reductions on both features. The data did not change between the two readings. What they measure did.") },
-            ),
-            exercise(
-              "Ask about people far from the crowd",
-              ["Section 31 asks the seed 7 forest about someone 250 centimetres tall weighing 30 kilograms, someone 100 centimetres and 120 kilograms, and someone 300 centimetres and 200 kilograms, and reads the adult share for each. Put the three questions to the forest yourself.", "The adult share is the second column of the forest’s averaged probabilities, since adult is class 1. Print it for each person to three places, and notice that the forest answers all three without any sign of how far away they are."],
-              `from oop_ml import Feature, RandomForestClassifier
+forest, permutation importance: height 0.640, weight 0.360`,{...{ hints: ["feature_importances on a fitted committee is the members’ impurity shares averaged, and it is iterable, each entry carrying a name and a value.", "PermutationImportance is constructed with n_repeats and random_seed, and its measure takes the fitted model, the features and the target. It never refits anything.", "Both readings are shares that sum to one, so the two numbers on each line should add up to 1.000."], check: numberCheck("What permutation importance does the forest give height, to two places?", 0.64, 0.005, "The two methods measure different properties. Split importance credits the training reductions the forest used, while permutation importance measures how much the fixed model's score depends on each input on the evaluated rows.") },question:"Do split credit and shuffled-feature dependence agree?"}),
+            exercise("Ask about people far from the crowd",["Section 31 asks the seed 7 forest about someone 250 centimetres tall weighing 30 kilograms, someone 100 centimetres and 120 kilograms, and someone 300 centimetres and 200 kilograms, and reads the adult share for each. Put the three questions to the forest yourself.", "The adult share is the second column of the forest’s averaged probabilities, since adult is class 1. Print it for each person to three places, and notice that the forest answers all three without any sign of how far away they are."],`from oop_ml import Feature, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1276,8 +1244,7 @@ forest = RandomForestClassifier(n_members=25, random_seed=7, max_features=1).fit
     [heights, weights], is_adult
 )
 # Ask the forest for its class probabilities at the three far-off people and
-# print each one's adult share to three places.`,
-              `from oop_ml import Feature, RandomForestClassifier
+# print each one's adult share to three places.`,`from oop_ml import Feature, RandomForestClassifier
 
 heights = Feature("height", [147, 156, 145, 159, 162, 120, 122, 118, 180, 183, 178, 145, 145, 151, 151, 157, 157, 148, 154, 160, 147, 153, 150, 156, 143])
 weights = Feature("weight", [41, 53, 57, 57, 61, 25, 28, 24, 80, 83, 78, 45, 55, 45, 55, 45, 55, 50, 50, 50, 58, 58, 42, 42, 50])
@@ -1293,12 +1260,9 @@ shares = forest.predict_probabilities(
     [Feature("height", far_heights), Feature("weight", far_weights)]
 )
 for height, weight, row in zip(far_heights, far_weights, shares):
-    print(f"{height} cm and {weight} kg: adult share {row[1]:.3f}")`,
-              `250 cm and 30 kg: adult share 0.493
+    print(f"{height} cm and {weight} kg: adult share {row[1]:.3f}")`,`250 cm and 30 kg: adult share 0.493
 100 cm and 120 kg: adult share 0.465
-300 cm and 200 kg: adult share 1.000`,
-              { hints: ["predict_probabilities takes features named exactly as the fit saw them and answers one row per person, with one column per class in class order.", "Iterating over the probability matrix gives one row at a time, and the adult share is the entry at position 1 of each row."], check: numberCheck("What adult share does the forest give the person 250 centimetres tall and 30 kilograms, to three places?", 0.493, 0.0005, "A classification forest lets the outermost regions of every tree extend to infinity, so a query far outside the crowd inherits whichever leaf its ray ends in. At 250 centimetres and 30 kilograms the members are split almost evenly between leaves that were about small children and leaves that were about tall adults, which is the 0.493, and at 300 centimetres and 200 kilograms they are unanimous at 1.000 and no less far from anything they saw. The share measures agreement, not distance from the data.") },
-            ),
+300 cm and 200 kg: adult share 1.000`,{...{ hints: ["predict_probabilities takes features named exactly as the fit saw them and answers one row per person, with one column per class in class order.", "Iterating over the probability matrix gives one row at a time, and the adult share is the entry at position 1 of each row."], check: numberCheck("What adult share does the forest give the person 250 centimetres tall and 30 kilograms, to three places?", 0.493, 0.0005, "Tree regions extend outside the observed measurements, so a distant query still reaches leaves and receives a class share. High agreement among those leaf predictions is not evidence that the query resembles training data.") },question:"What does a forest's class share tell us about queries far from its training data?"}),
           ],
         },
       ]}

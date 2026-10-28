@@ -77,7 +77,8 @@ test('the agent improvement section is discoverable and its lessons remain reada
   await page.goto('/concepts/agent-framework-tests');
   const lesson = expandedLessons.find(l => l.id === 'agent-framework-tests')!;
   const referencePart = lesson.parts.find(p => p.references?.length)!;
-  await page.getByRole('combobox', { name: 'Choose a section', exact: true }).first().selectOption({ label: referencePart.title });
+  await page.getByText('Lesson contents', { exact: true }).click();
+  await page.getByRole('combobox', { name: 'Jump to a page', exact: true }).first().selectOption({ label: referencePart.title });
   await expect(page.locator('[data-framework-reference]').first()).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: test.info().outputPath('agent-testing-mobile.png'), fullPage: true });

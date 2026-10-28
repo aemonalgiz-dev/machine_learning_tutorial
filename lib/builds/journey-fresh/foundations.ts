@@ -130,9 +130,9 @@ export const foundationFreshCases: Record<string, FreshJourneyCase> = {
   },
   "logistic-regression": {
     name: "A positive score just below the action boundary",
-    prompt: "The component's raw score is positive but small. Predict the inspection decision after converting it to a probability and applying the existing 0.6 cutoff.",
+    prompt: "The exam model's raw score is positive but small. Predict its pass-or-fail answer after converting that score to a probability and applying the existing 0.6 cutoff.",
     data: { score: 0.4 }, expected: 0,
-    why: "A positive raw score implies a sigmoid probability above one half, which need not reach the inspection policy's higher cutoff.",
+    why: "A positive score gives a sigmoid probability above one half. It can still fall below the chosen pass cutoff, so a positive score alone does not determine this decision.",
   },
   "judging-a-classifier": {
     name: "Every positive report was false",

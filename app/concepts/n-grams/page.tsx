@@ -263,21 +263,38 @@ export default function NGramsPage() {
                 </Equation>
                 <>
 <p>
-                  The n-gram model throws away all of that history except the last few words. A model of width three believes that the probability of a word given everything before it equals the probability of that word given the two words immediately before, and nothing else about the sentence matters. This is the Markov assumption, and it is false about language, since what a sentence is about survives across any number of words.
+                  Suppose the next word is predicted from only the two words
+                  immediately before it. We can collect examples of those short
+                  contexts even when the entire sentence is new. A width-three
+                  n-gram model makes that restriction: earlier words cannot
+                  change its answer once those final two words are fixed.
                 </p>
                 <p>
-                  It is useful anyway, because it turns an unanswerable question into a table of counts, and a table of counts can be built from any text at all and read in constant time.
+                  That fixed-context restriction is a Markov assumption. It is a
+                  modelling choice, not a claim that language really forgets
+                  everything earlier. A subject, topic or reference can matter
+                  from farther away, so the short context can miss information
+                  that a reader uses.
+                </p>
+                <p>
+                  The restriction gives us a table we can estimate from observed
+                  runs. At a fixed context width, a suitable lookup structure can
+                  retrieve an entry without searching the whole training corpus.
+                  Unseen contexts still need a policy, which the smoothing
+                  sections will make explicit.
                 </p>
 </>
                 <Equation>
                   {"P(wᵢ | w₁ … wᵢ₋₁)  ≈  P(wᵢ | wᵢ₋ₙ₊₁ … wᵢ₋₁)"}
                 </Equation>
                 <p>
-                  The width n is the whole trade and it is the only real dial the
-                  method has. A model of width one knows which words are common
+                  The width n controls how much preceding context the counts
+                  may use. A model of width one knows which words are common
                   and nothing else. A model of width three knows which words
                   follow which pairs and has seen very few of the pairs a new
-                  text will contain. Part 5 measures where the trade lands here.
+                  text will contain. Smoothing and the tokenizer are separate
+                  choices too. Part 5 measures where the context-width trade
+                  lands on this corpus while keeping those choices explicit.
                 </p>
                 <KeepInMind>
                   The number n counts the whole run, so a model of width three
@@ -1334,7 +1351,11 @@ export default function NGramsPage() {
           practice: [
             exercise(
               "Work the three sentences with the library",
-              ["Part 2 worked the report was late through the three sentences by hand and arrived at 4 ⁄ 9, and Part 3 found that the summary was late and a report was short both come out at exactly zero. Fit a two-word model to the three sentences with the counts as they stand, print the five steps of the report was late, and score each test sentence. Then score them again with one added to every count.", "The lesson gives 1.1761 for the sentence the corpus holds, no finite score for the other two, and 3.7965, 5.0321 and 5.8064 once one is added. The fourth test sentence, a summary was short, is in neither Part. The corpus never wrote it down, but every pair in it occurred, so it should score without any repair."],
+              [
+  "Train a model that predicts each next word from the preceding word on the three supplied sentences. First use MaximumLikelihood, which estimates each next-word probability directly from observed pair counts.",
+  "Print the five next-word probabilities for the report was late, including its end marker. Then report perplexity for each of the four supplied test sentences with raw counts and with AdditiveSmoothing(pretended_count=1.0).",
+  "Perplexity summarises how much probability the model assigns to the whole sequence, including sentence endings here. A zero-probability step gives infinite perplexity. The fourth test combines observed pairs into a sentence absent from training."
+],
               `from oop_ml.core.natural_language_processing.n_grams.language_model import (
     NGramLanguageModel,
 )
@@ -1409,11 +1430,21 @@ the report was late: counts alone 1.1761, one added 3.7965
 the summary was late: counts alone inf, one added 5.0321
 a report was short: counts alone inf, one added 5.8064
 a summary was short: counts alone 1.5518, one added 5.3783`,
-              { hints: ["Construction configures and fit learns. The width goes to the constructor as order, the rule as smoothing, and the list of sentences goes to fit, which answers the fitted model.", "The rule that divides one count by another is MaximumLikelihood(), and the rule that adds a constant first is AdditiveSmoothing(pretended_count=1.0).", "probability_of takes the word and then a list of the words before it, and pads a short context with start markers itself. evaluate takes a list of texts and answers an object with a perplexity, which is inf where a step was zero."], check: numberCheck("What does a summary was short score with the counts as they stand, to four places?", 1.5518, 0.0001, "A began one of the three sentences, so the first step is 1 ⁄ 3. Summary always followed a, was always followed summary, short followed was once in three, and short always ended its sentence. The product is 1 ⁄ 9 over five steps and the fifth root of 9 is 1.5518. A two-word model can score a sentence nobody wrote as long as every pair in it was written, which is all the generalising the counts do, and one unseen pair, as in a report was short, puts the score at infinity.") },
+              {
+question: "Can a bigram model score a sentence it never saw?",
+ hints: [
+  "Use order=2 and fit the same training list for both smoothing rules.",
+  "probability_of(next_word, context) returns one conditional probability. evaluate(test_texts).perplexity reports the sequence score.",
+  "The model supplies start markers for short contexts. Include the end marker when reproducing the five displayed steps."
+], check: numberCheck("What does a summary was short score with the counts as they stand, to four places?", 1.5518, 0.0001, "The unseen sentence a summary was short has finite perplexity of 1.5518 under raw counts. Every adjacent pair it needs occurred in training, which is sufficient for this bigram model to score it.") },
             ),
             exercise(
               "Reach a subject five words back, then smooth it",
-              ["Part 7 fitted six sentences in which the verb agrees with a subject standing five words before it, and read the probability of were and of was after the samples that Dr. Alvarez read at every width. Fit the same six sentences with the counts as they stand at widths two to six and print both probabilities at each.", "The lesson has the answer split exactly in half until the model reads five words back, where it becomes 1.0 and 0.0. Then fit the widest model twice more with a constant added to every count, 1.0 and 0.005, and print the same two probabilities. The lesson never smooths this corpus, and Part 4 says what adding one does to a context that is rare."],
+              [
+  "The six training sentences distinguish singular and plural subjects before otherwise shared wording. Measure how far back the model must look to prefer were over was after the supplied context.",
+  "Fit unsmoothed models with orders 2 through 6. For each print the probabilities of were and was. Then fit order 6 with additive constants 1.0 and 0.005 and print the same pair.",
+  "Order includes the next word being predicted, so order 6 uses five preceding words. Keep the vocabulary and training sentences fixed when comparing smoothing strengths."
+],
               `from oop_ml.core.natural_language_processing.n_grams.language_model import (
     NGramLanguageModel,
 )
@@ -1479,11 +1510,21 @@ reading 4 back: were 0.5000, was 0.5000
 reading 5 back: were 1.0000, was 0.0000
 reading 5 back with 1.0 added: were 0.1250, was 0.0625
 reading 5 back with 0.005 added: were 0.9349, was 0.0047`,
-              { hints: ["A model of width n reads n − 1 words back, so the widths two to six are the lesson’s rows one to five.", "probability_of can be handed the whole six-word context at every width. The model keeps only as many of the last words as its width reads.", "The smoothing rule is an object given to the constructor, so the second loop builds AdditiveSmoothing(pretended_count=pretended) and fits a new model with order=6 each time."], check: numberCheck("With 1.0 added to every count, what probability does the model reading five words back give were, to four places?", 0.125, 0.0001, "The five words samples that Dr. Alvarez read stood before a next word once in the six sentences, and that word was were. The vocabulary is 15 words, so adding one turns 1 ⁄ 1 into 2 ⁄ 16, which is 0.125, and gives was 1 ⁄ 16. The window wide enough to reach the subject is exactly the kind of rare context Part 4 warned about, and the textbook constant throws most of the certainty away the moment it is reached. At 0.005 the same model keeps 0.9349.") },
+              {
+question: "What does a longer context remember, and what does smoothing change?",
+ hints: [
+  "probability_of accepts the whole context and keeps the suffix allowed by the model’s order.",
+  "Construct a fresh model for each order or smoothing rule.",
+  "A wider context can have fewer observations. Added counts spread probability to alternatives even when the observed continuation is consistent."
+], check: numberCheck("With 1.0 added to every count, what probability does the model reading five words back give were, to four places?", 0.125, 0.0001, "Add-one smoothing gives were probability 0.1250 at the widest context. That context occurs only once here, so a full added count for every vocabulary outcome has a large influence.") },
             ),
             exercise(
               "Choose the constant for eleven sentences",
-              ["Part 5 fitted a two-word model to the first eleven of the forty-four sentences at 0.005, the constant chosen for the full corpus, and found it scoring 52.03 on the reporting text where knowing nothing over its 36 words scores 36.00. Below are those eleven sentences, the six the lesson chooses on and the six it reports on. Run Part 4’s sweep for this smaller model. Fit at each constant, score both texts to two places, and report the score of the constant the choosing text prefers.", "Then fit once more at 100,000, which is the lesson’s model that knows nothing, and print its score on the reporting text with the size of the vocabulary and how many of the predicted positions hold a word the eleven sentences never contained. The lesson’s row for eleven sentences says 36 words and 15 of 53."],
+              [
+  "Use the eleven training sentences, the choosing set and the reporting set supplied in the starter. The choosing set selects the setting; the reporting set measures the final selected model.",
+  "Fit order-2 models at each supplied smoothing constant. Print choosing and reporting perplexities to two decimal places, then select the row with the lowest choosing score and print its reporting score.",
+  "Fit the supplied very-large-constant comparison separately. Print its reporting perplexity, vocabulary size and the reporting set’s unknown-token count out of all predicted positions. Do not use reporting scores to choose the constant."
+],
               `from oop_ml.core.natural_language_processing.n_grams.language_model import (
     NGramLanguageModel,
 )
@@ -1595,7 +1636,13 @@ print(f"{read.n_unknown} of {read.n_words} positions unfamiliar")`,
 chosen 0.2, which reports 24.36
 knowing nothing over 36 words: 36.00
 15 of 53 positions unfamiliar`,
-              { hints: ["perplexity takes a list of texts and answers one number for all of them together, the end marker of every sentence counted among the predicted positions.", "Tuples compare by their first entry, so min(rows) is the row with the lowest choosing score, and its other two entries are the reporting score and the constant.", "evaluate answers an object that also carries n_words, the predicted positions, and n_unknown, how many of them held a word outside the vocabulary. The vocabulary of a fitted model has an n_tokens."], check: numberCheck("What does the constant chosen on the choosing text score on the reporting text, to two places?", 24.36, 0.005, "With eleven sentences the counts are thin, so the choosing text prefers 0.2, forty times the 0.005 chosen for the full corpus, which is the lesson’s chosen constant drifting up as the counts thin out. At that setting the model scores 24.36 where knowing nothing over its 36 words scores 36.00, so the counting does pay at eleven sentences. The 52.03 in Part 5 is the price of a constant chosen for the full forty-four sentences, and the choice here was made without looking at the reporting text at all.") },
+              {
+question: "Which smoothing strength should be chosen when the training corpus is smaller?",
+ hints: [
+  "perplexity(texts) evaluates the complete list, including sentence endings.",
+  "Keep choosing_score, reporting_score and constant together in each row; select by choosing_score.",
+  "evaluate exposes n_words and n_unknown. The very large constant produces an approximately uniform prediction over this model’s vocabulary."
+], check: numberCheck("What does the constant chosen on the choosing text score on the reporting text, to two places?", 24.36, 0.005, "The choosing set selects 0.2, whose reporting perplexity is 24.36. The reporting set remains separate from selection, so its result checks the chosen setting on different sentences.") },
             ),
           ],
         },

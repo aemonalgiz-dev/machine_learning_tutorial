@@ -936,15 +936,19 @@ export default function FiniteScalarQuantisationPage() {
               "Three of those four counts are odd, so only the first coordinate is affected, the reachable codes fall from a thousand to eight hundred and seventy-five and the error rises by four per cent, which reads as noise. All-even configurations are where it bites, since four levels across four coordinates reaches eighty-one of two hundred and fifty-six codes at 79 per cent higher error, and two levels reaches one code out of sixteen and answers the same number for every vector.",
             ),
             several(
-              "Which of these did the comparison on the six hundred vectors find?",
+              "Which statements agree with these measured quantisation comparisons?",
               [
-                "The fitted table is better everywhere, by between 2.04 and 4.96 times",
-                "Giving eight levels to one coordinate and two to each of the other three is the worst of the three ways of spending sixty-four codes, at 0.6228",
-                "Sixty-four codes spent as four, four, two, two cost 0.4828, while fifty-four codes spent as three, three, three, two cost 0.3918",
-                "From sixteen codes up to a hundred and sixty the fitted table uses every one of its codes, while the grid uses 152 of 160 and 80 of 81",
-              ],
+                              "The fitted table is better everywhere, by between 2.04 and 4.96 times",
+                              "Giving eight levels to one coordinate and two to each of the other three is the worst of the three ways of spending sixty-four codes, at 0.6228",
+                              "Sixty-four codes spent as four, four, two, two cost 0.4828, while fifty-four codes spent as three, three, three, two cost 0.3918",
+                              "From sixteen codes up to a hundred and sixty the fitted table uses every one of its codes, while the grid uses 152 of 160 and 80 of 81",
+                            ],
               [0, 1, 2, 3],
               "The table was fitted on precisely the vectors it was then judged on, which is the honest price of doing without a fit. The grid’s curve is not monotone, since sixteen codes cost 0.8200, eighty-one cost 0.2312 and a hundred and sixty cost 0.2828, and three configurations of exactly sixty-four codes differ by 29 per cent in error on nothing but how the levels are spread, so the level counts are a real design choice rather than a formality.",
+              {
+                "description": "Use these results from the lesson’s experiment. They describe this dataset and run, rather than a guarantee for every model.",
+                "data": "codes | configuration | grid | fitted table | times worse\n16 | 2, 2, 2, 2 | 0.8200 | 0.3719 | 2.21\n24 | 3, 2, 2, 2 | 0.6782 | 0.2864 | 2.37\n36 | 3, 3, 2, 2 | 0.5509 | 0.2173 | 2.53\n54 | 3, 3, 3, 2 | 0.3918 | 0.1610 | 2.43\n64 | 4, 4, 2, 2 | 0.4828 | 0.1368 | 3.53\n81 | 3, 3, 3, 3 | 0.2312 | 0.1136 | 2.04\n160 | 5, 4, 4, 2 | 0.2828 | 0.0570 | 4.96\n\nconfiguration | codes | rounding error\n8, 2, 2, 2 | 64 | 0.6228\n2, 2, 2, 8 | 64 | 0.6145\n4, 4, 2, 2 | 64 | 0.4828\n3, 3, 3, 2 | 54 | 0.3918\n\nFor each fitted table from 16 through 160 codes, every code is used.\nGrid usage: 80 of 81 codes; 152 of 160 codes.\nThe fitted tables were trained and scored on these same 600 vectors."
+              },
             ),
             trueFalse(
               "Of the 981 codes the seventy-two word vectors leave empty, only sixteen are the rounding’s doing.",
@@ -1205,7 +1209,10 @@ export default function FiniteScalarQuantisationPage() {
           practice: [
             exercise(
               "Take the word cost through the grid",
-              ["Give every word of the eighteen sentences four numbers the way Part 1 does, by decomposing the term-document table to four directions and dividing the table by four, then round the word cost on the published grid of eight, five, five and five levels. Print its four numbers, the four squashed values, the digit chosen in each coordinate, the code, the vector the code stands for and the squared distance it moved.", "Section 7 arrived at digits 5, 3, 2 and 1 and a squared distance of 0.065215, and section 8 composed those digits into the code 309. The library should land on all of them."],
+              [
+  "Build the supplied four-dimensional word vectors from the term-document table and apply the starter’s scaling. Quantise cost with level counts (8,5,5,5).",
+  "Print its original and tanh-squashed coordinates, digits, packed code, reconstructed grid point and squared distance from the squashed input. The reconstruction is in squashed coordinates, not the original embedding scale."
+],
               `import numpy as np
 from oop_ml import FiniteScalarQuantizer, LatentSemanticAnalysis
 
@@ -1280,11 +1287,17 @@ digits (5, 3, 2, 1)
 code 309 of 1000
 stands for [0.4286, 0.5, 0.0, -0.5]
 squared distance moved 0.065215`,
-              { hints: ["The quantizer is configured and never fitted, so its one argument is the tuple of level counts, and quantize takes a block of rows even when there is one row.", "The code is the first entry of ids, and digits_of takes a code back to its four digits, which is section 10 as a single call.", "The reconstruction is the grid point the code names, in the squashed coordinates, and the distortion is the mean squared distance from the squashed input to that point, which for one row is the squared distance itself."], check: numberCheck("What code does the word cost receive on the published grid?", 309, 0.5, "The digits are 5, 3, 2 and 1 and the place values are one, eight, forty and two hundred, so the code is 5 plus 24 plus 80 plus 200. The squared distance of 0.065215 is measured in the bounded interval, from the squashed values to the levels 3/7, 1/2, 0 and minus 1/2, which is where the grid lives.") },
+              { hints: [
+  "Quantize accepts an observation-by-coordinate block even for one word.",
+  "Use ids and digits_of for code structure; compare reconstruction with tanh(input) when measuring the stated distortion."
+], check: numberCheck("What code does the word cost receive on the published grid?", 309, 0.5, "The packed code is 309. Its digits identify one grid coordinate per dimension; the single integer is an address for their combination."), question: "How does a four-coordinate word vector become one grid code?" },
             ),
             exercise(
               "Count what each rounding rule reaches",
-              ["Section 13 swept two hundred thousand inputs spread across the range through both rounding rules at every level count from two to twelve. Repeat the sweep, counting the distinct codes the library reaches at each level count beside the distinct positions the obvious rule of section 12 reaches, which is multiply by the half width and round.", "The library rounds the corrected way, so the obvious rule has to be written out, and it is three operations. Then round a coordinate of exactly zero at eight levels and at five, which section 17 says come back as 1/7 and as zero."],
+              [
+  "Sweep the supplied two hundred thousand inputs for each level count from two through twelve. Compare distinct library codes with distinct positions from the starter’s naive squash/scale/round rule.",
+  "Print both reachable counts for every setting. Then quantise exactly zero at eight and five levels, reporting reconstruction and squared distortion."
+],
               `import numpy as np
 from oop_ml import FiniteScalarQuantizer
 
@@ -1328,11 +1341,17 @@ for n_levels in (8, 5):
 12 levels: library reaches 12, obvious rule reaches 11
 zero at 8 levels comes back as 0.1429, squared distance 0.020408
 zero at 5 levels comes back as 0.0000, squared distance 0.000000`,
-              { hints: ["A quantizer over one coordinate takes a tuple of one level count, and quantize wants a block with one column, which reshape(-1, 1) gives the sweep.", "The distinct codes are the set of the ids, and the obvious rule is np.rint of the squashed values times the half width, counted with np.unique.", "A coordinate of exactly zero at eight levels lands on a half-way tie, which the rounding sends to the even whole number, so it comes back as 1/7 rather than minus 1/7."], check: numberCheck("How many distinct positions does the obvious rule reach at twelve levels?", 11, 0.5, "At twelve levels the half width is 5.5, and the whole numbers strictly inside minus 5.5 to 5.5 run from minus 5 to 5, which is eleven of them. The corrected rule subtracts a half before rounding and adds it back after, so it reaches all twelve, and the two rules agree at every odd count because the half width is then a whole number.") },
+              { hints: [
+  "A one-coordinate quantizer needs a one-element levels tuple and a two-dimensional input column.",
+  "Count distinct IDs separately from distinct naive rounded values; inspect the even-level half-way case."
+], check: numberCheck("How many distinct positions does the obvious rule reach at twelve levels?", 11, 0.5, "The naive rule reaches eleven positions at twelve requested levels. Its even-level rounding convention fails to use the complete intended grid."), question: "Can a naive rounding rule reach every promised level?" },
             ),
             exercise(
               "The same six hundred vectors at three scales",
-              ["Draw the six hundred four-coordinate vectors of Part 5, which are a seeded normal draw of spread 1.5 about the origin, and round them on the published grid of a thousand codes at a tenth of their scale, at their own scale and at eight times it. Print the rounding error, the number of codes reached and the share of coordinates past 0.99 after squashing at each scale.", "Section 22 arrived at errors of 0.0564, 0.0565 and 0.0095, with 30, 420 and 117 codes reached. The error and the codes reached do not move together, which is the finding."],
+              [
+  "Use the same seeded six hundred four-coordinate vectors at scale factors 0.1, 1 and 8 with one unchanged thousand-code grid.",
+  "For each print distortion in tanh-squashed coordinates, distinct codes reached and fraction of squashed coordinates whose absolute value exceeds 0.99."
+],
               `import numpy as np
 from oop_ml import FiniteScalarQuantizer
 
@@ -1360,11 +1379,17 @@ for factor in (0.1, 1.0, 8.0):
               `multiplied by 0.1: error 0.0564, codes reached 30 of 1000, past 0.99 0.0000
 multiplied by 1.0: error 0.0565, codes reached 420 of 1000, past 0.99 0.0737
 multiplied by 8.0: error 0.0095, codes reached 117 of 1000, past 0.99 0.8121`,
-              { hints: ["The grid never changes, so one quantizer serves all three scales and only the block handed to quantize is multiplied.", "The codes reached are the distinct ids, so a set of the ids and its length.", "The squashing is the hyperbolic tangent, so the share past the edge is the mean of a comparison between the absolute squashed values and 0.99."], check: numberCheck("How many of the thousand codes are reached at eight times the scale?", 117, 0.5, "At eight times the scale 81 per cent of all coordinates have been pushed past 0.99 and land on the ends, where they are reproduced almost exactly and describe almost nothing, so the error is six times lower than at full scale while only 117 codes are reached against 420. A low rounding error is not by itself evidence that the arrangement is working.") },
+              { hints: [
+  "Scale the original input block, not the grid.",
+  "A large input can saturate tanh near an endpoint. Compare code coverage and saturation with distortion before judging the result."
+], check: numberCheck("How many of the thousand codes are reached at eight times the scale?", 117, 0.5, "The enlarged inputs reach 117 codes. Many squashed coordinates saturate near grid extremes, so lower squashed-space distortion can coexist with reduced code coverage."), question: "Does a lower grid distortion necessarily mean that more codes are useful?" },
             ),
             exercise(
               "The seventy-two words on the thousand-code grid",
-              ["Round all seventy-two word vectors of Part 1 on the published grid and count what happens to them. Print how many words there are, how many distinct vectors they hold between them, how many codes they reach, how many codes are left empty, and how many words share the busiest code.", "Section 21 arrived at nineteen codes reached and 981 empty, from thirty-five distinct vectors. The size of the busiest code is not on the page. Finish by printing the code of lower and the code of estimate, which section 21 says come back identical."],
+              [
+  "Quantise all seventy-two supplied word vectors on the same thousand-code grid. Print word count, distinct vector count, codes reached, empty codes and largest number of words sharing one code.",
+  "Finish with the codes assigned to lower and the punctuated estimate entry from the vocabulary. Preserve the exact spelling estimate. when looking it up."
+],
               `from collections import Counter
 
 import numpy as np
@@ -1445,7 +1470,10 @@ codes left empty 981
 words on the busiest code 28
 lower is code 748
 estimate is code 748`,
-              { hints: ["The whole table goes to quantize at once, since it is already a block with one row per word, and the ids come back in vocabulary order.", "A Counter over the ids gives the codes reached as its length and the busiest code with its count as most_common(1).", "The vocabulary was split on whitespace, so estimate keeps the full stop that followed it in every sentence that used it, and the word to look up is estimate with the full stop attached."], check: numberCheck("How many words share the busiest code?", 28, 0.5, "A word occurring in only one sentence comes out with the same vector as every other word in that sentence, so the busiest code is where those single-sentence words from several sentences land once rounding has merged them. Twenty-eight of the seventy-two words answer one number, and nothing downstream can tell them apart, which is the cost section 21 measures as 981 empty codes read from the other side.") },
+              { hints: [
+  "Result IDs retain vocabulary-row order. A Counter measures occupancy without losing duplicate words.",
+  "Use the exact vocabulary spelling rather than removing its punctuation."
+], check: numberCheck("How many words share the busiest code?", 28, 0.5, "Twenty-eight words share the busiest code. A nominal thousand-code grid does not imply that a particular input table uses its capacity evenly."), question: "How much of the nominal grid does this word table actually use?" },
             ),
           ],
         },
