@@ -84,6 +84,7 @@ test("alternative cases remain interactive in continuous and one-step views", as
   const index = lesson.steps.findIndex(item=>item.alternative);
   const alternative = lesson.steps[index].alternative!;
   await page.goto("/concepts/simple-linear-regression#one-line-five-different-answers");
+  await expect(page.getByTestId("learning-restore-guard")).toHaveCount(0);
   const example = page.locator("[data-guided-intuition]");
   const region = example.locator(`[data-walkthrough-step="${index}"]`);
   await region.getByRole("button",{name:alternative.label,exact:true}).click();
