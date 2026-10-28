@@ -103,6 +103,112 @@
     ],
     "why": "A zero-dependency row is ready immediately, while unrelated completion still cannot satisfy another row."
   },
+  "software-named-request-contracts": {
+    "name": "A Boolean reaches the vibration field",
+    "prompt": "Botie receives a flag, a negative reading and an omitted vibration. Predict both aligned lists before testing.",
+    "data": {
+      "requests": [
+        {
+          "vibration": false
+        },
+        {
+          "vibration": -2
+        },
+        {}
+      ],
+      "field": "vibration",
+      "fallback": 1.5
+    },
+    "expected": [
+      [
+        "reject",
+        "keep",
+        "default"
+      ],
+      [
+        null,
+        -2,
+        1.5
+      ]
+    ],
+    "why": "The rule must inspect types and key presence, not memorise a temperature fixture."
+  },
+  "software-schema-evolution": {
+    "name": "A future version has familiar-looking fields",
+    "prompt": "The new fixture declares version 3 but uses query/count. Predict whether familiar keys are enough to make it supported.",
+    "data": {
+      "request": {
+        "version": 3,
+        "query": "pump",
+        "count": 2
+      }
+    },
+    "expected": {
+      "error": "unsupported_version"
+    },
+    "why": "A contract version is an explicit promise, not a guess from a similar object shape."
+  },
+  "software-semantic-contracts": {
+    "name": "A different Fahrenheit batch and fitted coefficient",
+    "prompt": "The incoming readings are 32 F and 77 F. The model has a 10 C centre and coefficient 0.5. Predict the two scores before testing.",
+    "data": {
+      "values": [
+        32,
+        77
+      ],
+      "unit": "F",
+      "centre": 10,
+      "coefficient": 0.5
+    },
+    "expected": [
+      -5,
+      7.5
+    ],
+    "why": "A complete conversion must handle the offset and changed model state, rather than hard-code the earlier scores."
+  },
+  "software-tool-errors": {
+    "name": "A new code arrives beside an uncertain outcome",
+    "prompt": "The service adds an unrecognised code. Predict both actions with no remaining retry budget.",
+    "data": {
+      "outcomes": [
+        "future_error",
+        "outcome_unknown"
+      ],
+      "repeat": [
+        1,
+        1
+      ],
+      "attempts": 0
+    },
+    "expected": [
+      "stop",
+      "reconcile"
+    ],
+    "why": "Unknown failure types must not become a newly invented automatic recovery protocol."
+  },
+  "software-contract-tests": {
+    "name": "A different first reading shares the busy batch",
+    "prompt": "The new first reading is 6, followed by 100 and 2. The stored centre remains 4, and the independent first-result expectation is 2. Predict both outputs.",
+    "data": {
+      "values": [
+        6,
+        100,
+        2
+      ],
+      "centre": 4,
+      "expectedFirst": 2,
+      "tolerance": 1e-9
+    },
+    "expected": [
+      [
+        2,
+        96,
+        -2
+      ],
+      true
+    ],
+    "why": "The construction must preserve fitted state and follow the current first example rather than remember a previous position’s value."
+  },
   "data-partition-statistics": {
     "name": "Three workers, including an empty one",
     "prompt": "Botie receives three partition reports. Keep the empty worker from changing either the denominator or the weighting of the other records.",
@@ -208,6 +314,355 @@
     "expected": false,
     "why": "The combined check must preserve simultaneous mismatches rather than treating a single changed field as the only possible case."
   },
+  "databricks-lazy-dataframes": {
+    "name": "The valid boundary moves to a different column",
+    "prompt": "The minimum now applies to pressure. Return the requested fields from the new batch without changing the source.",
+    "data": {
+      "rows": [
+        {
+          "pump": "A",
+          "pressure": 4
+        },
+        {
+          "pump": "B",
+          "pressure": 7
+        },
+        {
+          "pump": "C",
+          "pressure": null
+        }
+      ],
+      "field": "pressure",
+      "minimum": 7,
+      "columns": [
+        "pressure",
+        "pump"
+      ]
+    },
+    "expected": [
+      {
+        "pressure": 7,
+        "pump": "B"
+      }
+    ],
+    "why": "The rule reads the supplied field and preserves a value exactly on the boundary."
+  },
+  "databricks-shuffle-skew": {
+    "name": "A different pump sends an uneven burst",
+    "prompt": "Five B records and one A arrive. Split B over three salt groups and route to three workers with the declared hash.",
+    "data": {
+      "rows": [
+        {
+          "pump": "B"
+        },
+        {
+          "pump": "B"
+        },
+        {
+          "pump": "B"
+        },
+        {
+          "pump": "B"
+        },
+        {
+          "pump": "B"
+        },
+        {
+          "pump": "A"
+        }
+      ],
+      "key": "pump",
+      "hot": "B",
+      "salts": 3,
+      "workers": 3
+    },
+    "expected": [
+      2,
+      2,
+      2
+    ],
+    "why": "Changing the dominant key and worker count tests the routing rule rather than a copied balanced list."
+  },
+  "databricks-delta-snapshots": {
+    "name": "A new correction arrives while the older run is inspected",
+    "prompt": "Versions 2 and 3 are retained, but the report names version 2. Return the pressure mean for that version.",
+    "data": {
+      "history": [
+        {
+          "version": 2,
+          "rows": [
+            {
+              "pressure": 3
+            },
+            {
+              "pressure": 9
+            }
+          ]
+        },
+        {
+          "version": 3,
+          "rows": [
+            {
+              "pressure": 99
+            },
+            {
+              "pressure": 9
+            }
+          ]
+        }
+      ],
+      "version": 2,
+      "field": "pressure"
+    },
+    "expected": 6,
+    "why": "A later extreme correction must not redefine the declared historical input."
+  },
+  "databricks-replay-safe-ingest": {
+    "name": "A replay arrives beside a new empty file",
+    "prompt": "File b is already committed; file c is new and empty. Preserve the rows and record c as completed.",
+    "data": {
+      "files": [
+        {
+          "file": "b",
+          "rows": [
+            {
+              "id": "second"
+            }
+          ]
+        },
+        {
+          "file": "c",
+          "rows": []
+        }
+      ],
+      "rows": [
+        {
+          "id": "first"
+        },
+        {
+          "id": "second"
+        }
+      ],
+      "checkpoint": [
+        "a",
+        "b"
+      ]
+    },
+    "expected": {
+      "rows": [
+        {
+          "id": "first"
+        },
+        {
+          "id": "second"
+        }
+      ],
+      "checkpoint": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    "why": "A genuine new input can change progress without changing the output row count."
+  },
+  "databricks-change-data-capture": {
+    "name": "Another entity changes while an old pump update returns",
+    "prompt": "A is already deleted at sequence 6. Ignore its incoming sequence 5 update while accepting B at sequence 2.",
+    "data": {
+      "state": [
+        {
+          "pump": "A",
+          "seq": 6,
+          "deleted": true,
+          "value": null
+        }
+      ],
+      "changes": [
+        {
+          "pump": "A",
+          "seq": 5,
+          "deleted": false,
+          "value": 1
+        },
+        {
+          "pump": "B",
+          "seq": 2,
+          "deleted": false,
+          "value": 8
+        }
+      ],
+      "key": "pump"
+    },
+    "expected": [
+      {
+        "pump": "B",
+        "seq": 2,
+        "deleted": false,
+        "value": 8
+      }
+    ],
+    "why": "A stale update and a useful update can share one batch; reject the former without dropping the latter."
+  },
+  "databricks-lakeflow-quality": {
+    "name": "A different field passes exactly at its boundary",
+    "prompt": "Pressure values are 4,5 and null. With a minimum of 5, drop only failing records and publish the accepted candidate.",
+    "data": {
+      "rows": [
+        {
+          "pressure": 4
+        },
+        {
+          "pressure": 5
+        },
+        {
+          "pressure": null
+        }
+      ],
+      "field": "pressure",
+      "minimum": 5,
+      "policy": "drop",
+      "previous": [
+        {
+          "pressure": 8
+        }
+      ]
+    },
+    "expected": {
+      "status": "published",
+      "rows": [
+        {
+          "pressure": 5
+        }
+      ],
+      "passed": 1,
+      "failed": 2
+    },
+    "why": "A changed field and an exact-boundary value test the predicate and policy independently."
+  },
+  "databricks-mlflow-lineage": {
+    "name": "Matching version numbers hide a different table",
+    "prompt": "Select on lab.validation.sensor_readings version 6, split holdout-A. The low-error run uses another table with the same version and split. Keep the requested assessment identity while allowing a different training table.",
+    "data": {
+      "runs": [
+        {
+          "runId": "fast",
+          "modelUri": "models:/fast",
+          "trainingTable": "lab.training.raw_features",
+          "trainingVersion": 5,
+          "validationTable": "lab.validation.easy_readings",
+          "validationVersion": 6,
+          "split": "holdout-A",
+          "role": "validation",
+          "mae": 0.001
+        },
+        {
+          "runId": "checked",
+          "modelUri": "models:/checked",
+          "trainingTable": "lab.training.calibrated_features",
+          "trainingVersion": 7,
+          "validationTable": "lab.validation.sensor_readings",
+          "validationVersion": 6,
+          "split": "holdout-A",
+          "role": "validation",
+          "mae": 4
+        }
+      ],
+      "validationVersion": 6,
+      "split": "holdout-A",
+      "validationTable": "lab.validation.sensor_readings"
+    },
+    "expected": {
+      "runId": "checked",
+      "modelUri": "models:/checked",
+      "trainingTable": "lab.training.calibrated_features",
+      "trainingVersion": 7,
+      "validationTable": "lab.validation.sensor_readings",
+      "validationVersion": 6,
+      "split": "holdout-A"
+    },
+    "why": "The version belongs to one table. The selected run keeps its distinct training identity while sharing the requested assessment evidence."
+  },
+  "databricks-unity-catalog-access": {
+    "name": "The short table name stays the same in another schema",
+    "prompt": "The job has catalog usage and SELECT on lab.other.features, but schema usage is granted only on lab.training. Return the missing requirement.",
+    "data": {
+      "table": "lab.other.features",
+      "grants": [
+        {
+          "principal": "job",
+          "object": "lab",
+          "privilege": "USE CATALOG"
+        },
+        {
+          "principal": "job",
+          "object": "lab.training",
+          "privilege": "USE SCHEMA"
+        },
+        {
+          "principal": "job",
+          "object": "lab.other.features",
+          "privilege": "SELECT"
+        }
+      ],
+      "principals": [
+        "job"
+      ]
+    },
+    "expected": {
+      "allow": false,
+      "missing": [
+        "USE SCHEMA lab.other"
+      ]
+    },
+    "why": "A privilege on the earlier schema does not satisfy the new object boundary."
+  },
+  "databricks-historical-features": {
+    "name": "One pump is stale while another has just published",
+    "prompt": "At minute 8, A’s minute-5 value is too old for a two-minute limit and its next value arrives at 9. B has a value at 8. Preserve both prediction rows.",
+    "data": {
+      "history": [
+        {
+          "pump": "A",
+          "publishedAt": 5,
+          "value": 1
+        },
+        {
+          "pump": "A",
+          "publishedAt": 9,
+          "value": 7
+        },
+        {
+          "pump": "B",
+          "publishedAt": 8,
+          "value": 4
+        }
+      ],
+      "predictions": [
+        {
+          "pump": "A",
+          "at": 8
+        },
+        {
+          "pump": "B",
+          "at": 8
+        }
+      ],
+      "maximumAge": 2
+    },
+    "expected": [
+      {
+        "pump": "A",
+        "at": 8,
+        "temperature": null
+      },
+      {
+        "pump": "B",
+        "at": 8,
+        "temperature": 4
+      }
+    ],
+    "why": "Missingness belongs to the particular prediction; a different entity’s fresh value cannot repair it."
+  },
   "systems-inference-batching": {
     "name": "A partial batch leaves on its delay limit",
     "prompt": "Two images arrive at 2 and 7 ms, dispatch at 9, and finish after 4 ms of execution. Predict both latencies before changing the waiting policy.",
@@ -267,6 +722,189 @@
     },
     "expected": false,
     "why": "Context equality alone is insufficient; the actual question remains a required dependency."
+  },
+  "serving-prefill-decode": {
+    "name": "A prompt starts sooner but decoding stalls",
+    "prompt": "The next trace arrives at 20 ms and emits at [60,80,150,170] ms. Predict the first wait and every later gap separately.",
+    "data": {
+      "arrival": 20,
+      "times": [
+        60,
+        80,
+        150,
+        170
+      ]
+    },
+    "expected": [
+      40,
+      [
+        20,
+        70,
+        20
+      ]
+    ],
+    "why": "A shorter initial wait does not remove a long pause inside the stream."
+  },
+  "serving-prefix-reuse": {
+    "name": "The next team sends the same tokens",
+    "prompt": "All tokens and model versions match, but the incoming tenant namespace is different. Predict the reusable-token count under the stated isolation policy.",
+    "data": {
+      "cached": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "incoming": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "stored": {
+        "model": "manual-model-1",
+        "tokenizer": "tokens-1",
+        "adapter": "none",
+        "template": "chat-1",
+        "tenant": "maintenance",
+        "kvFormat": "fp16"
+      },
+      "current": {
+        "model": "manual-model-1",
+        "tokenizer": "tokens-1",
+        "adapter": "none",
+        "template": "chat-1",
+        "tenant": "another-team",
+        "kvFormat": "fp16"
+      },
+      "block": 2
+    },
+    "expected": 0,
+    "why": "A cross-namespace match still fails this explicit application contract."
+  },
+  "serving-continuous-admission": {
+    "name": "A longer output allowance fills the remaining cache",
+    "prompt": "B still owns two of six blocks. Two slots are free. C reserves four blocks and D reserves one. Predict the new admissions under strict FIFO.",
+    "data": {
+      "running": [
+        {
+          "id": "B",
+          "remaining": 2,
+          "blocks": 2
+        }
+      ],
+      "waiting": [
+        {
+          "id": "C",
+          "prompt": 2,
+          "maxNew": 6
+        },
+        {
+          "id": "D",
+          "prompt": 1,
+          "maxNew": 1
+        }
+      ],
+      "slots": 3,
+      "blocks": 6,
+      "blockSize": 2
+    },
+    "expected": [
+      "C"
+    ],
+    "why": "Two free slots do not permit D after C consumes the remaining block allowance."
+  },
+  "serving-cancellation-pressure": {
+    "name": "One release arrives during a new burst",
+    "prompt": "A is now acknowledged; B still owns four blocks. One request already waits and three arrive with a queue limit of three. Predict both ownership and queue outcomes.",
+    "data": {
+      "running": [
+        {
+          "id": "A",
+          "state": "cancel_requested",
+          "blocks": 2
+        },
+        {
+          "id": "B",
+          "state": "running",
+          "blocks": 4
+        }
+      ],
+      "acks": [
+        "A"
+      ],
+      "waiting": [
+        "Q1"
+      ],
+      "arriving": [
+        "Q2",
+        "Q3",
+        "Q4"
+      ],
+      "queueLimit": 3
+    },
+    "expected": {
+      "heldSlots": 1,
+      "heldBlocks": 4,
+      "queued": [
+        "Q1",
+        "Q2",
+        "Q3"
+      ],
+      "rejected": [
+        "Q4"
+      ]
+    },
+    "why": "Confirmed release changes the held reservation while the independent waiting limit still rejects the overflow."
+  },
+  "serving-canary-effects": {
+    "name": "The candidate now handles every request",
+    "prompt": "With 100 percent candidate traffic, one run is a shadow and another lacks write capability. Predict the named write decisions without treating candidate routing as permission.",
+    "data": {
+      "ids": [
+        "live",
+        "shadow",
+        "restricted"
+      ],
+      "buckets": [
+        0,
+        45,
+        99
+      ],
+      "percent": 100,
+      "shadow": [
+        0,
+        1,
+        0
+      ],
+      "capability": [
+        1,
+        1,
+        0
+      ]
+    },
+    "expected": [
+      {
+        "id": "live",
+        "model": "candidate",
+        "writeAllowed": true
+      },
+      {
+        "id": "shadow",
+        "model": "candidate",
+        "writeAllowed": false
+      },
+      {
+        "id": "restricted",
+        "model": "candidate",
+        "writeAllowed": false
+      }
+    ],
+    "why": "Changing rollout share does not change the independent effect-authority rule."
   },
   "robot-perception-frames": {
     "name": "A clockwise camera observes another point",
@@ -348,6 +986,90 @@
     ],
     "why": "The instantaneous clipped command stays the same while the time-integrated memory update shrinks."
   },
+  "state-predict-correct": {
+    "name": "A reversed measurement pulls the next prediction back",
+    "prompt": "The earlier mean is-1m, displacement3m, earlier variance2 m² and added motion variance2 m². The new measurement is1m with variance 4 m². Predict both corrected quantities.",
+    "data": {
+      "mean": -1,
+      "variance": 2,
+      "move": 3,
+      "q": 2,
+      "z": 1,
+      "r": 4
+    },
+    "expected": {
+      "mean": 1.5,
+      "variance": 2
+    },
+    "why": "The same gain must handle either innovation sign while keeping variance separate from position."
+  },
+  "state-missing-observations": {
+    "name": "A longer reverse interval follows the missed frame",
+    "prompt": "Start at mean1m and variance0.5m². The two displacements are-1m and-2 m, with added variances0.5m² and1 m². Only the final measurement arrives, at-1m with variance 1 m². Predict the final state.",
+    "data": {
+      "initial": {
+        "mean": 1,
+        "variance": 0.5
+      },
+      "move0": -1,
+      "q0": 0.5,
+      "z0": null,
+      "r0": 1,
+      "move1": -2,
+      "q1": 1,
+      "z1": -1,
+      "r1": 1
+    },
+    "expected": {
+      "mean": -1.3333333333333333,
+      "variance": 0.6666666666666666
+    },
+    "why": "Unequal intervals and reversed motion expose a reset or a fabricated zero measurement."
+  },
+  "state-gating-association": {
+    "name": "A more uncertain prediction accepts a larger raw displacement",
+    "prompt": "The prediction is0 m with variance 4 m². Candidate positions are[-2,10]m, R is1 m² and the squared-distance gate is1. Predict the final estimate after resolving the candidate.",
+    "data": {
+      "prediction": {
+        "mean": 0,
+        "variance": 4
+      },
+      "candidates": [
+        -2,
+        10
+      ],
+      "r": 1,
+      "threshold": 1
+    },
+    "expected": {
+      "mean": -1.6,
+      "variance": 0.8
+    },
+    "why": "Scaling by combined uncertainty changes what a raw displacement means, while the exact-one association rule still applies."
+  },
+  "state-model-uncertainty": {
+    "name": "The next camera reading has a different error",
+    "prompt": "Initial mean0 m and variance0.5m², expected displacement1m and Q0.5m² produce a prior. The observation is4 m with R1 m²; independent reference is3m. Predict the completed estimate and its diagnostic without leaking that reference into the update.",
+    "data": {
+      "initial": {
+        "mean": 0,
+        "variance": 0.5
+      },
+      "move": 1,
+      "q": 0.5,
+      "z": 4,
+      "r": 1,
+      "truth": 3
+    },
+    "expected": {
+      "mean": 2.5,
+      "variance": 0.5,
+      "error": -0.5,
+      "normalisedSquaredError": 0.5,
+      "withinTwoSigma": true
+    },
+    "why": "A different observation error checks the separated estimation/evaluation paths; its covered reference remains one diagnostic example."
+  },
   "security-retrieval-authority": {
     "name": "The requester changes tenant",
     "prompt": "The same candidates are now evaluated for tenant B, and one B document lacks a grant. Predict which IDs remain without reusing the previous caller’s mask.",
@@ -413,6 +1135,125 @@
     "expected": [],
     "why": "An acceptable loader does not repair an artifact whose bytes differ from the trusted expectation."
   },
+  "security-training-provenance": {
+    "name": "Neither proposal is ready for this release",
+    "prompt": "One row has a reviewed label from an unapproved source; another comes from the approved source without completed review. Predict the accepted IDs and mean.",
+    "data": {
+      "rows": [
+        {
+          "id": "x",
+          "source": "proposal",
+          "target": 7,
+          "reviewed": true
+        },
+        {
+          "id": "y",
+          "source": "field",
+          "target": 2,
+          "reviewed": false
+        }
+      ],
+      "approved": [
+        "field"
+      ]
+    },
+    "expected": [
+      [],
+      null
+    ],
+    "why": "Independent requirements cannot be satisfied by different records or by treating an empty fit as zero."
+  },
+  "security-backdoor-evaluation": {
+    "name": "One clean prediction was already wrong",
+    "prompt": "Predict both report branches when one faulty example was already classified safe before the supplied change.",
+    "data": {
+      "truth": [
+        "fault",
+        "fault",
+        "safe"
+      ],
+      "clean": [
+        "fault",
+        "safe",
+        "safe"
+      ],
+      "changed": [
+        "safe",
+        "safe",
+        "fault"
+      ],
+      "target": "safe",
+      "preserved": [
+        1,
+        1,
+        1
+      ]
+    },
+    "expected": [
+      0.6666666666666666,
+      {
+        "eligible": 1,
+        "successes": 1,
+        "rate": 1
+      }
+    ],
+    "why": "The clean error and true target-class example must not inflate the newly induced target-success denominator."
+  },
+  "security-adversarial-threat-models": {
+    "name": "The same size change reaches a protected coordinate",
+    "prompt": "The new supplied input changes only the second coordinate. Predict the complete report rather than counting its wrong label as a permitted failure.",
+    "data": {
+      "original": [
+        0.375,
+        0.5
+      ],
+      "changed": [
+        0.375,
+        0.625
+      ],
+      "mutable": [
+        1,
+        0
+      ],
+      "epsilon": 0.125,
+      "bounds": [
+        0,
+        1
+      ],
+      "weights": [
+        1,
+        1
+      ],
+      "cutoff": 1,
+      "truth": 0
+    },
+    "expected": {
+      "within_scope": false,
+      "clean_correct": true,
+      "changed_correct": false,
+      "observed_failure": null
+    },
+    "why": "A numerical change budget cannot override the independent restriction on which measurements the opponent controls."
+  },
+  "security-prediction-api-controls": {
+    "name": "The batch exactly fits the caller’s remaining rows",
+    "prompt": "The caller has used 8 of 10 rows. A 2-row batch costs 2 units per row, and 5 global units remain. Predict the admitted public response for score 0.2 and cutoff 0.5.",
+    "data": {
+      "used": 8,
+      "rowLimit": 10,
+      "rows": 2,
+      "globalUsed": 5,
+      "globalLimit": 10,
+      "unitsPerRow": 2,
+      "score": 0.2,
+      "cutoff": 0.5
+    },
+    "expected": {
+      "allowed": true,
+      "label": 0
+    },
+    "why": "An inclusive capacity boundary should admit a fitting batch while the response still withholds the internal score."
+  },
   "simulation-time-steps": {
     "name": "A different ambient temperature and a shorter step",
     "prompt": "The pump is now at 40, ambient is 10, the rate is 0.2 and timestep is 0.5. Predict one Euler update without reusing the old cooling difference.",
@@ -475,5 +1316,87 @@
       9
     ],
     "why": "A lower maximum can coexist with more failing conditions; preserve per-condition evidence beyond both summary values."
+  },
+  "numerical-stable-normalisation": {
+    "name": "A signed embedding arrives at an even larger scale",
+    "prompt": "Botie receives [0,-5e250]. Predict the direction before running the repaired graph. Neither the sign nor the zero coordinate should disappear.",
+    "data": {
+      "vector": [
+        0,
+        -5e+250
+      ]
+    },
+    "expected": [
+      0,
+      -1
+    ],
+    "why": "A stable calculation preserves direction, including its sign, across numerical scales."
+  },
+  "numerical-identifiable-models": {
+    "name": "A different unresolved gain pair changes the useful experiment",
+    "prompt": "The candidates are [1,1] and [1,2]. The proposed rows are [[1,0],[0,2],[1,1]], and the minimum planning gap is 1.5. Predict which original position survives.",
+    "data": {
+      "experiments": [
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "first": [
+        1,
+        1
+      ],
+      "second": [
+        1,
+        2
+      ],
+      "resolution": 1.5
+    },
+    "expected": [
+      1
+    ],
+    "why": "A useful experiment depends on the specific competing parameter difference and the instrument’s declared resolution."
+  },
+  "numerical-gradient-checks": {
+    "name": "The corner moves with the target",
+    "prompt": "The absolute test loss now has target 3 and is checked at weight 3 with step 0.25. Predict the two sides and their central estimate. A shifted target does not remove the corner.",
+    "data": {
+      "weight": 3,
+      "target": 3,
+      "step": 0.25,
+      "kind": "absolute"
+    },
+    "expected": {
+      "left": -1,
+      "right": 1,
+      "central": 0
+    },
+    "why": "The checker must follow the actual loss and its target, rather than assuming the only problematic point is numerical zero."
+  },
+  "numerical-adaptive-steps": {
+    "name": "A faster cooling rate exposes a shorter acceptable interval",
+    "prompt": "Botie now starts at excess temperature four with rate one per second and proposed interval 0.2 seconds. Absolute tolerance is 0.01 and relative tolerance is zero. Predict the report before running it.",
+    "data": {
+      "state": 4,
+      "rate": 1,
+      "dt": 0.2,
+      "atol": 0.01,
+      "rtol": 0
+    },
+    "expected": {
+      "candidate": 3.24,
+      "estimated_error": 0.04,
+      "tolerance": 0.01,
+      "accepted": 0
+    },
+    "why": "Changing the dynamics changes the numerical disagreement; the old accepted interval is not a universal property of the simulator."
   }
 }

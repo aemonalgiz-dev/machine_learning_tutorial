@@ -1526,6 +1526,41 @@
     "blurb": "Represent a training workflow as dependencies, detect cycles, and separate readiness from completion."
   },
   {
+    "id": "software-named-request-contracts",
+    "title": "Did the Caller Leave It Out, or Send No Reading?",
+    "section": "Model and Tool API Contracts",
+    "topic": "Describing a model request",
+    "blurb": "Give absent measurements, explicit nulls and real zeroes different meanings before a request reaches the model."
+  },
+  {
+    "id": "software-schema-evolution",
+    "title": "Yesterday’s Client Still Sends the Old Request",
+    "section": "Model and Tool API Contracts",
+    "topic": "Describing a model request",
+    "blurb": "Introduce a new request shape without guessing what an older client meant or silently changing its results."
+  },
+  {
+    "id": "software-semantic-contracts",
+    "title": "The Number Was Valid, but It Meant Something Else",
+    "section": "Model and Tool API Contracts",
+    "topic": "Describing a model request",
+    "blurb": "Keep units and score direction attached to numerical values before reusing fitted preprocessing or ranking evidence."
+  },
+  {
+    "id": "software-tool-errors",
+    "title": "Should Botie Repeat the Request, or Find Out What Happened?",
+    "section": "Model and Tool API Contracts",
+    "topic": "Handling and testing tool outcomes",
+    "blurb": "Give callers stable failure types, bounded retry rules and a separate path for operations whose outcome is unknown."
+  },
+  {
+    "id": "software-contract-tests",
+    "title": "One Correct Prediction Did Not Test the Interface",
+    "section": "Model and Tool API Contracts",
+    "topic": "Handling and testing tool outcomes",
+    "blurb": "Turn expected relationships between requests into tests, then retain the small example that exposed a broken contract."
+  },
+  {
     "id": "data-partition-statistics",
     "title": "One Training Dataset, Several Unequal Files",
     "section": "Data Pipelines for Learning",
@@ -1561,6 +1596,69 @@
     "blurb": "Bind reusable artifacts to input versions and code versions so a changed dataset invalidates the right work."
   },
   {
+    "id": "databricks-lazy-dataframes",
+    "title": "Writing the Steps Is Different from Running Them",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Following a distributed calculation",
+    "blurb": "Botie needs the same cleaning rule on many files. Separate a table of records from the instructions that produce the next table."
+  },
+  {
+    "id": "databricks-shuffle-skew",
+    "title": "One Busy Pump Can Keep Every Worker Waiting",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Following a distributed calculation",
+    "blurb": "Find why a keyed calculation remains slow when most workers are idle, then split a mergeable hot group without changing its identity."
+  },
+  {
+    "id": "databricks-delta-snapshots",
+    "title": "Which Version of the Table Did the Model Read?",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Keeping a dependable table history",
+    "blurb": "Read a committed table snapshot instead of allowing a training run to silently follow later corrections."
+  },
+  {
+    "id": "databricks-replay-safe-ingest",
+    "title": "A Retried File Should Not Become New Training Data",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Keeping a dependable table history",
+    "blurb": "Keep discovered files separate from committed progress, and make a retry preserve the logical dataset."
+  },
+  {
+    "id": "databricks-change-data-capture",
+    "title": "The Last Message to Arrive May Be an Older Reading",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Keeping a dependable table history",
+    "blurb": "Use per-entity source versions to apply corrections and retain deletion evidence against late messages."
+  },
+  {
+    "id": "databricks-lakeflow-quality",
+    "title": "A Quality Check Needs a Decision About Failure",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Publishing a pipeline result",
+    "blurb": "Distinguish measuring a failed expectation from deciding whether to retain, drop or stop its records."
+  },
+  {
+    "id": "databricks-mlflow-lineage",
+    "title": "A Better Score on Which Dataset?",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Connecting model evidence to an artifact",
+    "blurb": "Keep a model artifact attached to its training inputs and compare scores only when the evaluation evidence is comparable."
+  },
+  {
+    "id": "databricks-unity-catalog-access",
+    "title": "SELECT Is Not the Whole Permission to Read a Table",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Making feature access explicit",
+    "blurb": "Follow a three-part table name through catalog, schema and table permissions for the actual training principal."
+  },
+  {
+    "id": "databricks-historical-features",
+    "title": "Give Each Prediction the Features It Could Actually Have Seen",
+    "section": "Databricks for ML Pipelines",
+    "topic": "Making feature access explicit",
+    "blurb": "Combine entity identity, publication time and feature age without confusing a historical feature join with a Delta table snapshot."
+  },
+  {
     "id": "systems-inference-batching",
     "title": "Faster Batches Can Still Make a User Wait",
     "section": "Serving Models and Agent Runs",
@@ -1587,6 +1685,41 @@
     "section": "Serving Models and Agent Runs",
     "topic": "Memory and reuse",
     "blurb": "Separate response reuse from semantic similarity by preserving tenant, evidence and model identity."
+  },
+  {
+    "id": "serving-prefill-decode",
+    "title": "The Answer Starts Late, Then Arrives in Bursts",
+    "section": "LLM Inference and Capacity",
+    "topic": "When the answer arrives",
+    "blurb": "Separate the wait for the first token from the gaps between later tokens before changing a language-model service."
+  },
+  {
+    "id": "serving-prefix-reuse",
+    "title": "The Same Manual Can Be Read Once, Until Its Prefix Changes",
+    "section": "LLM Inference and Capacity",
+    "topic": "When the answer arrives",
+    "blurb": "Find reusable leading token blocks, then check the model and namespace contract that makes their saved attention state usable."
+  },
+  {
+    "id": "serving-continuous-admission",
+    "title": "Let the Next Request In Without Overfilling the Cache",
+    "section": "LLM Inference and Capacity",
+    "topic": "Serving a changing workload",
+    "blurb": "Release finished sequences at an iteration boundary, then admit waiting work only when both sequence slots and conservative KV reservations fit."
+  },
+  {
+    "id": "serving-cancellation-pressure",
+    "title": "Stop Accepting Work You Cannot Hold",
+    "section": "LLM Inference and Capacity",
+    "topic": "Serving a changing workload",
+    "blurb": "Keep cancelled-but-unreleased work in capacity accounting and give overflow arrivals an explicit outcome."
+  },
+  {
+    "id": "serving-canary-effects",
+    "title": "A Shadow Answer Must Not Book a Second Inspection",
+    "section": "LLM Inference and Capacity",
+    "topic": "Serving a changing workload",
+    "blurb": "Keep model routing separate from tool-write authority when comparing stable, canary and shadow agent runs."
   },
   {
     "id": "robot-perception-frames",
@@ -1617,6 +1750,34 @@
     "blurb": "Add integral correction, then handle saturation with an explicit anti-windup update."
   },
   {
+    "id": "state-predict-correct",
+    "title": "Keep a Position Estimate Without Believing Every Detection",
+    "section": "Estimating State from Noisy Observations",
+    "topic": "Following an estimate through time",
+    "blurb": "Carry a position estimate and its uncertainty through a motion prediction, then use an independent noisy measurement to correct both."
+  },
+  {
+    "id": "state-missing-observations",
+    "title": "When the Camera Misses a Frame, Keep Predicting Honestly",
+    "section": "Estimating State from Noisy Observations",
+    "topic": "Following an estimate through time",
+    "blurb": "Skip unavailable measurement updates while continuing motion and uncertainty prediction at the correct intervals."
+  },
+  {
+    "id": "state-gating-association",
+    "title": "A Plausible Position Might Belong to the Other Part",
+    "section": "Estimating State from Noisy Observations",
+    "topic": "When observation and model disagree",
+    "blurb": "Scale a detection’s disagreement by predicted observation uncertainty, then decline an update when object association remains ambiguous."
+  },
+  {
+    "id": "state-model-uncertainty",
+    "title": "A Small Covariance Can Be Confidently Wrong",
+    "section": "Estimating State from Noisy Observations",
+    "topic": "When observation and model disagree",
+    "blurb": "Distinguish declared uncertainty from actual error, investigate systematic innovations, and test the covariance model on independent reference trajectories."
+  },
+  {
     "id": "security-retrieval-authority",
     "title": "Relevant Evidence Is Not Necessarily Permitted Evidence",
     "section": "Protecting ML Data and Artifacts",
@@ -1636,6 +1797,34 @@
     "section": "Protecting ML Data and Artifacts",
     "topic": "Boundaries around learning systems",
     "blurb": "Verify bytes against trusted provenance and choose a constrained loading format before using a downloaded model."
+  },
+  {
+    "id": "security-training-provenance",
+    "title": "Who Was Allowed to Teach the Model?",
+    "section": "Threats Across the ML Lifecycle",
+    "topic": "Protecting the training process",
+    "blurb": "Trace proposed training records to reviewed sources before they influence a model, while keeping the limits of that evidence visible."
+  },
+  {
+    "id": "security-backdoor-evaluation",
+    "title": "The Model Passed Until a Particular Mark Appeared",
+    "section": "Threats Across the ML Lifecycle",
+    "topic": "Protecting the training process",
+    "blurb": "Separate ordinary accuracy from a declared targeted-failure experiment, keeping eligibility and missing coverage beside the rate."
+  },
+  {
+    "id": "security-adversarial-threat-models",
+    "title": "Which Changes Is the Opponent Actually Allowed to Make?",
+    "section": "Threats Across the ML Lifecycle",
+    "topic": "Assessing exposure through prediction",
+    "blurb": "Define input control and a perturbation budget before interpreting a model failure as evidence about a particular threat."
+  },
+  {
+    "id": "security-prediction-api-controls",
+    "title": "A Prediction Service Can Reveal More Than One Answer",
+    "section": "Threats Across the ML Lifecycle",
+    "topic": "Assessing exposure through prediction",
+    "blurb": "Count the work inside a request, minimise exposed prediction details and distinguish practical controls from a guarantee against model extraction."
   },
   {
     "id": "simulation-time-steps",
@@ -1664,5 +1853,33 @@
     "section": "Simulating and Learning System Behaviour",
     "topic": "Checking a simulator against observations",
     "blurb": "Evaluate a learned policy across changed physical conditions and keep the worst tested condition visible."
+  },
+  {
+    "id": "numerical-stable-normalisation",
+    "title": "A Finite Vector Broke Our Normalisation",
+    "section": "Numerical Methods for Learning",
+    "topic": "Where a fitted number can mislead",
+    "blurb": "Build a unit vector without overflowing or losing tiny components before the comparison even begins."
+  },
+  {
+    "id": "numerical-identifiable-models",
+    "title": "A Perfect Fit Left Two Different Answers",
+    "section": "Numerical Methods for Learning",
+    "topic": "Where a fitted number can mislead",
+    "blurb": "Separate a good fit from identified parameters, then choose measurements that distinguish competing explanations."
+  },
+  {
+    "id": "numerical-gradient-checks",
+    "title": "Does This Gradient Describe the Loss We Actually Run?",
+    "section": "Numerical Methods for Learning",
+    "topic": "Checking derivatives and simulated trajectories",
+    "blurb": "Perturb a small loss, compare its slopes and learn why a neat central difference can hide a corner."
+  },
+  {
+    "id": "numerical-adaptive-steps",
+    "title": "Which Simulation Steps Need More Work?",
+    "section": "Numerical Methods for Learning",
+    "topic": "Checking derivatives and simulated trajectories",
+    "blurb": "Compare a full step with two half steps, reject a poor local approximation and keep rejected attempts out of simulated time."
   }
 ]

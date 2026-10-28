@@ -3630,6 +3630,103 @@
       "For an ML run, the graph must also refer to the intended dataset and model versions. The small dependency matrix here explains readiness; it is not a replacement for an orchestrator or an artifact store."
     ]
   },
+  "software-named-request-contracts": {
+    "title": "A Named Field Still Needs an Agreement",
+    "sources": [
+      {
+        "title": "JSON Schema: object properties and required fields",
+        "url": "https://json-schema.org/understanding-json-schema/reference/object"
+      },
+      {
+        "title": "JSON Schema: null is a value",
+        "url": "https://json-schema.org/understanding-json-schema/reference/null"
+      },
+      {
+        "title": "Sculley and colleagues: Hidden Technical Debt in Machine Learning Systems (2015)",
+        "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/"
+      }
+    ],
+    "blocks": [
+      "Machine-readable messages made it possible for independently written services to exchange records. They also made disagreements easy to hide: a sender can include a field the reader interprets differently. JSON Schema documents separate rules for a property’s presence and the values it may contain.",
+      "The 2015 ML technical debt paper describes how upstream dependencies can change system behaviour. Our invented sensor incident is one small example. The boundary below states a policy before numerical preprocessing begins; it does not infer whether a sensor told the truth."
+    ]
+  },
+  "software-schema-evolution": {
+    "title": "Two Programs Rarely Upgrade at the Same Instant",
+    "sources": [
+      {
+        "title": "JSON Schema: object properties and required fields",
+        "url": "https://json-schema.org/understanding-json-schema/reference/object"
+      },
+      {
+        "title": "JSON Schema: dialect and vocabulary declaration",
+        "url": "https://json-schema.org/understanding-json-schema/reference/schema"
+      },
+      {
+        "title": "Sculley and colleagues: Hidden Technical Debt in Machine Learning Systems (2015)",
+        "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/"
+      }
+    ],
+    "blocks": [
+      "Separately deployed clients made compatibility a practical engineering problem long before agents began calling tools. A schema gives a version of the message an explicit shape; it does not arrange simultaneous upgrades. The ML technical debt paper highlights dependencies whose consumers are easy to overlook.",
+      "Here we preserve two invented request versions with small adapters. Each adapter validates its own public form and produces one internal search record. This is compatibility at a service boundary, rather than a new prompt-formatting technique."
+    ]
+  },
+  "software-semantic-contracts": {
+    "title": "An Interface Can Carry the Right Type in the Wrong Unit",
+    "sources": [
+      {
+        "title": "NASA: Mars Climate Orbiter mishap investigation, PhaseI",
+        "url": "https://llis.nasa.gov/lesson/641"
+      },
+      {
+        "title": "Sculley and colleagues: Hidden Technical Debt in Machine Learning Systems (2015)",
+        "url": "https://research.google/pubs/hidden-technical-debt-in-machine-learning-systems/"
+      }
+    ],
+    "blocks": [
+      "NASA’s 1999 investigation identified a ground-software file using the wrong unit convention as the root cause of the Mars Climate Orbiter loss. A numerical interface specification existed, but the integration failed to enforce it. This is a documented software-interface failure, not an ML experiment.",
+      "Our invented sensor example brings that problem into a fitted prediction pipeline. The model’s stored reference belongs to a particular representation. A field rename, a unit change and a different score definition are distinct changes even when the transport keeps sending ordinary numbers."
+    ]
+  },
+  "software-tool-errors": {
+    "title": "A Human Error Sentence Was Not a Recovery Protocol",
+    "sources": [
+      {
+        "title": "RFC 9457: Problem Details for HTTP APIs (2023)",
+        "url": "https://www.rfc-editor.org/rfc/rfc9457.html"
+      },
+      {
+        "title": "RFC 9110: HTTP Semantics (2022)",
+        "url": "https://www.rfc-editor.org/rfc/rfc9110.html"
+      }
+    ],
+    "blocks": [
+      "HTTP defines status and method semantics so independently written clients can reason about responses. RFC 9457, published in 2023, describes machine-readable problem details, building on RFC 7807. A stable problem type allows a client to recognise a failure without parsing a changing human sentence.",
+      "HTTP semantics also distinguish when repeating a request preserves its intended effect. Our local job-tool policy keeps that question explicit. It is a teaching policy for the outcomes below, not a universal promise that every 429 or 503 response can be repeated safely."
+    ]
+  },
+  "software-contract-tests": {
+    "title": "Write What Must Hold Across Many Inputs",
+    "sources": [
+      {
+        "title": "Hughes: specification-based testing with QuickCheck",
+        "url": "https://www.cs.utexas.edu/~hunt/fmcad/FMCAD11/papers/inv8.pdf"
+      },
+      {
+        "title": "Hypothesis: introduction to property-based testing",
+        "url": "https://hypothesis.readthedocs.io/en/latest/tutorial/introduction.html"
+      },
+      {
+        "title": "NumPy: allclose tolerance and broadcasting rules",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.allclose.html"
+      }
+    ],
+    "blocks": [
+      "QuickCheck, first published by Claessen and Hughes in 2000, made executable properties and generated test inputs practical in a testing library. Modern Python tools such as Hypothesis generate inputs and try to reduce a failure to a smaller counterexample.",
+      "For a numerical interface, some useful checks compare related requests rather than requiring us to hand-calculate every prediction. The relationship still needs a valid assumption. Our fitted row-wise transformer has a batch-independence promise; a genuinely batch-dependent model would need a different property."
+    ]
+  },
   "data-partition-statistics": {
     "title": "Move Summaries Instead of Every Row",
     "sources": [
@@ -3695,6 +3792,163 @@
       "We use a smaller manifest to follow a prepared feature artifact. Its identity includes input content, code and configuration. Matching a filename or a successful run status cannot establish those dependencies."
     ]
   },
+  "databricks-lazy-dataframes": {
+    "title": "A Table Interface for Work Spread Across Machines",
+    "sources": [
+      {
+        "title": "Spark DataFrame quickstart",
+        "url": "https://spark.apache.org/docs/latest/api/python/getting_started/quickstart_df.html"
+      },
+      {
+        "title": "Spark SQL research paper",
+        "url": "https://people.csail.mit.edu/matei/papers/2015/sigmod_spark_sql.pdf"
+      }
+    ],
+    "blocks": [
+      "A distributed engine has to decide where operations can run and which records need to move. The Spark SQL work described combining relational queries with programs that operate on data. A named table and an expression for another table give the engine more information than an opaque loop over arbitrary objects.",
+      "Our workshop keeps that separation visible by storing a tiny instruction list. It interprets the list on local records only when an execution component is connected."
+    ]
+  },
+  "databricks-shuffle-skew": {
+    "title": "The Cost of Bringing Matching Keys Together",
+    "sources": [
+      {
+        "title": "Spark SQL performance tuning",
+        "url": "https://spark.apache.org/docs/latest/sql-performance-tuning.html"
+      },
+      {
+        "title": "Spark SQL research paper",
+        "url": "https://people.csail.mit.edu/matei/papers/2015/sigmod_spark_sql.pdf"
+      }
+    ],
+    "blocks": [
+      "A grouped calculation or join can require records with the same key to meet. Moving them between processing partitions is a shuffle. Distributed query engines use partitioning and exchange plans to arrange this movement. Unequal key frequencies make some partitions much more expensive than others.",
+      "Our fixture isolates record counts rather than estimating seconds. Spark can apply partial aggregation and adaptive optimisations, so a hot-key count does not imply that every real count job will transfer every original row in the way this deliberately exposed model does."
+    ]
+  },
+  "databricks-delta-snapshots": {
+    "title": "A Transaction Log Around Analytical Files",
+    "sources": [
+      {
+        "title": "Delta Lake paper, VLDB 2020",
+        "url": "https://www.vldb.org/pvldb/vol13/p3411-armbrust.pdf"
+      },
+      {
+        "title": "Delta batch reads and time travel",
+        "url": "https://docs.delta.io/delta-batch/"
+      }
+    ],
+    "blocks": [
+      "Analytical jobs often work on files that other jobs are adding, replacing or correcting. Delta Lake combines data files with a transaction log so readers can identify committed table states. The 2020 paper describes that design and the need for dependable concurrent reads and writes.",
+      "The workshop represents a history as complete named snapshots. Real Delta reconstructs a table state from its log and retained files. This representation helps us inspect version choice without suggesting that Delta stores a full duplicate of every table for every commit."
+    ]
+  },
+  "databricks-replay-safe-ingest": {
+    "title": "Remembering Progress After a Process Disappears",
+    "sources": [
+      {
+        "title": "Auto Loader progress and recovery",
+        "url": "https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/"
+      },
+      {
+        "title": "Auto Loader loading patterns",
+        "url": "https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/patterns"
+      },
+      {
+        "title": "Unity Catalog volume privileges",
+        "url": "https://docs.databricks.com/aws/en/volumes/privileges"
+      }
+    ],
+    "blocks": [
+      "A process can forget where it was when it restarts. File ingestion therefore needs progress that survives the process. Auto Loader records discovered-file metadata in its checkpoint and documents recovery when writing to Delta Lake. The relevant guarantee depends on the source, checkpoint and sink working together.",
+      "Our model stores accepted rows and file identities in one returned state. That gives us an inspectable atomic transition. Its commit component makes the intended recovery boundary visible."
+    ]
+  },
+  "databricks-change-data-capture": {
+    "title": "Applying Changes Without Replacing the Whole Table",
+    "sources": [
+      {
+        "title": "Delta MERGE semantics",
+        "url": "https://docs.delta.io/delta-update/"
+      },
+      {
+        "title": "Delta change data feed",
+        "url": "https://docs.delta.io/delta-change-data-feed/"
+      }
+    ],
+    "blocks": [
+      "Operational sources change records after creation. Change data capture, or CDC, communicates those inserts, updates and deletions so a consumer can maintain a derived table. Delta MERGE provides conditional operations matching source and target records; its documentation also warns about multiple ambiguous source matches.",
+      "A merge statement does not invent the source’s ordering contract. Our model makes that contract explicit with a monotonically increasing sequence per pump. It uses logical deletion markers rather than physically removing the version evidence."
+    ]
+  },
+  "databricks-lakeflow-quality": {
+    "title": "Declaring the Dataset and Its Conditions",
+    "sources": [
+      {
+        "title": "Lakeflow Python interface",
+        "url": "https://docs.databricks.com/aws/en/ldp/developer/python-ref"
+      },
+      {
+        "title": "Pipeline expectations",
+        "url": "https://docs.databricks.com/aws/en/ldp/expectations"
+      }
+    ],
+    "blocks": [
+      "A pipeline author can describe datasets and their dependencies instead of manually ordering every calculation. Lakeflow’s Python interface uses dataset definitions and expectations to attach data-quality conditions to those datasets. The documented policies distinguish keeping invalid records, dropping them and failing an update.",
+      "The workshop evaluates one predicate on one candidate dataset. It exposes the policy as a separate component so a green execution signal cannot be confused with an acceptable training input."
+    ]
+  },
+  "databricks-mlflow-lineage": {
+    "title": "Keeping Experiment Evidence Beside the Saved Model",
+    "sources": [
+      {
+        "title": "MLflow dataset tracking",
+        "url": "https://mlflow.org/docs/latest/api_reference/python_api/mlflow.data.html"
+      },
+      {
+        "title": "MLflow on Databricks",
+        "url": "https://docs.databricks.com/aws/en/mlflow"
+      }
+    ],
+    "blocks": [
+      "An experiment involves more than its final score. A team needs to know what was trained, with which configuration and inputs, and which saved artifact belongs to that result. MLflow provides run tracking and model artifacts; its dataset interfaces attach source and dataset metadata to a run.",
+      "Those records help us revisit a particular experiment. Our workshop puts the comparison conditions before model selection so the smallest metric cannot hide changed assessment data."
+    ]
+  },
+  "databricks-unity-catalog-access": {
+    "title": "A Shared Namespace Still Needs an Access Model",
+    "sources": [
+      {
+        "title": "Manage Unity Catalog privileges",
+        "url": "https://docs.databricks.com/aws/en/data-governance/unity-catalog/manage-privileges/"
+      },
+      {
+        "title": "Unity Catalog privilege reference",
+        "url": "https://docs.databricks.com/aws/en/data-governance/unity-catalog/access-control/privileges-reference"
+      }
+    ],
+    "blocks": [
+      "A growing workspace can give people and jobs access to many datasets. Unity Catalog uses a catalog, schema and object namespace with privileges and ownership so access decisions can be managed around those data objects. This extends familiar database access-control questions to the assets used by ML workflows.",
+      "The workshop makes the explicit requirements for a simple table read visible. We will trace a missing boundary under the job’s actual identity before deciding which grant needs attention."
+    ]
+  },
+  "databricks-historical-features": {
+    "title": "Turning Historical Availability into a Lookup Contract",
+    "sources": [
+      {
+        "title": "Databricks point-in-time feature joins",
+        "url": "https://docs.databricks.com/aws/en/machine-learning/feature-store/time-series"
+      },
+      {
+        "title": "Feature tables and model training",
+        "url": "https://docs.databricks.com/aws/en/machine-learning/feature-store/train-models-with-feature-store"
+      }
+    ],
+    "blocks": [
+      "Feature engineering systems keep reusable feature definitions and link them to training and inference procedures. Time-series feature lookup adds a particular responsibility: select feature values by entity and historical timestamp instead of attaching the current value to every past row. Databricks documents this separately from Delta Lake time travel.",
+      "The earlier as-of lesson established why availability matters. Here we connect it to feature-table keys, lookup timestamps and an age policy. We assume published feature history is immutable: a later correction receives a new availability timestamp rather than rewriting what an earlier decision could have read."
+    ]
+  },
   "systems-inference-batching": {
     "title": "Batching Trades Waiting for Shared Computation",
     "sources": [
@@ -3745,6 +3999,91 @@
     "blocks": [
       "HTTP caching rules distinguish cache keys, freshness and constraints on reusing responses, including requests carrying authorisation. The broader systems problem is deciding when a prior result is applicable to a new request.",
       "An agent response adds dependencies such as retrieved evidence and model configuration. Our cache-key exercise is an application-level model; it does not claim that HTTP cache headers alone enforce agent permissions."
+    ]
+  },
+  "serving-prefill-decode": {
+    "title": "A Generating Model Keeps Coming Back for Another Step",
+    "sources": [
+      {
+        "title": "Yu and colleagues, 2022: iteration-level scheduling",
+        "url": "https://www.usenix.org/conference/osdi22/presentation/yu"
+      },
+      {
+        "title": "vLLM: serving metrics and their definitions",
+        "url": "https://docs.vllm.ai/en/latest/usage/metrics/"
+      }
+    ],
+    "blocks": [
+      "A language-model request differs from a single image classification because producing its response normally requires repeated model steps. Orca’s 2022 serving design made those iterations a scheduling unit rather than treating an entire response as one indivisible batch.",
+      "Serving systems now expose separate timing measurements for the first token, queueing and decoding. Our invented trace isolates their meanings; it is not an Orca or vLLM performance measurement."
+    ]
+  },
+  "serving-prefix-reuse": {
+    "title": "Paged Attention State Made Reuse a Memory Problem Too",
+    "sources": [
+      {
+        "title": "vLLM: automatic prefix caching",
+        "url": "https://docs.vllm.ai/en/latest/design/prefix_caching/"
+      },
+      {
+        "title": "Kwon and colleagues, 2023: PagedAttention",
+        "url": "https://arxiv.org/abs/2309.06180"
+      }
+    ],
+    "blocks": [
+      "PagedAttention described managing saved attention keys and values in blocks instead of requiring one large contiguous allocation per sequence. vLLM’s prefix-caching design identifies reusable blocks using the preceding prefix and additional compatibility information.",
+      "This exercise counts a leading match under an explicit application contract. It does not reproduce the runtime’s hashes, allocator or eviction policy."
+    ]
+  },
+  "serving-continuous-admission": {
+    "title": "Orca Schedules an Iteration Instead of an Entire Answer",
+    "sources": [
+      {
+        "title": "Yu and colleagues, 2022: iteration-level scheduling",
+        "url": "https://www.usenix.org/conference/osdi22/presentation/yu"
+      },
+      {
+        "title": "vLLM: scheduler configuration",
+        "url": "https://docs.vllm.ai/en/latest/api/vllm/config/scheduler/"
+      }
+    ],
+    "blocks": [
+      "Orca’s iteration-level scheduling allowed a serving engine to reconsider which requests participate between generation iterations. This addresses the mismatch between responses that finish at different lengths.",
+      "Current runtimes also manage token budgets, memory, preemption and prefill work. Our FIFO reservation model exposes two constraints; it is intentionally much smaller than a production scheduler."
+    ]
+  },
+  "serving-cancellation-pressure": {
+    "title": "Cancellation Must Reach the Work That Owns the Resources",
+    "sources": [
+      {
+        "title": "gRPC: cancellation and application responsibilities",
+        "url": "https://grpc.io/docs/guides/cancellation/"
+      },
+      {
+        "title": "vLLM: asynchronous engine request cancellation",
+        "url": "https://docs.vllm.ai/en/latest/api/vllm/v1/engine/async_llm/"
+      }
+    ],
+    "blocks": [
+      "Cancellation protocols allow callers to communicate that a result is no longer needed. The work that actually holds resources still needs to observe that signal and clean up. gRPC explicitly separates signalling cancellation from an application stopping its ongoing work.",
+      "Our state machine records a confirmed release explicitly. It does not claim that a particular network stack or model runtime acknowledges cancellation using these exact states."
+    ]
+  },
+  "serving-canary-effects": {
+    "title": "Mirroring Traffic Does Not Make Its Effects Imaginary",
+    "sources": [
+      {
+        "title": "Envoy: request mirroring behaviour",
+        "url": "https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/route/v3/route_components.proto.html"
+      },
+      {
+        "title": "Kubernetes: a canary deployment",
+        "url": "https://kubernetes.io/docs/tutorials/stateless-application/canary-deployment/"
+      }
+    ],
+    "blocks": [
+      "A canary routes a limited share of live traffic to a candidate version. Traffic mirroring copies requests to another service for observation; Envoy documents that its mirror response is not on the primary response path.",
+      "Neither routing choice proves a downstream tool is harmless. Our invented booking example adds an explicit write-authority calculation and describes where an actual agent service must enforce it."
     ]
   },
   "robot-perception-frames": {
@@ -3799,6 +4138,74 @@
       "We implement one discrete back-calculation step for a PI controller. The derivative part of PID is discussed separately from this exercise so its noise and timing behaviour are not hidden inside the same formula."
     ]
   },
+  "state-predict-correct": {
+    "title": "A Filter That Carries Its Error Estimate Forward",
+    "sources": [
+      {
+        "title": "Kalman, 1960: a recursive filtering and prediction method",
+        "url": "https://doi.org/10.1115/1.3662552"
+      },
+      {
+        "title": "Dellaert and Hutchinson: localisation and Bayes filtering",
+        "url": "https://www.roboticsbook.org/S44_logistics_perception.html"
+      }
+    ],
+    "blocks": [
+      "Kalman’s 1960 paper described a recursive way to estimate a changing state and its error covariance. The filter carries information from the earlier estimate through a motion model and incorporates a new measurement without recomputing the entire observation history.",
+      "We begin with one position coordinate and known expected displacement. This is a scalar linear-Gaussian example, not an account of an entire navigation system or a claim that a camera detector has Gaussian errors."
+    ]
+  },
+  "state-missing-observations": {
+    "title": "Recursive Prediction Does Not Require a Fabricated Observation",
+    "sources": [
+      {
+        "title": "Kalman, 1960: a recursive filtering and prediction method",
+        "url": "https://doi.org/10.1115/1.3662552"
+      },
+      {
+        "title": "Barfoot: State Estimation for Robotics, author’s text",
+        "url": "https://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser24.pdf"
+      }
+    ],
+    "blocks": [
+      "The recursive filtering view separates propagating a state from incorporating an observation. This makes the distinction between elapsed motion and new measurement information explicit.",
+      "Our example omits an update when an observation is absent. It is a small consequence of that separation, rather than a new filtering algorithm or a solution to every delayed-data problem."
+    ]
+  },
+  "state-gating-association": {
+    "title": "A Good Residual Alone Does Not Solve Association",
+    "sources": [
+      {
+        "title": "Neira and Tardós, 2001: joint compatibility in stochastic mapping",
+        "url": "https://doi.org/10.1109/70.976019"
+      },
+      {
+        "title": "Barfoot: State Estimation for Robotics, author’s text",
+        "url": "https://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser24.pdf"
+      }
+    ],
+    "blocks": [
+      "Robotic mapping and tracking must decide which measurement corresponds to which state. Neira and Tardós studied why individually plausible matches can still form an incompatible set and introduced a joint-compatibility approach to the mapping problem.",
+      "We use a much smaller one-track gate and deliberately decline ambiguous cases. This is not their joint-assignment algorithm, a multi-object tracker or a proof of identity."
+    ]
+  },
+  "state-model-uncertainty": {
+    "title": "The Error Model Determines the Filter’s Influence",
+    "sources": [
+      {
+        "title": "Welch and Bishop: Kalman filtering and assumed noise statistics",
+        "url": "https://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf"
+      },
+      {
+        "title": "Barfoot: State Estimation for Robotics, author’s text",
+        "url": "https://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser24.pdf"
+      }
+    ],
+    "blocks": [
+      "Recursive estimators choose corrections using assumptions about motion and observation errors. Welch and Bishop’s worked experiments illustrate how changing assumed noise statistics changes the filter’s response. Barfoot treats estimation as a model of uncertain state, including its limitations.",
+      "Our invented conveyor mismatch examines those assumptions rather than presenting a tuning rule or claiming that one larger process variance solves arbitrary real motion."
+    ]
+  },
   "security-retrieval-authority": {
     "title": "Authorisation Is a Service Responsibility",
     "sources": [
@@ -3836,6 +4243,74 @@
     "blocks": [
       "Python’s pickle documentation warns that malicious pickle data can execute code during unpickling. The format reconstructs Python objects, which is more powerful than simply reading a table of numbers.",
       "ML artifacts may contain weights, preprocessing objects and custom code. Our exercise checks raw bytes against a digest obtained through a trusted channel, without deserialising the artifact. A separate loader policy remains necessary."
+    ]
+  },
+  "security-training-provenance": {
+    "title": "Learning from Examples Makes Example Supply a Security Boundary",
+    "sources": [
+      {
+        "title": "Biggio, Nelson and Laskov: Poisoning Attacks against Support Vector Machines (2012)",
+        "url": "https://icml.cc/2012/papers/880.pdf"
+      },
+      {
+        "title": "NIST: Adversarial Machine Learning taxonomy (2025)",
+        "url": "https://doi.org/10.6028/NIST.AI.100-2e2025"
+      }
+    ],
+    "blocks": [
+      "Biggio, Nelson and Laskov’s 2012 work studied deliberately introduced training examples that increase a support vector machine’s later error. It made the training-data channel itself part of the security problem, rather than assuming all future trouble arrives at prediction time.",
+      "Our workshop uses a much smaller invented baseline: the mean of accepted numerical targets. It lets us see how changing the accepted records changes a fitted result. It does not reproduce the paper’s optimisation procedure or demonstrate a defence against all poisoning attacks."
+    ]
+  },
+  "security-backdoor-evaluation": {
+    "title": "Ordinary Validation Can Miss Conditional Behaviour",
+    "sources": [
+      {
+        "title": "Gu, Dolan-Gavitt and Garg: BadNets (2017)",
+        "url": "https://arxiv.org/abs/1708.06733"
+      },
+      {
+        "title": "NIST: Adversarial Machine Learning taxonomy (2025)",
+        "url": "https://doi.org/10.6028/NIST.AI.100-2e2025"
+      }
+    ],
+    "blocks": [
+      "The 2017 BadNets paper demonstrated maliciously trained networks that performed well on ordinary validation examples but behaved differently on attacker-chosen trigger conditions. It raised a supply-chain question: a model can arrive with a hidden conditional behaviour even when its usual score looks good.",
+      "We do not train or implant a backdoor here. The fixtures supply reviewed original/changed pairs and their predictions so we can build a defensible evaluation report. A measured failure on one tested condition is evidence to investigate; it does not by itself prove the training cause or identify every possible trigger."
+    ]
+  },
+  "security-adversarial-threat-models": {
+    "title": "Small Chosen Changes Could Cross a Learned Boundary",
+    "sources": [
+      {
+        "title": "Szegedy and colleagues: Intriguing properties of neural networks (2013)",
+        "url": "https://arxiv.org/abs/1312.6199"
+      },
+      {
+        "title": "NIST: Adversarial Machine Learning taxonomy (2025)",
+        "url": "https://doi.org/10.6028/NIST.AI.100-2e2025"
+      }
+    ],
+    "blocks": [
+      "Szegedy and colleagues reported in 2013 that carefully chosen small input changes could cause neural-network misclassification, including changes that transferred between models in their experiments. This drew attention to behaviour near an example rather than only accuracy on naturally collected test inputs.",
+      "The workshop uses an explicit two-input linear threshold so we can inspect every condition. It evaluates supplied changes without searching for them. The small coordinate budget is an invented mathematical threat model, not a claim that every such sensor change is physically possible or imperceptible."
+    ]
+  },
+  "security-prediction-api-controls": {
+    "title": "Useful Query Access Exposes Behaviour",
+    "sources": [
+      {
+        "title": "Tramèr and colleagues: Stealing Machine Learning Models via Prediction APIs (2016)",
+        "url": "https://www.usenix.org/conference/usenixsecurity16/technical-sessions/presentation/tramer"
+      },
+      {
+        "title": "OWASP API4: unrestricted resource consumption(2023)",
+        "url": "https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/"
+      }
+    ],
+    "blocks": [
+      "Tramèr and colleagues’ 2016 study showed that prediction interfaces could be used to approximate the functionality of several model families. The study also found that omitting confidence scores alone did not remove the possibility of harmful extraction. Query access itself provides information.",
+      "Our workshop focuses on two defensible service choices: charge limits for evaluated rows rather than only HTTP envelopes, and return the fields required by the public task. The small admission calculation is a policy model, not an extraction detector or proof that a determined caller cannot approximate the service."
     ]
   },
   "simulation-time-steps": {
@@ -3888,6 +4363,74 @@
     "blocks": [
       "Tobin and colleagues varied rendering conditions when training a visual model in simulation and studied transfer to real images for robotic object localisation. The work addresses dependence on a simulator’s particular appearance.",
       "We apply the broader experimental idea to a deliberately small policy-cost table. Varying dynamics or appearance must follow plausible assumptions for the task. Randomisation does not guarantee transfer to every real condition."
+    ]
+  },
+  "numerical-stable-normalisation": {
+    "title": "A Formula Must Fit Inside the Computer Too",
+    "sources": [
+      {
+        "title": "David Goldberg: What Every Computer Scientist Should Know About Floating-Point Arithmetic",
+        "url": "https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html"
+      },
+      {
+        "title": "NumPy: hypot",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.hypot.html"
+      }
+    ],
+    "blocks": [
+      "Scientific programs needed to calculate with measurements that differed greatly in scale. Floating-point formats make that possible by storing a limited collection of significant digits and an exponent. They still have a largest finite value and a smallest usable scale. Intermediate operations can leave that range even when the answer we wanted would fit.",
+      "Numerical analysis asks how a calculation behaves under those limits. Here we use a change of scale before squaring. The change preserves direction while making the intermediate products manageable. It is the same geometric calculation, evaluated through a more suitable route; it does not repair a poorly trained embedding."
+    ]
+  },
+  "numerical-identifiable-models": {
+    "title": "More Equations Do Not Always Add New Information",
+    "sources": [
+      {
+        "title": "NumPy: least-squares solutions, rank and singular values",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html"
+      },
+      {
+        "title": "NumPy: matrix condition numbers",
+        "url": "https://numpy.org/doc/stable/reference/generated/numpy.linalg.cond.html"
+      }
+    ],
+    "blocks": [
+      "Scientific fitting has to distinguish inconsistent measurements from insufficient information. Least squares addresses how to fit equations that do not agree perfectly. It cannot make independent information appear when the experiments repeatedly ask the same question. Adding more measurements of the same combination may reduce some noise while leaving individual parameters unresolved.",
+      "Linear algebra expresses that distinction through the independent directions represented by a measurement matrix. Computational routines can report its numerical rank and the scales of those directions. We will connect those quantities to a concrete experimental choice before using them as diagnostics for a learned physical model."
+    ]
+  },
+  "numerical-gradient-checks": {
+    "title": "Compare a Derivative with Changes We Can Observe",
+    "sources": [
+      {
+        "title": "SciPy: finite-difference derivative evaluation",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.differentiate.derivative.html"
+      },
+      {
+        "title": "Goldberg: rounding and cancellation",
+        "url": "https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html"
+      }
+    ],
+    "blocks": [
+      "Numerical differentiation approximates a derivative from function evaluations, which is useful when an analytic derivative is unavailable or needs an independent check. The approximation compares changes over a finite interval. Its accuracy depends on the function’s local behaviour as well as arithmetic error in those evaluations.",
+      "Automatic differentiation follows the program’s operations to calculate derivatives. A finite-difference check takes a different route, so agreement on carefully chosen smooth cases can expose implementation mistakes. The routes need not agree at a nondifferentiable point, and neither removes the need to specify which computation was evaluated."
+    ]
+  },
+  "numerical-adaptive-steps": {
+    "title": "Let the Calculation Ask for a Shorter Interval",
+    "sources": [
+      {
+        "title": "SciPy: adaptive initial-value solvers and tolerances",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html"
+      },
+      {
+        "title": "SciPy: RK45 embedded numerical method",
+        "url": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.RK45.html"
+      }
+    ],
+    "blocks": [
+      "Numerical differential-equation solvers faced a practical allocation problem: a fixed small step could waste work, while a fixed large step could lose accuracy during important changes. Adaptive methods estimate local numerical error and use it to decide whether to accept a proposed advance and how to choose later intervals.",
+      "Modern embedded Runge-Kutta solvers obtain two related estimates while sharing function evaluations. SciPy’s RK45 uses an embedded pair with a different order from our teaching calculation. We begin with Euler step doubling so the learner can build every evaluation and understand what a rejection means before reaching for a production solver."
     ]
   }
 }

@@ -56,13 +56,13 @@ export const LEARNING_AREAS: LearningArea[] = [
     id: 'software-engineering', title: 'Software Engineering',
     description: 'A model needs software that preserves what its inputs mean. Build dependable prediction code, keep retrieved evidence attached to its scores, and organise the jobs that produce a trained artifact.',
     introduction: 'Suppose a prediction changes even though the weights are identical. The cause may be field order, mutable preprocessing state or a stale file. We will work through those failures with Botie, then build reusable procedures and tests that expose them. Data structures and program design enter when the ML or agent workload gives us a reason to use them.',
-    groups: [{ id: 'ml-software', title: 'Make the model procedure dependable', sections: ['Software for Models and Agents'] }],
+    groups: [{ id: 'ml-software', title: 'Make the model procedure dependable', sections: ['Software for Models and Agents', 'Model and Tool API Contracts'] }],
   },
   {
     id: 'data-engineering', title: 'Data Engineering',
     description: 'The model can only learn from the records we actually give it. Build feature pipelines that handle unequal files, late arrivals and changed producers without quietly rewriting the training problem.',
     introduction: 'Botie receives sensor files and events from several systems. They do not arrive together, and some are corrected later. We will turn them into traceable training inputs, preserving what was known at each decision. The database lessons explain storage and queries; this area follows the transformations and runs that carry those records into models.',
-    groups: [{ id: 'feature-pipelines', title: 'Follow records into the model', sections: ['Data Pipelines for Learning'] }],
+    groups: [{ id: 'feature-pipelines', title: 'Follow records into the model', sections: ['Data Pipelines for Learning', 'Databricks for ML Pipelines'] }],
   },
   {
     id: 'ai-agents-and-applications', title: 'AI Agents and Applications',
@@ -78,25 +78,25 @@ export const LEARNING_AREAS: LearningArea[] = [
     id: 'computer-systems-and-infrastructure', title: 'Computer Systems and Infrastructure',
     description: 'A prediction service and an agent run share finite time and memory. Follow requests through batches, deadlines and caches to understand what happens as the workload grows.',
     introduction: 'Botie can answer one request, but several long conversations create a different problem. The accelerator may wait for batches, tool calls may spend the deadline twice, and conversation state may exhaust memory after the model has loaded. We will inspect those resource decisions using small executable examples tied to ML serving.',
-    groups: [{ id: 'serving-workloads', title: 'Keep inference and tool use within their limits', sections: ['Serving Models and Agent Runs'] }],
+    groups: [{ id: 'serving-workloads', title: 'Keep inference and tool use within their limits', sections: ['Serving Models and Agent Runs', 'LLM Inference and Capacity'] }],
   },
   {
     id: 'robotics-and-control', title: 'Robotics and Control',
     description: 'A learned detector tells Botie where something was. Work out how that prediction becomes a current position and a controlled action, then test what happens when the actuator reaches its limits.',
     introduction: 'A physical agent needs more than an accurate label. Its observations have coordinate frames and timestamps, and its actions change the next observation. We will connect learned perception to numerical motion and feedback models. The workshops run simulations, so we can inspect failed assumptions before making any claim about physical behaviour.',
-    groups: [{ id: 'perception-to-action', title: 'Connect predictions to repeated actions', sections: ['From Learned Perception to Control'] }],
+    groups: [{ id: 'perception-to-action', title: 'Connect predictions to repeated actions', sections: ['From Learned Perception to Control', 'Estimating State from Noisy Observations'] }],
   },
   {
     id: 'security-and-privacy', title: 'Security and Privacy',
     description: 'Decide which evidence an agent may read, how much a person can influence a released statistic, and what must be checked before loading a model artifact.',
     introduction: 'An ML system can produce a correct answer while crossing a data boundary. We will keep relevance separate from permission and inspect the assumptions behind a privacy calculation. Model loading introduces another boundary because an artifact may contain executable behaviour. The agent area covers action-specific guardrails; these lessons examine the data and artifacts those applications depend on.',
-    groups: [{ id: 'ml-data-boundaries', title: 'Protect the inputs, reports and artifacts', sections: ['Protecting ML Data and Artifacts'] }],
+    groups: [{ id: 'ml-data-boundaries', title: 'Protect the inputs, reports and artifacts', sections: ['Protecting ML Data and Artifacts', 'Threats Across the ML Lifecycle'] }],
   },
   {
     id: 'scientific-computing-and-simulation', title: 'Scientific Computing and Simulation',
     description: 'Use simulations to train and compare models, while checking whether the numerical procedure and physical assumptions support the result. Fit unknown parameters and test fresh conditions with Botie.',
     introduction: 'A simulator can generate many training examples, including examples of its own mistakes. We will distinguish numerical error from a wrong physical model, compare policies on shared scenarios, and learn unknown system parameters from observations. Each transfer claim will stay attached to the conditions we actually tested.',
-    groups: [{ id: 'simulation-evidence', title: 'Build evidence from simulated and measured behaviour', sections: ['Simulating and Learning System Behaviour'] }],
+    groups: [{ id: 'simulation-evidence', title: 'Build evidence from simulated and measured behaviour', sections: ['Simulating and Learning System Behaviour', 'Numerical Methods for Learning'] }],
   },
 ];
 

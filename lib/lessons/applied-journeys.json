@@ -147,6 +147,263 @@
       "carryForward": "Record run identity and artifact identity beside completion status."
     }
   },
+  "software-named-request-contracts": {
+    "premise": "A truthiness shortcut made a valid zero disappear.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Inspect what the caller supplied",
+      "start": "Place the field inspector first, then split its result into a decision branch and a numerical-value branch.",
+      "outcome": "A missing key can use a default without accepting a null or replacing zero.",
+      "hints": [
+        "Follow the inspection result into both branches so their positions stay aligned.",
+        "The action branch names the policy. The resolver uses the fallback only when the inspector says missing."
+      ]
+    },
+    "investigation": {
+      "title": "The old shortcut sees four false-looking inputs",
+      "question": "The changed case contains zero, null, text \"0\" and an absent field. Which distinction must the repaired construction preserve?",
+      "outcome": "Test the original requests again after adding the missing/null distinction.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Only the absent field uses the default",
+          "feedback": "A zero is numerical data. Null and text are supplied values that this contract rejects.",
+          "correct": true
+        },
+        {
+          "label": "Every unusual value becomes the default",
+          "feedback": "That would conceal a producer error and overwrite real zeroes."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "software-feature-contracts",
+        "skill": "Keep a measurement attached to its name",
+        "why": "Before ordering fields, decide whether each named value is admissible."
+      }
+    ],
+    "reflection": {
+      "prompt": "What would change if the model had been trained with a distinct missing-value indicator?",
+      "carryForward": "Write the missing/null policy beside the fitted model, rather than inferring it from truthiness."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "See the three field states before choosing a policy",
+      "challenge": "Connect requests and the field name to the inspector. Read how an absent key differs from a supplied null.",
+      "why": "Inspection preserves evidence before a default can erase the distinction.",
+      "hints": [
+        "The inspector needs the entire record, not only the result of get.",
+        "A present zero should have kind number."
+      ]
+    }
+  },
+  "software-schema-evolution": {
+    "premise": "The old parser worked until a supported caller selected the new shape.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Build the two public edges around one internal form",
+      "start": "Place both adapters and connect their results to the matching version-selection ports.",
+      "outcome": "The internal search record stays stable while the public keys differ.",
+      "hints": [
+        "Each adapter understands one named version; selection must use the original request’s version.",
+        "Connect version 1 and version 2 outputs to their matching ports. An unsupported version should not choose either branch."
+      ]
+    },
+    "investigation": {
+      "title": "A newer caller reaches yesterday’s parser",
+      "question": "The changed request declares version 2 and sends query/count. What should change in the construction?",
+      "outcome": "Retest the legacy default after repairing version 2 dispatch.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Select the version 2 adapter while retaining version 1",
+          "feedback": "The server promised both versions. Replacing the old parser would break the other supported caller.",
+          "correct": true
+        },
+        {
+          "label": "Ignore the version and prefer any available text field",
+          "feedback": "That could silently choose an unintended operation in a mixed message."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "software-named-request-contracts",
+        "skill": "Define acceptance before conversion",
+        "why": "Each supported public version needs its own presence and value checks."
+      },
+      {
+        "lessonId": "software-retrieval-shortlists",
+        "skill": "Preserve the intended shortlist size",
+        "why": "A renamed count must still request the same retrieval operation."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which old client would fail if the server rolled back to version 1-only code?",
+      "carryForward": "Keep supported public contracts distinct from the internal representation."
+    }
+  },
+  "software-semantic-contracts": {
+    "premise": "The same pump looked different because its replacement sensor changed units.",
+    "order": "build-first",
+    "construction": {
+      "title": "Keep fitted state in its training representation",
+      "start": "Build conversion from a scale and offset, then connect the stored centre and coefficient after it.",
+      "outcome": "The physical temperature, rather than the raw transport number, determines the score.",
+      "hints": [
+        "Follow one reading through conversion before introducing the fitted centre.",
+        "The centre is already in Celsius. Subtract it after the scale-and-offset branch, then multiply by the coefficient."
+      ]
+    },
+    "investigation": {
+      "title": "The sensor changes units without changing temperature",
+      "question": "The changed inputs are 68 F and 86 F. Predict the two scores after the saved Celsius preprocessing.",
+      "outcome": "Compare both device representations; changing unit convention must not change these two predictions.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Two illustrative scores in input order, as a JSON list"
+    },
+    "connections": [
+      {
+        "lessonId": "software-fitted-state",
+        "skill": "Keep the saved training centre fixed",
+        "why": "A fixed reference is still wrong if a request reaches it in another unit."
+      },
+      {
+        "lessonId": "software-feature-contracts",
+        "skill": "Preserve feature meaning",
+        "why": "The named temperature now also needs a declared unit."
+      }
+    ],
+    "reflection": {
+      "prompt": "What would a Celsius-to-Fahrenheit change do if the model subtracted its centre before conversion?",
+      "carryForward": "Save canonical units and preprocessing order with the fitted artifact."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "Convert one representation before centring",
+      "challenge": "Connect readings and the declared unit to both conversion components. Return Celsius values before applying fitted state.",
+      "why": "The intermediate Celsius readings make an incorrect offset visible.",
+      "hints": [
+        "Fahrenheit needs an offset as well as scaling.",
+        "A Celsius request should pass through unchanged."
+      ]
+    }
+  },
+  "software-tool-errors": {
+    "premise": "Repeating every failed call worked for a read, then risked creating a second job.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Classify failure before deciding to repeat",
+      "start": "Place the outcome classifier before the recovery decision. Connect the repeat flags and budget as separate policy inputs.",
+      "outcome": "An unknown write outcome is investigated instead of retried blindly.",
+      "hints": [
+        "A status category answers what was observed. The repeat flag answers a different question about the operation’s effect.",
+        "Unknown outcomes go to reconciliation first. Only a known transient category with repeat permission and remaining attempts reaches retry."
+      ]
+    },
+    "investigation": {
+      "title": "The transport loses a write response",
+      "question": "One changed outcome is outcome_unknown. Which next step protects the existing operation identity?",
+      "outcome": "Retest the known repeatable read and the exhausted budget after changing recovery.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Reconcile before attempting another create",
+          "feedback": "The service may already have performed the write. A stable operation ID gives us something to check.",
+          "correct": true
+        },
+        {
+          "label": "Retry because the network failed",
+          "feedback": "A network failure tells us the caller lacks a response, not that the write failed."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "software-schema-evolution",
+        "skill": "Version observable failure behaviour",
+        "why": "Clients also depend on stable error categories."
+      },
+      {
+        "lessonId": "software-workflow-dependencies",
+        "skill": "Keep one logical job identity",
+        "why": "Retries must not silently create a different training run."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which service guarantee would make an uncertain create safely repeatable?",
+      "carryForward": "Record the operation identity and recovery outcome without inventing success."
+    }
+  },
+  "software-contract-tests": {
+    "premise": "The original batch let a wrong request-local mean imitate the stored training reference.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Make the fitted-state promise observable",
+      "start": "Build the transformation and an independent first-reading comparison. Keep the saved centre on the input side of both branches.",
+      "outcome": "A new neighbour cannot silently redefine the first pump’s transformed value.",
+      "hints": [
+        "Build the numerical result before the check so Botie can inspect an actual discrepancy.",
+        "Read the first entry from that same result and compare it with the independently supplied expectation, using the declared tolerance."
+      ]
+    },
+    "investigation": {
+      "title": "The first reading stays 2 while its neighbour becomes 100",
+      "question": "Should the first transformed reading change in this fitted row-wise contract?",
+      "outcome": "Retest both baseline batches after repairing the reference branch.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; its saved reference is still 4",
+          "feedback": "The same pump retains the same input and fitted reference. Relearning a mean from this request would violate the contract.",
+          "correct": true
+        },
+        {
+          "label": "Yes; use the new request mean",
+          "feedback": "That would make the prediction depend on unrelated requests and would conceal the fitted-state bug."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "software-fitted-state",
+        "skill": "Reuse the training reference",
+        "why": "The earlier implementation rule now becomes an executable property."
+      },
+      {
+        "lessonId": "software-feature-contracts",
+        "skill": "Preserve meaning through representation changes",
+        "why": "The Python challenge checks a different invariance: aligned field permutation."
+      }
+    ],
+    "reflection": {
+      "prompt": "Could a constant transformation pass one relationship check while still failing the expected-value fixture?",
+      "carryForward": "Use properties to discover counterexamples, then keep those incidents beside independent fixtures."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Inspect the actual transformed list",
+      "challenge": "Return the batch after subtracting the stored centre, before adding a Boolean check.",
+      "why": "A passing flag is easier to assess when the values it summarises remain visible.",
+      "hints": [
+        "The stored centre is a source. A Mean tool applied to the current batch would learn a different reference."
+      ]
+    }
+  },
   "data-partition-statistics": {
     "premise": "A storage change should not reweight the training population.",
     "order": "build-first",
@@ -337,6 +594,471 @@
       "carryForward": "Include behaviour-changing configuration in artifact identity."
     }
   },
+  "databricks-lazy-dataframes": {
+    "premise": "The sensor rule was written down, but the interface kept displaying the original records.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Make the plan produce the requested table",
+      "start": "Construct the filter and projection before connecting the execution boundary to the current records.",
+      "outcome": "The result contains accepted records only, with their requested named fields.",
+      "hints": [
+        "Start with the field comparison; projection comes afterwards so the checked field is still present.",
+        "Execute the plan needs both the completed plan and the current batch. Inspect its input record preview."
+      ]
+    },
+    "investigation": {
+      "title": "The next file still shows yesterday’s answer",
+      "question": "The new file contains temperatures -1, 0 and 14, with a minimum of zero. What should we investigate first?",
+      "outcome": "Trace the record wire, then predict which current records survive.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Whether the current batch reaches the execution component",
+          "feedback": "A valid plan must be executed on the current records; a copied answer does not process a new batch.",
+          "correct": true
+        },
+        {
+          "label": "Whether negative readings should be replaced with yesterday’s mean",
+          "feedback": "Replacement is a different policy from the filter this lesson declared."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "data-partition-statistics",
+        "skill": "Keep record meaning while changing how work is organised",
+        "why": "Distributed execution still has to preserve which observations contributed."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which operation in your construction actually needs the source rows?",
+      "carryForward": "Keep source identity, transformation plan and materialised result distinct."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Write the plan before running it",
+      "challenge": "Return a plan containing the declared filter and projection, without reading the current records.",
+      "why": "Its output should describe instructions, not contain accepted sensor rows."
+    }
+  },
+  "databricks-shuffle-skew": {
+    "premise": "The earlier filter accepts the correct records, but the grouped job waits for one busy pump.",
+    "order": "build-first",
+    "construction": {
+      "title": "Expose and repair the hot route",
+      "start": "Create partial routing keys, then connect routing and worker counts. Inspect the records inside each worker.",
+      "outcome": "The same records reach workers through multiple partial groups without changing their original pump field.",
+      "hints": [
+        "Keep pump untouched and add routingKey alongside it.",
+        "Route by the temporary key, then count every worker list, including empty ones."
+      ]
+    },
+    "investigation": {
+      "title": "A second route is opened for A",
+      "question": "Four A records and one B are routed to two workers by the declared hash. Predict loads when A uses two salt groups.",
+      "outcome": "Compare the load vector with the unsplit case, then check that its total still counts every record.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-lazy-dataframes",
+        "skill": "Preserve named fields across transformations",
+        "why": "The original pump identity must survive a routing-only transformation."
+      },
+      {
+        "lessonId": "data-partition-statistics",
+        "skill": "Merge the quantities that really add",
+        "why": "Partial groups require a correct final merge, not an unweighted average."
+      }
+    ],
+    "reflection": {
+      "prompt": "What evidence would justify salting a real Spark job rather than trusting this count-only picture?",
+      "carryForward": "Keep logical group identity separate from temporary execution keys."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "Prepare routing keys without losing pump identity",
+      "challenge": "Return the records with their temporary routing keys, preserving every original record.",
+      "why": "Inspect the hot records before a worker boundary hides why they were grouped."
+    }
+  },
+  "databricks-delta-snapshots": {
+    "premise": "The routing repair still works, but a rerun silently reads a corrected table and changes the training evidence.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Pin the input before calculating",
+      "start": "Choose the committed snapshot named by the run, then connect its field values to the existing mean calculation.",
+      "outcome": "A later table commit does not silently replace this run’s declared evidence.",
+      "hints": [
+        "Open the requested version before extracting the field.",
+        "The input to Mean should be a column from one snapshot, not a list of all historical rows."
+      ]
+    },
+    "investigation": {
+      "title": "The code is identical but the mean changes",
+      "question": "Version 0 has temperatures 10 and 20. Version 1 has 30 and 20. The model report names version 0, but its loader requests latest. What is the first repair?",
+      "outcome": "Inspect the selected snapshot before changing the numerical procedure.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Make the loader request version 0 explicitly",
+          "feedback": "The input must agree with the version recorded in the report.",
+          "correct": true
+        },
+        {
+          "label": "Change the mean formula until the result is 15",
+          "feedback": "The arithmetic is not the source of the mismatch."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-lazy-dataframes",
+        "skill": "Name the data that reaches the action",
+        "why": "A plan still needs a precise source identity."
+      },
+      {
+        "lessonId": "data-artifact-lineage",
+        "skill": "Keep the inputs attached to their artifact",
+        "why": "The table version is part of the model’s evidence."
+      }
+    ],
+    "reflection": {
+      "prompt": "What else would need preserving before this old version could be called reproducible a year later?",
+      "carryForward": "A version reference needs retained data, recorded dependencies and an explicit failure when unavailable."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "Select the committed records",
+      "challenge": "Return only the snapshot named by the run, before extracting a feature.",
+      "why": "The table preview should show which records the numerical calculation will consume."
+    }
+  },
+  "databricks-replay-safe-ingest": {
+    "premise": "A stable snapshot exposed a duplicate: the same input file contributed twice after a restart.",
+    "order": "build-first",
+    "construction": {
+      "title": "Keep the retry from changing the dataset",
+      "start": "Select files absent from committed progress before connecting the atomic-state commit.",
+      "outcome": "The same discovery can be repeated without appending its records again.",
+      "hints": [
+        "Compare file identities with the checkpoint, not row counts with the previous output.",
+        "The accepted-file list feeds the commit alongside the earlier rows and earlier checkpoint."
+      ]
+    },
+    "investigation": {
+      "title": "The acknowledgement disappears after success",
+      "question": "The output already contains r1 and the checkpoint contains f1. The scheduler discovers f1 again. Predict the complete next state.",
+      "outcome": "Progress and output must remain consistent even when the request is repeated.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-delta-snapshots",
+        "skill": "Give a completed table state a durable identity",
+        "why": "A retry must preserve the intended logical state instead of appending another copy."
+      }
+    ],
+    "reflection": {
+      "prompt": "What would change if a producer overwrote a file under the same path?",
+      "carryForward": "Treat source identity and checkpoint identity as part of the query contract."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Choose only uncommitted files",
+      "challenge": "Return accepted file records before flattening or changing progress.",
+      "why": "An empty accepted-file list on replay should be visible before the commit."
+    }
+  },
+  "databricks-change-data-capture": {
+    "premise": "File replay is fixed, but different files contain out-of-order changes for the same pump.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Preserve deletion evidence through the merge",
+      "start": "Select source versions before the merge, then separate stored state from its visible active view.",
+      "outcome": "A delayed older change cannot recreate an entity deleted by a newer source version.",
+      "hints": [
+        "Use seq for ordering and pump for identity; delivery position has no authority here.",
+        "Keep deleted rows through the merge. Hide them only on the final consumer branch."
+      ]
+    },
+    "investigation": {
+      "title": "The pump reappears after deletion",
+      "question": "Stored state says P7 was deleted at sequence 9. The next file carries an active P7 at sequence 8. What has the broken machine forgotten?",
+      "outcome": "Inspect retained state rather than only the active-row output.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The deletion’s source sequence",
+          "feedback": "That version is needed to recognise the arriving record as older.",
+          "correct": true
+        },
+        {
+          "label": "The order in which the file names sort",
+          "feedback": "File-name order does not define the entity’s authoritative source sequence."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-replay-safe-ingest",
+        "skill": "Separate a repeated file from a new file",
+        "why": "A genuinely new file can still carry an old entity version."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which source guarantee would allow your system to retire an old tombstone safely?",
+      "carryForward": "Retain ordering evidence for as long as older messages can arrive."
+    },
+    "preparation": {
+      "path": [
+        0,
+        1
+      ],
+      "title": "Find an unambiguous last change per pump",
+      "challenge": "Return the highest source-sequence change for each entity before touching target state.",
+      "why": "The source stage must resolve multiplicity before a target row can be updated."
+    }
+  },
+  "databricks-lakeflow-quality": {
+    "premise": "The versioned merge is correct, but a warning was mistaken for a gate and invalid values reached training.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Make the chosen policy control publication",
+      "start": "Evaluate rows first, then connect their flags to the publication policy and earlier dataset.",
+      "outcome": "The output rows and status now agree with the declared consequence of failure.",
+      "hints": [
+        "Do not drop rows while evaluating the predicate; the policy may require keeping or rejecting the entire candidate.",
+        "The publication component needs the earlier snapshot as well as the new checked rows."
+      ]
+    },
+    "investigation": {
+      "title": "The failure count is nonzero but every row remains",
+      "question": "The pipeline retained 10,-1,20 under a declared warning policy. What is wrong with expecting the invalid row to disappear?",
+      "outcome": "Choose a policy from the training contract, then predict its effect before running.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "A warning does not declare a drop or failure policy",
+          "feedback": "The check can be working exactly as configured while the chosen policy is inappropriate.",
+          "correct": true
+        },
+        {
+          "label": "Every expectation silently clips negative values to zero",
+          "feedback": "Clipping is not one of the stated publication policies."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "data-contract-quarantine",
+        "skill": "Keep invalid records identifiable",
+        "why": "A platform quality policy must implement the intended rejection boundary."
+      },
+      {
+        "lessonId": "databricks-delta-snapshots",
+        "skill": "Distinguish an older published snapshot from a failed candidate",
+        "why": "Failure must not make stale data appear newly produced."
+      }
+    ],
+    "reflection": {
+      "prompt": "What evidence should an operator see when a failed update leaves the previous dataset in service?",
+      "carryForward": "Retain the candidate failure reason and the identity/age of the dataset that remains published."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Attach the quality evidence to each row",
+      "challenge": "Return complete records with pass flags before choosing any publication consequence.",
+      "why": "A count should remain traceable to the records that produced it."
+    }
+  },
+  "databricks-mlflow-lineage": {
+    "premise": "Quality checks pass, but the new winning model was measured against different validation evidence.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Keep the score attached to the comparison and artifact",
+      "start": "Build an eligible-run shortlist before choosing minimum MAE, then preserve the chosen run’s manifest.",
+      "outcome": "The selected artifact belongs to a run assessed on the declared validation evidence.",
+      "hints": [
+        "Start with the validation table identity, its version, split and role. Looking only at version numbers can mix unrelated histories.",
+        "Return the chosen model URI together with both table identities, their versions and the assessment split. Different training tables can be the intended experiment."
+      ]
+    },
+    "investigation": {
+      "title": "A perfect test score enters the shortlist",
+      "question": "Both records use lab.validation.sensor_readings version 4 and split S. One has role=test and MAE zero; the other has role=validation and MAE three. Which issue must the selector repair?",
+      "outcome": "Check role, validation table identity, its version and split before comparing MAE.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The assessment-role filter",
+          "feedback": "A final-test result must not be used to choose the validation winner.",
+          "correct": true
+        },
+        {
+          "label": "The precision of the number zero",
+          "feedback": "The score’s role determines whether it belongs in this selection."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-lakeflow-quality",
+        "skill": "Know which dataset was actually published",
+        "why": "A run must refer to the data it measured, including whether an older snapshot remained in use."
+      },
+      {
+        "lessonId": "held-out-evaluation",
+        "skill": "Keep model selection separate from final assessment",
+        "why": "The comparison cannot recruit a final-test score as another validation candidate."
+      }
+    ],
+    "reflection": {
+      "prompt": "Would a deterministic tie-break justify saying one model is better?",
+      "carryForward": "Preserve the evidence and uncertainty behind a choice, not only the selected model label."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "Identify genuinely comparable validation runs",
+      "challenge": "Return only validation-role runs using the declared validation table identity, version and split.",
+      "why": "Inspecting the shortlist before sorting lets us see which tempting scores answer a different question."
+    }
+  },
+  "databricks-unity-catalog-access": {
+    "premise": "The run manifest names a valid table, but the scheduled training identity cannot read it.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Trace permission through the complete table name",
+      "start": "List the catalog, schema and table requirements before comparing explicit grants for this job.",
+      "outcome": "The refusal identifies a missing boundary without returning protected records.",
+      "hints": [
+        "SELECT on a table does not supply its enclosing usage requirements in this model.",
+        "Each requirement needs a grant for this principal or an already established group, not just any grant on the object."
+      ]
+    },
+    "investigation": {
+      "title": "A colleague’s grant appears in the evidence",
+      "question": "All three privileges belong to job-A; the current principal is job-B. Why must the construction refuse?",
+      "outcome": "Keep principal, privilege and object attached while checking each boundary.",
+      "caseIndex": 2,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The privileges belong to a different identity",
+          "feedback": "Matching object names do not transfer another principal’s authority.",
+          "correct": true
+        },
+        {
+          "label": "The table must be corrupt",
+          "feedback": "The shown evidence establishes an identity mismatch, not damaged data."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "databricks-mlflow-lineage",
+        "skill": "Name the exact source table",
+        "why": "A manifest identifies what to read; it does not authorise the job to read it."
+      },
+      {
+        "lessonId": "sql-parameters-permissions",
+        "skill": "Keep query values separate from database authority",
+        "why": "Accepting a value in a query never grants the caller permission to read its source."
+      }
+    ],
+    "reflection": {
+      "prompt": "Where must this permission be enforced after a browser workshop says allow?",
+      "carryForward": "The authoritative data service must check the executing identity and current policy."
+    },
+    "preparation": {
+      "path": [
+        0,
+        0
+      ],
+      "title": "Resolve the object boundaries",
+      "challenge": "Return the three explicit read requirements implied by the complete table name.",
+      "why": "Inspecting each object prevents a short table name from hiding another namespace."
+    }
+  },
+  "databricks-historical-features": {
+    "premise": "Access is correct, but the latest-value join gives past predictions information published later.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Build the feature candidates for each decision",
+      "start": "Keep each prediction’s entity and time beside its candidates, then select the newest eligible published value.",
+      "outcome": "Future, stale and wrong-entity values cannot silently fill a historical model input.",
+      "hints": [
+        "Match the entity first and exclude later publication times before selecting a maximum.",
+        "A latest explicit null is not permission to search backward for a nonnull value."
+      ]
+    },
+    "investigation": {
+      "title": "The newest value was published after the prediction",
+      "question": "P7 at minute 6 sees values published at 3 and 8. A broken join chooses the minute-8 correction because its event was earlier. What should be repaired?",
+      "outcome": "Predict the eligible candidate list before choosing its newest row.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The availability boundary before latest-value selection",
+          "feedback": "A correction’s old event label does not make its newly published value available earlier.",
+          "correct": true
+        },
+        {
+          "label": "The prediction’s timestamp should move forward until the result looks good",
+          "feedback": "Changing the decision time rewrites the prediction problem."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "data-asof-features",
+        "skill": "Respect what was available at the decision",
+        "why": "The platform lookup must preserve that same historical boundary."
+      },
+      {
+        "lessonId": "databricks-delta-snapshots",
+        "skill": "Read an identified committed input",
+        "why": "A timestamp filter cannot recover overwritten historical contents."
+      }
+    ],
+    "reflection": {
+      "prompt": "What evidence shows that publishedAt really records availability rather than a backdated event?",
+      "carryForward": "Keep publication history, table identity and the lookup/fallback policy with the trained procedure."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Keep eligible candidates beside each prediction",
+      "challenge": "Return one candidate group per prediction after entity, time and age filtering.",
+      "why": "An empty candidate group should remain visible rather than being replaced by another pump’s recent value."
+    }
+  },
   "systems-inference-batching": {
     "premise": "Botie’s batch throughput improves while the earliest user waits longer.",
     "order": "build-first",
@@ -483,6 +1205,226 @@
     "reflection": {
       "prompt": "What should a permission revocation do to already cached answers?",
       "carryForward": "Recheck current authority and expire or invalidate affected entries."
+    }
+  },
+  "serving-prefill-decode": {
+    "premise": "Botie starts two equally long answers at different times. A shared throughput number does not tell the technician which wait changed.",
+    "order": "build-first",
+    "construction": {
+      "title": "Put two kinds of waiting on separate branches",
+      "start": "Take the first emission minus arrival, then keep the neighbouring token gaps beside it.",
+      "outcome": "The output distinguishes an empty screen from an interrupted stream.",
+      "hints": [
+        "The first emitted timestamp belongs on the arrival subtraction branch.",
+        "Later pauses need adjacent differences, not division by the number of output tokens."
+      ]
+    },
+    "investigation": {
+      "title": "The first token stays put, but the last one stalls",
+      "question": "Arrival is 0 ms and emissions are [140,170,230] ms. Predict [first-token wait, list of later gaps], then compare the two branches with the evenly spaced case.",
+      "outcome": "A later pause can worsen while time to first token remains unchanged.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "systems-inference-batching",
+        "skill": "Measure each request from its own arrival",
+        "why": "A generated answer adds several completion boundaries inside one request."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which timestamp would distinguish queue waiting from prompt processing?",
+      "carryForward": "Keep measurement boundaries with any latency number you compare."
+    }
+  },
+  "serving-prefix-reuse": {
+    "premise": "Botie already accounts for KV memory. Now repeated manual prefixes offer a way to avoid some prompt work, provided the state is compatible.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Connect a leading-token match to a compatibility gate",
+      "start": "Build the reusable-token count, then require agreement on the stated model and namespace contract.",
+      "outcome": "A plausible token match alone cannot authorise reuse.",
+      "hints": [
+        "First ask whether the stored arrays belong to the same configuration and namespace.",
+        "The prefix counter stops at the first differing ID. Round its result down, then make a failed compatibility decision produce zero."
+      ]
+    },
+    "investigation": {
+      "title": "Identical tokens arrive under a new adapter",
+      "question": "The cached and incoming token lists match, but the adapter field differs. Which earlier assumption fails?",
+      "outcome": "The correct repair keeps a compatibility branch beside the prefix counter.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The saved keys and values were calculated under the same model configuration",
+          "feedback": "The adapter can change those arrays, so this contract rejects reuse.",
+          "correct": true
+        },
+        {
+          "label": "Equal token IDs guarantee equal attention state",
+          "feedback": "The IDs identify inputs; the model configuration also affects their calculated state."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "systems-kv-cache-memory",
+        "skill": "Account for retained attention state",
+        "why": "Reuse changes how some state is computed or shared; it does not make storage free."
+      },
+      {
+        "lessonId": "serving-prefill-decode",
+        "skill": "Distinguish prompt work from continuation",
+        "why": "The saved work belongs primarily to repeated prompt processing, not a complete cached answer."
+      }
+    ],
+    "reflection": {
+      "prompt": "What else would need versioning if the request included an image encoder output?",
+      "carryForward": "Treat reusable computation as versioned state with explicit boundaries."
+    }
+  },
+  "serving-continuous-admission": {
+    "premise": "The earlier batch timing still describes waiting, but generated responses finish at different iteration boundaries. Botie needs a group that can change.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Rebuild the next group from remaining work",
+      "start": "Remove finished sequences and build separate free-slot and free-block branches before admitting waiting IDs.",
+      "outcome": "A sequence joins only when both its place and its storage fit.",
+      "hints": [
+        "Keep only rows with remaining output tokens before measuring occupied capacity.",
+        "Add each waiting prompt and output allowance, round up to blocks, then consume slots and blocks in FIFO order."
+      ]
+    },
+    "investigation": {
+      "title": "The same free slot faces a longer prompt",
+      "question": "C now needs five blocks while only four are free. Why does the earlier slot-only construction fail?",
+      "outcome": "Repair the admission path without evicting an unfinished sequence or silently changing FIFO.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "It never checked the memory reservation",
+          "feedback": "One place in a batch does not guarantee enough KV blocks.",
+          "correct": true
+        },
+        {
+          "label": "Finished A still needs all its output iterations",
+          "feedback": "A has zero remaining tokens in the stated fixture and releases its reservation."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "systems-kv-cache-memory",
+        "skill": "Count retained attention tokens",
+        "why": "Admission must account for the new sequence’s storage, not only model weights."
+      },
+      {
+        "lessonId": "serving-prefix-reuse",
+        "skill": "Respect cache allocation units",
+        "why": "A reservation rounds upward to whole blocks, unlike reusable prefix length."
+      }
+    ],
+    "reflection": {
+      "prompt": "When might skipping an unfit head help utilisation, and whose waiting time could worsen?",
+      "carryForward": "State the scheduling policy beside its capacity calculation."
+    }
+  },
+  "serving-cancellation-pressure": {
+    "premise": "The earlier scheduler released finished sequences. A cancellation request looks finished to the reader before the worker confirms it has released anything.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Add an acknowledgement boundary before freeing capacity",
+      "start": "Apply worker release acknowledgements and keep every other owned row in the capacity report. Bound the waiting queue separately.",
+      "outcome": "Clicking Stop does not create a fictitious free slot.",
+      "hints": [
+        "The acknowledgement list identifies which cancellation requests actually released resources.",
+        "After applying those events, count held rows and sum their blocks. The waiting queue has its own limit and rejected-arrival list."
+      ]
+    },
+    "investigation": {
+      "title": "The display stopped but no release arrived",
+      "question": "A is cancellation-requested with no acknowledgement. Which repair belongs between the user event and the capacity counter?",
+      "outcome": "Compare the same rows after A’s acknowledgement, without changing waiting arrivals.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Wait for the engine’s release evidence",
+          "feedback": "A remains owned until the execution layer confirms its release.",
+          "correct": true
+        },
+        {
+          "label": "Treat every user cancellation as immediate free memory",
+          "feedback": "The worker may still need the reservation while stopping."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "serving-continuous-admission",
+        "skill": "Count resources before admitting another sequence",
+        "why": "A release now needs an authoritative lifecycle event, not only an abandoned display."
+      },
+      {
+        "lessonId": "systems-agent-deadlines",
+        "skill": "Keep one overall time budget",
+        "why": "Waiting or retrying must not create a new full deadline for an old request."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which record would tell you whether an earlier booking tool had already committed?",
+      "carryForward": "Track resource release separately from external effect reconciliation."
+    }
+  },
+  "serving-canary-effects": {
+    "premise": "Botie can route traffic to a candidate, but a duplicated maintenance question can duplicate its booking unless the effect path has a separate boundary.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Keep model choice out of the write-authority rule",
+      "start": "Build one branch for routing and another for capability plus non-shadow status, then attach both to each run ID.",
+      "outcome": "A model experiment does not silently become a second live actor.",
+      "hints": [
+        "Route from buckets and percentage without using those values as permissions.",
+        "For write authority, require capability and a zero shadow flag. Preserve each result beside its own run ID."
+      ]
+    },
+    "investigation": {
+      "title": "The comparison run inherits a broad capability",
+      "question": "The copied run has capability1 and shadow1. What must prevent the second booking?",
+      "outcome": "Check an unauthorised stable-model request too; model version must never substitute for permission.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "An enforced non-shadow requirement at the effect boundary",
+          "feedback": "The shadow status must deny live writes independently of the selected model.",
+          "correct": true
+        },
+        {
+          "label": "Hiding the candidate’s response from the screen",
+          "feedback": "The booking tool can act before any text reaches the screen."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "serving-cancellation-pressure",
+        "skill": "Separate computation from external effects",
+        "why": "Hiding, cancelling or rerouting an answer cannot undo an action already committed."
+      },
+      {
+        "lessonId": "agent-retries-and-effects",
+        "skill": "Give effects a deliberate identity",
+        "why": "A comparison run must not manufacture another live write under a fresh effect key."
+      }
+    ],
+    "reflection": {
+      "prompt": "What evidence would establish that the real booking service rejects shadow credentials?",
+      "carryForward": "Enforce effect authority where an action can occur, not in generated prose."
     }
   },
   "robot-perception-frames": {
@@ -633,6 +1575,212 @@
       "carryForward": "Test the return from saturation and keep actuator limits in the loop."
     }
   },
+  "state-predict-correct": {
+    "premise": "The earlier motion projection moves a point forward in time. A new noisy detection now disagrees with that projection, so Botie needs an uncertainty-weighted correction.",
+    "order": "build-first",
+    "construction": {
+      "title": "Build the correction rather than always replacing the position",
+      "start": "Predict both quantities, calculate the innovation and gain, then assemble the corrected mean and variance.",
+      "outcome": "The observation influences the estimate according to its stated reliability.",
+      "hints": [
+        "Predict uncertainty as well as motion. The old variance alone misses the new motion error.",
+        "Use the gain on measurement minus predicted mean. The variance branch keeps both weighted error contributions."
+      ]
+    },
+    "investigation": {
+      "title": "The same camera reading becomes less reliable",
+      "question": "Keep prediction4 m and prior variance 4 m², but change camera variance to16 m². Predict the named mean and variance after correction.",
+      "outcome": "The mean moves less toward the reading and the remaining variance is larger.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "gaussian-sensor-fusion",
+        "skill": "Combine independent evidence with stated variances",
+        "why": "The motion prediction now supplies one side of the same reliability calculation."
+      },
+      {
+        "lessonId": "robot-observation-latency",
+        "skill": "Predict a position at the observation time",
+        "why": "Measurement and prediction must describe the same time and frame before their difference is meaningful."
+      }
+    ],
+    "reflection": {
+      "prompt": "What would invalidate adding the two error variances?",
+      "carryForward": "Carry the independence and model assumptions with the uncertainty numbers."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Correct the position before assembling the full record",
+      "challenge": "Build the predicted mean, gain and innovation branch that returns the corrected position.",
+      "why": "It shows which measurement difference is being weighted before adding the uncertainty branch.",
+      "hints": [
+        "The innovation compares the camera with the predicted position at its timestamp.",
+        "The gain uses predicted variance, including the motion-error contribution."
+      ]
+    }
+  },
+  "state-missing-observations": {
+    "premise": "The earlier filter expected a number from every camera frame. An occlusion now removes one observation while the object continues moving.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Give prediction and optional correction their own places",
+      "start": "Connect the first prediction and available correction before feeding their result into the next interval.",
+      "outcome": "A missing observation supplies no invented position and no invented information.",
+      "hints": [
+        "None is a missing marker. Zero must still follow the ordinary numeric correction path.",
+        "Connect prediction, optional update, prediction, optional update in that order. Each interval adds its own supplied process variance."
+      ]
+    },
+    "investigation": {
+      "title": "The first frame disappears",
+      "question": "Why would filling the missing first measurement with0 m produce another result?",
+      "outcome": "The repair preserves the predicted state until actual observation data arrives.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "It would assert a real observation at the origin",
+          "feedback": "Zero would attract the estimated position and reduce variance under the observation model.",
+          "correct": true
+        },
+        {
+          "label": "Skipping the correction stops the belt",
+          "feedback": "Motion prediction still advances the state before the next measurement."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "state-predict-correct",
+        "skill": "Keep prediction separate from measurement correction",
+        "why": "The correction can be omitted without discarding motion or uncertainty propagation."
+      },
+      {
+        "lessonId": "robot-observation-latency",
+        "skill": "Respect the capture time",
+        "why": "Missing a frame and receiving an old frame late are different timing situations."
+      }
+    ],
+    "reflection": {
+      "prompt": "What must change if an observation arrives out of timestamp order?",
+      "carryForward": "Represent unavailable evidence explicitly and keep the estimate’s time."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Carry the first boundary into the second",
+      "challenge": "Build the second motion prediction from the result of the first optional update.",
+      "why": "This makes the temporal dependency visible before the final camera correction."
+    }
+  },
+  "state-gating-association": {
+    "premise": "The earlier filter accepted the supplied observation as belonging to its part. A crowded frame now contains several plausible observations, so that identity assumption must be checked.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Put compatibility and ambiguity before the correction",
+      "start": "Build the scaled disagreement list and pass mask. Give the optional update a measurement only when one candidate remains.",
+      "outcome": "An unresolved match leaves the predicted state visible rather than generating false certainty.",
+      "hints": [
+        "The denominator includes prediction uncertainty and measurement uncertainty.",
+        "Threshold gate returns1when its first input is at least its second: connect threshold first and the distance list second. Exactly one pass is needed."
+      ]
+    },
+    "investigation": {
+      "title": "Another part appears inside the gate",
+      "question": "Both10.5 m and9.5 m pass around a10 m prediction. Why must the exact-one rule skip the update?",
+      "outcome": "The missing-observation route is now useful for unresolved identity as well as an absent camera frame.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The numerical test has not resolved which object supplied the observation",
+          "feedback": "Both observations are plausible, but this fixture supplies no further identity evidence.",
+          "correct": true
+        },
+        {
+          "label": "The smallest variance must always be zero",
+          "feedback": "Skipping an ambiguous observation preserves the prediction’s nonzero uncertainty."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "state-missing-observations",
+        "skill": "Represent an unavailable observation explicitly",
+        "why": "Ambiguous association can also produce no usable measurement for this track."
+      },
+      {
+        "lessonId": "distance-and-similarity",
+        "skill": "Choose a distance with the right meaning",
+        "why": "The covariance-scaled innovation replaces an unqualified raw position distance."
+      }
+    ],
+    "reflection": {
+      "prompt": "What extra evidence could distinguish two candidates without changing their positions?",
+      "carryForward": "Keep compatibility, identity and correction as separate decisions."
+    },
+    "preparation": {
+      "path": [
+        1
+      ],
+      "title": "Inspect which candidate survives before updating",
+      "challenge": "Return the single numeric candidate or null after computing and applying the gate.",
+      "why": "The association output reveals ambiguity before it is hidden in a corrected mean."
+    }
+  },
+  "state-model-uncertainty": {
+    "premise": "The earlier filter still produces a clean mean and variance when its motion model misses an acceleration. Botie now needs to test what those numbers claim.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Keep truth outside the estimation branch",
+      "start": "Reuse prediction and correction, then compare their final estimate with the separate simulated reference.",
+      "outcome": "A precise-looking result can visibly fail its own declared uncertainty scale.",
+      "hints": [
+        "Finish estimation without using the reference source. The reference belongs on its own evaluation input.",
+        "Compare signed error and squared error relative to declared variance. A covered case can still be imprecise, and one case never proves calibration."
+      ]
+    },
+    "investigation": {
+      "title": "The camera repeatedly lies ahead of the prediction",
+      "question": "The changed interval adds almost no motion uncertainty while actual displacement is larger than expected. What should be investigated?",
+      "outcome": "The broader-variance case illustrates a consequence to evaluate, not an automatic tuning prescription.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The motion/error model and the signed innovation pattern",
+          "feedback": "Understated process uncertainty makes this filter resist an informative measurement.",
+          "correct": true
+        },
+        {
+          "label": "Whether truth can be wired directly into the prediction to improve the score",
+          "feedback": "That would leak the evaluation answer into the estimator and invalidate the test."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "state-predict-correct",
+        "skill": "Carry an explicit uncertainty model",
+        "why": "The covariance is now evaluated rather than accepted simply because the formula returned it."
+      },
+      {
+        "lessonId": "robot-feedback-corrections",
+        "skill": "Separate state estimation from action selection",
+        "why": "A controller needs a state estimate, but this diagnostic does not choose a safe action."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which held-out motion conditions would distinguish a model repair from a wider error bar?",
+      "carryForward": "Assess uncertainty width, actual error and their relationship on independent trajectories."
+    }
+  },
   "security-retrieval-authority": {
     "premise": "The most relevant manual is private to another tenant.",
     "order": "investigate-first",
@@ -747,6 +1895,244 @@
     "reflection": {
       "prompt": "Which review becomes stale when the loader version changes?",
       "carryForward": "Bind release evidence to the artifact and its execution environment."
+    }
+  },
+  "security-training-provenance": {
+    "premise": "A label-review-only filter worked until a new source entered through the same numerical interface.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Build the training-release boundary before the fit",
+      "start": "Keep source and label evidence on separate branches, combine their masks, then filter IDs and targets together.",
+      "outcome": "An attractive training result cannot substitute for a record’s release evidence.",
+      "hints": [
+        "Use the same combined mask for identities and targets.",
+        "Keep the empty accepted list visible as no evidence. Do not invent a zero baseline."
+      ]
+    },
+    "investigation": {
+      "title": "A new feed claims its labels are reviewed",
+      "question": "The proposed row has reviewed=true but its resolved source is not approved. May its target enter this release?",
+      "outcome": "Retest the unresolved label from the familiar source as well.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; source approval is still missing",
+          "feedback": "Completed review does not replace the independent source policy.",
+          "correct": true
+        },
+        {
+          "label": "Yes; a numerical reviewed target is enough",
+          "feedback": "That would let the new contribution channel bypass the boundary this release promised."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "data-artifact-lineage",
+        "skill": "Trace fitted results to exact inputs",
+        "why": "The record identity must survive filtering and fitting."
+      },
+      {
+        "lessonId": "security-model-artifacts",
+        "skill": "Separate identity from trust",
+        "why": "Expected bytes and familiar names do not establish truthful training labels."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which approved-source compromise would this gate fail to detect?",
+      "carryForward": "Record what the filter establishes, and keep independent evaluation outside the same contribution channel."
+    },
+    "preparation": {
+      "path": [
+        0,
+        1
+      ],
+      "title": "Inspect eligibility before seeing its fitted effect",
+      "challenge": "Build one flag per proposed record, requiring both source approval and completed review.",
+      "why": "This separates the release decision from the numerical effect of fitting.",
+      "hints": [
+        "Both pieces of evidence must describe the same row.",
+        "A reviewed proposal from an unapproved source still needs a zero flag."
+      ]
+    }
+  },
+  "security-backdoor-evaluation": {
+    "premise": "The clean metric looked reassuring because it never asked about the changed input condition.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Build a report that can expose conditional failure",
+      "start": "Keep clean correctness on one branch. On another, define the eligible pair set before counting target hits.",
+      "outcome": "A high clean score remains visible without excusing a measured failure on the declared condition.",
+      "hints": [
+        "Keep clean accuracy and the conditional test on separate branches.",
+        "Count target hits only where the eligibility flag is 1, and show the count beside its denominator."
+      ]
+    },
+    "investigation": {
+      "title": "Clean predictions stay fixed while changed predictions become safe",
+      "question": "Which evidence must change in the report?",
+      "outcome": "Retest the all-target population so an empty denominator remains unavailable rather than zero.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The targeted-success count, not the unchanged clean accuracy",
+          "feedback": "The observations differ only on changed inputs, so the two metrics must remain separate.",
+          "correct": true
+        },
+        {
+          "label": "Only clean accuracy; one score is enough",
+          "feedback": "The ordinary predictions did not change and cannot describe the newly tested condition."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "security-training-provenance",
+        "skill": "Keep evaluation outside the contribution channel",
+        "why": "A conditional failure needs its own reviewed evidence rather than a reassuring training story."
+      },
+      {
+        "lessonId": "judging-a-classifier",
+        "skill": "Name the population behind a metric",
+        "why": "The new denominator is a specifically eligible paired subset."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which additional evidence would distinguish an implanted condition from an ordinary model weakness?",
+      "carryForward": "Preserve paired case identities, denominators and ordinary task quality when reviewing a repair."
+    },
+    "preparation": {
+      "path": [
+        1,
+        0
+      ],
+      "title": "Choose the eligible paired examples",
+      "challenge": "Mark clean-correct non-target examples only when the supplied edit has been reviewed as label-preserving.",
+      "why": "The denominator must be established before a target-hit rate can be interpreted.",
+      "hints": [
+        "A true target-class example is not a newly induced target prediction.",
+        "An already incorrect clean prediction does not enter this lesson’s induced-failure denominator."
+      ]
+    }
+  },
+  "security-adversarial-threat-models": {
+    "premise": "The initial small test passed, but a deliberately selected allowed change reached a different side of the boundary.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Build the model and the scope checks side by side",
+      "start": "Start with the weighted-sum classifier. Keep the change-budget, domain and fixed-coordinate checks on a separate branch before combining the report.",
+      "outcome": "A wrong prediction is interpreted under the exact capability we declared.",
+      "hints": [
+        "First construct the two predictions from the actual vectors and fixed weights.",
+        "Keep the scope branch independent. A null observed_failure can mean the comparison is excluded, so inspect its diagnostic fields."
+      ]
+    },
+    "investigation": {
+      "title": "The allowed first coordinate reaches 0.5",
+      "question": "Both inputs sum to the cutoff. Is this a relevant new failure under the stated fixture label?",
+      "outcome": "Retest the larger out-of-budget change without counting it as an in-scope failure.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "Yes; it is in scope and the original was correct",
+          "feedback": "The supplied change respects the budget and fixed-coordinate rule while the model’s inclusive cutoff now predicts 1.",
+          "correct": true
+        },
+        {
+          "label": "No; the clean test had passed",
+          "feedback": "The clean result says nothing about this additional allowed input."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "neurons-and-activations",
+        "skill": "Follow a weighted sum into a decision",
+        "why": "The familiar threshold now gives a visible decision boundary."
+      },
+      {
+        "lessonId": "security-backdoor-evaluation",
+        "skill": "Keep eligibility separate from outcomes",
+        "why": "The capability checks define which prediction changes answer this experiment’s question."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which claim would remain untested even after every supplied case passes?",
+      "carryForward": "Record the capability, label assumptions and search coverage beside each robustness result."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Decide whether the supplied trial is in scope",
+      "challenge": "Combine the size limit, fixed-coordinate rule and public domain checks into one flag of 0 or 1.",
+      "why": "We must know what capability a trial represents before interpreting its failure.",
+      "hints": [
+        "A permitted size does not allow a change to a protected coordinate.",
+        "The epsilon value goes before the measured largest change in a Threshold gate."
+      ]
+    }
+  },
+  "security-prediction-api-controls": {
+    "premise": "A request-count limit looked effective until batching changed the work inside one message.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Reserve the actual prediction work",
+      "start": "Build a caller-row branch and a global-unit branch, then require both before projecting the public response.",
+      "outcome": "A batch cannot obtain a prediction merely because it fits one of the two independent allowances.",
+      "hints": [
+        "Subtract prior use separately from each allowance.",
+        "Require both capacity flags, then pass the result into the public-label component. A denied request should not expose its internal score."
+      ]
+    },
+    "investigation": {
+      "title": "One envelope now carries 6 rows",
+      "question": "The caller has 5 rows left. Does the single envelope fit this policy?",
+      "outcome": "Retest the independently exhausted global budget before returning any public label.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; the work exceeds the remaining row allowance",
+          "feedback": "This quota is expressed in evaluated rows, so the request envelope cannot reset its meaning.",
+          "correct": true
+        },
+        {
+          "label": "Yes; the HTTP request count increased only once",
+          "feedback": "That is the assumption the larger batch exposes."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "security-retrieval-authority",
+        "skill": "Use trusted service authority",
+        "why": "A caller’s identity and resource state cannot come from a model’s untrusted claim."
+      },
+      {
+        "lessonId": "software-tool-errors",
+        "skill": "Keep retries inside an operation budget",
+        "why": "Repeated calls and batches participate in the same resource accounting."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which information does a label-only interface still reveal to repeated callers?",
+      "carryForward": "Keep access, admitted work and public response detail as explicit service policies."
+    },
+    "preparation": {
+      "path": [
+        0
+      ],
+      "title": "Construct admission before exposing output",
+      "challenge": "Require the batch to fit both remaining caller rows and remaining estimated compute units.",
+      "why": "A response projector should consume the completed admission decision, not invent its own quota policy.",
+      "hints": [
+        "The remaining caller allowance and new batch size must use the same row unit.",
+        "The second branch compares compute units, so calculate the batch’s estimated cost before its Threshold gate."
+      ]
     }
   },
   "simulation-time-steps": {
@@ -905,6 +2291,179 @@
     "reflection": {
       "prompt": "Which real-world mechanism is missing from the simulator entirely?",
       "carryForward": "Validate the simulator and reserve fresh conditions before claiming transfer."
+    }
+  },
+  "numerical-stable-normalisation": {
+    "premise": "A new encoder changes numerical scale and breaks the normalisation Botie used for retrieval.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Protect the products before they are formed",
+      "start": "Reuse the vector-length calculation, but move a common rescaling in front of its squares.",
+      "outcome": "The direction stays the same across a large change in magnitude.",
+      "hints": [
+        "Start with the largest absolute component. It gives a common scale, rather than a separate scale for every coordinate.",
+        "A zero vector needs a deliberate policy. Use the nonzero-divisor tool at the scale and scaled-length divisions so zeros remain zeros."
+      ]
+    },
+    "investigation": {
+      "title": "The first length calculation becomes infinite",
+      "question": "Which part of the earlier construction lost the direction?",
+      "outcome": "Repair the calculation before interpreting the retrieval result.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "The squares overflowed before the final division",
+          "feedback": "The original components were finite. Changing their scale before multiplying avoids that intermediate failure.",
+          "correct": true
+        },
+        {
+          "label": "Every large embedding must have zero relevance",
+          "feedback": "Numerical failure is not evidence about whether a document answers the question."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "distance-and-similarity",
+        "skill": "Separate direction from vector size",
+        "why": "We preserve that same geometric comparison while changing its numerical evaluation."
+      }
+    ],
+    "reflection": {
+      "prompt": "What other failure could remain even after every output direction has length one?",
+      "carryForward": "Keep encoder compatibility and retrieval relevance as separate checks from numerical range."
+    }
+  },
+  "numerical-identifiable-models": {
+    "premise": "The fitted simulator uses two heater gains that the original combined measurements never identified.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Construct a test of the competing fits",
+      "start": "Reuse matrix-times-vector twice, retaining one prediction per candidate experiment. Keep positions only after comparing the aligned gaps.",
+      "outcome": "The suggested experiments are tied to a specific unresolved parameter difference.",
+      "hints": [
+        "Both branches must use the same candidate experiment rows and the same coordinate order.",
+        "Subtract the two prediction vectors before taking absolute values. Compare those gaps with the planning resolution, then retain passing original positions."
+      ]
+    },
+    "investigation": {
+      "title": "The next batch runs the heaters together again",
+      "question": "Did the larger record count resolve which heater contributes more?",
+      "outcome": "Change the proposed experiment, not just the file size.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; both candidates still predict the same totals",
+          "feedback": "These new rows repeat the same combination of inputs. More records need not add an independent direction.",
+          "correct": true
+        },
+        {
+          "label": "Yes; every extra row identifies another parameter",
+          "feedback": "Repeated dependent rows can leave the same ambiguity."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "simulation-system-identification",
+        "skill": "Fit a declared physical relationship",
+        "why": "A returned parameter estimate now needs a check that the experiments could determine it."
+      },
+      {
+        "lessonId": "linear-algebra",
+        "skill": "Apply one coefficient vector to many rows",
+        "why": "The same matrix calculation compares candidate predictions at proposed experiments."
+      }
+    ],
+    "reflection": {
+      "prompt": "If a new measurement rejects both candidates, what assumptions would you inspect?",
+      "carryForward": "Preserve model alternatives and measurement resolution when planning new evidence."
+    }
+  },
+  "numerical-gradient-checks": {
+    "premise": "Botie’s symmetric gradient check conceals an absolute-loss corner behind a zero.",
+    "order": "investigate-first",
+    "construction": {
+      "title": "Keep the two local comparisons separate",
+      "start": "Reuse the loss evaluation and subtraction tools to measure each side before averaging.",
+      "outcome": "The report explains why a central zero can have different meanings.",
+      "hints": [
+        "Build weight-minus-step and weight-plus-step before evaluating the loss. Each loss machine uses the same target and kind.",
+        "The left slope uses centre-minus-left; the right uses right-minus-centre. Their average is the central difference, which must not replace the separate evidence."
+      ]
+    },
+    "investigation": {
+      "title": "The loss changes to absolute error at its target",
+      "question": "Does the central zero establish a classical derivative of zero?",
+      "outcome": "Retain both sides before judging the implementation’s derivative convention.",
+      "caseIndex": 1,
+      "kind": "diagnose",
+      "options": [
+        {
+          "label": "No; inspect the opposite one-sided slopes",
+          "feedback": "The two sides approach different slopes at this corner.",
+          "correct": true
+        },
+        {
+          "label": "Yes; a central estimate always proves differentiability",
+          "feedback": "Symmetric cancellation can hide a nondifferentiable point."
+        }
+      ]
+    },
+    "connections": [
+      {
+        "lessonId": "calculus",
+        "skill": "Interpret a local slope",
+        "why": "We now approximate that local relationship from evaluations of the running program."
+      },
+      {
+        "lessonId": "backpropagation",
+        "skill": "Calculate a model derivative",
+        "why": "An independent finite-difference fixture helps diagnose a reported derivative without replacing training."
+      }
+    ],
+    "reflection": {
+      "prompt": "Which changes to randomness or state would make these perturbations compare different losses?",
+      "carryForward": "Keep the loss definition, numerical scale and derivative convention attached to a gradient-check result."
+    }
+  },
+  "numerical-adaptive-steps": {
+    "premise": "The simulator’s old fixed timestep misses a rapid change that its learned training target must represent.",
+    "order": "build-first",
+    "construction": {
+      "title": "Build an acceptance test around the old update",
+      "start": "Reuse the Euler update, then add a midpoint reevaluation and an explicit error comparison before the result is accepted.",
+      "outcome": "A failed attempt has a visible numerical reason rather than silently entering the training trajectory.",
+      "hints": [
+        "The fine branch must take its second half step from the midpoint output, not from the original state again.",
+        "Compute the error magnitude and tolerance on separate branches. For Threshold gate, supply tolerance first and error second so acceptance means the allowance is at least the estimate."
+      ]
+    },
+    "investigation": {
+      "title": "The proposed interval grows from a tenth of a second to one second",
+      "question": "Will the discrepancy remain inside the same absolute-plus-relative tolerance?",
+      "outcome": "The larger interval is rejected. Retry it from the unchanged starting state.",
+      "caseIndex": 1,
+      "kind": "predict",
+      "predictionLabel": "Your prediction before running"
+    },
+    "connections": [
+      {
+        "lessonId": "simulation-time-steps",
+        "skill": "Expose a finite numerical update",
+        "why": "The same update becomes a component inside a check of its local approximation."
+      },
+      {
+        "lessonId": "data-artifact-lineage",
+        "skill": "Keep the procedure that produced training records",
+        "why": "Solver method and tolerance belong beside the simulator version and generated data."
+      }
+    ],
+    "reflection": {
+      "prompt": "What separate evidence would tell us whether the physical cooling law is wrong?",
+      "carryForward": "Track local numerical acceptance separately from complete-trajectory error and agreement with measured equipment."
     }
   }
 }
