@@ -1,5 +1,5 @@
 import { view, exercise, s, op, sample, before, construction } from "./authoring.mjs";
-import { py, worked, lessonPart as p, question as q, numpyHistory as h, pythonSection as section } from "./numpy-authoring.mjs";
+import { py, worked, lessonPart as p, question as q, pythonSection as section } from "./numpy-authoring.mjs";
 
 const lessons = [
   {
@@ -8,7 +8,31 @@ const lessons = [
     openingTitle:"Did the Method Fail, or Did We Ask the Wrong Check?",
     opening:["Botie converts a report, then reverses the conversion to check the original readings. The recovered numbers may differ by a tiny rounding amount. An exact comparison can reject a perfectly useful calculation, but accepting every small-looking difference would also be careless.","We need to choose what agreement means for the task. That includes the arrangement of the result, the kind of numbers it stores, whether its entries are finite, and how much numerical error we allow."],
     prerequisites:[before("One Calculation for a Whole Report","numpy-vectorisation")],
-    history:h("Representing Real Quantities With Finite Storage","A computer has a finite number of bits for each stored numerical value. Many decimal fractions therefore cannot be represented exactly in binary floating-point storage. Repeated arithmetic must round intermediate results.","NumPy exposes data types, finite-value checks, and approximate comparisons so a program can account for those limitations. The tolerance is part of our numerical contract, not a way to declare every discrepancy harmless.",[["Numerical data types","user/basics.types.html"],["Approximate comparisons","reference/generated/numpy.isclose.html"],["Comparing complete arrays","reference/generated/numpy.allclose.html"]]),
+    history:{
+  "title": "Representing Real Quantities With Finite Storage",
+  "sources": [
+    {
+      "title": "Numerical data types",
+      "url": "https://numpy.org/doc/stable/user/basics.types.html"
+    },
+    {
+      "title": "Approximate comparisons",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.isclose.html"
+    },
+    {
+      "title": "Comparing complete arrays",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.allclose.html"
+    },
+    {
+      "title": "Goldberg: What Every Computer Scientist Should Know About Floating-Point Arithmetic (1991)",
+      "url": "https://docs.oracle.com/cd/E19957-01/806-3568/ncg_goldberg.html"
+    }
+  ],
+  "blocks": [
+    "A calculation could behave differently on another computer because machines used different ways to approximate numbers. IEEE 754 standardised important rules for this floating-point arithmetic in 1985, including rounding and exceptional results.",
+    "Goldberg’s 1991 survey explained why programmers still had to account for finite precision under those rules. A stored number can approximate the intended value, and successive calculations can round differently. Our NumPy checks will therefore distinguish an invalid value from a small expected discrepancy. The tolerance must come from what the calculation needs to resolve."
+  ]
+},
     intuition:[view("Keep the expected result","We want a converted reading to match its reference closely.",[["Reference",["20"]],["Calculated",["20.0001"]]]),view("State an allowed difference","An absolute tolerance is measured in the result's own units.",[["Allowed absolute error",["0.001"]]]),view("Check the whole contract","Check the shape and whether every value is finite as well as comparing the printed result. A plausible number in the wrong layout can still break the next calculation.",[["Checks",["shape","finite values","tolerance"]]])],
     parts:[
       p("1. Choose Storage Before Losing Information","Suppose a thermometer reports a fractional temperature, but we put it into an array that stores whole numbers. The fractional part is lost at that assignment. Changing the array to hold fractions later cannot tell us which fraction was discarded.\n\nThe array’s dtype, short for data type, chooses the numerical representation used for its entries. An integer dtype stores whole numbers; a floating-point dtype can represent fractional values approximately. Choosing between them is part of deciding what information the calculation must preserve.\n\nFixed-width integer types also have limits, unlike Python's arbitrary-precision integers. Choose a type that can represent the required range. Narrowing a type merely to save memory can change the calculation.",[
@@ -64,7 +88,28 @@ print("Shape, finite values, and tolerance checked.")`,"True\nFalse\nShape, fini
     openingTitle:"Can We Explain the Rule Once and Use It Again?",
     opening:["Botie keeps converting new greenhouse reports. If we copy the same calculation into each program, one copy may use a different offset or quietly change the original data. A named function gives the rule one place to live.","The name alone is not enough. The function needs a clear agreement about its inputs, output shape, units, and treatment of invalid data. We will build that agreement as part of the code."],
     prerequisites:[before("When Two Calculations Almost Agree","numpy-numerical-checks")],
-    history:h("Making Numerical Routines Reusable Without Losing Their Assumptions","Reusable numerical routines let programmers test one implementation and call it from many calculations. Their usefulness depends on the caller and the routine agreeing about dimensions, units, and valid inputs.","NumPy's array conversion and testing interfaces support those contracts. They let a Python function accept array-like input, validate its layout, and compare a result with a small independently checked example. The function remains responsible for its scientific assumptions.",[["Converting array-like inputs","reference/generated/numpy.asarray.html"],["Testing numerical arrays","reference/routines.testing.html"]]),
+    history:{
+  "title": "Making Numerical Routines Reusable Without Losing Their Assumptions",
+  "sources": [
+    {
+      "title": "Converting array-like inputs",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.asarray.html"
+    },
+    {
+      "title": "Testing numerical arrays",
+      "url": "https://numpy.org/doc/stable/reference/routines.testing.html"
+    },
+    {
+      "title": "Python’s official FAQ: Guido van Rossum explains its origins",
+      "url": "https://docs.python.org/3/faq/general.html#why-was-python-created-in-the-first-place"
+    }
+  ],
+  "blocks": [
+    "Scientific work needs a small tested calculation to be callable from several larger procedures. Copying its implementation into each one makes later corrections difficult to keep consistent.",
+    "Guido van Rossum began Python in 1989 while seeking a more practical scripting language for work on the Amoeba system, and released it publicly in 1991. His account stresses extensibility: Python should be able to work with existing facilities rather than being restricted to one application. Numerical Python libraries used that ability to put reusable compiled operations behind ordinary Python calls.",
+    "Our own function needs the same clarity at its boundary. The caller supplies arrays of a stated shape and meaning; the function checks those assumptions and returns a result the caller can interpret. Naming a routine does not make its assumptions disappear."
+  ]
+},
     intuition:[view("Name the input meaning","The function receives Celsius readings in their original greenhouse order.",[["Input",["12","18","24"]]]),view("Keep the rule in one place","Scale each entry, then shift the zero point.",[["Scale",["1.8"]],["Offset",["32"]]]),view("Check a second report","A useful function works on values beyond its first demonstration.",[["Reference Celsius",["0","100"]],["Expected Fahrenheit",["32","212"]]])],
     parts:[
       p("1. Separate a Function Definition From a Call","A conversion function should describe the rule once and let us supply a different report each time. Writing def creates that function. Its parameters name the inputs that the function will receive, and the indented body describes what to do with them.\n\nDefining the function does not run that work. A call supplies actual arguments, such as today’s temperature array. The return statement passes the calculated result back to the caller, where another operation can use it.\n\nPrinting and returning are different: print displays something; return makes the result available to the next calculation. A function that only prints cannot be used as a numerical result in the same way.",[

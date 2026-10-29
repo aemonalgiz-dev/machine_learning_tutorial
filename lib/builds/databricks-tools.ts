@@ -22,7 +22,7 @@ export const databricksTools: Record<string, Tool> = {
     const names = strings(columns); if (new Set(names).size !== names.length) throw Error("Use distinct output column names.");
     return [...clone(rows(plan)), { kind: "select", columns: names }];
   }),
-  dbxExecutePlan: tool("Execute the plan on these rows", "Interpret the small filter/projection plan against this batch. This is the workshop's action boundary, not a Spark scheduler.", ["Transformation plan", "Input records"], ([plan, input]) => {
+  dbxExecutePlan: tool("Execute the plan on these rows", "Run the saved filter and column-selection instructions on the supplied rows. Building the plan does not read the table; this component gives those instructions their data.", ["Transformation plan", "Input records"], ([plan, input]) => {
     let result = clone(rows(input));
     for (const step of rows(plan)) {
       if (step.kind === "filter") result = result.filter(row => { const value = field(row, text(step.field)); return value !== null && number(value) >= number(step.minimum); });
@@ -42,7 +42,7 @@ export const databricksTools: Record<string, Tool> = {
     return result;
   }),
   dbxPartitionSizes: tool("Count each worker's records", "Keep one count for every worker, including empty workers. An idle worker cannot finish a different worker's unsplit hot group.", ["Worker partitions"], ([partitions]) => array(partitions).map(part => array(part).length)),
-  dbxSnapshot: tool("Open a committed table version", "Select exactly one supplied immutable snapshot by its version number. Missing or repeated versions stop the read. The workshop stores full snapshots, unlike Delta's transaction-log implementation.", ["Table history", "Required version"], ([history, version]) => {
+  dbxSnapshot: tool("Open a committed table version", "Read the exact saved table version requested. A missing or repeated version stops the read. This workshop stores complete copies; Delta reconstructs a table version from its transaction log.", ["Table history", "Required version"], ([history, version]) => {
     const requested = integer(version), found = rows(history).filter(commit => integer(commit.version) === requested);
     if (found.length !== 1) throw Error("The requested version must exist exactly once in the retained history.");
     return clone(rows(found[0].rows));
@@ -59,7 +59,7 @@ export const databricksTools: Record<string, Tool> = {
     }
     return result;
   }),
-  dbxCommitFiles: tool("Commit accepted rows and file progress", "Return a new state containing appended records and their file identities together. This atomic-state teaching model assumes an idempotent transactional sink; it is not a promise about arbitrary external side effects.", ["New files", "Earlier output records", "Earlier file checkpoint"], ([input, previous, checkpoint]) => {
+  dbxCommitFiles: tool("Commit accepted rows and file progress", "Add the accepted rows and record the same file identities in one new state. A real data sink must commit both updates together so a retry cannot add the rows twice.", ["New files", "Earlier output records", "Earlier file checkpoint"], ([input, previous, checkpoint]) => {
     const files = rows(input), ids = strings(checkpoint), names = files.map(file => text(file.file));
     if (new Set(names).size !== names.length || names.some(name => ids.includes(name))) throw Error("Filter completed or repeated files before committing.");
     return { rows: [...clone(rows(previous)), ...files.flatMap(file => clone(rows(file.rows)))], checkpoint: [...ids, ...names] };

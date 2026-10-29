@@ -17,6 +17,38 @@ import { journeyFor } from '../lib/builds/journey';
 // fields. At runtime an absent field remains absent, as required by the tools.
 const freshCases = fresh as unknown as Record<string, Build['cases'][number]>;
 
+const databricksBookmarks = [
+  ['1-begin-with-the-records-not-a-cluster-diagram', 'Begin with the records, not a cluster diagram'],
+  ['2-give-the-proposed-result-its-own-name', 'Give the proposed result its own name'],
+  ['3-ask-when-the-rows-are-actually-needed', 'Ask when the rows are actually needed'],
+  ['4-read-a-spark-plan-before-collecting-a-result', 'Read a Spark plan before collecting a result'],
+  ['5-reuse-the-procedure-not-an-accidentally-captured-answer', 'Reuse the procedure, not an accidentally captured answer'],
+] as const;
+
+test('Databricks foundations retain existing reading and quiz bookmarks', () => {
+  const lesson = expandedLessonById['databricks-lazy-dataframes'];
+  for (const [id] of databricksBookmarks) expect(lesson.parts.filter(part => part.id === id)).toHaveLength(1);
+  expect(lesson.parts.findIndex(part => part.id === databricksBookmarks[0][0])).toBeGreaterThanOrEqual(2);
+  expect(lesson.checkpoints?.find(checkpoint => checkpoint.id === 'questions-on-parts-1-to-3')?.title).toBe('Questions on Parts 1 to 5');
+  expect(lesson.quizId).toBe('questions-on-parts-1-to-5');
+  expect(expandedLessonById['numerical-adaptive-steps'].parts.find(part => part.id === '8-ask-a-library-for-the-trajectory-not-just-its-final-array')?.title).toBe('8. Ask a library for values at the observation times');
+});
+
+test('old Databricks links open the intended pages after the new introductions', async ({ page }) => {
+  for (const [id, heading] of [
+    ...databricksBookmarks,
+    ['questions-on-parts-1-to-3', 'Questions on Parts 1 to 5'],
+    ['questions-on-parts-1-to-5', 'Questions on Parts 1 to 7'],
+  ]) {
+    await page.goto(`/concepts/databricks-lazy-dataframes#${id}`);
+    const section = page.locator(`[id="${id}"]`);
+    await expect(section).toBeVisible();
+    await expect(section.getByRole('heading', { level: 2 })).toContainText(heading);
+  }
+  await page.goto('/concepts/numerical-adaptive-steps#8-ask-a-library-for-the-trajectory-not-just-its-final-array');
+  await expect(page.getByRole('heading', { level: 2, name: '8. Ask a library for values at the observation times', exact: true })).toBeVisible();
+});
+
 test('applied paths preserve agent URLs and publish complete ML-specific lessons', () => {
   expect(LEARNING_AREAS).toHaveLength(11);
   expect(Object.keys(plans)).toHaveLength(55);

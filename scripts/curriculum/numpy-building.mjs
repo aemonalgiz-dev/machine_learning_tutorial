@@ -1,5 +1,5 @@
 import { view, exercise, s, op, sample, before, construction } from "./authoring.mjs";
-import { py, worked, lessonPart as p, question as q, numpyHistory as h, pythonSection as section } from "./numpy-authoring.mjs";
+import { py, worked, lessonPart as p, question as q, pythonSection as section } from "./numpy-authoring.mjs";
 
 const lessons = [
   {
@@ -8,7 +8,27 @@ const lessons = [
     openingTitle: "Do We Have to Type Every Entry?",
     opening: ["Suppose Botie plans to check three greenhouses on two mornings. We know how many entries the report will need before we know the temperatures. We also want a regular schedule of checks. Neither task should require copying the same number over and over.", "NumPy can create arrays from a shape, a repeated value, or a sequence rule. The choice matters: an empty place in a report is not evidence that the thermometer measured zero."],
     prerequisites: [before("Giving Measurements a Place", "numpy-arrays"), before("Which Direction Are We Adding?", "numpy-axes")],
-    history: h("When the Layout Was Known Before the Measurements", "Scientific programs often know the dimensions of a calculation before they have its results. They need storage for accumulators, trial settings, and numerical grids without writing each entry by hand.", "NumPy's array-creation routines make those intentions explicit. A shape describes the arrangement; a fill value or spacing rule describes its initial contents. Our greenhouse schedule is an invented example of that distinction.", [["Creating arrays", "user/basics.creation.html"], ["Evenly spaced samples", "reference/generated/numpy.linspace.html"]]),
+    history: {
+  "title": "When the Layout Was Known Before the Measurements",
+  "sources": [
+    {
+      "title": "Creating arrays",
+      "url": "https://numpy.org/doc/stable/user/basics.creation.html"
+    },
+    {
+      "title": "Evenly spaced samples",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.linspace.html"
+    },
+    {
+      "title": "Oliphant: Guide to NumPy (December 2006)",
+      "url": "https://web.mit.edu/dvp/Public/numpybook.pdf"
+    }
+  ],
+  "blocks": [
+    "A simulation needs places to accumulate results before those results exist. It also needs repeatable grids of proposed times or settings. Asking a person to type every initial value would make both jobs fragile.",
+    "Oliphant’s 2006 Guide to NumPy documented distinct constructors for filled storage, uninitialised storage and regularly spaced values. That distinction makes the programmer’s intention visible: reserving room is different from assigning meaningful starting values. Our schedule will use those separate choices so an uninitialised entry cannot be mistaken for a sensor reading."
+  ]
+},
     intuition: [view("Decide what a row means", "Each row belongs to a morning and each column to a greenhouse.", [["Monday", ["north", "middle", "south"]], ["Tuesday", ["north", "middle", "south"]]]), view("Choose the initial meaning", "Zero is appropriate for a count of checks made so far. It is not a replacement for an unmeasured temperature.", [["Checks so far", ["0", "0", "0"]]]), view("Generate the schedule", "A start, stop, and spacing rule determine which times Botie will inspect.", [["Hour", ["6", "8", "10", "12"]]])],
     parts: [
       p("1. Start With a Shape and a Meaning", "Our check sheet needs one row for each morning and one column for each greenhouse. Before entering measurements, we can ask NumPy to create that layout. We pass the shape as a tuple, an ordered group written in parentheses, with the row count first and the column count second.\n\nThe creation function decides what initially occupies those positions: zeros supplies zero, ones supplies one, and full supplies a value we choose. None of those initial values is a thermometer reading until our program records an actual measurement there.\n\nA zero-filled array is useful for a counter before any events have occurred. A constant target table is useful for a shared rule. Neither is a table of observations merely because it has the right shape.", [
@@ -62,7 +82,27 @@ print(identity.shape)`, "[[1, 0, 0], [0, 1, 0], [0, 0, 1]]\n(3, 3)", "This is a 
     openingTitle:"Which Part of the Report Did We Ask For?",
     opening:["A report with hundreds of rows is useful only if we can retrieve the observations we need. Sometimes they are adjacent. Sometimes we need particular positions in a particular order. Those requests should not be confused.","We will follow a small temperature table through slices and explicit index selections, then check which results share storage with the original. This matters whenever we prepare data while keeping the original measurements available."],
     prerequisites:[before("Which Direction Are We Adding?","numpy-axes")],
-    history:h("Working on Part of a Large Scientific Record","Scientific arrays can be too large to copy every time a calculation needs a subset. Regular stretches of storage can often be described by a starting position, a length, and a step.","NumPy distinguishes basic slicing, which can share storage, from advanced indexing, which gathers values into a new array. Those documented rules explain both the convenience of selection and the need for care when editing it.",[["Indexing arrays","user/basics.indexing.html"],["Copies and views","user/basics.copies.html"]]),
+    history:{
+  "title": "Working on Part of a Large Scientific Record",
+  "sources": [
+    {
+      "title": "Indexing arrays",
+      "url": "https://numpy.org/doc/stable/user/basics.indexing.html"
+    },
+    {
+      "title": "Copies and views",
+      "url": "https://numpy.org/doc/stable/user/basics.copies.html"
+    },
+    {
+      "title": "Van der Walt, Colbert and Varoquaux: The NumPy array (2011)",
+      "url": "https://arxiv.org/abs/1102.1523"
+    }
+  ],
+  "blocks": [
+    "Copying a large image whenever a program inspects one region can cost more than the calculation on that region. Numerical array implementations therefore needed to describe a subset without automatically duplicating its stored values.",
+    "Van der Walt, Colbert and Varoquaux’s 2011 account explained NumPy’s array structure and the importance of avoiding copies. A view describes how to reach values in existing storage; its shape and steps through memory can differ from the original array’s. That saving also explains why editing a slice can change its source. We will contrast that shared view with a separately gathered result."
+  ]
+},
     intuition:[view("Keep the original order visible","Rows are mornings; columns are north, middle, south.",[["Monday",["10","20","30"]],["Tuesday",["14","22","36"]],["Wednesday",["16","24","38"]]]),view("A range follows existing positions","Taking the first two mornings keeps their order and stops before the third.",[["Rows",["0","1"]]]),view("A gather follows requested positions","Requesting row two and then row zero deliberately changes the order.",[["Requested rows",["2","0"]]])],
     parts:[
       p("1. Read a Slice From Start to Stop", "Suppose we need the first two mornings from a longer report. We can describe that uninterrupted portion by where it begins and where it stops. NumPy calls this selection a slice.\n\nA slice has a start, a stop, and an optional step. The stop position is excluded, so the first position outside our requested portion supplies the boundary. Leaving a boundary empty uses the corresponding end of the axis. A negative index counts back from the end; minus one selects the last entry.\n\nIn a matrix we supply a selector for each axis, separated by a comma. Selecting with a single integer removes that axis; selecting a one-entry slice keeps it.",[

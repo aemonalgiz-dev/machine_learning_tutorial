@@ -50,7 +50,7 @@ export const servingDepthTools: Record<string, Tool> = {
   },
   servingCacheCompatible: {
     title: 'Check the cache compatibility contract', inputs: ['Stored contract', 'Incoming contract'],
-    why: 'This conservative teaching policy requires equal model, tokenizer, adapter, prompt-template, tenant and KV-format versions. It is an application contract, not a reproduction of every runtime cache-key field or an authorization system.',
+    why: "Compare the saved and current model, tokenizer, adapter, prompt template, tenant and KV-format versions. They must all match before this example reuses data. This compares supplied values; the server still has to enforce who may use a cache.",
     run: ([stored, incoming]) => {
       const pair = [stored, incoming].map(x => {
         if (!x || typeof x !== 'object' || Array.isArray(x)) throw Error('Connect both named compatibility records.');
@@ -83,7 +83,7 @@ export const servingDepthTools: Record<string, Tool> = {
   },
   servingAdmitFIFO: {
     title: 'Admit the waiting prefix that fits', inputs: ['Waiting IDs', 'Required blocks', 'Free sequence slots', 'Free blocks'],
-    why: 'Admits requests in the supplied FIFO order while both limits permit. Stops at the first request that cannot fit, even if a later smaller request could. This deliberately simple policy is not a vLLM scheduler emulator.',
+    why: "Take waiting requests in their listed order. A request needs both a free slot and enough memory blocks. Stop when the next request cannot fit; later requests keep waiting. This example uses a simple queue policy.",
     run: ([data, requirements, slotInput, blockInput]) => {
       const names = ids(data), blocks = array(requirements).map(x => integer(x, 'Required blocks'));
       let slots = integer(slotInput, 'Free slots'), free = integer(blockInput, 'Free blocks');
@@ -124,7 +124,7 @@ export const servingDepthTools: Record<string, Tool> = {
   },
   servingPressureReport: {
     title: 'Keep ownership beside the waiting decisions', inputs: ['Held sequence slots', 'Held KV blocks', 'Queue decision'],
-    why: 'Names the independent occupancy and waiting-queue results. A bounded waiting queue does not by itself bound running memory or stop an external tool effect.',
+    why: "Collect the active slot count, reserved memory count and waiting-queue result in one report. A queue limit restricts waiting requests; running work still needs its own memory limit.",
     run: ([slots, blocks, queue]) => {
       if (!queue || typeof queue !== 'object' || Array.isArray(queue)) throw Error('Connect a queue decision record.');
       return { heldSlots: integer(slots, 'Held slots'), heldBlocks: integer(blocks, 'Held blocks'), queued: ids(field(queue, 'queued')), rejected: ids(field(queue, 'rejected')) };

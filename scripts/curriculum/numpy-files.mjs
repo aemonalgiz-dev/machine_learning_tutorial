@@ -1,5 +1,5 @@
 import { view, exercise, s, op, sample, before, construction } from "./authoring.mjs";
-import { py, worked, lessonPart as p, question as q, numpyHistory as h, pythonSection as section } from "./numpy-authoring.mjs";
+import { py, worked, lessonPart as p, question as q, pythonSection as section } from "./numpy-authoring.mjs";
 
 const lessons = [{
   id:"numpy-saving-data",title:"Keep Enough of a Calculation to Run It Again",section,topic:"Keep the Calculation Trustworthy",
@@ -7,7 +7,31 @@ const lessons = [{
   openingTitle:"What Will Tomorrow's Program Need From Today's Work?",
   opening:["Botie has prepared a feature table, fitted coefficients, and kept the greenhouse names. Tomorrow's program must load those pieces in the same order. Saving only a screenshot or a rounded list of predictions would not be enough to repeat the calculation.","NumPy can save one array in its native format, keep several arrays in a named archive, or exchange numbers as text. We will try each route and check both the values and the information needed to interpret them."],
   prerequisites:[before("Give a Reusable Calculation a Clear Contract","numpy-functions"),before("Turn Several Measurements Into Several Predictions","numpy-linear-algebra")],
-  history:h("Keeping Numerical Results Usable by the Next Program","Scientific programs need to exchange data and repeat earlier calculations. Plain text is inspectable, but it does not automatically preserve every array's type, shape, labels, or full numerical precision.","NumPy's NPY format records an array's dtype and shape with its values. NPZ archives collect named arrays, while text readers and writers serve simpler interchange needs. These formats preserve stored data, not the scientific meaning we forget to record.",[["NumPy binary format","reference/generated/numpy.lib.format.html"],["Saving named arrays","reference/generated/numpy.savez.html"],["Text array input","reference/generated/numpy.loadtxt.html"]]),
+  history:{
+  "title": "Keeping Numerical Results Usable by the Next Program",
+  "sources": [
+    {
+      "title": "NumPy binary format",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.lib.format.html"
+    },
+    {
+      "title": "Saving named arrays",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.savez.html"
+    },
+    {
+      "title": "Text array input",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.loadtxt.html"
+    },
+    {
+      "title": "Kern: NEP 1, a simple file format for NumPy arrays (2007)",
+      "url": "https://numpy.org/neps/nep-0001-npy-format.html"
+    }
+  ],
+  "blocks": [
+    "Saving raw array bytes was economical, but another program could not recover the shape or numerical type from those bytes alone. Saving a general Python object raised different problems for large arrays and direct access to part of a file.",
+    "Robert Kern’s December 2007 NPY proposal designed a small binary format that kept array shape and type information beside the data and supported memory mapping. It deliberately addressed array storage rather than trying to describe every part of a scientific dataset. That distinction still matters when we save Botie’s results: the file can preserve a number exactly while omitting its units or the observation it belongs to."
+  ]
+},
   intuition:[view("Keep the model inputs","Observation rows must remain attached to their feature columns.",[["North features",["10","40"]],["South features",["20","60"]]]),view("Keep the rule and the names","Coefficients and labels explain how the table is used.",[["Weights",["2","0.1"]],["Names",["north","south"]]]),view("Recompute after loading","A successful round trip restores the data and lets the same calculation run.",[["Weighted sum",["24","46"]]])],
   parts:[
     p("1. Save the Array, Not Only Its Printed Appearance","np.save writes one array in NPY format. np.load reads it back, including the dtype and shape. A printed string is intended for people; a saved numerical array is intended for another calculation.\n\nThese browser examples use BytesIO, a binary file held in memory. It follows the same read/write interface as a file without writing to your computer. Its contents are temporary and disappear when the Python runtime is reset. For a local Python program, a file path can be supplied instead.",[

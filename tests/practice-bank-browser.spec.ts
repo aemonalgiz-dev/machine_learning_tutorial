@@ -57,7 +57,7 @@ test("library filters cases and runs the Python challenge, retaining drafts by a
   test.setTimeout(180000);
   const state=await service(page);
   await page.goto("/practice");
-  await expect(page.getByText(/3,456 activities across 48 problem families/)).toBeVisible();
+  await expect(page.getByText(/3,456 activities covering 48 problems/)).toBeVisible();
   await page.screenshot({path:info.outputPath("account-library.png")});
   await page.setViewportSize({width:390,height:844});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

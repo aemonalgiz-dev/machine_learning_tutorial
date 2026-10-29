@@ -71,7 +71,7 @@ function Gate({ destination }: {
     if (account.status === "unavailable")
         return <div role="alert" className="space-y-4 rounded-xl border border-line p-6"><p>Your account could not be checked. Account work remains on the server. Keep this tab open for any changes that have not saved yet.</p><button className={control} onClick={() => void refreshAccount()}>Check account again</button></div>;
     return <div className="space-y-5 rounded-xl border border-line bg-surface p-6">
-    <BotieSays mood="curious"><p>Want more problems to work through? Sign in to choose a practice membership for this additional library.</p></BotieSays>
+    <BotieSays mood="curious"><p>This library is part of the paid practice membership. Sign in to see the plans.</p></BotieSays>
     <Link className="inline-flex min-h-11 items-center rounded-lg bg-accent-fill px-4 py-2 font-semibold text-accent-ink" href={"/account?returnTo=" + encodeURIComponent(destination)}>Sign in or create an account</Link>
     <p className="text-sm leading-6 text-muted">The course and its existing exercises stay free. A free account keeps your learning progress and drafts; membership adds these extra practice cases.</p>
   </div>;
@@ -117,7 +117,7 @@ export function PracticeLibrary() {
         return <p role="status">Loading your practice library…</p>;
     const families = data.families.filter(f => (group === "All topics" || f.group === group) && [f.id, f.title, f.intro, f.group, f.language, f.lesson].join(" ").toLowerCase().includes(search.toLowerCase().trim()));
     return <div className="space-y-5">
-    <p className="text-muted">{data.total.toLocaleString("en-US")} activities across {data.families.length} problem families. Each family has {data.variants} reproducible cases in quiz, programming and workshop form. Cases vary the inputs and boundary conditions of the same problem; they are not separate lessons.</p>
+    <p className="text-muted">{data.total.toLocaleString("en-US")} activities covering {data.families.length} problems. Each problem has {data.variants} sets of inputs. Every set is available as a quiz, programming problem and workshop, so you can keep practising the topic after its lesson.</p>
     <PracticeMemory />
     <div className="flex flex-wrap gap-4 rounded-xl border border-line bg-surface p-4">
       <label className="flex min-w-0 flex-1 basis-56 flex-col gap-2 text-sm">Find a problem<input className={control + " w-full"} type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Try precision, SQL, or attention"/></label>
@@ -125,7 +125,7 @@ export function PracticeLibrary() {
       <label className="flex flex-col gap-2 text-sm">Activity<select aria-label="Activity" className={control} value={mode} onChange={e => setMode(e.target.value as PracticeMode)}>{Object.entries(names).map(([key, label]) => <option value={key} key={key}>{label}</option>)}</select></label>
       <label className="flex flex-col gap-2 text-sm">Case<select aria-label="Case" className={control} value={variant} onChange={e => setVariant(Number(e.target.value))}>{Array.from({ length: data.variants }, (_, i) => <option key={i} value={i}>{i + 1}</option>)}</select></label>
     </div>
-    <p aria-live="polite" className="text-sm text-muted">{families.length === 1 ? "1 problem family matches." : families.length + " problem families match."}</p>
+    <p aria-live="polite" className="text-sm text-muted">{families.length === 1 ? "1 problem matches." : families.length + " problems match."}</p>
     {families.length ? <div>{families.map(f => <FamilyRow key={f.id} family={f} mode={mode} variant={variant}/>)}</div> : <p>No matching problems. Try another topic or search term.</p>}
   </div>;
 }

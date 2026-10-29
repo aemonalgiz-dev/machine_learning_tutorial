@@ -1,5 +1,5 @@
 import { view, exercise, s, op, sample, before, construction } from "./authoring.mjs";
-import { py, worked, lessonPart as p, question as q, numpyHistory as h, pythonSection as section } from "./numpy-authoring.mjs";
+import { py, worked, lessonPart as p, question as q, pythonSection as section } from "./numpy-authoring.mjs";
 
 const lessons = [
   {
@@ -8,7 +8,27 @@ const lessons = [
     openingTitle:"How Do We Repeat a Rule Without Hiding What It Does?",
     opening:["Suppose we need to compare every greenhouse reading with a target. A Python loop can visit each entry, subtract the target, and save the result. Once we understand those steps, an array expression can ask NumPy to perform that same repeated calculation.","This is vectorisation. It is useful because common numerical loops can run inside compiled library routines, but a short expression is not automatically correct or economical. We still need to understand the operations and the shapes it creates."],
     prerequisites:[before("One Reference for Many Rows","numpy-broadcasting"),before("Ask Each Row a Question","numpy-masks")],
-    history:h("Moving Repeated Arithmetic Into Numerical Routines","Scientific Python programs often repeat a small arithmetic rule over many observations. Performing each iteration through Python has overhead, while compiled array routines can carry out many such operations directly.","NumPy exposes common elementwise operations as universal functions, often shortened to ufuncs. This lets us express the numerical rule at array scale. It does not eliminate the need to inspect temporary arrays or prove that the rule matches the intended calculation.",[["Universal functions","user/basics.ufuncs.html"],["The vectorize convenience wrapper","reference/generated/numpy.vectorize.html"]]),
+    history:{
+  "title": "Moving Repeated Arithmetic Into Numerical Routines",
+  "sources": [
+    {
+      "title": "Universal functions",
+      "url": "https://numpy.org/doc/stable/user/basics.ufuncs.html"
+    },
+    {
+      "title": "The vectorize convenience wrapper",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.vectorize.html"
+    },
+    {
+      "title": "Wiebe: NEP 10, improving array iteration (2010)",
+      "url": "https://numpy.org/neps/nep-0010-new-iterator-ufunc.html"
+    }
+  ],
+  "blocks": [
+    "Moving a loop into compiled code removes repeated Python interpretation, but it leaves another cost: repeatedly moving data through memory. An operation can be written compactly and still spend much of its time on that movement.",
+    "Mark Wiebe’s 2010 NumPy iterator proposal addressed this problem by arranging array traversal to reuse nearby data efficiently while supporting broadcasting. This was work on the machinery that runs array calculations. It helps explain why a genuine array operation and the convenient np.vectorize wrapper need not have the same performance. We will first make the numerical rule clear, then choose how to execute it."
+  ]
+},
     intuition:[view("Start with observations and a reference","Each greenhouse is compared with the same target.",[["Reading",["18","22","26"]],["Target",["20","20","20"]]]),view("Keep one difference per observation","Subtracting gives direction as well as size.",[["Difference",["-2","2","6"]]]),view("Then decide how to summarise error","Squaring makes negative and positive deviations contribute positively.",[["Squared difference",["4","4","36"]]])],
     parts:[
       p("1. Follow the Repeated Steps Before Shortening Them","A for statement visits each value in a collection. The indented instructions run for the current value, then repeat for the next. We can append each result to an initially empty list.\n\nAn array subtraction performs the corresponding elementwise operation. Elementwise means each output is calculated from the corresponding input entry or aligned entries.",[
@@ -64,7 +84,32 @@ print(np.square(readings).shape)`,"48\n(2, 1, 3)\nTrue\n(2, 3)","Know which axes
     openingTitle:"How Can One Rule Read a Whole Table?",
     opening:["Botie has two measurements for every greenhouse. A simple illustrative score gives each measurement a coefficient, adds its contributions, then adds an offset. We can calculate one greenhouse's score by hand before doing the same for a whole table.","This is where the distinction between elementwise multiplication and matrix multiplication matters. We will keep the observations, feature columns, coefficients, and output shapes visible at every step."],
     prerequisites:[before("The linear algebra primer","linear-algebra","primers"),before("One Calculation for a Whole Report","numpy-vectorisation")],
-    history:h("Reusing Numerical Linear Algebra for Many Observations","Solving systems of equations and fitting more equations than there are unknowns are longstanding numerical problems. Reliable implementations need algorithms that account for rounding and the structure of the system.","NumPy's linear algebra interface draws on established BLAS and LAPACK routines. We use that interface after making the small matrix calculation visible, and distinguish solving an exact square system from fitting an overdetermined one.",[["NumPy linear algebra","reference/routines.linalg.html"],["Least squares","reference/generated/numpy.linalg.lstsq.html"]]),
+    history:{
+  "title": "Reusing Numerical Linear Algebra for Many Observations",
+  "sources": [
+    {
+      "title": "NumPy linear algebra",
+      "url": "https://numpy.org/doc/stable/reference/routines.linalg.html"
+    },
+    {
+      "title": "Least squares",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html"
+    },
+    {
+      "title": "LAPACK: official release history, beginning February 1992",
+      "url": "https://www.netlib.org/lapack/"
+    },
+    {
+      "title": "LAPACK Users’ Guide: LAPACK and the BLAS",
+      "url": "https://www.netlib.org/lapack/lug/node11.html"
+    }
+  ],
+  "blocks": [
+    "Solving measurement equations repeatedly meant numerical programmers needed dependable routines they could reuse on different machines. Fast hardware also changed which arrangements of arithmetic and memory access were efficient.",
+    "LAPACK’s first public release was in February 1992. It built numerical solvers around BLAS building blocks, allowing tuned matrix operations to do much of the work. NumPy’s linear-algebra interface draws on that numerical software rather than asking every Python user to implement a solver.",
+    "We will still write down what the matrix represents. A library can solve the equations we supply without establishing that those equations describe the equipment, or that the measurements uniquely determine the unknowns."
+  ]
+},
     intuition:[view("Keep one observation per row","These are invented temperature and humidity features.",[["North",["10","40"]],["South",["20","60"]]]),view("Give each feature a contribution rule","The same coefficients apply to every row.",[["Coefficient",["2","0.1"]],["Offset",["3"]]]),view("Sum within each observation","The resulting scores stay in north, south order.",[["Score",["27","49"]]])],
     parts:[
       p("1. Inspect the Contributions Before Summing","Take one greenhouse and place its two measurements beside the two coefficients in the scoring rule. Multiplication gives a separate contribution from each measurement. We still need to add those contributions to obtain one score.\n\nElementwise multiplication performs only the matching multiplications. A dot product performs those multiplications and adds their results. The feature vector and coefficient vector must therefore have the same length: every coefficient needs a corresponding measurement.\n\nThe coefficients in this example are supplied solely to illustrate the calculation. They are not a trained rule or a physical greenhouse control law.",[

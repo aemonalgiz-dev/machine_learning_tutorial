@@ -41,7 +41,7 @@ export function ExpandedLessonPage({ id }: { id: string }) {
         {index === lesson.parts.length - 1 && lesson.appliedIn?.length && <aside className="mt-8 rounded-lg border border-line bg-surface p-4 text-sm">
           <p className="font-semibold text-foreground">Continue with {lesson.appliedIn.map((item, i) => <span key={item.href}>{i > 0 && ", "}<Link className="text-accent underline underline-offset-4" href={item.href}>{item.title}</Link></span>)}</p>
         </aside>}
-      </> }, ...(lesson.checkpoints ?? []).filter(checkpoint=>checkpoint.after===part.title).map(checkpoint=>({title:checkpoint.title,quiz:checkpoint.questions}))]),
+      </> }, ...(lesson.checkpoints ?? []).filter(checkpoint=>checkpoint.after===part.title).map(checkpoint=>({title:checkpoint.title,id:checkpoint.id,quiz:checkpoint.questions}))]),
       { title: `Questions on Parts 1 to ${lesson.parts.length}`, id: lesson.quizId, quiz: lesson.quiz },
       { title: lesson.reading.practiceTitle, id: lesson.section === "SQL" ? "practice-write-the-query" : ["NoSQL", "Graph Databases"].includes(lesson.section) ? "practice" : "practice-work-through-the-problem-with-numpy", practice: lesson.practice },
     ]} />;

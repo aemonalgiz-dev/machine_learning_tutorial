@@ -6,11 +6,8 @@ import calculating from "./numpy-calculating.mjs";
 import reliable from "./numpy-reliable.mjs";
 import files from "./numpy-files.mjs";
 import { deepenNumpyLessons, numpyApplications } from "./numpy-continuations.mjs";
-import { source, history, view, choice, truth, exercise, s, op, c, sample, before, construction } from "./authoring.mjs";
+import { view, choice, truth, exercise, s, op, c, sample, before, construction } from "./authoring.mjs";
 
-const arrays = source("Harris and colleagues: Array programming with NumPy (2020)", "https://doi.org/10.1038/s41586-020-2649-2");
-const pythonStructures = source("Python: lists, tuples, sets and dictionaries", "https://docs.python.org/3/tutorial/datastructures.html");
-const docs = (title, page) => source(title, `https://numpy.org/doc/stable/${page}`);
 const section = "Python and NumPy";
 const numpyLessons = [
   {
@@ -19,9 +16,28 @@ const numpyLessons = [
     openingTitle: "How Do We Give the Computer Our Measurements?",
     opening: ["Suppose Botie checks three greenhouses each morning. Today the thermometers read 12, 18, and 24 degrees Celsius. We can write those readings on paper, but a program needs them in a form it can work with.", "Let's start with one reading, then work out how to keep all three together. Python gives us several ways to organise information. We will see why a list is useful for keeping entries in order, a dictionary is useful for finding a named reading, and a NumPy array is useful for calculating with the readings."],
     prerequisites: [before("The statistics primer", "statistics", "primers")],
-    history: history("When One Calculation Needed to Work on Many Measurements", [arrays, pythonStructures, docs("NumPy's beginner guide", "user/absolute_beginners.html")],
-      "Scientific programs often repeat the same operation on long collections of measurements. Writing a separate instruction for every reading makes the program harder to inspect, while writing a Python loop for every numerical operation can add overhead.",
-      "The NumPy authors' 2020 account describes an array model that combines compact expressions with compiled numerical operations. The useful idea for us is simple: organise the readings once, then express a calculation for the collection. Our greenhouse readings are invented, not measurements from that paper."),
+    history: {
+  "title": "When One Calculation Needed to Work on Many Measurements",
+  "sources": [
+    {
+      "title": "Harris and colleagues: Array programming with NumPy (2020)",
+      "url": "https://doi.org/10.1038/s41586-020-2649-2"
+    },
+    {
+      "title": "Python: lists, tuples, sets and dictionaries",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html"
+    },
+    {
+      "title": "NumPy's beginner guide",
+      "url": "https://numpy.org/doc/stable/user/absolute_beginners.html"
+    }
+  ],
+  "blocks": [
+    "Physicists and astronomers wanted to try a calculation interactively, then apply it to a large set of measurements. Rewriting the whole experiment in a low-level language made that awkward. Python was useful for describing the procedure, but ordinary Python containers were not a substitute for efficient numerical arrays.",
+    "Numeric brought compiled array operations to Python in the mid-1990s. Numarray later addressed large astronomical images. Their differences split scientific Python software between two array packages; NumPy united their strengths in 2005.",
+    "That history explains the combination we will use: a readable Python instruction working on a numerical collection whose repeated arithmetic is handled by compiled routines. Our greenhouse readings let us begin with what each position means before asking the whole array to calculate."
+  ]
+},
     intuition: [view("Give every greenhouse a position", "Keep the same greenhouse order throughout the calculation. A result in the first position still belongs to the first greenhouse.", [["Greenhouse", ["North", "Middle", "South"]], ["Celsius", ["12", "18", "24"]]]), view("Apply the conversion to each reading", "The conversion needs a scale and an offset. Neither depends on which greenhouse supplied the reading.", [["Scale", ["1.8", "1.8", "1.8"]], ["Offset", ["32", "32", "32"]]]), view("Read the answers in the original order", "We now have the same observations in Fahrenheit. Changing the units has not changed the temperature in any greenhouse.", [["Fahrenheit", ["53.6", "64.4", "75.2"]]])],
     parts: numpyParts["numpy-arrays"],
     quiz: [choice("What does position zero identify in our temperature array?", ["The north greenhouse's reading", "A temperature of zero", "The average of all greenhouses"], 0, "We assigned the north greenhouse the first position. The value stored there is 12; the index and the measurement are different things."), truth("After the conversion we should still have one result per greenhouse.", true, "The scale and offset change each reading's units. They do not combine different observations."), choice("Which mistake could produce plausible numbers with the wrong meaning?", ["Keeping the greenhouse order", "Mixing Celsius and Fahrenheit without recording the units", "Checking a known reference temperature"], 1, "The arithmetic cannot tell us that the input units were inconsistent. We must establish their meaning before calculating.")],
@@ -40,7 +56,31 @@ const numpyLessons = [
     openingTitle:"Which Average Did We Actually Ask For?",
     opening:["Botie now has two days of temperatures for three greenhouses. We could ask for the average temperature of each greenhouse, or the average across all greenhouses on each day. Both are reasonable questions, but they have different answers.","The entries alone cannot tell the computer which question we mean. We need to describe the table's layout and say which direction the calculation should combine."],
     prerequisites:[before("Giving Measurements a Place","numpy-arrays")],
-    history:history("Keeping the Meaning of a Scientific Table",[pythonStructures, docs("NumPy's array axes and reductions","user/quickstart.html"), docs("NumPy copies and views", "user/basics.copies.html")],"Scientific records commonly separate observations from the things measured about them. Array programming keeps those distinctions as axes, so a calculation can combine one direction while preserving the others.","NumPy's documented reduction operations make the chosen axis explicit. Our two-day greenhouse table is an invented example of why that choice matters. We are using an established array convention, not attributing the invention of tables or averages to NumPy."),
+    history:{
+  "title": "Keeping the Meaning of a Scientific Table",
+  "sources": [
+    {
+      "title": "Python: lists, tuples, sets and dictionaries",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html"
+    },
+    {
+      "title": "NumPy's array axes and reductions",
+      "url": "https://numpy.org/doc/stable/user/quickstart.html"
+    },
+    {
+      "title": "NumPy copies and views",
+      "url": "https://numpy.org/doc/stable/user/basics.copies.html"
+    },
+    {
+      "title": "Falkoff and Iverson: APL/360 User’s Manual (1968)",
+      "url": "https://softwarepreservation.computerhistory.org/apl/book/196808_APL360%20Users%20Manual.pdf"
+    }
+  ],
+  "blocks": [
+    "Once a program could operate on a whole table, it needed a way to say which direction an operation should follow. Combining readings across days answers a different question from combining greenhouses on the same day.",
+    "The 1968 APL/360 manual already described reductions along specified array axes. Array languages made the direction part of the operation instead of requiring a separate hand-written loop for each layout. NumPy continues that general approach with its axis argument. We will give the directions ordinary names first: days and greenhouses."
+  ]
+},
     intuition:[view("Name both directions","Rows are days; columns are greenhouses. Keep these labels in view before reducing anything.",[["Monday",["10","20","30"]],["Tuesday",["14","22","36"]]]),view("Keep the greenhouses separate","Combine the two days within each column. We should end with three answers.",[["North across days",["10","14"]],["Middle across days",["20","22"]],["South across days",["30","36"]]]),view("Or keep the days separate","Combining each row gives a daily summary instead. That leaves two answers.",[["Monday's mean",["20"]],["Tuesday's mean",["24"]]])],
     parts: numpyParts["numpy-axes"],
     quiz:[choice("Which axis must disappear to leave one mean per greenhouse?",["The greenhouse axis","The day axis","Both axes"],1,"We combine observations from different days while keeping greenhouse columns separate."),truth("A result with two entries answers the question about three greenhouse means.",false,"There are three greenhouses. Two entries fit the number of days instead."),choice("What does shape alone tell us?",["Which greenhouse is warmest","The units used","The number of entries along each axis"],2,"Shape gives sizes. We still supply the interpretation of rows, columns, and units.")],
@@ -59,7 +99,23 @@ const numpyLessons = [
     openingTitle:"Do We Need to Repeat the Same Reference Every Day?",
     opening:["Suppose the north, middle, and south greenhouses have target temperatures of 10, 20, and 30 degrees. Botie checks them on two days. Each day needs the same three references, in the same order.","We could write those targets beside every row. Instead, we can tell the array calculation that this one target row applies to every day. NumPy calls this matching of compatible shapes broadcasting."],
     prerequisites:[before("Which Direction Are We Adding?","numpy-axes")],
-    history:history("Repeating a Calculation Without Repeating Its Data",[docs("NumPy broadcasting rules","user/basics.broadcasting.html")],"Array calculations often combine a large collection with a smaller reference: one scale for all entries, or one target for each feature column. Explicitly constructing a second large table adds work and obscures that the reference is shared.","NumPy's broadcasting rules specify when smaller shapes can be reused across larger ones. Our greenhouse example illustrates one such case. It is not a claim that NumPy understands the meaning of the columns; matching the references to the right columns remains our responsibility."),
+    history:{
+  "title": "Repeating a Calculation Without Repeating Its Data",
+  "sources": [
+    {
+      "title": "NumPy broadcasting rules",
+      "url": "https://numpy.org/doc/stable/user/basics.broadcasting.html"
+    },
+    {
+      "title": "Oliphant: Guide to NumPy (December 2006)",
+      "url": "https://web.mit.edu/dvp/Public/numpybook.pdf"
+    }
+  ],
+  "blocks": [
+    "Suppose every row needs the same set of reference temperatures. Storing a complete repeated reference table would hide the fact that those rows share one reference and would use unnecessary memory.",
+    "By the 2006 NumPy guide, broadcasting was an established part of how its array operations combined compatible shapes. A small operand could be reused while the calculation moved through the larger one. The reuse is governed by dimensions, so the program still needs us to place the greenhouse references along the correct axis. Matching sizes alone cannot establish that meaning."
+  ]
+},
     intuition:[view("Start with two days of readings","The greenhouse order is north, middle, south in every row.",[["Monday",["12","18","24"]],["Tuesday",["14","22","36"]]]),view("Supply one target per greenhouse","The target belongs to a column. It does not change with the day.",[["Target",["10","20","30"]]]),view("Keep a difference for every reading","Positive means above target; negative means below target. We still have both days and all three greenhouses.",[["Monday difference",["2","-2","-6"]],["Tuesday difference",["4","2","6"]]])],
     parts: numpyParts["numpy-broadcasting"],
     quiz:[truth("Subtracting our three targets should leave two rows and three columns.",true,"We change each reading independently. We have not averaged or discarded an axis."),choice("Which shape represents one reference per day in this two-day table?",["(3,)","(2, 1)","(1, 2)"],1,"Two rows align with the days. A one-column axis lets each day's reference apply to all three greenhouses."),choice("Why might a square table hide an alignment mistake?",["All square tables have identical entries","Broadcasting adds instead of subtracting","The row count and column count match, so the wrong meaning may still fit the shape"],2,"Shape compatibility checks sizes, not the real-world meaning of the axes.")],
@@ -78,7 +134,27 @@ const numpyLessons = [
     openingTitle:"Which Readings Need Our Attention?",
     opening:["A greenhouse report includes comfortable temperatures and readings that need attention. We want to see only the readings at or above 25 degrees, while keeping the original collection available.","We can ask the same question of every entry. The answers form another array, containing true or false at each position. This array of decisions is called a mask."],
     prerequisites:[before("Giving Measurements a Place","numpy-arrays"), before("Which Direction Are We Adding?", "numpy-axes")],
-    history:history("Selecting Observations Without Rewriting the Table",[pythonStructures, docs("NumPy indexing and Boolean selection","user/basics.indexing.html")],"Selecting observations is a recurring problem in scientific computing: a calculation might need only a certain period, a particular group, or measurements that satisfy a condition. Keeping a decision beside each observation separates the selection rule from the stored measurements.","NumPy documents Boolean indexing as a way to use those decisions. This lesson uses invented greenhouse readings to show the mechanism. It teaches selection, not a claim that all unusual observations should be discarded."),
+    history:{
+  "title": "Selecting Observations Without Rewriting the Table",
+  "sources": [
+    {
+      "title": "Python: lists, tuples, sets and dictionaries",
+      "url": "https://docs.python.org/3/tutorial/datastructures.html"
+    },
+    {
+      "title": "NumPy indexing and Boolean selection",
+      "url": "https://numpy.org/doc/stable/user/basics.indexing.html"
+    },
+    {
+      "title": "Iverson: A Programming Language (1962), original book",
+      "url": "https://softwarepreservation.computerhistory.org/apl/book/APROGRAMMINGLANGUAGE.pdf"
+    }
+  ],
+  "blocks": [
+    "A numerical record often needs a selection rule: keep observations from one interval, or choose readings that pass a stated check. We need that decision to stay aligned with the observation it describes.",
+    "Iverson’s 1962 A Programming Language described compression using a vector of membership decisions to select entries from another vector. That provides an earlier concrete example of array selection expressed through aligned decisions. Our NumPy Boolean mask uses the same useful picture: one true-or-false decision per entry being selected. The result is a selection, so we still have to explain why its condition is appropriate."
+  ]
+},
     intuition:[view("Keep the full report","Each position belongs to one greenhouse reading. The threshold includes the boundary itself.",[["Reading",["20","27","25","18"]]]),view("Ask the same question four times","A true decision means this reading meets the rule. It is a selection instruction, not a replacement temperature.",[["At least 25?",["false","true","true","false"]]]),view("Keep the selected observations","Only the two readings whose decisions were true survive, in their original order.",[["Selected temperatures",["27","25"]]])],
     parts: numpyParts["numpy-masks"],
     quiz:[truth("The reading at exactly 25 qualifies under our rule.",true,"The rule says at or above 25. A strict greater-than comparison would ask a different question."),choice("What is the right count for the selected mean?",["All four readings","The two readings kept by the mask","The threshold value"],1,"Only the two selected readings contributed to that total."),truth("The mean of the warm subset describes the whole report without qualification.",false,"Selection changed the population being summarised. The result describes only readings meeting the stated rule.")],
@@ -94,7 +170,28 @@ const numpyLessons = [
     openingTitle:"Did Our New Method Help, or Did We Draw Easier Examples?",
     opening:["Botie compares two ways of checking greenhouse sensors. If each method sees a different selection of readings, a changed score could come from the method or from the selection. We have changed two things at once.","A reproducible draw lets us hold the selection still while we investigate a change. It does not make that one selection representative of every possible draw. We need both repeatability and an honest account of variation."],
     prerequisites:[before("Ask Each Row a Question","numpy-masks")],
-    history:history("Giving Simulated Experiments a Repeatable Starting Point",[docs("NumPy random sampling","reference/random/index.html"),docs("PCG64 and reproducible streams","reference/random/bit_generators/pcg64.html")],"Numerical simulations need many values that behave like random draws, yet debugging also requires the ability to repeat an experiment. Pseudorandom generators address this by maintaining a state and updating it through a deterministic rule.","NumPy separates the bit generator from the interface that draws values. Its PCG64 documentation specifies how an initial seed establishes a stream. Our lesson uses this distinction to explain repeatability; the workshop receives already chosen indices and does not implement a random-number generator."),
+    history:{
+  "title": "Giving Simulated Experiments a Repeatable Starting Point",
+  "sources": [
+    {
+      "title": "NumPy random sampling",
+      "url": "https://numpy.org/doc/stable/reference/random/index.html"
+    },
+    {
+      "title": "PCG64 and reproducible streams",
+      "url": "https://numpy.org/doc/stable/reference/random/bit_generators/pcg64.html"
+    },
+    {
+      "title": "Kern: NEP 19, random number generator policy (2018)",
+      "url": "https://numpy.org/neps/nep-0019-rng-policy.html"
+    }
+  ],
+  "blocks": [
+    "Simulation users wanted a saved seed to reproduce earlier results, while library developers wanted to improve random-sampling algorithms. Those goals can conflict when a new algorithm consumes the random stream differently.",
+    "Robert Kern’s 2018 NumPy proposal described how strict cross-version stream compatibility had obstructed such improvements. It proposed a different compatibility policy alongside the newer separation between the underlying bit generator and distribution sampling. A seed identifies a starting state within a specified setup; it is not a complete record of that setup.",
+    "We will keep the generator and sampling procedure explicit. The workshop receives chosen indices so we can inspect how they select records; the Python example is where an actual generator produces the draws."
+  ]
+},
     intuition:[view("Name the observations before drawing","An index identifies a reading. Keeping the indices makes the selected observations inspectable.",[["Index",["0","1","2","3"]],["Reading",["10","20","30","40"]]]),view("Record a particular draw","A draw with replacement can ask for the same observation twice. Position one therefore appears twice here.",[["Drawn indices",["1","1","3"]]]),view("Follow the indices back to the data","The selected report contains the actual readings at those positions, including the repeated observation.",[["Selected readings",["20","20","40"]]])],
     parts: numpyParts["reproducible-sampling"],
     quiz:[truth("Calling the same generator again automatically restarts the original sequence.",false,"A draw advances its state. Reinitialising a separate generator with the same setup is different from making another request to the current one."),choice("Why does the workshop's selected report contain 20 twice?",["Sampling with replacement selected its position twice","The thermometer was read twice independently","The average requires duplicate entries"],0,"The repeated index is visible in the supplied draw. It represents repeated selection of the same observation."),truth("A repeatable high score proves the method works equally well on other samples.",false,"Repeatability concerns the same experiment. Generalisation requires appropriate independent evaluation.")],

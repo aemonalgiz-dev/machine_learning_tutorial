@@ -58,7 +58,7 @@ export interface ExpandedLesson {
   }[];
   quiz: QuizQuestion[];
   quizId?: string;
-  checkpoints?: { after: string; title: string; questions: QuizQuestion[] }[];
+  checkpoints?: { after: string; title: string; id?: string; questions: QuizQuestion[] }[];
   practice: Exercise[];
   build: Omit<Build, "id">;
 }

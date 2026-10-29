@@ -45,8 +45,8 @@ export function MembershipSummary() {
   return <section aria-label="Practice membership" className="journal-panel space-y-3 p-6">
     <h2 className="text-xl font-semibold">{account.membership.practiceAccess ? "Practice membership" : "Your free account"}</h2>
     <p className="text-sm leading-6 text-muted">{account.membership.practiceAccess
-      ? "Your membership includes the additional practice library. You can manage its billing separately from your saved course work."
-      : "Your course progress, code and workshop drafts save with your free account. A practice membership adds the separate library of extra problems."}</p>
+      ? "Your membership opens the additional practice library. Your course work saves with your free account."
+      : "Your course progress, code and workshop drafts save with your free account. A paid membership adds extra practice problems."}</p>
     <Link href="/membership" className="inline-flex min-h-11 items-center text-sm font-semibold text-accent underline underline-offset-4">{account.membership.practiceAccess ? "Manage membership" : "See practice membership"}</Link>
   </section>;
 }
@@ -63,8 +63,8 @@ export function PracticeMembership({ accessDenied = false, onAccessRetry }: { ac
     <Link href="/#course" className="game-button game-button-primary">Explore the free course →</Link>
   </div>;
   if (!account.user) return <div className="space-y-5 rounded-xl border border-line bg-surface p-6">
-    <h2 className="text-2xl font-semibold">Want more problems to work through?</h2>
-    <p className="leading-7 text-muted">Practice membership adds extra quizzes, programming challenges and Botie workshops. Sign in first to see the monthly and annual options for your account.</p>
+    <h2 className="text-2xl font-semibold">Try the same idea on different data</h2>
+    <p className="leading-7 text-muted">After a lesson, it helps to work through another example yourself. The additional practice library has more problems for that. Sign in to see the monthly and annual membership options.</p>
     <Link className="game-button game-button-primary" href="/account?returnTo=%2Fmembership">Sign in or create an account</Link>
     <p className="text-sm leading-6 text-muted">The course and its existing exercises are free. A free account also keeps your learning progress and drafts.</p>
   </div>;
@@ -126,8 +126,8 @@ function AccountMembership({ owner, accessDenied, onAccessRetry }: { owner: stri
   }
   return <section aria-label="Practice membership" className="space-y-5 rounded-xl border border-line bg-surface p-6 sm:p-8">
     <div className="space-y-3">
-      <h2 className="text-2xl font-semibold">{alreadySubscribed ? "Your practice membership" : "More room to practise"}</h2>
-      <p className="leading-7 text-muted">The extra practice library gives you more cases to investigate after a lesson. The inputs change, so you can check whether your reasoning still works on a different example.</p>
+      <h2 className="text-2xl font-semibold">{alreadySubscribed ? "Your extra practice membership" : "Extra practice"}</h2>
+      <p className="leading-7 text-muted">Once you&apos;ve worked through a lesson, try its method on different data. These extra problems give you more cases to work through, with tests and feedback as you go.</p>
     </div>
     {error && <div role="alert" className="space-y-3"><p>{error}</p><button className={button} onClick={() => { setBilling(null); setError(""); setAttempt(value => value + 1); }} disabled={Boolean(busy)}>Try membership details again</button></div>}
     {!billing && !error && <p role="status" className="text-sm text-muted">Loading membership options…</p>}
@@ -136,14 +136,14 @@ function AccountMembership({ owner, accessDenied, onAccessRetry }: { owner: stri
       {billing?.membership.validUntil && <p className="text-sm text-muted">Current paid period ends {new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeStyle: "short", timeZone: "UTC" }).format(billing.membership.validUntil * 1000)} UTC.</p>}
       {hasAccess && !accessDenied && <Link href="/practice" className="game-button game-button-primary">Open extra practice →</Link>}
     </div> : billing?.checkoutAvailable && offers.length ? <div className="space-y-4">
-      <h3 className="font-semibold">One practice membership. Choose how often it renews.</h3>
+      <h3 className="font-semibold">Pay monthly or yearly</h3>
       <div className="grid gap-4 sm:grid-cols-2">{(["monthly", "annual"] as const).map(interval => {
         const offer = offers.find(item => item.interval === interval);
         if (!offer) return null;
         return <div key={interval} className="space-y-4 rounded-xl border border-line bg-background p-5">
           <h4 className="font-semibold">{interval === "monthly" ? "Monthly" : "Annual"}</h4>
           <p className="text-2xl font-semibold">{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(offer.amount / 100)} <span className="text-sm font-normal text-muted">USD / {interval === "monthly" ? "month" : "year"}</span></p>
-          <button className="game-button game-button-primary w-full disabled:opacity-50" disabled={Boolean(busy) || checking} onClick={() => { void openPayment("checkout", interval); }}>{busy === interval ? "Opening checkout…" : `Continue with ${interval}`}</button>
+          <button className="game-button game-button-primary w-full disabled:opacity-50" disabled={Boolean(busy) || checking} onClick={() => { void openPayment("checkout", interval); }}>{busy === interval ? "Opening checkout…" : `Continue with ${interval} billing`}</button>
         </div>;
       })}</div>
       <p className="text-sm leading-6 text-muted">Membership renews at the interval you choose. You can review the total in Stripe before subscribing, and manage or cancel your subscription there.</p>

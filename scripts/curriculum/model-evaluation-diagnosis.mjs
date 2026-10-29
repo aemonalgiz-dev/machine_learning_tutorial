@@ -14,7 +14,23 @@ export const residuals = lesson({
   openingTitle: 'How Can Zero Average Error Still Be a Problem?',
   opening: ['Botie predicts the greenhouse temperature before the heaters switch on. On one morning the prediction is too low. On another it is too high by the same amount. If we add those mistakes, they cancel. The plants still experienced both mornings.', 'We need to keep two questions separate. Does the model usually miss in one direction? How large are its misses? Once we can answer those, we can look for conditions that make the model struggle.'],
   prerequisites: [before('Held-Out Evaluation', 'held-out-evaluation'), before('Establish a baseline', 'baseline-predictions')],
-  history: history('Checking What a Fitted Equation Left Behind', [source('NIST: Are the model residuals well-behaved?', 'https://www.itl.nist.gov/div898/handbook/pri/section2/pri24.htm')], 'Fitting a regression equation leaves a difference at each observation. Statistical model checking examines those differences because a fitted average can conceal a systematic pattern. The NIST engineering handbook documents checks involving residual plots and model assumptions.', 'Our greenhouse readings are invented. We use the same diagnostic idea: keep the part the prediction failed to explain, then ask whether it changes with temperature, time or another recorded condition.'),
+  history: {
+  "title": "Checking What a Fitted Equation Left Behind",
+  "sources": [
+    {
+      "title": "NIST: Are the model residuals well-behaved?",
+      "url": "https://www.itl.nist.gov/div898/handbook/pri/section2/pri24.htm"
+    },
+    {
+      "title": "Anscombe: Graphs in Statistical Analysis (1973)",
+      "url": "https://doi.org/10.1080/00031305.1973.10478966"
+    }
+  ],
+  "blocks": [
+    "Once regression programs could return fitted coefficients and summary statistics quickly, those numbers could make different problems look deceptively alike. A model could have an acceptable average error while missing the shape of the relationship.",
+    "Anscombe’s 1973 Graphs in Statistical Analysis used small constructed datasets to show how similar regression summaries could conceal very different pictures. Inspecting the observations and the errors left by the fit exposed what the summary missed. We will do that with the greenhouse predictions, keeping each residual beside the temperature and operating condition that produced it."
+  ]
+},
   reading: { experimentTitle: 'Keep direction before averaging', experimentIntro: 'Use the observed temperatures and predictions to inspect the errors your construction produces.', connectionTitle: 'A score is a question about errors', practiceTitle: 'Practice. Give Botie an honest error report', outputLabel: 'Residual summary', exampleNote: 'Invented temperatures in degrees Celsius. These predictions are supplied for diagnosis; the workshop does not train a model.' },
   intuition: [table('Two mistakes cancel on paper', 'Subtract each prediction from its observed temperature. Keep the morning attached to both values.', ['Morning', 'Observed', 'Predicted', 'Residual'], [['A', '12', '10', '+2'], ['B', '16', '18', '-2']], 'Positive means the prediction was too low. Negative means it was too high.'), table('A large miss changes the comparison', 'One new morning has a much larger error. Compare quantities in the original temperature units.', ['Residual set', 'Mean residual', 'MAE', 'RMSE'], [['[2, -2]', '0', '2', '2'], ['[0, 0, 6]', '2', '2', '3.4641']], 'The same MAE can accompany a very different distribution of errors.')],
   technicalIndex: 2, checkpointAfter: 3,
@@ -52,7 +68,24 @@ export const precisionRecall = lesson({
   openingTitle:'What If Almost Every Pump Is Healthy?',
   opening:['Most pumps on Botie’s route work normally. A detector that always says healthy could get a very high accuracy simply because faults are rare. It would also give the inspection team no help finding them.', 'We need to ask what fraction of actual faults we find and what fraction of our alerts lead to a real fault. Those questions use different denominators. Let’s keep the individual pumps visible while we calculate both.'],
   prerequisites:[before('Judging a classifier','judging-a-classifier'),before('Decision thresholds','decision-thresholds')],
-  history:history('Finding Relevant Items in a Much Larger Collection',[source('Scikit-learn: precision-recall and average precision','https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html')], 'Precision and recall are established measures in information retrieval: returning many documents is only useful if the relevant ones are among them, and a short clean list can still omit most relevant documents. The same counting problem appears in a rare-fault detector.', 'Modern classification libraries expose these measures over many score thresholds. Our pump example keeps the underlying counts visible so a curve cannot hide the inspection workload.'),
+  history:{
+  "title": "Finding Relevant Items in a Much Larger Collection",
+  "sources": [
+    {
+      "title": "Scikit-learn: precision-recall and average precision",
+      "url": "https://scikit-learn.org/stable/auto_examples/model_selection/plot_precision_recall.html"
+    },
+    {
+      "title": "NIST: TREC’s shared retrieval evaluations, begun in 1992",
+      "url": "https://trec.nist.gov/about.html"
+    }
+  ],
+  "blocks": [
+    "Search researchers needed to compare systems that returned different sets of documents. A system could retrieve plenty of relevant material by returning far too much, or produce a short clean list while omitting most relevant material.",
+    "NIST began TREC in 1992 to support shared, large-scale retrieval evaluations. Participants received common documents and questions, then returned ranked results for relevance assessment. Precision and recall address the two different counts in that setting: how much of the returned material is relevant, and how much of the relevant material was found.",
+    "Our fault detector has the same counting problem. Its returned set is the inspection queue, so we will keep the queue size and the missed faults visible beside the percentages."
+  ]
+},
   reading:{experimentTitle:'Lower the threshold and follow the alerts',experimentIntro:'Connect score selection to the actual fault labels before calculating either ratio.',connectionTitle:'Two denominators, two questions',practiceTitle:'Practice. Count what the inspection team receives',outputLabel:'Alert report',exampleNote:'Invented fault scores and binary labels. Scores are supplied; their calibration has not been established.'},
   intuition:[table('A score orders the inspection queue','A larger score puts a pump nearer the front. The actual label remains separate from the score.',['Pump','Score','Fault label'],[['A','0.95','1'],['B','0.80','0'],['C','0.70','1'],['D','0.10','0']],'Predict an alert when the score is at least the chosen threshold.'),table('A lower threshold finds another fault and a false alert','The positive class is fault. Both thresholds use the same four pumps.',['Threshold','Alerts','True alerts','Precision','Recall'],[['0.90','1','1','1','0.5'],['0.70','3','2','0.6667','1']],'The team gains coverage of actual faults at the cost of another unnecessary visit.')],
   technicalIndex:2,checkpointAfter:3,

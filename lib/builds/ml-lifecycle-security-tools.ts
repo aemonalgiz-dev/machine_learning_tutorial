@@ -44,7 +44,7 @@ export const mlLifecycleSecurityTools: Record<string, Tool> = {
   },
   lifecycleEligiblePairs: {
     title: 'Select clean-correct, non-target, label-preserving pairs', inputs: ['True labels', 'Clean predictions', 'Target class', 'Label-preserving review flags'],
-    why: 'Marks only non-target examples correctly classified before the supplied change, whose label is reviewed as unchanged. This defines this lesson’s conditional denominator explicitly.',
+    why: "Keep an example only if the original prediction was correct, its true class differs from the target, and the edit left that true class unchanged. These are the examples used to calculate the conditional failure rate.",
     run: ([truth, clean, target, preserved]) => { const y = array(truth), p = array(clean), valid = flags(preserved); aligned(y,p,valid); return y.map((value,i) => Number(value !== target && p[i] === value && valid[i] === 1)); },
   },
   lifecycleTargetHits: {
@@ -54,7 +54,7 @@ export const mlLifecycleSecurityTools: Record<string, Tool> = {
   },
   lifecycleConditionalRate: {
     title: 'Keep the failure count beside its denominator', inputs: ['Eligible-pair flags', 'Target-hit flags'],
-    why: 'Counts target hits only among eligible pairs and returns eligible, successes and rate. An empty denominator yields null, not a zero-failure claim.',
+    why: "Count target predictions only for the reviewed eligible pairs. Return the eligible count and target-hit count with their ratio. When there are no eligible pairs, return null for the rate.",
     run: ([eligibleInput, hitInput]) => { const eligible = flags(eligibleInput), hit = flags(hitInput); aligned(eligible,hit); const n = eligible.reduce<number>((a,b) => a+b,0), successes = eligible.reduce<number>((a,b,i) => a+b*hit[i],0); return { eligible:n, successes, rate:n ? successes/n : null }; },
   },
   lifecycleFixedCoordinates: {

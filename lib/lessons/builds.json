@@ -30011,7 +30011,7 @@
     "id": "software-named-request-contracts",
     "title": "Keep the zero; expose the missing measurement",
     "problem": "Botie must distinguish what each caller supplied before preparing model inputs.",
-    "challenge": "Inspect the named field. Return two aligned lists: keep/default/reject decisions, and the corresponding number or null for a rejected entry. Use the declared default only for absent fields.",
+    "challenge": "For each record, inspect whether the named field exists and what it contains. Return aligned lists of keep/default/reject decisions and their usable numbers. Put null in the value list for a rejected entry; use the declared default only when the field is absent.",
     "sources": {
       "requests": "Sensor request records",
       "field": "Optional numerical field name",
@@ -30139,7 +30139,7 @@
       ]
     },
     "why": "The state of the field remains visible beside the value we may use.",
-    "limitation": "This is a local policy demonstration. Rejected null entries are diagnostics, not accepted model inputs; real request limits and server enforcement are separate.",
+    "limitation": "Rejected null entries are diagnostic placeholders and must stay out of the model input. A deployed service also needs request-size limits and enforcement on the server.",
     "extras": [
       "constant",
       "add",
@@ -30156,7 +30156,7 @@
   {
     "id": "software-schema-evolution",
     "title": "Keep the old client working through an explicit adapter",
-    "problem": "Botie’s retrieval server supports a renamed request while yesterday’s agent still uses version 1.",
+    "problem": "The server needs to accept query/count while an existing agent still sends text/limit. Both supported messages should reach the intended search.",
     "challenge": "Connect the request to both adapters and to version selection. Return only the selected canonical request, or the declared unsupported-version error.",
     "sources": {
       "request": "Versioned search request"
@@ -30229,7 +30229,7 @@
       ]
     },
     "why": "Only the public edge depends on the old names.",
-    "limitation": "The local adapters implement these two authored schemas. They do not negotiate real network versions or guarantee compatibility for other clients.",
+    "limitation": "The adapters recognise only these two specified request versions. Supporting another client requires checking its actual message and behaviour, then adding the relevant adapter and fixtures.",
     "extras": [
       "constant",
       "add",
@@ -30349,8 +30349,8 @@
         }
       ]
     },
-    "why": "Equivalent physical temperatures reach the same fitted representation before scoring.",
-    "limitation": "The linear scores are invented and uncalibrated. This checks unit conversion and the order of preprocessing, not sensor correctness or model quality.",
+    "why": "After conversion, the saved centre and coefficient receive temperatures in their original Celsius unit. Equivalent physical readings therefore receive the same illustrative score.",
+    "limitation": "The scores come from a supplied linear rule and have no calibrated probability meaning. This exercise checks conversion and calculation order; sensor calibration and predictive quality require other evidence.",
     "extras": [
       "constant",
       "add",
@@ -30456,7 +30456,7 @@
       ]
     },
     "why": "Failure identity, repeat safety and budget remain separate inputs to the decision.",
-    "limitation": "The browser calculates a recovery policy. It does not execute retries, reconcile a real operation or establish that a service honours idempotency keys.",
+    "limitation": "These components recommend a next action only. A real service must supply the operation record and enforce any idempotency guarantee before the caller relies on it.",
     "extras": [
       "constant",
       "add",
@@ -30474,7 +30474,7 @@
     "id": "software-contract-tests",
     "title": "Keep one pump’s transformed value stable across batches",
     "problem": "Botie’s first test accidentally made request-local fitting look correct.",
-    "challenge": "Subtract the saved training centre from every reading. Return the whole transformed list and a Boolean check that its first entry matches the supplied independent expectation within tolerance.",
+    "challenge": "Use the saved centre to transform the current readings. Return that whole list beside a Boolean saying whether its first entry matches the independently supplied expectation within tolerance. Both outputs should describe the same calculation.",
     "sources": {
       "values": "Current request batch",
       "centre": "Stored training centre",
@@ -30591,7 +30591,7 @@
       ]
     },
     "why": "A known expected result and a changed-batch relationship expose request-local relearning.",
-    "limitation": "This finite workshop checks a deterministic row-wise transformation. It does not establish accuracy, arbitrary numerical stability or batch independence for a genuinely batch-dependent model.",
+    "limitation": "This relationship belongs to a deterministic transform that processes examples independently. A batch-dependent model needs a different promise, and a passing relationship test still needs independently calculated result checks.",
     "extras": [
       "constant",
       "add",
@@ -31329,7 +31329,7 @@
       ]
     },
     "why": "The instructions and their execution have separate components, so a plan cannot be mistaken for the output table.",
-    "limitation": "A local interpreter for two operations. It has no Spark optimiser, workers, I/O, scheduling or Databricks connection.",
+    "limitation": "The floor interprets a filter and a column selection on local records. Spark’s optimiser and distributed execution belong to the optional workspace example.",
     "extras": [],
     "draftVersion": 1
   },
@@ -31465,7 +31465,7 @@
       ]
     },
     "why": "The original entity key survives; the temporary key affects where partial work is performed.",
-    "limitation": "Equal-cost records and an invented hash only. This models routing before a mergeable aggregation, not Spark’s complete planner or a generally safe join rewrite.",
+    "limitation": "The workers are local lists of equal-cost records, routed by our stated teaching hash. Real Spark plans can aggregate before moving data, and a join needs its own correct treatment of both inputs.",
     "extras": [],
     "draftVersion": 1
   },
@@ -31626,7 +31626,7 @@
       ]
     },
     "why": "A version choice occurs before numerical extraction, so the calculation cannot accidentally mix committed states.",
-    "limitation": "Full in-memory snapshots for teaching. No Delta log reconstruction, concurrent writers, cross-table transaction or retention guarantee.",
+    "limitation": "The history contains full local copies of the supplied versions. A real Delta read also depends on its transaction log, retained files and concurrency rules; choosing versions of separate tables requires an explicit input contract.",
     "extras": [],
     "draftVersion": 1
   },
@@ -31778,7 +31778,7 @@
       ]
     },
     "why": "File acceptance changes the output and durable progress together in the returned teaching state.",
-    "limitation": "Immutable file identities and an atomic-state sink model only. It does not implement Auto Loader, business-event deduplication or exactly-once arbitrary API effects.",
+    "limitation": "This local state transition assumes immutable file identities and returns accepted rows with their progress record. A real loader needs durable sink commits, and duplicate business events need their own identities.",
     "extras": [],
     "draftVersion": 1
   },
@@ -31904,7 +31904,7 @@
       ]
     },
     "why": "The current sequence survives in internal state even when the visible row disappears.",
-    "limitation": "A declared per-entity sequence and retained logical tombstones only. No real Delta transaction, source CDC connector, cross-table consistency or physical-erasure guarantee.",
+    "limitation": "The source supplies a comparable sequence within each pump’s history. This local merge retains logical deletion records; connecting a real CDC source, committing Delta transactions and fulfilling physical-deletion requirements are separate work.",
     "extras": [],
     "draftVersion": 1
   },
@@ -32049,7 +32049,7 @@
       ]
     },
     "why": "The predicate produces evidence and the policy determines which output is acceptable.",
-    "limitation": "One atomic candidate dataset and a simple nonnull numerical predicate. No Lakeflow scheduler, event-log guarantees, global rollback or automatic quarantine output.",
+    "limitation": "We evaluate one candidate dataset and one temperature condition, then apply its publication policy. A real Lakeflow pipeline has its own update boundaries and failure metrics; a rejected-record dataset must be designed explicitly.",
     "extras": [],
     "draftVersion": 1
   },
@@ -32269,7 +32269,7 @@
       ]
     },
     "why": "The full assessment identity is checked before a metric can choose an artifact.",
-    "limitation": "Run selection over supplied metadata only. Table identities refer to retained histories under this fixture contract. No MLflow service, training, artifact loading, statistical significance test or production release approval.",
+    "limitation": "The floor selects among supplied experiment records. Training and loading the saved models happen elsewhere, and a small observed error difference still needs appropriate assessment before a release decision.",
     "extras": [],
     "draftVersion": 2
   },
@@ -32402,7 +32402,7 @@
       ]
     },
     "why": "A table read requires its declared object boundaries under the actual principal, not an unrelated successful grant.",
-    "limitation": "Direct explicit grants only. No authentication, group resolution, privilege inheritance, ownership/admin authority, row filters, storage credentials or real Unity Catalog enforcement.",
+    "limitation": "This local check considers direct explicit grants for the supplied verified identities. Authentication, group resolution and the platform’s full effective-permission rules remain the real service’s responsibility.",
     "extras": [],
     "draftVersion": 1
   },
@@ -32594,7 +32594,7 @@
       ]
     },
     "why": "Entity, availability and age eligibility are established before newest-value selection.",
-    "limitation": "Immutable publication history and a declared inclusive age rule only. No Databricks service, online materialisation, historical permission engine, feature computation or causal claim.",
+    "limitation": "The floor looks up supplied immutable publication history using an inclusive age rule. Computing the features, establishing truthful availability timestamps and operating a real feature service are separate responsibilities.",
     "extras": [],
     "draftVersion": 1
   },
@@ -32948,7 +32948,7 @@
   {
     "id": "serving-prefill-decode",
     "title": "Separate the first wait from later pauses",
-    "problem": "A single response duration hides whether Botie starts late or pauses while continuing.",
+    "problem": "The technician sees a late start in one answer and a long pause in another. A single response duration does not show which wait changed.",
     "challenge": "Return a pair: first-token wait in ms, then the list of neighbouring emission gaps. Arrival and token timestamps share one clock.",
     "sources": {
       "arrival": "Request arrival in ms",
@@ -33059,8 +33059,8 @@
   {
     "id": "serving-prefix-reuse",
     "title": "Keep reusable prefix state inside its compatibility boundary",
-    "problem": "Repeated manual tokens are useful only when their saved state belongs to the current model and namespace.",
-    "challenge": "Compare the two contracts, count equal leading token IDs, keep complete cached blocks, and return reusable token count. A failed contract must force zero.",
+    "problem": "Botie has already processed this manual for another question. Which of those saved calculations still belong to the current request?",
+    "challenge": "Return the number of reusable leading token IDs. The saved and current configuration records must agree, and only complete matching blocks count. A configuration mismatch must return zero even when the token lists match.",
     "sources": {
       "cached": "Cached leading token IDs",
       "incoming": "Incoming token IDs",
@@ -33232,8 +33232,8 @@
   {
     "id": "serving-continuous-admission",
     "title": "Release finished sequences before admitting the queue",
-    "problem": "A free generation slot can still lack room for the next conversation’s KV reservation.",
-    "challenge": "Keep unfinished running rows. Compute free slots and blocks, reserve prompt-plus-maximum-output blocks for each queued row, then return the strict FIFO prefix that fits both limits.",
+    "problem": "One answer has finished and a waiting conversation wants its place. Botie needs enough cache storage for that conversation as well as a free generation slot.",
+    "challenge": "Remove finished running rows and calculate the remaining slots and cache blocks. For each waiting request, reserve whole blocks for its prompt and maximum new-token allowance. Follow the queue in order and stop at the first request that cannot fit. Return only the newly admitted IDs.",
     "sources": {
       "running": "Current rows: id, remaining, blocks",
       "waiting": "Waiting rows: id, prompt, maxNew",
@@ -33444,7 +33444,7 @@
       ]
     },
     "why": "The finished rows release resources before each newly admitted request consumes its own reservation.",
-    "limitation": "One iteration boundary, conservative full-continuation reservations and strict FIFO; no real engine, preemption or GPU timings.",
+    "limitation": "This checks one scheduling boundary with full-continuation reservations and a queue that cannot skip its first waiting request. It does not run a model engine or measure GPU performance.",
     "extras": [
       "constant",
       "add",
@@ -33461,8 +33461,8 @@
   {
     "id": "serving-cancellation-pressure",
     "title": "Keep ownership and queue overflow visible",
-    "problem": "A cancelled display must not make Botie promise the same worker reservation twice.",
-    "challenge": "Apply confirmed cancellation IDs, count still-held slots and blocks, and place incoming IDs into the remaining waiting-queue capacity. Return the named pressure report.",
+    "problem": "The technician has closed an answer, but its worker has not confirmed that the memory is free. More questions are arriving while that reservation remains held.",
+    "challenge": "Apply the worker’s release acknowledgements before counting held slots and blocks. Keep unacknowledged cancellations counted. Use the separate waiting-queue limit to divide new arrivals into accepted and rejected lists, retaining their order.",
     "sources": {
       "running": "Worker rows: id, state, blocks",
       "acks": "Confirmed cancellation-release IDs",
@@ -33661,8 +33661,8 @@
   {
     "id": "serving-canary-effects",
     "title": "Route the model and gate the effect on separate branches",
-    "problem": "A shadow booking must be denied even when its selected model and current capability look like a live run’s.",
-    "challenge": "Use the supplied stable buckets to select stable or candidate. Independently allow writes only when the capability is present and the run is not a shadow. Return named records in run-ID order.",
+    "problem": "The candidate’s answer stays hidden during comparison, but its booking tool can still act. Botie needs a write decision that does not depend on which answer is displayed.",
+    "challenge": "Return each run’s ID, selected model and write-allowed flag in input order. Choose the model from its bucket and the candidate percentage. A write is allowed only when the run has the capability and is not a shadow, whichever model was selected.",
     "sources": {
       "ids": "Distinct run IDs",
       "buckets": "Stable buckets from 0 to 99",
@@ -34357,8 +34357,8 @@
   {
     "id": "state-predict-correct",
     "title": "Give the motion estimate and camera their stated influence",
-    "problem": "The simulated conveyor prediction and camera disagree, and neither should always win.",
-    "challenge": "Predict the mean and variance, form the reliability gain, correct the mean, and keep both Joseph-form variance contributions. Return a named mean/variance estimate.",
+    "problem": "The simulated belt movement predicts one position and the camera reports another. Use their supplied error variances to decide how much the estimate should change.",
+    "challenge": "Predict the position mean and variance at the camera’s time. Use the camera disagreement and correction gain to update the mean, and keep both error contributions in the Joseph-form variance update. Return a record with mean and variance.",
     "sources": {
       "mean": "Earlier position mean in m",
       "variance": "Earlier position variance in m²",
@@ -34616,7 +34616,7 @@
       ]
     },
     "why": "The correction size comes from the supplied independent uncertainties, while variance stays beside position.",
-    "limitation": "Scalar linear-Gaussian teaching model with known displacement; no detector training, hardware actuation or accuracy guarantee.",
+    "limitation": "This follows one position coordinate with known expected movement and the stated independent linear-Gaussian error model. It does not train a detector, control hardware or establish physical accuracy.",
     "extras": [
       "constant",
       "add",
@@ -34633,8 +34633,8 @@
   {
     "id": "state-missing-observations",
     "title": "Keep the timeline while a measurement is absent",
-    "problem": "The conveyor continues moving while Botie misses a frame. A missing observation must not become a position of zero.",
-    "challenge": "Predict through both intervals and apply a correction only at a boundary with a numeric measurement. Return the mean/variance estimate after the second boundary.",
+    "problem": "The camera misses a position while the conveyor keeps moving. Botie must carry the estimate through that interval without using zero as an invented reading.",
+    "challenge": "Run the two interval predictions in order, carrying mean and variance from the first into the second. Correct only where a numeric camera reading is present. Return the final mean and variance; null means no observation, while zero is a real position.",
     "sources": {
       "initial": "Initial mean/variance record",
       "move0": "First expected displacement in m",
@@ -34776,8 +34776,8 @@
   {
     "id": "state-gating-association",
     "title": "Gate candidates before correcting the tracked position",
-    "problem": "A second nearby part can pass the same numerical test, leaving Botie without a resolved identity.",
-    "challenge": "Compute each scaled squared innovation, gate at the supplied threshold, select a measurement only when exactly one passes, then apply the optional correction. Return the named estimate.",
+    "problem": "A nearby second part also fits Botie’s position prediction. Before correcting the track, decide whether the camera supplies one usable match or leaves an unresolved choice.",
+    "challenge": "Calculate a scaled squared disagreement for every candidate and mark those at or below the threshold. Use a camera reading only when exactly one passes. Apply that optional correction and return the estimate’s mean and variance.",
     "sources": {
       "prediction": "Predicted mean/variance record",
       "candidates": "Candidate positions in m at this time",
@@ -34884,7 +34884,7 @@
       ]
     },
     "why": "A gate feeds an association decision before any new measurement can reduce uncertainty.",
-    "limitation": "One track and equal candidate measurement variance; no global assignment, appearance model, real perception or physical actuation.",
+    "limitation": "The example follows one track and gives every camera candidate the same error variance. It does not solve assignment across several tracks, use image appearance or move a physical robot.",
     "extras": [
       "constant",
       "add",
@@ -34901,8 +34901,8 @@
   {
     "id": "state-model-uncertainty",
     "title": "Test the precision claim on an independent simulated reference",
-    "problem": "A small motion-error allowance can leave a precise-looking estimate behind an accelerating part.",
-    "challenge": "Use the supplied motion and observation model to estimate position, then compare that completed estimate with reference truth on a separate evaluation branch. Return the named consistency report.",
+    "problem": "The simulated part moves farther than Botie expected, yet the filter reports a narrow uncertainty. Compare the completed estimate with a separate reference to see that mismatch.",
+    "challenge": "Complete the position and variance update without using the reference. Then report its mean, variance, signed reference error, normalised squared error and whether the reference lies within two standard deviations.",
     "sources": {
       "initial": "Earlier mean/variance record",
       "move": "Expected displacement in m",
@@ -35369,7 +35369,7 @@
   {
     "id": "security-training-provenance",
     "title": "Keep the training contribution attached to its evidence",
-    "problem": "A newly connected feedback feed must not redefine Botie’s baseline merely because its targets are numerical.",
+    "problem": "A new feed supplies numerical targets, but this release has not approved its source. Botie needs to keep it out of the fit while retaining the accepted records’ identities.",
     "challenge": "Combine approved-source and completed-review flags. Apply the same mask to record IDs and numerical targets. Return accepted IDs and their mean, or null when none remain.",
     "sources": {
       "rows": "Proposed training records with resolved evidence",
@@ -35554,7 +35554,7 @@
       ]
     },
     "why": "Every retained numerical contribution has the same retained record identity.",
-    "limitation": "Source and review evidence are trusted fixtures. This local mean model does not authenticate producers, verify signatures, detect all poisoning or prove a source is honest.",
+    "limitation": "The source identities and review decisions are already trusted fixtures here. The components apply that evidence to a mean calculation; authenticating sources and judging labels happen outside this workshop.",
     "extras": [
       "constant",
       "add",
@@ -35735,7 +35735,7 @@
       ]
     },
     "why": "The clean metric cannot conceal the separate population and outcome of the targeted experiment.",
-    "limitation": "Predictions and reviewed pairs are supplied fixtures. This does not train, implant or universally detect a backdoor, and the conditional denominator is specific to this lesson.",
+    "limitation": "The paired predictions and label-preservation reviews are supplied data. The workshop measures this specified condition; it neither determines how the behaviour was learned nor checks untested trigger conditions.",
     "extras": [
       "constant",
       "add",
@@ -35752,7 +35752,7 @@
   {
     "id": "security-adversarial-threat-models",
     "title": "Check capability before interpreting the changed prediction",
-    "problem": "Botie needs to distinguish a real counterexample from a failure outside the stated input-control policy.",
+    "problem": "A wrong changed prediction matters to this experiment only if the opponent was allowed to make that change. Botie needs both the model result and the capability checks.",
     "challenge": "Check maximum coordinate change, fixed coordinates and the public domain independently. Combine those scope flags, calculate both threshold predictions, then return the trial report.",
     "sources": {
       "original": "Original normalised sensor vector",
@@ -35979,7 +35979,7 @@
       ]
     },
     "why": "The same model can have a correct clean prediction, a wrong changed prediction and a separately assessed scope result.",
-    "limitation": "This exposes one finite linear boundary and supplied fixture changes. It does not search for attacks, establish physical feasibility or certify robustness outside these cases.",
+    "limitation": "The classifier and changed inputs are specified finite fixtures. These checks evaluate their declared capability rules; they cannot establish physical feasibility or cover every allowed input beyond the tested cases.",
     "extras": [
       "constant",
       "add",
@@ -35997,7 +35997,7 @@
     "id": "security-prediction-api-controls",
     "title": "Check the work before revealing a prediction",
     "problem": "Botie’s envelope counter misses the work hidden in a batch.",
-    "challenge": "Require both caller-row capacity and global compute capacity. Then return only the admission flag and, when admitted, the thresholded label. Never return the supplied internal score.",
+    "challenge": "Check whether the whole batch fits the caller’s remaining row allowance and the remaining global compute allowance. Return allowed=false if either check fails. Otherwise return allowed=true and the thresholded label. Keep the supplied internal score out of both public responses.",
     "sources": {
       "used": "Caller rows already admitted in this window",
       "rowLimit": "Caller row allowance",
@@ -36122,7 +36122,7 @@
       ]
     },
     "why": "Both allowances must fit the batch before any prediction is returned.",
-    "limitation": "This snapshot calculation assumes trusted server counters and fixed-size rows. It does not implement authentication, concurrent atomic reservations, a rolling window or a guarantee against model extraction.",
+    "limitation": "The counters are trusted snapshots, and each row uses the supplied fixed cost estimate. A live service must coordinate reservations across callers and workers; these examples do not measure resistance to model extraction.",
     "extras": [
       "constant",
       "add",
@@ -36640,7 +36640,7 @@
       ]
     },
     "why": "Rescaling protects the intermediate products while preserving the direction we compare.",
-    "limitation": "This workshop models finite binary64 arithmetic for small vectors. It deliberately returns zero for a zero vector; the application must decide whether to use that record.",
+    "limitation": "The workshop follows small finite binary64 vectors and deliberately returns zeros for an all-zero input. A caller must decide whether a document with that outcome should enter retrieval.",
     "extras": [
       "constant",
       "add",
@@ -36803,7 +36803,7 @@
       ]
     },
     "why": "New evidence must distinguish the competing explanations, rather than repeat their shared prediction.",
-    "limitation": "The candidates and additive response model are supplied. A planning threshold is not a statistical guarantee or permission to conduct a physical experiment.",
+    "limitation": "The two candidate gain vectors and additive heater model are supplied. The gap threshold helps plan a distinguishing measurement; the actual equipment, uncertainty and permission to run that experiment still need assessment.",
     "extras": [
       "constant",
       "add",
@@ -37091,7 +37091,7 @@
       ]
     },
     "why": "Separate one-sided evidence explains whether a symmetric numerical estimate is hiding a corner.",
-    "limitation": "These deterministic scalar losses expose the arithmetic. Agreement at finite steps is a diagnostic, not a general proof of differentiability.",
+    "limitation": "The floor uses deterministic scalar losses so each slope can be followed directly. A finite-step comparison is a diagnostic; corners and rounded evaluations still need interpretation.",
     "extras": [
       "constant",
       "add",
@@ -37849,7 +37849,7 @@
       ]
     },
     "why": "The same elapsed interval receives two numerical estimates, and a stated tolerance decides whether this attempted advance is accepted.",
-    "limitation": "Scalar Euler step doubling illustrates a local error test. It does not certify global accuracy, physical validity or general solver stability.",
+    "limitation": "This scalar Euler comparison makes a local acceptance decision. A complete trajectory still needs a global error check and evidence for the physical cooling law; RK45 uses a different numerical method.",
     "extras": [
       "constant",
       "add",

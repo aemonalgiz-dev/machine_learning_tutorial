@@ -4,7 +4,7 @@ import Link from "next/link";
 import { PracticeReturn } from "@/components/practice/PracticeReturn";
 import { MembershipSummary } from "@/components/membership/PracticeMembership";
 import { JourneyResume } from "@/components/site/JourneyResume";
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { refreshAccount, signOut, syncProgress, useAccount } from "@/lib/accounts";
 import { finishedCount, lessonFinished, useProgress } from "@/lib/progress";
 import { useLearningMap, workshopHref } from "@/lib/learning-map";
@@ -19,6 +19,64 @@ const authErrors: Record<string, string> = {
   "registration-unavailable": "Account registration could not be reached. Please try again in a moment.",
   "sign-in-unavailable": "Sign-in could not be reached. Please try again in a moment.",
 };
+
+function CheckoutConfirmation({ owner }: { owner: string }) {
+  const account = useAccount();
+  const [returnedOwner] = useState(owner);
+  const [waiting, setWaiting] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const deadline = useRef<number | null>(null);
+  const mounted = useRef(false);
+  const sameAccount = account.user?.id === returnedOwner;
+  const confirmed = sameAccount && account.status === "ready" && account.membership.practiceAccess;
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!sameAccount || account.status !== "ready" || confirmed) return;
+    const until = deadline.current ?? Date.now() + 30_000;
+    deadline.current = until;
+    let stopped = false;
+    let next: ReturnType<typeof setTimeout> | undefined;
+    const finish = setTimeout(() => {
+      stopped = true;
+      clearTimeout(next);
+      setWaiting(true);
+    }, Math.max(0, until - Date.now()));
+    async function check() {
+      if (stopped || Date.now() >= until) return;
+      // The account store shares an in-flight session check with focus/manual
+      // refreshes. This short loop finishes before its normal minute timer.
+      await refreshAccount();
+      if (!stopped) next = setTimeout(check, Math.min(2_000, Math.max(0, until - Date.now())));
+    }
+    next = setTimeout(check, Math.min(2_000, Math.max(0, until - Date.now())));
+    return () => { stopped = true; clearTimeout(next); clearTimeout(finish); };
+  }, [sameAccount, account.status, confirmed]);
+
+  if (!sameAccount) return null;
+  return <aside aria-label="Checkout confirmation" role="status" className="journal-panel space-y-3 p-5">
+    <p>{confirmed
+      ? "Your extra practice membership is active."
+      : account.status === "unavailable"
+        ? "We couldn't check your membership just now. You can try again below. The free course is still available."
+        : waiting
+          ? "Payment confirmation is taking longer than expected. Check again, or open your membership details."
+          : "We're checking your payment. Extra practice will open here after confirmation."}</p>
+    {confirmed ? <Link href="/practice" className="game-button game-button-primary">Open extra practice →</Link> : <div className="flex flex-wrap items-center gap-4">
+      <button className={button} disabled={checking || account.status === "checking"} onClick={async () => {
+        if (checking) return;
+        setChecking(true);
+        await refreshAccount();
+        if (mounted.current) setChecking(false);
+      }}>{checking ? "Checking membership…" : "Check membership again"}</button>
+      <Link href="/membership" className="text-sm font-semibold text-accent underline underline-offset-4">Membership details</Link>
+    </div>}
+  </aside>;
+}
 
 export default function AccountPage() {
   const account = useAccount();
@@ -37,15 +95,11 @@ export default function AccountPage() {
   return <div className="mx-auto max-w-3xl space-y-8 px-6 py-12">
     <PracticeReturn />
     <div className="space-y-3">
-      <p className="game-eyebrow">Your place in the lab</p>
-      <h1 className="text-3xl font-semibold">Your learning journal</h1>
-      <p className="text-muted">Sign in to keep your answers, code and constructions with your account. Guest work lasts for this visit.</p>
+      <h1 className="text-3xl font-semibold">Your account</h1>
+      <p className="text-muted">Sign in to save your answers, code and workshop constructions. You can use the course without an account.</p>
     </div>
     <JourneyResume />
-    {account.user && billingReturn === "success" && <aside role="status" className="journal-panel space-y-3 p-5">
-      <p>Returned from checkout. Practice access opens after payment is confirmed.</p>
-      <Link href="/membership" className="text-sm font-semibold text-accent underline underline-offset-4">Check membership status</Link>
-    </aside>}
+    {account.user && billingReturn === "success" && <CheckoutConfirmation owner={account.user.id} />}
     <section aria-label="Account" className="journal-panel space-y-4 p-6">
       {account.status === "checking" && <p role="status">Checking your account…</p>}
       {account.user ? <>
@@ -63,8 +117,8 @@ export default function AccountPage() {
           }}>{busy ? "Signing out…" : "Sign out"}</button>
         </div>
       </> : account.status === "ready" && account.enabled ? <>
-        <p>{account.registrationEnabled ? "Create an account or sign in to keep your work across devices." : "Sign in to keep your work across devices."}</p>
-        <p className="text-sm text-muted">You will continue to our account provider, then return here. Sign in before starting work you want to keep. Guest answers and drafts reset when the page reloads or you leave for sign-in.</p>
+        <p>{account.registrationEnabled ? "Create an account or sign in to return to your saved work on another visit or device." : "Sign in to return to your saved work on another visit or device."}</p>
+        <p className="text-sm text-muted">The sign-in page will return you here afterward. Sign in before starting work you want to save. Guest answers and drafts reset when the page reloads or you leave for sign-in.</p>
         <div className="flex flex-wrap gap-3">
           {account.registrationEnabled && <form action="/account-api/auth/register" method="get"><button className="rounded-lg bg-accent-fill px-4 py-2 text-sm font-semibold text-accent-ink hover:opacity-90" type="submit">Create account</button></form>}
           <form action="/account-api/auth/login" method="get"><button className={button} type="submit">Sign in</button></form>

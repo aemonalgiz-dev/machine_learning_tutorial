@@ -17,7 +17,7 @@ export default function Home() {
     <LegacyCourseLinks destinations={legacyCourseDestinations} />
     <header className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <div><p className="game-eyebrow">Perceptron Lab</p><h1 className="mt-2 text-xl font-semibold">Your journey into machine learning</h1><span className="sr-only">{SITE_TITLE}</span></div>
-      <Link href="/account" className="text-sm text-muted hover:text-accent">Your learning journal ↗</Link>
+      <Link href="/account" className="text-sm text-muted hover:text-accent">Your progress ↗</Link>
     </header>
     <LearningDashboard />
     <section id="course" aria-labelledby="learning-areas" className="mt-12 scroll-mt-28">

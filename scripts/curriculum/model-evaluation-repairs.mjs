@@ -105,7 +105,23 @@ export const project=lesson({
  openingTitle:'The Same Heater Setting Produces Different Nights',
  opening:['We have enough evidence to try a specific repair. Botie’s temperature baseline uses the heater setting, but its night readings are consistently underpredicted. The night indicator is available before prediction, so we can test whether adding it helps.', 'Keep the original model as a reference. We will fit both versions using the same training records, compare their predictions on development data, and write down what the candidate must satisfy before a limited trial. The next shift will challenge those requirements.'],
  prerequisites:[before('Evaluation slices','model-evaluation-slices'),before('Paired comparisons','model-paired-comparisons'),before('Nested validation','model-nested-validation'),before('Behaviour tests','model-behaviour-tests'),before('Linear algebra primer','linear-algebra','primers')],
- history:history('A Fitted Equation Needs an Evaluation Record',[source('NumPy: least-squares fitting with linalg.lstsq','https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html'),source('Mitchell and colleagues: Model Cards for Model Reporting','https://arxiv.org/abs/1810.03993')], 'Least-squares fitting provides coefficients that minimise squared training discrepancies for a specified linear model. It does not decide whether the inputs are appropriate or whether a revised model is useful for its intended population.', 'This project brings fitting together with explicit evaluation and reporting. The greenhouse is invented, and the small exact training relation makes the mechanics visible. We still keep the distinction between fitting a relation and collecting enough evidence to use it.'),
+ history:{
+  "title": "A Fitted Equation Needs an Evaluation Record",
+  "sources": [
+    {
+      "title": "NumPy: least-squares fitting with linalg.lstsq",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html"
+    },
+    {
+      "title": "Mitchell and colleagues: Model Cards for Model Reporting",
+      "url": "https://arxiv.org/abs/1810.03993"
+    }
+  ],
+  "blocks": [
+    "A revised model can improve its overall score while becoming worse for the people or conditions it is supposed to help. A saved parameter file does not tell its next user where the evidence supports its use.",
+    "Mitchell and colleagues’ Model Cards proposal, published at FAT* in 2019 after a 2018 preprint, called for structured accounts of intended use and evaluation, including performance under different conditions. That reporting problem is part of our repair project. We will fit a specific change to the greenhouse model, test the old and new procedures on shared cases, and retain the day/night results that explain the decision."
+  ]
+},
  reading:{experimentTitle:'Give the revision a fair trial decision',experimentIntro:'Compute both error arrays from shared observations, inspect group changes, then enforce the declared policy.',connectionTitle:'A repair needs a record of what changed',practiceTitle:'Practice. Fit both versions without reading the answers early',outputLabel:'Candidate decision and reasons',exampleNote:'Workshop predictions and runtime are supplied measurements for an invented comparison. The Python challenge actually fits both least-squares models on training data.'},
  intuition:[table('The missing condition is visible in matched settings','The heater setting alone cannot distinguish these day and night records.',['Training row','Heater','Night indicator','Temperature'],[['A','0','0','10'],['B','1','0','12'],['C','0','1','14'],['D','1','1','16']],'The night indicator is known at prediction time. These four exact values are a teaching construction, not a field dataset.'),flow('Carry a specific hypothesis into the comparison','Each boundary answers a different question.',[['Hypothesis','Night conditions shift the mean','Add the available night indicator'],['Development','Fit both versions on training only','Inspect shared-case and group errors'],['Assessment','Freeze candidate and requirements','Check fresh cases before a limited trial']],'A failed assessment that prompts another repair becomes development evidence for that repair.'),table('A better average can still fail a requirement','Both candidates are compared with baseline absolute errors of 2 on each of four readings.',['Candidate','Errors: day, day, day, night','Mean gain','Worst group increase'],[['Local repair','1, 1, 1, 1','1','-1'],['Day-only gain','0, 0, 0, 4','1','2']],'The second candidate has the same average improvement but breaks the night requirement.')],
  technicalIndex:2,checkpointAfter:3,

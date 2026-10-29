@@ -41,7 +41,7 @@ export const numericalLearningTools: Record<string, Tool> = {
   },
   numericalStepReport: {
     title: 'Show the step comparison',
-    why: 'Keep the candidate state, step-doubling error estimate and tolerance beside your zero-or-one acceptance decision. Acceptance is evidence about this local numerical test, not about the physical accuracy of a simulator.',
+    why: "Keep the proposed state, its estimated step error and the allowed error beside the acceptance decision. This compares numerical steps; it does not establish that the simulated motion matches reality.",
     inputs: ['Candidate state', 'Estimated local error', 'Allowed local error', 'Accept: zero or one'],
     run: ([candidate, error, tolerance, accepted]) => {
       const flag = scalar(accepted);

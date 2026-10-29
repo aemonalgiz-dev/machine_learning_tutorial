@@ -77,7 +77,7 @@ const databaseLessons = [...sqlLessons, ...nosqlFoundationLessons, ...nosqlSyste
 const lessons = [...numpy, ...databaseLessons, ...data, ...evaluation, ...modelEvaluation, ...gaps].map(lesson => ({ ...lesson, reading: lesson.reading ?? readingVoice[lesson.id],
   intuition: [...lesson.intuition, ...(readingExtensions[lesson.id] ? [readingExtensions[lesson.id]] : [])] }));
 // Existing quiz bookmarks keep working as the preceding explanation grows.
-for (const lesson of lessons) lesson.quizId=`questions-on-parts-1-to-${lesson.parts.length}`;
+for (const lesson of lessons) lesson.quizId ??= `questions-on-parts-1-to-${lesson.parts.length}`;
 deepenProbability(lessons);
 deepenTraining(lessons);
 deepenProjects(lessons);

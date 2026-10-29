@@ -156,7 +156,7 @@
       "outcome": "A missing key can use a default without accepting a null or replacing zero.",
       "hints": [
         "Follow the inspection result into both branches so their positions stay aligned.",
-        "The action branch names the policy. The resolver uses the fallback only when the inspector says missing."
+        "Read the action list beside the resolved numbers. A default should appear only where the inspector found no field; a supplied zero should remain zero."
       ]
     },
     "investigation": {
@@ -207,7 +207,7 @@
     "order": "investigate-first",
     "construction": {
       "title": "Build the two public edges around one internal form",
-      "start": "Place both adapters and connect their results to the matching version-selection ports.",
+      "start": "Give each adapter the original request. Connect their outputs to the corresponding version-selection inputs so the declared version chooses the common query/count record.",
       "outcome": "The internal search record stays stable while the public keys differ.",
       "hints": [
         "Each adapter understands one named version; selection must use the original request’s version.",
@@ -307,7 +307,7 @@
       "start": "Place the outcome classifier before the recovery decision. Connect the repeat flags and budget as separate policy inputs.",
       "outcome": "An unknown write outcome is investigated instead of retried blindly.",
       "hints": [
-        "A status category answers what was observed. The repeat flag answers a different question about the operation’s effect.",
+        "Start with what the caller actually knows. A missing answer does not tell it whether the job was created; the separate repeat flag describes whether the operation can safely be sent again.",
         "Unknown outcomes go to reconciliation first. Only a known transient category with repeat permission and remaining attempts reaches retry."
       ]
     },
@@ -599,7 +599,7 @@
     "order": "investigate-first",
     "construction": {
       "title": "Make the plan produce the requested table",
-      "start": "Construct the filter and projection before connecting the execution boundary to the current records.",
+      "start": "Choose the field comparison and the columns you want to keep. Connect those instructions to the current records only when you are ready to execute the plan.",
       "outcome": "The result contains accepted records only, with their requested named fields.",
       "hints": [
         "Start with the field comparison; projection comes afterwards so the checked field is still present.",
@@ -633,7 +633,7 @@
     ],
     "reflection": {
       "prompt": "Which operation in your construction actually needs the source rows?",
-      "carryForward": "Keep source identity, transformation plan and materialised result distinct."
+      "carryForward": "Before trusting a displayed table, ask which object names the source and which operation produced the rows you are seeing."
     },
     "preparation": {
       "path": [
@@ -649,7 +649,7 @@
     "order": "build-first",
     "construction": {
       "title": "Expose and repair the hot route",
-      "start": "Create partial routing keys, then connect routing and worker counts. Inspect the records inside each worker.",
+      "start": "Give the busy pump temporary routing labels, then inspect which records arrive at each worker. Its original pump identifier should survive every step.",
       "outcome": "The same records reach workers through multiple partial groups without changing their original pump field.",
       "hints": [
         "Keep pump untouched and add routingKey alongside it.",
@@ -751,7 +751,7 @@
     "order": "build-first",
     "construction": {
       "title": "Keep the retry from changing the dataset",
-      "start": "Select files absent from committed progress before connecting the atomic-state commit.",
+      "start": "First show which discovered files are absent from committed progress. Feed only that accepted list into the next state, keeping its rows and completed identities together.",
       "outcome": "The same discovery can be repeated without appending its records again.",
       "hints": [
         "Compare file identities with the checkpoint, not row counts with the previous output.",
@@ -957,7 +957,7 @@
       "outcome": "The refusal identifies a missing boundary without returning protected records.",
       "hints": [
         "SELECT on a table does not supply its enclosing usage requirements in this model.",
-        "Each requirement needs a grant for this principal or an already established group, not just any grant on the object."
+        "Every required privilege needs a matching grant for this principal or an already established group."
       ]
     },
     "investigation": {
@@ -1208,12 +1208,12 @@
     }
   },
   "serving-prefill-decode": {
-    "premise": "Botie starts two equally long answers at different times. A shared throughput number does not tell the technician which wait changed.",
+    "premise": "In the earlier batching workshop, each request had an arrival and a completion. A streamed answer now has several intermediate timestamps. Botie needs to show whether the delay happened before the answer began or between its later pieces.",
     "order": "build-first",
     "construction": {
       "title": "Put two kinds of waiting on separate branches",
-      "start": "Take the first emission minus arrival, then keep the neighbouring token gaps beside it.",
-      "outcome": "The output distinguishes an empty screen from an interrupted stream.",
+      "start": "Use arrival and the first token to measure the initial wait. On another branch, compare each emitted timestamp with the one immediately before it. Keep both results in the returned pair.",
+      "outcome": "The technician can see which part of the response became slower when the trace changes.",
       "hints": [
         "The first emitted timestamp belongs on the arrival subtraction branch.",
         "Later pauses need adjacent differences, not division by the number of output tokens."
@@ -1240,12 +1240,12 @@
     }
   },
   "serving-prefix-reuse": {
-    "premise": "Botie already accounts for KV memory. Now repeated manual prefixes offer a way to avoid some prompt work, provided the state is compatible.",
+    "premise": "Botie has already counted the memory used by retained attention state. Several technicians now send the same manual before different questions. The earlier timing trace gives us a reason to try reusing that repeated prompt work.",
     "order": "investigate-first",
     "construction": {
       "title": "Connect a leading-token match to a compatibility gate",
-      "start": "Build the reusable-token count, then require agreement on the stated model and namespace contract.",
-      "outcome": "A plausible token match alone cannot authorise reuse.",
+      "start": "Find how many token IDs agree from the beginning. Keep only complete reusable blocks, then let the compatibility check decide whether that count is allowed to reach the output.",
+      "outcome": "Changing the adapter or tenant can now stop reuse even when every displayed token ID still matches.",
       "hints": [
         "First ask whether the stored arrays belong to the same configuration and namespace.",
         "The prefix counter stops at the first differing ID. Round its result down, then make a failed compatibility decision produce zero."
@@ -1287,12 +1287,12 @@
     }
   },
   "serving-continuous-admission": {
-    "premise": "The earlier batch timing still describes waiting, but generated responses finish at different iteration boundaries. Botie needs a group that can change.",
+    "premise": "The earlier workshop counted the memory a conversation would keep. Botie now has several conversations that finish at different times. When a place opens, the next request may be much longer than the one that left.",
     "order": "investigate-first",
     "construction": {
       "title": "Rebuild the next group from remaining work",
-      "start": "Remove finished sequences and build separate free-slot and free-block branches before admitting waiting IDs.",
-      "outcome": "A sequence joins only when both its place and its storage fit.",
+      "start": "Remove finished requests first. Work out the remaining places and cache blocks, then follow the waiting queue in order while consuming both allowances.",
+      "outcome": "The construction can explain why a request still waits even though a generation place has opened.",
       "hints": [
         "Keep only rows with remaining output tokens before measuring occupied capacity.",
         "Add each waiting prompt and output allowance, round up to blocks, then consume slots and blocks in FIFO order."
@@ -1301,7 +1301,7 @@
     "investigation": {
       "title": "The same free slot faces a longer prompt",
       "question": "C now needs five blocks while only four are free. Why does the earlier slot-only construction fail?",
-      "outcome": "Repair the admission path without evicting an unfinished sequence or silently changing FIFO.",
+      "outcome": "Add the missing memory check while keeping unfinished requests and the stated queue order intact.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
@@ -1334,12 +1334,12 @@
     }
   },
   "serving-cancellation-pressure": {
-    "premise": "The earlier scheduler released finished sequences. A cancellation request looks finished to the reader before the worker confirms it has released anything.",
+    "premise": "Botie’s earlier scheduler freed a reservation when a request finished. Now the technician closes an answer before the worker has stopped. Reusing that reservation immediately would promise the same memory twice.",
     "order": "investigate-first",
     "construction": {
       "title": "Add an acknowledgement boundary before freeing capacity",
-      "start": "Apply worker release acknowledgements and keep every other owned row in the capacity report. Bound the waiting queue separately.",
-      "outcome": "Clicking Stop does not create a fictitious free slot.",
+      "start": "Use the worker’s acknowledgements to update the request states. Count the rows that still hold resources, then handle new arrivals with the waiting queue’s separate limit.",
+      "outcome": "The stopped display and the released reservation can be checked separately when the next burst arrives.",
       "hints": [
         "The acknowledgement list identifies which cancellation requests actually released resources.",
         "After applying those events, count held rows and sum their blocks. The waiting queue has its own limit and rejected-arrival list."
@@ -1367,7 +1367,7 @@
       {
         "lessonId": "serving-continuous-admission",
         "skill": "Count resources before admitting another sequence",
-        "why": "A release now needs an authoritative lifecycle event, not only an abandoned display."
+        "why": "A user abandoning the display does not supply the worker’s release event. The capacity counter needs that event before it changes."
       },
       {
         "lessonId": "systems-agent-deadlines",
@@ -1381,12 +1381,12 @@
     }
   },
   "serving-canary-effects": {
-    "premise": "Botie can route traffic to a candidate, but a duplicated maintenance question can duplicate its booking unless the effect path has a separate boundary.",
+    "premise": "The earlier cancellation workshop showed why closing an answer cannot undo a booking. Botie now copies a question to compare two model versions. The copied run could create its own booking before anyone sees either answer.",
     "order": "investigate-first",
     "construction": {
       "title": "Keep model choice out of the write-authority rule",
-      "start": "Build one branch for routing and another for capability plus non-shadow status, then attach both to each run ID.",
-      "outcome": "A model experiment does not silently become a second live actor.",
+      "start": "Choose the model from the request’s bucket. Separately decide whether its capability and shadow status allow a write. Return both decisions beside the same run ID.",
+      "outcome": "Changing the candidate’s traffic share changes model routing while leaving the booking permission rule in place.",
       "hints": [
         "Route from buckets and percentage without using those values as permissions.",
         "For write authority, require capability and a zero shadow flag. Preserve each result beside its own run ID."
@@ -1394,7 +1394,7 @@
     },
     "investigation": {
       "title": "The comparison run inherits a broad capability",
-      "question": "The copied run has capability1 and shadow1. What must prevent the second booking?",
+      "question": "The copied run has capability set to 1 and shadow set to 1. Which check must stop it from making a second booking?",
       "outcome": "Check an unauthorised stable-model request too; model version must never substitute for permission.",
       "caseIndex": 1,
       "kind": "diagnose",
@@ -1576,12 +1576,12 @@
     }
   },
   "state-predict-correct": {
-    "premise": "The earlier motion projection moves a point forward in time. A new noisy detection now disagrees with that projection, so Botie needs an uncertainty-weighted correction.",
+    "premise": "Botie previously projected a position forward using expected movement. The camera now disagrees with that projection. Use the supplied uncertainty of each source to decide how far to move the estimate toward the reading.",
     "order": "build-first",
     "construction": {
       "title": "Build the correction rather than always replacing the position",
-      "start": "Predict both quantities, calculate the innovation and gain, then assemble the corrected mean and variance.",
-      "outcome": "The observation influences the estimate according to its stated reliability.",
+      "start": "Advance the position and its variance to the camera’s time. Use the disagreement and their relative uncertainties to build the position correction, then assemble the corrected mean and variance together.",
+      "outcome": "The same camera position can have less influence when its supplied error variance increases.",
       "hints": [
         "Predict uncertainty as well as motion. The old variance alone misses the new motion error.",
         "Use the gain on measurement minus predicted mean. The variance branch keeps both weighted error contributions."
@@ -1589,7 +1589,7 @@
     },
     "investigation": {
       "title": "The same camera reading becomes less reliable",
-      "question": "Keep prediction4 m and prior variance 4 m², but change camera variance to16 m². Predict the named mean and variance after correction.",
+      "question": "Keep the predicted position at 4 m and its variance at 4 m². The camera-error variance changes to 16 m². Predict the mean and variance record after correction.",
       "outcome": "The mean moves less toward the reading and the remaining variance is larger.",
       "caseIndex": 1,
       "kind": "predict",
@@ -1625,12 +1625,12 @@
     }
   },
   "state-missing-observations": {
-    "premise": "The earlier filter expected a number from every camera frame. An occlusion now removes one observation while the object continues moving.",
+    "premise": "The previous construction used a camera number at every update. An obstruction now removes one reading, but the conveyor keeps moving. Botie needs to continue the prediction without inventing camera evidence.",
     "order": "investigate-first",
     "construction": {
       "title": "Give prediction and optional correction their own places",
       "start": "Connect the first prediction and available correction before feeding their result into the next interval.",
-      "outcome": "A missing observation supplies no invented position and no invented information.",
+      "outcome": "The resulting timeline shows where Botie used a camera reading and where the estimate relied on motion alone.",
       "hints": [
         "None is a missing marker. Zero must still follow the ordinary numeric correction path.",
         "Connect prediction, optional update, prediction, optional update in that order. Each interval adds its own supplied process variance."
@@ -1638,7 +1638,7 @@
     },
     "investigation": {
       "title": "The first frame disappears",
-      "question": "Why would filling the missing first measurement with0 m produce another result?",
+      "question": "Why would replacing the missing first camera reading with a measurement of 0 m change this estimate?",
       "outcome": "The repair preserves the predicted state until actual observation data arrives.",
       "caseIndex": 1,
       "kind": "diagnose",
@@ -1680,20 +1680,20 @@
     }
   },
   "state-gating-association": {
-    "premise": "The earlier filter accepted the supplied observation as belonging to its part. A crowded frame now contains several plausible observations, so that identity assumption must be checked.",
+    "premise": "Botie can already continue without a missing camera reading. Now the camera returns several positions, and more than one may belong to the tracked part. Reuse the missing-observation path when the available evidence cannot resolve that choice.",
     "order": "investigate-first",
     "construction": {
       "title": "Put compatibility and ambiguity before the correction",
-      "start": "Build the scaled disagreement list and pass mask. Give the optional update a measurement only when one candidate remains.",
-      "outcome": "An unresolved match leaves the predicted state visible rather than generating false certainty.",
+      "start": "Compare every candidate with the predicted position using both sources’ uncertainty. Keep the pass/fail result for each candidate, then send a reading to the correction only when exactly one passes.",
+      "outcome": "A crowded frame can leave the prediction unchanged because choosing an object is still unresolved.",
       "hints": [
         "The denominator includes prediction uncertainty and measurement uncertainty.",
-        "Threshold gate returns1when its first input is at least its second: connect threshold first and the distance list second. Exactly one pass is needed."
+        "The Threshold gate tool tests whether its first input is at least its second. Put the threshold first and the distance list second so distances at or below the limit pass. The association step still needs exactly one pass."
       ]
     },
     "investigation": {
       "title": "Another part appears inside the gate",
-      "question": "Both10.5 m and9.5 m pass around a10 m prediction. Why must the exact-one rule skip the update?",
+      "question": "Both 10.5 m and 9.5 m pass around a prediction of 10 m. Why must the exact-one rule leave the camera update unused?",
       "outcome": "The missing-observation route is now useful for unresolved identity as well as an absent camera frame.",
       "caseIndex": 1,
       "kind": "diagnose",
@@ -1735,12 +1735,12 @@
     }
   },
   "state-model-uncertainty": {
-    "premise": "The earlier filter still produces a clean mean and variance when its motion model misses an acceleration. Botie now needs to test what those numbers claim.",
+    "premise": "Botie’s earlier filter still returns a mean and variance when the conveyor accelerates more than expected. The camera keeps pulling ahead of the prediction. Use the separate reference to test whether the filter’s stated uncertainty fits the error we observe.",
     "order": "investigate-first",
     "construction": {
       "title": "Keep truth outside the estimation branch",
-      "start": "Reuse prediction and correction, then compare their final estimate with the separate simulated reference.",
-      "outcome": "A precise-looking result can visibly fail its own declared uncertainty scale.",
+      "start": "Keep the reference disconnected while building the motion prediction and camera correction. Once that estimate is complete, compare it with the reference on a separate evaluation branch.",
+      "outcome": "The workshop can now show an error that is large relative to the filter’s own declared uncertainty.",
       "hints": [
         "Finish estimation without using the reference source. The reference belongs on its own evaluation input.",
         "Compare signed error and squared error relative to declared variance. A covered case can still be imprecise, and one case never proves calibration."
@@ -1903,7 +1903,7 @@
     "construction": {
       "title": "Build the training-release boundary before the fit",
       "start": "Keep source and label evidence on separate branches, combine their masks, then filter IDs and targets together.",
-      "outcome": "An attractive training result cannot substitute for a record’s release evidence.",
+      "outcome": "The average is calculated only from records that have the evidence required by this release. Their IDs remain available to investigate the fitted result.",
       "hints": [
         "Use the same combined mask for identities and targets.",
         "Keep the empty accepted list visible as no evidence. Do not invent a zero baseline."
@@ -1966,7 +1966,7 @@
       "outcome": "A high clean score remains visible without excusing a measured failure on the declared condition.",
       "hints": [
         "Keep clean accuracy and the conditional test on separate branches.",
-        "Count target hits only where the eligibility flag is 1, and show the count beside its denominator."
+        "A target prediction counts as a newly induced failure only when its eligibility flag is 1. Keep the success count and the eligible-pair count visible beside the rate."
       ]
     },
     "investigation": {
@@ -2026,12 +2026,12 @@
       "outcome": "A wrong prediction is interpreted under the exact capability we declared.",
       "hints": [
         "First construct the two predictions from the actual vectors and fixed weights.",
-        "Keep the scope branch independent. A null observed_failure can mean the comparison is excluded, so inspect its diagnostic fields."
+        "Inspect the scope checks separately from the predictions. If observed_failure is null, use the remaining fields to see whether the trial was excluded or the original prediction was already wrong."
       ]
     },
     "investigation": {
       "title": "The allowed first coordinate reaches 0.5",
-      "question": "Both inputs sum to the cutoff. Is this a relevant new failure under the stated fixture label?",
+      "question": "The changed vector reaches the cutoff, while the original was below it. Does this create a new failure under the stated change rules and true label?",
       "outcome": "Retest the larger out-of-budget change without counting it as an in-scope failure.",
       "caseIndex": 1,
       "kind": "diagnose",
@@ -2081,7 +2081,7 @@
     "order": "investigate-first",
     "construction": {
       "title": "Reserve the actual prediction work",
-      "start": "Build a caller-row branch and a global-unit branch, then require both before projecting the public response.",
+      "start": "Count the requested rows against the caller allowance. In another branch, calculate their estimated compute cost against global capacity. Require both checks before returning a public label.",
       "outcome": "A batch cannot obtain a prediction merely because it fits one of the two independent allowances.",
       "hints": [
         "Subtract prior use separately from each allowance.",
@@ -2097,7 +2097,7 @@
       "options": [
         {
           "label": "No; the work exceeds the remaining row allowance",
-          "feedback": "This quota is expressed in evaluated rows, so the request envelope cannot reset its meaning.",
+          "feedback": "Putting the readings into one HTTP message does not reduce how many predictions the model must make. The row allowance still applies to the whole batch.",
           "correct": true
         },
         {
@@ -2298,11 +2298,11 @@
     "order": "investigate-first",
     "construction": {
       "title": "Protect the products before they are formed",
-      "start": "Reuse the vector-length calculation, but move a common rescaling in front of its squares.",
+      "start": "Start from the vector-length calculation. Find a common scale before its squares, then check that the resulting direction survives the encoder’s larger values.",
       "outcome": "The direction stays the same across a large change in magnitude.",
       "hints": [
-        "Start with the largest absolute component. It gives a common scale, rather than a separate scale for every coordinate.",
-        "A zero vector needs a deliberate policy. Use the nonzero-divisor tool at the scale and scaled-length divisions so zeros remain zeros."
+        "Which single positive number could bring every nonzero component into a manageable range without changing their proportions? Try the largest absolute component.",
+        "After rescaling, calculate the remaining length and divide by it. Use the nonzero-divisor tool only to handle actual zero divisors, so a zero vector remains zero."
       ]
     },
     "investigation": {
@@ -2340,7 +2340,7 @@
     "order": "investigate-first",
     "construction": {
       "title": "Construct a test of the competing fits",
-      "start": "Reuse matrix-times-vector twice, retaining one prediction per candidate experiment. Keep positions only after comparing the aligned gaps.",
+      "start": "Apply each proposed setting row to both candidate gain vectors. Keep their predictions aligned so that a gap belongs to the experiment that produced it.",
       "outcome": "The suggested experiments are tied to a specific unresolved parameter difference.",
       "hints": [
         "Both branches must use the same candidate experiment rows and the same coordinate order.",
@@ -2350,7 +2350,7 @@
     "investigation": {
       "title": "The next batch runs the heaters together again",
       "question": "Did the larger record count resolve which heater contributes more?",
-      "outcome": "Change the proposed experiment, not just the file size.",
+      "outcome": "Design a new measurement that can distinguish the fitted explanations.",
       "caseIndex": 1,
       "kind": "diagnose",
       "options": [
@@ -2387,7 +2387,7 @@
     "order": "investigate-first",
     "construction": {
       "title": "Keep the two local comparisons separate",
-      "start": "Reuse the loss evaluation and subtraction tools to measure each side before averaging.",
+      "start": "Build the weight values on each side and evaluate the same loss at all of them. Keep the left and right slopes visible before forming their central average.",
       "outcome": "The report explains why a central zero can have different meanings.",
       "hints": [
         "Build weight-minus-step and weight-plus-step before evaluating the loss. Each loss machine uses the same target and kind.",
@@ -2434,7 +2434,7 @@
     "order": "build-first",
     "construction": {
       "title": "Build an acceptance test around the old update",
-      "start": "Reuse the Euler update, then add a midpoint reevaluation and an explicit error comparison before the result is accepted.",
+      "start": "Start with the existing Euler update. Add a branch that evaluates the rate again at a midpoint, then compare both routes before accepting either result.",
       "outcome": "A failed attempt has a visible numerical reason rather than silently entering the training trajectory.",
       "hints": [
         "The fine branch must take its second half step from the midpoint output, not from the original state again.",

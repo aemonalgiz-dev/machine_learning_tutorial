@@ -1,5 +1,5 @@
 import { view, exercise, s, op, sample, before, construction } from "./authoring.mjs";
-import { py, worked, lessonPart as p, question as q, numpyHistory as h, pythonSection as section } from "./numpy-authoring.mjs";
+import { py, worked, lessonPart as p, question as q, pythonSection as section } from "./numpy-authoring.mjs";
 
 const lessons = [
   {
@@ -8,7 +8,27 @@ const lessons = [
     openingTitle:"Where Does One Day End and the Next Begin?",
     opening:["Botie's logger sends six readings in order: all three greenhouses on Monday, then all three on Tuesday. The message has no row breaks. We need to restore the table before asking for a daily or greenhouse summary.","Reshaping changes how existing entries are grouped. Transposing exchanges axes. Joining combines separate collections. These operations can produce similar-looking shapes while assigning very different meanings to their positions."],
     prerequisites:[before("Choose the Readings Without Losing Their Place","numpy-indexing")],
-    history:h("Separating Stored Order From the Shape of a Calculation","Scientific instruments and file formats often deliver observations in a flat sequence. Numerical calculations need arrangements that identify time, location, and measurement channels.","NumPy's manipulation routines describe shape and axis changes explicitly. This makes array-oriented calculations possible without treating every change of layout as a new measurement. The documented distinction between reshape, transpose, and joining is the mechanism we use here.",[["Changing array shapes","reference/routines.array-manipulation.html"],["Reshaping an array","reference/generated/numpy.reshape.html"]]),
+    history:{
+  "title": "Separating Stored Order From the Shape of a Calculation",
+  "sources": [
+    {
+      "title": "Changing array shapes",
+      "url": "https://numpy.org/doc/stable/reference/routines.array-manipulation.html"
+    },
+    {
+      "title": "Reshaping an array",
+      "url": "https://numpy.org/doc/stable/reference/generated/numpy.reshape.html"
+    },
+    {
+      "title": "Falkoff and Iverson: APL/360 User’s Manual (1968)",
+      "url": "https://softwarepreservation.computerhistory.org/apl/book/196808_APL360%20Users%20Manual.pdf"
+    }
+  ],
+  "blocks": [
+    "A sequence of stored numbers does not tell us whether it represents days, greenhouses or channels. Early array languages treated the arrangement as something a program could describe and change.",
+    "APL/360’s 1968 manual included explicit reshaping and transposition operations. They answer different questions: how entries are arranged, and which axes exchange places. NumPy has its own precise storage and copying rules, but the need to separate those questions remains. We will keep the readings fixed while changing the arrangement we ask the next calculation to read."
+  ]
+},
     intuition:[view("Read the logger's order","The first three values belong to Monday and the next three to Tuesday.",[["Sequence",["10","20","30","14","22","36"]]]),view("Restore the day boundary","Group consecutive triples into day rows.",[["Monday",["10","20","30"]],["Tuesday",["14","22","36"]]]),view("Then follow a greenhouse instead","Swapping axes puts each greenhouse's two readings together.",[["North",["10","14"]],["Middle",["20","22"]],["South",["30","36"]]])],
     parts:[
       p("1. Restore Boundaries With reshape","The logger sends Monday’s three readings first, followed by Tuesday’s three. We want those same entries back in two rows, with each day kept together. reshape describes that arrangement; it does not decide which reading belonged to which day.\n\nBy default, reshape reads entries in row order and places them into the new row order. It cannot create or discard entries. The product of the new dimensions must match the number of existing entries, so a valid shape needs the same number of available positions.\n\nOne dimension may be minus one, meaning infer this length from the remaining dimensions and the number of entries. It does not mean a missing observation.",[
@@ -61,7 +81,27 @@ print(np.squeeze(batch, axis=0).shape)`,"[[12.0, 50.0], [18.0, 60.0], [24.0, 70.
     openingTitle:"Do We Need the Hottest Reading or the Greenhouse That Produced It?",
     opening:["A maximum temperature tells Botie how hot a greenhouse became. It does not by itself identify which greenhouse to inspect. An average answers another question, and an average alone can hide a large spread.","We will calculate these summaries with NumPy, keep their axis meanings explicit, and use returned positions to preserve the connection between values and labels."],
     prerequisites:[before("One Reference for Many Rows","numpy-broadcasting"),before("Ask Each Row a Question","numpy-masks")],
-    history:h("Turning a Large Report Into a Specific Answer","Scientists needed summaries long before NumPy: totals, central values, and measures of variation compress observations into answers to particular questions. Array libraries must make clear which observations each summary combines.","NumPy's statistical reductions accept axes, while functions such as argmax return positions instead of measurements. Keeping that distinction explicit lets a numerical summary remain connected to its original observation.",[["Statistical routines","reference/routines.statistics.html"],["Sorting and searching","reference/routines.sort.html"]]),
+    history:{
+  "title": "Turning a Large Report Into a Specific Answer",
+  "sources": [
+    {
+      "title": "Statistical routines",
+      "url": "https://numpy.org/doc/stable/reference/routines.statistics.html"
+    },
+    {
+      "title": "Sorting and searching",
+      "url": "https://numpy.org/doc/stable/reference/routines.sort.html"
+    },
+    {
+      "title": "Iverson: A Programming Language (1962), original book",
+      "url": "https://softwarepreservation.computerhistory.org/apl/book/APROGRAMMINGLANGUAGE.pdf"
+    }
+  ],
+  "blocks": [
+    "An array makes many measurements available at once. The next question is often how to combine them into a particular answer without losing which observations contributed.",
+    "In his 1962 notation, Iverson described reduction: applying a combining operation across a collection, such as addition to obtain a total. It let an array expression state the combination directly. NumPy’s reductions also make the chosen axis explicit. A total, a mean and the position of a maximum carry different meanings, so we will follow which direction disappears and what each remaining entry identifies."
+  ]
+},
     intuition:[view("Keep labels beside readings","The order is north, middle, south, annex.",[["Temperature",["20","27","25","18"]]]),view("A value and its position are different answers","The highest reading is attached to position one in the supplied order.",[["Largest value",["27"]],["Position",["1"]]]),view("Ordering should move labels with values","Sorting the readings alone would detach them from their greenhouse names.",[["Ascending positions",["3","0","2","1"]]])],
     parts:[
       p("1. Choose the Summary and the Axis","If Botie wants one daily total, the readings across each day must contribute to one answer. If he wants the hottest reading, only the largest value survives. Both operations turn several entries into a smaller summary. NumPy calls that kind of operation a reduction.\n\nsum adds values; mean shares their total across the entries; min and max keep an extreme value. Each can reduce a selected axis. The keepdims argument leaves a length-one axis in the result, preserving a place for the direction we combined. That can make the summary line up with the original table in a later calculation.",[

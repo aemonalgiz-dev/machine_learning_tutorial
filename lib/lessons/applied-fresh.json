@@ -131,7 +131,7 @@
         1.5
       ]
     ],
-    "why": "The rule must inspect types and key presence, not memorise a temperature fixture."
+    "why": "The same inspection now handles vibration: its Boolean is rejected, its negative number is retained, and omission follows the declared default."
   },
   "software-schema-evolution": {
     "name": "A future version has familiar-looking fields",
@@ -146,7 +146,7 @@
     "expected": {
       "error": "unsupported_version"
     },
-    "why": "A contract version is an explicit promise, not a guess from a similar object shape."
+    "why": "The version 3 message has familiar field names, but the service has not agreed to interpret that version. Its unsupported-version result should remain visible."
   },
   "software-semantic-contracts": {
     "name": "A different Fahrenheit batch and fitted coefficient",
@@ -164,7 +164,7 @@
       -5,
       7.5
     ],
-    "why": "A complete conversion must handle the offset and changed model state, rather than hard-code the earlier scores."
+    "why": "The freezing-point reading checks the offset, while the second reading and changed coefficient check that conversion still feeds the supplied model."
   },
   "software-tool-errors": {
     "name": "A new code arrives beside an uncertain outcome",
@@ -184,7 +184,7 @@
       "stop",
       "reconcile"
     ],
-    "why": "Unknown failure types must not become a newly invented automatic recovery protocol."
+    "why": "There is no retry policy for the new code, so it stops. The uncertain operation still needs its status checked even though no retry attempts remain."
   },
   "software-contract-tests": {
     "name": "A different first reading shares the busy batch",
@@ -207,7 +207,7 @@
       ],
       true
     ],
-    "why": "The construction must preserve fitted state and follow the current first example rather than remember a previous position’s value."
+    "why": "The first example has changed along with its expected result. Reusing the saved centre should still work without remembering which reading came first in an earlier batch."
   },
   "data-partition-statistics": {
     "name": "Three workers, including an empty one",
@@ -988,7 +988,7 @@
   },
   "state-predict-correct": {
     "name": "A reversed measurement pulls the next prediction back",
-    "prompt": "The earlier mean is-1m, displacement3m, earlier variance2 m² and added motion variance2 m². The new measurement is1m with variance 4 m². Predict both corrected quantities.",
+    "prompt": "The earlier position mean is -1 m, with variance 2 m². Expected displacement is 3 m and added motion variance is 2 m². The new camera reading is 1 m with variance 4 m². Predict both corrected quantities.",
     "data": {
       "mean": -1,
       "variance": 2,
@@ -1005,7 +1005,7 @@
   },
   "state-missing-observations": {
     "name": "A longer reverse interval follows the missed frame",
-    "prompt": "Start at mean1m and variance0.5m². The two displacements are-1m and-2 m, with added variances0.5m² and1 m². Only the final measurement arrives, at-1m with variance 1 m². Predict the final state.",
+    "prompt": "Start with mean 1 m and variance 0.5 m². The two displacements are -1 m and -2 m, with added variances 0.5 m² and 1 m². Only the final camera reading arrives: -1 m with variance 1 m². Predict the final mean and variance.",
     "data": {
       "initial": {
         "mean": 1,
@@ -1028,7 +1028,7 @@
   },
   "state-gating-association": {
     "name": "A more uncertain prediction accepts a larger raw displacement",
-    "prompt": "The prediction is0 m with variance 4 m². Candidate positions are[-2,10]m, R is1 m² and the squared-distance gate is1. Predict the final estimate after resolving the candidate.",
+    "prompt": "The predicted mean is 0 m with variance 4 m². Camera candidates are [-2, 10] m, each with measurement-error variance 1 m². The squared-distance threshold is 1. Predict the final estimate after deciding which candidate, if any, can be used.",
     "data": {
       "prediction": {
         "mean": 0,
@@ -1049,7 +1049,7 @@
   },
   "state-model-uncertainty": {
     "name": "The next camera reading has a different error",
-    "prompt": "Initial mean0 m and variance0.5m², expected displacement1m and Q0.5m² produce a prior. The observation is4 m with R1 m²; independent reference is3m. Predict the completed estimate and its diagnostic without leaking that reference into the update.",
+    "prompt": "Begin with mean 0 m and variance 0.5 m². The expected displacement is 1 m, with added motion variance 0.5 m². The camera reports 4 m with error variance 1 m²; the independent reference is 3 m. Predict the completed estimate and its diagnostic, keeping the reference out of the correction.",
     "data": {
       "initial": {
         "mean": 0,
@@ -1161,7 +1161,7 @@
       [],
       null
     ],
-    "why": "Independent requirements cannot be satisfied by different records or by treating an empty fit as zero."
+    "why": "Neither row satisfies both requirements. The empty ID list therefore accompanies null, which says that no mean was fitted from accepted evidence."
   },
   "security-backdoor-evaluation": {
     "name": "One clean prediction was already wrong",
@@ -1197,7 +1197,7 @@
         "rate": 1
       }
     ],
-    "why": "The clean error and true target-class example must not inflate the newly induced target-success denominator."
+    "why": "Only the originally correct fault example can show a newly induced safe prediction. Keep the other original error in clean accuracy, outside this conditional denominator."
   },
   "security-adversarial-threat-models": {
     "name": "The same size change reaches a protected coordinate",
@@ -1233,7 +1233,7 @@
       "changed_correct": false,
       "observed_failure": null
     },
-    "why": "A numerical change budget cannot override the independent restriction on which measurements the opponent controls."
+    "why": "The edit fits the size limit but changes a protected coordinate. Keep its wrong prediction visible as a diagnostic, while leaving observed_failure unavailable for this narrower experiment."
   },
   "security-prediction-api-controls": {
     "name": "The batch exactly fits the caller’s remaining rows",
@@ -1252,7 +1252,7 @@
       "allowed": true,
       "label": 0
     },
-    "why": "An inclusive capacity boundary should admit a fitting batch while the response still withholds the internal score."
+    "why": "The batch exactly fills the remaining caller rows and still fits global capacity. Its accepted response can return the label while keeping the internal score private."
   },
   "simulation-time-steps": {
     "name": "A different ambient temperature and a shorter step",

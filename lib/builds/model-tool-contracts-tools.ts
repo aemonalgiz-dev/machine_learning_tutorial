@@ -56,7 +56,7 @@ export const modelToolContractsTools: Record<string, Tool> = {
   },
   contractTemperatureScale: {
     title: 'Read the temperature conversion scale', inputs: ['Declared unit: C or F'],
-    why: 'Celsius uses scale 1. Fahrenheit uses scale 5/9, followed by its separate offset. Unit names belong to the service contract, not a guess based on the value.',
+    why: "Read the scale associated with the supplied C or F unit. Combine it with the separate offset before subtracting the training centre. The lesson shows how the two temperature scales are related.",
     run: ([unit]) => { if (unit === 'C') return 1; if (unit === 'F') return 5 / 9; throw Error('This contract supports only C and F.'); },
   },
   contractTemperatureOffset: {
@@ -66,12 +66,12 @@ export const modelToolContractsTools: Record<string, Tool> = {
   },
   contractOutcomeKinds: {
     title: 'Classify the structured tool outcome', inputs: ['Outcome codes'],
-    why: 'Keeps success, permanent failure, transient failure and an unknown operation outcome separate. These fixture codes are an application policy, not a universal mapping from HTTP status alone.',
+    why: "Classify each supplied code as a success, a permanent failure, a temporary failure or an operation with an unknown result. These categories describe this application’s policy; an HTTP status alone may not establish the result.",
     run: ([input]) => list(input).map(value => value === 'ok' ? 'success' : value === 'rate_limited' || value === 'unavailable' ? 'transient' : value === 'outcome_unknown' ? 'unknown_outcome' : 'permanent'),
   },
   contractRetryActions: {
     title: 'Decide whether repeating is permitted', inputs: ['Outcome classifications', 'Safe-to-repeat flags', 'Attempts remaining'],
-    why: 'A known transient failure is retried only with a trusted safe-to-repeat flag and remaining attempts. Unknown operation outcomes require reconciliation; permanent failures stop.',
+    why: "Retry only when we know the failed request is safe to repeat and attempts remain. If we do not know what happened, check the operation’s status before deciding to repeat it. A permanent failure stops here.",
     run: ([input, flagInput, remaining]) => {
       const kinds = list(input), flags = list(flagInput), left = finite(remaining);
       if (flags.length !== kinds.length || !flags.every(value => value === 0 || value === 1) || !Number.isSafeInteger(left) || left < 0) throw Error('Align 0-or-1 repeat flags with outcomes and supply nonnegative remaining attempts.');

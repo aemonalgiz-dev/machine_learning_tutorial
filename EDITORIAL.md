@@ -131,6 +131,11 @@ existing fragment IDs when changing section titles.
   contribution, then give an intuitive account of why it helps. Link primary
   sources. Distinguish an influential example from an invention or priority
   claim, and distinguish the original method from this site's teaching variant.
+  A description of a current API alone is insufficient historical context.
+  Explain what a platform or library is before asking readers to use its
+  interfaces, including how it relates to the other tools in that lesson.
+  Trace a feature to documented developments without inventing a separate
+  origin date for every command or routine.
   Use topic-specific headings and preserve the existing section and practice
   links when adding history. Dates and names should support the explanation,
   not replace it.

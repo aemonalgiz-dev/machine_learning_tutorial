@@ -27,12 +27,12 @@ const numbers = (value: Data): number[] => {
 export const stateEstimationTools: Record<string, Tool> = {
   stateEstimate: {
     title: 'Keep an estimate and its spread', inputs: ['Position mean', 'Position variance'],
-    why: 'Keeps position in metres beside its uncertainty in squared metres. Variance describes the stated model, rather than a guaranteed error bound.',
+    why: "Keep the position estimate together with its declared variance. The estimate uses metres, and the variance uses squared metres. The variance comes from our model; compare it with observed errors before treating it as reliable.",
     run: ([mean, variance]) => ({ mean: finite(mean, 'Mean'), variance: nonnegative(variance, 'Variance') }),
   },
   stateAdvance: {
     title: 'Predict through one motion interval', inputs: ['Earlier estimate', 'Expected displacement', 'Added motion variance'],
-    why: 'Adds the supplied displacement to the mean and independent motion-error variance to the variance. This scalar model has state-transition coefficient one; other dynamics need covariance propagation too.',
+    why: "Move the earlier position by the expected displacement. Add the independent variance supplied for that movement. This example tracks one position coordinate; a different motion model needs its own uncertainty calculation.",
     run: ([state, displacement, process]) => {
       const prior = estimate(state);
       return { mean: prior.mean + finite(displacement, 'Displacement'), variance: prior.variance + nonnegative(process, 'Motion variance') };

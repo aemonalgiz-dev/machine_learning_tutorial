@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Practice membership · Perceptron La
 
 export default function MembershipPage() {
   return <div className="mx-auto max-w-3xl space-y-7 px-6 py-12">
-    <header className="space-y-3"><p className="game-eyebrow">Keep working through the ideas</p><h1 className="text-3xl font-semibold">Practice membership</h1></header>
+    <header className="space-y-3"><h1 className="text-3xl font-semibold">Extra practice membership</h1></header>
     <PracticeMembership />
   </div>;
 }

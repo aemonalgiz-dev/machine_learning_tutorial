@@ -15,15 +15,26 @@ async function billingService(page: Page, initialUser: string | null = "alice") 
     checkoutUrl: "https://checkout.stripe.com/c/pay/cs_test_browser_fixture",
     portalUrl: "https://billing.stripe.com/p/session/browser_fixture",
     billingOwners: [] as string[], practiceLoads: [] as string[], denyPractice: false,
+    sessionReads: [] as (string | null)[], sessionInFlight: 0, maxSessionInFlight: 0, sessionFailure: false,
+    sessionDelay: null as Promise<void> | null,
     actions: [] as { owner: string; action: string; body: unknown; origin: string | undefined }[],
   };
   await page.route("https://checkout.stripe.com/**", route => route.fulfill({ contentType: "text/html", body: "<h1>Mock Stripe checkout</h1>" }));
   await page.route("https://billing.stripe.com/**", route => route.fulfill({ contentType: "text/html", body: "<h1>Mock Stripe billing portal</h1>" }));
   await page.route("**/account-api/**", async route => {
     const request = route.request(), path = new URL(request.url()).pathname;
-    if (path.endsWith("/session")) return route.fulfill({ json: { enabled: true, registrationEnabled: true,
-      user: state.user ? { id: state.user, name: state.user, email: null } : null,
-      membership: state.user ? state.membership[state.user] ?? FREE_MEMBERSHIP : FREE_MEMBERSHIP } });
+    if (path.endsWith("/session")) {
+      state.sessionReads.push(state.user);
+      state.sessionInFlight++;
+      state.maxSessionInFlight = Math.max(state.maxSessionInFlight, state.sessionInFlight);
+      const snapshot = { enabled: true, registrationEnabled: true,
+        user: state.user ? { id: state.user, name: state.user, email: null } : null,
+        membership: structuredClone(state.user ? state.membership[state.user] ?? FREE_MEMBERSHIP : FREE_MEMBERSHIP) };
+      try {
+        if (state.sessionDelay) await state.sessionDelay;
+        return await route.fulfill(state.sessionFailure ? { status: 503, json: { error: "Session unavailable." } } : { json: snapshot });
+      } finally { state.sessionInFlight--; }
+    }
     if (path.endsWith("/auth/login") || path.endsWith("/auth/register")) { state.user = "alice"; return route.fulfill({ status: 303, headers: { location: "/account" } }); }
     const owner = request.headers()["x-fitlab-account"];
     if (!state.user || owner !== state.user) return route.fulfill({ status: 409, json: {} });
@@ -65,7 +76,7 @@ test("guests sign in before billing loads and return to membership without purch
   await page.getByRole("link", { name: "Sign in or create an account", exact: true }).click();
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
   await expect(page).toHaveURL(/\/membership$/);
-  await expect(page.getByRole("button", { name: "Continue with monthly", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue with monthly billing", exact: true })).toBeVisible();
   expect(state.actions).toEqual([]);
 });
 
@@ -74,14 +85,14 @@ test("free accounts keep saving and see verified monthly and annual offers witho
   await page.goto("/practice"); await waitForAccountReady(page);
   await expect(page.getByText("$9.00", { exact: false })).toBeVisible();
   await expect(page.getByText("$90.00", { exact: false })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Continue with annual", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue with annual billing", exact: true })).toBeVisible();
   expect(state.practiceLoads).toEqual([]); expect(state.actions).toEqual([]);
   await page.screenshot({ path: info.outputPath("membership-wide.png"), fullPage: true });
   for (const width of [390, 320]) {
     await page.setViewportSize({ width, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     for (const interval of ["monthly", "annual"]) {
-      const choice = page.getByRole("button", { name: `Continue with ${interval}`, exact: true });
+      const choice = page.getByRole("button", { name: `Continue with ${interval} billing`, exact: true });
       await choice.scrollIntoViewIfNeeded();
       const bounds = (await choice.boundingBox())!;
       expect(bounds.x).toBeGreaterThanOrEqual(0); expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
@@ -101,7 +112,7 @@ for (const interval of ["monthly", "annual"] as const) test(`the ${interval} cho
   const state = await billingService(page);
   await page.goto("/membership");
   const origin = new URL(page.url()).origin;
-  await page.getByRole("button", { name: `Continue with ${interval}`, exact: true }).click();
+  await page.getByRole("button", { name: `Continue with ${interval} billing`, exact: true }).click();
   await expect(page).toHaveURL(state.checkoutUrl);
   expect(state.actions).toEqual([{ owner: "alice", action: "checkout", body: { interval }, origin }]);
   await expect(page.getByRole("heading", { name: "Mock Stripe checkout", exact: true })).toBeVisible();
@@ -135,7 +146,7 @@ test("active membership opens practice while cancellation management keeps saved
   await expect(page.getByRole("button", { name: /Continue with/ })).toHaveCount(0);
   await expect(page.getByText(/Your saved course work remains with your free account/)).toBeVisible();
   await page.getByRole("link", { name: "Open extra practice →", exact: true }).click();
-  await expect(page.getByText(/3,456 activities across 48 problem families/)).toBeVisible();
+  await expect(page.getByText(/3,456 activities covering 48 problems/)).toBeVisible();
 });
 
 test("verified existing access remains available when new billing is unconfigured", async ({ page }) => {
@@ -144,13 +155,13 @@ test("verified existing access remains available when new billing is unconfigure
   await expect(page.getByText("Your practice membership is active.", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /Continue with/ })).toHaveCount(0);
   await page.getByRole("link", { name: "Open extra practice →", exact: true }).click();
-  await expect(page.getByText(/3,456 activities across 48 problem families/)).toBeVisible();
+  await expect(page.getByText(/3,456 activities covering 48 problems/)).toBeVisible();
 });
 
 test("a forged success query does not grant premium access and a 403 becomes the membership gate", async ({ page }) => {
   const state = await billingService(page);
   await page.goto("/practice?billing=success&practiceAccess=true");
-  await expect(page.getByRole("button", { name: "Continue with monthly", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue with monthly billing", exact: true })).toBeVisible();
   expect(state.practiceLoads).toEqual([]);
   state.membership.alice = paid(); state.denyPractice = true;
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
@@ -162,7 +173,7 @@ test("a forged success query does not grant premium access and a 403 becomes the
 test("membership status can be refreshed after delayed payment confirmation", async ({ page }) => {
   const state = await billingService(page);
   await page.goto("/membership?billing=success");
-  await expect(page.getByRole("button", { name: "Continue with monthly", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue with monthly billing", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Open extra practice →", exact: true })).toHaveCount(0);
   state.membership.alice = paid(); state.checkoutAvailable = false;
   await page.getByRole("button", { name: "Check membership status", exact: true }).click();
@@ -179,7 +190,7 @@ test("billing from a different account and an untrusted checkout URL are rejecte
   await expect(page.getByRole("button", { name: /Continue with/ })).toHaveCount(0);
   state.responseOwner = null; state.checkoutUrl = "https://checkout.stripe.com.example.org/pay";
   await page.getByRole("button", { name: "Try membership details again", exact: true }).click();
-  await page.getByRole("button", { name: "Continue with monthly", exact: true }).click();
+  await page.getByRole("button", { name: "Continue with monthly billing", exact: true }).click();
   await expect(panel.getByRole("alert")).toContainText("payment page could not be verified");
   await expect(page).toHaveURL(/\/membership$/);
 });
@@ -187,13 +198,99 @@ test("billing from a different account and an untrusted checkout URL are rejecte
 test("a checkout response for the earlier account cannot redirect the next account", async ({ page }) => {
   const state = await billingService(page), checkout = deferred(); state.checkoutDelay = checkout.promise;
   await page.goto("/membership");
-  await page.getByRole("button", { name: "Continue with monthly", exact: true }).click();
+  await page.getByRole("button", { name: "Continue with monthly billing", exact: true }).click();
   await expect.poll(() => state.actions.length).toBe(1);
   state.user = "bob";
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect.poll(() => state.billingOwners.includes("bob")).toBe(true);
   checkout.resolve();
-  await expect(page.getByRole("button", { name: "Continue with annual", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue with annual billing", exact: true })).toBeVisible();
   await expect(page).toHaveURL(/\/membership$/);
   expect(state.actions.map(action => action.owner)).toEqual(["alice"]);
+});
+
+test("checkout return opens practice after delayed server confirmation without another click", async ({ page }) => {
+  const state = await billingService(page);
+  await page.goto("/account?billing=success");
+  await waitForAccountReady(page);
+  const confirmation = page.getByRole("status", { name: "Checkout confirmation", exact: true });
+  await expect(confirmation).toContainText("We're checking your payment.");
+  await expect(confirmation.getByRole("link", { name: "Open extra practice →", exact: true })).toHaveCount(0);
+  const before = state.sessionReads.length;
+  state.membership.alice = paid(); state.checkoutAvailable = false;
+  await expect(confirmation).toContainText("Your extra practice membership is active.");
+  expect(state.sessionReads.length).toBeGreaterThan(before);
+  expect(state.actions).toEqual([]);
+  await page.clock.install();
+  const confirmedReads = state.sessionReads.length;
+  await page.clock.runFor(6_000);
+  expect(state.sessionReads).toHaveLength(confirmedReads);
+  await confirmation.getByRole("link", { name: "Open extra practice →", exact: true }).click();
+  await expect(page.getByText(/3,456 activities covering 48 problems/)).toBeVisible();
+});
+
+test("a success query cannot grant access and automatic confirmation checks finish within their window", async ({ page }) => {
+  const state = await billingService(page);
+  await page.goto("/account?billing=success&practiceAccess=true");
+  await waitForAccountReady(page);
+  await page.clock.install();
+  await page.clock.runFor(31_000);
+  const confirmation = page.getByRole("status", { name: "Checkout confirmation", exact: true });
+  await expect(confirmation).toContainText("Payment confirmation is taking longer than expected.");
+  await expect(confirmation.getByRole("link", { name: "Open extra practice →", exact: true })).toHaveCount(0);
+  expect(state.practiceLoads).toEqual([]);
+  const afterWindow = state.sessionReads.length;
+  await page.clock.runFor(10_000);
+  expect(state.sessionReads).toHaveLength(afterWindow);
+  expect(state.maxSessionInFlight).toBe(1);
+  expect(state.actions).toEqual([]);
+});
+
+test("leaving the checkout return stops its automatic checks", async ({ page }) => {
+  const state = await billingService(page);
+  await page.goto("/account?billing=success");
+  await waitForAccountReady(page);
+  const confirmation = page.getByRole("status", { name: "Checkout confirmation", exact: true });
+  await confirmation.getByRole("link", { name: "Membership details", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Continue with monthly billing", exact: true })).toBeVisible();
+  await page.clock.install();
+  const afterLeaving = state.sessionReads.length;
+  await page.clock.runFor(8_000);
+  expect(state.sessionReads).toHaveLength(afterLeaving);
+  expect(state.actions).toEqual([]);
+});
+
+for (const nextUser of [null, "bob"] as const) test(`checkout return stops when the authenticated account becomes ${nextUser ?? "signed out"}`, async ({ page }) => {
+  const state = await billingService(page);
+  await page.goto("/account?billing=success");
+  await waitForAccountReady(page);
+  state.user = nextUser;
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  if (nextUser) await expect(page.getByRole("region", { name: "Account", exact: true })).toContainText("bob");
+  else await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+  await expect(page.getByRole("status", { name: "Checkout confirmation", exact: true })).toHaveCount(0);
+  await page.clock.install();
+  const afterChange = state.sessionReads.length;
+  await page.clock.runFor(8_000);
+  expect(state.sessionReads).toHaveLength(afterChange);
+  expect(state.actions).toEqual([]);
+});
+
+test("a failed checkout confirmation remains retryable and session checks do not overlap", async ({ page }) => {
+  const state = await billingService(page), delayed = deferred();
+  await page.goto("/account?billing=success");
+  await waitForAccountReady(page);
+  const confirmation = page.getByRole("status", { name: "Checkout confirmation", exact: true });
+  state.sessionDelay = delayed.promise; state.sessionFailure = true;
+  await expect.poll(() => state.sessionInFlight).toBe(1);
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await confirmation.getByRole("button", { name: "Check membership again", exact: true }).click();
+  delayed.resolve();
+  await expect(confirmation).toContainText("We couldn't check your membership just now.");
+  expect(state.maxSessionInFlight).toBe(1);
+  state.sessionDelay = null; state.sessionFailure = false;
+  state.membership.alice = paid(); state.checkoutAvailable = false;
+  await confirmation.getByRole("button", { name: "Check membership again", exact: true }).click();
+  await expect(confirmation).toContainText("Your extra practice membership is active.");
+  expect(state.actions).toEqual([]);
 });
