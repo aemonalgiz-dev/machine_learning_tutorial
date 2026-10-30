@@ -13,6 +13,7 @@ import { assemble, evaluate, same } from "../lib/builds/engine";
 import { TOOLS } from "../lib/builds/tools";
 import { workshopRecordKey } from "../lib/builds/workshop-session";
 import { fingerprint } from "../lib/learner-state";
+import { FREE_MEMBERSHIP } from "../lib/membership";
 
 const root = path.resolve(process.env.FITLAB_BACKEND_PATH ?? "../backend");
 const python = process.env.FITLAB_BACKEND_PYTHON ?? path.join(root, ".venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
@@ -149,7 +150,7 @@ test.describe("real account backend through the website proxy", () => {
 
   test("Cognito registration creates an account whose saved work survives logout and sign-in", async () => {
     const newcomer = device();
-    expect(await (await newcomer.request("GET", "session")).json()).toEqual({ enabled: true, registrationEnabled: true, user: null });
+    expect(await (await newcomer.request("GET", "session")).json()).toEqual({ enabled: true, registrationEnabled: true, membership: FREE_MEMBERSHIP, user: null });
     expect((await newcomer.request("GET", "learner-state")).status).toBe(401);
     const account = await newcomer.register("new-learner");
     const session = await (await newcomer.request("GET", "session")).json();

@@ -8,6 +8,7 @@ import { CURRICULUM } from "../lib/curriculum";
 import { firstLesson, lessonOrder } from "../lib/course-navigation";
 import { lessonHistories } from "../lib/history";
 import { buildById } from "../lib/builds/catalog";
+import { journeyPlans } from "../lib/builds/journeys";
 import { assemble, evaluate, same } from "../lib/builds/engine";
 import { TOOLS } from "../lib/builds/tools";
 
@@ -23,7 +24,9 @@ test("published lessons, navigation, histories and workshops describe the same c
     expect(lessonOrder, lesson.id).toContain(href);
     expect(staticFolders, lesson.id).not.toContain(lesson.id);
     expect(lessonHistories[lesson.id]).toEqual(lesson.history);
-    expect(buildById[lesson.id]).toEqual({ id: lesson.id, ...lesson.build });
+    // The catalog takes a workshop's hints from its journey plan when the plan has them.
+    const journeyHints = journeyPlans[lesson.id]?.construction.hints;
+    expect(buildById[lesson.id]).toEqual({ id: lesson.id, ...lesson.build, ...(journeyHints ? { hints: journeyHints } : {}) });
     for (const prerequisite of lesson.prerequisites) {
       expect(lessonOrder, prerequisite.href).toContain(prerequisite.href);
       expect(lessonOrder.indexOf(prerequisite.href), `${lesson.id}: prerequisite ${prerequisite.href} should come earlier`).toBeLessThan(lessonOrder.indexOf(href));

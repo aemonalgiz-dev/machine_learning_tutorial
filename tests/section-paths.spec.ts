@@ -20,8 +20,8 @@ const lessons = expandedLessons.filter(lesson => Object.hasOwn(sections, lesson.
 const run = (name: string, ...inputs: Data[]) => TOOLS[name].run(inputs, {});
 
 test("ten new sections contain complete lessons and preserve the reinforcement introduction", () => {
-  expect(CURRICULUM).toHaveLength(33);
-  expect(lessonOrder).toHaveLength(322);
+  expect(CURRICULUM).toHaveLength(45);
+  expect(lessonOrder).toHaveLength(377);
   expect(lessons).toHaveLength(47);
   for (const [title, count] of Object.entries(sections)) {
     const section = CURRICULUM.find(part => part.title === title)!;

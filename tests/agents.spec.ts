@@ -18,7 +18,7 @@ test('agents: the complete path is discoverable and prerequisites precede their 
   }
   for (const lesson of lessons) {
     const href = `/concepts/${lesson.id}`;
-    expect(lessonLocations[href].areaHref).toBe('/learn/machine-learning');
+    expect(lessonLocations[href].areaHref).toBe('/learn/ai-agents-and-applications');
     expect(lessonLocations[href].sectionHref).toBe(lesson.section === 'Agents' ? '/sections/agents' : '/sections/prompting-evaluation-and-iteration');
     for (const prerequisite of lesson.prerequisites) {
       expect(lessonOrder.indexOf(prerequisite.href), `${lesson.id}: ${prerequisite.href}`).toBeGreaterThanOrEqual(0);
